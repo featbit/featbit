@@ -1,0 +1,36 @@
+name: FeatBit UI
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/featbit-ui/**'
+      - '.github/workflows/featbit-ui.yml'
+  pull_request:
+    branches: 
+      - main
+
+jobs:
+  build:
+    name : Run builds
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: npm build and install
+        run: |
+              cd 'modules/featbit-ui'
+              npm ci
+              npm run build
+        shell: bash
