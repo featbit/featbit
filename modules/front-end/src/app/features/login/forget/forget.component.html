@@ -1,0 +1,61 @@
+<div class="reset-hint">输入您的电话/注册邮箱以及收到的验证码<br>我们将为您进行密码重置</div>
+<form nz-form [formGroup]="resetForm" (ngSubmit)="resetPwd()">
+  <nz-form-item>
+    <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
+      <nz-input-group [nzPrefix]="prefixTemplateuser">
+        <input type="text" nz-input formControlName="identity" placeholder="请输入手机号/邮箱"/>
+      </nz-input-group>
+      <ng-template #prefixTemplateuser>
+        <i nz-icon nzType="icons:icon-user">
+        </i>
+      </ng-template>
+      <ng-template #invalidPhoneNumberOrEmail let-control>
+        <ng-container *ngIf="control.hasError('required')">请输入手机号/邮箱</ng-container>
+        <ng-container *ngIf="control.hasError('invalid')">非法的手机号/邮箱</ng-container>
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-control nzErrorTip="请输入有效的验证码">
+        <nz-input-group [nzPrefix]="shieldPrefix" [nzSuffix]="sendSuffix">
+          <input maxlength="6" type="text" nz-input formControlName="code" placeholder="请输入6位验证码"/>
+        </nz-input-group>
+        <ng-template #shieldPrefix>
+          <i nz-icon nzType="icons:icon-shield">
+          </i>
+        </ng-template>
+      <ng-template #sendSuffix>
+        <nz-divider nzType="vertical"></nz-divider>
+        <button class="send-code-button" nz-button nzType="link" type="button"
+                (click)="sendIdentityCode()"
+                [disabled]="getCodeInterval !== 0"
+                [nzLoading]="isSendingCode">
+          {{getCodeInterval === 0 ? '获取验证码' : getCodeInterval + ' s 后重试'}}
+        </button>
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-control nzErrorTip="新密码不能少于5位">
+      <nz-input-group [nzPrefix]="passwordPrefix" [nzSuffix]="suffixTemplate">
+        <input
+          formControlName="newPassword"
+          [type]="passwordVisible ? 'text' : 'password'"
+          nz-input
+          placeholder="请输入新密码（至少五位）"
+        />
+      </nz-input-group>
+      <ng-template #passwordPrefix>
+        <i nz-icon nzType="icons:icon-password">
+        </i>
+      </ng-template>
+      <ng-template #suffixTemplate>
+        <i nz-icon [nzType]="passwordVisible ? 'eye' : 'eye-invisible'" (click)="passwordVisible = !passwordVisible">
+        </i>
+      </ng-template>
+    </nz-form-control>
+  </nz-form-item>
+
+  <button nz-button nzType="primary" class="submit-btn" [nzLoading]="isResetting">重置密码</button>
+  <a class="return-login" (click)="login()">返回登录</a>
+</form>
