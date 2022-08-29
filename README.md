@@ -1,7 +1,10 @@
 <h1 align="center">
 <b>
     <a href="" >FeatBit</a>  
-</b>
+</b> <br/>
+A scalable and high-performance <br/> 
+feature management and progressive experiment <br/> 
+open source platform based on .NET technology
 </h1>
 
 <p>
