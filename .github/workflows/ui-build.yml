@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - 'modules/featbit-ui/**'
-      - '.github/workflows/featbit-ui.yml'
+      - '.github/workflows/ui-build.yml'
   pull_request:
     branches: 
       - main
