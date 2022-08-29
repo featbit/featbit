@@ -1,10 +1,9 @@
-![image](https://user-images.githubusercontent.com/68597908/187119482-7951956f-89a3-4786-a3a5-9bd80acc4d04.png)
-
+<p align="center">
+<img src="./Logo.png" width=518 />
+</p>
 
 <h3 align="center">
-A scalable and high-performance <br/> 
-feature management and progressive experiment <br/> 
-open source platform based on .NET technology
+A scalable and high-performance feature management and progressive experiment open source platform based on .NET technology
 </h3>
 
 
