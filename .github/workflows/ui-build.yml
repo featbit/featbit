@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'modules/featbit-ui/**'
+      - 'modules/front-end/**'
       - '.github/workflows/ui-build.yml'
   pull_request:
     branches: 
@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-          cache-dependency-path: "modules/featbit-ui/package-lock.json"
+          cache-dependency-path: "modules/front-end/package-lock.json"
 
       - name: npm build and install
         run: |
