@@ -31,7 +31,7 @@ jobs:
 
       - name: npm build and install
         run: |
-              cd 'modules/featbit-ui'
+              cd 'modules/front-end'
               npm ci
               npm run build
         shell: bash
