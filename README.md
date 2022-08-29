@@ -5,7 +5,7 @@
     </b>
 </h1>
 
-<p align="center" style="font-size:36px;">
+<p align="center" style="font-size:28px !important;">
     A scalable and high-performance feature management and progressive experiment open source platform based on .NET technology
 </p>
 
