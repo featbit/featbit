@@ -1,10 +1,8 @@
 
 <h1 align="center" style="border-bottom: none">
     <b>
-        <a href="https://affine.pro">FeatBit</a><br>
+        <a href="https://affine.pro">FeatBit</a>
     </b>
-    
-    <br>
 </h1>
 
 <p align="center">
