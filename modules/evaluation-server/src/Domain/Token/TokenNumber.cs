@@ -16,19 +16,35 @@ public static class TokenNumber
         { 'U', '9' },
     };
 
-    public static ReadOnlySpan<char> Decode(ReadOnlySpan<char> characters)
+    public static byte DecodeByte(ReadOnlySpan<char> characters)
     {
         if (characters.IsEmpty || characters.IsWhiteSpace())
         {
-            return ReadOnlySpan<char>.Empty;
+            return 0;
         }
 
-        var number = new char[characters.Length];
-        for (var i = 0; i < characters.Length; i++)
+        Span<char> chars = stackalloc char[characters.Length];
+        for (var i = 0; i < chars.Length; i++)
         {
-            number[i] = CharacterMap[characters[i]];
+            chars[i] = CharacterMap[characters[i]];
         }
 
-        return number;
+        return byte.Parse(chars);
+    }
+
+    public static long DecodeLong(ReadOnlySpan<char> characters)
+    {
+        if (characters.IsEmpty || characters.IsWhiteSpace())
+        {
+            return 0;
+        }
+
+        Span<char> chars = stackalloc char[characters.Length];
+        for (var i = 0; i < chars.Length; i++)
+        {
+            chars[i] = CharacterMap[characters[i]];
+        }
+
+        return long.Parse(chars);
     }
 }
