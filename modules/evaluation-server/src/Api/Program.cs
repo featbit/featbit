@@ -1,5 +1,4 @@
-using System.Net.WebSockets;
-using System.Text;
+using Api.Middlewares;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,31 +29,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// use web socket server
-app.UseWebSockets();
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path == "/streaming" && context.WebSockets.IsWebSocketRequest)
-    {
-        // the simplest websocket server
-        using var ws = await context.WebSockets.AcceptWebSocketAsync();
-        
-        // send message to client
-        await ws.SendAsync(
-            Encoding.UTF8.GetBytes("hello, client!"),
-            WebSocketMessageType.Text,
-            true,
-            CancellationToken.None
-        );
-
-        // websocket will be close after 1s
-        await Task.Delay(1000);
-        
-        return;
-    }
-
-    await next();
-});
+// enable streaming
+app.UseStreaming();
 
 app.MapControllers();
 
