@@ -51,25 +51,6 @@ export class DoLoginComponent implements OnInit {
     )
   }
 
-  phoneCodeLogin(data) {
-    const {phoneNumber, code} = data;
-
-    this.isLogin = true;
-
-    this.userService.loginByPhoneCode(phoneNumber, code).subscribe(
-      response => this.handleResponse(response),
-      error => this.handleError(error)
-    )
-  }
-
-  forgetPassword() {
-    this.router.navigateByUrl('/login/forget-password');
-  }
-
-  register() {
-    this.router.navigateByUrl('/login/register');
-  }
-
   async handleResponse(response) {
     this.isLogin = false;
 

@@ -1,21 +1,10 @@
 <nz-tabset class="no-bottom-line">
-  <nz-tab nzTitle="短信验证码">
-    <phone-code-form scene="login" (onSubmit)="phoneCodeLogin($event)" [footer]="footerTpl"></phone-code-form>
-    <ng-template #footerTpl>
-      <button type="submit" class="submit-btn" nz-button nzType="primary" [nzLoading]="isLogin">登录</button>
-      <p class="tip">
-        未注册的手机号码验证后将自动创建账号
-        <i nz-icon nzType="bulb" nzTheme="outline"></i>
-      </p>
-    </ng-template>
-  </nz-tab>
-
-  <nz-tab nzTitle="密码登录">
+  <nz-tab nzTitle="Login">
     <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
       <nz-form-item>
         <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
           <nz-input-group [nzPrefix]="userPrefix">
-            <input type="text" nz-input formControlName="identity" placeholder="请输入手机号/邮箱"/>
+            <input type="text" nz-input formControlName="identity" placeholder="username"/>
           </nz-input-group>
           <ng-template #userPrefix>
             <i nz-icon nzType="icons:icon-user"></i>
@@ -47,10 +36,6 @@
         </nz-form-control>
       </nz-form-item>
       <button type="submit" nz-button nzType="primary" class="submit-btn" [nzLoading]="isLogin">登录</button>
-      <div class="actions">
-        <a (click)="forgetPassword()">忘记密码</a>
-        <a style="float: right" (click)="register()">立即注册</a>
-      </div>
     </form>
   </nz-tab>
 </nz-tabset>

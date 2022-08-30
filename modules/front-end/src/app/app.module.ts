@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
 import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { TokenInterceptor } from "@interceptors/token.interceptor";
 import { NZ_I18N, zh_CN } from "ng-zorro-antd/i18n";
@@ -12,7 +11,6 @@ import { IconsProviderModule } from "./icons-provider.module";
 import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
-
 @NgModule({
   declarations: [
     AppComponent
@@ -25,8 +23,7 @@ import { FormsModule } from "@angular/forms";
     BrowserAnimationsModule,
     IconsProviderModule,
     NzLayoutModule,
-    NzMessageModule,
-    NzCodeEditorModule
+    NzMessageModule
   ],
   providers: [
     { provide: NZ_I18N, useValue: zh_CN },
