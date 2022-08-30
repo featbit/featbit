@@ -1,3 +1,5 @@
+using System.Net.WebSockets;
+using System.Text;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,8 @@ builder.Services.AddSwaggerGen();
 // health check dependencies
 builder.Services.AddHealthChecks();
 
+// configure HTTP request pipeline.
+
 var app = builder.Build();
 
 // reference: https://andrewlock.net/deploying-asp-net-core-applications-to-kubernetes-part-6-adding-health-checks-with-liveness-readiness-and-startup-probes/
@@ -19,12 +23,38 @@ var app = builder.Build();
 // external use
 app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
 
-// Configure the HTTP request pipeline.
+// enable swagger in dev mode
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// use web socket server
+app.UseWebSockets();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/streaming" && context.WebSockets.IsWebSocketRequest)
+    {
+        // the simplest websocket server
+        using var ws = await context.WebSockets.AcceptWebSocketAsync();
+        
+        // send message to client
+        await ws.SendAsync(
+            Encoding.UTF8.GetBytes("hello, client!"),
+            WebSocketMessageType.Text,
+            true,
+            CancellationToken.None
+        );
+
+        // websocket will be close after 1s
+        await Task.Delay(1000);
+        
+        return;
+    }
+
+    await next();
+});
 
 app.MapControllers();
 
