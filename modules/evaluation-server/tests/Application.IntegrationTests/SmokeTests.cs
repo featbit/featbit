@@ -15,7 +15,7 @@ public class SmokeTests : IClassFixture<TestApp>
     public async Task Should_Start_The_Server()
     {
         var client = _app.CreateClient();
-        var response = await client.GetAsync("/WeatherForecast");
+        var response = await client.GetAsync("/health/liveness");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }

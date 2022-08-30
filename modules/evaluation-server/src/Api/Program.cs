@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,7 +9,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// health check dependencies
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
+
+// reference: https://andrewlock.net/deploying-asp-net-core-applications-to-kubernetes-part-6-adding-health-checks-with-liveness-readiness-and-startup-probes/
+// health check endpoints
+// external use
+app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
