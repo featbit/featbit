@@ -2,10 +2,11 @@
   "name": "front-end",
   "version": "0.1.0",
   "scripts": {
-    "ng": "ng",
     "start": "ng serve --configuration development --host=0.0.0.0",
     "build": "ng build --configuration development",
-    "build-prod": "ng build --configuration production"
+    "build-prod": "ng build --configuration production",
+    "test": "ng test",
+    "test-coverage": "ng test --code-coverage"
   },
   "private": true,
   "dependencies": {
