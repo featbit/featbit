@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    name : Run builds
+    name : Run front-end builds
     runs-on: ubuntu-latest
     strategy:
       matrix:
