@@ -1,0 +1,25 @@
+{
+  "users": [
+    {
+      "keyId": "tester-id",
+      "name": "tester",
+      "email": "tester@gmail.com",
+      "country": "cn",
+      "customizedProperties": [
+        {
+          "name": "role",
+          "value": "admin"
+        },
+        {
+          "name": "browser",
+          "value": "chrome"
+        },
+        {
+          "name": "location",
+          "value": "beijing"
+        }
+      ]
+    }
+  ],
+  "userProperties": [ "role", "browser", "location" ]
+}

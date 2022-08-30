@@ -2,10 +2,11 @@
   "name": "front-end",
   "version": "0.1.0",
   "scripts": {
-    "ng": "ng",
     "start": "ng serve --configuration development --host=0.0.0.0",
     "build": "ng build --configuration development",
-    "build-prod": "ng build --configuration production"
+    "build-prod": "ng build --configuration production",
+    "test": "ng test",
+    "test-coverage": "ng test --code-coverage"
   },
   "private": true,
   "dependencies": {
@@ -18,8 +19,8 @@
     "@angular/platform-browser-dynamic": "^14.0.0",
     "@angular/router": "^14.0.0",
     "@antv/g2": "^4.2.7",
-    "monaco-editor": "^0.34.0",
-    "ng-zorro-antd": "^14.0.0",
+    "monaco-editor": "0.33.0",
+    "ng-zorro-antd": "14.0.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
@@ -28,7 +29,9 @@
     "@angular-devkit/build-angular": "^14.2.1",
     "@angular/cli": "~14.2.1",
     "@angular/compiler-cli": "^14.0.0",
+    "@angular/localize": "^14.2.0",
     "@types/jasmine": "~4.0.0",
+    "@types/karma-coverage": "^2.0.1",
     "jasmine-core": "~4.3.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.1.0",
