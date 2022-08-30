@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { phoneNumberOrEmailValidator } from "../../../utils/form-validators";
-import { UserService } from "../../../services/user.service";
+import { phoneNumberOrEmailValidator } from "@utils/form-validators";
+import { UserService } from "@services/user.service";
 
 @Component({
   selector: 'app-forget',

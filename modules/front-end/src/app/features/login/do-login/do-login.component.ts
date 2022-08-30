@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
-import { UserService } from "src/app/services/user.service";
+import { UserService } from "@services/user.service";
 
 @Component({
   selector: 'app-do-login',
