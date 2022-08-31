@@ -1,6 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 using Domain.Streaming;
+using Version = Domain.Streaming.Version;
 
 namespace Api.Middlewares;
 
@@ -62,6 +63,13 @@ public class StreamingMiddleware
             return false;
         }
         
+        // version
+        var version = query["version"].ToString();
+        if (!Version.IsSupported(version))
+        {
+            return false;
+        }
+
         // connection token
         var token = new Token(query["token"].ToString());
         if (!token.IsValid)

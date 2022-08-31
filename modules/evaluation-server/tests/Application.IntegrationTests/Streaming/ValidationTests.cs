@@ -32,14 +32,14 @@ public class ValidationTests : IClassFixture<TestApp>
     }
 
     [Theory]
-    [InlineData("client")]
-    [InlineData("server")]
-    public async Task Should_Say_Hello_Valid_Ws_Request(string type)
+    [InlineData("client", "1")]
+    [InlineData("server", "2")]
+    public async Task Should_Say_Hello_Valid_Ws_Request(string type, string version)
     {
         const string token =
             "QXBBHYWVkLWNiZTgtNCUyMDIyMDEwODA5MjIzNF9fOTRfXzExMV9fMjM3X19kZWZhdWx0XzRmOWRQQBDDBUPHZHWZUZh"; 
         
-        using var ws = await _app.ConnectToWsServerAsync($"?type={type}&token={token}");
+        using var ws = await _app.ConnectToWsServerAsync($"?type={type}&token={token}&version={version}");
 
         var message = new byte[100];
         var res = await ws.ReceiveAsync(message, CancellationToken.None);

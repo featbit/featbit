@@ -1,6 +1,6 @@
 ﻿using Domain.Streaming;
 
-namespace Application.IntegrationTests.Streaming;
+namespace Domain.UnitTests.Streaming;
 
 public class SdkTypesTests
 {
