@@ -1,4 +1,4 @@
-﻿namespace Domain.Token;
+﻿namespace Domain.Streaming;
 
 public static class TokenNumber
 {
