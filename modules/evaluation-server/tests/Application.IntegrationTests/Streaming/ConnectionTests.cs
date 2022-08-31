@@ -14,12 +14,7 @@ public class ConnectionTests : IClassFixture<TestApp>
     [Fact]
     public async Task Should_Connect_To_Ws_Server()
     {
-        var server = _app.Server;
-        var webSocketClient = server.CreateWebSocketClient();
-        var streamingUrl = new Uri(server.BaseAddress, "streaming");
-
-        var ws = await webSocketClient.ConnectAsync(streamingUrl, CancellationToken.None);
-
+        using var ws = await _app.ConnectToWsServerAsync();
         Assert.Equal(WebSocketState.Open, ws.State);
     }
 }

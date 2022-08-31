@@ -1,5 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
+using Domain.Streaming;
 
 namespace Api.Middlewares;
 
@@ -26,6 +27,17 @@ public class StreamingMiddleware
 
         // transitions the request to a WebSocket connection
         using var ws = await context.WebSockets.AcceptWebSocketAsync();
+        
+        // validate request
+        if (!TryAcceptRequest(request))
+        {
+            await ws.CloseOutputAsync(
+                (WebSocketCloseStatus)4003,
+                "invalid request, close by server",
+                CancellationToken.None
+            );
+            return;
+        }
 
         // send message to client
         await ws.SendAsync(
@@ -37,5 +49,19 @@ public class StreamingMiddleware
 
         // close websocket after 1s
         await Task.Delay(1000);
+    }
+
+    private bool TryAcceptRequest(HttpRequest request)
+    {
+        var query = request.Query;
+        
+        // connection token
+        var token = new Token(query["token"].ToString());
+        if (!token.IsValid)
+        {
+            return false;
+        }
+
+        return true;
     }
 }
