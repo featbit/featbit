@@ -31,10 +31,15 @@ public class ValidationTests : IClassFixture<TestApp>
         Assert.Equal((WebSocketCloseStatus)4003, res.CloseStatus);
     }
 
-    [Fact]
-    public async Task Should_Say_Hello_Valid_Ws_Request()
+    [Theory]
+    [InlineData("client")]
+    [InlineData("server")]
+    public async Task Should_Say_Hello_Valid_Ws_Request(string type)
     {
-        using var ws = await _app.ConnectToWsServerAsync("?token=QXBBHYWVkLWNiZTgtNCUyMDIyMDEwODA5MjIzNF9fOTRfXzExMV9fMjM3X19kZWZhdWx0XzRmOWRQQBDDBUPHZHWZUZh");
+        const string token =
+            "QXBBHYWVkLWNiZTgtNCUyMDIyMDEwODA5MjIzNF9fOTRfXzExMV9fMjM3X19kZWZhdWx0XzRmOWRQQBDDBUPHZHWZUZh"; 
+        
+        using var ws = await _app.ConnectToWsServerAsync($"?type={type}&token={token}");
 
         var message = new byte[100];
         var res = await ws.ReceiveAsync(message, CancellationToken.None);

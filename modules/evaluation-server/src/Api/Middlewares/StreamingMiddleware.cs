@@ -55,6 +55,13 @@ public class StreamingMiddleware
     {
         var query = request.Query;
         
+        // sdkType
+        var sdkType = query["type"].ToString();
+        if (!SdkTypes.IsRegistered(sdkType))
+        {
+            return false;
+        }
+        
         // connection token
         var token = new Token(query["token"].ToString());
         if (!token.IsValid)
