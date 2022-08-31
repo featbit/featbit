@@ -1,7 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 using Domain.Streaming;
-using Version = Domain.Streaming.Version;
 
 namespace Api.Middlewares;
 
@@ -30,7 +29,8 @@ public class StreamingMiddleware
         using var ws = await context.WebSockets.AcceptWebSocketAsync();
         
         // validate request
-        if (!TryAcceptRequest(request))
+        var query = request.Query;
+        if (!RequestHandler.TryAcceptRequest(query["type"], query["version"], query["token"]))
         {
             await ws.CloseOutputAsync(
                 (WebSocketCloseStatus)4003,
@@ -50,33 +50,5 @@ public class StreamingMiddleware
 
         // close websocket after 1s
         await Task.Delay(1000);
-    }
-
-    private bool TryAcceptRequest(HttpRequest request)
-    {
-        var query = request.Query;
-        
-        // sdkType
-        var sdkType = query["type"].ToString();
-        if (!SdkTypes.IsRegistered(sdkType))
-        {
-            return false;
-        }
-        
-        // version
-        var version = query["version"].ToString();
-        if (!Version.IsSupported(version))
-        {
-            return false;
-        }
-
-        // connection token
-        var token = new Token(query["token"].ToString());
-        if (!token.IsValid)
-        {
-            return false;
-        }
-
-        return true;
     }
 }
