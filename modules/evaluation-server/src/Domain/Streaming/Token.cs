@@ -21,24 +21,52 @@ public struct Token
         EnvSecret = string.Empty;
         IsValid = false;
 
+        #region token header
+
         if (tokenSpan.IsEmpty || tokenSpan.Length < 5)
         {
-            // invalid token
+            // invalid token: token header must be 5 characters
             return;
         }
 
         var headerSpan = tokenSpan[..5];
-        Position = TokenNumber.DecodeByte(headerSpan[..3]);
-        ContentLength = TokenNumber.DecodeByte(headerSpan[3..]);
+        if (!TokenNumber.TryDecodeByte(headerSpan[..3], out var position))
+        {
+            // invalid token: invalid position
+            return;
+        }
+
+        if (!TokenNumber.TryDecodeByte(headerSpan[3..], out var contentLength))
+        {
+            // invalid token: invalid contentLength
+            return;
+        }
+
+        Position = position;
+        ContentLength = contentLength;
+
+        #endregion
+
+        #region token payload: timestamp
 
         var payloadSpan = tokenSpan[5..];
         if (payloadSpan.Length < Position + ContentLength)
         {
-            // invalid token
+            // invalid token: incomplete token payload
             return;
         }
 
-        Timestamp = TokenNumber.DecodeLong(payloadSpan.Slice(Position, ContentLength));
+        if (!TokenNumber.TryDecodeLong(payloadSpan.Slice(Position, ContentLength), out var timestamp))
+        {
+            // invalid token: invalid timestamp
+            return;
+        }
+
+        Timestamp = timestamp;
+
+        #endregion
+
+        #region token payload: envSecret
 
         var padding = Array.Empty<char>();
         var secretLength = payloadSpan.Length - ContentLength;
@@ -54,6 +82,8 @@ public struct Token
             padding
         );
         EnvSecret = envSecret;
+
+        #endregion
 
         IsValid = true;
     }

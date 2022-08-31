@@ -28,7 +28,9 @@ public class TokenTests
     [InlineData(" ")]
     [InlineData(null)]
     [InlineData("4chs")]
+    [InlineData("5chars")]
     [InlineData("QDUBHYWVkLWNiZT")]
+    [InlineData("QQQQS123")]
     public void Should_Get_Invalid_Token(string tokenString)
     {
         var token = new Token(tokenString);

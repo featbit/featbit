@@ -11,8 +11,9 @@ public class TokenNumberTests
     [InlineData("WHH", 255)]
     public void Should_Decode_Byte(string encoded, byte expected)
     {
-        var actual = TokenNumber.DecodeByte(encoded);
+        var parseResult = TokenNumber.TryDecodeByte(encoded, out var actual);
 
+        Assert.True(parseResult);
         Assert.Equal(expected, actual);
     }
 
@@ -21,8 +22,9 @@ public class TokenNumberTests
     [InlineData("BWSPHDXZUQ", 1234567890)]
     public void Should_Decode_Long(string encoded, long expected)
     {
-        var actual = TokenNumber.DecodeLong(encoded);
+        var parseResult = TokenNumber.TryDecodeLong(encoded, out var actual);
 
+        Assert.True(parseResult);
         Assert.Equal(expected, actual);
     }
 
@@ -32,10 +34,22 @@ public class TokenNumberTests
     [InlineData(" ")]
     public void Should_Decode_Null_Or_WhiteSpace_As_Zero(string encoded)
     {
-        var byteActual = TokenNumber.DecodeByte(encoded);
-        var longActual = TokenNumber.DecodeLong(encoded);
+        var byteParseResult = TokenNumber.TryDecodeByte(encoded, out var byteActual);
+        var longParseResult = TokenNumber.TryDecodeLong(encoded, out var longActual);
 
+        Assert.True(byteParseResult);
         Assert.Equal(0, byteActual);
+        
+        Assert.True(longParseResult);
         Assert.Equal(0, longActual);
+    }
+
+    [Theory]
+    [InlineData("QBabcd")]
+    [InlineData("1234QB")]
+    public void Should_Return_False_When_Decode_Unknown_Character(string encoded)
+    {
+        Assert.False(TokenNumber.TryDecodeByte(encoded, out _));
+        Assert.False(TokenNumber.TryDecodeLong(encoded, out _));
     }
 }

@@ -16,35 +16,49 @@ public static class TokenNumber
         { 'U', '9' },
     };
 
-    public static byte DecodeByte(ReadOnlySpan<char> characters)
+    public static bool TryDecodeByte(ReadOnlySpan<char> characters, out byte value)
     {
+        value = 0;
         if (characters.IsEmpty || characters.IsWhiteSpace())
         {
-            return 0;
+            return true;
         }
 
         Span<char> chars = stackalloc char[characters.Length];
         for (var i = 0; i < chars.Length; i++)
         {
-            chars[i] = CharacterMap[characters[i]];
+            if (!CharacterMap.TryGetValue(characters[i], out var charValue))
+            {
+                return false;
+            }
+
+            chars[i] = charValue;
         }
 
-        return byte.Parse(chars);
+        value = byte.Parse(chars);
+        return true;
     }
-
-    public static long DecodeLong(ReadOnlySpan<char> characters)
+    
+    public static bool TryDecodeLong(ReadOnlySpan<char> characters, out long value)
     {
+        value = 0;
         if (characters.IsEmpty || characters.IsWhiteSpace())
         {
-            return 0;
+            return true;
         }
 
         Span<char> chars = stackalloc char[characters.Length];
         for (var i = 0; i < chars.Length; i++)
         {
-            chars[i] = CharacterMap[characters[i]];
+            if (!CharacterMap.TryGetValue(characters[i], out var charValue))
+            {
+                return false;
+            }
+
+            chars[i] = charValue;
         }
 
-        return long.Parse(chars);
+        value = long.Parse(chars);
+        return true;
     }
 }
