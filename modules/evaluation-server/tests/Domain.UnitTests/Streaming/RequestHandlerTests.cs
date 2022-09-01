@@ -6,38 +6,40 @@ public class RequestHandlerTests
 {
     [Theory]
     [ClassData(typeof(Requests))]
-    public void Should_Validate_Request(string sdkType, string version, string tokenString, bool isValid)
+    public void Should_Validate_Request(
+        string sdkType, 
+        string version, 
+        string tokenString, 
+        long currentTimestamp, 
+        bool isValid)
     {
-        Assert.Equal(isValid, RequestHandler.TryAcceptRequest(sdkType, version, tokenString));
+        Assert.Equal(isValid, RequestHandler.TryAcceptRequest(sdkType, version, tokenString, currentTimestamp));
     }
 }
 
-public class Requests : TheoryData<string, string, string, bool>
+public class Requests : TheoryData<string, string, string, long, bool>
 {
     public Requests()
     {
-        Add(
-            "client", string.Empty,
-            "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ",
-            true
-        );
+        const string sdkType = "client";
+        const string version = "";
+        const string token =
+            "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ";
+        const long tokenCreatedAt = 1661907157706;
+
+        // valid
+        Add(sdkType, version, token, tokenCreatedAt, true);
+
+        // invalid client
+        Add("invalid-client", version, token, tokenCreatedAt, false);
+
+        // invalid version
+        Add(sdkType, "invalid-version", token, tokenCreatedAt, false);
+
+        // invalid token string
+        Add(sdkType, version, "invalid-token-string", tokenCreatedAt, false);
         
-        Add(
-            "invalid-client", string.Empty, // invalid client
-            "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ",
-            false
-        );
-        
-        Add(
-            "client", "invalid-version", // invalid version
-            "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ",
-            false
-        );
-        
-        Add(
-            "client", string.Empty,
-            "invalid-token-string", // invalid token string
-            false
-        );
+        // invalid timestamp (after 31s)
+        Add(sdkType, version, token, tokenCreatedAt + 31 * 1000, false);
     }
 }
