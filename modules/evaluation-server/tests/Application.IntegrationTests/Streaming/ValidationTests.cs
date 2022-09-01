@@ -12,14 +12,10 @@ public class ValidationTests : IClassFixture<TestApp>
         _app = app;
     }
 
-    [Theory]
-    [InlineData(" ")]
-    [InlineData(null)]
-    [InlineData("?token=a-invalid-token")]
-    [InlineData("?token=")]
-    public async Task Should_Close_Invalid_Ws_Request(string queryString)
+    [Fact]
+    public async Task Should_Close_Invalid_Ws_Request()
     {
-        using var ws = await _app.ConnectToWsServerAsync(queryString);
+        using var ws = await _app.ConnectToWsServerAsync();
 
         var res = await ws.ReceiveAsync(new byte[100], CancellationToken.None);
 
@@ -31,15 +27,13 @@ public class ValidationTests : IClassFixture<TestApp>
         Assert.Equal((WebSocketCloseStatus)4003, res.CloseStatus);
     }
 
-    [Theory]
-    [InlineData("client", "1")]
-    [InlineData("server", "2")]
-    public async Task Should_Say_Hello_Valid_Ws_Request(string type, string version)
+    [Fact]
+    public async Task Should_Say_Hello_Valid_Ws_Request()
     {
         const string token =
             "QXBBHYWVkLWNiZTgtNCUyMDIyMDEwODA5MjIzNF9fOTRfXzExMV9fMjM3X19kZWZhdWx0XzRmOWRQQBDDBUPHZHWZUZh"; 
         
-        using var ws = await _app.ConnectToWsServerAsync($"?type={type}&token={token}&version={version}");
+        using var ws = await _app.ConnectToWsServerAsync($"?type=client&version=2&token={token}");
 
         var message = new byte[100];
         var res = await ws.ReceiveAsync(message, CancellationToken.None);
