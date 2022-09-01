@@ -1,5 +1,6 @@
 using Api.Middlewares;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Internal;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// add SystemClock
+builder.Services.AddSingleton<ISystemClock, SystemClock>();
 
 // health check dependencies
 builder.Services.AddHealthChecks();

@@ -1,16 +1,20 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 using Domain.Streaming;
+using Microsoft.Extensions.Internal;
 
 namespace Api.Middlewares;
 
 public class StreamingMiddleware
 {
     private const string StreamingPath = "/streaming";
+    private readonly ISystemClock _systemClock;
+
     private readonly RequestDelegate _next;
 
-    public StreamingMiddleware(RequestDelegate next)
+    public StreamingMiddleware(ISystemClock systemClock, RequestDelegate next)
     {
+        _systemClock = systemClock;
         _next = next;
     }
 
@@ -27,10 +31,11 @@ public class StreamingMiddleware
 
         // transitions the request to a WebSocket connection
         using var ws = await context.WebSockets.AcceptWebSocketAsync();
-        
+
         // validate request
         var query = request.Query;
-        if (!RequestHandler.TryAcceptRequest(query["type"], query["version"], query["token"]))
+        var currentTimestamp = _systemClock.UtcNow.ToUnixTimeMilliseconds();
+        if (!RequestHandler.TryAcceptRequest(query["type"], query["version"], query["token"], currentTimestamp))
         {
             await ws.CloseOutputAsync(
                 (WebSocketCloseStatus)4003,
