@@ -5,17 +5,17 @@ namespace Application.IntegrationTests.Streaming;
 
 public class ValidationTests : IClassFixture<TestApp>
 {
-    private readonly TestApp _app;
+    private readonly StreamingTestApp _app;
 
     public ValidationTests(TestApp app)
     {
-        _app = app;
+        _app = new StreamingTestApp(app);
     }
 
     [Fact]
     public async Task Should_Close_Invalid_Ws_Request()
     {
-        using var ws = await _app.ConnectToWsServerAsync();
+        using var ws = await _app.ConnectAsync();
 
         var res = await ws.ReceiveAsync(new byte[100], CancellationToken.None);
 
@@ -27,13 +27,14 @@ public class ValidationTests : IClassFixture<TestApp>
         Assert.Equal((WebSocketCloseStatus)4003, res.CloseStatus);
     }
 
-    [Fact(Skip = "should generate token dynamically or mock the DateTime.UtcNow")]
-    public async Task Should_Say_Hello_Valid_Ws_Request()
+    [Fact]
+    public async Task Should_Say_Hello_To_Valid_Ws_Request()
     {
+        const long tokenCreatedAt = 1661907157706;
         const string token =
-            "QXBBHYWVkLWNiZTgtNCUyMDIyMDEwODA5MjIzNF9fOTRfXzExMV9fMjM3X19kZWZhdWx0XzRmOWRQQBDDBUPHZHWZUZh"; 
+            "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ";
         
-        using var ws = await _app.ConnectToWsServerAsync($"?type=client&version=2&token={token}");
+        using var ws = await _app.ConnectAsync(tokenCreatedAt, $"?type=client&version=2&token={token}");
 
         var message = new byte[100];
         var res = await ws.ReceiveAsync(message, CancellationToken.None);
