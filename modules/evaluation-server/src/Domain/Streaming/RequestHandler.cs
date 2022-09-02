@@ -32,7 +32,7 @@ public class RequestHandler
         
         // token timestamp
         var current = currentTimestamp ?? DateTime.UtcNow.ToUnixTimeMilliseconds();
-        if (current - token.Timestamp > 30 * 1000)
+        if (Math.Abs(current - token.Timestamp) > 30 * 1000)
         {
             return false;
         }

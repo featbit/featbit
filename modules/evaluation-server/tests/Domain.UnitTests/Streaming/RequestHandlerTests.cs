@@ -39,7 +39,8 @@ public class Requests : TheoryData<string, string, string, long, bool>
         // invalid token string
         Add(sdkType, version, "invalid-token-string", tokenCreatedAt, false);
         
-        // invalid timestamp (after 31s)
+        // invalid timestamp (after/before 31s)
         Add(sdkType, version, token, tokenCreatedAt + 31 * 1000, false);
+        Add(sdkType, version, token, tokenCreatedAt - 31 * 1000, false);
     }
 }
