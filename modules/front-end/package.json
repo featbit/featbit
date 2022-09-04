@@ -2,9 +2,13 @@
   "name": "front-end",
   "version": "0.1.0",
   "scripts": {
-    "start": "ng serve --configuration development --host=0.0.0.0",
-    "build": "ng build --configuration development",
-    "build-prod": "ng build --configuration production",
+    "start": "ng serve",
+    "start:en": "ng serve --configuration=development",
+    "start:zh": "ng serve --configuration=development,zh",
+    "build": "ng build --localize",
+    "build:prod": "ng build --localize --configuration production",
+    "watch": "ng build --watch --configuration development",
+    "i18n": "ng extract-i18n --output-path src/locale",
     "test": "ng test",
     "test-coverage": "ng test --code-coverage"
   },

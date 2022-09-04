@@ -1,0 +1,3 @@
+<nz-select class="extend" [(ngModel)]="activeLocale" (ngModelChange)="onLocaleChange()">
+  <nz-option *ngFor="let locale of locales" [nzLabel]="locale.name" [nzValue]="locale.code"></nz-option>
+</nz-select>

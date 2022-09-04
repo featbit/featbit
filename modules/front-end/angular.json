@@ -4,6 +4,14 @@
   "newProjectRoot": "projects",
   "projects": {
     "front-end": {
+      "i18n": {
+        "sourceLocale": "en-US",
+        "locales": {
+          "zh": {
+            "translation": "src/locale/messages.zh.xlf"
+          }
+        }
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,6 +25,8 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "localize": true,
+            "aot": true,
             "outputPath": "dist/front-end",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -75,7 +85,11 @@
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true
+              "namedChunks": true,
+              "localize": ["en-US"]
+            },
+            "zh": {
+              "localize": ["zh"]
             }
           },
           "defaultConfiguration": "production"
@@ -88,6 +102,9 @@
             },
             "development": {
               "browserTarget": "front-end:build:development"
+            },
+            "zh": {
+              "browserTarget": "front-end:build:zh"
             }
           },
           "defaultConfiguration": "development"
