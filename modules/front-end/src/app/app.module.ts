@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {NgModule} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -11,9 +11,14 @@ import { IconsProviderModule } from "./icons-provider.module";
 import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
+import {LocaleSwitcherComponent} from "./locale-switcher/locale-switcher.component";
+import {NzSelectModule} from "ng-zorro-antd/select";
+
+
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    LocaleSwitcherComponent
   ],
   imports: [
     BrowserModule,
@@ -23,7 +28,8 @@ import { FormsModule } from "@angular/forms";
     BrowserAnimationsModule,
     IconsProviderModule,
     NzLayoutModule,
-    NzMessageModule
+    NzMessageModule,
+    NzSelectModule
   ],
   providers: [
     { provide: NZ_I18N, useValue: zh_CN },
