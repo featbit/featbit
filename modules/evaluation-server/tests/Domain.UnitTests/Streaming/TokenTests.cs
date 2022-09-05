@@ -11,14 +11,14 @@ public class TokenTests
         byte position,
         byte contentLength,
         long timestamp,
-        string envSecret)
+        Secret secret)
     {
         var token = new Token(tokenString);
         
         Assert.Equal(token.Position, position);
         Assert.Equal(token.ContentLength, contentLength);
         Assert.Equal(token.Timestamp, timestamp);
-        Assert.Equal(token.EnvSecret, envSecret);
+        Assert.Equal(token.Secret, secret);
         
         Assert.True(token.IsValid);
     }
@@ -39,26 +39,23 @@ public class TokenTests
     }
 }
 
-public class ValidTokens : TheoryData<string, byte, byte, long, string>
+public class ValidTokens : TheoryData<string, byte, byte, long, Secret>
 {
     public ValidTokens()
     {
         Add(
             "QDUBHYWVkLWNiZTgtNCUyMDIyMDEwODA5MjIzNF9fOTRfXzExMV9fMjM3X19kZWZhdWx0XzRmOQQBDDBZXPDDZBQHWRh",
-            69, 15, 1661874668105,
-            "YWVkLWNiZTgtNCUyMDIyMDEwODA5MjIzNF9fOTRfXzExMV9fMjM3X19kZWZhdWx0XzRmOWRh"
+            69, 15, 1661874668105, new Secret { AccountId = 94, ProjectId = 111, EnvId = 237 }
         );
         
         Add(
             "QPPBHNjQ5LWNmY2EtNCUyMDIyMDYyOTEzMzU1OF9fMTU4X18yQQBDDBUQDUZSZQPMDBfXzQxMF9fZGVmYXVsdF8yODRmYg",
-            44, 15, 1661906983804,
-            "NjQ5LWNmY2EtNCUyMDIyMDYyOTEzMzU1OF9fMTU4X18yMDBfXzQxMF9fZGVmYXVsdF8yODRmYg=="
+            44, 15, 1661906983804, new Secret { AccountId = 158, ProjectId = 200, EnvId = 410 }
         );
         
         Add(
             "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ",
-            47, 15, 1661907157706,
-            "MWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRfXzQyMV9fZGVmYXVsdF84ZDBmZQ=="
+            47, 15, 1661907157706, new Secret { AccountId = 161, ProjectId = 204, EnvId = 421 }
         );
     }
 }

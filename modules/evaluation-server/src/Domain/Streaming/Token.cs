@@ -8,7 +8,7 @@ public struct Token
 
     public long Timestamp { get; set; }
 
-    public string EnvSecret { get; set; }
+    public Secret Secret { get; set; }
 
     public bool IsValid { get; set; }
 
@@ -18,7 +18,7 @@ public struct Token
         Position = 0;
         ContentLength = 0;
         Timestamp = 0;
-        EnvSecret = string.Empty;
+        Secret = default;
         IsValid = false;
 
         #region token header
@@ -81,7 +81,13 @@ public struct Token
             payloadSpan[(Position + ContentLength)..],
             padding
         );
-        EnvSecret = envSecret;
+        var isValidSecret = Secret.TryParse(envSecret, out var secret);
+        if (!isValidSecret)
+        {
+            // invalid token: invalid secret
+            return;
+        }
+        Secret = secret;
 
         #endregion
 
