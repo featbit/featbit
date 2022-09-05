@@ -40,6 +40,10 @@ We're here to help - and to make FeatBit even better!
 
 Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. We'd love to have your help too: Please feel free to open issues or provide pull requests.
 
+### Rewards
+
+We are looking into the possibility of incentivizing and rewarding contributors through Web3 technology. [tea.xyz](https://tea.xyz) is in the scope of our study. We hope you can recommend more related content via Slack or Discord.
+
 ## Architecture
 
 Under construction...
