@@ -1,42 +1,51 @@
+using System.Net.WebSockets;
 using Domain.Utils.ExtensionMethods;
 
 namespace Domain.Streaming;
 
 public class RequestHandler
 {
-    public static bool TryAcceptRequest(
-        string sdkType, 
-        string version, 
-        string tokenString, 
+    public static Connection? TryAcceptRequest(
+        WebSocket webSocket,
+        string sdkType,
+        string version,
+        string tokenString,
         // for testability
         long? currentTimestamp = null)
     {
-        // sdkType
-        if (!SdkTypes.IsRegistered(sdkType))
+        // connection type
+        if (!ConnectionType.IsRegistered(sdkType))
         {
-            return false;
+            return null;
         }
-        
+
         // version
         if (!Version.IsSupported(version))
         {
-            return false;
+            return null;
         }
 
         // connection token
         var token = new Token(tokenString);
         if (!token.IsValid)
         {
-            return false;
+            return null;
         }
-        
+
         // token timestamp
         var current = currentTimestamp ?? DateTime.UtcNow.ToUnixTimeMilliseconds();
         if (Math.Abs(current - token.Timestamp) > 30 * 1000)
         {
-            return false;
+            return null;
         }
 
-        return true;
+        // websocket state
+        if (webSocket is not { State: WebSocketState.Open })
+        {
+            return null;
+        }
+
+        var connection = new Connection(webSocket, token.Secret.EnvId, sdkType, version, current);
+        return connection;
     }
 }

@@ -32,10 +32,13 @@ public class StreamingMiddleware
         // transitions the request to a WebSocket connection
         using var ws = await context.WebSockets.AcceptWebSocketAsync();
 
-        // validate request
+        // try accept request
         var query = request.Query;
         var currentTimestamp = _systemClock.UtcNow.ToUnixTimeMilliseconds();
-        if (!RequestHandler.TryAcceptRequest(query["type"], query["version"], query["token"], currentTimestamp))
+        
+        var connection =
+            RequestHandler.TryAcceptRequest(ws, query["type"], query["version"], query["token"], currentTimestamp);
+        if (connection == null)
         {
             await ws.CloseOutputAsync(
                 (WebSocketCloseStatus)4003,
