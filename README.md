@@ -22,6 +22,14 @@ Under construction..
 
 Under construction..
 
+## Features
+
+Unser construction...
+
+## Roadmap
+
+Unser construction...
+
 ## Community & Support
 
 Join [our Slack community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature.
@@ -34,7 +42,7 @@ Building FeatBit is a collaborative effort, and we owe a lot of gratitude to man
 
 ## Architecture
 
-Under construction
+Under construction...
 
 ## License
 
