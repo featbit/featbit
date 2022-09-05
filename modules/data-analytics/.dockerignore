@@ -1,0 +1,13 @@
+*
+!app
+!integration_tests
+!utils
+!.env
+!flasky.py
+!gunicorn.conf.py
+!requirements.txt
+!start.sh
+!supervisord.conf
+!nginx.conf
+!docker-entrypoint.sh
+!wait-for-it.sh

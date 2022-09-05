@@ -1,0 +1,41 @@
+[flake8]
+
+################### FILE PATTERNS ##########################
+
+# Provide a comma-separated list of glob patterns to exclude from checks.
+exclude =
+    # git folder
+    .git,
+    # python cache
+    __pycache__,
+    # pytest cache
+    .pytest_cache,
+    # mypy cache
+    .mypy_cache,
+    build,
+    dist,
+    api,
+    ExperimentApiPy.py
+# Provide a comma-separate list of glob patterns to include for checks.
+filename = *.py
+
+########## Options ##########
+
+# Report all errors, even if it is on the same line as a `# NOQA` comment.
+disable-noqa = False
+
+# Set the maximum length that any line (with some exceptions) may be.
+max-line-length = 199
+# Set the maximum allowed McCabe complexity value for a block of code.
+max-complexity = 10
+
+########## Rules ##########
+ignore =
+    E133,
+    E203,
+    W503,
+    C901,
+    E722
+
+per-file-ignores =
+    __init__.py:F401,F403

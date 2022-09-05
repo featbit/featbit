@@ -1,0 +1,150 @@
+version: "3.9"
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: on-failure
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=featbit
+    volumes:
+      - mongodb:/data/db
+      - ./infra/mongodb/docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - featbit-network
+
+  redis:
+    image: 'bitnami/redis:latest'
+    container_name: redis
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - featbit-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    container_name: zookeeper
+    restart: on-failure
+    ports:
+      - '2181:2181'
+    volumes:
+      - zookeeper:/bitnami/zookeeper
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: 'true'
+    networks:
+      - featbit-network
+
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    restart: on-failure
+    depends_on:
+      - zookeeper
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      KAFKA_BROKER_ID: 1001
+      KAFKA_CFG_RESERVED_BROKER_MAX_ID: 1001
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      ALLOW_PLAINTEXT_LISTENER: 'true'
+    networks:
+      - featbit-network
+    volumes:
+      - kafka:/bitnami/kafka
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=featbit-kafka
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    networks:
+      - featbit-network
+
+  clickhouse-server:
+    image: yandex/clickhouse-server
+    container_name: clickhouse-server
+    restart: on-failure
+    depends_on:
+      - zookeeper
+      - kafka
+
+    ports:
+      - "8123:8123"
+      - "8443:8443"
+      - "9000:9000"
+      - "9009:9009"
+      - "9440:9440"
+    networks:
+      - featbit-network
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
+      - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse-server:/var/lib/clickhouse
+
+  clickhouse-client:
+    image: yandex/clickhouse-client
+    container_name: clickhouse-client
+    restart: on-failure
+    entrypoint:
+      - /bin/sleep
+    command:
+      - infinity
+    networks:
+      - featbit-network
+
+  da-server:
+    build: ./modules/data-analytics/
+    image: da-server
+    depends_on:
+      - zookeeper
+      - kafka
+      - clickhouse-server
+    ports:
+      - 80:80
+    networks:
+      - featbit-network
+    environment:
+      KAFKA_HOSTS: kafka:9092
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.10.0.0/16
+
+volumes:
+  mongodb:
+  redis:
+  kafka:
+  clickhouse-server:
+  zookeeper:
