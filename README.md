@@ -7,7 +7,7 @@
 [![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)  [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
 
 
-**FeatBit** is a scalable, high-performance open source platform for **Feature Management** and **Progressive Experimentation**. **Our Philosophy** is to enable **continuous innovation** in product development and to maintain a steady, **healthy iteration heartbeat**. We offer two broad modules that complement each other to achieve core objectives:
+**FeatBit** is a scalable, high-performance **Feature Management** and **Progressive Experimentation** platform. **Our Philosophy** is to enable **continuous innovation** in product development and to maintain a steady, **healthy iteration heartbeat**. We offer two broad modules that complement each other to achieve core objectives:
 
 **Feature Management**, which Empowers All Team to Deliver and Control Software，Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome. Use cases like `Trunk-based development`,`Testing in production`,`Progressive & Targeted release`,`Kill switches`,`Faster incident resolution`,`Data & Cloud Migration`, etc.
     
