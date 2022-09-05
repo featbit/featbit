@@ -14,8 +14,22 @@
 **Progressive Experimentation**, which provides the ability to get valid online and offline feedback as quickly as possible and keep the product iteration heart rate healthy and stable because of it. Use cases like `Beta testing and qualitative feedback`,`Experimentation and A/B testing`.
 
 
-## Documentation and Support
+## Get Started
+
+Under construction..
+
+## Documentation
+
+Under construction..
+
+## Community & Support
 
 Join [our Slack community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature.
 
 We're here to help - and to make FeatBit even better!
+
+## Contribute to FeatBit
+
+Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. We'd love to have your help too: Please feel free to open issues or provide pull requests.
+
+
