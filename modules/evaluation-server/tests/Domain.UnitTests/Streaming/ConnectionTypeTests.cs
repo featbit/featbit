@@ -2,7 +2,7 @@
 
 namespace Domain.UnitTests.Streaming;
 
-public class SdkTypesTests
+public class ConnectionTypeTests
 {
     [Theory]
     [InlineData("client", true)]
@@ -12,6 +12,6 @@ public class SdkTypesTests
     [InlineData(null, false)]
     public void Should_Check_SdkType_Registration_Status(string type, bool registered)
     {
-        Assert.Equal(registered, SdkTypes.IsRegistered(type));
+        Assert.Equal(registered, ConnectionType.IsRegistered(type));
     }
 }

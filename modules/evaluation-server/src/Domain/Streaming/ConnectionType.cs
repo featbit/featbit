@@ -1,6 +1,6 @@
 ﻿namespace Domain.Streaming;
 
-public class SdkTypes
+public class ConnectionType
 {
     public const string Server = "server";
     public const string Client = "client";
