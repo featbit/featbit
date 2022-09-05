@@ -24,11 +24,11 @@ Under construction..
 
 ## Features
 
-Unser construction...
+Under construction...
 
 ## Roadmap
 
-Unser construction...
+Under construction...
 
 ## Community & Support
 
