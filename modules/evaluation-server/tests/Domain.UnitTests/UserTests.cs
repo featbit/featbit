@@ -8,7 +8,7 @@ public class UserTests
     public void Should_Deserialize_From_Json()
     {
         var json =
-            "{'userName':'rick','email':'rick@universe.com','userKeyId':'97f202d6-db9e-4da2-a465-1b35f8621858','customizedProperties':[{'name':'role','value':'bad-guy'},{'name':'中文名','value':'瑞克'}]}".Replace('\'', '"');
+            "{'userName':'rick','email':'rick@universe.com','userKeyId':'97f202d6-db9e-4da2-a465-1b35f8621858', 'country': 'us', 'customizedProperties':[{'name':'role','value':'bad-guy'},{'name':'中文名','value':'瑞克'}]}".Replace('\'', '"');
 
         // use web defaults JsonSerializerOptions
         // https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-configure-options?pivots=dotnet-6-0#web-defaults-for-jsonserializeroptions
@@ -20,7 +20,7 @@ public class UserTests
         Assert.Equal("97f202d6-db9e-4da2-a465-1b35f8621858", actual.UserKeyId);
         Assert.Equal("rick", actual.UserName);
         Assert.Equal("rick@universe.com", actual.Email);
-        Assert.Null(actual.Country);
+        Assert.Equal("us", actual.Country);
 
         Assert.NotNull(actual.CustomizedProperties);
         Assert.Equal("role", actual.CustomizedProperties[0].Name);
