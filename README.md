@@ -10,21 +10,16 @@
 FeatBit is a scalable, high-performance open source platform for **Feature Management** and **Progressive Experimentation**. Our core goal is to enable continuous innovation in product development and to maintain a steady, healthy iteration heartbit. We offer two broad modules that complement each other to achieve core objectives:
 
 - **Feature Management**, which Empowers All Team to Deliver and Control Software，Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome. Use cases like:
-    - Decoupling deployments from releases
     - Trunk-based development
     - Testing in production
-    - Progressive Delivery: Risk-free CI/CD
-    - Kill switches
-    - Targeted rollouts/release progressions
-    - Application modernization
-    - Canary launches
-    - Faster incident resolution
-    - Entitlements
+    - Progressive & Targeted release
+    - Kill switches / Faster incident resolution
+    - Data / Cloud Migration
+    - etc.
     
 - **Progressive Experimentation**, which provides the ability to get valid online and offline feedback as quickly as possible and keep the product iteration heart rate healthy and stable because of it. Use cases like:
     - Beta testing and qualitative feedback
     - Experimentation and A/B testing
-    - Lean&Trial Development
 
 
 ## Documentation and Support
