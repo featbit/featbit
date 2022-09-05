@@ -13,13 +13,13 @@ RUN node --version
 RUN npm --version
 
 # build
-WORKDIR /front-end
-COPY . /front-end
+WORKDIR /featbit
+COPY package*.json ./
 RUN npm install
-RUN npm run build:prod
+COPY . .
+RUN npm run build
 
 # Set up nginx
 COPY dist/front-end /usr/share/nginx/html/
-RUN rm /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
-COPY dist/front-end /usr/share/nginx/html
-COPY nginx/nginx.conf /etc/nginx
+#RUN rm /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+#COPY nginx/nginx.conf /etc/nginx
