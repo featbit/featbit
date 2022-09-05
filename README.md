@@ -32,4 +32,10 @@ We're here to help - and to make FeatBit even better!
 
 Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. We'd love to have your help too: Please feel free to open issues or provide pull requests.
 
+## Architecture
 
+Under construction
+
+## License
+
+FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
