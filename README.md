@@ -18,10 +18,6 @@
 
 Under construction..
 
-## Documentation
-
-Under construction..
-
 ## Features
 
 Under construction...
@@ -30,9 +26,13 @@ Under construction...
 
 Under construction...
 
-## Community & Support
+## Documentation & Support
 
-Join [our Slack community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature.
+**Documentation** is under construction.
+
+Join our [**Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) or **Discord Community**(under construction) if you get stuck, want to chat, or are thinking of a new feature.
+
+Or email us at hu-beau@outlook.com if Slack isn't your thing.
 
 We're here to help - and to make FeatBit even better!
 
