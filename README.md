@@ -9,9 +9,9 @@
 
 **FeatBit** is a scalable, high-performance **Feature Management** and **Progressive Experimentation** platform. **Our Philosophy** is to enable **continuous innovation** in product development and to maintain a steady, **healthy iteration heartbeat**. We offer two broad modules that complement each other to achieve core objectives:
 
-**Feature Management**, which Empowers All Team to Deliver and Control Software，Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome. Use cases like `Trunk-based development`,`Testing in production`,`Progressive & Targeted release`,`Kill switches`,`Faster incident resolution`,`Data & Cloud Migration`, etc.
+**Feature Management**, which Empowers All Team to Deliver and Control Software，Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome. Use cases like `Trunk-based development`, `Testing in production`, `Progressive & Targeted release`, `Kill switches`, `Faster incident resolution`, `Data & Cloud Migration`, etc.
     
-**Progressive Experimentation**, which provides the ability to get valid online and offline feedback as quickly as possible and keep the product iteration heart rate healthy and stable because of it. Use cases like `Beta testing and qualitative feedback`,`Experimentation and A/B testing`.
+**Progressive Experimentation**, which provides the ability to get valid online and offline feedback as quickly as possible and keep the product iteration heart rate healthy and stable because of it. Use cases like `Beta testing and qualitative feedback`, `Experimentation and A/B testing`.
 
 
 ## Get Started
