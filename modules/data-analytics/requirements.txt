@@ -1,0 +1,16 @@
+certifi>=2018.4.16
+urllib3>=1.22.0
+python-dateutil==2.8.2
+flask==2.1.2
+clickhouse-pool==0.5.3
+clickhouse-driver==0.2.1
+kafka-python==2.0.2
+sqlparse==0.3.0
+numpy > 1.17
+scipy > 1.3
+statsmodels > 0.13
+gunicorn==20.1.0
+infi-clickhouse-orm@ git+https://github.com/PostHog/infi.clickhouse_orm@37722f350f3b449bbcd6564917c436b0d93e796f
+Flask-APScheduler
+python-dotenv
+pytest
