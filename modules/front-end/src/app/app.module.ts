@@ -12,7 +12,6 @@ import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
 import {NzSelectModule} from "ng-zorro-antd/select";
-import {SharedModule} from "@shared/shared.module";
 
 
 @NgModule({
@@ -26,7 +25,6 @@ import {SharedModule} from "@shared/shared.module";
     HttpClientModule,
     BrowserAnimationsModule,
     IconsProviderModule,
-    SharedModule,
     NzLayoutModule,
     NzMessageModule,
     NzSelectModule

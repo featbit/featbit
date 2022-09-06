@@ -8,6 +8,66 @@
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
           <context context-type="linenumber">3</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">39,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="193324215946023286" datatype="html">
+        <source>username</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8056544210376488" datatype="html">
+        <source>username is mandatory</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5908006480861982585" datatype="html">
+        <source>Illegal username</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4267710907648326582" datatype="html">
+        <source>password is mandatory</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">19,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4809196861118879526" datatype="html">
+        <source>password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">26,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="" datatype="html">
+        <source>username and/or password incorrect</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3427095830950090423" datatype="html">
+        <source>Login with success</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1294601887930644953" datatype="html">
+        <source>Error occurred, please contact the support.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
       </trans-unit>
     </body>
   </file>
