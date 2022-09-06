@@ -1,25 +1,15 @@
-FROM nginx:latest
+# Stage 0, "build-stage", based on Node.js, to build and compile Angular
+FROM node:16.17 as build-stage
 
-# install nodejs
-ENV NODE_VERSION=16.13.0
-RUN apt install -y curl
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-ENV NVM_DIR=/root/.nvm
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-RUN node --version
-RUN npm --version
-
-# build
-WORKDIR /featbit
-COPY package*.json ./
+WORKDIR /app
+COPY package*.json /app/
 RUN npm install
-COPY . .
+COPY ./ /app/
+RUN npm run i18n
 RUN npm run build
 
-# Set up nginx
-COPY dist/front-end /usr/share/nginx/html/
-#RUN rm /etc/nginx/nginx.conf /etc/nginx/conf.d/default.conf
-#COPY nginx/nginx.conf /etc/nginx
+# Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
+FROM nginx:1.23
+COPY --from=build-stage /app/dist/front-end/ /usr/share/nginx/featbit/
+
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
