@@ -3,6 +3,7 @@ import {
   Component,
   LOCALE_ID,
 } from '@angular/core';
+import {CURRENT_ACCOUNT, CURRENT_LANGUAGE} from "@utils/localstorage-keys";
 
 @Component({
   selector: 'app-locale-switcher',
@@ -17,9 +18,15 @@ export class LocaleSwitcherComponent {
   constructor(
     @Inject(LOCALE_ID) public activeLocale: string
   ) {
+    const lang = localStorage.getItem(CURRENT_LANGUAGE());
+    if (lang !== 'null' && lang !== null && lang !== this.activeLocale) {
+      this.activeLocale = lang;
+      this.onLocaleChange();
+    }
   }
 
   onLocaleChange() {
     window.location.href = `/${this.activeLocale}`;
+    localStorage.setItem(CURRENT_LANGUAGE(), this.activeLocale);
   }
 }

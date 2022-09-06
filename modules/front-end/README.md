@@ -19,7 +19,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 FeatBit includes a customer UI/Portal. It is optional to install, but we highly recommend using it as the management portal.
 
-The FeatBit UI provides features for managing and updating properties, rollout, rollback, configuration peer reviews, permission management, audit logs, and many other features.
+The FeatBit UI provides features for managing and updating feature flags, users, rollback, configuration peer reviews, permission management, organization management, audit logs, and many other features.
 
 # Getting Started
 
@@ -30,5 +30,16 @@ docker build -t featbit/ui .
 docker run -d -p 80:80 --name featbit-ui featbit/ui 
 ```
 
+Then go to http://localhost
+
+### Switch UI language
+
 When you put http://localhost in your browser, by default, the UI will redirect to the language defined by **accept-language** of the request headers,
 you can manually switch the language with the language switcher in the UI.
+
+As **ng serve** only support one single locale, during development, the locale-switcher compoent doesn't. If you want to check different language,
+run the app with one of the following
+```
+npm run serve:en // English
+npm run serve:zh // Chinese
+```
