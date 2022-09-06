@@ -5,7 +5,7 @@
     "start": "ng serve",
     "start:en": "ng serve --configuration=development",
     "start:zh": "ng serve --configuration=development,zh",
-    "build": "ng build --localize",
+    "build": "ng build --localize --configuration development",
     "build:prod": "ng build --localize --configuration production",
     "watch": "ng build --watch --configuration development",
     "i18n": "ng extract-i18n --output-path src/locale",
