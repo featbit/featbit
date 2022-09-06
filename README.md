@@ -30,7 +30,7 @@ Under construction...
 
 **Documentation** is under construction.
 
-Join our [**Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) or **Discord Community**(under construction) if you get stuck, want to chat, or are thinking of a new feature.
+Join our [**Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature.
 
 Or email us at hu-beau@outlook.com if Slack isn't your thing.
 
