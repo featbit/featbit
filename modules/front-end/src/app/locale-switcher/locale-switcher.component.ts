@@ -20,6 +20,6 @@ export class LocaleSwitcherComponent {
   }
 
   onLocaleChange() {
-    window.location.href = `/${this.activeLocale}/`;
+    window.location.href = `/${this.activeLocale}`;
   }
 }
