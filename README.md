@@ -50,7 +50,7 @@ Building FeatBit is a collaborative effort, and we owe a lot of gratitude to man
 
 ### Rewards
 
-We are looking into the possibility of incentivizing and rewarding contributors through Web3 technology. [tea.xyz](https://tea.xyz) is in the scope of our study. We hope you can recommend more related content via Slack or Discord.
+We are looking into the possibility of incentivizing and rewarding contributors through Web3 technology. [tea.xyz](https://tea.xyz) is in the scope of our study. We hope you can recommend more related content via Slack.
 
 ## License
 
