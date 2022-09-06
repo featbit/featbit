@@ -24,7 +24,7 @@ The FeatBit UI provides features for managing and updating properties, rollout, 
 # Getting Started
 
 ## Installing UI Independently with a Docker Image
-You can install and run UI with a Docker image. To run, binding the exposed port 8080 or any other available port, use:
+You can install and run UI with a Docker image. To run, binding the exposed port 80 or any other available port, use:
 ```
 docker build -t featbit/ui .
 docker run -d -p 80:80 --name featbit-ui featbit/ui 
