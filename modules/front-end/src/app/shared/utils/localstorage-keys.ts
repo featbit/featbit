@@ -15,3 +15,7 @@ export function CURRENT_ACCOUNT(): string {
 export function CURRENT_USER_FILTER_ATTRIBUTE(envId: number): string {
   return `${getLocalStorageKey('current-user-search-filter-attribute')}_${envId}`;
 }
+
+export function CURRENT_LANGUAGE(): string {
+  return getLocalStorageKey('current-lang');
+}

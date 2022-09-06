@@ -9,6 +9,6 @@ RUN npm run build
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
 FROM nginx:1.23
-COPY --from=build-stage /app/dist/front-end/ /usr/share/nginx/featbit/
+COPY --from=build-stage /app/dist/featbit/ /usr/share/nginx/featbit/
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf

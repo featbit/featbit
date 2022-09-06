@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "front-end": {
+    "featbit": {
       "i18n": {
         "sourceLocale": "en",
         "locales": {
@@ -27,7 +27,7 @@
           "options": {
             "localize": true,
             "aot": true,
-            "outputPath": "dist/front-end",
+            "outputPath": "dist/featbit",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -98,13 +98,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "front-end:build:production"
+              "browserTarget": "featbit:build:production"
             },
             "development": {
-              "browserTarget": "front-end:build:development"
+              "browserTarget": "featbit:build:development"
             },
             "zh": {
-              "browserTarget": "front-end:build:zh"
+              "browserTarget": "featbit:build:zh"
             }
           },
           "defaultConfiguration": "development"
@@ -112,7 +112,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "front-end:build"
+            "browserTarget": "featbit:build"
           }
         },
         "test": {

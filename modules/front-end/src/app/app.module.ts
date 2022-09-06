@@ -11,14 +11,13 @@ import { IconsProviderModule } from "./icons-provider.module";
 import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
-import {LocaleSwitcherComponent} from "./locale-switcher/locale-switcher.component";
 import {NzSelectModule} from "ng-zorro-antd/select";
+import {SharedModule} from "@shared/shared.module";
 
 
 @NgModule({
   declarations: [
-    AppComponent,
-    LocaleSwitcherComponent
+    AppComponent
   ],
   imports: [
     BrowserModule,
@@ -27,6 +26,7 @@ import {NzSelectModule} from "ng-zorro-antd/select";
     HttpClientModule,
     BrowserAnimationsModule,
     IconsProviderModule,
+    SharedModule,
     NzLayoutModule,
     NzMessageModule,
     NzSelectModule
