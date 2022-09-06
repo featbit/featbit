@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import packageInfo from '../../package.json';
+import { environment } from '../environments/environment';
 
 interface Locale {
   localeCode: string;
@@ -18,7 +19,7 @@ export class AppComponent {
   ];
 
   constructor() {
-    console.log(`Current Version: ${packageInfo.version}`);
+    console.log(`Env: ${environment.production ? 'Prod' : 'dev' }; Version: ${packageInfo.version}`);
   }
 }
 

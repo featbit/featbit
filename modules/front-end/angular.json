@@ -5,7 +5,7 @@
   "projects": {
     "front-end": {
       "i18n": {
-        "sourceLocale": "en-US",
+        "sourceLocale": "en",
         "locales": {
           "zh": {
             "translation": "src/locale/messages.zh.xlf"
@@ -86,7 +86,7 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,
-              "localize": ["en-US"]
+              "localize": ["en"]
             },
             "zh": {
               "localize": ["zh"]
