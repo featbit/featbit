@@ -7,12 +7,10 @@
     "start:zh": "ng serve --configuration=development,zh --port=4201",
     "build": "ng build --localize --configuration development",
     "build:prod": "ng build --localize --configuration production",
-    "watch": "ng build --watch --configuration development",
     "i18n": "ng extract-i18n --output-path src/locale",
     "test": "ng test",
     "test-coverage": "ng test --code-coverage"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^14.0.0",
     "@angular/common": "^14.0.0",

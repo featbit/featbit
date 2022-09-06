@@ -4,25 +4,26 @@
       <nz-form-item>
         <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
           <nz-input-group [nzPrefix]="userPrefix">
-            <input type="text" nz-input formControlName="identity" placeholder="username"/>
+            <input type="text" nz-input formControlName="identity" i18n-placeholder placeholder="username"/>
           </nz-input-group>
           <ng-template #userPrefix>
             <i nz-icon nzType="icons:icon-user"></i>
           </ng-template>
           <ng-template #invalidPhoneNumberOrEmail let-control>
-            <ng-container *ngIf="control.hasError('required')">请输入手机号/邮箱</ng-container>
-            <ng-container *ngIf="control.hasError('invalid')">非法的手机号/邮箱</ng-container>
+            <ng-container *ngIf="control.hasError('required')" i18n>username is mandatory</ng-container>
+            <ng-container *ngIf="control.hasError('invalid')" i18n>Illegal username</ng-container>
           </ng-template>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-control nzErrorTip="请输入密码">
+        <nz-form-control i18n-nzErrorTip nzErrorTip="password is mandatory">
           <nz-input-group [nzPrefix]="passwordPrefix" [nzSuffix]="suffixTemplate">
             <input
+              i18n-placeholder
               formControlName="password"
               [type]="passwordVisible ? 'text' : 'password'"
               nz-input
-              placeholder="请输入登录密码"
+              placeholder="password"
             />
           </nz-input-group>
           <ng-template #passwordPrefix>
@@ -35,7 +36,7 @@
           </ng-template>
         </nz-form-control>
       </nz-form-item>
-      <button type="submit" nz-button nzType="primary" class="submit-btn" [nzLoading]="isLogin">登录</button>
+      <button type="submit" nz-button nzType="primary" class="submit-btn" [nzLoading]="isLogin" i18n>Login</button>
     </form>
   </nz-tab>
 </nz-tabset>
