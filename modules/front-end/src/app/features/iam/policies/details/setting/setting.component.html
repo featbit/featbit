@@ -1,0 +1,67 @@
+<section class="body-container">
+  <ng-template #loadingTem>
+    <div class="block">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
+    </div>
+  </ng-template>
+
+  <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
+    <div class="title">
+      <ng-container *ngIf="!isEditingTitle">
+        <span [nz-tooltip]="policy.name" class="text">{{policy.name}}</span>
+        <i class="edit-save" nz-tooltip="编辑策略名称" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+      </ng-container>
+      <ng-container *ngIf="isEditingTitle">
+        <input nz-input placeholder="名称..." [(ngModel)]="policy.name" />
+        <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
+      </ng-container>
+    </div>
+    <div class="description" [class]="{editing: isEditingDescription}">
+      <ng-container *ngIf="!isEditingDescription">
+        <span>{{policy.description}}</span>
+        <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
+      </ng-container>
+      <ng-container *ngIf="isEditingDescription">
+        <textarea nz-input placeholder="描述..." [(ngModel)]="policy.description" [nzAutosize]="{ minRows: 3 }"></textarea>
+        <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
+      </ng-container>
+    </div>
+    <div class="item">
+      <div class="label">
+        类型
+      </div>
+      <div class="value">
+        <i *ngIf="policy.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+        {{policy.type | policyType}}
+      </div>
+    </div>
+    <div class="item">
+      <div class="label">
+        资源名
+      </div>
+      <div class="value">
+        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(resourceName())"></i>
+        {{resourceName()}}
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!isLoading; else loadingTem;">
+    <div class="block"  *ngIf="policy.type !== 'FFCManaged'">
+      <div class="delete">
+        <button nz-button nzType="default" nz-popconfirm="删除后不可恢复，确定要删除么？"
+                nzPopconfirmPlacement="bottomRight"
+                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                (nzOnConfirm)="deletePolicy()" [nzIcon]="iconTpl">
+          <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
+          删除
+        </button>
+        <ng-template #iconTpl>
+          <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+        </ng-template>
+      </div>
+    </div>
+  </ng-container>
+</section>
+
+

@@ -44,3 +44,39 @@ export interface IEnvironment {
   secret: string,
   mobileSecret: string
 }
+
+export interface ISubsriptionPlan {
+  id: string,
+  type: string
+}
+
+export interface IAccountUser {
+  userId: string,
+  userName: string,
+  email: string,
+  role: string,
+  initialPassword: string
+}
+
+export interface EnvironmentSetting {
+  id: string;
+  type: string;
+  key: string;
+  value: string;
+  tag?: string;
+  remark?: string;
+}
+
+export const EnvironmentSettingTypes = {
+  SyncUrls: 'sync-urls',
+}
+
+export enum EnvKeyNameEnum {
+  Secret = "Secret",
+  MobileSecret = "MobileSecret"
+}
+
+export interface IEnvKey {
+  keyName: EnvKeyNameEnum,
+  keyValue?: string
+}

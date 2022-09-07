@@ -1,4 +1,4 @@
-import { IAccount, IProjectEnv } from "../config/types";
+import { IAccount, IProjectEnv } from "@shared/types";
 import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "./localstorage-keys";
 
 export function getCurrentAccount(): IAccount {

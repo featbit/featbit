@@ -1,0 +1,37 @@
+<div class="actions">
+  <div class="top-title">
+    <div class="prefix">操作</div>
+    <div class="suffix">
+      <span>{{selectedActions.length}} 个操作</span>
+    </div>
+  </div>
+  <div class="selected-actions" *ngIf="selectedActions.length">
+    <div nz-col class="action" *ngFor="let act of selectedActions">
+      <div class="inner-box">
+        {{act.displayName}} ({{act.name}})
+      </div>
+      <button nz-button nzType="default" [nzSize]="'large'" (click)="removeAction(act)"><i nz-icon nzType="close"></i></button>
+    </div>
+  </div>
+  <nz-select [class]="{invalid: isInvalid}" #actionsSelector
+             nzPlaceHolder="请选择操作"
+             nzShowSearch
+             nzServerSearch
+             [(ngModel)]="actionSelectModel"
+             (ngModelChange)="onActionChange()"
+             (nzOnSearch)="onSearchActions($event)"
+             [nzOptionHeightPx]="54">
+    <ng-container *ngFor="let action of filteredActions">
+      <nz-option
+        nzCustomContent
+        [nzValue]="action"
+        [nzLabel]="action.displayName"
+        [nzHide]="isActionSelected(action)">
+        <div class="action-selection-item">
+          <div class="title">{{ action.displayName }}</div>
+          <div class="digest">{{ getActionDigest(action) }}</div>
+        </div>
+      </nz-option>
+    </ng-container>
+  </nz-select>
+</div>

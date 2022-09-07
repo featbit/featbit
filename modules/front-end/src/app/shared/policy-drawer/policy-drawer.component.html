@@ -1,0 +1,37 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right"
+  nzTitle="添加策略"
+  [nzWidth]="500"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <form nz-form [formGroup]="form" (ngSubmit)="doSubmit()" nzLayout="vertical">
+      <!-- name -->
+      <nz-form-item>
+        <nz-form-label nzRequired>名称</nz-form-label>
+        <nz-form-control nzHasFeedback nzValidatingTip="校验中..." [nzErrorTip]="errorTpl">
+          <input type="text" nz-input formControlName="name" placeholder="填写名称"/>
+        </nz-form-control>
+        <ng-template #errorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')">组名称不可为空</ng-container>
+          <ng-container *ngIf="control.hasError('duplicated')">该名称已被使用</ng-container>
+        </ng-template>
+      </nz-form-item>
+
+      <!-- description -->
+      <nz-form-item>
+        <nz-form-label>描述</nz-form-label>
+        <nz-form-control nzErrorTip="描述">
+          <textarea nz-input placeholder="填写描述性文字" formControlName="description" ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+    <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
+

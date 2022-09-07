@@ -1,0 +1,77 @@
+<div class="resources">
+  <div class="top-title">
+    <div class="prefix title">
+      <span>资源</span>
+      <span *ngIf="resourceType?.type === 'general'" style="display: inline-block;margin-left: 12px;">( 当资源类型为<span style="display:inline-block;padding: 0 5px; font-weight: 600">通用</span>时，只能选择一个资源。)</span>
+    </div>
+    <div class="suffix">
+      <span>{{selectedResources.length}} 个资源</span>
+    </div>
+  </div>
+  <div class="selected-resources" *ngIf="selectedResources.length">
+    <div class="resource" *ngFor="let rsc of selectedResources">
+      <div nz-tooltip="点击编辑" class="inner-box" (click)="openEditModal(rsc)">
+        {{rsc.rn}}
+      </div>
+      <button nz-button nzType="default" [nzSize]="'large'" (click)="removeResource(rsc)"><i nz-icon nzType="close"></i></button>
+    </div>
+  </div>
+  <nz-select [class]="{invalid: isInvalid}" #resourcesSelector
+             nzPlaceHolder="请选择资源"
+             nzShowSearch
+             nzServerSearch
+             [(ngModel)]="resourceSelectModel"
+             (ngModelChange)="onResourceChange()"
+             (nzOnSearch)="onSearchResources($event)"
+             [nzOptionHeightPx]="isResourceLoading ? 32 : 54">
+    <ng-container *ngFor="let rsc of availableResources">
+      <nz-option
+        *ngIf="!isResourceLoading" nzCustomContent [nzValue]="rsc" [nzHide]="isSelected(rsc)">
+        <div class="resource-selection-item">
+          <div class="title">{{ rsc.name }}</div>
+          <div class="digest">{{ getDigest(rsc) }}</div>
+        </div>
+      </nz-option>
+    </ng-container>
+    <nz-option *ngIf="isResourceLoading" nzDisabled nzCustomContent>
+      <i nz-icon nzType="loading" class="loading-icon"></i> 数据加载中...
+    </nz-option>
+  </nz-select>
+</div>
+
+<nz-modal [(nzVisible)]="editModalVisible"
+          [nzTitle]="modalTitle"
+          [nzCentered]="true"
+          [nzContent]="modalContent"
+          [nzFooter]="modalFooter" (nzOnCancel)="closeModal()">
+  <ng-template #modalTitle>设置资源名 (RN)</ng-template>
+  <ng-template #modalContent>
+    <div class="rsc-config-modal">
+      <div>
+        资源名 (RN) 唯一标识敏捷开关的资源。敏捷开关中的每个数据都可看做是一个资源，比如项目、环境、开关等。
+        <span style="display: inline-block;font-weight: 600;">合法的资源名 (RN) 不可以包含英文冒号, {{'{'}} 以及 }。</span>
+      </div>
+
+      <div class="edit-area">
+        <div class="rn">
+          <div class="label">指定资源名 (RN)</div>
+          <input style="color: rgba(0, 0, 0, 0.85)" nz-input placeholder="资源名 (RN)" [(ngModel)]="currentRn.val" disabled="true"/>
+        </div>
+        <div *ngFor="let param of rscParams" class="config">
+          <div class="label">{{param.placeholder.displayName}}</div>
+          <input nz-input placeholder="项目名称" [(ngModel)]="param.val" (ngModelChange)="vmValChanged()" [class]="{invalid: param.isInvalid}"/>
+          <label
+            nz-checkbox
+            [(ngModel)]="param.isAnyChecked"
+            (ngModelChange)="isValAnyCheckedChanged(param)">
+            任意
+          </label>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="closeModal()">取消</button>
+    <button nz-button nzType="primary" [disabled]="false" (click)="save()">确认</button>
+  </ng-template>
+</nz-modal>

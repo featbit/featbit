@@ -1,0 +1,90 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right"
+  nzTitle="添加成员"
+  [nzWidth]="500"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <form nz-form [formGroup]="memberForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>邀请方式</nz-form-label>
+        <nz-form-control>
+          <nz-radio-group formControlName="identityType" (ngModelChange)="onIdentityTypeChange($event)">
+            <label nz-radio nzValue="phoneNumber">手机号</label>
+            <label nz-radio nzValue="email">邮箱</label>
+          </nz-radio-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- phoneNumber -->
+      <nz-form-item *ngIf="memberForm.get('identityType').value === 'phoneNumber'">
+        <nz-form-label nzRequired>手机号</nz-form-label>
+        <nz-form-control nzErrorTip="请输入有效的手机号">
+          <input type="text" nz-input formControlName="identity" placeholder="填写成员手机号"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- email -->
+      <nz-form-item *ngIf="memberForm.get('identityType').value === 'email'">
+        <nz-form-label nzRequired>邮箱</nz-form-label>
+        <nz-form-control nzErrorTip="请输入有效的邮箱">
+          <input type="text" nz-input formControlName="identity" placeholder="填写成员邮箱"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- name -->
+      <nz-form-item>
+        <nz-form-label>名称</nz-form-label>
+        <nz-form-control>
+          <input type="text" nz-input formControlName="name" placeholder="填写成员名称"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired>初始权限 <span style="margin-left: 4px; color: #ff4d4f" *ngIf="isPermissionInvalid">(策略和组不可同时为空)</span></nz-form-label>
+        <nz-form-control nzErrorTip="请选择新成员初始策略">
+            <nz-select
+              nzShowSearch
+              nzServerSearch
+              nzPlaceHolder="初始策略"
+              (nzOnSearch)="getPolicies($event)"
+              (ngModelChange)="validatePermissions()"
+              formControlName="policyId">
+              <ng-container *ngFor="let policy of policies.items">
+                <nz-option nzCustomContent *ngIf="!isPoliciesLoading" [nzLabel]="policy.name" [nzValue]="policy.id">
+                  <i *ngIf="policy.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+                  {{ policy.name }}
+                </nz-option>
+              </ng-container>
+              <nz-option *ngIf="isPoliciesLoading" nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i> 数据加载中...
+              </nz-option>
+            </nz-select>
+          </nz-form-control>
+        <nz-form-control style="margin-top: 10px;" nzErrorTip="请选择新成员初始组">
+            <nz-select
+              nzShowSearch
+              nzServerSearch
+              nzPlaceHolder="初始组"
+              (nzOnSearch)="getGroups($event)"
+              (ngModelChange)="validatePermissions()"
+              formControlName="groupId">
+              <ng-container *ngFor="let group of groups.items">
+                <nz-option *ngIf="!isGroupsLoading" [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
+              </ng-container>
+              <nz-option *ngIf="isGroupsLoading" nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i> 数据加载中...
+              </nz-option>
+            </nz-select>
+          </nz-form-control>
+      </nz-form-item>
+    </form>
+    <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
+

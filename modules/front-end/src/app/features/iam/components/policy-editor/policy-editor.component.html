@@ -1,0 +1,60 @@
+<message *ngIf="readonly" [type]="'warning'" [content]="'由敏捷开关托管的策略不能被修改'"></message>
+<div class="operations">
+  <button class="standard-btn copy-btn" nz-button nzType="primary" (click)="copyPolicy()">
+    <i nz-icon nzType="icons:icon-copy"></i>
+    复制策略
+  </button>
+  <button class="standard-btn" nz-button nzType="primary" (click)="saveStatements()">
+    <i nz-icon nzType="icons:icon-save"></i>
+    保存设置
+  </button>
+</div>
+<div class="policy-editor body-container standard-div" [class]="{ffcmanaged: readonly}">
+  <div class="statements-banner">
+    <div class="title">权限</div>
+    <i nz-icon *ngIf="!readonly" (click)="addStatement()" nzType="icons:icon-add-outline"></i>
+  </div>
+  <div class="statements-wrapper">
+    <div *ngFor="let statement of statements" class="statement">
+      <nz-card style="margin-bottom: 10px; border-radius: 20px">
+        <div class="input-item" style="margin-top: 0;">
+          <div style="display: flex; justify-content: space-between">
+            <div class="title">资源类型</div>
+            <div style="display:flex;justify-content: flex-end;">
+              <button *ngIf="!readonly" class="action-btn" nz-button nzType="default" nzSize="small"
+                      nz-popconfirm="确定删除吗?"
+                      nzPopconfirmPlacement="bottomRight"
+                      (nzOnConfirm)="removeStatement(statement)">
+                <i nz-icon nzType="icons:icon-delete"></i>
+                删除
+              </button>
+            </div>
+          </div>
+
+          <nz-select class="extend"
+                     nzShowSearch
+                     nzPlaceHolder="选择资源类型"
+                     [compareWith]="statement.compareResourceType"
+                     [(ngModel)]="statement.resourceType"
+                     (ngModelChange)="statement.onResourceTypeChange()">
+            <nz-option *ngFor="let rt of resourcesTypes" [nzLabel]="rt.displayName" [nzValue]="rt"></nz-option>
+          </nz-select>
+        </div>
+        <div class="input-item">
+          <resources-selector [isInvalid]="statement.isResourcesInvalid" [selectedResources]="statement.selectedResources" [resourceType]="statement.resourceType" (onSelectedResourcesChange)="statement.onSelectedResourcesChange($event)"></resources-selector>
+        </div>
+        <div class="input-item">
+          <div class="title">允许或禁止操作</div>
+          <nz-select nzPlaceHolder="允许或禁止操作" [(ngModel)]="statement.effect">
+            <nz-option [nzLabel]="'允许操作'" [nzValue]="'allow'"></nz-option>
+            <nz-option [nzLabel]="'禁止操作'" [nzValue]="'deny'"></nz-option>
+          </nz-select>
+        </div>
+        <div class="input-item">
+          <actions-selector [isInvalid]="statement.isActionsInvalid" [selectedActions]="statement.selectedActions" [actions]="statement.availableActions" (onSelectedActionsChange)="statement.onSelectedActionsChange($event)"></actions-selector>
+        </div>
+      </nz-card>
+    </div>
+  </div>
+</div>
+

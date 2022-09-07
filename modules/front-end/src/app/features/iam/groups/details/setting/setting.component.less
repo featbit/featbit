@@ -1,0 +1,108 @@
+@import "variables";
+
+.block {
+  &:not(:first-child) {
+    margin-top: 10px;
+  }
+
+  padding: 20px 24px 24px 24px;
+  background-color: @grey5-color;
+  border-radius: 20px;
+  min-height: 50px;
+
+  .edit-save {
+    cursor: pointer;
+    margin-left: 16px;
+  }
+  .title {
+    display: flex;
+    align-items: center;
+    font-family: "Noto Sans S Chinese medium";
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    color: @grey80-color;
+    height: 30px;
+
+    .text {
+      display: inline-block;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 221px;
+    }
+    input {
+      width: 221px;
+      border-radius: 8px;
+    }
+  }
+
+  .description {
+    margin-top: 12px;
+    color: @grey50-color;
+    border: 1px solid @grey20-color;
+    border-radius: 8px;
+    padding: 5px;
+
+    &.editing {
+      border: none;
+      padding: 0;
+    }
+
+    .edit-save {
+      width: 100%;
+      text-align: right;
+      padding-right:14px;
+    }
+
+    textarea {
+      border-radius: 8px;
+    }
+  }
+
+  .delete {
+    width: 100%;
+    text-align: center;
+    button {
+      font-family: "Noto Sans S Chinese medium";
+      border-radius: 15px;
+      background-color: @red50-color;
+      color: #fff;
+      padding-left:20px;
+      padding-right:20px;
+      border: none;
+    }
+  }
+
+  .item {
+    &:not(:first-child) {
+      margin-top: 16px;
+    }
+
+    .label {
+      display: flex;
+      align-items: center;
+      font-family: "Noto Sans S Chinese medium";
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 150%;
+      color: @grey70-color;
+    }
+
+    .value {
+      i {
+        font-size: 14px;
+      }
+
+      font-size: 12px;
+      word-break: break-all;
+    }
+  }
+
+  i:not(.delete-icon) {
+    color: @grey50-color;
+    &:hover {
+      color: @grey70-color;
+    }
+  }
+}

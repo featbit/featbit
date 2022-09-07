@@ -37,10 +37,20 @@ import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzImageModule } from "ng-zorro-antd/image";
 import {NzPopoverModule} from "ng-zorro-antd/popover";
 import {NzCodeEditorModule} from "ng-zorro-antd/code-editor";
+import {PercentagePipe} from "@core/pipes/percentage.pipe";
+import {FfcDatePipe} from "@core/pipes/ffcdate.pipe";
+import {PolicyTypePipe} from "@core/pipes/policy-type.pipe";
+import {ExtraUserColumnPipe} from "@core/pipes/extra-user-column.pipe";
+import {SubscriptionTypePipe} from "@core/pipes/subscription-type.pipe";
 
 @NgModule({
   declarations: [
-    SwitchKeyNamePipe
+    SwitchKeyNamePipe,
+    PercentagePipe,
+    FfcDatePipe,
+    PolicyTypePipe,
+    ExtraUserColumnPipe,
+    SubscriptionTypePipe
   ],
   imports: [
     CommonModule,
@@ -84,7 +94,12 @@ import {NzCodeEditorModule} from "ng-zorro-antd/code-editor";
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
-    SwitchKeyNamePipe
+    SwitchKeyNamePipe,
+    PercentagePipe,
+    FfcDatePipe,
+    PolicyTypePipe,
+    ExtraUserColumnPipe,
+    SubscriptionTypePipe
   ]
 })
 export class CoreModule { }

@@ -1,0 +1,35 @@
+<div class="standard-div rows">
+  <div class="row">
+    <div class="row-title">机构名称</div>
+    <form class="row-content" nz-form [formGroup]="validateOrgForm" [nzLayout]="'inline'" (ngSubmit)="submitOrgForm()">
+      <nz-form-item class="extend">
+        <nz-form-control nzErrorTip="请输入机构名称！">
+          <nz-input-group class="row-input-group" [nzPrefix]="orgIcon">
+            <input type="text" nz-input formControlName="organizationName" placeholder="机构名称"/>
+            <ng-template #orgIcon>
+              <i nz-icon nzType="icons:icon-org"></i>
+            </ng-template>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button nzType="primary" [nzLoading]="isLoading" [disabled]="!canUpdateOrgName">
+        <i nz-icon nzType="icons:icon-sync"></i>
+        更新机构名称
+      </button>
+    </form>
+  </div>
+  <div class="row">
+    <div class="row-title">切换机构</div>
+    <div class="row-content">
+      <nz-select class="extend" nzShowSearch nzPlaceHolder="选择机构" [(ngModel)]="currentAccount" (ngModelChange)="onAccountChange()">
+        <nz-option *ngFor="let account of allAccounts" [nzLabel]="account.organizationName" [nzValue]="account"></nz-option>
+      </nz-select>
+      <button class="create-org-btn" nz-button nzType="primary" (click)="onCreateAccountClick()">
+        <i nz-icon nzType="icons:icon-add"></i>
+        创建机构
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-account-drawer [visible]="creatAccountFormVisible" (close)="onCreateAccountClosed($event)"></app-account-drawer>

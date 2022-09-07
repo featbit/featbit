@@ -1,0 +1,24 @@
+<div class="body-container">
+  <div class="flag-container">
+    <user-setting></user-setting>
+  </div>
+  <nz-tabset nzLinkRouter class="tabs-container segment-flag">
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./users']" queryParamsHandling="preserve">
+        团队
+      </a>
+      <ng-template nz-tab>
+        <users></users>
+      </ng-template>
+    </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./policies']" queryParamsHandling="preserve">
+        策略
+      </a>
+      <ng-template nz-tab>
+        <policies></policies>
+      </ng-template>
+    </nz-tab>
+  </nz-tabset>
+</div>
+

@@ -1,0 +1,67 @@
+<section class="body-container">
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
+        <input class="search-input" nz-input type="text" placeholder="按名称筛选" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+      <nz-select [(ngModel)]="filter.getAllGroups" (ngModelChange)="doSearch(true)">
+        <nz-option [nzValue]="true" nzLabel="所有组"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="当前用户所在的组"></nz-option>
+      </nz-select>
+    </div>
+    <div class="table-wrapper">
+      <nz-table #table nzSize="small"
+                [nzData]="groups.items"
+                [nzFrontPagination]="false"
+                [nzLoading]="isLoading"
+                [nzTotal]="groups.totalCount"
+                [(nzPageSize)]="filter.pageSize"
+                (nzPageSizeChange)="doSearch()"
+                [(nzPageIndex)]="filter.pageIndex"
+                (nzPageIndexChange)="doSearch()">
+        <thead>
+        <tr>
+          <th>名称</th>
+          <th>描述</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of table.data">
+          <td (click)="goToGroup(item.id)">{{item.name}}</td>
+          <td>{{item.description}}</td>
+          <td>
+            <a class="primary-link-btn" (click)="goToGroup(item.id)">
+              查看
+            </a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <ng-container *ngIf="item.isGroupMember">
+              <a style="color: #717D8A"
+                 [nz-popconfirm]="confirm"
+                 nzPopconfirmPlacement="bottomRight"
+                 (nzOnConfirm)="removeFromGroup(item.id)">
+                移除
+              </a>
+              <ng-template #confirm>
+                <span>
+                  <i nz-icon nzType="question-circle" nzTheme="fill" style="margin-right: 4px; color: #FAAD14;"></i>
+                  确定将该用户从 <strong>{{item.name}}</strong> 组中移除么？
+                </span>
+              </ng-template>
+            </ng-container>
+            <ng-container *ngIf="!item.isGroupMember">
+              <a class="primary-link-btn" (click)="addToGroup(item.id)">
+                添加
+              </a>
+            </ng-container>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,32 @@
+<div class="body-container">
+  <div class="flag-container">
+    <user-setting></user-setting>
+  </div>
+  <nz-tabset nzLinkRouter class="tabs-container segment-flag">
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./permission']" queryParamsHandling="preserve">
+        权限
+      </a>
+      <ng-template nz-tab>
+        <permission></permission>
+      </ng-template>
+    </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./users']" queryParamsHandling="preserve">
+        团队
+      </a>
+      <ng-template nz-tab>
+        <users></users>
+      </ng-template>
+    </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./groups']" queryParamsHandling="preserve">
+        组
+      </a>
+      <ng-template nz-tab>
+        <groups></groups>
+      </ng-template>
+    </nz-tab>
+  </nz-tabset>
+</div>
+

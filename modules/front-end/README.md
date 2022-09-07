@@ -24,10 +24,10 @@ The FeatBit UI provides features for managing and updating feature flags, users,
 # Getting Started
 
 ## Install UI with a Docker Image
-You can install and run UI with a Docker image. To run, binding the exposed port 80 or any other available port, use:
+You can install and run UI with a Docker image. To run, binding the exposed port 8080 or any other available port, use:
 ```
 docker build -t featbit/ui .
-docker run -d -p 80:80 --name featbit-ui featbit/ui 
+docker run -d -p 8080:80 --name featbit-ui featbit/ui 
 ```
 
 Then go to http://localhost
@@ -40,6 +40,6 @@ you can manually switch the language with the language switcher in the UI.
 As **ng serve** only support one single locale, during development, the locale-switcher compoent doesn't. If you want to check different language,
 run the app with one of the following
 ```
-npm run start:en // English
-npm run start:zh // Chinese
+npm run start:en // English, available at localhost:4200
+npm run start:zh // Chinese, available at localhost:4201
 ```

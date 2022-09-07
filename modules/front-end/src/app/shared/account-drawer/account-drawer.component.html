@@ -1,0 +1,24 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right"
+  [nzWidth]="500"
+  nzTitle="创建机构"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <form nz-form [formGroup]="accountForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>机构名称</nz-form-label>
+        <nz-form-control nzErrorTip="机构名称不能为空">
+          <input type="text" nz-input formControlName="organizationName" placeholder="填入您的机构名称"/>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button class="submit-btn" nzType="primary" [nzLoading]="isLoading">确认</button>
+    </form>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
+

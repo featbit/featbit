@@ -5,6 +5,7 @@
     "baseUrl": "./",
     "paths": {
       "@core/*": ["./src/app/core/*"],
+      "@features/*": ["./src/app/features/*"],
       "@services/*": ["./src/app/core/services/*"],
       "@interceptors/*": ["./src/app/core/interceptors/*"],
       "@utils/*": ["./src/app/shared/utils/*"],

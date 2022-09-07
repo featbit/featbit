@@ -1,0 +1,43 @@
+@import "variables";
+
+.table-content-area {
+  nz-input-group {
+    width: 520px;
+  }
+
+  .copy-icon {
+    color: #717D8A;
+    &:hover {
+      cursor: pointer;
+      color: @grey70-color;
+    }
+  }
+
+  .table-wrapper {
+    .more-tags-item {
+      max-width: 150px;
+    }
+
+    .tag {
+      max-width: 150px;
+    }
+
+    .col-rn {
+      height: 56px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      .rn {
+        display: inline-block;
+        max-width: 310px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
+
+
+
+

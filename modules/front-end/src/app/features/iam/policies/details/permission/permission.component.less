@@ -1,0 +1,68 @@
+@import "variables";
+
+.body-container {
+  width: 100%;
+  height: 100%;
+  padding-left: 24px;
+
+  .spin {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255,0.5);
+  }
+
+  .detail-body {
+    width: 100%;
+    padding: 0 0 10px 0;
+    position: relative;
+    height: 100%;
+
+    .banner {
+      min-width: 290px;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 16px;
+      .save-btn {
+        margin-left: 16px;
+      }
+
+      .ant-btn-primary {
+        width: 135px;
+        height: 40px;
+        border-radius: 32px;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 150%;
+        text-shadow: none;
+        box-shadow: none;
+        border: none;
+      }
+    }
+
+    .content-container {
+      height: 100%;
+
+      .standard-div {
+        &:not(:last-child) {
+          margin-bottom: 24px;
+        }
+
+        .title {
+          font-family: "Noto Sans S Chinese medium";
+          font-style: normal;
+          font-weight: 500;
+          font-size: 16px;
+          line-height: 150%;
+          color: @grey70-color;
+        }
+      }
+
+    }
+  }
+}
+

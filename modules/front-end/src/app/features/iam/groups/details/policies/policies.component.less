@@ -1,0 +1,54 @@
+.body-container {
+  width: 100%;
+  height: 100%;
+  padding-left: 24px;
+
+  nz-divider {
+    margin: 0 24px;
+  }
+
+  //height: calc(100% - 52px);
+  overflow: auto;
+
+  .policy-list {
+    .action-btns {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 20px;
+
+      button {
+        border-radius: 20px;
+        height: 40px;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    }
+
+    .search-input {
+      height: 30px;
+      width: 200px;
+    }
+
+    ::ng-deep .table-wrapper .ant-select-selector{
+      height: 28px !important;
+    }
+
+    ::ng-deep .ant-select-selector {
+      border-radius: 32px !important;
+      .ant-select-selection-item {
+        margin-top: 5px !important;
+      }
+    }
+
+    .btn-edit {
+      display: inline-block;
+      margin-right: 20px;
+    }
+  }
+}
+
+
+
+
+

@@ -1,0 +1,63 @@
+<div class="table-content-area">
+  <div class="table-search-area">
+    <nz-input-group [nzPrefix]="prefixIconSearch">
+      <input nz-input type="text" placeholder="按名称筛选" [(ngModel)]="this.filter.name" (ngModelChange)="doSearch()">
+    </nz-input-group>
+    <ng-template #prefixIconSearch>
+      <i nz-icon nzType="icons:icon-search"></i>
+    </ng-template>
+    <button nz-button nzType="primary" (click)="openGroupDrawer()">
+      <i nz-icon nzType="icons:icon-add"></i>
+      添加
+    </button>
+  </div>
+  <div class="table-wrapper">
+    <nz-table #table nzSize="small"
+              nzShowSizeChanger
+              [nzData]="pagedGroup.items"
+              [nzFrontPagination]="false"
+              [nzLoading]="isLoading"
+              [nzTotal]="pagedGroup.totalCount"
+              [(nzPageSize)]="filter.pageSize"
+              (nzPageSizeChange)="doSearch()"
+              [nzPageSizeOptions]="[10,20,30]"
+              [(nzPageIndex)]="filter.pageIndex"
+              (nzPageIndexChange)="doSearch()"
+              >
+      <thead>
+      <tr>
+        <th>名称</th>
+        <th>描述</th>
+        <th>资源名</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of table.data">
+        <td (click)="navigateToDetail(item.id)">
+          <span nz-tooltip="点击进入详情页">{{ item.name }}</span>
+        </td>
+        <td>{{ item.description }}</td>
+        <td>
+          <i (click)="copyText(resourceName(item))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+          {{ resourceName(item) }}
+        </td>
+        <td>
+          <a class="primary-link-btn" (click)="navigateToDetail(item.id)">详情</a>
+          <nz-divider nzType="vertical"></nz-divider>
+          <a style="color: #717D8A" nz-popconfirm="删除后不可恢复，确定要删除么？"
+             nzPopconfirmPlacement="bottomRight"
+             [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+             (nzOnConfirm)="delete(item)" [nzIcon]="iconTplIamUser">删除</a>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+    <ng-template #iconTplIamUser>
+      <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+    </ng-template>
+  </div>
+</div>
+
+<group-drawer [visible]="groupDrawerVisible" (close)="closeGroupDrawer($event)"></group-drawer>
+
