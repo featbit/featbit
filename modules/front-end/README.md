@@ -30,11 +30,11 @@ docker build -t featbit/ui .
 docker run -d -p 8080:80 --name featbit-ui featbit/ui 
 ```
 
-Then go to http://localhost
+Then go to http://localhost:8080
 
 ### Switch UI language
 
-When you put http://localhost in your browser, by default, the UI will redirect to the language defined by **accept-language** of the request headers,
+When you put http://localhost:8080 in your browser, by default, the UI will redirect to the language defined by **accept-language** of the request headers,
 you can manually switch the language with the language switcher in the UI.
 
 As **ng serve** only support one single locale, during development, the locale-switcher compoent doesn't. If you want to check different language,
