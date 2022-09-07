@@ -16,7 +16,7 @@
 
 ## Get Started
 
-Under construction..
+Under construction...
 
 ## Features
 
