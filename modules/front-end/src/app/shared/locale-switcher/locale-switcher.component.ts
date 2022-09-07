@@ -26,7 +26,7 @@ export class LocaleSwitcherComponent {
   }
 
   onLocaleChange() {
-    window.location.href = `/${this.activeLocale}`;
     localStorage.setItem(CURRENT_LANGUAGE(), this.activeLocale);
+    window.location.href = `/${this.activeLocale}`;
   }
 }
