@@ -12,7 +12,7 @@ import {
   PolicyFilter,
   PolicyGroupFilter,
   PolicyMemberFilter
-} from "@features/iam/types/policy";
+} from "@features/safe/iam/types/policy";
 import { catchError } from "rxjs/operators";
 
 @Injectable({

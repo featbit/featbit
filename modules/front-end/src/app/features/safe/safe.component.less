@@ -1,0 +1,137 @@
+@import "variables";
+
+.main-container {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: min-content 1fr;
+
+  .menu-container {
+    overflow: hidden;
+    background-color: #FFFFFF;
+    transition: width 500ms;
+    height: 100vh;
+  }
+
+  &:not(.menu-extended) {
+    .menu-container {
+      width: 88px;
+    }
+  }
+
+  &.menu-extended {
+    .menu-container {
+      width: 252px;
+    }
+  }
+
+  section.right-container {
+    height: 100vh;
+    padding-right: 4px;
+
+    .header-container{
+      padding-left: 36px;
+      width: 100%;
+      height: 60px;
+      background-color: #FFFFFF;
+      padding-right: 36px;
+      // margin-bottom: 10px;
+      margin-bottom: 13px;
+    }
+
+    div.router-container {
+      overflow: auto;
+      background-color: #FFFFFF;
+      height: calc(100% - 98px);
+      padding-right: 36px;
+    }
+  }
+}
+
+::ng-deep .table-wrapper {
+  border-radius: 20px;
+  padding: 0 24px 16px 24px;
+
+  .ant-table table{
+    border-spacing:0 4px;
+    background: @grey5-color;
+
+    th {
+      border: none;
+      color: @grey50-color;
+
+      &:first-child {
+        padding-left: 30px;
+      }
+
+      &:last-child {
+        padding-right: 30px;
+      }
+
+      &::before {
+        background-color: transparent !important;
+      }
+    }
+
+    tr {
+      cursor: pointer;
+      height: 56px;
+
+        td {
+          background-color: white;
+          border-bottom: none;
+          color: @grey70-color;
+          &:first-child {
+            padding-left: 30px;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+          }
+
+          &:last-child {
+            padding-right: 30px;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+          }
+        }
+    }
+  }
+
+  .ant-select-selector {
+    border-radius: 8px !important;
+    padding-left: 12px !important;
+  }
+
+  .spin {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255,0.5);
+  }
+
+  .tag {
+    background: @grey10-color;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 150%;
+    color: @grey70-color;
+    display: inline-block;
+    margin-right: 8px;
+    white-space: nowrap;
+    padding: 2px 7px;
+    max-width: 85px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+xu-breadcrumb {
+  font-size: 2em;
+  margin-block-start: 0.67em;
+  margin-block-end: 0.67em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  font-weight: bold;
+}

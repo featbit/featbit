@@ -1,0 +1,14 @@
+<div class="main-container" [class]="{'menu-extended': menuExtended}">
+  <div class="menu-container">
+    <app-menu [menus]="menus" [menuExtended]="menuExtended" (toggleMenu)="toggleMenu($event)" (logout)="logout()"></app-menu>
+  </div>
+  <section class="right-container">
+    <div class="header-container">
+      <app-header [auth]="auth"></app-header>
+    </div>
+    <div class="router-container">
+      <router-outlet></router-outlet>
+    </div>
+  </section>
+</div>
+

@@ -15,7 +15,6 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "declaration": false,
@@ -27,7 +26,7 @@
     "target": "es2020",
     "module": "es2020",
     "lib": [
-      "es2020",
+      "es2022",
       "dom"
     ],
     "allowSyntheticDefaultImports": true
@@ -35,7 +34,6 @@
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictInputAccessModifiers": true
   }
 }

@@ -1,0 +1,33 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right"
+  [nzTitle]="isEditing?'编辑项目':'添加项目'"
+  [nzWidth]="500"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <message *ngIf="!canTakeAction()" [type]="'warning'" [content]="permissionDenyMsg"></message>
+
+    <nz-alert
+      *ngIf="isEditing"
+      nzType="warning"
+      nzDescription="修改项目名称后对其设置的权限可能会失效"
+      nzShowIcon
+      nzIconType="icons:icon-warning"
+    ></nz-alert>
+
+    <form nz-form [formGroup]="projectForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>项目名称</nz-form-label>
+        <nz-form-control nzErrorTip="项目名称不能为空">
+          <input type="text" nz-input formControlName="name" placeholder="新项目的名称"/>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+    <button class="submit-btn" [disabled]="!canTakeAction()" (click)="doSubmit()" nz-button [nzType]="'primary'" [nzLoading]="isLoading">{{isEditing ? '更新' : '创建'}}</button>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>

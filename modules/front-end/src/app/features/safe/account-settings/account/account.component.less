@@ -1,0 +1,53 @@
+@import "src/variables";
+
+.standard-div {
+  padding-bottom: 40px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.row {
+  .row-title {
+    font-size: 16px;
+    line-height: 150%;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: @grey70-color;
+  }
+
+  .row-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 40px;
+
+    nz-input-group {
+      border: 1px solid @grey200-color;
+      box-sizing: border-box;
+      border-radius: 8px;
+      padding: 9px;
+
+      i {
+        font-size: 20px;
+        color: @grey50-color;
+      }
+    }
+  }
+
+  nz-form-item {
+    margin-right: 0;
+  }
+
+  .extend {
+    flex: 1;
+  }
+}
+
+.create-org-btn {
+  border-color: @purple50-color;
+  background-color: @purple50-color;
+}

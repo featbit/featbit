@@ -10,8 +10,8 @@ import {
   MemberFilter,
   MemberGroupFilter,
   MemberPolicyFilter
-} from "@features/iam/types/member";
-import { IPolicy } from "@features/iam/types/policy";
+} from "@features/safe/iam/types/member";
+import { IPolicy } from "@features/safe/iam/types/policy";
 
 @Injectable({
   providedIn: 'root'

@@ -7,7 +7,7 @@ import {
   IGroup,
   IPagedGroup,
   IPagedGroupMember, IPagedGroupPolicy
-} from "@features/iam/types/group";
+} from "@features/safe/iam/types/group";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentAccount } from "@utils/project-env";
 import { environment } from "src/environments/environment";

@@ -1,0 +1,73 @@
+<section class="header-body">
+  <div class="page-title">
+    {{pageTitle}}
+    <!-- <ul>
+      <li *ngFor="let breadcrumb of (breadcrumbs$ | async)">
+        <a [href]="breadcrumb.url">{{ breadcrumb.label }}</a>
+      </li>
+    </ul> -->
+  </div>
+  <div style="display:flex;justify-content: flex-end;align-items: center">
+    <div class="header-info">
+      <div class="org-proj-env">
+      <span [routerLink]="['/account-settings']">
+        <i nz-icon nzType="icons:icon-org"></i>
+        {{currentAccount?.organizationName}}
+      </span>
+        <span (click)="envModalVisible=true">
+        <i nz-icon nzType="icons:icon-proj"></i>
+          {{currentProjectEnv?.projectName}}
+      </span>
+        <span (click)="envModalVisible=true">
+        <i nz-icon nzType="icons:icon-env"></i>
+          {{currentProjectEnv?.envName}}
+      </span>
+      </div>
+
+      <div class="switch" (click)="envModalVisible=true">
+        <button class="switch-link-btn" nz-button nzType="link">
+          <i nz-icon nzType="icons:icon-swap"></i>
+          切换
+        </button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<nz-modal
+  nzCentered
+  nzWidth="792"
+  [nzVisible]="envModalVisible"
+  (nzOnCancel)="envModelCancel()"
+  (nzOnOk)="envModalConfirm()"
+  nzTitle="切换项目环境">
+  <ng-container *nzModalContent>
+    <message *ngIf="!canListProjects" [type]="'warning'" [content]="'您没有查看项目列表的权限， 请联系账户管理员添加相关权限'"></message>
+    <message *ngIf="!canListEnvs" [type]="'warning'" [content]=" canListProjects? '您没有查看该环境列表的权限， 请联系账户管理员添加相关权限' : '您没有查看项目环境列表的权限， 请联系账户管理员添加相关权限'"></message>
+    <div class="project-envs">
+      <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
+        <nz-list-item
+          [ngClass]="{'item-selected': selectedProject?.id === project.id}"
+          *ngFor="let project of availableProjects"
+          (click)="onSelectProject(project)">
+          {{ project.name }}
+        </nz-list-item>
+        <ng-template #projectHeader>
+          <span class="header">项目</span>
+        </ng-template>
+      </nz-list>
+      <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
+        <nz-list-item
+          [ngClass]="{'item-selected': selectedEnv?.id === env.id}"
+          *ngFor="let env of availableEnvs"
+          (click)="onSelectEnv(env)">
+          {{ env.name }}
+        </nz-list-item>
+        <ng-template #envHeader>
+          <span class="header">环境</span>
+        </ng-template>
+      </nz-list>
+    </div>
+  </ng-container>
+</nz-modal>

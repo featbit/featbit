@@ -1,0 +1,4 @@
+<div class="permission">
+  <ng-content *ngIf="canTakeAction"></ng-content>
+  <message *ngIf="!canTakeAction" [type]="'warning'" [content]="messageIfDeny"></message>
+</div>

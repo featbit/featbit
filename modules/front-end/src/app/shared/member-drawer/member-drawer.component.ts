@@ -4,8 +4,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberValidator } from "@utils/form-validators";
 import { MemberService } from "@services/member.service";
 import { PolicyService } from "@services/policy.service";
-import { IPagedPolicy, PolicyFilter } from "@features/iam/types/policy";
-import { GroupListFilter, IPagedGroup } from "@features/iam/types/group";
+import { IPagedPolicy, PolicyFilter } from "@features/safe/iam/types/policy";
+import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
 import { GroupService } from "@services/group.service";
 
 @Component({

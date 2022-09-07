@@ -1,8 +1,8 @@
 import {Injectable} from "@angular/core";
 import {lastValueFrom} from "rxjs";
-import {IPolicy, IPolicyStatement} from "@features/iam/types/policy";
+import {IPolicy, IPolicyStatement} from "@features/safe/iam/types/policy";
 import {MemberService} from "@services/member.service";
-import {EffectEnum, ResourceTypeEnum} from "@features/iam/components/policy-editor/types";
+import {EffectEnum, ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
 
 @Injectable({
   providedIn: 'root'

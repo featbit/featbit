@@ -41,7 +41,7 @@ import {PercentagePipe} from "@core/pipes/percentage.pipe";
 import {FfcDatePipe} from "@core/pipes/ffcdate.pipe";
 import {PolicyTypePipe} from "@core/pipes/policy-type.pipe";
 import {ExtraUserColumnPipe} from "@core/pipes/extra-user-column.pipe";
-import {SubscriptionTypePipe} from "@core/pipes/subscription-type.pipe";
+import {PermissionCheckDirective} from "@core/directives/permission-check.directive";
 
 @NgModule({
   declarations: [
@@ -50,7 +50,7 @@ import {SubscriptionTypePipe} from "@core/pipes/subscription-type.pipe";
     FfcDatePipe,
     PolicyTypePipe,
     ExtraUserColumnPipe,
-    SubscriptionTypePipe
+    PermissionCheckDirective
   ],
   imports: [
     CommonModule,
@@ -99,7 +99,7 @@ import {SubscriptionTypePipe} from "@core/pipes/subscription-type.pipe";
     FfcDatePipe,
     PolicyTypePipe,
     ExtraUserColumnPipe,
-    SubscriptionTypePipe
+    PermissionCheckDirective,
   ]
 })
 export class CoreModule { }

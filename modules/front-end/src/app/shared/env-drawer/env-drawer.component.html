@@ -1,0 +1,42 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible" nzPlacement="right"
+  [nzTitle]="isEditing ? '编辑环境':'添加环境'"
+  [nzWidth]="500"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <message *ngIf="!canTakeAction()" [type]="'warning'" [content]="permissionDenyMsg"></message>
+
+    <nz-alert
+      *ngIf="isEditing"
+      nzType="warning"
+      nzDescription="修改环境名称后对其设置的权限可能会失效"
+      nzShowIcon
+      nzIconType="icons:icon-warning"
+    ></nz-alert>
+
+    <form nz-form [formGroup]="envForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>环境名称</nz-form-label>
+        <nz-form-control nzErrorTip="环境名称不能为空">
+          <input type="text" nz-input formControlName="name" placeholder="新环境的名称"/>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>环境描述</nz-form-label>
+        <nz-form-control>
+          <input type="text" nz-input formControlName="description" placeholder="对该环境的简要描述"/>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+    <!-- disable env secret regeneration -->
+    <button *ngIf="false" nz-button [nzType]="'primary'" (click)="onRegenerate(envKeySecret)">重新生成 Secret</button>
+
+    <button [disabled]="!canTakeAction()" class="submit-btn" (click)="doSubmit()" nz-button [nzType]="'primary'" [nzLoading]="isLoading">保存</button>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
+
