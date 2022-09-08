@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { IAuthProps } from '@shared/types';
-import { IMenuItem } from '@shared/menu/menu';
+import { IMenuItem } from '@core/components/menu/menu';
 import { getAuth } from '@shared/utils';
 import { UserService } from "@services/user.service";
 

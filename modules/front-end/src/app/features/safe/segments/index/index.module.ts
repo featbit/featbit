@@ -19,8 +19,8 @@ import { NzTransferModule } from "ng-zorro-antd/transfer";
 import { NzTagModule } from "ng-zorro-antd/tag";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { NzFormModule } from "ng-zorro-antd/form";
-import { SharedModule } from "@shared/shared.module";
 import { NzDividerModule } from "ng-zorro-antd/divider";
+import {CoreModule} from "@core/core.module";
 
 
 @NgModule({
@@ -46,7 +46,7 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
     NzToolTipModule,
     NzFormModule,
     ReactiveFormsModule,
-    SharedModule,
+    CoreModule,
     NzDividerModule
   ]
 })

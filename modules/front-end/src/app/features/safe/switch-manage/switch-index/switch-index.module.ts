@@ -23,12 +23,12 @@ import { NzTagModule } from "ng-zorro-antd/tag";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { NzFormModule } from "ng-zorro-antd/form";
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
-import { SharedModule } from "@shared/shared.module";
 import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
 import { NzListModule } from "ng-zorro-antd/list";
 import { NzAlertModule } from "ng-zorro-antd/alert";
 import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
 import { NzNotificationModule } from "ng-zorro-antd/notification";
+import {CoreModule} from "@core/core.module";
 
 
 @NgModule({
@@ -54,7 +54,7 @@ import { NzNotificationModule } from "ng-zorro-antd/notification";
     NzToolTipModule,
     NzFormModule,
     ReactiveFormsModule,
-    SharedModule,
+    CoreModule,
     NzDropDownModule,
     NzPopconfirmModule,
     NzListModule,

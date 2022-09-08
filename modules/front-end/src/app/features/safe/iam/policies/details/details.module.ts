@@ -12,7 +12,6 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { SharedModule } from '@shared/shared.module';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
@@ -59,7 +58,7 @@ import {CoreModule} from "@core/core.module";
     NzTagModule,
     NzSpaceModule,
     NzPopconfirmModule,
-    SharedModule,
+    ComponentsModule,
     ComponentsModule,
     NzMessageModule,
     NzTypographyModule,

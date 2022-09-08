@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { SafeRoutingModule } from './safe-routing.module';
 import { SafeComponent } from './safe.component';
-import { SharedModule } from '@shared/shared.module';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+import {CoreModule} from "@core/core.module";
 
 @NgModule({
   declarations: [SafeComponent],
   imports: [
-    SharedModule,
+    CoreModule,
     NzBreadCrumbModule,
     SafeRoutingModule
   ],

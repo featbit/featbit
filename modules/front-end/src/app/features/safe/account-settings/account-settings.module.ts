@@ -23,7 +23,6 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
-import { SharedModule } from '@shared/shared.module';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { ProjectFilterPipe } from "./project/project-filter.pipe";
@@ -42,7 +41,7 @@ import {CoreModule} from "@core/core.module";
   imports: [
     CommonModule,
     FormsModule,
-    SharedModule,
+    CoreModule,
     NzFormModule,
     NzTabsModule,
     NzIconModule,

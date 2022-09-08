@@ -12,7 +12,6 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { SharedModule } from '@shared/shared.module';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
@@ -38,6 +37,7 @@ import { ReportingComponent } from './reporting/reporting.component';
 import { ExperimentationComponent } from './experimentation/experimentation.component';
 import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
 import {NzGridModule} from "ng-zorro-antd/grid";
+import {CoreModule} from "@core/core.module";
 
 @NgModule({
   declarations: [
@@ -65,7 +65,7 @@ import {NzGridModule} from "ng-zorro-antd/grid";
     NzTagModule,
     NzSpaceModule,
     NzPopconfirmModule,
-    SharedModule,
+    CoreModule,
     NzMessageModule,
     NzTypographyModule,
     NzDividerModule,

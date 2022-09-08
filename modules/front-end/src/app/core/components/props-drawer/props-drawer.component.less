@@ -1,0 +1,159 @@
+@import "src/variables";
+
+.table-operations {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.table-header th {
+  background-color: #DDDCEB;
+}
+
+.row-operations {
+  button {
+    padding-left: 0;
+  }
+}
+
+.creation-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  .input-wrapper {
+    display: flex;
+    justify-content: flex-start;
+    gap: 16px;
+  }
+
+  .preset-value-key, .preset-value-description {
+    width: 280px;
+
+    label {
+      font-size: 14px;
+      line-height: 150%;
+      color: @grey70-color;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+  }
+
+  .preset-value-add button {
+    width: 120px;
+    height: 40px;
+    border-radius: 32px;
+    font-weight: 500;
+    font-size: 14px;
+    text-shadow: none;
+    box-shadow: none;
+    border: none;
+  }
+}
+
+.preset-value-wrapper {
+  max-height: 465px;
+  overflow: auto;
+  overflow-x: hidden;
+  margin-bottom: 16px;
+  border: 1px solid @grey20-color;
+  background-color: #ffffff;
+  border-radius: 8px;
+}
+
+.preset-values {
+  width: 720px;
+
+  padding: 6px 7px 6px 7px;
+  box-sizing: border-box;
+
+
+
+  ::ng-deep .ant-list-items {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-flow: row wrap;
+    gap: 6px;
+  }
+
+  .preset-value {
+    width: 348px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 4px;
+    padding: 4px 4px 4px 6px;
+    background: @grey20-color;
+
+    .value-item {
+      width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      div {
+        display: inline-block;
+        width: 30px;
+      }
+    }
+
+    button {
+      border: 0;
+
+      background-color: @grey20-color;
+
+      i {
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+.use-preset-values-only-label {
+  ::ng-deep .ant-checkbox {
+    margin-right: 0;
+  }
+
+  i {
+    position: relative;
+    top: 1.5px;
+    font-size: 16px;
+    color: @red50-color;
+    margin-left: 3px;
+  }
+}
+
+.editable-table {
+  .editable-row nz-select {
+    width: 100%;
+  }
+
+  .editable-cell {
+    position: relative;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+
+  .editable-cell span {
+    display: inline-block;
+    height: 15px;
+  }
+
+  .editable-cell:hover {
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    padding: 4px 11px;
+  }
+}
+
+nz-input-group {
+  width: 300px !important;
+
+  input {
+    height: unset;
+  }
+}

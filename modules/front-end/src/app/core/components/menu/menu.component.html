@@ -1,0 +1,112 @@
+<section class="menu-body" [class]="{'menu-extended': menuExtended}">
+  <div class="brand">
+    <div class="brand-content">
+      <a class="brand-logo" [routerLink]="['/']">
+        <img src="../../../../assets/icons/logo-with-text.svg" alt="">
+      </a>
+      <a class="icon-fold" (click)="toggleMenuMode()">
+        <i nz-icon nzType="icons:icon-fold"></i>
+      </a>
+    </div>
+  </div>
+  <div class="menu-list">
+    <ul nz-menu [nzMode]="menuExtended ? 'inline' : 'vertical'">
+      <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menus }"></ng-container>
+      <ng-template #menuTpl let-menus>
+        <ng-container *ngFor="let menu of menus">
+          <ng-container *ngIf="menu.line;else menuItem">
+            <div class="menu-item-line">
+              <div class="line"></div>
+            </div>
+          </ng-container>
+          <ng-template #menuItem>
+            <li
+              *ngIf="!menu.children && !menu.hide"
+              nz-menu-item
+              nzMatchRouter
+              [nzPaddingLeft]="32"
+              [nzDisabled]="menu.disabled"
+              [nzSelected]="menu.selected">
+              <ng-container *ngIf="menuExtended; else menuItemWithTooltip">
+                <a class="menu-item" [routerLink]="menu.path" *ngIf="menu.path; else targetMenuItem">
+                  <i nz-icon [nzType]="menu.icon"></i>
+                  <span class="menu-item-title">{{ menu.title }}</span>
+                </a>
+              </ng-container>
+              <ng-template #menuItemWithTooltip>
+                <a [routerLink]="menu.path" *ngIf="menu.path; else targetMenuItem" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
+                  <i nz-icon [nzType]="menu.icon"></i>
+                  <span class="menu-item-title">{{ menu.title }}</span>
+                </a>
+              </ng-template>
+              <ng-template #targetMenuItem>
+                <ng-container *ngIf="menuExtended; else targetMenuItemWithTooltip">
+                  <a target="_blank" [href]="menu.target">
+                    <i nz-icon [nzType]="menu.icon"></i>
+                    <span class="menu-item-title">{{ menu.title }}</span>
+                  </a>
+                </ng-container>
+              </ng-template>
+              <ng-template #targetMenuItemWithTooltip>
+                <ng-container>
+                  <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
+                    <i nz-icon [nzType]="menu.icon"></i>
+                    <span class="menu-item-title">{{ menu.title }}</span>
+                  </a>
+                </ng-container>
+              </ng-template>
+            </li>
+            <li
+              *ngIf="menu.children && !menu.hide"
+              nz-submenu
+              [nzPaddingLeft]="32"
+              [nzOpen]="menu.open"
+              [nzTitle]="menu.title"
+              [nzIcon]="menu.icon"
+              [nzDisabled]="menu.disabled">
+              <ul>
+                <ng-container
+                  *ngTemplateOutlet="menuTpl;
+                  context: { $implicit: menu.children }">
+                </ng-container>
+              </ul>
+            </li>
+          </ng-template>
+        </ng-container>
+      </ng-template>
+    </ul>
+  </div>
+  <div class="menu-item-line">
+    <div class="line"></div>
+  </div>
+  <div class="organization-management">
+    <button nzType="text" nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="topCenter">
+      <span class="icon-text-btn">
+        <i nz-icon nzType="icons:icon-setting"></i>
+        <span class="menu-item-title">账户管理</span>
+      </span>
+    </button>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+      <ul nz-menu class="dropdown-menu">
+        <li style="justify-content: center">
+          {{ auth.name }}
+        </li>
+        <li style="height: 12px; margin: 0 20px">
+          <span class="line"></span>
+        </li>
+        <li *ngIf="isInitialized" nz-menu-item [routerLink]="['/account-settings/profile']">
+          <i nz-icon nzType="icons:icon-user"></i>
+          个人信息
+        </li>
+        <li nz-menu-item (click)="logout.emit()">
+          <i nz-icon nzType="icons:icon-logout"></i>
+          退出登录
+        </li>
+      </ul>
+    </nz-dropdown-menu>
+  </div>
+</section>
+
+
+
+

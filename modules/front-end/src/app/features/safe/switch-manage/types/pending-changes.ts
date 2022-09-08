@@ -4,7 +4,7 @@ import { IProjectEnv } from "@shared/types";
 import { TeamService } from "@services/team.service";
 import { IUserType } from "@shared/types";
 import { isNotPercentageRollout, isSegmentRule, isSingleOperator } from "@shared/utils";
-import { ruleValueConfig, ruleType } from "@shared/find-rule/ruleConfig";
+import { ruleValueConfig, ruleType } from "@core/components/find-rule/ruleConfig";
 import { IFfParams, IFfpParams, IFftuwmtrParams, IJsonContent, IPrequisiteFeatureFlag, IRulePercentageRollout, IVariationOption } from "./switch-new";
 
 export enum InstructionKindEnum {

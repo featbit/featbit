@@ -18,7 +18,7 @@ import {
   ResourcesSelectorComponent
 } from "@features/safe/iam/components/policy-editor/resources-selector/resources-selector.component";
 import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
-import {SharedModule} from "@shared/shared.module";
+import {CoreModule} from "@core/core.module";
 
 @NgModule({
   declarations: [
@@ -41,7 +41,7 @@ import {SharedModule} from "@shared/shared.module";
     NzModalModule,
     NzCardModule,
     NzPopconfirmModule,
-    SharedModule
+    CoreModule
   ],
   exports: [
     PolicyEditorComponent,

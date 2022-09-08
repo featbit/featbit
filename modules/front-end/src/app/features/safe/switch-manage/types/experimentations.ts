@@ -1,4 +1,4 @@
-import {ChartConfig} from "@shared/g2-chart/g2-line-chart/g2-line-chart";
+import {ChartConfig} from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
 
 export enum EventType {
   Custom = 1,

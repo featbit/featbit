@@ -11,7 +11,6 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { FormsModule } from '@angular/forms';
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { SharedModule } from '@shared/shared.module';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzGridModule } from "ng-zorro-antd/grid";
 import {NzSelectModule} from "ng-zorro-antd/select";
@@ -25,7 +24,6 @@ import {CoreModule} from "@core/core.module";
     imports: [
       CommonModule,
       FormsModule,
-      SharedModule,
       CoreModule,
       NzTableModule,
       NzInputModule,

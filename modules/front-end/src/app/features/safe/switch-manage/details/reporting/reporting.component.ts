@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {SwitchService} from '@services/switch.service';
 import {map} from 'rxjs/operators';
-import { ChartConfig } from "@shared/g2-chart/g2-line-chart/g2-line-chart";
+import { ChartConfig } from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
 
 
 @Component({
