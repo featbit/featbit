@@ -9,9 +9,9 @@ export function getAuth() : IAuthProps | null {
     return JSON.parse(auth);
 }
 
-export function getLocalStorageKey(key: string): string {
+export function getLocalStorageKey(key: string, isUserIndependant: boolean): string {
   const auth = getAuth();
-  return auth ? `${key}_${auth.id}` : key;
+  return !isUserIndependant && auth ? `${key}_${auth.id}` : key;
 }
 
 export function uuidv4() {

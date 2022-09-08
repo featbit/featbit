@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 import {
-  CURRENT_ACCOUNT,
+  CURRENT_ACCOUNT, CURRENT_LANGUAGE,
   CURRENT_PROJECT,
   IDENTITY_TOKEN,
   LOGIN_REDIRECT_URL,
@@ -92,6 +92,7 @@ export class UserService {
       // restore account and project, so when user login, he would always see the same project & env
       [CURRENT_ACCOUNT()]: localStorage.getItem(CURRENT_ACCOUNT()),
       [CURRENT_PROJECT()]: localStorage.getItem(CURRENT_PROJECT()),
+      [CURRENT_LANGUAGE()]: localStorage.getItem(CURRENT_LANGUAGE()),
     };
 
     localStorage.clear();
