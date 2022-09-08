@@ -61,7 +61,7 @@ FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/f
 
 ### Philosophy
 
-From `The art of community` - **Ideally, people would change/improve the products
+From `The art of community` - *Ideally, people would change/improve the products
 ("derivative designs") to address market needs that they perceive and we have not addressed.
 That’s the sort of innovation that open source is designed to promote. But if they only clone the
-products and sell them at lower prices, that’s okay, too. The marketplace will decide.**
+products and sell them at lower prices, that’s okay, too. The marketplace will decide.*
