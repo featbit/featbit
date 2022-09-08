@@ -1,0 +1,28 @@
+<nz-spin [nzSpinning]="isDownloading" nzTip="下载中...">
+  <div class="container">
+    <div class="description" nz-typography>
+      数据同步只针对当前选择的项目和环境（ {{ projectEnv.projectName }} - {{ projectEnv.envName }} ）, 包括以下数据
+    </div>
+    <div class="data-sync-list">
+      <nz-card  nzTitle="开关用户">
+        <p>包括当前环境下的所有开关用户。</p>
+      </nz-card>
+      <nz-card  nzTitle="开关用户属性">
+        <p>包括当前环境下的所有自定义的用户属性。</p>
+      </nz-card>
+    </div>
+    <div class="actions">
+      <button nz-tooltip="下载当前环境数据" class="standard-btn download-btn" (click)="onDownload()" nz-button nzType="primary">
+        <i nz-icon nzType="icons:icon-download"></i>
+        下载
+      </button>
+      <button nz-tooltip="上传当前环境数据" class="standard-btn upload-btn" (click)="openUploadForm()" nz-button nzType="primary">
+        <i nz-icon nzType="icons:icon-upload"></i>
+        上传
+      </button>
+    </div>
+    <a style="visibility: hidden;" #downloadRef [href]="downloadUri" [download]="downloadFileName"></a>
+  </div>
+</nz-spin>
+
+<app-upload-drawer [visible]="uploadFormVisible" (close)="onUploadClosed()"></app-upload-drawer>

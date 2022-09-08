@@ -1,0 +1,92 @@
+@import "variables";
+
+.block {
+  padding: 20px 24px 24px 24px;
+  background-color: @grey5-color;
+  border-radius: 20px;
+  min-height: 50px;
+
+  .edit-save {
+    cursor: pointer;
+    margin-left: 16px;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    font-family: "Noto Sans S Chinese medium";
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    color: @grey80-color;
+    height: 30px;
+
+    .text {
+      display: inline-block;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 221px;
+    }
+    input {
+      width: 221px;
+      border-radius: 8px;
+    }
+  }
+
+  .description {
+    margin-top: 12px;
+    color: @grey50-color;
+    border: 1px solid @grey20-color;
+    border-radius: 8px;
+    padding: 5px;
+
+    &.editing {
+      border: none;
+      padding: 0;
+    }
+
+    .edit-save {
+      width: 100%;
+      text-align: right;
+      padding-right:14px;
+    }
+
+    textarea {
+      border-radius: 8px;
+    }
+  }
+
+  .delete {
+    width: 100%;
+    text-align: center;
+    button {
+      font-family: "Noto Sans S Chinese medium";
+      border-radius: 15px;
+      background-color: @red50-color;
+      color: #fff;
+      padding-left:20px;
+      padding-right:20px;
+      border: none;
+    }
+  }
+}
+
+.warning-message {
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px;
+  border: 1px solid #d2d2d2;
+  margin: 15px 0;
+  border-left: 3px solid #ff912b;
+  .warning {
+    display: flex;
+
+    .warning-icon {
+      color: #ff912b;
+    }
+    .warning-content {
+      padding-left: 5px;
+    }
+  }
+}

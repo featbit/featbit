@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { IAuthProps } from '@shared/types';
-import { IMenuItem } from '@shared/menu/menu';
+import { IMenuItem } from '@core/components/menu/menu';
 import { getAuth } from '@shared/utils';
 import { UserService } from "@services/user.service";
 
@@ -42,15 +42,42 @@ export class SafeComponent implements OnInit, OnDestroy {
 
     this.menus = [
       {
+        title: '开关管理',
+        icon: 'icons:icon-switch',
+        path: '/switch-manage'
+      },
+      {
+        title: '开关存档',
+        icon: 'icons:icon-switch-archive',
+        path: '/switch-archive'
+      },
+      {
+        title: '用户管理',
+        icon: 'icons:icon-switch-user',
+        path: '/switch-user'
+      },
+      {
+        title: '用户组',
+        icon: 'icons:icon-segment',
+        path: '/segments'
+      },
+      {
+        title: '数据实验',
+        icon: 'icons:icon-expt',
+        path: '/experiments'
+      },
+      {
+        title: '数据同步',
+        icon: 'icons:icon-data-sync',
+        path: '/data-sync'
+      },
+      {
         line: true
       },
       {
         title: '组织机构',
         icon: 'icons:icon-org',
         path: '/account-settings'
-      },
-      {
-        line: true
       },
       {
         title: '权限管理',

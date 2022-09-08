@@ -1,0 +1,178 @@
+<section class="body-container">
+  <ng-template #loadingTem>
+    <div class="block">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
+    </div>
+  </ng-template>
+
+  <div *ngIf="isArchived" class="block standard-div archived">
+    <div class="title">
+      <i class="warning-icon" nz-icon nzType="icons:icon-warning"></i>
+      <span class="text">此开关已存档</span>
+    </div>
+    <div class="content">
+      您可
+      <a class="restore"
+         nz-popconfirm="确定复位开关么？"
+         (nzOnConfirm)="restoreFlag()">&nbsp;复位&nbsp;
+      </a>
+      或
+      <a class="delete" nz-popconfirm="确定删除该开关么？删除后数据不可恢复。" (nzOnConfirm)="deleteFlag()"> 永久删除 </a>
+      此开关
+    </div>
+  </div>
+  <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
+    <div class="title">
+      <ng-container *ngIf="!isEditingTitle">
+        <span class="text">{{currentSwitch?.name}}</span>
+        <i class="edit-save" nz-tooltip="编辑开关名称" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+      </ng-container>
+      <ng-container *ngIf="isEditingTitle">
+        <input nz-input placeholder="名称..." [(ngModel)]="currentSwitch.name" />
+        <i class="edit-save" (click)="onSaveSwitch()" nz-icon nzType="icons:icon-save"></i>
+      </ng-container>
+    </div>
+    <div class="flag-key">
+      <nz-input-group [nzSuffix]="copySuffix">
+        <input readonly nz-input value="{{currentSwitch.keyName}}" nz-tooltip="{{currentSwitch.keyName}}">
+      </nz-input-group>
+      <ng-template #copySuffix>
+        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(currentSwitch.keyName)"></i>
+      </ng-template>
+      <i nz-icon nz-tooltip="开关 Key, SDK 获取开关返回值时传入该值。" nzType="icons:icon-info-outline"></i>
+    </div>
+    <div class="tags">
+      <div nz-tooltip="{{tag}}" class="tag" *ngFor="let tag of tags">{{tag}}</div>
+    </div>
+    <div class="status-switcher" >
+      <div class="switcher">
+        <nz-switch nz-popconfirm="确定要{{switchStatus? '关闭该开关吗? 关闭后将只返回下方设置的开关关闭时的返回值。': '开启该开关吗? 开启后将按照目标条件匹配用户。'}}" nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}" (nzOnConfirm)="onChangeSwitchStatus()" [ngModel]="switchStatus" [nzControl]="true"  nzCheckedChildren="开" nzUnCheckedChildren="关"></nz-switch>
+        <span>开关已<span *ngIf="switchStatus">开启</span><span *ngIf="!switchStatus">关闭</span></span>
+      </div>
+      <div class="disabled-variation">
+        <span class="label">开关关闭时返回</span>
+        <nz-select
+          [compareWith]="compareWith"
+          [(ngModel)]="currentSwitch.variationOptionWhenDisabled"
+          (ngModelChange)="onChangeDisabledStatusVariationOption()"
+          nzPlaceHolder="选择返回值">
+          <nz-option *ngFor="let variationOption of originalVariationOptions" nzCustomContent [nzValue]="variationOption" [nzLabel]="variationOption.variationValue">
+              {{variationOption.variationValue}}
+          </nz-option>
+        </nz-select>
+      </div>
+    </div>
+  </div>
+  <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
+    <div class="title">
+      <span class="text">返回值</span>
+      <!--       <i class="edit-save" nz-tooltip="" nz-icon nzType="icons:icon-info-outline"></i> -->
+      <i *ngIf="!isEditingVariationOptions" class="edit-save" (click)="toggleVariationOptionEditState()" nz-icon nzType="icons:icon-edit"></i>
+      <i *ngIf="isEditingVariationOptions" class="edit-save" (click)="addVariationOption()" nz-icon nzType="icons:icon-add-outline"></i>
+      <i *ngIf="isEditingVariationOptions" style="font-size: 14px" class="edit-save" (click)="saveVariationOptions()" nz-icon nzType="icons:icon-save"></i>
+    </div>
+    <div class="varation-type">
+      <span class="label">数据类型</span>
+      <ng-container *ngIf="!isEditingVariationOptions">
+        <div class="value">
+          {{variationDataType}}
+          <i *ngIf="variationDataType === 'json'" nz-icon nz-tooltip="number, boolean, null 以及空字符串都是合法 JSON" nzType="icons:icon-info-outline"></i>
+        </div>
+      </ng-container>
+      <nz-select *ngIf="isEditingVariationOptions" [(ngModel)]="variationDataType" (ngModelChange)="validateVariationDataTypes()">
+        <nz-option  nzValue="string" nzLabel="string"></nz-option>
+        <nz-option  nzValue="boolean" nzLabel="boolean"></nz-option>
+        <nz-option  nzValue="number" nzLabel="number"></nz-option>
+        <nz-option  nzValue="json" nzLabel="json"></nz-option>
+      </nz-select>
+    </div>
+    <nz-spin [nzSpinning]="isExportingVariationUsers" nzTip="下载中...">
+    <div class="options">
+      <div class="option-line" *ngFor="let variationOption of variationOptions; let key=index; trackBy: trackById;">
+        <div class="left">
+          <div class="variation-tip {{'tip-' + key % 9}}"></div>
+          <div class="variation-value" *ngIf="!isEditingVariationOptions">{{variationOption.variationValue}}</div>
+          <ng-container *ngIf="isEditingVariationOptions">
+            <nz-input-group *ngIf="['json', 'string'].includes(variationDataType)" [nzSuffix]="suffixIconButton" [class]="{'invalid': variationOption.isInvalid}">
+              <input type="text" nz-input [(ngModel)]="variationOption.variationValue" />
+            </nz-input-group>
+            <ng-template #suffixIconButton>
+              <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(variationOption)"></i>
+            </ng-template>
+            <input class="simple" *ngIf="!['json', 'string'].includes(variationDataType)" type="text" nz-input [(ngModel)]="variationOption.variationValue" [class]="{'invalid': variationOption.isInvalid}"/>
+          </ng-container>
+        </div>
+        <i class="expand-icon" *ngIf="!isEditingVariationOptions && ['json', 'string'].includes(variationDataType)" nz-icon nzType="expand" (click)="expandVariationOption(variationOption, true)"></i>
+        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variationOption.variationValue)"></i>
+        <div *ngIf="isEditingVariationOptions">
+          <span class="delete-icon-wrapper" nz-popconfirm="确定删除吗? 删除后将不可恢复！" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(variationOption.localId)">
+            <i nz-icon nzType="icons:icon-delete"></i>
+          </span>
+        </div>
+        <i class="expand-icon" *ngIf="!isEditingVariationOptions" (click)="onExportVariationUsers(variationOption)" nz-icon nzType="icons:icon-download" nz-tooltip="下载返回值为 {{variationOption.variationValue}} 的用户"></i>
+      </div>
+      <a style="visibility: hidden;" *ngIf="!isEditingVariationOptions" #downloadRef [href]="downloadUri" [download]="downloadFileName"></a>
+    </div>
+    </nz-spin>
+  </div>
+
+  <div class="block standard-div"
+       *ngIf="quickStartDeliverFlag===true">
+    <div class="title">
+      <span class="text">Quick Start</span>
+    </div>
+    <div class="languages-frameworks">
+      <div class="line">
+        <button (click)="openTutorial('react')" style="width:66px;">React</button>
+        <button (click)="openTutorial('javascript')" style="width:66px;">JS</button>
+        <button (click)="openTutorial('wechat-mini-program')" style="width:98px;">微信小程序</button>
+      </div>
+      <div class="line">
+        <button (click)="openTutorial('python')" style="width:66px;">Python</button>
+        <button (click)="openTutorial('java-server')" style="width:66px;">Java</button>
+        <button (click)="openTutorial('spring-boot')" style="width:98px;">Spring Boot</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="block" *ngIf="!isArchived">
+    <div *ngIf="!isLoading; else loadingTem;" class="delete">
+      <button nz-button nzType="default" (click)="onArchiveClick()">
+        <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
+        存档开关（软删除）
+      </button>
+    </div>
+  </div>
+</section>
+
+<nz-modal
+  [nzWidth]='800'
+  nzClassName="option-value-editor"
+  [nzClosable]="true"
+  [nzTitle]="modalTitle"
+  [nzContent]="modalContent"
+  [nzFooter]="modalFooter"
+  [(nzVisible)]="optionValueExpandVisible"
+  (nzOnCancel)="optionValueExpandVisible=false">
+  <ng-template #modalTitle>开关返回值</ng-template>
+  <ng-template #modalContent>
+    <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentEditingVariationOption.variationValue" [nzEditorOption]="{ language: variationDataType, theme: 'vs-dark' }"></nz-code-editor>
+  </ng-template>
+  <ng-template #modalFooter>
+    <div style="display: flex;justify-content: space-between">
+      <button nz-button nzType="default" (click)="formatCode()">格式化</button>
+      <div>
+        <button nz-button nzType="default" (click)="optionValueExpandVisible=false">{{ expandReadonly ? '关闭' : '取消'}}</button>
+        <button *ngIf="!expandReadonly" nz-button nzType="primary" (click)="saveOptionValue()" >确定</button>
+      </div>
+    </div>
+  </ng-template>
+</nz-modal>
+
+<tutorial-drawer
+  *ngIf="!isLoading"
+  [tutorial]="tutorial"
+  (close)="tutorial = ''"
+  [secret]="currentProjectEnv.envSecret"
+  [flagName]="currentSwitch.name"
+></tutorial-drawer>

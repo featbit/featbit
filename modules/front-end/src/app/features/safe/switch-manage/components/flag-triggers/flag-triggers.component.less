@@ -1,0 +1,198 @@
+@import "variables";
+
+.subscription-alert {
+  border-radius: 10px;
+  padding: 24px 24px;
+  border: 0px solid transparent;
+  background-color: #FFF4EC;
+  margin-bottom: 24px;
+  display: flex;
+
+
+  .inner-icon {
+    font-size: 20px;
+    margin-right: 15px;
+    display: inline-block;
+    color: #FF513A;
+    line-height: 21px;
+  }
+
+  .inner-text {
+    line-height: 21px;
+    display: block;
+    // flex: 1;
+  }
+}
+
+.detail-body {
+  width: 100%;
+  padding: 0 0 10px 0;
+  position: relative;
+  height: 100%;
+
+  .banner {
+    min-width: 290px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+
+    .title {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+
+      .label{
+        font-size: 13px;
+        line-height: 14px;
+        font-weight: bold;
+        margin-right: 33px;
+
+        div:first-child {
+          font-family: 'Noto Sans S Chinese medium';
+          font-style: normal;
+          font-weight: 500;
+          font-size: 16px;
+          line-height: 150%;
+          color: @grey70-color;
+        }
+      }
+    }
+
+    .action-btns {
+      display: flex;
+      justify-content: space-between;
+
+      button {
+        width: 170px;
+
+        &:not(:first-child) {
+          margin-left: 16px;
+        }
+      }
+    }
+
+    .ant-btn-primary {
+      width: 135px;
+      height: 40px;
+      border-radius: 32px;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 150%;
+      text-shadow: none;
+      box-shadow: none;
+      border: none;
+    }
+  }
+
+  .content-container {
+    height: calc(100% - 180px);
+    overflow: auto;
+
+    .standard-div {
+      &:not(:last-child) {
+        margin-bottom: 24px;
+      }
+    }
+
+      nz-card {
+        border-radius: 10px;
+        ::ng-deep .ant-card-actions {
+          border-bottom-left-radius: 10px !important;
+          border-bottom-right-radius: 10px !important;
+        }
+
+        .trigger-body {
+          display:flex;
+          justify-content: space-between;
+
+          .trigger-body-main {
+            display:flex;
+            align-items:center;
+
+            .avatar {
+              margin-right: 10px;
+              font-size: 32px;
+              &.status_1 {
+                color: #389e0d;
+              }
+              &.status_2 {
+                color: rgba(0, 0, 0, 0.45);
+              }
+            }
+
+            .trigger-main {
+              max-width: 800px;
+            }
+
+            .trigger-type {
+              overflow: hidden;
+              color: rgba(0, 0, 0, 0.85);
+              font-weight: 600;
+              font-size: 16px;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              margin-bottom: 8px;
+            }
+
+            .trigger-action {
+              font-size: 16px;
+              margin-bottom: 8px;
+              .action {
+                border-radius: 10px;
+
+                &.action_1 {
+                  color: #389e0d;
+                  background: #f6ffed;
+                  border-color: #b7eb8f;
+                }
+                &.action_2 {
+                  color: #cf1322;
+                  background: #fff1f0;
+                  border-color: #ffa39e
+                }
+              }
+
+            }
+
+            .trigger-description {
+              color: rgba(0, 0, 0, 0.45);
+              margin-bottom: 8px;
+            }
+
+            .trigger-url{
+              color: rgba(0, 0, 0, 0.45);
+            }
+          }
+        }
+      }
+  }
+}
+
+.create-trigger {
+  .info-item:not(:first-child) {
+    margin-top: 10px;
+  }
+
+  .action {
+    border-radius: 10px;
+
+    &.action_1 {
+      color: #389e0d;
+      background: #f6ffed;
+      border-color: #b7eb8f;
+    }
+    &.action_2 {
+      color: #cf1322;
+      background: #fff1f0;
+      border-color: #ffa39e
+    }
+  }
+
+  nz-select, textarea {
+    width: 100%;
+  }
+}
+
+

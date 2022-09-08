@@ -42,6 +42,31 @@ import {FfcDatePipe} from "@core/pipes/ffcdate.pipe";
 import {PolicyTypePipe} from "@core/pipes/policy-type.pipe";
 import {ExtraUserColumnPipe} from "@core/pipes/extra-user-column.pipe";
 import {PermissionCheckDirective} from "@core/directives/permission-check.directive";
+import {LocaleSwitcherComponent} from "@core/components/locale-switcher/locale-switcher.component";
+import {MemberDrawerComponent} from "@core/components/member-drawer/member-drawer.component";
+import {MessageComponent} from "@core/components/message/message.component";
+import {GroupDrawerComponent} from "@core/components/group-drawer/group-drawer.component";
+import {PolicyDrawerComponent} from "@core/components/policy-drawer/policy-drawer.component";
+import {AccountDrawerComponent} from "@core/components/account-drawer/account-drawer.component";
+import {EnvDrawerComponent} from "@core/components/env-drawer/env-drawer.component";
+import {PermissionCheckComponent} from "@core/components/permission-check/permission-check.component";
+import {ProjectDrawerComponent} from "@core/components/project-drawer/project-drawer.component";
+import {MenuComponent} from "@core/components/menu/menu.component";
+import {HeaderComponent} from "@core/components/header/header.component";
+import {PropsDrawerComponent} from "@core/components/props-drawer/props-drawer.component";
+import {UploadDrawerComponent} from "@core/components/upload-drawer/upload-drawer.component";
+import {MetricDrawerComponent} from "@core/components/metric-drawer/metric-drawer.component";
+import {ExperimentDrawerComponent} from "@core/components/experiment-drawer/experiment-drawer.component";
+import {G2LineChartComponent} from "@core/components/g2-chart/g2-line-chart/g2-line-chart.component";
+import {ExptRulesDrawerComponent} from "@core/components/expt-rules-drawer/expt-rules-drawer.component";
+import {
+  UserSegmentsFlagsDrawerComponent
+} from "@core/components/user-segments-flags-drawer/user-segments-flags-drawer.component";
+import {TargetUserV2Component} from "@core/components/target-user-v2/target-user-v2.component";
+import {FindRuleComponent} from "@core/components/find-rule/find-rule.component";
+import {ServeMultistatesComponent} from "@core/components/find-rule/serve-multistates/serve-multistates.component";
+import {RuleComponent} from "@core/components/find-rule/rule/rule.component";
+import {NzCardModule} from "ng-zorro-antd/card";
 
 @NgModule({
   declarations: [
@@ -50,7 +75,30 @@ import {PermissionCheckDirective} from "@core/directives/permission-check.direct
     FfcDatePipe,
     PolicyTypePipe,
     ExtraUserColumnPipe,
-    PermissionCheckDirective
+    PermissionCheckDirective,
+
+    LocaleSwitcherComponent,
+    MemberDrawerComponent,
+    MessageComponent,
+    GroupDrawerComponent,
+    PolicyDrawerComponent,
+    AccountDrawerComponent,
+    EnvDrawerComponent,
+    PermissionCheckComponent,
+    ProjectDrawerComponent,
+    MenuComponent,
+    HeaderComponent,
+    PropsDrawerComponent,
+    UploadDrawerComponent,
+    MetricDrawerComponent,
+    ExperimentDrawerComponent,
+    G2LineChartComponent,
+    ExptRulesDrawerComponent,
+    UserSegmentsFlagsDrawerComponent,
+    TargetUserV2Component,
+    FindRuleComponent,
+    ServeMultistatesComponent,
+    RuleComponent
   ],
   imports: [
     CommonModule,
@@ -88,7 +136,8 @@ import {PermissionCheckDirective} from "@core/directives/permission-check.direct
     NzLayoutModule,
     NzImageModule,
     NzPopoverModule,
-    NzCodeEditorModule
+    NzCodeEditorModule,
+    NzCardModule
   ],
   exports: [
     CommonModule,
@@ -100,6 +149,29 @@ import {PermissionCheckDirective} from "@core/directives/permission-check.direct
     PolicyTypePipe,
     ExtraUserColumnPipe,
     PermissionCheckDirective,
+
+    LocaleSwitcherComponent,
+    MemberDrawerComponent,
+    MessageComponent,
+    GroupDrawerComponent,
+    PolicyDrawerComponent,
+    AccountDrawerComponent,
+    EnvDrawerComponent,
+    PermissionCheckComponent,
+    ProjectDrawerComponent,
+    MenuComponent,
+    HeaderComponent,
+    PropsDrawerComponent,
+    UploadDrawerComponent,
+    MetricDrawerComponent,
+    ExperimentDrawerComponent,
+    G2LineChartComponent,
+    ExptRulesDrawerComponent,
+    UserSegmentsFlagsDrawerComponent,
+    TargetUserV2Component,
+    FindRuleComponent,
+    ServeMultistatesComponent,
+    RuleComponent
   ]
 })
 export class CoreModule { }

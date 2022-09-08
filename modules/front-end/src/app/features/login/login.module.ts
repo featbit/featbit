@@ -14,7 +14,7 @@ import { NzTabsModule } from "ng-zorro-antd/tabs";
 import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { NzDividerModule } from "ng-zorro-antd/divider";
-import {SharedModule} from "@shared/shared.module";
+import {CoreModule} from "@core/core.module";
 
 @NgModule({
   declarations: [LoginComponent, DoLoginComponent],
@@ -32,7 +32,7 @@ import {SharedModule} from "@shared/shared.module";
     NzToolTipModule,
     FormsModule,
     NzDividerModule,
-    SharedModule,
+    CoreModule,
   ]
 })
 export class LoginModule { }

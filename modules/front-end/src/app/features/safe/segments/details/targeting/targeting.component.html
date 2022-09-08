@@ -1,0 +1,85 @@
+<section class="body-container">
+  <div class="detail-body">
+    <div class="banner" *ngIf="!isLoading; else loadingTem;">
+      <div class="references" *ngIf="flagReferences.length === 0">
+        该用户组没有被任何开关引用
+      </div>
+      <div class="references" nz-dropdown [nzDropdownMenu]="menu" *ngIf="flagReferences.length > 0">
+        <a>
+          该用户组在 <span class="reference-count">{{flagReferences.length}}</span> 个开关中被引用 <i nz-icon nzType="down"></i>
+        </a>
+      </div>
+      <nz-dropdown-menu #menu="nzDropdownMenu">
+        <ul nz-menu>
+          <li nz-menu-item *ngFor="let flag of flagReferences" (click)="openFlagPage(flag.id)">
+            {{flag.name}}
+          </li>
+        </ul>
+      </nz-dropdown-menu>
+      <button class="save-btn" nz-button nzType="primary" (click)="onSave()">
+        <i nz-icon nzType="icons:icon-save"></i>
+        保存设置
+      </button>
+    </div>
+    <div class="content-container">
+      <div class="standard-div target-users" *ngIf="!isLoading; else loadingTem;">
+        <div class="rule-banner">
+          <div class="title-wraper">
+            <div class="title">目标用户</div>
+            <i *ngIf="targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive" nzType="icons:icon-arrow-down"></i>
+            <i *ngIf="!targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive" nzType="icons:icon-arrow-right"></i>
+          </div>
+        </div>
+        <div *ngIf="targetIndividualsActive" style="margin-left: -12px;margin-top: 16px">
+          <div class="content">
+            <target-user-v2
+              [type]="'包含用户'"
+              [tipIdx]="0"
+              [userList]="userList"
+              [selectedUserDetailList]="segmentDetail.includedUsers"
+              (search)="onSearchUser($event)"
+              (onSelectedUserListChange)="onSelectedUserListChange($event, true)">
+            </target-user-v2>
+          </div>
+          <div class="content">
+            <target-user-v2
+              [type]="'不包含用户'"
+              [tipIdx]="1"
+              [userList]="userList"
+              [selectedUserDetailList]="segmentDetail.excludedUsers"
+              (search)="onSearchUser($event)"
+              (onSelectedUserListChange)="onSelectedUserListChange($event, false)">
+            </target-user-v2>
+          </div>
+        </div>
+      </div>
+      <div class="standard-div" *ngIf="!isLoading && !isUserPropsLoading; else loadingTem;">
+        <div class="rule-banner">
+          <div class="title">自定义规则</div>
+          <i nz-icon (click)="addRule()" nzType="icons:icon-add-outline"></i>
+        </div>
+        <div class="drop-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+          <ng-container *ngFor="let rule of segmentDetail.rules; let index=index; trackBy: trackRuleById;">
+            <div class="drop-box rule" cdkDrag>
+              <find-rule
+                [serveSingleOption]="true"
+                [data]="rule"
+                [userProps]="userProps"
+                (deleteRule)="deleteRule(index)"
+                (ruleConfigChange)="onRuleConfigChange($event, index)"
+                (updateRuleName)="rule.ruleName = $event">
+              </find-rule>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #loadingTem>
+    <div class="block">
+      <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+    </div>
+  </ng-template>
+</section>
+
+

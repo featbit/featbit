@@ -1,0 +1,51 @@
+<section class="rule-serve">
+    <div class="tip" *ngIf="!isSingle">返回</div>
+    <div class="select" [class.single-select]="isSingle">
+        <nz-select [nzCustomTemplate]="multipleTemplate" [(ngModel)]="variationRuleValue" (ngModelChange)="modelChange()">
+            <nz-option nzCustomContent [nzValue]="true" [nzLabel]="'true'">
+                <i class="true-tip" nz-icon nzType="border" nzTheme="outline"></i>true
+            </nz-option>
+            <nz-option nzCustomContent [nzValue]="false" [nzLabel]="'false'">
+                <i class="false-tip" nz-icon nzType="border" nzTheme="outline"></i>false
+            </nz-option>
+            <nz-option [nzValue]="'null'" [nzLabel]="'a percentage rollout'"></nz-option>
+        </nz-select>
+
+        <div class="percentage-body" *ngIf="variationRuleValue == 'null'">
+            <div class="percentage">
+                <div class="item">
+                    <nz-slider class="my-slider" [(ngModel)]="truePercentage" (ngModelChange)="onSliderChange()"></nz-slider>
+                </div>
+                <div class="item">
+                    <span>
+                        <i class="true-tip" nz-icon nzType="border" nzTheme="outline"></i>true
+                    </span>
+                    <div class="percentage-number">
+                        <input type="number" [(ngModel)]="truePercentage" nz-input readonly/>%
+                    </div>
+                </div>
+                <div class="item">
+                    <span>
+                        <i class="false-tip" nz-icon nzType="border" nzTheme="outline"></i>false
+                    </span>
+                    <div class="percentage-number">
+                        <input type="number" [(ngModel)]="falsePercentage" nz-input readonly/>%
+                    </div>
+                </div>
+                <div class="item">
+                    <span></span>
+                    <span>100%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<ng-template #multipleTemplate let-selected>
+    <div class="ant-select-selection-item-content">
+        <ng-container *ngIf="['true', 'false'].includes(selected.nzValue)">
+            <i [ngClass]="selected.nzValue == 'true' ? 'true-tip' : 'false-tip'" nz-icon nzType="border" nzTheme="outline"></i>
+        </ng-container>
+        {{ selected.nzLabel }}
+    </div>
+</ng-template>

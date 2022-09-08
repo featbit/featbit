@@ -9,6 +9,48 @@ const routes: Routes = [
     component: SafeComponent,
     children: [
       {
+        path: 'switch-manage',
+        loadChildren: () => import("./switch-manage/switch-manage.module").then(m => m.SwitchManageModule),
+        data: {
+          breadcrumb: '开关管理'
+        },
+      },
+      {
+        path: 'switch-user',
+        loadChildren: () => import("./switch-user/switch-user.module").then(m => m.SwitchUserModule),
+        data: {
+          breadcrumb: '开关用户管理'
+        },
+      },
+      {
+        path: 'segments',
+        loadChildren: () => import("./segments/segments.module").then(m => m.SegmentsModule),
+        data: {
+          breadcrumb: '用户组'
+        },
+      },
+      {
+        path: 'switch-archive',
+        loadChildren: () => import("./switch-archive/switch-archive.module").then(m => m.SwitchArchiveModule),
+        data: {
+          breadcrumb: '开关存档'
+        },
+      },
+      {
+        path: 'experiments',
+        loadChildren: () => import("./experiments/experiments.module").then(m => m.ExperimentsModule),
+        data: {
+          breadcrumb: '数据实验'
+        },
+      },
+      {
+        path: 'data-sync',
+        loadChildren: () => import("./data-sync/data-sync.module").then(m => m.DataSyncModule),
+        data: {
+          breadcrumb: '数据同步'
+        },
+      },
+      {
         path: 'account-settings',
         loadChildren: () => import("./account-settings/account-settings.module").then(m => m.AccountSettingsModule),
         data: {
@@ -25,7 +67,7 @@ const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: '/account-settings',
+        redirectTo: '/switch-manage',
         pathMatch: 'full'
       }
     ]

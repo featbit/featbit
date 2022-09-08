@@ -9,7 +9,6 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { SharedModule } from '@shared/shared.module';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
@@ -17,6 +16,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import {IndexComponent} from "@features/safe/iam/users/index/index.component";
 import {NzDividerModule} from "ng-zorro-antd/divider";
 import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
+import {CoreModule} from "@core/core.module";
 
 @NgModule({
   declarations: [
@@ -32,7 +32,7 @@ import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
     NzButtonModule,
     NzIconModule,
     NzInputModule,
-    SharedModule,
+    CoreModule,
     NzMessageModule,
     NzDropDownModule,
     NzToolTipModule,

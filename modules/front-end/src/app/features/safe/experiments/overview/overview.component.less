@@ -1,0 +1,112 @@
+@import "variables";
+
+.body-container {
+  .table-content-area {
+    margin-top: 20px;
+
+    nz-input-group {
+      width: 520px;
+    }
+  }
+
+  .annotations {
+    display: flex;
+    justify-content: flex-start;
+
+    .annotation {
+      display: flex;
+      justify-content: space-between;
+      border: 1px solid #EAECEE;
+      border-radius: 12px;
+      background: #FFFFFF;
+
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 150%;
+      width: 360px;
+      height: 159px;
+      margin: 0 24px 0 0;
+      padding: 24px;
+
+      .legend {
+        color: @grey70-color;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+
+        div {
+          &:first-child {
+            font-weight: 400;
+            font-size: 16px;
+          }
+          &:last-child {
+            font-weight: 700;
+            font-size: 28px;
+          }
+        }
+      }
+
+      .icon {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        .anticon.status {
+          font-size: 100px;
+          font-weight: 800;
+        }
+      }
+    }
+  }
+
+  .ant-tag {
+    background: @grey10-color;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 150%;
+    color: @grey70-color;
+    display: inline-block;
+    margin-right: 8px;
+    white-space: nowrap;
+    padding: 2px 7px;
+  }
+
+  .expt-status-col {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 56px;
+
+    .expt-status {
+      width: 10px;
+      height: 10px;
+      border: none;
+      border-radius: 10px;
+      margin-right: 12px;
+
+      &.ongoing {
+        background-color: @green60-color;
+      }
+
+      &.paused {
+        background-color: @red50-color;
+      }
+
+      &.not-started {
+        background-color: @blue50-color;
+      }
+    }
+  }
+
+
+  .title {
+    font-size: 15px;
+  }
+  .subtitle {
+    font-size: 13px;
+  }
+}
+
+
+
+

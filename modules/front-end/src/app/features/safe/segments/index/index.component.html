@@ -1,0 +1,121 @@
+<section class="body-container">
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <nz-input-group [nzPrefix]="prefixIconSearch">
+        <input nz-input type="text" placeholder="按名字查找" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearch(true)">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+      <button nz-button nzType="primary" (click)="addSegment()">
+        <i nz-icon nzType="icons:icon-add"></i>
+        新建
+      </button>
+    </div>
+
+    <div class="table-wrapper">
+      <nz-table #table nzSize="small"
+                nzShowSizeChanger
+                [nzData]="segmentListModel.items"
+                [nzFrontPagination]="false"
+                [nzLoading]="loading"
+                [nzTotal]="segmentListModel.totalCount"
+                [(nzPageSize)]="segmentFilter.pageSize"
+                (nzPageSizeChange)="onSearch()"
+                [nzPageSizeOptions]="[10,20,30]"
+                [(nzPageIndex)]="segmentFilter.pageIndex"
+                (nzPageIndexChange)="onSearch()">
+        <thead>
+          <tr>
+            <th nzWidth="35%">名称</th>
+            <th nzWidth="35%">最近修改</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of table.data">
+            <td style="cursor: pointer;" (click)="onIntoSegmentDetail(item)">
+              <span nz-tooltip="点击进入详情页">{{item.name}}</span>
+            </td>
+            <td>{{getLocalDate(item.updatedAt) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
+            <td>
+              <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)">详情</a>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a style="color: #717D8A" (click)="deleteValidation(item)">删除</a>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</section>
+
+<nz-modal [(nzVisible)]="createModalVisible"
+          [nzTitle]="modalTitle"
+          [nzCentered]="true"
+          [nzContent]="modalContent"
+  [nzFooter]="modalFooter" (nzOnCancel)="closeCreateModal()">
+  <ng-template #modalTitle>新建用户组</ng-template>
+  <ng-template #modalContent>
+    <form nz-form [formGroup]="segmentForm" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired>名称</nz-form-label>
+        <nz-form-control nzHasFeedback nzValidatingTip="校验中..." [nzErrorTip]="segmentNameErrorTpl">
+          <input nz-input formControlName="name" />
+          <ng-template #segmentNameErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')">名称必填</ng-container>
+            <ng-container *ngIf="control.hasError('invalid_character')">名称不能包含 '__'</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')">该名称已被使用</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')">名称校验失败</ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>描述</nz-form-label>
+        <nz-form-control>
+          <textarea style="resize: none" nz-input formControlName="description" placeholder="用户组的简要描述..."></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-template>
+
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="this.closeCreateModal()">取消</button>
+    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!segmentForm.valid"
+      (click)="createSegment()">创建</button>
+  </ng-template>
+</nz-modal>
+
+<nz-modal [(nzVisible)]="deleteModalVisible"
+          [nzTitle]="deleteModalTitle"
+          [nzCentered]="true"
+          [nzContent]="deleteModalContent"
+          [nzFooter]="deleteModalFooter"
+          (nzOnCancel)="closeDeleteModal()">
+
+  <ng-template #deleteModalTitle><span style="font-size:18px">删除用户组</span></ng-template>
+
+  <ng-template #deleteModalContent>
+    <div style="font-size:15px">用户组<span
+        style="font-weight:800;display:inline-block;margin:0 3px;">{{currentDeletingSegment.name}}</span>将被永久删除，且删除后不可恢复！
+    </div>
+    <div *ngIf="currentDeletingSegmentFlagReferences.length > 0" class="warning-message">
+      <div class="warning">
+        <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+        <div class="warning-content">该用户组在下边列出的 <span
+            style="font-weight:800;display:inline-block;margin:0 3px;">{{currentDeletingSegmentFlagReferences.length}}</span>
+          个开关中被引用，移除所有引用后方可删除！</div>
+      </div>
+    </div>
+    <div *ngFor="let flag of currentDeletingSegmentFlagReferences" style="margin-top:5px">
+      <a (click)="openFlagPage(flag.id)">{{flag.name}}</a>
+    </div>
+  </ng-template>
+
+  <ng-template #deleteModalFooter>
+    <button nz-button nzType="default" (click)="this.closeDeleteModal()">取消</button>
+    <button nz-button nzType="primary" [nzLoading]="this.deleting"
+      [disabled]="currentDeletingSegmentFlagReferences.length > 0"
+      (click)="delete(currentDeletingSegment.id)">删除</button>
+  </ng-template>
+</nz-modal>

@@ -1,0 +1,316 @@
+@import "variables";
+
+.archived {
+  background-image: repeating-linear-gradient(45deg, white, white 20px, #FAFAFA 20px, #FAFAFA 40px);
+
+  .warning-icon {
+    font-size: 20px;
+    margin-right: 8px;
+    color: @red50-color;
+  }
+
+  .content {
+    margin-top: 8px;
+    font-size: 13px;
+
+    .restore {
+      text-decoration: underline;
+      font-weight: bold;
+    }
+
+    .delete {
+      color: @red50-color;
+      text-decoration: underline;
+      font-weight: bold;
+    }
+  }
+}
+
+.block {
+  &:not(:first-child) {
+    margin-top: 10px;
+  }
+
+  padding: 15px 24px 15px 24px;
+  background-color: @grey5-color;
+  border-radius: 20px;
+  min-height: 50px;
+
+  .edit-save {
+    cursor: pointer;
+    margin-left: 12px;
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    font-family: "Noto Sans S Chinese medium";
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    color: @grey70-color;
+    height: 30px;
+
+    .text {
+      display: inline-block;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 221px;
+    }
+    input {
+      width: 221px;
+      border-radius: 8px;
+    }
+  }
+
+  .varation-type {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+
+    .label {
+      display: inline-block;
+      margin-right: 12px;
+    }
+
+    .value {
+      display: flex;
+      align-items: center;
+
+      i {
+        margin-left: 8px;
+        font-size: 16px;
+        cursor:pointer;
+      }
+    }
+
+    nz-select {
+      width: 100px;
+    }
+  }
+
+  .flag-key {
+    nz-input-group {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      height: 36px;
+      background: #FFFFFF;
+      border: 1px solid @grey200-color;
+      border-radius: 8px;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 150%;
+      color: @grey50-color;
+    }
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+
+    i {
+      cursor: pointer;
+      font-size: 20px;
+
+      &:last-child {
+        margin-left: 8px;
+      }
+    }
+  }
+
+  .tags {
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+
+    .tag {
+      text-align: center;
+      width: 117px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      background-color: @grey10-color;
+      padding: 4px 6px;
+      border-radius: 4px;
+      margin-right: 10px;
+      margin-bottom: 8px;
+    }
+  }
+
+  .status-switcher {
+    margin-top: 20px;
+
+    .switcher {
+      nz-switch {
+        margin-right: 12px;
+      }
+    }
+
+    .disabled-variation {
+      margin-top: 12px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+
+      .label {
+        display: inline-block;
+        margin-right: 12px;
+      }
+
+      nz-select {
+        width: 160px;
+      }
+    }
+  }
+
+  .options {
+    margin-top: 16px;
+    .option-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      width: 100%;
+
+      div.left {
+        width: 75%;
+        display: flex;
+        align-items: center;
+
+        .variation-value {
+          height: 20px;
+          width: 200px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+      }
+
+      i {
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      .ant-typography {
+        margin-bottom: 0;
+      }
+
+      ::ng-deep .ant-input-suffix {
+        padding-left: 6px;
+      }
+
+      nz-input-group {
+        padding: 4.8px 11px 4.8px 11px;
+        width: 85%;
+        height: 36px;
+        border-radius: 8px;
+        input {
+          border: none;
+        }
+      }
+
+      input.simple {
+        width: 85%;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid @grey200-color;
+      }
+
+      .delete-icon-wrapper {
+        display: inline-block;
+        cursor: pointer;
+        margin-top: 5px;
+
+        i {
+          font-size: 18px;
+        }
+      }
+    }
+
+    input.invalid, nz-input-group.invalid {
+      border: 1px solid #F00 !important;
+
+      &:hover, &:focus {
+        box-shadow: 0 0 0 2px rgb(255 0 0 / 20%);
+      }
+    }
+  }
+
+  .languages-frameworks {
+    margin-top: 16px;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .line {
+      margin: 3px 0;
+      width: 100%;
+
+      &:first-child{
+        margin-top: 0;
+      }
+
+      &:last-child{
+        margin-bottom: 0;
+      }
+
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      button {
+        border: none;
+        background: @purple50-color;
+        border-radius: 8px;
+        width: 120px;
+        height: 37px;
+        padding: 8px 12px;
+        color: #FFFFFF;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .delete {
+    width: 100%;
+    text-align: center;
+    button {
+      font-family: "Noto Sans S Chinese medium";
+      border-radius: 15px;
+      background-color: @red50-color;
+      color: #fff;
+      padding-left:20px;
+      padding-right:20px;
+      border: none;
+    }
+  }
+
+  i:not(.delete-icon, .warning-icon) {
+    color: @grey50-color;
+    &:hover {
+      color: @grey70-color;
+    }
+  }
+}
+
+::ng-deep .cdk-drag-preview {
+  display: table;
+}
+
+::ng-deep .cdk-drag-placeholder {
+  opacity: 0;
+}
+
+::ng-deep .option-value-editor .ant-modal-body {
+  padding: 20px 30px;
+
+  .ant-code-editor {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}

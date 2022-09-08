@@ -1,0 +1,59 @@
+@import "src/variables";
+
+.table-operations {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.table-header th {
+  background-color: #DDDCEB;
+}
+
+.row-operations {
+  button {
+    padding-left: 0;
+  }
+}
+
+.table-wrapper {
+  .option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 20px;
+    width: 100%;
+
+    div.left {
+      height: 40px;
+      width: 80%;
+      display: flex;
+      align-items: center;
+
+      .variation-value {
+        width: 200px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+    }
+
+    i {
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .ant-typography {
+      margin-bottom: 0;
+    }
+  }
+}
+
+nz-input-group {
+  width: 300px !important;
+
+  input {
+    height: unset;
+  }
+}
