@@ -25,6 +25,12 @@ Under construction...
 
 Under construction...
 
+### Self-hosted
+- [] IaC to AWS
+- [] IaC to Azure
+- [] IaC to Aliyun
+- [] IaC to other cloud services
+
 ## Roadmap
 
 Under construction...
