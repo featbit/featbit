@@ -135,7 +135,7 @@ export class UserListComponent implements OnInit {
 
   navigateToUserDetail(user: IUserType) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/switch-user/${encodeURIComponent(user.id)}`])
+      this.router.createUrlTree([`${window.location.pathname}/${encodeURIComponent(user.id)}`])
     );
 
     window.open(url, '_blank');
