@@ -30,6 +30,27 @@ const routes: Routes = [
         },
       },
       {
+        path: 'switch-archive',
+        loadChildren: () => import("./switch-archive/switch-archive.module").then(m => m.SwitchArchiveModule),
+        data: {
+          breadcrumb: '开关存档'
+        },
+      },
+      {
+        path: 'experiments',
+        loadChildren: () => import("./experiments/experiments.module").then(m => m.ExperimentsModule),
+        data: {
+          breadcrumb: '数据实验'
+        },
+      },
+      {
+        path: 'data-sync',
+        loadChildren: () => import("./data-sync/data-sync.module").then(m => m.DataSyncModule),
+        data: {
+          breadcrumb: '数据同步'
+        },
+      },
+      {
         path: 'account-settings',
         loadChildren: () => import("./account-settings/account-settings.module").then(m => m.AccountSettingsModule),
         data: {

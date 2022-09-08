@@ -1,0 +1,115 @@
+<div class="body-container">
+  <div class="annotations">
+    <div class="annotation">
+      <div class="legend">
+        <div>进行中</div>
+        <div>{{ getExptCountByStatus(3) }}</div>
+      </div>
+      <div class="icon">
+        <i class="status" nz-icon nzType="icons:icon-expt-ongoing"></i>
+      </div>
+    </div>
+    <div class="annotation">
+      <div class="legend">
+        <div>暂停</div>
+        <div>{{ getExptCountByStatus(2) }}</div>
+      </div>
+      <div class="icon">
+        <i class="status" nz-icon nzType="icons:icon-expt-paused"></i>
+      </div>
+    </div>
+    <div class="annotation">
+      <div class="legend">
+        <div>未开始</div>
+        <div>{{ getExptCountByStatus(1) }}</div>
+      </div>
+      <div class="icon">
+        <i class="status" nz-icon nzType="icons:icon-expt-not-started"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <div class="search-inputs">
+        <nz-input-group [nzPrefix]="prefixIconSearch">
+          <input nz-input type="text" placeholder="通过开关名字查找" [(ngModel)]="searchText" (ngModelChange)="onSearch()">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+      </div>
+
+      <button nz-button nzType="primary" (click)="onCreateClick()">
+        <i nz-icon nzType="icons:icon-add"></i>
+        添加实验
+      </button>
+    </div>
+    <div class="table-wrapper">
+      <nz-table #borderedTable
+                nzSize="small"
+                [nzLoading]="isLoading"
+                nzFrontPagination
+                nzShowPagination
+                nzShowSizeChanger
+                [nzPageSizeOptions]="[10, 20, 30]"
+                [nzData]="experimentList"
+                style="margin-top: 20px;">
+        <thead>
+        <tr>
+          <th>开关名称</th>
+          <th>Metric 名称</th>
+          <th>Metric 事件名称</th>
+          <th>Metric 事件类型</th>
+          <th>当前状态</th>
+          <th nzAlign="center">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let data of borderedTable.data">
+          <td>{{data.featureFlagName}}</td>
+          <td>{{data.metric.name}}</td>
+          <td>
+            <ng-container *ngIf="data.metric.eventType === customEventType">
+              {{data.metric.eventName}}
+            </ng-container>
+            <ng-container *ngIf="data.metric.eventType === pageViewEventType">
+              pageview
+            </ng-container>
+            <ng-container *ngIf="data.metric.eventType === clickEventType">
+              click
+            </ng-container>
+          </td>
+          <td>
+            <span class="tag">
+              <ng-container *ngIf="data.metric.eventType === customEventType">
+                自定义事件: {{ data.metric.customEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
+              </ng-container>
+              <ng-container *ngIf="data.metric.eventType === pageViewEventType">
+                Page View: 转化率
+              </ng-container>
+              <ng-container *ngIf="data.metric.eventType === clickEventType">
+                Click: 转化率
+              </ng-container>
+            </span>
+          </td>
+          <td class="expt-status-col">
+            <div *ngIf="data.status === 3" class="expt-status ongoing"></div>
+            <div *ngIf="data.status === 2" class="expt-status paused"></div>
+            <div *ngIf="data.status === 1" class="expt-status not-started"></div>
+            <div>
+              {{data.statusName}}
+            </div>
+          </td>
+          <td style="text-align: center">
+            <a (click)="goToFeatureFlag(data.featureFlagId)">查看开关</a>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>
+
+<app-experiment-drawer [visible]="detailViewVisible" (close)="onDetailViewClosed($event)" [experiment]="currentExperiment"></app-experiment-drawer>
+

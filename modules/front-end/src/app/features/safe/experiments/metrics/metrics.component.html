@@ -1,0 +1,96 @@
+<div class="body">
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <div class="search-inputs">
+        <nz-input-group [nzPrefix]="prefixIconSearch">
+          <input nz-input type="text" placeholder="按名字查找" [(ngModel)]="searchText" (ngModelChange)="onSearch()">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+        <nz-select [(ngModel)]="showType">
+          <nz-option nzValue="" nzLabel="展示所有 Metric"></nz-option>
+          <nz-option [nzValue]="customEventType" nzLabel="展示自定义事件的 Metric"></nz-option>
+        </nz-select>
+      </div>
+
+      <button nz-button nzType="primary" (click)="onCreateOrEditClick()">
+        <i nz-icon nzType="icons:icon-add"></i>
+        添加 Metric
+      </button>
+    </div>
+
+    <div class="table-wrapper">
+      <nz-table #borderedTable style="margin-top: 20px;"
+                nzFrontPagination
+                nzShowPagination
+                nzShowSizeChanger
+                [nzPageSizeOptions]="[10, 20, 30]"
+                nzSize="small"
+                [nzLoading]="isLoading"
+                [nzData]="metricList">
+        <thead>
+        <tr>
+          <th nzWidth="20%">Metric</th>
+          <th nzWidth="20%">事件类型</th>
+          <th nzWidth="20%">事件名称</th>
+          <th nzWidth="20%">维护人</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr  *ngFor="let data of borderedTable.data">
+          <td>{{data.name}}</td>
+          <td>
+            <span class="tag">
+              <ng-container *ngIf="data.eventType === customEventType">
+                自定义事件: {{ data.customEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
+              </ng-container>
+              <ng-container *ngIf="data.eventType === pageViewEventType">
+                Page View: 转化率
+              </ng-container>
+              <ng-container *ngIf="data.eventType === clickEventType">
+                Click: 转化率
+              </ng-container>
+            </span>
+          </td>
+          <td>
+            <ng-container *ngIf="data.eventType === customEventType">
+              {{data.eventName}}
+            </ng-container>
+            <ng-container *ngIf="data.eventType === pageViewEventType">
+              pageview
+            </ng-container>
+            <ng-container *ngIf="data.eventType === clickEventType">
+              click
+            </ng-container>
+          </td>
+          <td>{{ data.maintainerName }}</td>
+          <td>
+            <a style="color: #23AD7F" (click)="onCreateOrEditClick(data)">编辑</a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <a
+              style="color: #717D8A"
+              nz-popconfirm="确定删除吗?"
+              nzPopconfirmPlacement="bottomRight"
+              [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+              (nzOnConfirm)="onDeleteClick(data, errorMsgsTpl)" [nzIcon]="iconTplDelete">
+              删除
+            </a>
+            <ng-template #iconTplDelete>
+              <i nz-icon nzType="question-circle" nzTheme="fill"></i>
+            </ng-template>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>
+<ng-template #errorMsgsTpl>
+  <i nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f"></i><span>{{errorMsgTitle}}</span>
+  <ul style="list-style-type:none;padding:0;margin:5px 0">
+    <li style="text-align: center;" *ngFor="let msg of errorMsgs">{{msg}}</li>
+  </ul>
+</ng-template>
+<app-metric-drawer [visible]="detailViewVisible" (close)="onDetailViewClosed($event)" [metric]="currentMetric"></app-metric-drawer>

@@ -1,0 +1,40 @@
+@import "variables";
+
+nz-alert {
+  margin-bottom: 24px;
+}
+
+.container {
+  padding: 24px;
+  background: @grey5-color;
+  border-radius: 20px;
+
+  .description {
+    font-size: 15px;
+    line-height: 150%;
+  }
+
+  .data-sync-list {
+    nz-card {
+      border-radius: 10px;
+      margin-top: 12px;
+
+      &:first-child {
+        margin-top: 24px;
+      }
+    }
+  }
+
+  .actions {
+    text-align: end;
+    margin-top: 40px;
+
+    .download-btn {
+      margin-right: 24px;
+    }
+
+    .upload-btn {
+      background: @purple50-color;
+    }
+  }
+}

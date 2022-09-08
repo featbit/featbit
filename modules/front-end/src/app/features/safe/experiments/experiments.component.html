@@ -1,0 +1,20 @@
+<div class="experiments-layout">
+    <nz-tabset nzLinkRouter>
+      <nz-tab>
+        <a *nzTabLink nz-tab-link [routerLink]="['.']">
+          概览
+        </a>
+        <ng-template nz-tab>
+          <experiments-overview></experiments-overview>
+        </ng-template>
+      </nz-tab>
+      <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./metrics']">
+        Metrics
+      </a>
+      <ng-template nz-tab>
+        <experiments-metrics></experiments-metrics>
+      </ng-template>
+    </nz-tab>
+    </nz-tabset>
+</div>

@@ -47,6 +47,11 @@ export class SafeComponent implements OnInit, OnDestroy {
         path: '/switch-manage'
       },
       {
+        title: '开关存档',
+        icon: 'icons:icon-switch-archive',
+        path: '/switch-archive'
+      },
+      {
         title: '用户管理',
         icon: 'icons:icon-switch-user',
         path: '/switch-user'
@@ -57,15 +62,22 @@ export class SafeComponent implements OnInit, OnDestroy {
         path: '/segments'
       },
       {
+        title: '数据实验',
+        icon: 'icons:icon-expt',
+        path: '/experiments'
+      },
+      {
+        title: '数据同步',
+        icon: 'icons:icon-data-sync',
+        path: '/data-sync'
+      },
+      {
         line: true
       },
       {
         title: '组织机构',
         icon: 'icons:icon-org',
         path: '/account-settings'
-      },
-      {
-        line: true
       },
       {
         title: '权限管理',
