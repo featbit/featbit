@@ -26,13 +26,13 @@ Under construction...
 Under construction...
 
 ### Self-hosted methods
-- [v] DIY
-- [v] Docker
-- [x] K8s
-- [x] IaC to AWS
-- [x] IaC to Azure
-- [x] IaC to Aliyun
-- [x] IaC to other cloud services
+- [x] DIY
+- [x] Docker
+- [ ] K8s
+- [ ] IaC to AWS
+- [ ] IaC to Azure
+- [ ] IaC to Aliyun
+- [ ] IaC to other cloud services
 
 ## Roadmap
 
