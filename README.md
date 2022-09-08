@@ -25,6 +25,19 @@ Under construction...
 
 Under construction...
 
+### Data Export
+- [x] Export data to airbyte
+- [ ] Export feature usage data to segment.com
+
+### APM Integration
+- [ ] Grafana
+
+### Analytics Integration
+- [ ] Import data from segment.com for experimentation
+- [ ] Import data from airbyte for experimentation
+- [ ] Export experimentation data source
+- [ ] Export experimentation result
+
 ### Self-hosted methods
 - [x] DIY
 - [x] Docker
