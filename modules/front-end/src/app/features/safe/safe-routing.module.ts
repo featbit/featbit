@@ -46,7 +46,7 @@ const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: '/account-settings',
+        redirectTo: '/switch-manage',
         pathMatch: 'full'
       }
     ]
