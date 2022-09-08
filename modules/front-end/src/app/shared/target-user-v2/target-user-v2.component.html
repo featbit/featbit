@@ -1,0 +1,76 @@
+<section class="body">
+    <div class="top-title">
+        <div class="prefix">{{type}}</div>
+        <div class="suffix">
+            <span>{{selectedUserDetailList.length}} 个用户</span>
+            <!-- <i nz-icon nzType="more" nzTheme="outline"></i> -->
+        </div>
+    </div>
+    <div class="selected-target-users" nz-row *ngIf="selectedUserDetailList.length">
+      <div nz-col class="target-user" *ngFor="let user of selectedUserDetailList">
+        <div nz-tooltip="点击编辑" class="inner-box" (click)="openEditModal(user)">
+          {{user.name}}
+        </div>
+        <button nz-button nzType="default" [nzSize]="'large'" (click)="removeUser(user)"><i nz-icon nzType="close"></i></button>
+      </div>
+    </div>
+    <nz-select
+      [nzSize]="'large'"
+      nzPlaceHolder="请选择目标用户"
+      nzShowSearch
+      nzServerSearch
+      [compareWith]="compareWith"
+      [(ngModel)]="selectModel"
+      (ngModelChange)="onSelectChange()"
+      (nzOnSearch)="onSearch($event)"
+      [nzOptionHeightPx]="isLoading ? 32 : 54">
+      <ng-container *ngFor="let item of userList">
+        <nz-option
+          *ngIf="!isLoading"
+          nzCustomContent
+          [nzValue]="item"
+          [nzLabel]="item.name"
+          [nzHide]="isSelected(item)">
+          <div class="user-selection-item">
+            <div class="title">{{ item.isNew ? '新建用户 "' + item.name + '"' : item.name }}</div>
+            <div class="digest">{{getUserDigest(item)}}</div>
+          </div>
+        </nz-option>
+      </ng-container>
+      <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>
+        <i nz-icon nzType="loading" class="loading-icon"></i> 数据加载中...
+      </nz-option>
+    </nz-select>
+</section>
+
+<nz-modal [(nzVisible)]="editModalVisible"
+          [nzTitle]="modalTitle"
+          [nzCentered]="true"
+          [nzContent]="editModalContent"
+          [nzFooter]="editModalFooter"
+          (nzOnCancel)="closeEditModal()">
+  <ng-template #modalTitle>编辑用户信息</ng-template>
+  <ng-template #editModalContent>
+    <div class="info-item">
+      <div class="label">KeyId</div>
+      <input nz-input placeholder="KeyId..." [disabled]="true" [(ngModel)]="currentEditingUser.keyId"/>
+    </div>
+    <div class="info-item">
+      <div class="label">name</div>
+      <input nz-input placeholder="name..." [(ngModel)]="currentEditingUser.name"/>
+    </div>
+    <div class="info-item">
+      <div class="label">email</div>
+      <input nz-input placeholder="email..." [(ngModel)]="currentEditingUser.email"/>
+    </div>
+    <div class="info-item">
+      <div class="label">country</div>
+      <input nz-input placeholder="country..." [(ngModel)]="currentEditingUser.country"/>
+    </div>
+  </ng-template>
+
+  <ng-template #editModalFooter>
+    <button nz-button nzType="default" (click)="closeEditModal()">取消</button>
+    <button nz-button nzType="primary" [nzLoading]="saving" (click)="save()">保存</button>
+  </ng-template>
+</nz-modal>

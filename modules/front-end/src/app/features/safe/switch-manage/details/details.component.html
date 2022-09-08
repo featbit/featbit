@@ -1,0 +1,40 @@
+<div class="body-container">
+  <div class="flag-container">
+    <flag-setting></flag-setting>
+  </div>
+  <nz-tabset nzLinkRouter class="tabs-container segment-flag">
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./targeting']" queryParamsHandling="preserve">
+        目标条件
+      </a>
+      <ng-template nz-tab>
+        <switch-targeting></switch-targeting>
+      </ng-template>
+    </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./triggers']">
+        触发器
+      </a>
+      <ng-template nz-tab>
+        <switch-triggers></switch-triggers>
+      </ng-template>
+    </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./experimentations']">
+        数据实验
+      </a>
+      <ng-template nz-tab>
+        <switch-experimentations></switch-experimentations>
+      </ng-template>
+    </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./reporting']">
+        统计报表
+      </a>
+      <ng-template nz-tab>
+        <switch-reporting></switch-reporting>
+      </ng-template>
+    </nz-tab>
+  </nz-tabset>
+</div>
+

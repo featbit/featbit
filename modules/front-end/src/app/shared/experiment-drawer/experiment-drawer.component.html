@@ -1,0 +1,90 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right" nzTitle="实验信息"
+  [nzWidth]="500"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <form nz-form [formGroup]="experimentForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label>选择开关</nz-form-label>
+        <nz-form-control nzErrorTip="开关！">
+          <nz-input-group>
+            <nz-select
+              nzPlaceHolder="选择开关"
+              nzShowSearch
+              nzServerSearch
+              [compareWith]="compareWith"
+              formControlName="featureFlag"
+              (nzOnSearch)="onSearchFeatureFlag($event)"
+              (ngModelChange)="onFeatureFlagChange($event)"
+              [nzCustomTemplate]="ffTemplate"
+            >
+              <ng-container *ngFor="let o of featureFlagList">
+                <nz-option *ngIf="!isFeatureFlagsLoading" nzCustomContent [nzValue]="o" [nzLabel]="o.ff.name">
+                  <span>{{o.ff.name}}</span>
+                  <nz-tag *ngIf="o.ff.status === 'Enabled'" class="status on">ON</nz-tag>
+                  <nz-tag *ngIf="o.ff.status !== 'Enabled'" class="status off">OFF</nz-tag>
+                </nz-option>
+              </ng-container>
+              <nz-option *ngIf="isFeatureFlagsLoading" nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i>
+                数据加载中...
+              </nz-option>
+            </nz-select>
+            <ng-template #ffTemplate let-selected>
+              {{selected.nzValue.ff.name}}
+              <nz-tag *ngIf="selected.nzValue.ff.status === 'Enabled'" class="status on">ON</nz-tag>
+              <nz-tag *ngIf="selected.nzValue.ff.status !== 'Enabled'" class="status off">OFF</nz-tag>
+            </ng-template>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>选择 Metric</nz-form-label>
+        <nz-form-control nzErrorTip="Metric!">
+          <nz-input-group>
+            <nz-select
+              nzPlaceHolder="选择 Metric"
+              nzShowSearch
+              nzServerSearch
+              formControlName="metricId"
+              (nzOnSearch)="onSearchMetrics($event)"
+            >
+              <ng-container *ngFor="let o of metricList">
+                <nz-option *ngIf="!isMetricsLoading" [nzValue]="o.id" [nzLabel]="o.name">
+                </nz-option>
+              </ng-container>
+              <nz-option *ngIf="isMetricsLoading" nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i>
+                数据加载中...
+              </nz-option>
+            </nz-select>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>选择基准特性</nz-form-label>
+        <nz-form-control nzErrorTip="基准特性！">
+          <nz-input-group>
+            <div class="">
+              <nz-select nzPlaceHolder="选择基准特性" formControlName="baselineVariation">
+                <nz-option
+                  *ngFor="let o of currentVariations"
+                  [nzValue]="o.localId"
+                  [nzLabel]="o.variationValue">
+                </nz-option>
+              </nz-select>
+            </div>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
+    </form>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
+

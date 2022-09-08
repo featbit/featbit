@@ -42,6 +42,21 @@ export class SafeComponent implements OnInit, OnDestroy {
 
     this.menus = [
       {
+        title: '开关管理',
+        icon: 'icons:icon-switch',
+        path: '/switch-manage'
+      },
+      {
+        title: '用户管理',
+        icon: 'icons:icon-switch-user',
+        path: '/switch-user'
+      },
+      {
+        title: '用户组',
+        icon: 'icons:icon-segment',
+        path: '/segments'
+      },
+      {
         line: true
       },
       {

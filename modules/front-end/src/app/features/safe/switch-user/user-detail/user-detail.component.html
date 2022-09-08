@@ -1,0 +1,32 @@
+<div class="body-container">
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <div class="search-inputs">
+        <nz-input-group style="width: 300px" [nzPrefix]="prefixIconSearch">
+          <input  nz-input type="text" placeholder="按属性名称或属性值筛选" [(ngModel)]="searchValue" (ngModelChange)="onSearch()">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <nz-table #basicTable [nzData]="searchResult"  nzSize="small" nzFrontPagination>
+        <thead>
+        <tr>
+          <th>属性名称</th>
+          <th>属性值</th>
+          <th>属性备注</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let prop of basicTable.data">
+          <td>{{ prop.name }}</td>
+          <td>{{ prop.value }}</td>
+          <td>{{ getPropRemark(prop.name) }} </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</div>

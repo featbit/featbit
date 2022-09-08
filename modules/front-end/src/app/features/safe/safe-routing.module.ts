@@ -9,6 +9,27 @@ const routes: Routes = [
     component: SafeComponent,
     children: [
       {
+        path: 'switch-manage',
+        loadChildren: () => import("./switch-manage/switch-manage.module").then(m => m.SwitchManageModule),
+        data: {
+          breadcrumb: '开关管理'
+        },
+      },
+      {
+        path: 'switch-user',
+        loadChildren: () => import("./switch-user/switch-user.module").then(m => m.SwitchUserModule),
+        data: {
+          breadcrumb: '开关用户管理'
+        },
+      },
+      {
+        path: 'segments',
+        loadChildren: () => import("./segments/segments.module").then(m => m.SegmentsModule),
+        data: {
+          breadcrumb: '用户组'
+        },
+      },
+      {
         path: 'account-settings',
         loadChildren: () => import("./account-settings/account-settings.module").then(m => m.AccountSettingsModule),
         data: {

@@ -45,6 +45,20 @@ import {NzStepsModule} from "ng-zorro-antd/steps";
 import {NzPopoverModule} from "ng-zorro-antd/popover";
 import {NzImageModule} from "ng-zorro-antd/image";
 import {HeaderComponent} from "@shared/header/header.component";
+import {PropsDrawerComponent} from "@shared/props-drawer/props-drawer.component";
+import {UploadDrawerComponent} from "@shared/upload-drawer/upload-drawer.component";
+import {MetricDrawerComponent} from "@shared/metric-drawer/metric-drawer.component";
+import {ExperimentDrawerComponent} from "@shared/experiment-drawer/experiment-drawer.component";
+import {G2LineChartComponent} from "@shared/g2-chart/g2-line-chart/g2-line-chart.component";
+import {ExptRulesDrawerComponent} from "@shared/expt-rules-drawer/expt-rules-drawer.component";
+import {
+  UserSegmentsFlagsDrawerComponent
+} from "@shared/user-segments-flags-drawer/user-segments-flags-drawer.component";
+import {TargetUserV2Component} from "@shared/target-user-v2/target-user-v2.component";
+import {FindRuleComponent} from "@shared/find-rule/find-rule.component";
+import {ServeMultistatesComponent} from "@shared/find-rule/serve-multistates/serve-multistates.component";
+import {NzCardModule} from "ng-zorro-antd/card";
+import {RuleComponent} from "@shared/find-rule/rule/rule.component";
 
 @NgModule({
   declarations: [
@@ -58,7 +72,18 @@ import {HeaderComponent} from "@shared/header/header.component";
     PermissionCheckComponent,
     ProjectDrawerComponent,
     MenuComponent,
-    HeaderComponent
+    HeaderComponent,
+    PropsDrawerComponent,
+    UploadDrawerComponent,
+    MetricDrawerComponent,
+    ExperimentDrawerComponent,
+    G2LineChartComponent,
+    ExptRulesDrawerComponent,
+    UserSegmentsFlagsDrawerComponent,
+    TargetUserV2Component,
+    FindRuleComponent,
+    ServeMultistatesComponent,
+    RuleComponent
   ],
   imports: [
     CommonModule,
@@ -96,7 +121,8 @@ import {HeaderComponent} from "@shared/header/header.component";
     NzLayoutModule,
     NzImageModule,
     NzPopoverModule,
-    NzCodeEditorModule
+    NzCodeEditorModule,
+    NzCardModule
   ],
   exports:[
     LocaleSwitcherComponent,
@@ -109,7 +135,17 @@ import {HeaderComponent} from "@shared/header/header.component";
     PermissionCheckComponent,
     ProjectDrawerComponent,
     MenuComponent,
-    HeaderComponent
+    HeaderComponent,
+    PropsDrawerComponent,
+    UploadDrawerComponent,
+    MetricDrawerComponent,
+    ExperimentDrawerComponent,
+    G2LineChartComponent,
+    ExptRulesDrawerComponent,
+    UserSegmentsFlagsDrawerComponent,
+    TargetUserV2Component,
+    FindRuleComponent,
+    ServeMultistatesComponent
   ]
 })
 export class SharedModule { }

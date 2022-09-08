@@ -1,0 +1,83 @@
+<section class="body-container">
+  <div class="table-content-area">
+    <div class="table-search-area" style="height: auto;">
+      <div *ngIf="compareAndCopySubscriptionFlag==='基础版'" nz-row
+        style="width:100%;max-width:860px;margin-left:auto;margin-right:auto;">
+        <div nz-col nzSpan="12">
+          <nz-result nzStatus="403" nzTitle=" " nzSubTitle=" ">
+
+          </nz-result>
+        </div>
+        <div nz-col nzSpan="12">
+          <div class="compare-and-copy-panel-right-basic">
+            <h3 style="margin-bottom: 26px;">
+              用户您好，
+            </h3>
+            <p>
+              您可以通过此模块对比不同环境下 feature flags 的差别，并选择 feature flags （已经对应的用户分组）从一个环境复制到另外一个环境。
+            </p>
+            <p>
+              很遗憾，对比与复制功能目前只针对团队版和企业版用户开放，可以通过官网 https://featureflag.co 的《预约咨询》升级您的订阅计划。
+            </p>
+            <p>
+              感谢您的支持。我们将努力为您服务！
+            </p>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="compareAndCopySubscriptionFlag==='团队版'" nz-row
+        style="width:100%;max-width:800px;margin-left:auto;margin-right:auto;">
+        <div nz-col nzSpan="12">
+          <div class="compare-and-copy-panel">
+            <img src="assets/svgs/working-on-it.svg">
+          </div>
+        </div>
+        <div nz-col nzSpan="12">
+          <div class="compare-and-copy-panel-right">
+            <h3 style="margin-bottom: 26px;">
+              团队版用户您好，
+            </h3>
+            <p>
+              您可以通过此模块对比不同环境下 feature flags 的差别，并选择 feature flags （已经对应的用户分组）从一个环境复制到另外一个环境。
+            </p>
+            <p>
+              我们正在致力于这个模块的实现，若您希望我们加快速度，可以及时与我们的客户经理或客服联系。
+            </p>
+            <p>
+              感谢您的支持。我们将努力为您服务！
+            </p>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="compareAndCopySubscriptionFlag==='企业版'" nz-row
+        style="width:100%;max-width:800px;margin-left:auto;margin-right:auto;">
+        <div nz-col nzSpan="12">
+          <div class="compare-and-copy-panel">
+            <img src="assets/svgs/working-on-it.svg">
+          </div>
+        </div>
+        <div nz-col nzSpan="12">
+          <div class="compare-and-copy-panel-right">
+            <h3 style="margin-bottom: 26px;">
+              企业版用户您好，
+            </h3>
+            <p>
+              您可以通过此模块对比不同环境下 feature flags 的差别，并选择 feature flags （已经对应的用户分组）从一个环境复制到另外一个环境。
+            </p>
+            <p>
+              我们正在致力于这个模块的实现，若您希望我们加快速度，可以及时与我们的客户经理或客服联系。
+            </p>
+            <p>
+              感谢您的支持。我们将努力为您服务！
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="table-wrapper">
+
+    </div>
+  </div>
+</section>

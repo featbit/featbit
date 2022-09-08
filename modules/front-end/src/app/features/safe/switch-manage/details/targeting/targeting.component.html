@@ -1,0 +1,177 @@
+<section class="body-container">
+  <div class="detail-body">
+    <div class="banner">
+      <div class="placeholder"></div>
+      <div class="action-btns">
+        <button nz-button nzType="primary" (click)="onSetExptRulesClick()">
+          <i nz-icon nzType="filter" nzTheme="outline"></i>
+          A/B 测试分流设置
+        </button>
+        <button nz-button nzType="primary" class="save-btn" (click)="onSaveConditionsOld()">
+          <i nz-icon nzType="icons:icon-save"></i>
+          保存设置
+        </button>
+        <button class="more-action" nzType="primary" nz-dropdown [nzDropdownMenu]="menu">
+          <i nz-icon nzType="icons:icon-menu"></i>
+        </button>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu style="margin-top: 8px;min-width: 100px;">
+            <li *ngIf="approvalRequestEnabled" (click)="onRequestApproval()" nz-menu-item
+                style="text-align: center;display: block;">
+              请求审阅
+            </li>
+            <li nz-menu-item (click)="onFlagScheduler()"
+                style="text-align: center;display: block;">
+              定时发布
+            </li>
+          </ul>
+        </nz-dropdown-menu>
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
+        <div class="rule-banner">
+          <div class="title">默认规则</div>
+          <i nz-tooltip="如果开关被开启则返回以下结果" nz-icon nzType="icons:icon-info-outline"></i>
+        </div>
+        <div class="find-rule">
+          <app-serve-multistates [variationOptions]="variationOptions"
+            [rulePercentageRollouts]="featureDetail?.getFFDefaultRulePercentageRollouts()"
+            (onPercentageChange)="onDefaultRulePercentageRolloutsChange($event)">
+          </app-serve-multistates>
+        </div>
+      </div>
+      <div class="standard-div target-users" *ngIf="!isLoading; else loadingTem;">
+        <div class="rule-banner">
+          <div class="title-wraper">
+            <div class="title">目标用户</div>
+            <i *ngIf="targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive"
+              nzType="icons:icon-arrow-down"></i>
+            <i *ngIf="!targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive"
+              nzType="icons:icon-arrow-right"></i>
+          </div>
+          <i nz-tooltip="满足规则后将覆盖原有的默认规则" nz-icon nzType="icons:icon-info-outline"></i>
+        </div>
+        <div *ngIf="targetIndividualsActive" style="margin-left: -12px;margin-top: 16px">
+          <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
+            <target-user-v2 [type]="variationOption.variationValue" [tipIdx]="i" [userList]="userList"
+              [selectedUserDetailList]="targetIndividuals[variationOption.localId]" (search)="onSearchUser($event)"
+              (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)">
+            </target-user-v2>
+          </div>
+        </div>
+      </div>
+      <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
+        <div class="rule-banner">
+          <div class="title">自定义规则</div>
+          <i nz-tooltip="满足规则后将覆盖原有的默认规则" nz-icon nzType="icons:icon-info-outline"></i>
+          <i nz-icon (click)="onAddRule()" nzType="icons:icon-add-outline"></i>
+        </div>
+        <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
+          <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index; trackBy: trackRuleById;">
+            <div class="drop-box rule" cdkDrag>
+              <find-rule [data]="condition" [userProps]="userProps" (deleteRule)="onDeleteRule(key)"
+                (ruleConfigChange)="onRuleConfigChange($event, key)" (updateRuleName)="condition.ruleName = $event"
+                [variationOptions]="variationOptions"
+                (onPercentageChangeMultistates)="onPercentageChangeMultistates($event, key)">
+              </find-rule>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #loadingTem>
+    <div class="block" style="margin: auto;text-align: center">
+      <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+    </div>
+  </ng-template>
+</section>
+
+<nz-modal [nzWidth]='800' nzClassName="target-approval" [(nzVisible)]="requestApprovalModalVisible"
+  [nzTitle]="isApprovalRequestModal ? '请求审阅' : '保存改动'" [nzClosable]="false"
+  (nzOnCancel)="requestApprovalModalVisible=false">
+  <ng-container *nzModalContent>
+    <div nz-row [nzGutter]="0" class="">
+      <section class="context">
+        <div><span>{{pendingChanges.featureFlag.name}}</span><span> ({{pendingChanges.featureFlag.keyName}}) </span>
+        </div>
+        <div><span>环境 : </span><span>{{pendingChanges.projectEnv.envName}}</span></div>
+      </section>
+      <section class="warning-message">
+        <div class="warning">
+          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+          <div class="warning-content">以下改动将可能会影响到统计数据</div>
+        </div>
+      </section>
+      <section class="pending-changes">
+        <h3 class="pending-changes-title">改动</h3>
+        <div class="change-instructions">
+
+          <!-- <p class="instruction-count">
+            <span>{{numChanges}}</span> 个待提交改动
+          </p>
+          <div [innerHtml]="pChanges | safeHtml"></div> -->
+
+          <p class="instruction-count">
+            <span>{{pendingChanges.data.instructions.length}}</span> 个待提交改动
+          </p>
+          <ul class="instruction-list">
+            <li class="instruction-category" *ngFor="let item of pendingChanges.categorizedInstructions">
+              <ng-container *ngIf="item.changes.length > 0">
+                <h3>{{item.category}}</h3>
+                <ul class="instructions">
+                  <li class="instruction" *ngFor="let change of item.changes">
+                    <span [innerHtml]="change | safeHtml"></span>
+                  </li>
+                </ul>
+              </ng-container>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="approval-request">
+        <div class="approval-request-title">
+          <div>请求审阅</div>
+          <div (click)='isApprovalRequestModal=!isApprovalRequestModal'><i *ngIf="isApprovalRequestModal" nz-icon
+              nzType="minus" nzTheme="outline" style="cursor: pointer;"></i><i *ngIf="!isApprovalRequestModal" nz-icon
+              nzType="plus" nzTheme="outline" style="cursor: pointer;"></i></div>
+        </div>
+        <div *ngIf="isApprovalRequestModal">
+          <div>描述<span style="color:red">*</span></div>
+          <input nz-input placeholder="请对改动做简要描述" class="ffc-input" [(ngModel)]="pendingChanges.comment" />
+          <div style="margin-top:5px">审核人<span style="color:red">*</span></div>
+          <nz-select nzMode="multiple" nzPlaceHolder="选择审核人" nzAllowClear nzShowSearch nzServerSearch
+            [(ngModel)]="pendingChanges.selectedReviewers" (nzOnSearch)="pendingChanges.onSearchReviewers($event)">
+            <ng-container *ngFor="let o of pendingChanges.reviewerList">
+              <nz-option *ngIf="!pendingChanges.isReviewersLoading" [nzValue]="o" [nzLabel]="o.userName || o.email">
+              </nz-option>
+            </ng-container>
+            <nz-option *ngIf="pendingChanges.isReviewersLoading" nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              数据加载中...
+            </nz-option>
+          </nz-select>
+        </div>
+      </section>
+      <section *ngIf="!isApprovalRequestModal" class="save">
+        <div class="save-title">评论</div>
+        <textarea class="ffc-input" rows="4" nz-input [(ngModel)]="pendingChanges.comment"></textarea>
+      </section>
+    </div>
+  </ng-container>
+  <div *nzModalFooter>
+    <span style="display:inline-box;color:red;margin-right:10px"
+      *ngIf="!pendingChanges.hasInstruction()">只有在存在改动的情况下才可<span *ngIf="!isApprovalRequestModal">保存</span><span
+        *ngIf="isApprovalRequestModal">提交审阅</span></span>
+    <button nz-button nzType="default" (click)="requestApprovalModalVisible=false">取消</button>
+    <button [disabled]="!pendingChanges.hasInstruction()" *ngIf="!isApprovalRequestModal" nz-button nzType="primary"
+      (click)="onSaveConditions()">保存改动</button>
+    <button [disabled]="!pendingChanges.canSubmit()" *ngIf="isApprovalRequestModal" nz-button nzType="primary"
+      (click)="handleOk()">提交审阅</button>
+  </div>
+</nz-modal>
+
+<app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
+  [featureFlag]="featureDetail"></app-expt-rules-drawer>

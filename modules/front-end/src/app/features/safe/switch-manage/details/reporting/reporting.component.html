@@ -1,0 +1,27 @@
+<section class="body-container">
+  <ng-container>
+    <div class="detail-body" name="detail" *ngIf="switchId">
+      <nz-button-group [nzSize]="'large'" style="width: fit-content;font-size: 13px;">
+        <div style="border-bottom: 1px solid rgba(0, 0, 0, 0.06);width: 100%">
+          <ng-container *ngFor="let timeSpan of timeSpans;">
+            <a nz-button style="font-size: 13px;padding: 0 0 2px 0;margin-right: 32px;height: auto;"
+                        [ngStyle]="{
+                          borderBottom: '1px solid ' + (selectedTimeSpanKey === timeSpans.key ? '#4CB287' : 'transparent'),
+                          color: selectedTimeSpanKey=== timeSpan.key ? '#4CB287' : '#000'
+                        }"
+                        nzType='link'
+              (click)="onTimeSpanClick(timeSpan.key)">{{timeSpan.value}}</a>
+          </ng-container>
+        </div>
+      </nz-button-group>
+      <div style="margin: 20px 0;text-align: center;">{{usage}}</div>
+      <div class="chart-container" style="width:97%">
+        <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
+          <ng-container *ngIf="!isLoading">
+            <g2-line-chart [defaultChartHeight]="600" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
+          </ng-container>
+        </nz-spin>
+      </div>
+    </div>
+  </ng-container>
+</section>

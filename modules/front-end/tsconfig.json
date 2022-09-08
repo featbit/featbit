@@ -12,10 +12,6 @@
       "@shared/*": ["./src/app/shared/*"]
     },
     "outDir": "./dist/out-tsc",
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
@@ -29,6 +25,7 @@
       "es2022",
       "dom"
     ],
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true
   },
   "angularCompilerOptions": {

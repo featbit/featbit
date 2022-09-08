@@ -1,3 +1,56 @@
+export interface IUserType {
+  id: string;
+  name: string;
+  email: string;
+  country: string;
+  keyId: string;
+  customizedProperties: [{name: string, value: string}];
+
+  isNew?: boolean; // only for front end
+}
+
+export interface IEnvUserProperty {
+  environmentId: number;
+  userProperties: IUserProp[];
+  userTags: IUserTag[];
+}
+
+export interface IUserProp {
+  id: string;
+  name: string;
+  presetValues: IUserPropertyPresetValue[];
+  usePresetValuesOnly: boolean;
+  isBuiltIn: boolean;
+  isArchived: boolean;
+  isDigestField: boolean;
+  remark: string;
+
+  // front end use
+  isNew?: boolean;
+  isSaving?: boolean;
+  isEditing?: boolean;
+  isDeleting?: boolean;
+}
+
+export interface IUserTag {
+  id: string;
+  source: string;
+  requestProperty: string;
+  userProperty: string;
+  isArchived: boolean;
+
+  // front end use
+  isSaving?: boolean;
+  isEditing?: boolean;
+  isDeleting?: boolean;
+}
+
+export interface IUserPropertyPresetValue {
+  id: string;
+  value: string;
+  description: string;
+}
+
 export interface IAuthProps {
   id: string;
   email: string;

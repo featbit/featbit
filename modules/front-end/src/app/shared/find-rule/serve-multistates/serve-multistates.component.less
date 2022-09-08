@@ -1,0 +1,104 @@
+@import "variables";
+
+section.rule-item {
+  display: flex;
+  height: max-content;
+  margin-top: 10px;
+
+  .tip {
+    font-size: 14px;
+    margin-right: 16px;
+    line-height: 36px;
+    color: @grey60-color;
+  }
+
+  .single-select {
+    nz-select{
+      width: 200px;
+    }
+  }
+
+  .rule-serve {
+    display: flex;
+    align-items: flex-start;
+
+    .select {
+      height: 36px;
+      width: 200px;
+      nz-select{
+        width: 100%;
+
+        .ant-select-selector {
+          height: 36px !important;
+        }
+      }
+    }
+
+    .percentage-body {
+      font-size: 13px;
+      height: max-content;
+      margin-left: 24px;
+
+      .percentage {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        .item {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          margin-top: 1px;
+          margin-bottom: 5px;
+
+          .percentage-number {
+            display: flex;
+            align-items: center;
+            margin-right: 24px;
+
+            .ant-input-group-wrapper {
+              border: none;
+              padding: 0;
+
+              input {
+                text-align: right;
+                height: 36px;
+                width: 55px;
+                padding-right: 0;
+                border-top-left-radius: 8px;
+                border-bottom-left-radius: 8px;
+              }
+            }
+          }
+
+          .variation {
+            display: inline-block;
+          }
+        }
+
+        .total-percentage{
+          width: 175px;
+          align-self: flex-end;
+
+          .hundred-percent{
+            text-align: right;
+          }
+        }
+      }
+    }
+  }
+}
+
+:host ::ng-deep .ant-slider {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+:host ::ng-deep .ant-slider:hover .ant-slider-rail,
+:host ::ng-deep .ant-slider-rail {
+    background: #1E90FF;
+}
+
+:host ::ng-deep .ant-slider:hover .ant-slider-track,
+:host ::ng-deep .ant-slider-track {
+    background: #7FFFD4;
+}

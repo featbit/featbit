@@ -1,0 +1,60 @@
+<section class="body">
+  <nz-collapse [nzBordered]="false" [nzGhost]="true">
+    <ng-template #collapseTitle>
+        <span style="font-size: 13px;font-weight: bold;">上游开关</span>
+        <p style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin-left: 24px">若下方上游开关不符合条件，则此开关处于关闭状态</p>
+    </ng-template>
+    <ng-template #collapseAction>
+      <div style="position: relative">
+        <button style="position: absolute;right:0" nz-button nzType="primary" (click)="onAddUpperSwitch($event)">
+          <i nz-icon nzType="plus" style="color: #fff;" nzTheme="outline"></i>
+          添加上游开关
+        </button>
+      </div>
+    </ng-template>
+
+  <nz-collapse-panel [nzHeader]="collapseTitle" [nzExtra]="collapseAction" [nzActive]="upperFeatures.length!==0" >
+  <nz-table #basicTable [nzData]="upperFeatures" [nzFrontPagination]="false" nzSize="small">
+    <thead>
+    <tr class="table-th-style">
+      <th>上游开关名称</th>
+      <th>版本</th>
+      <th nzWidth="200px" nzAlign="center">操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let item of basicTable.data;let key=index;" class="table-tr-pointer">
+      <td>
+        <div class="select">
+          <nz-select
+            nzPlaceHolder="Select feature flag"
+            nzAllowClear
+            nzShowSearch
+            nzServerSearc
+            [compareWith]="compareWithPrequisiteFeatureFlag"
+            [(ngModel)]="item.selectedFeatureFlag"
+            (ngModelChange)="onSelectChange(item, $event)"
+            (nzOnSearch)="onSearch($event)">
+            <ng-container *ngFor="let feature of featureList">
+              <nz-option *ngIf="!isLoading" nzCustomContent [nzDisabled]="selectedFeatureFlagIDs.includes(feature.id)" [nzValue]="feature" [nzLabel]="feature.name">{{feature.name}}</nz-option>
+            </ng-container>
+            <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...
+            </nz-option>
+          </nz-select>
+        </div>
+      </td>
+      <td>
+        <div class="select">
+          <nz-select [(ngModel)]="item.valueOptionsVariationValue" [compareWith]="compareWithVariationOption" (ngModelChange)="onVariationValueChange()">
+            <nz-option *ngFor="let option of item.selectedFeatureFlag?.variationOptions" [nzValue]="option" [nzLabel]="option.variationValue"></nz-option>
+          </nz-select>
+        </div>
+      </td>
+      <td style="text-align: center;"><i style="color: #9A95CC" nz-icon nzType="delete" nzTheme="outline" (click)="onDeleteSwitch(key)"></i></td>
+    </tr>
+    </tbody>
+  </nz-table>
+  </nz-collapse-panel>
+  </nz-collapse>
+</section>

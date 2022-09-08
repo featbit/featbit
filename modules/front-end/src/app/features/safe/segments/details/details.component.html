@@ -1,0 +1,15 @@
+<div class="body-container">
+  <div class="flag-container">
+    <segment-setting></segment-setting>
+  </div>
+  <nz-tabset nzLinkRouter class="tabs-container segment-flag">
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./targeting']">
+        目标条件
+      </a>
+      <ng-template nz-tab>
+        <segment-targeting></segment-targeting>
+      </ng-template>
+    </nz-tab>
+  </nz-tabset>
+</div>

@@ -1,0 +1,40 @@
+<nz-drawer
+  nzClosable="false"
+  nzTitle="文件上传"
+  [nzVisible]="visible"
+  [nzExtra]="extra"
+  nzPlacement="right"
+  [nzWidth]="500"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <nz-spin [nzSpinning]="isUploading" nzTip="上传中...">
+      <div class="upload-drawer-layout">
+        <nz-alert nzType="warning" [nzMessage]="notice">
+          <ng-template #notice>
+            <div style="font-size: 14px;">
+              <i style="font-size: 16px; color: #4F5B67; margin-right: 4px" nz-icon nzType="icons:icon-info-outline"></i>
+              在数据同步时，对于开关用户数据，仅做新增/更新操作；对于开关用户属性，仅做新增操作。
+            </div>
+          </ng-template>
+        </nz-alert>
+        <div>请选择要上传的文件（仅支持 json 文件）
+          <a class="template-link" href="/assets/upload_example.json" target="_blank">点击查看模板</a>
+        </div>
+        <nz-upload
+          [nzAccept]="['application/json']"
+          nzFileType="application/json"
+          [nzAction]="uploadUrl"
+          (nzChange)="handleChange($event)">
+          <button nz-button>
+            <i nz-icon nzType="icons:icon-upload"></i>
+            点击选择并上传文件
+          </button>
+        </nz-upload>
+      </div>
+    </nz-spin>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
+

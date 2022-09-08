@@ -1,0 +1,33 @@
+<section class="body">
+    <div class="top-title">
+        <div class="prefix">{{type}}</div>
+        <div class="suffix">
+            <span>{{selectedUserDetailList.length}} users</span>
+            <i nz-icon nzType="more" nzTheme="outline"></i>
+        </div>
+    </div>
+    <nz-select nzMode="multiple"
+               nzPlaceHolder="Select users"
+               nzAllowClear
+               nzShowSearch
+               nzServerSearch
+               [nzCustomTemplate]="multipleTemplate"
+               [compareWith]="compareWith"
+               [(ngModel)]="selectedUserDetailList"
+               (ngModelChange)="onSelectChange()"
+               (nzOnSearch)="onSearch($event)">
+            <ng-container *ngFor="let item of userList">
+              <nz-option *ngIf="!isLoading" nzCustomContent [nzValue]="item" [nzLabel]="item.name">{{item.name}}</nz-option>
+            </ng-container>
+            <ng-template #multipleTemplate let-selected>
+              <div class="ant-select-selection-item-content">
+                {{ selected.nzLabel }}
+              </div>
+            </ng-template>
+            <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...
+            </nz-option>
+    </nz-select>
+  <nz-divider style="margin-bottom: 0"></nz-divider>
+<!--  <div style="border-bottom: 1px solid #DEE5E9; padding-bottom: 20px;">-->
+</section>

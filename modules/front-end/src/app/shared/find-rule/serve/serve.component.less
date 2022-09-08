@@ -1,0 +1,81 @@
+@import "variables";
+
+section.rule-serve {
+    display: flex;
+    height: max-content;
+    padding: 10px 20px 10px 0px;
+
+    .tip {
+      font-size: 14px;
+      min-width: 36px;
+      line-height: 36px;
+      color: @grey60-color;
+    }
+
+    .select {
+        flex: 1;
+
+        .percentage-body {
+            width: 50%;
+            height: max-content;
+            padding-top: 20px;
+
+            .percentage {
+                width: 100%;
+                height: 180px;
+                display: grid;
+                grid-template-rows: repeat(4, 1fr);
+
+                .item:not(:first-of-type) {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+
+                    .percentage-number {
+                        display: flex;
+                        align-items: center;
+
+                        input {
+                            margin-right: 10px;
+                            text-align: right;
+                        }
+                    }
+                }
+
+                .item:not(:last-of-type) {
+                    border-bottom: 1px solid #00000030;
+                }
+            }
+        }
+    }
+}
+
+
+.true-tip {
+    color: #7FFFD4;
+    background: #7FFFD4;
+    transform: rotate(-45deg);
+    margin: 0px 10px 0px 2px;
+}
+
+.false-tip {
+    color: #1E90FF;
+    background: #1E90FF;
+    transform: rotate(-45deg);
+    margin: 0px 10px 0px 2px;
+}
+
+:host ::ng-deep .ant-slider {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+:host ::ng-deep .ant-slider:hover .ant-slider-rail,
+:host ::ng-deep .ant-slider-rail {
+    background: #1E90FF;
+}
+
+:host ::ng-deep .ant-slider:hover .ant-slider-track,
+:host ::ng-deep .ant-slider-track {
+    background: #7FFFD4;
+}
