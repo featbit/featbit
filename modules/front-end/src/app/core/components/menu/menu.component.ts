@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import {Component, EventEmitter, Inject, Input, LOCALE_ID, Output} from '@angular/core';
 import { IMenuItem } from './menu';
 import { getAuth } from "@utils/index";
 import { IAuthProps } from "@shared/types";
+import {CURRENT_LANGUAGE} from "@utils/localstorage-keys";
 
 @Component({
   selector: 'app-menu',
@@ -16,12 +17,28 @@ export class MenuComponent {
   @Input() menuExtended: boolean = true;
 
   auth: IAuthProps;
-  constructor() {
+  constructor(@Inject(LOCALE_ID) public activeLocale: string) {
     this.auth = getAuth();
+    const lang = localStorage.getItem(CURRENT_LANGUAGE());
+    if (lang !== 'null' && lang !== null && lang !== this.activeLocale) {
+      this.onLocaleChange(lang);
+    }
   }
 
   toggleMenuMode() {
     this.menuExtended = !this.menuExtended;
     this.toggleMenu.emit(this.menuExtended);
+  }
+
+  onLocaleChange(lang: string) {
+    this.activeLocale = lang;
+    localStorage.setItem(CURRENT_LANGUAGE(), lang);
+    const regex = /^\/en|zh\//ig;
+    if (regex.test(location.pathname)) {
+      // only reload the page on not ng serve mode
+      window.location.href = `/${lang}`;
+    } else {
+      console.log('The language switcher does not work while run with ng serve, please read the README to check how to run with docker');
+    }
   }
 }

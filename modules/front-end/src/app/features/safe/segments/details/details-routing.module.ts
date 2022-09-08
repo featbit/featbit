@@ -23,7 +23,8 @@ const routes: Routes = [
         redirectTo: '/segments',
         data: {
           breadcrumb: '用户组'
-        }
+        },
+        pathMatch: 'full'
       }
     ]
   }
