@@ -31,12 +31,12 @@ export class MenuComponent {
   }
 
   onLocaleChange(lang: string) {
-    this.activeLocale = lang;
-    localStorage.setItem(CURRENT_LANGUAGE(), lang);
-    const regex = /^\/en|zh\//ig;
+    const regex = /^\/(en|zh)\//ig;
     if (regex.test(location.pathname)) {
       // only reload the page on not ng serve mode
-      window.location.href = `/${lang}`;
+      this.activeLocale = lang;
+      localStorage.setItem(CURRENT_LANGUAGE(), lang);
+      window.location.href = location.pathname.replace(regex, `/${lang}/`);
     } else {
       console.log('The language switcher does not work while run with ng serve, please read the README to check how to run with docker');
     }
