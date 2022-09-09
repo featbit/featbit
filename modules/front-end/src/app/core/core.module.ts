@@ -62,7 +62,7 @@ import {ExptRulesDrawerComponent} from "@core/components/expt-rules-drawer/expt-
 import {
   UserSegmentsFlagsDrawerComponent
 } from "@core/components/user-segments-flags-drawer/user-segments-flags-drawer.component";
-import {TargetUserV2Component} from "@core/components/target-user-v2/target-user-v2.component";
+import {TargetUserComponent} from "@core/components/target-user/target-user.component";
 import {FindRuleComponent} from "@core/components/find-rule/find-rule.component";
 import {ServeMultistatesComponent} from "@core/components/find-rule/serve-multistates/serve-multistates.component";
 import {RuleComponent} from "@core/components/find-rule/rule/rule.component";
@@ -95,7 +95,7 @@ import {NzCardModule} from "ng-zorro-antd/card";
     G2LineChartComponent,
     ExptRulesDrawerComponent,
     UserSegmentsFlagsDrawerComponent,
-    TargetUserV2Component,
+    TargetUserComponent,
     FindRuleComponent,
     ServeMultistatesComponent,
     RuleComponent
@@ -168,7 +168,7 @@ import {NzCardModule} from "ng-zorro-antd/card";
     G2LineChartComponent,
     ExptRulesDrawerComponent,
     UserSegmentsFlagsDrawerComponent,
-    TargetUserV2Component,
+    TargetUserComponent,
     FindRuleComponent,
     ServeMultistatesComponent,
     RuleComponent

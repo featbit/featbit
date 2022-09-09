@@ -54,10 +54,10 @@
         </div>
         <div *ngIf="targetIndividualsActive" style="margin-left: -12px;margin-top: 16px">
           <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
-            <target-user-v2 [type]="variationOption.variationValue" [tipIdx]="i" [userList]="userList"
+            <target-user [type]="variationOption.variationValue" [tipIdx]="i" [userList]="userList"
               [selectedUserDetailList]="targetIndividuals[variationOption.localId]" (search)="onSearchUser($event)"
               (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)">
-            </target-user-v2>
+            </target-user>
           </div>
         </div>
       </div>

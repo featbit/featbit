@@ -27,6 +27,7 @@ import { DragDropModule } from "@angular/cdk/drag-drop";
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { SettingComponent } from './setting/setting.component';
+import {CoreModule} from "@core/core.module";
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { SettingComponent } from './setting/setting.component';
     NzSkeletonModule,
     DragDropModule,
     NzToolTipModule,
-    NzDescriptionsModule
+    NzDescriptionsModule,
+    CoreModule
   ],
   providers: [
   ]

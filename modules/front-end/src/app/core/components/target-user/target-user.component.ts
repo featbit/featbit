@@ -9,11 +9,11 @@ import { EnvUserPropService } from "@services/env-user-prop.service";
 import {USER_BUILT_IN_PROPERTIES} from "@shared/constants";
 
 @Component({
-  selector: 'target-user-v2',
-  templateUrl: './target-user-v2.component.html',
-  styleUrls: ['./target-user-v2.component.less']
+  selector: 'target-user',
+  templateUrl: './target-user.component.html',
+  styleUrls: ['./target-user.component.less']
 })
-export class TargetUserV2Component implements OnInit {
+export class TargetUserComponent implements OnInit {
 
   private inputs = new Subject<any>();
   public compareWith: (obj1: IUserType, obj2: IUserType) => boolean = (obj1: IUserType, obj2: IUserType) => {

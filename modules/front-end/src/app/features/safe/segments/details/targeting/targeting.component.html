@@ -32,24 +32,24 @@
         </div>
         <div *ngIf="targetIndividualsActive" style="margin-left: -12px;margin-top: 16px">
           <div class="content">
-            <target-user-v2
+            <target-user
               [type]="'包含用户'"
               [tipIdx]="0"
               [userList]="userList"
               [selectedUserDetailList]="segmentDetail.includedUsers"
               (search)="onSearchUser($event)"
               (onSelectedUserListChange)="onSelectedUserListChange($event, true)">
-            </target-user-v2>
+            </target-user>
           </div>
           <div class="content">
-            <target-user-v2
+            <target-user
               [type]="'不包含用户'"
               [tipIdx]="1"
               [userList]="userList"
               [selectedUserDetailList]="segmentDetail.excludedUsers"
               (search)="onSearchUser($event)"
               (onSelectedUserListChange)="onSelectedUserListChange($event, false)">
-            </target-user-v2>
+            </target-user>
           </div>
         </div>
       </div>
