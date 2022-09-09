@@ -1,3 +1,5 @@
-<nz-select class="extend" [(ngModel)]="activeLocale" (ngModelChange)="onLocaleChange()">
-  <nz-option *ngFor="let locale of locales" [nzLabel]="locale.name" [nzValue]="locale.code"></nz-option>
-</nz-select>
+<div class="locale-switcher" style="">
+  <span class="locale" [ngClass]="{'active': activeLocale === 'en'}" (click)="onLocaleChange('en')">English</span>
+  <nz-divider nzType="vertical" style="border-left: 1px solid grey;margin:0 5px;"></nz-divider>
+  <span class="locale" [ngClass]="{'active': activeLocale === 'zh'}" (click)="onLocaleChange('zh')">中文</span>
+</div>

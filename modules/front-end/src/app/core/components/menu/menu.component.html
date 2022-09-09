@@ -105,10 +105,8 @@
         <li style="height: 12px; margin: 0 20px">
           <span class="line"></span>
         </li>
-        <li class="language-switcher" style="padding-left:17px;gap:10px;display: flex">
-          <span style="cursor: pointer" [ngStyle]="{'font-weight': activeLocale === 'en' ? 800 : 500}" (click)="onLocaleChange('en')">English</span>
-          <nz-divider nzType="vertical" style="border-left: 1px solid grey;margin:0 5px;"></nz-divider>
-          <span style="cursor: pointer" [ngStyle]="{'font-weight': activeLocale === 'zh' ? 800 : 500}" (click)="onLocaleChange('zh')">中文</span>
+        <li>
+          <app-locale-switcher></app-locale-switcher>
         </li>
       </ul>
     </nz-dropdown-menu>
