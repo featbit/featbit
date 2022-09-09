@@ -26,8 +26,8 @@ The FeatBit UI provides features for managing and updating feature flags, users,
 ## Install UI with a Docker Image
 You can install and run UI with a Docker image. To run, binding the exposed port 8080 or any other available port, use:
 ```
-docker build -t featbit/ui .
-docker run -d -e API_ENDPOINT='https://api.featureflag.co' -p 8080:80 --name featbit-ui featbit/ui
+docker build --build-arg API_URL=https://api.featureflag.co -t featbit/ui .
+docker run -d -p 8080:80 --name featbit-ui featbit/ui
 ```
 
 Then go to http://localhost:8080

@@ -6,9 +6,9 @@ COPY package*.json /app/
 RUN npm install
 COPY ./ /app/
 
-ARG API_ENDPOINT
-RUN sed -i "s+API_ENDPOINT+$API_ENDPOINT+g" src/environments/environment.ts  \
-    && sed -i "s+API_ENDPOINT+$API_ENDPOINT+g" src/environments/environment.prod.ts \
+ARG API_URL
+RUN sed -i "s|__API_URL__|${API_URL}|g" src/environments/environment.ts  \
+    && sed -i "s|__API_URL__|${API_URL}|g" src/environments/environment.prod.ts \
     && npm run build:prod
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx

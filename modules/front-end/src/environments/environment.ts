@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  url: 'API_ENDPOINT'
+  url: '__API_URL__'
 };
