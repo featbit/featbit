@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  url: 'https://api.featureflag.co'
+  url: '__API_URL__'
 };
