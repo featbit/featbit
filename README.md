@@ -40,25 +40,25 @@ Under construction...
 - [ ] Debugger
 - [ ] Code References
 
-### Integrations & API
-- [ ] APM
-- [ ] Collaboration Tools
-- [ ] API controls
-- [ ] IDE Connectors
-- [ ] DevOps
-- [ ] Automation Tools
+### Experimentations
+- [ ] AB Test
 
-### Data Import & Export
-- [ ] AirByte
-- [ ] Segment.com
-- [ ] Others
+### Integrations & API
+- [ ] APM (DataDog, ELK, Grafana, etc.)
+- [ ] Collaboration Tools (Slack, Microsoft Teams, Lark/Feishu, etc.)
+- [ ] API controls
+- [ ] IDE Connectors (VsCode, IntelliJ IDEA)
+- [ ] DevOps (Azure Devops, Terraform, Gitlab, etc.)
+- [ ] Workflow Automation Tools (Zapier, Trello, )
+- [ ] Data & Analytics Integration (AirByte, segment.com, etc.)
+
 
 ### SDKs
 - [x] Javascript (React, Vue, Angular)
 - [x] Typescript (React, Vue, Angular)
 - [x] Java
 - [x] Python
-- [ ] Go 
+- [x] Go 
 - [ ] .Net
 - [ ] Typescript (Node.js)
 - [ ] Kotlin
@@ -68,10 +68,7 @@ Under construction...
 - [x] DIY
 - [x] Docker
 - [ ] K8s
-- [ ] IaC to AWS
-- [ ] IaC to Azure
-- [ ] IaC to Aliyun
-- [ ] IaC to other cloud services
+- [ ] IaC to AWS/Azure/Aliyun/etc.
 
 ## Roadmap
 
