@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 
-namespace Application.IntegrationTests.Streaming;
+namespace Application.IntegrationTests.WebSockets;
 
 public class ConnectionTests : IClassFixture<TestApp>
 {

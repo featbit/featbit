@@ -1,8 +1,8 @@
 ﻿using System.Net.WebSockets;
-using Domain.Streaming;
+using Domain.WebSockets;
 using Moq;
 
-namespace Domain.UnitTests.Streaming;
+namespace Domain.UnitTests.WebSockets;
 
 public class RequestHandlerTests
 {

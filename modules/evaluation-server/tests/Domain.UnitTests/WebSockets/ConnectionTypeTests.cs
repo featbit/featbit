@@ -1,6 +1,6 @@
-﻿using Domain.Streaming;
+﻿using Domain.WebSockets;
 
-namespace Domain.UnitTests.Streaming;
+namespace Domain.UnitTests.WebSockets;
 
 public class ConnectionTypeTests
 {

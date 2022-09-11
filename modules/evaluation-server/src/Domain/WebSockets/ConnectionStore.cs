@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Domain.Streaming;
+namespace Domain.WebSockets;
 
 public class ConnectionStore
 {

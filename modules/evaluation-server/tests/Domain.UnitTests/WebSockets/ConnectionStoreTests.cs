@@ -1,9 +1,8 @@
 using System.Net.WebSockets;
-using Domain.Streaming;
+using Domain.WebSockets;
 using Moq;
-using Version = Domain.Streaming.Version;
 
-namespace Domain.UnitTests.Streaming;
+namespace Domain.UnitTests.WebSockets;
 
 public class ConnectionStoreTests
 {
@@ -14,7 +13,7 @@ public class ConnectionStoreTests
     {
         var store = new ConnectionStore();
         var connection = 
-            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, Version.V1, 1661907157706);
+            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, ConnectionVersion.V1, 1661907157706);
         
         Assert.Null(store[connection.Id]);
         
@@ -28,7 +27,7 @@ public class ConnectionStoreTests
     {
         var store = new ConnectionStore();
         var connection = 
-            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, Version.V1, 1661907157706);
+            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, ConnectionVersion.V1, 1661907157706);
         store.Add(connection);
         
         Assert.NotNull(store[connection.Id]);

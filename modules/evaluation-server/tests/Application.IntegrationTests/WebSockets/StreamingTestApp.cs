@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Internal;
 
-namespace Application.IntegrationTests.Streaming;
+namespace Application.IntegrationTests.WebSockets;
 
 public class StreamingTestApp
 {

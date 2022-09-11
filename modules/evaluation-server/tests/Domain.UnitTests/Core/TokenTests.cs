@@ -1,6 +1,6 @@
-﻿using Domain.Streaming;
+﻿using Domain.Core;
 
-namespace Domain.UnitTests.Streaming;
+namespace Domain.UnitTests.Core;
 
 public class TokenTests
 {

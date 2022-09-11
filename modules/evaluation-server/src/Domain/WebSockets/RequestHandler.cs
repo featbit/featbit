@@ -1,7 +1,8 @@
 using System.Net.WebSockets;
+using Domain.Core;
 using Domain.Utils.ExtensionMethods;
 
-namespace Domain.Streaming;
+namespace Domain.WebSockets;
 
 public class RequestHandler
 {
@@ -20,7 +21,7 @@ public class RequestHandler
         }
 
         // version
-        if (!Version.IsSupported(version))
+        if (!ConnectionVersion.IsSupported(version))
         {
             return null;
         }

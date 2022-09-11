@@ -1,6 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
-using Domain.Streaming;
+using Domain.WebSockets;
 using Microsoft.Extensions.Internal;
 
 namespace Api.Middlewares;

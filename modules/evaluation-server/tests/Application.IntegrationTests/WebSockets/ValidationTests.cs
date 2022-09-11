@@ -1,7 +1,7 @@
 ﻿using System.Net.WebSockets;
 using System.Text;
 
-namespace Application.IntegrationTests.Streaming;
+namespace Application.IntegrationTests.WebSockets;
 
 public class ValidationTests : IClassFixture<TestApp>
 {
