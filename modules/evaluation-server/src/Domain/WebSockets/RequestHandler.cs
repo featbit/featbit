@@ -21,7 +21,7 @@ public class RequestHandler
         }
 
         // version
-        if (!Version.IsSupported(version))
+        if (!ConnectionVersion.IsSupported(version))
         {
             return null;
         }

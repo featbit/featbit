@@ -1,4 +1,4 @@
-﻿using Version = Domain.WebSockets.Version;
+﻿using Domain.WebSockets;
 
 namespace Domain.UnitTests.WebSockets;
 
@@ -11,6 +11,6 @@ public class VersionTests
     [InlineData("3", false)]
     public void Should_Check_Supported_Version(string version, bool supported)
     {
-        Assert.Equal(supported, Version.IsSupported(version));
+        Assert.Equal(supported, ConnectionVersion.IsSupported(version));
     }
 }

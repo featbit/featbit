@@ -1,6 +1,6 @@
 ﻿namespace Domain.WebSockets;
 
-public class Version
+public class ConnectionVersion
 {
     public const string V1 = "1";
         
