@@ -25,18 +25,44 @@ Under construction...
 
 Under construction...
 
-### Data Export
-- [x] Export data to airbyte
-- [ ] Export feature usage data to segment.com
+### Targeting
+- [x] Individual targets
+- [x] Targeting users by attribute
+- [x] Reusable segments
+- [ ] Flag prerequisites
+- [ ] Big Segments
+- [ ] Bulk user management
 
-### APM Integration
-- [ ] Grafana
+### Managing flags
+- [x] Clone flags
+- [ ] Compare flags
+- [ ] Copy flag settings
+- [ ] Debugger
+- [ ] Code References
 
-### Analytics Integration
-- [ ] Import data from segment.com for experimentation
-- [ ] Import data from airbyte for experimentation
-- [ ] Export experimentation data source
-- [ ] Export experimentation result
+### Integrations & API
+- [ ] APM
+- [ ] Collaboration Tools
+- [ ] API controls
+- [ ] IDE Connectors
+- [ ] DevOps
+- [ ] Automation Tools
+
+### Data Import & Export
+- [ ] AirByte
+- [ ] Segment.com
+- [ ] Others
+
+### SDKs
+- [x] Javascript (React, Vue, Angular)
+- [x] Typescript (React, Vue, Angular)
+- [x] Java
+- [x] Python
+- [ ] Go 
+- [ ] .Net
+- [ ] Typescript (Node.js)
+- [ ] Kotlin
+- [ ] Swift
 
 ### Self-hosted methods
 - [x] DIY
