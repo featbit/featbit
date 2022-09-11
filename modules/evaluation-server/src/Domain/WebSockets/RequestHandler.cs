@@ -1,7 +1,8 @@
 using System.Net.WebSockets;
+using Domain.Core;
 using Domain.Utils.ExtensionMethods;
 
-namespace Domain.Streaming;
+namespace Domain.WebSockets;
 
 public class RequestHandler
 {

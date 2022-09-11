@@ -1,6 +1,6 @@
-﻿using Version = Domain.Streaming.Version;
+﻿using Version = Domain.WebSockets.Version;
 
-namespace Domain.UnitTests.Streaming;
+namespace Domain.UnitTests.WebSockets;
 
 public class VersionTests
 {

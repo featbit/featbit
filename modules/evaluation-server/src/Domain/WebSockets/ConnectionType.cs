@@ -1,4 +1,4 @@
-﻿namespace Domain.Streaming;
+﻿namespace Domain.WebSockets;
 
 public class ConnectionType
 {
