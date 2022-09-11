@@ -51,17 +51,23 @@ Under construction...
 - [ ] Code References
 
 ### Experimentations
-- [ ] AB Test
+- [x] AB Testing
 
-### Integrations & API
-- [ ] APM (DataDog, ELK, Grafana, etc.)
-- [ ] Collaboration Tools (Slack, Microsoft Teams, Lark/Feishu, etc.)
-- [ ] API controls
-- [ ] IDE Connectors (VsCode, IntelliJ IDEA)
-- [ ] DevOps (Azure Devops, Terraform, Gitlab, etc.)
-- [ ] Workflow Automation Tools (Zapier, Trello, )
-- [ ] Data & Analytics Integration (AirByte, segment.com, etc.)
+### Workflow automation
+- [x] Flag Triggers
+- [ ] Required Approvals
+- [ ] Flag Scheduling
+- [ ] Require comments for flag changes
+- [ ] Workflows
 
+### Security & compliance
+- [x] Multi-Project
+- [x] Multi-Organization
+- [x] Teams
+- [ ] Custom roles & teams
+- [ ] Audit Log
+- [ ] Flag reviews
+- [ ] Service tokens
 
 ### SDKs
 - [x] Javascript (React, Vue, Angular)
@@ -79,6 +85,17 @@ Under construction...
 - [x] Docker
 - [ ] K8s
 - [ ] IaC to AWS/Azure/Aliyun/etc.
+
+### Integrations & API
+- [ ] APM (DataDog, ELK, Grafana, etc.)
+- [ ] Collaboration Tools (Slack, Microsoft Teams, Lark/Feishu, etc.)
+- [ ] API controls
+- [ ] IDE Connectors (VsCode, IntelliJ IDEA)
+- [ ] DevOps (Azure Devops, Terraform, Gitlab, etc.)
+- [ ] Workflow Automation Tools (Zapier, Trello, )
+- [ ] Data & Analytics Integration (AirByte, segment.com, etc.)
+
+
 
 ## Roadmap
 
