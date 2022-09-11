@@ -17,6 +17,8 @@ export class HeaderComponent implements OnInit {
 
   @Input() auth: IAuthProps;
 
+  cannotReadProjectsMsg: string;
+  cannotReadEnvsMsg: string;
   currentProjectEnv: IProjectEnv;
   currentAccount: IAccount;
 
@@ -45,6 +47,8 @@ export class HeaderComponent implements OnInit {
     this.canListProjects = this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.ListProjects);
     this.canListEnvs = this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.ListEnvs);
 
+    this.cannotReadProjectsMsg = $localize `You don't have permissions to read project list, please contact the admin to grant you the necessary permissions`;
+    this.cannotReadEnvsMsg = this.canListProjects ? $localize `You don't have permissions to read environment list, please contact the admin to grant you the necessary permissions` : $localize `You don't have permissions to read project and environment list, please contact the admin to grant you the necessary permissions`;
     this.selectCurrentProjectEnv();
     this.setAllProjects();
 

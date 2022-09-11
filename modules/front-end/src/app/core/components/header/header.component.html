@@ -38,12 +38,13 @@
   nzCentered
   nzWidth="792"
   [nzVisible]="envModalVisible"
+  [nzFooter]="modalFooter"
   (nzOnCancel)="envModelCancel()"
-  (nzOnOk)="envModalConfirm()"
-  nzTitle="切换项目环境">
+  i18n-nzTitle
+  nzTitle="Change environment">
   <ng-container *nzModalContent>
-    <message *ngIf="!canListProjects" [type]="'warning'" [content]="'您没有查看项目列表的权限， 请联系账户管理员添加相关权限'"></message>
-    <message *ngIf="!canListEnvs" [type]="'warning'" [content]=" canListProjects? '您没有查看该环境列表的权限， 请联系账户管理员添加相关权限' : '您没有查看项目环境列表的权限， 请联系账户管理员添加相关权限'"></message>
+    <message *ngIf="!canListProjects" [type]="'warning'" [content]="cannotReadProjectsMsg"></message>
+    <message *ngIf="!canListEnvs" [type]="'warning'" [content]="cannotReadEnvsMsg"></message>
     <div class="project-envs">
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
         <nz-list-item
@@ -53,7 +54,7 @@
           {{ project.name }}
         </nz-list-item>
         <ng-template #projectHeader>
-          <span class="header">项目</span>
+          <span class="header" i18n>Projects</span>
         </ng-template>
       </nz-list>
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
@@ -64,9 +65,13 @@
           {{ env.name }}
         </nz-list-item>
         <ng-template #envHeader>
-          <span class="header">环境</span>
+          <span class="header" i18n>Environments</span>
         </ng-template>
       </nz-list>
     </div>
   </ng-container>
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="envModelCancel()" i18n>Cancel</button>
+    <button nz-button nzType="primary" (click)="envModalConfirm()" i18n>Confirm</button>
+  </ng-template>
 </nz-modal>

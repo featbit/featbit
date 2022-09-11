@@ -67,6 +67,7 @@ import {FindRuleComponent} from "@core/components/find-rule/find-rule.component"
 import {ServeMultistatesComponent} from "@core/components/find-rule/serve-multistates/serve-multistates.component";
 import {RuleComponent} from "@core/components/find-rule/rule/rule.component";
 import {NzCardModule} from "ng-zorro-antd/card";
+import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-user-table/targeted-user-table.component";
 
 @NgModule({
   declarations: [
@@ -98,7 +99,8 @@ import {NzCardModule} from "ng-zorro-antd/card";
     TargetUserComponent,
     FindRuleComponent,
     ServeMultistatesComponent,
-    RuleComponent
+    RuleComponent,
+    TargetedUserTableComponent
   ],
   imports: [
     CommonModule,
@@ -171,7 +173,8 @@ import {NzCardModule} from "ng-zorro-antd/card";
     TargetUserComponent,
     FindRuleComponent,
     ServeMultistatesComponent,
-    RuleComponent
+    RuleComponent,
+    TargetedUserTableComponent
   ]
 })
 export class CoreModule { }
