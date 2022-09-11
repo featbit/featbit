@@ -38,36 +38,34 @@ export class SafeComponent implements OnInit, OnDestroy {
   }
 
   private setMenus(): void {
-    // 菜单 path 和 target 互斥，优先匹配 path
-
     this.menus = [
       {
-        title: '开关管理',
+        title: $localize `Feature flags`,
         icon: 'icons:icon-switch',
         path: '/switch-manage'
       },
       {
-        title: '开关存档',
+        title: $localize `Archived feature flags`,
         icon: 'icons:icon-switch-archive',
         path: '/switch-archive'
       },
       {
-        title: '用户管理',
+        title: $localize `Users`,
         icon: 'icons:icon-switch-user',
         path: '/switch-user'
       },
       {
-        title: '用户组',
+        title: $localize `Segments`,
         icon: 'icons:icon-segment',
         path: '/segments'
       },
       {
-        title: '数据实验',
+        title: $localize `Experiments`,
         icon: 'icons:icon-expt',
         path: '/experiments'
       },
       {
-        title: '数据同步',
+        title: $localize `Data sync`,
         icon: 'icons:icon-data-sync',
         path: '/data-sync'
       },
@@ -75,27 +73,27 @@ export class SafeComponent implements OnInit, OnDestroy {
         line: true
       },
       {
-        title: '组织机构',
+        title: $localize `Orgnization`,
         icon: 'icons:icon-org',
         path: '/account-settings'
       },
       {
-        title: '权限管理',
+        title: $localize `IAM`,
         icon: 'icons:icon-user-permission',
         path: '/iam/users',
         children: [
           {
-            title: '团队',
+            title: $localize `Team`,
             icon: '',
             path: '/iam/users'
           },
           {
-            title: '组',
+            title: $localize `Group`,
             icon: '',
             path: '/iam/groups'
           },
           {
-            title: '策略',
+            title: $localize `Policies`,
             icon: '',
             path: '/iam/policies'
           }

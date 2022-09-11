@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IJsonContent } from "@main/switch-manage/types/switch-new";
+import { IJsonContent } from "@features/safe/switch-manage/types/switch-new";
 import { EnvUserService } from "@services/env-user.service";
-import { IUserType } from "@share/types";
+import { IUserType } from "@shared/types";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
