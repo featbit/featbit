@@ -2,6 +2,14 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="zh" datatype="plaintext" original="ng2.template">
     <body>
+      <trans-unit id="4086606389696938932" datatype="html">
+        <source>Account</source>
+        <target>账户管理</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="4915431133669985304" datatype="html">
         <source>Profile</source>
         <target>个人信息</target>
@@ -92,6 +100,92 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
           <context context-type="linenumber">69</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4861799705379205202" datatype="html">
+        <source>Feature flags</source>
+        <target>开关管理</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">43,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1424277003442840441" datatype="html">
+        <source>Archived feature flags</source>
+        <target>开关存档</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">48,47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4555457172864212828" datatype="html">
+        <source>Users</source>
+        <target>用户管理</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">53,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="107972732106533073" datatype="html">
+        <source>Segments</source>
+        <target>用户组</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">58,57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3789062473839221073" datatype="html">
+        <source>Experiments</source>
+        <target>数据实验</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">63,62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5968609357451001124" datatype="html">
+        <source>Data sync</source>
+        <target>数据同步</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">68,67</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2917317116654684312" datatype="html">
+        <source>Orgnization</source>
+        <target>组织机构</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">76,75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5696624068353988178" datatype="html">
+        <source>IAM</source>
+        <target>权限管理</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">81,80</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3724068243287682962" datatype="html">
+        <source>团队</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">86,85</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="8623978917681527907" datatype="html">
+        <source>组</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">91,90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4551581141684694255" datatype="html">
+        <source>Policies</source>
+        <source>策略</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">96,95</context>
         </context-group>
       </trans-unit>
     </body>
