@@ -1,11 +1,11 @@
-import {NgModule} from '@angular/core';
+import {LOCALE_ID, NgModule} from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { TokenInterceptor } from "@interceptors/token.interceptor";
-import { NZ_I18N, zh_CN } from "ng-zorro-antd/i18n";
+import { NZ_I18N, zh_CN, en_US } from "ng-zorro-antd/i18n";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { IconsProviderModule } from "./icons-provider.module";
 import { NzLayoutModule } from "ng-zorro-antd/layout";
@@ -32,7 +32,20 @@ import {AccountProjectEnvResolver} from "@services/account-preject-env-resolver.
   ],
   providers: [
     AccountProjectEnvResolver,
-    { provide: NZ_I18N, useValue: zh_CN },
+    {
+      provide: NZ_I18N,
+      useFactory: (localId: string) => {
+        switch (localId) {
+          case 'en':
+            return en_US;
+          case 'zh':
+            return zh_CN;
+          default:
+            return en_US;
+        }
+      },
+      deps: [LOCALE_ID]
+    },
     { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
   ],
   bootstrap: [AppComponent]
