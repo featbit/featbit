@@ -3,7 +3,7 @@
 
 ◆ [:mega: Introduction & Our Philosophy](#introduction--our-philosophy)
 
-◆ [:birthday: Get Started](#get-started)
+◆ [:birthday: Getting Started](#getting-started)
 
 ◆ [:syringe: Documentation & Support](#documentation--support)
 
@@ -31,7 +31,7 @@ Progressive Experimentation, which provides the ability to get online and offlin
 **Empower All teams to Deliver, Control and Experiment with the software**. To enable continuous innovation in product development and to maintain a healthy iteration heartbeat. 
 
 
-## Get Started
+## Getting Started
 
 Under construction...
 
