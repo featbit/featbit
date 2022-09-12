@@ -1,14 +1,21 @@
 
 ## Table of Contents
 
-- [:pencil: Introduction & Our Philosophy](#introduction--our-philosophy)
-- [:mega: Get Started](#get-started)
-- [:briefcase: Documentation & Support](#documentation--support)
-- [:rocket: Features](#features)
-- [:mag_right: Roadmap](#roadmap)
-- [:movie_camera: Architecture](#architecture)
-- [:movie_camera: Contribute to FeatBit](#contribute-to-featbit)
-- [:movie_camera: License](#license)
+◆ [:mega: Introduction & Our Philosophy](#introduction--our-philosophy)
+
+◆ [:birthday: Get Started](#get-started)
+
+◆ [:syringe: Documentation & Support](#documentation--support)
+
+◆ [:rocket: Features](#features)
+
+◆ [:mag_right: Roadmap](#roadmap)
+
+◆ [:house_with_garden: Architecture](#architecture)
+
+◆ [:two_hearts: Contribute to FeatBit](#contribute-to-featbit)
+
+◆ [:trophy: License](#license)
 
 ## Introduction & Our Philosophy
 
