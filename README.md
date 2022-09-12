@@ -1,11 +1,18 @@
 
+## Table of Contents
 
+- [:pencil: Introduction & Our Philosophy](#introduction--our-philosophy)
+- [:mega: Get Started](#get-started)
+- [:briefcase: Documentation & Support](#documentation--support)
+- [:rocket: Features](#features)
+- [:mag_right: Roadmap](#roadmap)
+- [:movie_camera: Architecture](#architecture)
+- [:movie_camera: Contribute to FeatBit](#contribute-to-featbit)
+- [:movie_camera: License](#license)
 
 ## Introduction & Our Philosophy
 
-
 [![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)  [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
-
 
 **FeatBit** is a scalable, high-performance **Feature Management** and **Progressive Experimentation** platform.
 
