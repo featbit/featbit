@@ -2,6 +2,7 @@ using System.Net.WebSockets;
 using Domain.WebSockets;
 using Microsoft.Extensions.Logging;
 using Moq;
+using TestBase;
 
 namespace Domain.UnitTests.WebSockets;
 

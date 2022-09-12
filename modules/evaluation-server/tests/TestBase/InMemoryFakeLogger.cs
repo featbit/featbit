@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
-namespace Domain.UnitTests;
+namespace TestBase;
 
 // taken from
 // https://pnguyen.io/posts/verify-ilogger-call-in-dotnet-core/#using-handwritten-mock
