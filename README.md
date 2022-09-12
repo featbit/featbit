@@ -49,70 +49,10 @@ We're here to help - and to make FeatBit even better!
 
 Under construction...
 
-### Targeting
-- [x] Individual targets
-- [x] Targeting users by attribute
-- [x] Reusable segments
-- [ ] Flag prerequisites
-- [ ] Big Segments
-- [ ] Bulk user management
-
-### Managing flags
-- [x] Clone flags
-- [ ] Compare flags
-- [ ] Copy flag settings
-- [ ] Debugger
-- [ ] Code References
-
-### Experimentations
-- [x] AB Testing
-
-### Workflow automation
-- [x] Flag Triggers
-- [ ] Required Approvals
-- [ ] Flag Scheduling
-- [ ] Require comments for flag changes
-- [ ] Workflows
-
-### Security & compliance
-- [x] Multi-Project
-- [x] Multi-Organization
-- [x] Teams
-- [ ] Custom roles & teams
-- [ ] Audit Log
-- [ ] Flag reviews
-- [ ] Service tokens
-
-### SDKs
-- [x] Javascript (React, Vue, Angular)
-- [x] Typescript (React, Vue, Angular)
-- [x] Java
-- [x] Python
-- [x] Go 
-- [ ] .Net
-- [ ] Typescript (Node.js)
-- [ ] Kotlin
-- [ ] Swift
-
-### Self-hosted methods
-- [x] DIY
-- [x] Docker
-- [ ] K8s
-- [ ] IaC to AWS/Azure/Aliyun/etc.
-
-### Integrations & API
-- [ ] Data & Analytics Integration (AirByte, segment.com, etc.)
-- [ ] API controls
-- [ ] APM (DataDog, ELK, Grafana, etc.)
-- [ ] Collaboration Tools (Slack, Microsoft Teams, Lark/Feishu, etc.)
-- [ ] IDE Connectors (VsCode, IntelliJ IDEA)
-- [ ] DevOps (Azure Devops, Terraform, Gitlab, etc.)
-- [ ] Workflow Automation Tools (Zapier, Trello, )
-
 
 ## Roadmap
 
-Under construction...
+Read [FeatBit Roadmap](https://featbit.gitbook.io/welcome-to-gitbook/roadmap/roadmap-voter) document page to get more information.
 
 ## Architecture
 
