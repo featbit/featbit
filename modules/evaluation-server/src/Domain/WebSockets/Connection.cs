@@ -31,6 +31,14 @@ public class Connection
         CloseAt = 0;
     }
 
+    public async Task SendAsync(
+        ReadOnlyMemory<byte> bytes, 
+        WebSocketMessageType type, 
+        CancellationToken cancellationToken)
+    {
+        await WebSocket.SendAsync(bytes, type, true, cancellationToken);
+    }
+
     public async Task CloseAsync(WebSocketCloseStatus status, string description, long closeAt)
     {
         CloseAt = closeAt;

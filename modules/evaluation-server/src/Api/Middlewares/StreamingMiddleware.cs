@@ -1,5 +1,4 @@
 ﻿using System.Net.WebSockets;
-using System.Text;
 using Domain.WebSockets;
 using Microsoft.Extensions.Internal;
 
@@ -9,16 +8,21 @@ public class StreamingMiddleware
 {
     private const string StreamingPath = "/streaming";
     private readonly ISystemClock _systemClock;
+    private readonly IHostApplicationLifetime _applicationLifetime;
 
     private readonly RequestDelegate _next;
 
-    public StreamingMiddleware(ISystemClock systemClock, RequestDelegate next)
+    public StreamingMiddleware(
+        ISystemClock systemClock,
+        IHostApplicationLifetime applicationLifetime,
+        RequestDelegate next)
     {
         _systemClock = systemClock;
+        _applicationLifetime = applicationLifetime;
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, ConnectionHandler handler)
     {
         var request = context.Request;
 
@@ -35,7 +39,7 @@ public class StreamingMiddleware
         // try accept request
         var query = request.Query;
         var currentTimestamp = _systemClock.UtcNow.ToUnixTimeMilliseconds();
-        
+
         var connection =
             RequestHandler.TryAcceptRequest(ws, query["type"], query["version"], query["token"], currentTimestamp);
         if (connection == null)
@@ -48,15 +52,9 @@ public class StreamingMiddleware
             return;
         }
 
-        // send message to client
-        await ws.SendAsync(
-            Encoding.UTF8.GetBytes("hello, client!"),
-            WebSocketMessageType.Text,
-            true,
-            CancellationToken.None
-        );
-
-        // close websocket after 1s
-        await Task.Delay(1000);
+        // use ApplicationStopping token (note that this won't work if handler's cancellation token has been set before)
+        handler.CancellationToken = _applicationLifetime.ApplicationStopping;
+        
+        await handler.ProcessAsync(connection);
     }
 }

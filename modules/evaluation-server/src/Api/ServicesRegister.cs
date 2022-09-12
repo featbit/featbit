@@ -1,3 +1,4 @@
+using Domain.WebSockets;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Internal;
 
@@ -16,8 +17,10 @@ public static class ServicesRegister
         // health check dependencies
         builder.Services.AddHealthChecks();
 
-        // add SystemClock
+        // add app services
         builder.Services.TryAddSingleton<ISystemClock, SystemClock>();
+        builder.Services.AddSingleton<ConnectionManager>();
+        builder.Services.AddScoped<ConnectionHandler>();
 
         return builder;
     }
