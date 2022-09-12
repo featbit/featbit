@@ -29,7 +29,8 @@ const routes: Routes = [
         redirectTo: '/iam',
         data: {
           breadcrumb: '权限管理'
-        }
+        },
+        pathMatch: 'full'
       }
     ]
   }
