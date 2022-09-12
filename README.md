@@ -5,11 +5,7 @@
 
 ◆ [:birthday: Getting Started](#getting-started)
 
-◆ [:syringe: Documentation & Support](#documentation--support)
-
-◆ [:rocket: Features](#features)
-
-◆ [:mag_right: Roadmap](#roadmap)
+◆ [:rocket: Support & Community](#support--community)
 
 ◆ [:house_with_garden: Architecture](#architecture)
 
@@ -35,24 +31,15 @@ Progressive Experimentation, which provides the ability to get online and offlin
 
 Under construction...
 
-## Documentation & Support
+## Support & Community
 
-**Documentation** is under construction.
+◆ [**Documentation**](https://featbit.gitbook.io/) - More detailed documentation on how to use and develop with AFFiNE.
 
-Join our [**Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature.
+◆  [**FeatBit Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature. Or email us at hu-beau@outlook.com if Slack isn't your thing. We're here to help - and to make FeatBit even better!
 
-Or email us at hu-beau@outlook.com if Slack isn't your thing.
+◆ [FeatBit Roadmap](https://featbit.gitbook.io/welcome-to-gitbook/roadmap/roadmap-voter) - Looking for a feature? It might already be planned for release - you can check here.
 
-We're here to help - and to make FeatBit even better!
-
-## Features
-
-Under construction...
-
-
-## Roadmap
-
-Read [FeatBit Roadmap](https://featbit.gitbook.io/welcome-to-gitbook/roadmap/roadmap-voter) document page to get more information.
+◆ [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
 
 ## Architecture
 
