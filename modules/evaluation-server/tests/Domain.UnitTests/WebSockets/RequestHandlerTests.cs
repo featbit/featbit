@@ -54,7 +54,7 @@ public class Requests : TheoryData<WebSocket, string, string, string, long, bool
         Add(openedWebsocket, sdkType, version, token, tokenCreatedAt, true);
         
         // invalid websocket
-        Add(null, sdkType, version, token, tokenCreatedAt, false);
+        Add(null!, sdkType, version, token, tokenCreatedAt, false);
         Add(abortedWebsocket, sdkType, version, token, tokenCreatedAt, false);
 
         // invalid client
