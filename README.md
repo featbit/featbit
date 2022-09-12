@@ -101,14 +101,13 @@ Under construction...
 - [ ] IaC to AWS/Azure/Aliyun/etc.
 
 ### Integrations & API
+- [ ] Data & Analytics Integration (AirByte, segment.com, etc.)
+- [ ] API controls
 - [ ] APM (DataDog, ELK, Grafana, etc.)
 - [ ] Collaboration Tools (Slack, Microsoft Teams, Lark/Feishu, etc.)
-- [ ] API controls
 - [ ] IDE Connectors (VsCode, IntelliJ IDEA)
 - [ ] DevOps (Azure Devops, Terraform, Gitlab, etc.)
 - [ ] Workflow Automation Tools (Zapier, Trello, )
-- [ ] Data & Analytics Integration (AirByte, segment.com, etc.)
-
 
 
 ## Roadmap
