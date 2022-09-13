@@ -16,7 +16,7 @@ Progressive Experimentation, which provides the ability to get online and offlin
 
 ◆ Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome.
 
-◆ Less self-developed but more reusable open source software. 
+◆ Less self-developed, more reusable open source software. 
 
 
 ## Getting Started
