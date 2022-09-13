@@ -15,34 +15,38 @@ Feature Management use cases: `Trunk-based development`, `Testing in production`
 Progressive Experimentation, which provides the ability to get online and offline feedback as quickly as possible. Use cases: `Beta testing and qualitative feedback`, `Experimentation and A/B testing`.
 
 ### Our Philosophy
-◆ **Empower All teams to Deliver, Control and Experiment their software**. 
+◆  **Empower All teams to Deliver, Control and Experiment their software**. 
 
-◆ Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome.
+◆  Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome.
 
-◆ Less self-developed, more reusable open source software. 
+◆  Less self-developed, more reusable open source software. 
 
 
 ## Getting Started
 
 Under construction...
 
-## Documentation & Support Community
+## Documentation & Communities
 
-◆ View the [**FeatBit Docs**](https://featbit.gitbook.io/) for info on how to use and develop with FeatBit.
+◆  View the [**FeatBit Docs**](https://featbit.gitbook.io/) for info on how to use and develop with FeatBit.
 
-◆ Join [**FeatBit Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature. We're here to make FeatBit even better!
+◆  Join [**FeatBit Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature. 
+
+◆  Other Communities: [FeatBit@Reddit](http://reddit.com/r/featbit) | [FeatureManagement@Reddit](https://www.reddit.com/r/featuremanagement).  
 
 ## Useful links
 
-◆ [FeatBit Roadmap](https://featbit.gitbook.io/docs/roadmap/roadmap-voter) - Looking for a feature? It might already be planned for release. You can also vote for the feature you care mostly.
+◆  [FeatBit Roadmap](https://featbit.gitbook.io/docs/roadmap/roadmap-voter) - Looking for a feature? It might already be planned for release. You can also vote for the feature you care mostly.
 
-◆ [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
+◆  [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
+
+◆  [Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience for everyone in our community.
 
 ## Tech Stack
 
-◆ [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) - Architecture of FeatBit.
+◆  [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) - Architecture of FeatBit.
 
-◆ [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - More detailed reports on FeatBit's benchmark test. 
+◆  [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - More detailed reports on FeatBit's benchmark test. 
 
 
 ## Contribute to FeatBit
