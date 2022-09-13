@@ -1,10 +1,4 @@
-# 
-
-```
-
-```
-
-Hobby Deployment
+# Hobby Deployment
 
 We provide a **hobby deployment** option just for those that want to try out self-hosted Featbit without having to spend a lot on infrastructure costs.
 
