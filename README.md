@@ -1,21 +1,9 @@
-
-## Table of Contents
-
-◆ [:mega: Introduction & Our Philosophy](#introduction--our-philosophy)
-
-◆ [:birthday: Getting Started](#getting-started)
-
-◆ [:rocket: Support & Community](#support--community)
-
-◆ [:house_with_garden: Architecture](#architecture)
-
-◆ [:two_hearts: Contribute to FeatBit](#contribute-to-featbit)
-
-◆ [:trophy: License](#license)
-
 ## Introduction & Our Philosophy
 
 [![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)  [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
+
+![](https://img.shields.io/badge/language-.net%206-%2357278D)
+
 
 **FeatBit** is a scalable, high-performance **Feature Management** and **Progressive Experimentation** platform.
 
@@ -24,7 +12,9 @@ Feature Management, which progressively delegating the control of a feature to t
 Progressive Experimentation, which provides the ability to get online and offline feedback as quickly as possible.Use cases: `Beta testing and qualitative feedback`, `Experimentation and A/B testing`.
 
 ### Our Philosophy
-**Empower All teams to Deliver, Control and Experiment with the software**. To enable continuous innovation in product development and to maintain a healthy iteration heartbeat. 
+◆ **Empower All teams to Deliver, Control and Experiment their software**. 
+
+◆ Less self-developed but more reusable open source software. 
 
 
 ## Getting Started
@@ -33,11 +23,13 @@ Under construction...
 
 ## Support & Community
 
-◆ [**Documentation**](https://featbit.gitbook.io/) - More detailed documentation on how to use and develop with AFFiNE.
+◆ View the [**FeatBit Docs**](https://featbit.gitbook.io/) for info on how to use and develop with FeatBit.
 
-◆  [**FeatBit Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature. Or email us at hu-beau@outlook.com if Slack isn't your thing. We're here to help - and to make FeatBit even better!
+◆ Join [**FeatBit Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature. We're here to make FeatBit even better!
 
-◆ [FeatBit Roadmap](https://featbit.gitbook.io/welcome-to-gitbook/roadmap/roadmap-voter) - Looking for a feature? It might already be planned for release - you can check here.
+## Useful links
+
+◆ [FeatBit Roadmap](https://featbit.gitbook.io/welcome-to-gitbook/roadmap/roadmap-voter) - Looking for a feature? It might already be planned for release. You can also vote for the feature you care mostly.
 
 ◆ [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
 
