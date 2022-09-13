@@ -31,9 +31,15 @@ Under construction...
 
 ## Useful links
 
-◆ [FeatBit Roadmap](https://featbit.gitbook.io/welcome-to-gitbook/roadmap/roadmap-voter) - Looking for a feature? It might already be planned for release. You can also vote for the feature you care mostly.
+◆ [FeatBit Roadmap](https://featbit.gitbook.io/docs/roadmap/roadmap-voter) - Looking for a feature? It might already be planned for release. You can also vote for the feature you care mostly.
 
 ◆ [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
+
+## Tech Stack
+
+◆ [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) - Architecture of FeatBit.
+
+◆ [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - More detailed reports on FeatBit's benchmark test. 
 
 ## Architecture
 
