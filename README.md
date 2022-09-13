@@ -41,13 +41,6 @@ Under construction...
 
 ◆ [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - More detailed reports on FeatBit's benchmark test. 
 
-## Architecture
-
-Under construction...
-
-## Benchmark
-
-Under construction...
 
 ## Contribute to FeatBit
 
