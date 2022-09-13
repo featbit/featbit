@@ -1,6 +1,5 @@
 using System.Net.WebSockets;
 using Domain.Core;
-using Domain.Utils.ExtensionMethods;
 
 namespace Domain.WebSockets;
 
@@ -34,7 +33,7 @@ public class RequestHandler
         }
 
         // token timestamp
-        var current = currentTimestamp ?? DateTime.UtcNow.ToUnixTimeMilliseconds();
+        var current = currentTimestamp ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         if (Math.Abs(current - token.Timestamp) > 30 * 1000)
         {
             return null;
