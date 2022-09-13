@@ -26,7 +26,7 @@ Progressive Experimentation, which provides the ability to get online and offlin
 
 Under construction...
 
-## Support & Community
+## Documentation & Support Community
 
 ◆ View the [**FeatBit Docs**](https://featbit.gitbook.io/) for info on how to use and develop with FeatBit.
 
