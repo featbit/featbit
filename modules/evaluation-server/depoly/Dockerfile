@@ -3,16 +3,18 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /source
 
-# copy csproj and restore as distinct layers
+# copy sln
 COPY *.sln .
-COPY src/Domain/*.csproj src/Domain/
-COPY src/Application/*.csproj src/Application/
-COPY src/Infrastructure/*.csproj src/Infrastructure/
-COPY src/Api/*.csproj src/Api/
-COPY tests/Domain.UnitTests/*.csproj tests/Domain.UnitTests/
-COPY tests/Application.UnitTests/*.csproj tests/Application.UnitTests/
-COPY tests/Application.IntegrationTests/*.csproj tests/Application.IntegrationTests/
-RUN dotnet restore
+
+# copy src project files
+COPY src/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
+
+# copy test project files
+COPY tests/*/*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
+
+RUN dotnet restore 
 
 # copy all source, build and test
 COPY . .

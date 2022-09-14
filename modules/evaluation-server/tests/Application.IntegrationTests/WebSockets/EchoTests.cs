@@ -5,11 +5,11 @@ namespace Application.IntegrationTests.WebSockets;
 
 public class EchoTests : IClassFixture<TestApp>
 {
-    private readonly StreamingTestApp _app;
+    private readonly TestApp _app;
 
     public EchoTests(TestApp app)
     {
-        _app = new StreamingTestApp(app);
+        _app = app;
     }
 
     [Theory]
@@ -17,7 +17,7 @@ public class EchoTests : IClassFixture<TestApp>
     [InlineData(false)]
     public async Task DoEchoAsync(bool multiFragment)
     {
-        using var ws = await _app.ConnectWithTokenAsync();
+        var ws = await _app.ConnectWithTokenAsync();
         
         const string message = "hello, world!";
         var payload = Encoding.UTF8.GetBytes(message);

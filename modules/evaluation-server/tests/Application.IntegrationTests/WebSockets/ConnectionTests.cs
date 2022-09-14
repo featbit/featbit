@@ -4,24 +4,24 @@ namespace Application.IntegrationTests.WebSockets;
 
 public class ConnectionTests : IClassFixture<TestApp>
 {
-    private readonly StreamingTestApp _app;
+    private readonly TestApp _app;
 
     public ConnectionTests(TestApp app)
     {
-        _app = new StreamingTestApp(app);
+        _app = app;
     }
-    
+
     [Fact]
     public async Task ConnectToServer()
     {
-        using var ws = await _app.ConnectAsync();
+        var ws = await _app.ConnectAsync();
         Assert.Equal(WebSocketState.Open, ws.State);
     }
-    
+
     [Fact]
     public async Task CloseInvalidConnection()
     {
-        using var ws = await _app.ConnectAsync();
+        var ws = await _app.ConnectAsync();
 
         var res = await ws.ReceiveAsync(new byte[100], CancellationToken.None);
 

@@ -1,7 +1,37 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using System.Net.WebSockets;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Internal;
 
 namespace Application.IntegrationTests;
 
 public class TestApp : WebApplicationFactory<Program>
 {
+    public async Task<WebSocket> ConnectAsync(long timestamp = 0, string queryString = "")
+    {
+        var streamingApp = WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureTestServices(collection =>
+            {
+                collection.Replace(ServiceDescriptor.Singleton<ISystemClock>(new TestClock(timestamp)));
+            });
+        });
+
+        var client = streamingApp.Server.CreateWebSocketClient();
+        var streamingUri = new Uri($"http://localhost/streaming{queryString}");
+
+        var ws = await client.ConnectAsync(streamingUri, CancellationToken.None);
+        return ws;
+    }
+    
+    public async Task<WebSocket> ConnectWithTokenAsync()
+    {
+        const string token =
+            "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ";
+        const long tokenCreatedAt = 1661907157706;
+
+        return await ConnectAsync(tokenCreatedAt, $"?type=client&version=2&token={token}");
+    }
 }
