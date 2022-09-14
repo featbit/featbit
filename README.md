@@ -2,8 +2,8 @@
 
 [![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
 [![](https://img.shields.io/badge/language-.Net%206-%236E359E)](https://dotnet.microsoft.com/)
-[![](https://img.shields.io/badge/language-python-%23FFDD53)](https://www.python.org/)
-[![](https://img.shields.io/badge/language-typescript-%23007ACC)](https://www.typescriptlang.org/) 
+[![](https://img.shields.io/badge/language-python%203.9-FFDD53)](https://www.python.org/)
+[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)
 [![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)  
 
 
