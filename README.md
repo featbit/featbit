@@ -24,7 +24,7 @@ Progressive Experimentation, which provides the ability to get online and offlin
 
 ## Getting Started
 
-Under construction...
+The project is under code refactoring. An update will be coming soon.
 
 ## Documentation & Communities
 
