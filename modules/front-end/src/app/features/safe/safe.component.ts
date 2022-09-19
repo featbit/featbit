@@ -65,7 +65,7 @@ export class SafeComponent implements OnInit, OnDestroy {
         path: '/experiments'
       },
       {
-        title: $localize `Data sync`,
+        title: $localize `:@@data-sync:Data sync`,
         icon: 'icons:icon-data-sync',
         path: '/data-sync'
       },

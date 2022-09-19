@@ -8,53 +8,35 @@ import { SettingComponent } from './setting/setting.component';
 const routes: Routes = [
   {
     path: '',
-    data: {
-      breadcrumb: '开关管理'
-    },
     component: DetailsComponent,
     children: [
       {
         path: 'targeting',
         component: TargetingComponent,
         data: {
-          breadcrumb: '目标条件'
-        }
-      }, {
-        path: 'zero-code-settings',
-        component: SettingComponent,
-        data: {
-          breadcrumb: '零代码'
+          breadcrumb: $localize `:@@ff.routing.details.targeting: Targeting`
         }
       }, {
         path: 'reporting',
         component: SettingComponent,
         data: {
-          breadcrumb: '统计报表'
+          breadcrumb: $localize `:@@ff.routing.details.reporting: Reporting`
         }
       }, {
         path: 'triggers',
         component: SettingComponent,
         data: {
-          breadcrumb: '触发器'
+          breadcrumb: $localize `:@@ff.routing.details.triggers: Triggers`
         }
       }, {
         path: 'experimentations',
         component: SettingComponent,
         data: {
-          breadcrumb: '数据实验'
-        }
-      }, {
-        path: 'flag-code-reference',
-        component: SettingComponent,
-        data: {
-          breadcrumb: '代码引用管理'
+          breadcrumb: $localize `:@@ff.routing.details.experimentation: Experimentation`
         }
       }, {
         path: '',
         redirectTo: '/switch-manage',
-        data: {
-          breadcrumb: '开关管理'
-        },
         pathMatch: 'full'
       }
     ]

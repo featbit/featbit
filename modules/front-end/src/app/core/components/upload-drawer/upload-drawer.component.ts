@@ -38,12 +38,12 @@ export class UploadDrawerComponent implements OnInit {
     }
 
     if (status === 'error') {
-      this.message.error(`${info.file.name} 数据上传失败`);
+      this.message.error(`${info.file.name} ` + $localize `:@@upload-failed:upload failed`);
       return;
     }
 
     if (status === 'done') {
-      this.message.success(`${info.file.name} 数据上传成功`);
+      this.message.success(`${info.file.name} ` + $localize `:@@upload-success:upload success`);
       this.onClose();
     }
   }

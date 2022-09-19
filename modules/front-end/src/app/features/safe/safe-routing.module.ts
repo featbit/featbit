@@ -10,51 +10,48 @@ const routes: Routes = [
     children: [
       {
         path: 'switch-manage',
-        loadChildren: () => import("./switch-manage/switch-manage.module").then(m => m.SwitchManageModule),
-        data: {
-          breadcrumb: '开关管理'
-        },
+        loadChildren: () => import("./switch-manage/switch-manage.module").then(m => m.SwitchManageModule)
       },
       {
         path: 'switch-user',
         loadChildren: () => import("./switch-user/switch-user.module").then(m => m.SwitchUserModule),
         data: {
-          breadcrumb: '开关用户管理'
+          breadcrumb: $localize `:@@users:Users`
         },
       },
       {
         path: 'segments',
         loadChildren: () => import("./segments/segments.module").then(m => m.SegmentsModule),
         data: {
-          breadcrumb: '用户组'
+          breadcrumb: $localize `:@@segments:Segments`
         },
       },
       {
         path: 'switch-archive',
         loadChildren: () => import("./switch-archive/switch-archive.module").then(m => m.SwitchArchiveModule),
         data: {
-          breadcrumb: '开关存档'
+          breadcrumb: $localize `:@@ff-archive:Archived feature flags`
         },
       },
       {
         path: 'experiments',
         loadChildren: () => import("./experiments/experiments.module").then(m => m.ExperimentsModule),
         data: {
-          breadcrumb: '数据实验'
+          breadcrumb: $localize `:@@experiments:Experiments`
         },
       },
       {
         path: 'data-sync',
         loadChildren: () => import("./data-sync/data-sync.module").then(m => m.DataSyncModule),
         data: {
-          breadcrumb: '数据同步'
+          breadcrumb: $localize `:@@data-sync:Data sync`
         },
       },
       {
         path: 'account-settings',
         loadChildren: () => import("./account-settings/account-settings.module").then(m => m.AccountSettingsModule),
         data: {
-          breadcrumb: '组织机构'
+          breadcrumb: $localize `:@@organization:Organization`
         },
       },
       {
@@ -62,7 +59,7 @@ const routes: Routes = [
         canActivate: [IAMGuard],
         loadChildren: () => import("./iam/iam.module").then(m => m.IAMModule),
         data: {
-          breadcrumb: '角色&权限'
+          breadcrumb: $localize `:@@iam:IAM`
         },
       },
       {

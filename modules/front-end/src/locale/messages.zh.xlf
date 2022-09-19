@@ -90,6 +90,74 @@
           <context context-type="linenumber">103</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="upload" datatype="html">
+        <source>Upload</source>
+        <target>上传</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="Uploading" datatype="html">
+        <source>Uploading...</source>
+        <target>上传中...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="data-upload-warning" datatype="html">
+        <source>To users, only insert/update operations will be applied; To user properties, only insert operation would be applied.</source>
+        <target>在数据同步时，对于开关用户数据，仅做新增/更新操作；对于开关用户属性，仅做新增操作。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-file-to-upload" datatype="html">
+        <source>Please select the file to upload (only support JSON file).</source>
+        <target>请选择要上传的文件（仅支持 JSON 文件）</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="check-template" datatype="html">
+        <source>Click to see the template</source>
+        <target>点击查看模板</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="click-to-upload" datatype="html">
+        <source>Click to upload the file</source>
+        <target>点击选择文件上传</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="upload-failed" datatype="html">
+        <source>upload failed</source>
+        <target>上传失败</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="upload-success" datatype="html">
+        <source>upload success</source>
+        <target>上传成功</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="2454050363478003966" datatype="html">
         <source>Login</source>
         <target>登录</target>
@@ -166,6 +234,246 @@
           <context context-type="linenumber">69</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="sync-locally" datatype="html">
+        <source>Download/Upload</source>
+        <target>下载/上传</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/data-sync.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="sync-with-server-side-sdk" datatype="html">
+        <source>Sync with server side SDK</source>
+        <target>与 server side SDK 同步</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/data-sync.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="downloading" datatype="html">
+        <source>Downloading...</source>
+        <target>下载中...</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="only-applies-to-current-project-env" datatype="html">
+        <source>Only applies to current project and environment (</source>
+        <target>数据同步只针对当前选择的项目和环境（ </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="including" datatype="html">
+        <source>), including</source>
+        <target> ）, 包括以下数据</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users" datatype="html">
+        <source>Users</source>
+        <target>用户</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="including-all-users-of-current-env" datatype="html">
+        <source>Including all users of current environment.</source>
+        <target>包含当前环境下的所有用户</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="user-properties" datatype="html">
+        <source>User properties</source>
+        <target>用户属性</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="including-all-customized-user-properties" datatype="html">
+        <source>Including all customized user properties.</source>
+        <target>包含当前环境下的所有自定义用户属性。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="download-data" datatype="html">
+        <source>Download data</source>
+        <target>下载数据</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="download" datatype="html">
+        <source>Download</source>
+        <target>下载</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="upload-data" datatype="html">
+        <source>Upload data</source>
+        <target>上传数据</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5947241266456580665" datatype="html">
+        <source>Download failed</source>
+        <target>下载失败</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="filter-by-type" datatype="html">
+        <source>Filter by type</source>
+        <target>根据类别筛选</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="synchronize-to-all-addresses-in-table" datatype="html">
+        <source>Synchronize to all addresses in the table</source>
+        <target>对表格中的所有数据进行同步</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="synchronize" datatype="html">
+        <source>Synchronize</source>
+        <target>同步</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="add" datatype="html">
+        <source>Add</source>
+        <target>添加</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="name" datatype="html">
+        <source>Name</source>
+        <target>名称</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="type" datatype="html">
+        <source>Type</source>
+        <target>类别</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="url-header" datatype="html">
+        <source>URL</source>
+        <target>URL</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="action" datatype="html">
+        <source>Action</source>
+        <target>操作</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="comment" datatype="html">
+        <source>Comment</source>
+        <target>备注</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-type" datatype="html">
+        <source>Select type</source>
+        <target>选择类别</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="url" datatype="html">
+        <source>URL</source>
+        <target>URL</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="confirm-delete" datatype="html">
+        <source>Are you sure to delete?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1693176129016347712" datatype="html">
+        <source>Succeeded at</source>
+        <target>成功，同步时间</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="failure-sync-time" datatype="html">
+        <source>Failed at</source>
+        <target>失败，同步时间</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4648900870671159218" datatype="html">
+        <source>Success</source>
+        <target>操作成功</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.ts</context>
+          <context context-type="linenumber">181</context>
+        </context-group>
+      </trans-unit>
+
       <trans-unit id="4861799705379205202" datatype="html">
         <source>Feature flags</source>
         <target>开关管理</target>

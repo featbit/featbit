@@ -79,6 +79,66 @@
           <context context-type="linenumber">103</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="upload" datatype="html">
+        <source>Upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="Uploading" datatype="html">
+        <source>Uploading...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="data-upload-warning" datatype="html">
+        <source>To users, only insert/update operations will be applied; To user properties, only insert operation would be applied.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-file-to-upload" datatype="html">
+        <source>Please select the file to upload (only support JSON file).</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="check-template" datatype="html">
+        <source>Click to see the template</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-upload-file" datatype="html">
+        <source>Select and upload file</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="upload-failed" datatype="html">
+        <source>upload failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="upload-success" datatype="html">
+        <source>upload success</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="2454050363478003966" datatype="html">
         <source>Login</source>
         <context-group purpose="location">
@@ -146,81 +206,216 @@
           <context context-type="linenumber">69</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="4861799705379205202" datatype="html">
-        <source>Feature flags</source>
+      <trans-unit id="sync-locally" datatype="html">
+        <source>Download/Upload</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">43,42</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/data-sync.component.html</context>
+          <context context-type="linenumber">3</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="1424277003442840441" datatype="html">
-        <source>Archived feature flags</source>
+      <trans-unit id="sync-with-server-side-sdk" datatype="html">
+        <source>Sync with server side SDK</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">48,47</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/data-sync.component.html</context>
+          <context context-type="linenumber">6</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="4555457172864212828" datatype="html">
+      <trans-unit id="downloading" datatype="html">
+        <source>Downloading...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="only-applies-to-current-project-env" datatype="html">
+        <source>Only applies to current project and environment (</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="including" datatype="html">
+        <source>), including</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users" datatype="html">
         <source>Users</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">53,52</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">7</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="107972732106533073" datatype="html">
-        <source>Segments</source>
+      <trans-unit id="including-all-users-of-current-env" datatype="html">
+        <source>Including all users of current environment.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">58,57</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">8</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3789062473839221073" datatype="html">
-        <source>Experiments</source>
+      <trans-unit id="user-properties" datatype="html">
+        <source>User properties</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">63,62</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">10</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="5968609357451001124" datatype="html">
-        <source>Data sync</source>
+      <trans-unit id="including-all-customized-user-properties" datatype="html">
+        <source>Including all user properties of current environment.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">68,67</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">11</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2917317116654684312" datatype="html">
-        <source>Orgnization</source>
+      <trans-unit id="download-data" datatype="html">
+        <source>Download data</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">76,75</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">15</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="5696624068353988178" datatype="html">
-        <source>IAM</source>
+      <trans-unit id="download" datatype="html">
+        <source>Download</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">81,80</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3724068243287682962" datatype="html">
-        <source>Team</source>
+      <trans-unit id="upload-data" datatype="html">
+        <source>Upload data</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">86,85</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
+          <context context-type="linenumber">19</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="8623978917681527907" datatype="html">
-        <source>Group</source>
+      <trans-unit id="5947241266456580665" datatype="html">
+        <source>Download failed</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">91,90</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.ts</context>
+          <context context-type="linenumber">41</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="4551581141684694255" datatype="html">
-        <source>Policies</source>
+      <trans-unit id="filter-by-type" datatype="html">
+        <source>Filter by type</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">96,95</context>
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="synchronize-to-all-addresses-in-table" datatype="html">
+        <source>Synchronize to all addresses in the table</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="synchronize" datatype="html">
+        <source>Synchronize</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="add" datatype="html">
+        <source>Add</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="name" datatype="html">
+        <source>Name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="type" datatype="html">
+        <source>Type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="url-header" datatype="html">
+        <source>URL</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="action" datatype="html">
+        <source>Action</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="comment" datatype="html">
+        <source>Comment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-type" datatype="html">
+        <source>Select type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="url" datatype="html">
+        <source>URL</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="confirm-delete" datatype="html">
+        <source>Are you sure to delete?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="1693176129016347712" datatype="html">
+        <source>Succeeded at</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="failure-sync-time" datatype="html">
+        <source>Failed at</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="4648900870671159218" datatype="html">
+        <source>Success</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.ts</context>
+          <context context-type="linenumber">181</context>
         </context-group>
       </trans-unit>
     </body>

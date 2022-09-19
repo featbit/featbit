@@ -4,7 +4,9 @@ import { SwitchIndexComponent } from './switch-index.component';
 
 const routes: Routes = [{
   path: '',
-  data: { title: 'index' },
+  data: {
+    breadcrumb: $localize `:@@ff.routing.idx.pageTitle: Feature flags`
+  },
   component: SwitchIndexComponent
 }];
 

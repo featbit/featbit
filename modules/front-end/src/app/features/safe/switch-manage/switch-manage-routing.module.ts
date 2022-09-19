@@ -5,9 +5,6 @@ import { SwitchManageComponent } from './switch-manage.component';
 const routes: Routes = [
   {
     path: '',
-    data: {
-      breadcrumb: '开关管理'
-    },
     component: SwitchManageComponent,
     children: [
       {
@@ -17,9 +14,6 @@ const routes: Routes = [
       {
         path: ':id',
         loadChildren: () => import("./details/details.module").then(m => m.DetailsModule),
-        data: {
-          breadcrumb: '开关详情'
-        }
       },
       {
         path: '',
