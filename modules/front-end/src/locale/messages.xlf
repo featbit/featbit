@@ -47,11 +47,19 @@
         </context-group>
         <note priority="1" from="description">@org.org.orgNamePlaceholder</note>
       </trans-unit>
-      <trans-unit id="org.org.save" datatype="html">
+      <trans-unit id="common.save" datatype="html">
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/account-drawer/account-drawer.component.html</context>
           <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.org.orgCreated" datatype="html">
@@ -109,17 +117,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">35</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.save" datatype="html">
-        <source>Save</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">37</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.editEnv" datatype="html">
@@ -419,24 +416,24 @@
         </context-group>
       </trans-unit>
       <trans-unit id="org.org.tabtitle" datatype="html">
-        <source> Organization </source>
+        <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/account-settings/account-settings.component.html</context>
-          <context context-type="linenumber">4,6</context>
+          <context context-type="linenumber">4</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.tabtitle" datatype="html">
-        <source> Projects </source>
+        <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/account-settings/account-settings.component.html</context>
-          <context context-type="linenumber">13,15</context>
+          <context context-type="linenumber">11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.profile.tabtitle" datatype="html">
-        <source> Profile </source>
+        <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/account-settings/account-settings.component.html</context>
-          <context context-type="linenumber">22,24</context>
+          <context context-type="linenumber">18</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.org.updateOrgName" datatype="html">
@@ -574,7 +571,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.confirmRemove" datatype="html">
-        <source>Are you sure?</source>
+        <source>Are you sure to remove it?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/account-settings/project/project.component.html</context>
           <context context-type="linenumber">54</context>
@@ -787,7 +784,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="confirm-delete" datatype="html">
-        <source>Are you sure to delete?</source>
+        <source>Are you sure to remove it?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
           <context context-type="linenumber">89</context>
@@ -935,35 +932,35 @@
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.targeting" datatype="html">
-        <source> Targeting</source>
+        <source>Targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/details/details-routing.module.ts</context>
           <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.reporting" datatype="html">
-        <source> Reporting</source>
+        <source>Reporting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/details/details-routing.module.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.triggers" datatype="html">
-        <source> Triggers</source>
+        <source>Triggers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/details/details-routing.module.ts</context>
           <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.experimentation" datatype="html">
-        <source> Experimentation</source>
+        <source>Experimentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/details/details-routing.module.ts</context>
           <context context-type="linenumber">35</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.idx.pageTitle" datatype="html">
-        <source> Feature flags</source>
+        <source>Feature flags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/switch-index/switch-index-routing.module.ts</context>
           <context context-type="linenumber">8</context>

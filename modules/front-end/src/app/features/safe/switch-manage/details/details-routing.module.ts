@@ -14,25 +14,25 @@ const routes: Routes = [
         path: 'targeting',
         component: TargetingComponent,
         data: {
-          breadcrumb: $localize `:@@ff.routing.details.targeting: Targeting`
+          breadcrumb: $localize `:@@ff.routing.details.targeting:Targeting`
         }
       }, {
         path: 'reporting',
         component: SettingComponent,
         data: {
-          breadcrumb: $localize `:@@ff.routing.details.reporting: Reporting`
+          breadcrumb: $localize `:@@ff.routing.details.reporting:Reporting`
         }
       }, {
         path: 'triggers',
         component: SettingComponent,
         data: {
-          breadcrumb: $localize `:@@ff.routing.details.triggers: Triggers`
+          breadcrumb: $localize `:@@ff.routing.details.triggers:Triggers`
         }
       }, {
         path: 'experimentations',
         component: SettingComponent,
         data: {
-          breadcrumb: $localize `:@@ff.routing.details.experimentation: Experimentation`
+          breadcrumb: $localize `:@@ff.routing.details.experimentation:Experimentation`
         }
       }, {
         path: '',

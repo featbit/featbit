@@ -51,12 +51,20 @@
         </context-group>
         <note priority="1" from="description">@org.org.orgNamePlaceholder</note>
       </trans-unit>
-      <trans-unit id="org.org.save" datatype="html">
+      <trans-unit id="common.save" datatype="html">
         <source>Save</source>
         <target>保存</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/account-drawer/account-drawer.component.html</context>
           <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.org.orgCreated" datatype="html">
@@ -121,18 +129,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">35</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.save" datatype="html">
-        <source>Save</source>
-        <target>保存</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">37</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.editEnv" datatype="html">
@@ -472,24 +468,24 @@
         </context-group>
       </trans-unit>
       <trans-unit id="org.org.tabtitle" datatype="html">
-        <source> Organization </source>
-        <target> 机构 </target>
+        <source>Organization</source>
+        <target>机构</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/account-settings/account-settings.component.html</context>
           <context context-type="linenumber">4,6</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.tabtitle" datatype="html">
-        <source> Projects </source>
-        <target> 项目 </target>
+        <source>Projects</source>
+        <target>项目</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/account-settings/account-settings.component.html</context>
           <context context-type="linenumber">13,15</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.profile.tabtitle" datatype="html">
-        <source> Profile </source>
-        <target> 个人信息 </target>
+        <source>Profile</source>
+        <target>个人信息</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/account-settings/account-settings.component.html</context>
           <context context-type="linenumber">22,24</context>
@@ -1056,40 +1052,40 @@
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.targeting" datatype="html">
-        <source> Targeting</source>
-        <target> 目标条件</target>
+        <source>Targeting</source>
+        <target>目标条件</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/details/details-routing.module.ts</context>
           <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.reporting" datatype="html">
-        <source> Reporting</source>
-        <target> 统计报表</target>
+        <source>Reporting</source>
+        <target>统计报表</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/details/details-routing.module.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.triggers" datatype="html">
-        <source> Triggers</source>
-        <target> 触发器</target>
+        <source>Triggers</source>
+        <target>触发器</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/details/details-routing.module.ts</context>
           <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.experimentation" datatype="html">
-        <source> Experimentation</source>
-        <target> 数据实验</target>
+        <source>Experimentation</source>
+        <target>数据实验</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/details/details-routing.module.ts</context>
           <context context-type="linenumber">35</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.idx.pageTitle" datatype="html">
-        <source> Feature flags</source>
-        <target> 开关管理</target>
+        <source>Feature flags</source>
+        <target>开关管理</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/switch-index/switch-index-routing.module.ts</context>
           <context context-type="linenumber">8</context>

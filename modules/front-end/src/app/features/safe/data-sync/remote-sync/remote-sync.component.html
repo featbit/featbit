@@ -86,7 +86,7 @@
             </button>
 
             <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger [nzIcon]="iconTpl"
-              i18n-nz-popconfirm="@@confirm-delete" nz-popconfirm="Are you sure to delete?" (nzOnConfirm)="deleteRow(row)">
+              i18n-nz-popconfirm="@@confirm-delete" nz-popconfirm="Are you sure to remove it?" (nzOnConfirm)="deleteRow(row)">
               <i nz-icon nzType="delete" nzTheme="outline"></i>
               <ng-template #iconTpl>
                 <i nz-icon nzType="question-circle-o" style="color: red;"></i>
