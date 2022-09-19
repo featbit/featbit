@@ -32,7 +32,7 @@ The project is under code refactoring. An update will be coming soon.
 
 ◆  Join [**FeatBit Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature. 
 
-◆  Other Communities: [FeatBit@Reddit](http://reddit.com/r/featbit) | [FeatureManagement@Reddit](https://www.reddit.com/r/featuremanagement).  
+◆  Join [**FeatBit Github Discussions**](https://github.com/featbit/featbit/discussions) if you don't have slack.  
 
 ## Useful links
 
