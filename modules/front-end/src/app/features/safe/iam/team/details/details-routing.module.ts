@@ -1,9 +1,9 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DetailsComponent } from './details.component';
-import { TeamComponent } from './team/team.component';
-import {GroupsComponent} from "@features/safe/iam/policies/details/groups/groups.component";
-import {PermissionComponent} from "@features/safe/iam/policies/details/permission/permission.component";
+import { GroupsComponent } from './groups/groups.component';
+import {DirectPoliciesComponent} from "@features/safe/iam/team/details/direct-policies/direct-policies.component";
+import {InheritedPoliciesComponent} from "@features/safe/iam/team/details/inherited-policies/inherited-policies.component";
 
 const routes: Routes = [
   {
@@ -11,14 +11,14 @@ const routes: Routes = [
     component: DetailsComponent,
     children: [
       {
-        path: 'permission',
-        component: PermissionComponent,
-      }, {
-        path: 'team',
-        component: TeamComponent,
-      }, {
         path: 'groups',
-        component: GroupsComponent,
+        component: GroupsComponent
+      }, {
+        path: 'direct-policies',
+        component: DirectPoliciesComponent
+      }, {
+        path: 'inherited-policies',
+        component: InheritedPoliciesComponent
       }, {
         path: '',
         redirectTo: '/iam',

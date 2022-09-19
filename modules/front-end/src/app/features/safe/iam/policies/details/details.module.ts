@@ -29,7 +29,7 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzResultModule } from 'ng-zorro-antd/result';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { UsersComponent } from './users/users.component';
+import { TeamComponent } from './team/team.component';
 import { SettingComponent } from './setting/setting.component';
 import {GroupsComponent} from "./groups/groups.component";
 import {PermissionComponent} from "@features/safe/iam/policies/details/permission/permission.component";
@@ -39,7 +39,7 @@ import {CoreModule} from "@core/core.module";
     declarations: [
         DetailsComponent,
         SettingComponent,
-        UsersComponent,
+        TeamComponent,
         GroupsComponent,
         PermissionComponent
     ],

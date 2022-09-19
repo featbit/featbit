@@ -4,11 +4,11 @@
   </div>
   <nz-tabset nzLinkRouter class="tabs-container segment-flag">
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./users']" queryParamsHandling="preserve">
+      <a *nzTabLink nz-tab-link [routerLink]="['./team']" queryParamsHandling="preserve">
         团队
       </a>
       <ng-template nz-tab>
-        <users></users>
+        <groups-team></groups-team>
       </ng-template>
     </nz-tab>
     <nz-tab>

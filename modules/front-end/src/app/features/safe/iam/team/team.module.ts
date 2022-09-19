@@ -1,19 +1,19 @@
 import { NgModule } from '@angular/core';
-import { UsersRoutingModule } from './users-routing.module';
+import { TeamRoutingModule } from './team-routing.module';
 import { CommonModule } from '@angular/common';
-import {UsersComponent} from "@features/safe/iam/users/users.component";
+import {TeamComponent} from "@features/safe/iam/team/team.component";
 import {RouterModule} from "@angular/router";
 
 @NgModule({
   declarations: [
-    UsersComponent
+    TeamComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
-    UsersRoutingModule
+    TeamRoutingModule
   ],
   providers: [
   ]
 })
-export class UsersModule { }
+export class TeamModule { }

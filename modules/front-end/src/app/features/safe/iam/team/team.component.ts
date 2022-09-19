@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'iam-users',
+  selector: 'iam-team',
   template: `<router-outlet></router-outlet>`
 })
-export class UsersComponent {
+export class TeamComponent {
   constructor(
   ) {
   }

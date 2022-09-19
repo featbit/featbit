@@ -4,31 +4,29 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { encodeURIComponentFfc } from "@utils/index";
-import { MemberService } from "@services/member.service";
-import { PolicyService } from "@services/policy.service";
-import { IPagedPolicyMember, PolicyMemberFilter } from "@features/safe/iam/types/policy";
+import { GroupService } from "@services/group.service";
+import { GroupMemberFilter, IPagedGroupMember } from "@features/safe/iam/types/group";
 
 @Component({
-  selector: 'users',
-  templateUrl: './users.component.html',
-  styleUrls: ['./users.component.less']
+  selector: 'groups-team',
+  templateUrl: './team.component.html',
+  styleUrls: ['./team.component.less']
 })
-export class UsersComponent implements OnInit {
+export class TeamComponent implements OnInit {
 
+  groupId: string = null;
+  private search$ = new Subject();
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private policyService: PolicyService,
-    private memberService: MemberService,
+    private groupService: GroupService,
     private message: NzMessageService
   ) { }
 
-  policyId: string = '';
-  private search$ = new Subject();
   ngOnInit(): void {
-    this.route.paramMap.subscribe( paramMap => {
-      this.policyId = decodeURIComponent(paramMap.get('id'));
-    });
+    this.route.paramMap.subscribe(paramMap => {
+      this.groupId = decodeURIComponent(paramMap.get('id'));
+    })
 
     this.search$.pipe(
       debounceTime(300)
@@ -40,16 +38,15 @@ export class UsersComponent implements OnInit {
   }
 
   isLoading: boolean = true;
-  filter: PolicyMemberFilter = new PolicyMemberFilter();
-  members: IPagedPolicyMember = {
-    items: [],
-    totalCount: 0
+  members: IPagedGroupMember = {
+    totalCount: 0,
+    items: []
   };
+  filter: GroupMemberFilter = new GroupMemberFilter();
 
   getMembers() {
     this.isLoading = true;
-
-    this.policyService.getMembers(this.policyId, this.filter).subscribe(members => {
+    this.groupService.getMembers(this.groupId, this.filter).subscribe(members => {
       this.members = members;
       this.isLoading = false;
     });
@@ -63,25 +60,25 @@ export class UsersComponent implements OnInit {
     this.search$.next(null);
   }
 
-  addPolicy(userId: string) {
-    this.memberService.addPolicy(userId, this.policyId).subscribe(() => {
-      this.members.items = this.members.items.map(it => {
-        if (it.id === userId) {
-          it.isPolicyMember = true;
+  addMember(userId: string) {
+    this.groupService.addMember(this.groupId, userId).subscribe(() => {
+      this.members.items = this.members.items.map(item => {
+        if (item.id === userId) {
+          item.isGroupMember = true;
         }
 
-        return it;
+        return item;
       });
 
       this.message.success('添加成功');
     }, () => this.message.error('添加失败'));
   }
 
-  removePolicy(userId: string) {
-    this.memberService.removePolicy(userId, this.policyId).subscribe(() => {
+  removeMember(userId: string) {
+    this.groupService.removeMember(this.groupId, userId).subscribe(() => {
       this.members.items = this.members.items.map(item => {
         if (item.id === userId) {
-          item.isPolicyMember = false;
+          item.isGroupMember = false;
         }
 
         return item;
@@ -91,7 +88,7 @@ export class UsersComponent implements OnInit {
     }, () => this.message.error('移除失败'));
   }
 
-  navigateToMember(userId: string) {
+  navigateToUserDetail(userId: string) {
     const url = this.router.serializeUrl(
       this.router.createUrlTree([`/iam/users/${encodeURIComponentFfc(userId)}/groups`])
     );

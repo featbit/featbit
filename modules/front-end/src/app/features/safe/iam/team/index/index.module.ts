@@ -13,7 +13,7 @@ import { NzMessageModule } from 'ng-zorro-antd/message';
 
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import {IndexComponent} from "@features/safe/iam/users/index/index.component";
+import {IndexComponent} from "@features/safe/iam/team/index/index.component";
 import {NzDividerModule} from "ng-zorro-antd/divider";
 import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
 import {CoreModule} from "@core/core.module";

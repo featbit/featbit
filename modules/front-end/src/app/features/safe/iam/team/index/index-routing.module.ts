@@ -1,14 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {IndexComponent} from "@features/safe/iam/users/index/index.component";
+import {IndexComponent} from "@features/safe/iam/team/index/index.component";
 
 
 const routes: Routes = [
   {
     path: '',
-    data: {
-      breadcrumb: '权限管理 - 团队'
-    },
     component: IndexComponent,
   }
 ];
