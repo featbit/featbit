@@ -53,15 +53,6 @@ The project is under code refactoring. An update will be coming soon.
 
 Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. We'd love to have your help too: Please feel free to open issues or provide pull requests.
 
-### Rewards
-
-We are looking into the possibility of incentivizing and rewarding contributors through Web3 technology. [tea.xyz](https://tea.xyz) is in the scope of our study. We hope you can recommend more related content via Slack.
-
 ## License
 
 FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
-
-Why MIT? Because we agree what the book `The art of community` wrote: *Ideally, people would change/improve the products
-("derivative designs") to address market needs that they perceive and we have not addressed.
-That’s the sort of innovation that open source is designed to promote. But if they only clone the
-products and sell them at lower prices, that’s okay, too. The marketplace will decide.*
