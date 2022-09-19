@@ -19,18 +19,19 @@ export class EnvDrawerComponent implements OnInit {
   envForm: FormGroup;
 
   isEditing: boolean = false;
-
+  title: string;
   isLoading: boolean = false;
 
   public envKeySecret = EnvKeyNameEnum.Secret;
-  public envKeyMobileSecret = EnvKeyNameEnum.MobileSecret;
 
   @Input()
   set env(env: IEnvironment) {
     this.isEditing = env && !!env.id;
-    if (env) {
+    if (this.isEditing) {
+      this.title = $localize `:@@org.project.editEnv:Edit environment`;
       this.patchForm(env);
     } else {
+      this.title = $localize `:@@org.project.addEnv:Add environment`;
       this.resetForm();
     }
     this._env = env;
@@ -105,7 +106,7 @@ export class EnvDrawerComponent implements OnInit {
           () => {
             this.isLoading = false;
             this.close.emit({isEditing: true, env: { name }});
-            this.message.success('更新成功！');
+            this.message.success($localize `:@@org.project.envUpdateSuccess:Environment successfully updated`);
           },
           () => {
             this.isLoading = false;
@@ -118,7 +119,7 @@ export class EnvDrawerComponent implements OnInit {
           () => {
             this.isLoading = false;
             this.close.emit({isEditing: false, env: { name }});
-            this.message.success('创建成功！');
+            this.message.success($localize `:@@org.project.envCreateSuccess:Environment successfully created`);
           },
           () => {
             this.isLoading = false;
@@ -141,7 +142,7 @@ export class EnvDrawerComponent implements OnInit {
         }
 
         this.close.emit({isEditing: false});
-        this.message.success(`重新生成 ${keyName} 成功！`);
+        this.message.success($localize `:@@org.project.envRegenerateSuccess:Successfully regenerated`);
       },
       _ => { }
     );

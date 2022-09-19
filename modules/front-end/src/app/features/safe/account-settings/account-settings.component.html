@@ -1,8 +1,8 @@
 <div class="body-container">
   <nz-tabset nzLinkRouter>
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['.']">
-        机构
+      <a *nzTabLink nz-tab-link [routerLink]="['.']" i18n="@@org.org.tabtitle">
+        Organization
       </a>
       <ng-template nz-tab>
         <app-account></app-account>
@@ -10,8 +10,8 @@
     </nz-tab>
 
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./projects']">
-        项目
+      <a *nzTabLink nz-tab-link [routerLink]="['./projects']" i18n="@@org.project.tabtitle">
+        Projects
       </a>
       <ng-template nz-tab>
         <app-project></app-project>
@@ -19,8 +19,8 @@
     </nz-tab>
 
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./profile']">
-        个人信息
+      <a *nzTabLink nz-tab-link [routerLink]="['./profile']" i18n="@@org.profile.tabtitle">
+        Profile
       </a>
       <ng-template nz-tab>
         <app-profile></app-profile>

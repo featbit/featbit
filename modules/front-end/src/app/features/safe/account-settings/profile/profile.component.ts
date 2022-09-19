@@ -23,8 +23,8 @@ export class ProfileComponent {
     private fb: FormBuilder
   ) {
     this.profileForm = this.fb.group({
-      email: [this.auth.email ?? '未关联', [Validators.required, Validators.email]],
-      phoneNumber: [this.auth.phoneNumber ?? '未绑定', [Validators.required]],
+      email: [this.auth.email ?? $localize `:@@org.profile.notProvided:Not provided`, [Validators.required, Validators.email]],
+      phoneNumber: [this.auth.phoneNumber ?? $localize `:@@org.profile.notProvided:Not provided`, [Validators.required]],
     });
   }
 
@@ -43,12 +43,12 @@ export class ProfileComponent {
       .subscribe(
         _ => {
           this.isLoading = false;
-          this.message.success('信息更新成功');
+          this.message.success($localize `:@@org.profile.profileUpdateSuccess:Profile successfully updated`);
         },
         _ => {
           this.isLoading = false;
 
-          this.message.warning('该功能正在建设中...');
+          this.message.warning($localize `:@@org.profile.featureUnderConstruction:This feature will be released soon!`);
         }
       );
   }

@@ -2,7 +2,7 @@
   nzClosable="false"
   [nzExtra]="extra"
   [nzVisible]="visible" nzPlacement="right"
-  [nzTitle]="isEditing ? '编辑环境':'添加环境'"
+  [nzTitle]="title"
   [nzWidth]="500"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
@@ -11,29 +11,30 @@
     <nz-alert
       *ngIf="isEditing"
       nzType="warning"
-      nzDescription="修改环境名称后对其设置的权限可能会失效"
+      i18n-nzDescription="@@org.project.permissionMayInvalidAfterOperation"
+      nzDescription="Permission may become invalid after this operation"
       nzShowIcon
       nzIconType="icons:icon-warning"
     ></nz-alert>
 
     <form nz-form [formGroup]="envForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired>环境名称</nz-form-label>
-        <nz-form-control nzErrorTip="环境名称不能为空">
-          <input type="text" nz-input formControlName="name" placeholder="新环境的名称"/>
+        <nz-form-label nzRequired i18n="@@org.project.envName">Environment name</nz-form-label>
+        <nz-form-control nzErrorTip="Environment name is mandatory!" i18n-nzErrorTip="@@org.project.envNameMandatory">
+          <input type="text" nz-input formControlName="name" placeholder="Environment name" i18n-placeholder="@@org.project.envNamePlaceholder"/>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label>环境描述</nz-form-label>
+        <nz-form-label i18n="@@org.project.envDescription">Description</nz-form-label>
         <nz-form-control>
-          <input type="text" nz-input formControlName="description" placeholder="对该环境的简要描述"/>
+          <input type="text" nz-input formControlName="description" placeholder="Description" i18n="@@org.project.envDescriptionPlaceholder"/>
         </nz-form-control>
       </nz-form-item>
     </form>
     <!-- disable env secret regeneration -->
-    <button *ngIf="false" nz-button [nzType]="'primary'" (click)="onRegenerate(envKeySecret)">重新生成 Secret</button>
+    <button *ngIf="false" nz-button [nzType]="'primary'" (click)="onRegenerate(envKeySecret)" i18n="@@org.project.regenerateSecret">Regenerate secret</button>
 
-    <button [disabled]="!canTakeAction()" class="submit-btn" (click)="doSubmit()" nz-button [nzType]="'primary'" [nzLoading]="isLoading">保存</button>
+    <button [disabled]="!canTakeAction()" class="submit-btn" (click)="doSubmit()" nz-button [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>

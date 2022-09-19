@@ -27,16 +27,6 @@ export class AccountComponent implements OnInit {
 
   isLoading: boolean = false;
 
-  sdkModeNpm = 'npm';
-  sdkModeScript = 'script';
-  sdkMode = this.sdkModeScript;
-
-  sdkCodeNpm = '';
-  sdkCodeScript = '';
-  sdkCodeSetUserInfo = '';
-  sdkNpmInstall = `
-  npm install ffc-js-client-sdk --save`;
-
   constructor(
     private accountService: AccountService,
     private message: NzMessageService,
@@ -52,44 +42,6 @@ export class AccountComponent implements OnInit {
     this.currentAccount = this.allAccounts.find(x => x.id == currentAccountId);
 
     this.initOrgForm();
-
-    const projectEnv = getCurrentProjectEnv();
-    this.sdkCodeScript = `
-  <script data-ffc-client="${projectEnv.envSecret}" async src="https://assets.feature-flags.co/sdks/ffc-sdk.js"></script>`;
-
-    this.sdkCodeSetUserInfo = `
-  window.onload = (event) => {
-    // 初始化用户信息，通常这一步会在登录后被调用
-    FFCJsClient.initUserInfo({
-        userName: '##{用户名}##',
-        email: '##{用户邮箱（选填）}}##',
-        key: '##{用户在产品中的唯一Id}##',
-        customizeProperties: [
-            {
-                name: "##{自定义属性名称}##",
-                value: "##{自定义属性值}##"
-            }
-        ]
-    });
-  });`;
-
-    this.sdkCodeNpm = `
-  import { FFCJsClient } from 'ffc-js-client-sdk/esm';
-
-  FFCJsClient.initialize('${projectEnv.envSecret}');
-
-  // 初始化用户信息，通常这一步会在登录后被调用
-  FFCJsClient.initUserInfo({
-      userName: '##{用户名}##',
-      email: '##{用户邮箱（选填）}}##',
-      key: '##{用户在产品中的唯一Id}##',
-      customizeProperties: [
-          {
-              name: "##{自定义属性名称}##",
-              value: "##{自定义属性值}##"
-          }
-      ]
-  });`;
   }
 
   initOrgForm() {
@@ -136,7 +88,7 @@ export class AccountComponent implements OnInit {
       .subscribe(
         () => {
           this.isLoading = false;
-          this.message.success('更新信息成功！');
+          this.message.success($localize `:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
           this.accountService.setAccount({ id, initialized, organizationName });
         },
         () => {

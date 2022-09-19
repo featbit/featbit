@@ -57,7 +57,7 @@ export class AccountDrawerComponent implements OnInit {
         res => {
           this.isLoading = false;
           this.close.emit(res);
-          this.message.success('创建成功！');
+          this.message.success($localize `:@@org.org.orgCreated:Organization successfully created!`);
         },
         _ => {
           this.isLoading = false;

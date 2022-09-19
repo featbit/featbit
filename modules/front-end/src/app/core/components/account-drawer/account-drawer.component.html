@@ -4,17 +4,18 @@
   [nzVisible]="visible"
   nzPlacement="right"
   [nzWidth]="500"
-  nzTitle="创建机构"
+  i18n-nzTitle="@@org.org.createOrg"
+  nzTitle="Create organization"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="accountForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired>机构名称</nz-form-label>
-        <nz-form-control nzErrorTip="机构名称不能为空">
-          <input type="text" nz-input formControlName="organizationName" placeholder="填入您的机构名称"/>
+        <nz-form-label nzRequired i18n="@@org.org.orgName">Organization name</nz-form-label>
+        <nz-form-control i18n-nzErrorTip="@@org.org.orgMandatory" nzErrorTip="Organization name is mandatory!">
+          <input type="text" nz-input formControlName="organizationName" placeholder="Organization name" i18n-placeholder="@org.org.orgNamePlaceholder"/>
         </nz-form-control>
       </nz-form-item>
-      <button nz-button class="submit-btn" nzType="primary" [nzLoading]="isLoading">确认</button>
+      <button nz-button class="submit-btn" nzType="primary" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
     </form>
   </ng-container>
   <ng-template #extra>
