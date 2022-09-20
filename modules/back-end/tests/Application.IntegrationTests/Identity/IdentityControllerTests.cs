@@ -59,6 +59,6 @@ public class IdentityControllerTests : IClassFixture<IdentityApp>
         var body = JsonSerializer.Serialize(request);
         var content = new StringContent(body, Encoding.UTF8, MediaTypeNames.Application.Json);
 
-        return await client.PostAsync("/api/identity/login-by-password", content);
+        return await client.PostAsync("/api/v1/identity/login-by-password", content);
     }
 }

@@ -4,7 +4,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [ApiActionFilter]
-[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public class ApiControllerBase : ControllerBase
 {
     private ISender? _mediator;
