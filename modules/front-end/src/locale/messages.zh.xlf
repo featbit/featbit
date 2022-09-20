@@ -1214,6 +1214,10 @@
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
           <context context-type="linenumber">27</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="common.details" datatype="html">
         <source>Details</source>
@@ -1229,6 +1233,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
           <context context-type="linenumber">40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.team.details.remove-policy-from" datatype="html">
@@ -1451,14 +1459,6 @@
           <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.team.idx.actions" datatype="html">
-        <source>Actions</source>
-        <target>操作</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">35</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="iam.team.idx.etc" datatype="html">
         <source>+</source>
         <target>及另外</target>
@@ -1473,14 +1473,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
           <context context-type="linenumber">53</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.team.idx.details" datatype="html">
-        <source>Details</source>
-        <target>查看</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.team.idx.cannot-be-recovered" datatype="html">
