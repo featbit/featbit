@@ -15,7 +15,7 @@ Feature Management use cases: `Trunk-based development`, `Testing in production`
 Progressive Experimentation, which provides the ability to get online and offline feedback as quickly as possible. Use cases: `Beta testing and qualitative feedback`, `Experimentation and A/B testing`.
 
 ### Our Philosophy
-◆  **Empower All teams to Deliver, Control and Experiment their software**. 
+◆  **Empower All teams to Deliver, Control and Experiment with their software**. 
 
 ◆  Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome.
 
@@ -32,7 +32,7 @@ The project is under code refactoring. An update will be coming soon.
 
 ◆  Join [**FeatBit Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature. 
 
-◆  Join [**FeatBit Github Discussions**](https://github.com/featbit/featbit/discussions) if you don't have slack.  
+◆  Join [**FeatBit Github Discussions**](https://github.com/featbit/featbit/discussions), this is a place to ask questions to the community and make suggestions to the team. You can react to comments just like issues and you can even create threads! It's also an alternative to Slack.
 
 ## Useful links
 
