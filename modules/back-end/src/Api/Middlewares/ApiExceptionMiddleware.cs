@@ -1,4 +1,5 @@
-using Application.Bases.Exceptions;
+using Api.Controllers;
+using FluentValidation;
 
 namespace Api.Middlewares;
 
@@ -30,17 +31,15 @@ public class ApiExceptionMiddleware
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
-        if (exception is RequestValidationException validationException)
+        context.Response.StatusCode = ex switch
         {
-            context.Response.StatusCode = StatusCodes.Status400BadRequest;
-            var response = validationException.ToResponse();
-            await context.Response.WriteAsJsonAsync(response);
-            
-            return;
-        }
+            ValidationException => StatusCodes.Status400BadRequest,
+            _ => StatusCodes.Status500InternalServerError
+        };
 
-        context.Response.StatusCode = 500;
+        var response = ApiResponse.Error(ex.Message);
+        await context.Response.WriteAsJsonAsync(response);
     }
 }

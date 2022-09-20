@@ -1,5 +1,3 @@
-using Application.Bases.Exceptions;
-
 namespace Application.Bases.Behaviours;
 
 public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
@@ -30,7 +28,7 @@ public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TReque
 
             if (failures.Any())
             {
-                throw new RequestValidationException(failures);
+                throw new ValidationException(failures);
             }
         }
 

@@ -1,9 +1,11 @@
+using Api.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
 
 [ApiController]
+[ApiActionFilter]
 [Route("api/[controller]")]
 public class ApiControllerBase : ControllerBase
 {
