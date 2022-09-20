@@ -1,14 +1,14 @@
 <div class="table-content-area">
   <div class="table-search-area">
     <nz-input-group [nzPrefix]="prefixIconSearch">
-      <input nz-input type="text" placeholder="按电话或邮箱筛选" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch()">
+      <input nz-input type="text" placeholder="Filter by mobile or Email" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch()" i18n-placeholder="@@iam.team.idx.searchPlaceholder">
     </nz-input-group>
     <ng-template #prefixIconSearch>
       <i nz-icon nzType="icons:icon-search"></i>
     </ng-template>
     <button nz-button nzType="primary" (click)="openMemberDrawer()">
       <i nz-icon nzType="icons:icon-add"></i>
-      添加
+      <ng-container i18n="@@iam.team.idx.add">Add</ng-container>
     </button>
   </div>
   <div class="table-wrapper">
@@ -26,20 +26,20 @@
               >
       <thead>
       <tr>
-        <th style="min-width: 100px">名称</th>
-        <th>邮箱</th>
-        <th>电话</th>
-        <th>资源名</th>
-        <th>组</th>
-        <th>初始密码</th>
-        <th>操作</th>
+        <th style="min-width: 100px" i18n="@@iam.team.idx.name">Name</th>
+        <th i18n="@@iam.team.idx.email">Email</th>
+        <th i18n="@@iam.team.idx.mobile">Mobile</th>
+        <th i18n="@@iam.team.idx.rn">Resource name (RN)</th>
+        <th i18n="@@iam.team.idx.group">Group</th>
+        <th i18n="@@iam.team.idx.initial-password">Initial password</th>
+        <th i18n="@@common.actions">Actions</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let item of table.data">
         <td (click)="navigateToDetail(item.id)">{{ item.name ?? '--' }}</td>
-        <td (click)="navigateToDetail(item.id)">{{ item.email ?? '未绑定' }}</td>
-        <td (click)="navigateToDetail(item.id)">{{ item.phoneNumber ?? '未绑定' }}</td>
+        <td (click)="navigateToDetail(item.id)">{{ item.email ?? '--' }}</td>
+        <td (click)="navigateToDetail(item.id)">{{ item.phoneNumber ?? '--' }}</td>
         <td>
           <i (click)="copyText(resourceName(item))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
           {{ resourceName(item) }}
@@ -50,7 +50,7 @@
           </span>
           <ng-container *ngIf="item.groups.length > 3">
             <span class="tag more-tags-item">
-              等共 {{ item.groups.length }} 项
+              <ng-container i18n="@@iam.team.idx.etc">+</ng-container> {{ item.groups.length - 3 }} <ng-container i18n="@@iam.team.idx.entries">more</ng-container>
             </span>
           </ng-container>
         </td>
@@ -61,15 +61,15 @@
           </span>
         </td>
         <td>
-          <a class="primary-link-btn" (click)="navigateToDetail(item.id)">
-            详情
-          </a>
+          <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
           <ng-container *ngIf="canDelete(item)">
             <nz-divider nzType="vertical"></nz-divider>
-            <a style="color: #717D8A" nz-popconfirm="删除后不可恢复，确定要删除么？"
+            <a style="color: #717D8A" i18n-nz-popconfirm="@@iam.team.idx.cannot-be-recovered"  nz-popconfirm="Can not be recovered, are you sure to remove it?"
                nzPopconfirmPlacement="bottomRight"
                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-               (nzOnConfirm)="deleteMember(item)" [nzIcon]="iconTplIamUser">删除</a>
+               (nzOnConfirm)="deleteMember(item)" [nzIcon]="iconTplIamUser">
+              <ng-container i18n="@@common.remove">Remove</ng-container>
+            </a>
           </ng-container>
         </td>
       </tr>

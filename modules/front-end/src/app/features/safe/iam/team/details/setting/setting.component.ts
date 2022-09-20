@@ -46,22 +46,22 @@ export class SettingComponent implements OnInit {
 
   deleteMember() {
     this.memberService.delete(this.member.id).subscribe(() => {
-      this.message.success(`刪除成功`);
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.router.navigateByUrl(`/iam/users`);
-    }, () => this.message.error('操作失败'))
+    }, () => this.message.error($localize `:@@common.remove-success:Operation failed`))
   }
 
   updateMember() {
     this.memberService.update(this.member.id, {
       name: this.member.name
     }).subscribe(() => {
-      this.message.success(`更新成功`);
-    }, () => this.message.error('操作失败'))
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    }, () => this.message.error($localize `:@@common.remove-success:Operation failed`))
   }
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success('复制成功')
+      () => this.message.success($localize `:@@common.copySuccess:Copied`)
     );
   }
 

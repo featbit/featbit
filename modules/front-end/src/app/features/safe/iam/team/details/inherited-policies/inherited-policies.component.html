@@ -2,7 +2,7 @@
   <div class="table-content-area">
     <div class="table-search-area">
       <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
-        <input class="search-input" nz-input type="text" placeholder="按名称筛选" [(ngModel)]="filter.name" (ngModelChange)="doSearch(false,true)">
+        <input class="search-input" nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.team.details.ip-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(false,true)">
       </nz-input-group>
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="icons:icon-search"></i>
@@ -20,11 +20,11 @@
                 (nzPageIndexChange)="doSearch(false)">
         <thead>
         <tr>
-          <th>名称</th>
-          <th>组</th>
-          <th>类型</th>
-          <th>描述</th>
-          <th nzAlign="center">操作</th>
+          <th i18n="@@iam.team.details.name">Name</th>
+          <th i18n="@@iam.team.details.groups">Groups</th>
+          <th i18n="@@iam.team.details.type">Type</th>
+          <th i18n="@@iam.team.details.description">Description</th>
+          <th i18n="@@common.actions">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -37,9 +37,7 @@
           </td>
           <td>{{item.description}}</td>
           <td class="primary-link-btn" style="text-align: center">
-            <a (click)="navigateToPolicy(item.id)">
-              查看
-            </a>
+            <a (click)="navigateToPolicy(item.id)" i18n="@@common.details">Details</a>
           </td>
         </tr>
         </tbody>

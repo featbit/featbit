@@ -3,52 +3,54 @@
   [nzExtra]="extra"
   [nzVisible]="visible"
   nzPlacement="right"
-  nzTitle="添加成员"
+  i18n-nzTitle="@@iam.team.member-drawer.title"
+  nzTitle="Add team member"
   [nzWidth]="500"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="memberForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired>邀请方式</nz-form-label>
+        <nz-form-label nzRequired i18n="@@iam.team.member-drawer.invitation-mode">Invitation mode</nz-form-label>
         <nz-form-control>
           <nz-radio-group formControlName="identityType" (ngModelChange)="onIdentityTypeChange($event)">
-            <label nz-radio nzValue="phoneNumber">手机号</label>
-            <label nz-radio nzValue="email">邮箱</label>
+            <label nz-radio nzValue="phoneNumber" i18n="@@iam.team.member-drawer.mobile">Mobile</label>
+            <label nz-radio nzValue="email" i18n="@@iam.team.member-drawer.email">Email</label>
           </nz-radio-group>
         </nz-form-control>
       </nz-form-item>
 
       <!-- phoneNumber -->
       <nz-form-item *ngIf="memberForm.get('identityType').value === 'phoneNumber'">
-        <nz-form-label nzRequired>手机号</nz-form-label>
-        <nz-form-control nzErrorTip="请输入有效的手机号">
-          <input type="text" nz-input formControlName="identity" placeholder="填写成员手机号"/>
+        <nz-form-label nzRequired i18n="@@iam.team.member-drawer.mobile">Mobile</nz-form-label>
+        <nz-form-control nzErrorTip="Invalid mobile number" i18n-nzErrorTip="@@iam.team.member-drawer.invalid-mobile">
+          <input type="text" nz-input formControlName="identity" placeholder="Mobile number" i18n-placeholder="@@iam.team.member-drawer.mobile-placeholder"/>
         </nz-form-control>
       </nz-form-item>
 
       <!-- email -->
       <nz-form-item *ngIf="memberForm.get('identityType').value === 'email'">
-        <nz-form-label nzRequired>邮箱</nz-form-label>
-        <nz-form-control nzErrorTip="请输入有效的邮箱">
-          <input type="text" nz-input formControlName="identity" placeholder="填写成员邮箱"/>
+        <nz-form-label nzRequired i18n="@@iam.team.member-drawer.email">Email</nz-form-label>
+        <nz-form-control nzErrorTip="Invalid Email" i18n-nzErrorTip="@@iam.team.member-drawer.invalid-email">
+          <input type="text" nz-input formControlName="identity" placeholder="Email" i18n-placeholder="@@iam.team.member-drawer.email-placeholder"/>
         </nz-form-control>
       </nz-form-item>
 
       <!-- name -->
       <nz-form-item>
-        <nz-form-label>名称</nz-form-label>
+        <nz-form-label i18n="@@iam.team.member-drawer.name">Name</nz-form-label>
         <nz-form-control>
-          <input type="text" nz-input formControlName="name" placeholder="填写成员名称"/>
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@iam.team.member-drawer.name-placeholder"/>
         </nz-form-control>
       </nz-form-item>
 
       <nz-form-item>
-        <nz-form-label nzRequired>初始权限 <span style="margin-left: 4px; color: #ff4d4f" *ngIf="isPermissionInvalid">(策略和组不可同时为空)</span></nz-form-label>
-        <nz-form-control nzErrorTip="请选择新成员初始策略">
+        <nz-form-label nzRequired><ng-container i18n="@@iam.team.member-drawer.permissions">Permissions</ng-container> <span style="margin-left: 4px; color: #ff4d4f" *ngIf="isPermissionInvalid" i18n="@@iam.team.member-drawer.policy-group-set-at-least-one">(Policy and group cannot be both empty)</span></nz-form-label>
+        <nz-form-control>
             <nz-select
               nzShowSearch
               nzServerSearch
-              nzPlaceHolder="初始策略"
+              i18n-placeholder="@@iam.team.member-drawer.policy-placeholder"
+              nzPlaceHolder="Policy"
               (nzOnSearch)="getPolicies($event)"
               (ngModelChange)="validatePermissions()"
               formControlName="policyId">
@@ -59,15 +61,16 @@
                 </nz-option>
               </ng-container>
               <nz-option *ngIf="isPoliciesLoading" nzDisabled nzCustomContent>
-                <i nz-icon nzType="loading" class="loading-icon"></i> 数据加载中...
+                <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
             </nz-select>
           </nz-form-control>
-        <nz-form-control style="margin-top: 10px;" nzErrorTip="请选择新成员初始组">
+        <nz-form-control style="margin-top: 10px;">
             <nz-select
               nzShowSearch
               nzServerSearch
-              nzPlaceHolder="初始组"
+              i18n-placeholder="@@iam.team.member-drawer.group-placeholder"
+              nzPlaceHolder="Group"
               (nzOnSearch)="getGroups($event)"
               (ngModelChange)="validatePermissions()"
               formControlName="groupId">
@@ -75,13 +78,13 @@
                 <nz-option *ngIf="!isGroupsLoading" [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
               </ng-container>
               <nz-option *ngIf="isGroupsLoading" nzDisabled nzCustomContent>
-                <i nz-icon nzType="loading" class="loading-icon"></i> 数据加载中...
+                <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
             </nz-select>
           </nz-form-control>
       </nz-form-item>
     </form>
-    <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
+    <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
