@@ -1,5 +1,4 @@
 using Api.Controllers;
-using FluentValidation;
 
 namespace Api.Middlewares;
 
