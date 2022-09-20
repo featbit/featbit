@@ -1,3 +1,4 @@
+using Api.Middlewares;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,12 @@ builder.Services.AddSwaggerGen();
 // health check dependencies
 builder.Services.AddHealthChecks();
 
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddApplicationServices();
+
 var app = builder.Build();
+
+app.UseApiExceptionHandler();
 
 // reference: https://andrewlock.net/deploying-asp-net-core-applications-to-kubernetes-part-6-adding-health-checks-with-liveness-readiness-and-startup-probes/
 // health check endpoints
