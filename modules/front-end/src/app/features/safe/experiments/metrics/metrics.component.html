@@ -1,4 +1,4 @@
-<div class="body">
+<div class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
       <div class="search-inputs">
@@ -45,8 +45,8 @@
             <span class="tag">
               <ng-container *ngIf="data.eventType === customEventType">
                 <ng-container i18n="@@common.custom-event">Custom: </ng-container>
-                <ng-container *ngIf="data.metric.customEventTrackOption === customEventTrackConversion" i18n="@@common.conversion">Conversion</ng-container>
-                <ng-container *ngIf="data.metric.customEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
+                <ng-container *ngIf="data.customEventTrackOption === customEventTrackConversion" i18n="@@common.conversion">Conversion</ng-container>
+                <ng-container *ngIf="data.customEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
               </ng-container>
               <ng-container *ngIf="data.eventType === pageViewEventType">
                 Page View: <ng-container i18n="@@common.conversion">Conversion</ng-container>
