@@ -22,11 +22,11 @@
       nzShowSizeChanger [nzPageSizeOptions]="[10, 20, 30]" [nzLoading]="isLoading">
       <thead>
         <tr>
-          <th nzWidth="10%" i18n="@@name">Name</th>
-          <th nzWidth="15%" i18n="@@type">Type</th>
-          <th nzWidth="30%" i18n="@@url-header">URL</th>
-          <th nzWidth="20%" i18n="@@action">Action</th>
-          <th style="text-align: center" i18n="@@comment">Comment</th>
+          <th nzWidth="10%" i18n="@@common.name">Name</th>
+          <th nzWidth="15%" i18n="@@common.type">Type</th>
+          <th nzWidth="30%" i18n="@@common.url">URL</th>
+          <th nzWidth="20%" i18n="@@common.action">Action</th>
+          <th style="text-align: center" i18n="@@common.comment">Comment</th>
         </tr>
       </thead>
       <tbody>
@@ -86,7 +86,7 @@
             </button>
 
             <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger [nzIcon]="iconTpl"
-              i18n-nz-popconfirm="@@confirm-delete" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="deleteRow(row)">
+              i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="deleteRow(row)">
               <i nz-icon nzType="delete" nzTheme="outline"></i>
               <ng-template #iconTpl>
                 <i nz-icon nzType="question-circle-o" style="color: red;"></i>

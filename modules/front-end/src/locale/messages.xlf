@@ -370,6 +370,10 @@
           <context context-type="linenumber">93,94</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
           <context context-type="linenumber">10</context>
         </context-group>
@@ -1241,6 +1245,10 @@
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
           <context context-type="linenumber">46</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="common.actions" datatype="html">
         <source>Actions</source>
@@ -1317,13 +1325,12 @@
           <context context-type="linenumber">112</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="5894592232336565261" datatype="html">
+      <trans-unit id="users.idx.built-in-property" datatype="html">
         <source>Built in property</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <note priority="1" from="description">built-in-property</note>
       </trans-unit>
       <trans-unit id="users.idx.click-to-edit-set-comment" datatype="html">
         <source>Click to set/modify comment</source>
@@ -1332,7 +1339,7 @@
           <context context-type="linenumber">70</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="confirm-delete" datatype="html">
+      <trans-unit id="common.remove-confirm" datatype="html">
         <source>Can not be recovered, are you sure to remove it?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
@@ -1343,8 +1350,48 @@
           <context context-type="linenumber">200</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/account-settings/project/project.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/account-settings/project/project.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
           <context context-type="linenumber">89</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.html</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">67</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.remove" datatype="html">
@@ -1650,7 +1697,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="users.add-property" datatype="html">
-        <source>Create property</source>
+        <source>Create property </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
           <context context-type="linenumber">111</context>
@@ -1750,7 +1797,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="check-template" datatype="html">
-        <source>Click to see the template</source>
+        <source>Click to view the template</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
           <context context-type="linenumber">23</context>
@@ -2161,17 +2208,6 @@
           <context context-type="linenumber">72</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="org.project.confirmRemove" datatype="html">
-        <source>Can not be recovered, are you sure to remove it?</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/account-settings/project/project.component.html</context>
-          <context context-type="linenumber">54</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/account-settings/project/project.component.html</context>
-          <context context-type="linenumber">77</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="org.project.remove" datatype="html">
         <source>Remove</source>
         <context-group purpose="location">
@@ -2314,43 +2350,44 @@
           <context context-type="linenumber">51</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="name" datatype="html">
-        <source>Name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">38</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="type" datatype="html">
+      <trans-unit id="common.type" datatype="html">
         <source>Type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
           <context context-type="linenumber">26</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
       </trans-unit>
-      <trans-unit id="url-header" datatype="html">
+      <trans-unit id="common.url" datatype="html">
         <source>URL</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
           <context context-type="linenumber">27</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="action" datatype="html">
+      <trans-unit id="common.action" datatype="html">
         <source>Action</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
           <context context-type="linenumber">28</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/actions-selector/actions-selector.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
       </trans-unit>
-      <trans-unit id="comment" datatype="html">
-        <source>Comment</source>
+      <trans-unit id="name" datatype="html">
+        <source>Name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">38</context>
         </context-group>
       </trans-unit>
       <trans-unit id="select-type" datatype="html">
@@ -2459,41 +2496,6 @@
           <context context-type="linenumber">72</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.remove-confirm" datatype="html">
-        <source>Can not be recovered, are you sure to remove it?</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
-          <context context-type="linenumber">76</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
-          <context context-type="linenumber">43</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.html</context>
-          <context context-type="linenumber">46</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
-          <context context-type="linenumber">51</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
-          <context context-type="linenumber">51</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">67</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="common.loading-failed-try-again" datatype="html">
         <source>Loading failed, please try again</source>
         <context-group purpose="location">
@@ -2588,13 +2590,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
           <context context-type="linenumber">87</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.action" datatype="html">
-        <source>Action</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/actions-selector/actions-selector.component.html</context>
-          <context context-type="linenumber">3</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.num-actions" datatype="html">
@@ -2973,17 +2968,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.html</context>
           <context context-type="linenumber">42</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.type" datatype="html">
-        <source>Type</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
-          <context context-type="linenumber">33</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
-          <context context-type="linenumber">30</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.policies.details.team-filter-placeholder" datatype="html">

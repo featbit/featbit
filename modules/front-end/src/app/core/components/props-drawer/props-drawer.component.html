@@ -56,7 +56,7 @@
                     <label nzDisabled nz-checkbox [(ngModel)]="row.isDigestField"></label>
                   </td>
                   <td>{{row.remark}}</td>
-                  <td i18n="built-in-property">Built in property</td>
+                  <td i18n="@@users.idx.built-in-property">Built in property</td>
                 </ng-template>
                 <ng-template #customPropRow>
                   <div *ngIf="row.isEditing, then editingPropRow else showPropRow"></div>
@@ -93,7 +93,7 @@
                     </button>
 
                     <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
-                            [nzIcon]="iconTpl" i18n-nz-popconfirm="@@confirm-delete" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="archiveProp(row)">
+                            [nzIcon]="iconTpl" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="archiveProp(row)">
                       <i nz-icon nzType="delete" nzTheme="outline"></i> <ng-container i18n="@@common.remove">Remove</ng-container>
                       <ng-template #iconTpl>
                         <i nz-icon nzType="question-circle-o" style="color: red;"></i>
@@ -197,7 +197,7 @@
                   </button>
 
                   <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
-                          [nzIcon]="iconTpl" i18n-nz-popconfirm="@@confirm-delete" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="deleteTag(row)">
+                          [nzIcon]="iconTpl" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="deleteTag(row)">
                     <i nz-icon nzType="delete" nzTheme="outline"></i>
                     <ng-template #iconTpl>
                       <i nz-icon nzType="question-circle-o" style="color: red;"></i>

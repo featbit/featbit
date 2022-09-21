@@ -108,9 +108,9 @@ export class PropsDrawerComponent {
 
   selectTag(row: IUserTag, value: string) {
     // newly created tag
-    if (value.startsWith($localize `:@@users.add-property:Create property`)){
+    if (value.startsWith($localize `:@@users.add-property:Create property `)){
       const propName = value
-        .replace($localize `:@@users.add-property:Create property`, '')
+        .replace($localize `:@@users.add-property:Create property `, '')
         .replace(/'/g, '');
 
       const newProp: IUserProp = {
