@@ -7,23 +7,14 @@ import { TargetingComponent } from './targeting/targeting.component';
 const routes: Routes = [
   {
     path: '',
-    data: {
-      breadcrumb: '用户组'
-    },
     component: DetailsComponent,
     children: [
       {
         path: 'targeting',
         component: TargetingComponent,
-        data: {
-          breadcrumb: '用户组'
-        }
       }, {
         path: '',
         redirectTo: '/segments',
-        data: {
-          breadcrumb: '用户组'
-        },
         pathMatch: 'full'
       }
     ]
