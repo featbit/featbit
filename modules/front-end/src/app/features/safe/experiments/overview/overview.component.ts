@@ -26,6 +26,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
   pageViewEventType: EventType = EventType.PageView;
   clickEventType: EventType = EventType.Click;
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
+  customEventTrackNumeric: CustomEventTrackOption = CustomEventTrackOption.Numeric;
 
   constructor(
     private router: Router,
@@ -56,28 +57,15 @@ export class OverviewComponent implements OnInit, OnDestroy {
       this.isLoading = true;
       this.experimentService.getExperiments({envId: this.currentProjectEnv.envId, searchText: e}).subscribe((result: IExperiment[]) => {
         if(result) {
-          this.experimentList = result.map(r =>  Object.assign({}, r, { statusName: this.getStatusName(r.status)}));
+          this.experimentList = [...result];
         }
 
         this.isLoading = false;
       }, _ => {
-        this.message.error("数据加载失败，请重试!");
+        this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
         this.isLoading = false;
       })
     });
-  }
-
-  private getStatusName (status: ExperimentStatus) {
-    switch(status){
-      case ExperimentStatus.NotStarted:
-        return '未开始';
-      case ExperimentStatus.NotRecording:
-        return '暂停';
-      case ExperimentStatus.Recording:
-        return '进行中';
-      default:
-        return '未开始';
-    }
   }
 
   detailViewVisible: boolean = false;
@@ -92,11 +80,11 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
     if (data.data && data.data.id) {
       if (!this.experimentList.find(expt => expt.id === data.data.id)) {
-        const experiment = Object.assign({}, data.data, { statusName: this.getStatusName(data.data.status)})
+        const experiment = {...data.data};
         this.experimentList = [experiment, ...this.experimentList];
-        this.message.success('创建成功！');
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       } else {
-        this.message.warning("相同的实验已经存在");
+        this.message.warning($localize `:@@expt.overview.expt-exists:Experiment with the same feature flag and metric exists`);
       }
     }
   }

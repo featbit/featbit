@@ -162,7 +162,7 @@ export class ExperimentDrawerComponent implements OnInit {
           this.close.emit({isEditing: false, data: res});
         },
         err => {
-          this.message.error('发生错误，请重试！');
+          this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
           this.isLoading = false;
         }
       );
