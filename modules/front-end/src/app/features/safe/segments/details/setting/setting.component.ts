@@ -49,7 +49,7 @@ export class SettingComponent {
   save() {
     this.segmentService.update(this.segmentDetail).subscribe((result) => {
       this.segmentDetail = {...result};
-      this.msg.success("更新成功!");
+      this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
       this.segmentService.setCurrent({...result});
     }, errResponse => this.msg.error(errResponse.error));
   }
@@ -88,11 +88,15 @@ export class SettingComponent {
     this.deleteModalVisible = true;
   }
 
+  deleting: boolean = false;
   delete() {
+    this.deleting = true;
     this.segmentService.archive(this.segmentDetail.id).subscribe(() => {
+      this.deleting = false;
       this.router.navigateByUrl(`/segments`);
     }, () => {
-      this.msg.error('删除失败');
+      this.deleting = false;
+      this.msg.error($localize `:@@common.operation-failed:Operation failed`);
       this.closeDeleteModal();
     });
   }

@@ -96,7 +96,7 @@ export class TargetingComponent {
     this.isLoading = true;
     this.segmentService.update(this.segmentDetail.dataToSave)
       .subscribe((result) => {
-        this.msg.success("修改成功!");
+        this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
         this.loadSegment(result);
         this.isLoading = false;
     }, _ => {

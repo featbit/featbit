@@ -58,8 +58,8 @@ export class TargetUserComponent implements OnInit {
     });
   }
 
-  @Output() search = new EventEmitter<string>();    // 搜索用户
-  @Output() onSelectedUserListChange = new EventEmitter<IUserType[]>();      // 选择用户发生改变
+  @Output() search = new EventEmitter<string>();
+  @Output() onSelectedUserListChange = new EventEmitter<IUserType[]>();
 
   public selectModel: IUserType;
 
@@ -127,7 +127,7 @@ export class TargetUserComponent implements OnInit {
         this.selectedUserDetailList = [...this.selectedUserDetailList, {...user}];
         this.onSelectedUserListChange.next(this.selectedUserDetailList);
         this.selectNode.writeValue(undefined);
-      }, _ => this.msg.error('创建用户失败，请重试！'));
+      }, _ => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
     } else {
       this.selectedUserDetailList = [...this.selectedUserDetailList, {...this.selectModel}];
       this.onSelectedUserListChange.next(this.selectedUserDetailList);
@@ -157,7 +157,7 @@ export class TargetUserComponent implements OnInit {
       this.saving = false;
       this.closeEditModal();
     }, _ => {
-      this.msg.error('保存用户失败，请重试！');
+      this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       this.saving = false;
       this.closeEditModal();
     });

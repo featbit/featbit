@@ -72,18 +72,17 @@ export class FindRuleComponent {
     }
   }
 
-  @Input() userProps: IUserProp[] = [];                           // 字段配置
+  @Input() userProps: IUserProp[] = [];
 
-  @Output() deleteRule = new EventEmitter();                    // 删除规则
-  @Output() updateRuleName = new EventEmitter<string>();        // 修改规则名字
-  @Output() percentageChange = new EventEmitter<{ serve:boolean, T: number, F: number }>();     // serve 配置发生改变
+  @Output() deleteRule = new EventEmitter();
+  @Output() updateRuleName = new EventEmitter<string>();
+  @Output() percentageChange = new EventEmitter<{ serve:boolean, T: number, F: number }>();
   @Output() ruleConfigChange = new EventEmitter<IJsonContent[]>();
 
-  public ruleContentList: IJsonContent[] = [];     // 规则列表
-  public ruleName: string = "";                          // 规则名称
+  public ruleContentList: IJsonContent[] = [];
+  public ruleName: string = "";
   rulePercentageRollouts: IRulePercentageRollout[] = [];
 
-  // 添加规则
   onAddRule() {
     this.ruleContentList.push({
       property: '',
@@ -93,12 +92,10 @@ export class FindRuleComponent {
     })
   }
 
-  // 删除规则
   onDeleteRule() {
     this.deleteRule.emit();
   }
 
-  // 删除规则条目
   public onDeleteRuleItem(index: number) {
     if(this.ruleContentList.length === 1) {
       this.ruleContentList[0] = {
@@ -113,7 +110,6 @@ export class FindRuleComponent {
     this.ruleConfigChange.next(this.ruleContentList);
   }
 
-  // 刷新数据
   public onRuleChange(value: IJsonContent, index: number) {
     const rule = { ...value, ...{multipleValue: [...value.multipleValue]} };
     if (isSegmentRule(rule)) {
@@ -124,17 +120,14 @@ export class FindRuleComponent {
     this.ruleConfigChange.next(this.ruleContentList);
   }
 
-  // 确认删除规则
   public confirm() {
     this.onDeleteRule();
   }
 
-  // 修改规则名字
   public onRuleNameChange() {
     this.updateRuleName.emit(this.ruleName);
   }
 
-  // 查看与规则相匹配的用户
   canViewTargetedUsers(): boolean {
     const segmentProperties = [USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT];
     const segmentRules = this.ruleContentList.filter(x => segmentProperties.includes(x.property));

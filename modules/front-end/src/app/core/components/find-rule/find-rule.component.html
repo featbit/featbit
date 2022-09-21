@@ -25,11 +25,12 @@
     <div style="display:flex;justify-content: flex-start;">
       <input type="text" class="standard-bordered-input" nz-input style="width: 500px;height: 36px;" [(ngModel)]="ruleName" (ngModelChange)="onRuleNameChange()" />
       <div class="rule-title" style="margin-left: 16px;" *ngIf="canViewTargetedUsers()">
-        <i nz-tooltip="查看与此规则相匹配的用户" nz-icon nzType="icons:icon-targeted-user" (click)="viewTargetedUsers()"></i>
+        <i i18n-nz-tooltip="@@common.view-matched-users" nz-tooltip="View matched users" nz-icon nzType="icons:icon-targeted-user" (click)="viewTargetedUsers()"></i>
       </div>
       <div class="rule-title" style="margin-left: 12px;">
         <i nz-icon
-          nz-popconfirm="确认删除该规则吗?"
+          i18n-nz-popconfirm="@@common.remove-rule-confirm"
+          nz-popconfirm="Are you sure to remove the rule?"
           nzType="icons:icon-delete"
           nzPopconfirmPlacement="bottomRight"
           [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
@@ -39,7 +40,8 @@
   </ng-template>
 
   <nz-modal
-    nzTitle="与规则相匹配的用户列表"
+    i18n-nzTitle="@@common.matching-users"
+    nzTitle="Matching users"
     [(nzVisible)]="targetedUsersModalVisible"
     (nzOnCancel)="targetedUsersModalVisible = false"
     nzWidth="800px"
