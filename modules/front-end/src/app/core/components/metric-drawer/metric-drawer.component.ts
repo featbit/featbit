@@ -234,7 +234,7 @@ export class MetricDrawerComponent implements OnInit {
             this.isLoading = false;
             const maintainer = this.maintainerList.find(m => m.userId === res.maintainerUserId);
             this.close.emit({isEditing: true, data: {...res, maintainerName: maintainer.userName }});
-            this.message.success($localize `@@common.operation-success:Operation succeeded`);
+            this.message.success($localize `:@@common.operation-success:Operation succeeded`);
           },
           _ => {
             this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -252,7 +252,7 @@ export class MetricDrawerComponent implements OnInit {
             this.isLoading = false;
             const maintainer = this.maintainerList.find(m => m.userId === res.maintainerUserId);
             this.close.emit({isEditing: false, data: {...res, maintainerName: maintainer.userName }});
-            this.message.success($localize `@@common.operation-success:Operation succeeded`);
+            this.message.success($localize `:@@common.operation-success:Operation succeeded`);
           },
           _ => {
             this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
