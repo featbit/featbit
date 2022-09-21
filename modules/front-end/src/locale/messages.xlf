@@ -1710,6 +1710,13 @@
           <context context-type="linenumber">181</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="expt.expt" datatype="html">
+        <source>Experiments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/experiments-routing.module.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="expt.overview" datatype="html">
         <source>Overview</source>
         <context-group purpose="location">
@@ -3070,6 +3077,13 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
           <context context-type="linenumber">102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="segments.segments" datatype="html">
+        <source>Segments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/segments-routing.module.ts</context>
+          <context context-type="linenumber">9</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.targeting" datatype="html">
