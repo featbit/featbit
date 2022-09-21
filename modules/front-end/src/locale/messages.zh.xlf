@@ -1693,7 +1693,7 @@
        </trans-unit>
        <trans-unit id="iam.policies.details.legal-resource-name" datatype="html">
          <source>Legal resource name (RN) cannot include <x id="INTERPOLATION" equiv-text="{{&apos;{&apos;}}"/> <x id="INTERPOLATION_1" equiv-text="{{&apos;}&apos;}}"/> and :</source>
-         <target>合法的资源名 (RN) 不可以包含英文冒号, {{'{'}} 以及 }。</target>
+         <target>合法的资源名 (RN) 不可以包含英文冒号, <x id="INTERPOLATION" equiv-text="{{&apos;{&apos;}}"/> 以及 <x id="INTERPOLATION_1" equiv-text="{{&apos;}&apos;}}"/></target>
          <context-group purpose="location">
            <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
            <context context-type="linenumber">53</context>
