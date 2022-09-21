@@ -40,7 +40,7 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
   // copy keyName
   copyText(event, text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success('复制成功')
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }
 

@@ -2,19 +2,20 @@
   nzClosable="false"
   [nzExtra]="extra"
   nzPlacement="right"
-  nzTitle="开关用户自定义属性管理"
+  i18n-nzTitle="@@users.idx.customized-user-properties"
+  nzTitle="Customized user properties"
   [nzBodyStyle]="{'padding-top': '12px'}"
   [nzWidth]="850"
   [nzVisible]="visible"
   (nzOnClose)="close.emit()">
   <ng-container *nzDrawerContent>
     <nz-tabset class="no-bottom-line">
-      <nz-tab nzTitle="用户属性">
+      <nz-tab i18n-nzTitle="@@users.user-properties" nzTitle="User properties">
         <div class="table-content-area">
           <div class="table-search-area">
             <div class="search-inputs">
               <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="按属性名称查找" [(ngModel)]="propSearchText" (ngModelChange)="searchProp()">
+                <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="propSearchText" (ngModelChange)="searchProp()">
               </nz-input-group>
               <ng-template #prefixIconSearch>
                 <i nz-icon nzType="icons:icon-search"></i>
@@ -23,14 +24,13 @@
 
             <button class="standard-btn" nz-button nzType="primary" (click)="newProp()">
               <i nz-icon nzType="icons:icon-add"></i>
-              添加新属性
+              <ng-container i18n="@@common.add">Add</ng-container>
             </button>
           </div>
           <div class="table-wrapper">
             <nz-table #propTable
                       nzTableLayout="fixed"
                       nzSize="small"
-                      nzNoResult="暂无用户自定义属性"
                       nzFrontPagination
                       nzShowPagination
                       [nzData]="displayedProps"
@@ -38,13 +38,13 @@
                       [nzLoading]="isLoading">
               <thead>
               <tr>
-                <th nzWidth="150px">名称</th>
+                <th nzWidth="150px" i18n="@@common.name">Name</th>
                 <th nzWidth="130px">
-                  标记为摘要字段
-                  <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" nz-tooltip="用于显示用户摘要信息"></i>
+                  <ng-container i18n="@@users.idx.mark-as-digest-field">Mark as digest field</ng-container>
+                  <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@users.idx.used-to-display-user-digest-info" nz-tooltip="Used to display user's digest information"></i>
                 </th>
-                <th nzAlign="center" nzWidth="190px">备注</th>
-                <th>操作</th>
+                <th nzAlign="center" nzWidth="190px" i18n="@@common.comment">Comment</th>
+                <th i18n="@@common.actions">Actions</th>
               </tr>
               </thead>
               <tbody>
@@ -56,7 +56,7 @@
                     <label nzDisabled nz-checkbox [(ngModel)]="row.isDigestField"></label>
                   </td>
                   <td>{{row.remark}}</td>
-                  <td>内置属性</td>
+                  <td i18n="built-in-property">Built in property</td>
                 </ng-template>
                 <ng-template #customPropRow>
                   <div *ngIf="row.isEditing, then editingPropRow else showPropRow"></div>
@@ -67,13 +67,13 @@
                     <td style="text-align: center">
                       <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)"></label>
                     </td>
-                    <td style="text-align: center" nzEllipsis nz-tooltip="点击设置/修改备注" (click)="editProp(row)">
+                    <td style="text-align: center" nzEllipsis i18n-nz-tooltip="@@users.idx.click-to-edit-set-comment" nz-tooltip="Click to set/modify comment" (click)="editProp(row)">
                       {{row.remark}}
                     </td>
                   </ng-template>
                   <ng-template #editingPropRow>
                     <td *ngIf="row.isNew">
-                      <input nz-input [(ngModel)]="row.name" placeholder="属性名称">
+                      <input nz-input [(ngModel)]="row.name" i18n-placeholder="@@common.name" placeholder="Name">
                     </td>
                     <td *ngIf="!row.isNew" nzEllipsis>
                       <span nz-tooltip="{{row.name}}">{{row.name}}</span>
@@ -83,18 +83,18 @@
                       </label>
                     </td>
                     <td>
-                      <input [(ngModel)]="row.remark" nz-input placeholder="属性备注">
+                      <input [(ngModel)]="row.remark" nz-input i18n="@@common.comment" placeholder="Comment">
                     </td>
                   </ng-template>
                   <td class="row-operations">
                     <button nz-button nzSize="default" nzType="link" *ngIf="row.isEditing"
                             [nzLoading]="row.isSaving" (click)="saveProp(row)">
-                      <i nz-icon nzType="save" nzTheme="outline"></i> 保存
+                      <i nz-icon nzType="save" nzTheme="outline"></i> <ng-container i18n="@@common.save">Save</ng-container>
                     </button>
 
                     <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
-                            [nzIcon]="iconTpl" nz-popconfirm="确定删除么?" (nzOnConfirm)="archiveProp(row)">
-                      <i nz-icon nzType="delete" nzTheme="outline"></i> 删除
+                            [nzIcon]="iconTpl" i18n-nz-popconfirm="@@confirm-delete" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="archiveProp(row)">
+                      <i nz-icon nzType="delete" nzTheme="outline"></i> <ng-container i18n="@@common.remove">Remove</ng-container>
                       <ng-template #iconTpl>
                         <i nz-icon nzType="question-circle-o" style="color: red;"></i>
                       </ng-template>
@@ -102,13 +102,13 @@
 
                     <button nz-button nzSize="default" nzType="link" (click)="cancelEditProp(row)" *ngIf="row.isEditing"
                             style="color: #717D8A;">
-                      <i nz-icon nzType="close" nzTheme="outline"></i> 取消
+                      <i nz-icon nzType="close" nzTheme="outline"></i> <ng-container i18n="@@common.cancel">Cancel</ng-container>
                     </button>
 
                     <button nz-button nzSize="default" nzType="link" (click)="openPropPresetValuesModal(row)"
                             *ngIf="!row.isEditing">
                       <i nz-icon nzType="edit" nzTheme="outline"></i>
-                      预定义值（现有<span>{{row?.presetValues?.length || 0}}</span>个）
+                      <ng-container i18n="@@users.idx.preset-value">Preset value</ng-container>（<span>{{row?.presetValues?.length || 0}}</span>）
                     </button>
                   </td>
                 </ng-template>
@@ -119,11 +119,11 @@
         </div>
       </nz-tab>
 
-      <nz-tab nzTitle="用户标签">
+      <nz-tab i18n-nzTitle="@@users.idx.user-tags" nzTitle="User tags">
         <div class="table-operations">
           <button class="standard-btn" nz-button nzType="primary" (click)="newTag()">
             <i nz-icon nzType="icons:icon-add" nzTheme="outline"></i>
-            添加新标签
+            <ng-container i18n="@@common.add">Add</ng-container>
           </button>
         </div>
         <div class="table-content-area">
@@ -136,10 +136,10 @@
                       [nzLoading]="isLoading">
               <thead>
               <tr>
-                <th nzWidth="30%">请求字段名</th>
-                <th nzWidth="25%">来源</th>
-                <th nzWidth="25%">用户属性名</th>
-                <th nzWidth="20%">操作</th>
+                <th nzWidth="30%" i18n="@@users.idx.request-field">Request field</th>
+                <th nzWidth="25%" i18n="@@users.idx.source">Source</th>
+                <th nzWidth="25%" i18n="@@users.idx.user-property">User property</th>
+                <th nzWidth="20%" i18n="@@common.actions">Actions</th>
               </tr>
               </thead>
               <tbody>
@@ -197,7 +197,7 @@
                   </button>
 
                   <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
-                          [nzIcon]="iconTpl" nz-popconfirm="确定删除么?" (nzOnConfirm)="deleteTag(row)">
+                          [nzIcon]="iconTpl" i18n-nz-popconfirm="@@confirm-delete" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="deleteTag(row)">
                     <i nz-icon nzType="delete" nzTheme="outline"></i>
                     <ng-template #iconTpl>
                       <i nz-icon nzType="question-circle-o" style="color: red;"></i>
@@ -224,24 +224,22 @@
   (nzOnCancel)="closePropPresetValuesModal()"
   (nzOnOk)="savePropPresetValuesModal()"
   [nzTitle]="modalTitle">
-  <ng-template #modalTitle>设置<span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentUserPropRow.name}}</span>的预定义值</ng-template>
+  <ng-template #modalTitle><ng-container i18n="@@common.set">Set</ng-container><span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentUserPropRow.name}}</span><ng-container i18n="@@users.idx.of-preset-values">'s preset values</ng-container></ng-template>
   <ng-container *nzModalContent>
     <div class="preset-values-modal-body">
       <div class="creation-wrapper">
         <div class="input-wrapper">
           <div class="preset-value-key">
-            <label>Key (参与规则判断)</label>
+            <label>Key <ng-container i18n="@@users.idx.used-to-match-rules">(Used to match rules)</ng-container></label>
             <input [(ngModel)]="currentPresetValueKey" nz-input>
           </div>
           <div class="preset-value-description">
-            <label>描述 (用于 UI 显示)</label>
+            <label><ng-container i18n="@@common.description">Description</ng-container> <ng-container i18n="@@users.idx.used-by-ui">(Used by the UI)</ng-container></label>
             <input [(ngModel)]="currentPresetValueDescription" nz-input>
           </div>
         </div>
         <div class="preset-value-add">
-          <button nz-button nzSize="default" nzType="primary" (click)="addPropPresetValue()" [disabled]="currentPresetValueKey.trim().length === 0 || currentPresetValueDescription.trim().length === 0">
-            添加
-          </button>
+          <button nz-button nzSize="default" nzType="primary" (click)="addPropPresetValue()" [disabled]="currentPresetValueKey.trim().length === 0 || currentPresetValueDescription.trim().length === 0" i18n="@@common.add">Add</button>
         </div>
       </div>
       <ng-container *ngIf="currentUserPropRow.presetValues.length > 0">
@@ -250,15 +248,15 @@
             <nz-list-item *ngFor="let presetValue of currentUserPropRow.presetValues" class="preset-value">
               <div>
                 <div class="value-item"><div>Key</div>: &nbsp; <span nz-tooltip="{{ presetValue.value }}" nzTooltipPlacement="right">{{ presetValue.value }}</span></div>
-                <div class="value-item"><div>描述</div>: &nbsp;<span nz-tooltip="{{ presetValue.description }}" nzTooltipPlacement="right">{{ presetValue.description }}</span></div>
+                <div class="value-item"><div i18n="@@common.description">Description</div>: &nbsp;<span nz-tooltip="{{ presetValue.description }}" nzTooltipPlacement="right">{{ presetValue.description }}</span></div>
               </div>
               <button nz-button nzType="default" [nzSize]="'large'" (click)="removePropPresetValue(presetValue)"><i nz-icon nzType="close"></i></button>
             </nz-list-item>
           </nz-list>
         </div>
         <label class="use-preset-values-only-label" nz-checkbox [(ngModel)]="currentUserPropRow.usePresetValuesOnly">
-          要求用户在规则中使用<span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentUserPropRow.name}}</span>时只能从预定义值中选择
-          <i nz-icon nzType="icons:icon-warning" nz-tooltip="勾选并保存后之前在开关或用户组自定义规则中已经使用的但不在上边列表中的值仍然会被保留， 但是一旦该值被从规则中移除后将不能被重新选中，请谨慎操作"></i>
+          <ng-container i18n="@@uses.idx-force-user-to-use">Force user to select from preset valus when using</ng-container><span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentUserPropRow.name}}</span><ng-container i18n="@@uses.idx-force-user-to-use-suffix"></ng-container>
+          <i nz-icon i18n-nz-tooltip="@@users.idx.once-saved-be-causion" nzType="icons:icon-warning" nz-tooltip="Once saved, the value used by rules of feature flag or segment but not in above list, would still be kept there, but if it is removed from the rule, you cannot select it again."></i>
         </label>
       </ng-container>
     </div>

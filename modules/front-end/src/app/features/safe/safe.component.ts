@@ -52,7 +52,7 @@ export class SafeComponent implements OnInit, OnDestroy {
       {
         title: $localize `:@@menu.users:Users`,
         icon: 'icons:icon-switch-user',
-        path: '/switch-user'
+        path: '/users'
       },
       {
         title: $localize `:@@menu.segments:Segments`,
