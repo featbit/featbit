@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-switch-user',
-  templateUrl: './switch-user.component.html',
-  styleUrls: ['./switch-user.component.less']
+  templateUrl: './users.component.html',
+  styleUrls: ['./users.component.less']
 })
-export class SwitchUserComponent implements OnInit {
+export class UsersComponent implements OnInit {
 
   constructor() { }
 

@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SwitchUserComponent } from './switch-user.component';
+import { IndexComponent } from './index.component';
 
-describe('SwitchUserComponent', () => {
-  let component: SwitchUserComponent;
-  let fixture: ComponentFixture<SwitchUserComponent>;
+describe('UserListComponent', () => {
+  let component: IndexComponent;
+  let fixture: ComponentFixture<IndexComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SwitchUserComponent ]
+      declarations: [ IndexComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SwitchUserComponent);
+    fixture = TestBed.createComponent(IndexComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

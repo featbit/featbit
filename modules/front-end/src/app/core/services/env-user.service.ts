@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { getCurrentProjectEnv } from '@utils/project-env';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/switch-user/types/featureflag-user";
+import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/users/types/featureflag-user";
 import { IUserType } from "@shared/types";
 import { IJsonContent } from "@features/safe/switch-manage/types/switch-new";
 

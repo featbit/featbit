@@ -7,7 +7,7 @@ import { IUserType } from "@shared/types";
 @Injectable({
   providedIn: 'root'
 })
-export class SwitchUserResolver implements Resolve<IUserType> {
+export class DetailsResolver implements Resolve<IUserType> {
 
   constructor(private userService: EnvUserService) { }
 

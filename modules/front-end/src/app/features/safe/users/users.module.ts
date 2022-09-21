@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { SwitchUserRoutingModule } from './switch-user-routing.module';
-import { SwitchUserComponent } from './switch-user.component';
-import { UserDetailComponent } from './user-detail/user-detail.component';
-import { UserListComponent } from './user-list/user-list.component';
+import { UsersRoutingModule } from './users-routing.module';
+import { UsersComponent } from './users.component';
+import { DetailsComponent } from './details/details.component';
+import { IndexComponent } from './index/index.component';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -20,7 +20,7 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
 import {CoreModule} from "@core/core.module";
 
 @NgModule({
-  declarations: [SwitchUserComponent, UserDetailComponent, UserListComponent],
+  declarations: [UsersComponent, DetailsComponent, IndexComponent],
     imports: [
       CommonModule,
       FormsModule,
@@ -30,7 +30,7 @@ import {CoreModule} from "@core/core.module";
       NzDrawerModule,
       NzButtonModule,
       NzSpinModule,
-      SwitchUserRoutingModule,
+      UsersRoutingModule,
       NzIconModule,
       NzGridModule,
       NzSelectModule,
@@ -39,4 +39,4 @@ import {CoreModule} from "@core/core.module";
       NzDividerModule
     ]
 })
-export class SwitchUserModule { }
+export class UsersModule { }

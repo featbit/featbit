@@ -7,10 +7,10 @@ import { IUserProp } from "@shared/types";
 
 @Component({
   selector: 'app-user-detail',
-  templateUrl: './user-detail.component.html',
-  styleUrls: ['./user-detail.component.less']
+  templateUrl: './details.component.html',
+  styleUrls: ['./details.component.less']
 })
-export class UserDetailComponent implements OnInit {
+export class DetailsComponent implements OnInit {
 
   $search: Subject<string> = new Subject();
 

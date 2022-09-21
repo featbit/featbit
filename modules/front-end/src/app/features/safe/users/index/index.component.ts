@@ -5,17 +5,17 @@ import { AccountService } from '@services/account.service';
 import { debounceTime } from 'rxjs/operators';
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { IUserProp, IUserType } from "@shared/types";
-import { EnvUserFilter } from "@features/safe/switch-user/types/featureflag-user";
+import { EnvUserFilter } from "@features/safe/users/types/featureflag-user";
 import { CURRENT_USER_FILTER_ATTRIBUTE } from "@utils/localstorage-keys";
 import { EnvUserService } from "@services/env-user.service";
 
 
 @Component({
-  selector: 'app-user-list',
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.less']
+  selector: 'app-user-index',
+  templateUrl: './index.component.html',
+  styleUrls: ['./index.component.less']
 })
-export class UserListComponent implements OnInit {
+export class IndexComponent implements OnInit {
   $search: Subject<void> = new Subject();
 
   currentEnvId: number;

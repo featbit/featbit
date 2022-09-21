@@ -13,8 +13,8 @@ const routes: Routes = [
         loadChildren: () => import("./switch-manage/switch-manage.module").then(m => m.SwitchManageModule)
       },
       {
-        path: 'switch-user',
-        loadChildren: () => import("./switch-user/switch-user.module").then(m => m.SwitchUserModule),
+        path: 'users',
+        loadChildren: () => import("./users/users.module").then(m => m.UsersModule),
         data: {
           breadcrumb: $localize `:@@users:Users`
         },
