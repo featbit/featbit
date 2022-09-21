@@ -17,16 +17,14 @@ export class IndexComponent implements OnInit, OnDestroy {
 
   private destory$: Subject<void> = new Subject();
 
-  public createModalVisible: boolean = false;             // 新建的弹窗显示
-  public isOkLoading: boolean = false;                    // 新建加载中动画
+  public createModalVisible: boolean = false;
+  public isOkLoading: boolean = false;
   public segmentName: string = '';
-  public isIntoing: boolean = false;                      // 是否点击了一个segment，防止路由切换慢的双击效果
+  public isIntoing: boolean = false;
 
   public deleteModalVisible: boolean = false;
   public currentDeletingSegment: ISegment;
   public currentDeletingSegmentFlagReferences: ISegmentFlagReference[] = [];
-
-  public segmentsSubscriptionFlag: string = "团队版";
 
   deleteValidation(segment: ISegment) {
     this.currentDeletingSegment = segment;
@@ -165,7 +163,6 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.$search.next();
   }
 
-  // 添加
   addSegment() {
     this.createModalVisible = true;
   }
@@ -175,30 +172,6 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.destory$.complete();
   }
 
-  // 关闭弹窗
-  public handleCancel() {
-    this.createModalVisible = false;
-  }
-
-  public handleOk() {
-    if(!this.segmentName.length) {
-      this.msg.error("请输入名称!");
-      return;
-    }
-    this.isOkLoading = true;
-
-    this.segmentService.create(this.segmentName, null)
-      .subscribe((result: ISegment) => {
-        this.segmentService.setCurrent(result);
-        this.toRouter(result.id);
-        this.isOkLoading = false;
-      }, errResponse => {
-        this.msg.error(errResponse.error);
-        this.isOkLoading = false;
-      });
-  }
-
-  // 点击进入对应开关详情
   public onIntoSegmentDetail(data: ISegment) {
     if(this.isIntoing) return;
     this.isIntoing = true;
@@ -206,7 +179,6 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.toRouter(data.id);
   }
 
-  // 路由跳转
   private toRouter(id: string) {
     this.router.navigateByUrl(`/segments/details/${encodeURIComponentFfc(id)}/targeting`);
   }
@@ -219,7 +191,6 @@ export class IndexComponent implements OnInit, OnDestroy {
     window.open(url, '_blank');
   }
 
-  // 转换本地时间
   getLocalDate(date: string) {
     if (!date) return '';
     return new Date(date);
