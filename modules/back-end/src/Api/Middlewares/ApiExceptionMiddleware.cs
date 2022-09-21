@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Application.Bases;
 
 namespace Api.Middlewares;
 
@@ -32,13 +33,23 @@ public class ApiExceptionMiddleware
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
-        context.Response.StatusCode = ex switch
-        {
-            ValidationException => StatusCodes.Status400BadRequest,
-            _ => StatusCodes.Status500InternalServerError
-        };
+        var httpResponse = context.Response;
 
-        var response = ApiResponse.Error(ex.Message);
-        await context.Response.WriteAsJsonAsync(response);
+        // validation exception
+        if (ex is ValidationException validationException)
+        {
+            httpResponse.StatusCode = StatusCodes.Status400BadRequest;
+
+            var errors = validationException.Errors.Select(x => x.ErrorCode);
+            var validationError = ApiResponse.Error(errors);
+            await httpResponse.WriteAsJsonAsync(validationError);
+
+            return;
+        }
+
+        // other exception
+        httpResponse.StatusCode = StatusCodes.Status500InternalServerError;
+        var error = ApiResponse.Error(ErrorCodes.InternalServerError);
+        await httpResponse.WriteAsJsonAsync(error);
     }
 }

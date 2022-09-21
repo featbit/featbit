@@ -4,6 +4,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 using Api.Controllers;
+using Application.Bases;
 using Application.Identity;
 
 namespace Application.IntegrationTests.Identity;
@@ -23,11 +24,7 @@ public class IdentityControllerTests : IClassFixture<IdentityApp>
         var request = new LoginByPassword();
         var response = await DoRequestAsync(request);
 
-        var validationError =
-            $"Validation failed: {Environment.NewLine} " +
-            $"-- Identity: identity is required Severity: Error{Environment.NewLine} " +
-            "-- Password: password is required Severity: Error";
-
+        var validationError = new[] { ErrorCodes.IdentityIsRequired, ErrorCodes.PasswordIsRequired };
         AssertHelpers.BadRequest(response, validationError);
     }
 
@@ -48,7 +45,7 @@ public class IdentityControllerTests : IClassFixture<IdentityApp>
         var content = await response.Content.ReadFromJsonAsync<ApiResponse>();
         Assert.NotNull(content);
         Assert.True(content.Success);
-        Assert.Empty(content.Message);
+        Assert.Empty(content.Errors);
         Assert.NotNull(content.Data);
     }
 

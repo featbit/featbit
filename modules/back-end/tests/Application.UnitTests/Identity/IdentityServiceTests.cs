@@ -63,7 +63,7 @@ public class IdentityServiceTests
         var loginResult = await _identityService.LoginByPasswordAsync(user.Identity, realPwd);
 
         Assert.True(loginResult.Success);
-        Assert.Empty(loginResult.Message);
+        Assert.Empty(loginResult.ErrorCode);
         Assert.NotEmpty(loginResult.Token);
     }
 }

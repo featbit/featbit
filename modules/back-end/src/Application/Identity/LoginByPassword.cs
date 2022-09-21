@@ -1,3 +1,4 @@
+using Application.Bases;
 using Application.Services;
 using Microsoft.Extensions.Logging;
 
@@ -5,9 +6,9 @@ namespace Application.Identity;
 
 public record LoginByPassword : IRequest<LoginResult>
 {
-    public string Identity { get; set; } = string.Empty;
+    public string Identity { get; init; } = string.Empty;
 
-    public string Password { get; set; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
 }
 
 public class LoginByPasswordValidator : AbstractValidator<LoginByPassword>
@@ -15,10 +16,10 @@ public class LoginByPasswordValidator : AbstractValidator<LoginByPassword>
     public LoginByPasswordValidator()
     {
         RuleFor(x => x.Identity)
-            .NotEmpty().WithMessage("identity is required");
+            .NotEmpty().WithErrorCode(ErrorCodes.IdentityIsRequired);
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithMessage("password is required");
+            .NotEmpty().WithErrorCode(ErrorCodes.PasswordIsRequired);
     }
 }
 

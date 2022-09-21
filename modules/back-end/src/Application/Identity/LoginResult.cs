@@ -1,19 +1,19 @@
 namespace Application.Identity;
 
-public record LoginResult
+public class LoginResult
 {
     public bool Success { get; private init; }
 
-    public string Message { get; private init; } = string.Empty;
+    public string ErrorCode { get; private init; } = string.Empty;
 
     public string Token { get; private init; } = string.Empty;
 
-    public static LoginResult Failed(string message)
+    public static LoginResult Failed(string errorCode)
     {
         var failed = new LoginResult
         {
             Success = false,
-            Message = message,
+            ErrorCode = errorCode,
             Token = string.Empty
         };
 
@@ -25,7 +25,7 @@ public record LoginResult
         var success = new LoginResult
         {
             Success = true,
-            Message = string.Empty,
+            ErrorCode = string.Empty,
             Token = token
         };
 

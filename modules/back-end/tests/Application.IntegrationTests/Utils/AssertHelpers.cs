@@ -6,7 +6,7 @@ namespace Application.IntegrationTests.Utils;
 
 public static class AssertHelpers
 {
-    public static void BadRequest(HttpResponseMessage? response, string? message = null)
+    public static void BadRequest(HttpResponseMessage? response, string[]? errors = null)
     {
         Assert.NotNull(response);
 
@@ -17,9 +17,11 @@ public static class AssertHelpers
 
         Assert.False(content.Success);
         Assert.Null(content.Data);
-        if (message != null)
+        if (errors != null && errors.Any())
         {
-            Assert.Equal(message, content.Message);
+            Assert.True(
+                errors.OrderBy(x => x).SequenceEqual(content.Errors.OrderBy(y => y))
+            );
         }
     }
 }

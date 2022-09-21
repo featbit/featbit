@@ -5,6 +5,7 @@ using Domain.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using Application.Bases;
 using Microsoft.Extensions.Options;
 using IdentityOptions = Domain.Identity.IdentityOptions;
 
@@ -70,13 +71,13 @@ public class IdentityService : IIdentityService
         var user = await _store.FindByIdentityAsync(identity);
         if (user == null)
         {
-            return LoginResult.Failed("identity not exist, please register first.");
+            return LoginResult.Failed(ErrorCodes.IdentityNotExist);
         }
 
         var passwordMatch = await CheckPasswordAsync(user, password);
         if (!passwordMatch)
         {
-            return LoginResult.Failed("identity/password not match.");
+            return LoginResult.Failed(ErrorCodes.IdentityPasswordMismatch);
         }
 
         var token = IssueToken(user);

@@ -4,7 +4,7 @@ public record ApiResponse
 {
     public bool Success { get; set; }
 
-    public string Message { get; set; } = string.Empty;
+    public IEnumerable<string> Errors { get; set; } = Array.Empty<string>();
 
     public object? Data { get; set; }
 
@@ -13,18 +13,20 @@ public record ApiResponse
         return new ApiResponse
         {
             Success = true,
-            Message = string.Empty,
+            Errors = Array.Empty<string>(),
             Data = data
         };
     }
 
-    public static ApiResponse Error(string error)
+    public static ApiResponse Error(IEnumerable<string> errors)
     {
         return new ApiResponse
         {
             Success = false,
-            Message = error,
+            Errors = errors,
             Data = null
         };
     }
+
+    public static ApiResponse Error(string error) => Error(new[] { error });
 }
