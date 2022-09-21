@@ -7,29 +7,28 @@
 
   <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
     <div class="item title">
-      <div class="label" i18n="@@iam.team.details.name">Name</div>
-      <div class="label">
+      <div class="label" i18n="@@common.name">Name</div>
+      <div class="value">
         <ng-container *ngIf="!isEditingTitle">
-          <div class="value" style="font-size:13px;">{{member.name ?? '--'}}</div>
+          <div [nz-tooltip] class="text">{{member.name ?? '--'}}</div>
           <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
         </ng-container>
         <ng-container *ngIf="isEditingTitle">
           <input nz-input placeholder="Name" i18n-placeholder="@@iam.team.details.name-placeholder" [(ngModel)]="member.name" />
-          <i class="edit-save" (click)="onSaveSwitch()" nz-icon nzType="icons:icon-save"
-                               style="margin-top: 3px; margin-left: 20px;"></i>
+          <i class="edit-save" (click)="onSaveSwitch()" nz-icon nzType="icons:icon-save"></i>
         </ng-container>
       </div>
     </div>
     <div class="item">
-      <div class="label" i18n="@@iam.team.details.Email">Email</div>
+      <div class="label" i18n="@@common.email">Email</div>
       <div class="value">{{member.email ?? '--'}}</div>
     </div>
     <div class="item">
-      <div class="label" i18n="@@iam.team.details.mobile">Mobile</div>
+      <div class="label" i18n="@@common.mobile">Mobile</div>
       <div class="value">{{member.phoneNumber ?? '--'}}</div>
     </div>
     <div class="item">
-      <div class="label" i18n="@@iam.team.details.rn">Resource name (RN)</div>
+      <div class="label" i18n="@@common.rn">Resource name (RN)</div>
       <div class="value">
         <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(member.resourceName)"></i>
         {{member.resourceName}}

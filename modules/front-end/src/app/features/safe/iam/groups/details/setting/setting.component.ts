@@ -38,7 +38,7 @@ export class SettingComponent implements OnInit {
   save() {
     this.groupService.update(this.group).subscribe(updated => {
       this.group = updated;
-      this.message.success("更新成功!");
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
     }, err => this.message.error(err.error));
   }
 
@@ -65,9 +65,9 @@ export class SettingComponent implements OnInit {
 
   deleteGroup() {
     this.groupService.delete(this.group.id).subscribe(() => {
-      this.message.success(`刪除成功`);
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.router.navigateByUrl(`/iam/groups`);
-    }, () => this.message.error('操作失败'))
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 
   resourceName() {
@@ -76,7 +76,7 @@ export class SettingComponent implements OnInit {
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success('复制成功')
+      () => this.message.success($localize `:@@common.copySuccess:Copied`)
     );
   }
 }

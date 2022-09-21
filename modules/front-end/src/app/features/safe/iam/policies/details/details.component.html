@@ -4,25 +4,19 @@
   </div>
   <nz-tabset nzLinkRouter class="tabs-container segment-flag">
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./permission']" queryParamsHandling="preserve">
-        权限
-      </a>
+      <a *nzTabLink nz-tab-link [routerLink]="['./permission']" queryParamsHandling="preserve" i18n="@@common.permissions">Permissions</a>
       <ng-template nz-tab>
         <permission></permission>
       </ng-template>
     </nz-tab>
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./team']" queryParamsHandling="preserve">
-        团队
-      </a>
+      <a *nzTabLink nz-tab-link [routerLink]="['./team']" queryParamsHandling="preserve" i18n="@@common.team">Team</a>
       <ng-template nz-tab>
         <policies-team></policies-team>
       </ng-template>
     </nz-tab>
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./groups']" queryParamsHandling="preserve">
-        组
-      </a>
+      <a *nzTabLink nz-tab-link [routerLink]="['./groups']" queryParamsHandling="preserve" i18n="@@common.groups">Groups</a>
       <ng-template nz-tab>
         <groups></groups>
       </ng-template>

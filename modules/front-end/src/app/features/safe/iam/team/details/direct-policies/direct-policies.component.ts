@@ -73,7 +73,7 @@ export class DirectPoliciesComponent implements OnInit {
       });
 
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-    }, () => this.message.error($localize `:@@common.remove-success:Operation failed`));
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`));
   }
 
   removePolicyFrom(policyId: string) {
@@ -87,7 +87,7 @@ export class DirectPoliciesComponent implements OnInit {
       });
 
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-    }, () => this.message.error($localize `:@@common.remove-success:Operation failed`));
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`));
   }
 
   navigateToPolicy(policyId: string) {

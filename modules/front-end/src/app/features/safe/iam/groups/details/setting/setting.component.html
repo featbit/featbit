@@ -6,30 +6,31 @@
   </ng-template>
 
   <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
-    <div class="title">
-      <ng-container *ngIf="!isEditingTitle">
-        <span [nz-tooltip]="group.name" class="text">{{group.name}}</span>
-        <i class="edit-save" nz-tooltip="编辑用户组名称" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
-      </ng-container>
-      <ng-container *ngIf="isEditingTitle">
-        <input nz-input placeholder="名称..." [(ngModel)]="group.name" />
-        <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
-      </ng-container>
+    <div class="item title">
+      <div class="label" i18n="@@common.name">Name</div>
+      <div class="value">
+        <ng-container *ngIf="!isEditingTitle">
+          <span [nz-tooltip]="group.name" class="text">{{group.name}}</span>
+          <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+        </ng-container>
+        <ng-container *ngIf="isEditingTitle">
+          <input nz-input placeholder="Name" i18n-placeholder="@@common.name" [(ngModel)]="group.name" />
+          <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
+        </ng-container>
+      </div>
     </div>
-    <div class="description" [class]="{editing: isEditingDescription}">
+    <div class="item description" [class]="{editing: isEditingDescription}">
       <ng-container *ngIf="!isEditingDescription">
         <span>{{group.description}}</span>
         <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
       </ng-container>
       <ng-container *ngIf="isEditingDescription">
-        <textarea nz-input placeholder="描述..." [(ngModel)]="group.description" [nzAutosize]="{ minRows: 3 }"></textarea>
+        <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="group.description" [nzAutosize]="{ minRows: 3 }"></textarea>
         <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
       </ng-container>
     </div>
     <div class="item">
-      <div class="label">
-        资源名
-      </div>
+      <div class="label" i18n="@@common.rn">Resource name (RN)</div>
       <div class="value">
         <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(resourceName())"></i>
         {{resourceName()}}
@@ -39,20 +40,18 @@
 
   <div class="block" *ngIf="!isLoading; else loadingTem;" >
     <div class="delete">
-      <button nz-button nzType="default" nz-popconfirm="删除后不可恢复，确定要删除么？"
+      <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
               nzPopconfirmPlacement="bottomRight"
               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
               (nzOnConfirm)="deleteGroup()" [nzIcon]="iconTplIamUser">
         <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
-        删除
+        <ng-container i18n="@@common.remove">Remove</ng-container>
       </button>
       <ng-template #iconTplIamUser>
         <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
       </ng-template>
     </div>
   </div>
-
-
 </section>
 
 

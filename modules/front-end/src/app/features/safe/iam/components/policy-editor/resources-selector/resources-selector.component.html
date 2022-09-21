@@ -1,23 +1,24 @@
 <div class="resources">
   <div class="top-title">
     <div class="prefix title">
-      <span>资源</span>
-      <span *ngIf="resourceType?.type === 'general'" style="display: inline-block;margin-left: 12px;">( 当资源类型为<span style="display:inline-block;padding: 0 5px; font-weight: 600">通用</span>时，只能选择一个资源。)</span>
+      <span i18n="@@iam.policies.details.resource">Resource</span>
+      <span *ngIf="resourceType?.type === 'general'" style="display: inline-block;margin-left: 12px;">( <ng-container i18n="@@iam.policies.details.when-resource-type-is">Can only select one resource</ng-container>)</span>
     </div>
     <div class="suffix">
-      <span>{{selectedResources.length}} 个资源</span>
+      <span>{{selectedResources.length}} <ng-container i18n="@@iam.policies.details.num-resource">Resource(s)</ng-container></span>
     </div>
   </div>
   <div class="selected-resources" *ngIf="selectedResources.length">
     <div class="resource" *ngFor="let rsc of selectedResources">
-      <div nz-tooltip="点击编辑" class="inner-box" (click)="openEditModal(rsc)">
+      <div i18n-nz-tooltip="@@common.click-to-edit" nz-tooltip="Click to edit" class="inner-box" (click)="openEditModal(rsc)">
         {{rsc.rn}}
       </div>
       <button nz-button nzType="default" [nzSize]="'large'" (click)="removeResource(rsc)"><i nz-icon nzType="close"></i></button>
     </div>
   </div>
   <nz-select [class]="{invalid: isInvalid}" #resourcesSelector
-             nzPlaceHolder="请选择资源"
+             i18n-nzPlaceHolder="@@iam.policies.details.select-resource"
+             nzPlaceHolder="Select resource"
              nzShowSearch
              nzServerSearch
              [(ngModel)]="resourceSelectModel"
@@ -34,7 +35,7 @@
       </nz-option>
     </ng-container>
     <nz-option *ngIf="isResourceLoading" nzDisabled nzCustomContent>
-      <i nz-icon nzType="loading" class="loading-icon"></i> 数据加载中...
+      <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
     </nz-option>
   </nz-select>
 </div>
@@ -44,34 +45,34 @@
           [nzCentered]="true"
           [nzContent]="modalContent"
           [nzFooter]="modalFooter" (nzOnCancel)="closeModal()">
-  <ng-template #modalTitle>设置资源名 (RN)</ng-template>
+  <ng-template #modalTitle><ng-container i18n="@@iam.policies.details.set-resource-name">Set resource name (RN)</ng-container></ng-template>
   <ng-template #modalContent>
     <div class="rsc-config-modal">
       <div>
-        资源名 (RN) 唯一标识敏捷开关的资源。敏捷开关中的每个数据都可看做是一个资源，比如项目、环境、开关等。
-        <span style="display: inline-block;font-weight: 600;">合法的资源名 (RN) 不可以包含英文冒号, {{'{'}} 以及 }。</span>
+        <ng-container i18n="@@iam.policies.details.resource-name-description">Resource name (RN) uniquely identify resources. Every data can be seen as a resource, Project, Environment and Feature flag for example.</ng-container>
+        <div style="display: inline-block;font-weight: 600;" i18n="@@iam.policies.details.legal-resource-name">Legal resource name (RN) cannot include {{'{'}} {{'}'}} and :</div>
       </div>
 
       <div class="edit-area">
         <div class="rn">
-          <div class="label">指定资源名 (RN)</div>
-          <input style="color: rgba(0, 0, 0, 0.85)" nz-input placeholder="资源名 (RN)" [(ngModel)]="currentRn.val" disabled="true"/>
+          <div class="label" i18n="@@common.resource-name">Resource name (RN)</div>
+          <input style="color: rgba(0, 0, 0, 0.85)" nz-input [(ngModel)]="currentRn.val" disabled="true"/>
         </div>
         <div *ngFor="let param of rscParams" class="config">
           <div class="label">{{param.placeholder.displayName}}</div>
-          <input nz-input placeholder="项目名称" [(ngModel)]="param.val" (ngModelChange)="vmValChanged()" [class]="{invalid: param.isInvalid}"/>
+          <input nz-input [(ngModel)]="param.val" (ngModelChange)="vmValChanged()" [class]="{invalid: param.isInvalid}"/>
           <label
             nz-checkbox
             [(ngModel)]="param.isAnyChecked"
             (ngModelChange)="isValAnyCheckedChanged(param)">
-            任意
+            <ng-container i18n="@@common.any">Any</ng-container>
           </label>
         </div>
       </div>
     </div>
   </ng-template>
   <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="closeModal()">取消</button>
-    <button nz-button nzType="primary" [disabled]="false" (click)="save()">确认</button>
+    <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" [disabled]="false" (click)="save()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>

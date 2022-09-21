@@ -79,7 +79,7 @@ export class GroupsComponent implements OnInit {
       });
 
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-    }, () => this.message.error($localize `:@@common.remove-success:Operation failed`));
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`));
   }
 
   removeFromGroup(groupId: string) {
@@ -93,6 +93,6 @@ export class GroupsComponent implements OnInit {
       });
 
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-    }, () => this.message.error($localize `:@@common.remove-success:Operation failed`));
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`));
   }
 }

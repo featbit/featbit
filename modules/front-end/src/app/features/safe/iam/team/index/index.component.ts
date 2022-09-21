@@ -69,10 +69,10 @@ export class IndexComponent implements OnInit {
 
   deleteMember(member: IMember) {
     this.memberService.delete(member.id).subscribe(() => {
-      this.message.success(`刪除成功`);
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
       this.pagedMember.totalCount--;
-    }, () => this.message.error('操作失败'))
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 
   memberDrawerVisible: boolean = false;
@@ -89,7 +89,7 @@ export class IndexComponent implements OnInit {
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success('复制成功')
+      () => this.message.success($localize `:@@common.copySuccess:Copied`)
     );
   }
 

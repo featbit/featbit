@@ -65,7 +65,7 @@ export class PolicyDrawerComponent implements OnInit {
       () => {
         this.isLoading = false;
         this.close.emit(true);
-        this.message.success('添加策略成功！');
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.form.reset();
       },
       _ => {

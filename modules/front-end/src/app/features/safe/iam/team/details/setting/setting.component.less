@@ -57,14 +57,13 @@
   }
 
   .title {
-    // display: flex;
-    align-items: center;
-    font-family: "Noto Sans S Chinese medium";
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 150%;
     color: @grey70-color;
 
+    .value {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
     .text {
       display: inline-block;
       white-space: nowrap;
@@ -76,7 +75,6 @@
     input {
       width: 221px;
       border-radius: 8px;
-      margin-top:7px;
     }
 
     i{

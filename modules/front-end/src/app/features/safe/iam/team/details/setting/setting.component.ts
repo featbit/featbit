@@ -48,7 +48,7 @@ export class SettingComponent implements OnInit {
     this.memberService.delete(this.member.id).subscribe(() => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.router.navigateByUrl(`/iam/users`);
-    }, () => this.message.error($localize `:@@common.remove-success:Operation failed`))
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 
   updateMember() {
@@ -56,7 +56,7 @@ export class SettingComponent implements OnInit {
       name: this.member.name
     }).subscribe(() => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-    }, () => this.message.error($localize `:@@common.remove-success:Operation failed`))
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 
   copyText(text: string) {

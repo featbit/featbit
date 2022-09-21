@@ -26,10 +26,10 @@
               >
       <thead>
       <tr>
-        <th style="min-width: 100px" i18n="@@iam.team.idx.name">Name</th>
-        <th i18n="@@iam.team.idx.email">Email</th>
-        <th i18n="@@iam.team.idx.mobile">Mobile</th>
-        <th i18n="@@iam.team.idx.rn">Resource name (RN)</th>
+        <th style="min-width: 100px" i18n="@@common.name">Name</th>
+        <th i18n="@@common.email">Email</th>
+        <th i18n="@@common.mobile">Mobile</th>
+        <th i18n="@@common.rn">Resource name (RN)</th>
         <th i18n="@@iam.team.idx.group">Group</th>
         <th i18n="@@iam.team.idx.initial-password">Initial password</th>
         <th i18n="@@common.actions">Actions</th>
@@ -64,7 +64,7 @@
           <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
           <ng-container *ngIf="canDelete(item)">
             <nz-divider nzType="vertical"></nz-divider>
-            <a style="color: #717D8A" i18n-nz-popconfirm="@@iam.team.idx.cannot-be-recovered"  nz-popconfirm="Can not be recovered, are you sure to remove it?"
+            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="Can not be recovered, are you sure to remove it?"
                nzPopconfirmPlacement="bottomRight"
                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                (nzOnConfirm)="deleteMember(item)" [nzIcon]="iconTplIamUser">

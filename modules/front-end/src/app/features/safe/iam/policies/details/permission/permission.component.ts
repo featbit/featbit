@@ -37,7 +37,7 @@ export class PermissionComponent implements OnInit {
 
   saveStatements(statements: IPolicyStatement[]) {
     this.policyService.updateStatements(this.policy.id, statements).subscribe(() => {
-      this.message.success('保存成功');
-    }, _ => this.message.error('保存失败'));
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    }, _ => this.message.error($localize `:@@common.operation-failed:Operation failed`));
   }
 }

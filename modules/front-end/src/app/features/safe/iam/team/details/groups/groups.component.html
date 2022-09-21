@@ -9,7 +9,7 @@
       </ng-template>
       <nz-select [(ngModel)]="filter.getAllGroups" (ngModelChange)="doSearch(true)">
         <nz-option [nzValue]="true" nzLabel="All groups" i18n-nzLabel="@@iam.team.details.all-groups"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="Goups including current team member" i18n-nzLabel="@@iam.team.details.current-groups"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="Groups including current team member" i18n-nzLabel="@@iam.team.details.current-groups"></nz-option>
       </nz-select>
     </div>
     <div class="table-wrapper">
@@ -24,7 +24,7 @@
                 (nzPageIndexChange)="doSearch()">
         <thead>
         <tr>
-          <th i18n="@@iam.team.details.name">Name</th>
+          <th i18n="@@common.name">Name</th>
           <th i18n="@@iam.team.details.description">Description</th>
           <th i18n="@@common.actions">Actions</th>
         </tr>

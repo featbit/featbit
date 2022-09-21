@@ -15,15 +15,13 @@
     margin-left: 16px;
   }
   .title {
-    display: flex;
-    align-items: center;
-    font-family: "Noto Sans S Chinese medium";
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 150%;
-    color: @grey80-color;
-    height: 30px;
+    color: @grey70-color;
 
+    .value {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
     .text {
       display: inline-block;
       white-space: nowrap;
@@ -31,9 +29,15 @@
       overflow: hidden;
       max-width: 221px;
     }
+
     input {
       width: 221px;
       border-radius: 8px;
+    }
+
+    i{
+      margin-left: 8px;
+      cursor: pointer;
     }
   }
 

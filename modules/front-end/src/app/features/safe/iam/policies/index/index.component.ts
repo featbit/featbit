@@ -6,7 +6,6 @@ import {Router} from "@angular/router";
 import {NzMessageService} from "ng-zorro-antd/message";
 import { IPagedPolicy, IPolicy, PolicyFilter, policyRn } from "@features/safe/iam/types/policy";
 import { PolicyService } from "@services/policy.service";
-import {IGroup} from "@features/safe/iam/types/group";
 
 @Component({
   selector: 'iam-users',
@@ -78,15 +77,15 @@ export class IndexComponent implements OnInit {
 
   delete(policy: IPolicy) {
     this.policyService.delete(policy.id).subscribe(() => {
-      this.message.success(`刪除成功`);
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.policies.items = this.policies.items.filter(it => it.id !== policy.id);
       this.policies.totalCount--;
-    }, () => this.message.error('操作失败'))
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success('复制成功')
+      () => this.message.success($localize `:@@common.copySuccess:Copied`)
     );
   }
 }

@@ -1,8 +1,8 @@
 <div class="actions">
   <div class="top-title">
-    <div class="prefix">操作</div>
+    <div class="prefix" i18n="@@common.action">Action</div>
     <div class="suffix">
-      <span>{{selectedActions.length}} 个操作</span>
+      <span>{{selectedActions.length}} <ng-container i18n="@@common.num-actions">Action(s)</ng-container></span>
     </div>
   </div>
   <div class="selected-actions" *ngIf="selectedActions.length">
@@ -14,7 +14,8 @@
     </div>
   </div>
   <nz-select [class]="{invalid: isInvalid}" #actionsSelector
-             nzPlaceHolder="请选择操作"
+             i18n-nzPlaceHolder="@@iam.policies.details.select-action"
+             nzPlaceHolder="Select action"
              nzShowSearch
              nzServerSearch
              [(ngModel)]="actionSelectModel"

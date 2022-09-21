@@ -1,17 +1,17 @@
-<message *ngIf="readonly" [type]="'warning'" [content]="'由敏捷开关托管的策略不能被修改'"></message>
+<message *ngIf="readonly" [type]="'warning'" i18n-content="@@iam.policies.details.managed-policies-cannot-be-modified" content="Managed policies cannot be modified"></message>
 <div class="operations">
   <button class="standard-btn copy-btn" nz-button nzType="primary" (click)="copyPolicy()">
     <i nz-icon nzType="icons:icon-copy"></i>
-    复制策略
+    <ng-container i18n="@@iam.policies.details.copy-policy">Copy policy</ng-container>
   </button>
   <button class="standard-btn" nz-button nzType="primary" (click)="saveStatements()">
     <i nz-icon nzType="icons:icon-save"></i>
-    保存设置
+    <ng-container i18n="@@common.save">Save</ng-container>
   </button>
 </div>
 <div class="policy-editor body-container standard-div" [class]="{ffcmanaged: readonly}">
   <div class="statements-banner">
-    <div class="title">权限</div>
+    <div class="title" i18n="@@common.permissions">Permissions</div>
     <i nz-icon *ngIf="!readonly" (click)="addStatement()" nzType="icons:icon-add-outline"></i>
   </div>
   <div class="statements-wrapper">
@@ -19,21 +19,20 @@
       <nz-card style="margin-bottom: 10px; border-radius: 20px">
         <div class="input-item" style="margin-top: 0;">
           <div style="display: flex; justify-content: space-between">
-            <div class="title">资源类型</div>
+            <div class="title" i18n="@@iam.policies.details.resource-type">Resource type</div>
             <div style="display:flex;justify-content: flex-end;">
               <button *ngIf="!readonly" class="action-btn" nz-button nzType="default" nzSize="small"
-                      nz-popconfirm="确定删除吗?"
+                      i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
                       nzPopconfirmPlacement="bottomRight"
                       (nzOnConfirm)="removeStatement(statement)">
                 <i nz-icon nzType="icons:icon-delete"></i>
-                删除
+                <ng-container i18n="@@common.remove">Remove</ng-container>
               </button>
             </div>
           </div>
 
           <nz-select class="extend"
                      nzShowSearch
-                     nzPlaceHolder="选择资源类型"
                      [compareWith]="statement.compareResourceType"
                      [(ngModel)]="statement.resourceType"
                      (ngModelChange)="statement.onResourceTypeChange()">
@@ -44,10 +43,10 @@
           <resources-selector [isInvalid]="statement.isResourcesInvalid" [selectedResources]="statement.selectedResources" [resourceType]="statement.resourceType" (onSelectedResourcesChange)="statement.onSelectedResourcesChange($event)"></resources-selector>
         </div>
         <div class="input-item">
-          <div class="title">允许或禁止操作</div>
-          <nz-select nzPlaceHolder="允许或禁止操作" [(ngModel)]="statement.effect">
-            <nz-option [nzLabel]="'允许操作'" [nzValue]="'allow'"></nz-option>
-            <nz-option [nzLabel]="'禁止操作'" [nzValue]="'deny'"></nz-option>
+          <div class="title" i18n="@@iam.policies.details.allow-or-deny">Allow or deny</div>
+          <nz-select i18n-nzPlaceHolder="@@iam.policies.details.allow-or-deny" nzPlaceHolder="Allow or deny" [(ngModel)]="statement.effect">
+            <nz-option [nzLabel]="'Allow'" i18n-nzLabel="@@iam.policies.details.allow" [nzValue]="'allow'"></nz-option>
+            <nz-option [nzLabel]="'Deny'" i18n-nzLabel="@@iam.policies.details.deny" [nzValue]="'deny'"></nz-option>
           </nz-select>
         </div>
         <div class="input-item">
