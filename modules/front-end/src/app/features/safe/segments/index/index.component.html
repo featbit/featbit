@@ -59,7 +59,7 @@
   <ng-template #modalContent>
     <form nz-form [formGroup]="segmentForm" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.name">名称</nz-form-label>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
         <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="segmentNameErrorTpl">
           <input nz-input formControlName="name" />
           <ng-template #segmentNameErrorTpl let-control>
@@ -80,7 +80,7 @@
   </ng-template>
 
   <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">取消</button>
+    <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
     <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!segmentForm.valid"
       (click)="createSegment()" i18n="@@common.save">Save</button>
   </ng-template>

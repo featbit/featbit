@@ -2558,6 +2558,7 @@
       </trans-unit>
       <trans-unit id="common.details" datatype="html">
         <source>Details</source>
+        <target>详情</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.html</context>
           <context context-type="linenumber">44</context>
@@ -2605,6 +2606,7 @@
       </trans-unit>
       <trans-unit id="iam.group.details.remove-policy-confirm" datatype="html">
         <source>Are you sure to remove the policy from the group?</source>
+        <target>确定将该策略从组中移除吗？</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.html</context>
           <context context-type="linenumber">49</context>
@@ -2612,6 +2614,7 @@
       </trans-unit>
       <trans-unit id="common.add" datatype="html">
         <source>Add</source>
+        <target>添加</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.html</context>
           <context context-type="linenumber">60</context>
@@ -2643,6 +2646,7 @@
       </trans-unit>
       <trans-unit id="common.rn" datatype="html">
         <source>Resource name (RN)</source>
+        <target>资源名 （RN）</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
           <context context-type="linenumber">33</context>
@@ -2670,6 +2674,7 @@
       </trans-unit>
       <trans-unit id="iam.groups.details.team-filter-placeholder" datatype="html">
         <source>Filter by mobile or Email</source>
+        <target>按电话或邮箱查找</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
           <context context-type="linenumber">5</context>
