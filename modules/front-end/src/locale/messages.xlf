@@ -448,6 +448,14 @@
           <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
           <context context-type="linenumber">31</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="common.operation-success" datatype="html">
         <source>Operation succeeded</source>
@@ -2308,6 +2316,10 @@
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.html</context>
           <context context-type="linenumber">54</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="common.rn" datatype="html">
         <source>Resource name (RN)</source>
@@ -2802,14 +2814,6 @@
           <context context-type="linenumber">5</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="3249513483374643425" datatype="html">
-        <source>Add</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">12</context>
-        </context-group>
-        <note priority="1" from="description">Add</note>
-      </trans-unit>
       <trans-unit id="common.last-updated" datatype="html">
         <source>Last updated</source>
         <context-group purpose="location">
@@ -2850,17 +2854,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
           <context context-type="linenumber">69</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="comon.description" datatype="html">
-        <source>Description</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">74</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">76</context>
         </context-group>
       </trans-unit>
       <trans-unit id="segment.idx.remove-segment" datatype="html">
