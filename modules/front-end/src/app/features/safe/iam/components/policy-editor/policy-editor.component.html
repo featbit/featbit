@@ -36,7 +36,7 @@
                      [compareWith]="statement.compareResourceType"
                      [(ngModel)]="statement.resourceType"
                      (ngModelChange)="statement.onResourceTypeChange()">
-            <nz-option *ngFor="let rt of resourcesTypes" [nzLabel]="rt.displayName" [nzValue]="rt"></nz-option>
+            <nz-option *ngFor="let rt of resourcesTypes" [nzLabel]="rt.displayName | T: rt.displayName: 'resource-type' " [nzValue]="rt"></nz-option>
           </nz-select>
         </div>
         <div class="input-item">
@@ -45,8 +45,8 @@
         <div class="input-item">
           <div class="title" i18n="@@iam.policies.details.allow-or-deny">Allow or deny</div>
           <nz-select i18n-nzPlaceHolder="@@iam.policies.details.allow-or-deny" nzPlaceHolder="Allow or deny" [(ngModel)]="statement.effect">
-            <nz-option [nzLabel]="'Allow'" i18n-nzLabel="@@iam.policies.details.allow" [nzValue]="'allow'"></nz-option>
-            <nz-option [nzLabel]="'Deny'" i18n-nzLabel="@@iam.policies.details.deny" [nzValue]="'deny'"></nz-option>
+            <nz-option [nzLabel]="'Allow' | T: 'Allow': 'operation'" [nzValue]="'allow'"></nz-option>
+            <nz-option [nzLabel]="'Deny' | T: 'Deny': 'operation'" [nzValue]="'deny'"></nz-option>
           </nz-select>
         </div>
         <div class="input-item">

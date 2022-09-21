@@ -46,22 +46,22 @@ export const resourcesTypes: ResourceType[] = [
   {
     type: ResourceTypeEnum.All,
     pattern: generalResourceRNPattern.all,
-    displayName: '全部'
+    displayName: 'All'
   },
   {
     type: ResourceTypeEnum.General,
     pattern: generalResourceRNPattern.project,
-    displayName: '通用'
+    displayName: 'General'
   },
   {
     type: ResourceTypeEnum.Project,
     pattern: 'project/{project}',
-    displayName: '项目'
+    displayName: 'Project'
   },
   {
     type: ResourceTypeEnum.Env,
     pattern: 'project/{project}:env/{env}',
-    displayName: '环境'
+    displayName: 'Environment'
   }
 ];
 
@@ -117,112 +117,112 @@ export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
     {
       id: uuidv4(),
       name: permissionActions.All,
-      displayName: '全部操作'
+      displayName: 'All'
     },
   ],
   [`${ResourceTypeEnum.General},account`]: [
     {
       id: uuidv4(),
       name: permissionActions.UpdateOrgName,
-      displayName: '修改机构名称'
+      displayName: 'Update org name'
     },
   ],
   [`${ResourceTypeEnum.General},iam`]: [
     {
       id: uuidv4(),
       name: permissionActions.CanManageIAM,
-      displayName: '权限管理'
+      displayName: 'IAM'
     },
   ],
   [`${ResourceTypeEnum.General},project`]: [
     {
       id: uuidv4(),
       name: permissionActions.ListProjects,
-      displayName: '查看项目列表'
+      displayName: 'List projects'
     },
     {
       id: uuidv4(),
       name: permissionActions.CreateProject,
-      displayName: '创建项目'
+      displayName: 'Create projects'
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteProject,
-      displayName: '删除项目'
+      displayName: 'Delete projects'
     },
     {
       id: uuidv4(),
       name: permissionActions.UpdateProjectInfo,
-      displayName: '修改项目信息'
+      displayName: 'Update project info'
     },
     {
       id: uuidv4(),
       name: permissionActions.CreateEnv,
-      displayName: '创建环境'
+      displayName: 'Create environment'
     },
     {
       id: uuidv4(),
       name: permissionActions.ListEnvs,
-      displayName: '查看环境列表'
+      displayName: 'List environments'
     },
     {
       id: uuidv4(),
       name: permissionActions.AccessEnvs,
-      displayName: '进入环境'
+      displayName: 'Access environments'
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteEnv,
-      displayName: '删除环境'
+      displayName: 'Delete environment'
     },
     {
       id: uuidv4(),
       name: permissionActions.UpdateEnvInfo,
-      displayName: '修改环境信息'
+      displayName: 'Update environment info'
     },
   ],
   [ResourceTypeEnum.Project]: [
     {
       id: uuidv4(),
       name: permissionActions.AccessEnvs,
-      displayName: '进入环境'
+      displayName: 'Access environments'
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteProject,
-      displayName: '删除项目'
+      displayName: 'Delete projects'
     },
     {
       id: uuidv4(),
       name: permissionActions.UpdateProjectInfo,
-      displayName: '修改项目'
+      displayName: 'Update project info'
     },
     {
       id: uuidv4(),
       name: permissionActions.ListEnvs,
-      displayName: '查看环境列表'
+      displayName: 'List environments'
     },
     {
       id: uuidv4(),
       name: permissionActions.CreateEnv,
-      displayName: '创建环境'
+      displayName: 'Create environment'
     }
   ],
   [ResourceTypeEnum.Env]: [
     {
       id: uuidv4(),
       name: permissionActions.AccessEnvs,
-      displayName: '进入环境'
+      displayName: 'Access environments'
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteEnv,
-      displayName: '删除环境'
+      displayName: 'Delete environments'
     },
     {
       id: uuidv4(),
       name: permissionActions.UpdateEnvInfo,
-      displayName: '修改环境信息'
+      displayName: 'Update environment info'
     }
   ]
 }
