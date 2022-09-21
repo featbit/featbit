@@ -137,7 +137,7 @@ export class PolicyEditorComponent {
       (p: IPolicy) => {
 
         this.policyService.updateStatements(p.id, statements).subscribe(() => {
-          this.message.success($localize `:@@common.copied:copied`);
+          this.message.success($localize `:@@common.copy-success:Copied`);
           this.router.navigateByUrl(`/iam/policies/${encodeURIComponentFfc(p.id)}/permission`);
         }, _ => this.message.error($localize `:@@common.operation-failed:Operation failed`));
       },
