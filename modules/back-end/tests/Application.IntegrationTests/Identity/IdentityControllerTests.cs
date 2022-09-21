@@ -1,14 +1,11 @@
-using System.Net;
-using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
-using Api.Controllers;
-using Application.Bases;
 using Application.Identity;
 
 namespace Application.IntegrationTests.Identity;
 
+[UsesVerify]
 public class IdentityControllerTests : IClassFixture<IdentityApp>
 {
     private readonly IdentityApp _app;
@@ -24,8 +21,7 @@ public class IdentityControllerTests : IClassFixture<IdentityApp>
         var request = new LoginByPassword();
         var response = await DoRequestAsync(request);
 
-        var validationError = new[] { ErrorCodes.IdentityIsRequired, ErrorCodes.PasswordIsRequired };
-        AssertHelpers.BadRequest(response, validationError);
+        await Verify(response);
     }
 
     [Fact]
@@ -36,20 +32,12 @@ public class IdentityControllerTests : IClassFixture<IdentityApp>
             Identity = TestUser.Identity,
             Password = TestUser.RealPassword
         };
-        
         var response = await DoRequestAsync(request);
-        
-        Assert.NotNull(response);
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var content = await response.Content.ReadFromJsonAsync<ApiResponse>();
-        Assert.NotNull(content);
-        Assert.True(content.Success);
-        Assert.Empty(content.Errors);
-        Assert.NotNull(content.Data);
+        await Verify(response).ScrubLinesWithReplace(x => x.Split('.').Length == 3 ? "[Scrubbed JWT]" : x);
     }
 
-    private async Task<HttpResponseMessage?> DoRequestAsync(LoginByPassword request)
+    private async Task<HttpResponseMessage> DoRequestAsync(LoginByPassword request)
     {
         var client = _app.CreateClient();
 
