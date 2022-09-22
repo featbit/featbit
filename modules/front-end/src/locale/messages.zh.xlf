@@ -462,6 +462,10 @@
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
           <context context-type="linenumber">62</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/users/details/details.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="common.validating" datatype="html">
         <source>Validating...</source>
@@ -1345,6 +1349,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
           <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/users/details/details.component.html</context>
+          <context context-type="linenumber">19</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.actions" datatype="html">
@@ -3789,6 +3797,22 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/switch-manage/switch-index/switch-index-routing.module.ts</context>
           <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.details.filter-by-property-name-or-value" datatype="html">
+        <source>Filter by property name or value</source>
+        <target>按属性名或属性值查找</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/users/details/details.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.details.property-value" datatype="html">
+        <source>Value</source>
+        <target>属性值</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/users/details/details.component.html</context>
+          <context context-type="linenumber">18</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.filter-by-property" datatype="html">

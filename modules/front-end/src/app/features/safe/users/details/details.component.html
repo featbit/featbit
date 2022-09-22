@@ -3,7 +3,7 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group style="width: 300px" [nzPrefix]="prefixIconSearch">
-          <input  nz-input type="text" placeholder="按属性名称或属性值筛选" [(ngModel)]="searchValue" (ngModelChange)="onSearch()">
+          <input  nz-input type="text" i18n-placeholder="@@users.details.filter-by-property-name-or-value" placeholder="Filter by property name or value" [(ngModel)]="searchValue" (ngModelChange)="onSearch()">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
@@ -14,9 +14,9 @@
       <nz-table #basicTable [nzData]="searchResult"  nzSize="small" nzFrontPagination>
         <thead>
         <tr>
-          <th>属性名称</th>
-          <th>属性值</th>
-          <th>属性备注</th>
+          <th i18n="@@common.name">Name</th>
+          <th i18n="@@users.details.property-value">Value</th>
+          <th i18n="@@common.comment">Comment</th>
         </tr>
         </thead>
         <tbody>
