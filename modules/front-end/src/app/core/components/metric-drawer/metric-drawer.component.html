@@ -4,27 +4,28 @@
   [nzVisible]="visible"
   nzPlacement="right"
   [nzWidth]="700"
-  nzTitle="Metric 信息"
+  nzTitle="Metric"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="metricForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired>名称</nz-form-label>
-        <nz-form-control nzErrorTip="名称不能为空">
-          <input type="text" nz-input formControlName="name" placeholder="实验名称"/>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control nzErrorTip="Metric name cannot be empty" i18n-nzErrorTip="@@expt.metric.name-cannot-be-empty">
+          <input type="text" nz-input formControlName="name" i18n-placeholder="@@common.name" placeholder="Name"/>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label>描述</nz-form-label>
+        <nz-form-label i18n="@@common.description">Description</nz-form-label>
         <nz-form-control>
-          <input type="text" nz-input formControlName="description" placeholder="对该试验的简要描述"/>
+          <input type="text" nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description"/>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label nzRequired>维护人</nz-form-label>
-        <nz-form-control nzErrorTip="维护人不能为空">
+        <nz-form-label nzRequired i18n="@@expt.metric.maintainer">Maintainer</nz-form-label>
+        <nz-form-control i18n-nzErrorTip="@@expt.metric.maintainer-cannot-be-empty" nzErrorTip="Maintainer cannot be empty">
           <nz-select
-            nzPlaceHolder="选择维护人"
+            i18n-nzPlaceHolder="@@expt.metric.select-maintainer"
+            nzPlaceHolder="Select maintainer"
             nzAllowClear
             nzShowSearch
             nzServerSearch
@@ -39,19 +40,19 @@
             </ng-container>
             <nz-option *ngIf="isMaintainersLoading" nzDisabled nzCustomContent>
               <i nz-icon nzType="loading" class="loading-icon"></i>
-              数据加载中...
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
             </nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-      <h3>事件相关信息</h3>
+      <h3 i18n="@@expt.metric.event-info">Event information</h3>
       <nz-form-item [ngStyle]="metricForm.value.eventType === customEventType ? { 'margin-bottom': '8px' } : {}">
-        <nz-form-label nzRequired>事件类型</nz-form-label>
-        <nz-form-control nzErrorTip="事件类型不能为空">
+        <nz-form-label nzRequired i18n="@@expt.overview.event-type">Event type</nz-form-label>
+        <nz-form-control i18n-nzErrorTip="@@expt.overview.event-type-cannot-be-empty" nzErrorTip="Event type cannot be empty">
           <nz-select formControlName="eventType" (ngModelChange)="onEventTypeChange($event)">
-            <nz-option [nzValue]="customEventType" nzLabel="Custom - 自定义事件"></nz-option>
-            <nz-option [nzValue]="pageViewEventType" nzLabel="Page view - 页面展示"></nz-option>
-            <nz-option [nzValue]="clickEventType" nzLabel="Click - 点击事件"></nz-option>
+            <nz-option [nzValue]="customEventType"  nzLabel="Custom"></nz-option>
+            <nz-option [nzValue]="pageViewEventType" nzLabel="PageView"></nz-option>
+            <nz-option [nzValue]="clickEventType" nzLabel="Click"></nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>
@@ -59,15 +60,15 @@
       <ng-container
         *ngIf="metricForm.value.eventType === pageViewEventType || metricForm.value.eventType === clickEventType">
         <nz-form-item *ngIf="metricForm.value.eventType === clickEventType">
-          <nz-form-label>Click - 点击事件的 Targets</nz-form-label>
-          <nz-form-control nzErrorTip="Click - 点击事件的 Targets! ">
-            <input type="text" nz-input formControlName="elementTargets" placeholder="一个或多个 CSS selector，中间用逗号(,)隔开，请确保不要使用中文逗号！"/>
+          <nz-form-label>Targets</nz-form-label>
+          <nz-form-control nzErrorTip="Targets">
+            <input type="text" nz-input formControlName="elementTargets" i18n-placeholder="@@expt.metric.target-selector" placeholder="One or more CSS selector, seperated by (,)"/>
           </nz-form-control>
         </nz-form-item>
         <nz-form-item formArrayName="targetUrls">
           <nz-form-label>
-            <span>目标页面 URL</span>
-            <i nz-tooltip="新增目标页面 URL" class="add-target-url-icon" (click)="addTargetUrl()" nz-icon nzType="icons:icon-add-outline"></i>
+            <span i18n="@@expt.metric.targeting-page-url">Targeting page URL</span>
+            <i class="add-target-url-icon" (click)="addTargetUrl()" nz-icon nzType="icons:icon-add-outline"></i>
           </nz-form-label>
           <nz-form-control
             class="target-url-form-control"
@@ -75,9 +76,9 @@
             nzErrorTip="URL！" formGroupName="{{idx}}">
             <div class="target-url-row">
               <nz-select formControlName="matchType">
-                <nz-option [nzLabel]="'字符串包含'" [nzValue]="substringUrlMatchType"></nz-option>
+                <nz-option i18n-nzLabel="@@expt.metric.string-including" nzLabel="String including" [nzValue]="substringUrlMatchType"></nz-option>
               </nz-select>
-              <input type="text" nz-input formControlName="url" placeholder="目标页面地址"/>
+              <input type="text" nz-input formControlName="url" i18n-placeholder="@@expt.metric.targeting-page-url" placeholder="Targeting page URL"/>
               <i (click)="removeTargetUrl(idx)" nz-icon nzType="icons:icon-delete"></i>
             </div>
           </nz-form-control>
@@ -87,39 +88,39 @@
         <nz-form-item>
           <nz-form-control>
             <nz-radio-group formControlName="customEventTrackOption" class="custom-event-option">
-              <label nz-radio [nzValue]="customEventTrackConversion">转化率</label>
-              <label nz-radio [nzValue]="customEventTrackNumeric">数值</label>
+              <label nz-radio [nzValue]="customEventTrackConversion" i18n="@@common.conversion">Conversion</label>
+              <label nz-radio [nzValue]="customEventTrackNumeric" i18n="@@common.numeric">Numeric</label>
             </nz-radio-group>
           </nz-form-control>
           <span class="radio-group-tip" *ngIf="metricForm.value.customEventTrackOption === customEventTrackNumeric">
             <i nz-icon nzType="info-circle"></i>
-            为了获得精确结果，数值型的实验要求在埋点时必须发送一个数值
+            <ng-container i18n="@@expt.metric.to-get-accurate-result-send-value-for-numeric">To obtain a accurate result, a numeraic value must be sent for numeric experiment</ng-container>
           </span>
         </nz-form-item>
         <nz-form-item>
-          <nz-form-label nzRequired>事件名称</nz-form-label>
-          <nz-form-control nzErrorTip="事件名称不能为空">
-            <input type="text" nz-input formControlName="eventName" placeholder="事件名称"/>
+          <nz-form-label nzRequired i18n="@@expt.metric.event-name">Event name</nz-form-label>
+          <nz-form-control i18n-nzErrorTip="@@expt.metric.event-name-cannot-be-empty" nzErrorTip="Event name cannot be empty">
+            <input type="text" nz-input formControlName="eventName" i18n-placeholder="@@expt.metric.event-name" placeholder="Event name"/>
           </nz-form-control>
-          <span class="input-tip">在代码中埋点时使用该事件名称</span>
+          <span class="input-tip" i18n="@@expt.metric.used-by-code">Used by code</span>
         </nz-form-item>
         <nz-form-item>
-          <nz-form-label nzRequired>计量单位</nz-form-label>
-          <nz-form-control nzErrorTip="计量单位不能为空">
-            <input type="text" nz-input formControlName="customEventUnit" placeholder="ms, 毫秒, 元, ￥ 等"/>
+          <nz-form-label nzRequired i18n="@@expt.metric.unit">Unit</nz-form-label>
+          <nz-form-control i18n-nzErrorTip="@@expt.metric.unit-cannot-be-empty" nzErrorTip="Unit cannot be empty">
+            <input type="text" nz-input formControlName="customEventUnit" i18n-placeholder="@@expt.metric.unit-exemple" placeholder="ms, $, kg etc."/>
           </nz-form-control>
         </nz-form-item>
         <nz-form-item>
-          <nz-form-label>实验胜出标准</nz-form-label>
-          <nz-form-control nzErrorTip="实验胜出标准">
+          <nz-form-label i18n="@@expt.metric.winning-criteria">Winning criteria</nz-form-label>
+          <nz-form-control i18n-nzErrorTip="@@expt.metric.winning-criteria" nzErrorTip="Winning criteria">
             <nz-select formControlName="customEventSuccessCriteria">
-              <nz-option [nzValue]="customEventSuccessCriteriaHigher" nzLabel="高于 基准特性"></nz-option>
-              <nz-option [nzValue]="customEventSuccessCriteriaLower" nzLabel="低于 基准特性"></nz-option>
+              <nz-option [nzValue]="customEventSuccessCriteriaHigher" i18n-nzLabel="@@expt.metric.higher-than-baseline" nzLabel="Higher than baseline"></nz-option>
+              <nz-option [nzValue]="customEventSuccessCriteriaLower" i18n-nzLabel="@@expt.metric.lower-than-baseline" nzLabel="Lower than baseline"></nz-option>
             </nz-select>
           </nz-form-control>
         </nz-form-item>
       </ng-container>
-      <button nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
+      <button nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
     </form>
   </ng-container>
   <ng-template #extra>

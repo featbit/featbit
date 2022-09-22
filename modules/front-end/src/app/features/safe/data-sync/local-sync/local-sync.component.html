@@ -1,24 +1,24 @@
-<nz-spin [nzSpinning]="isDownloading" nzTip="下载中...">
+<nz-spin [nzSpinning]="isDownloading" i18n-nzTip="@@downloading" nzTip="Downloading...">
   <div class="container">
     <div class="description" nz-typography>
-      数据同步只针对当前选择的项目和环境（ {{ projectEnv.projectName }} - {{ projectEnv.envName }} ）, 包括以下数据
+      <ng-container i18n="@@only-applies-to-current-project-env">Only applies to current project and environment (</ng-container> <span class="project-env">{{ projectEnv.projectName }} - {{ projectEnv.envName }}</span><ng-container i18n="@@including">), including</ng-container>
     </div>
     <div class="data-sync-list">
-      <nz-card  nzTitle="开关用户">
-        <p>包括当前环境下的所有开关用户。</p>
+      <nz-card i18n-nzTitle="@@users" nzTitle="Users">
+        <p i18n="@@including-all-users-of-current-env">Including all users of current environment.</p>
       </nz-card>
-      <nz-card  nzTitle="开关用户属性">
-        <p>包括当前环境下的所有自定义的用户属性。</p>
+      <nz-card i18n-nzTitle="@@user-properties" nzTitle="User properties">
+        <p i18n="@@including-all-customized-user-properties">Including all user properties of current environment.</p>
       </nz-card>
     </div>
     <div class="actions">
-      <button nz-tooltip="下载当前环境数据" class="standard-btn download-btn" (click)="onDownload()" nz-button nzType="primary">
+      <button i18n-nz-tooltip="@@download-data" nz-tooltip="Download data" class="standard-btn download-btn" (click)="onDownload()" nz-button nzType="primary">
         <i nz-icon nzType="icons:icon-download"></i>
-        下载
+        <ng-container i18n="@@download">Download</ng-container>
       </button>
-      <button nz-tooltip="上传当前环境数据" class="standard-btn upload-btn" (click)="openUploadForm()" nz-button nzType="primary">
+      <button i18n-nz-tooltip="@@upload-data" nz-tooltip="Upload data" class="standard-btn upload-btn" (click)="openUploadForm()" nz-button nzType="primary">
         <i nz-icon nzType="icons:icon-upload"></i>
-        上传
+        <ng-container i18n="@@upload">Upload</ng-container>
       </button>
     </div>
     <a style="visibility: hidden;" #downloadRef [href]="downloadUri" [download]="downloadFileName"></a>

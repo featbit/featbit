@@ -3,7 +3,7 @@
   [nzExtra]="extra"
   [nzVisible]="visible"
   nzPlacement="right"
-  [nzTitle]="isEditing?'编辑项目':'添加项目'"
+  [nzTitle]="title"
   [nzWidth]="500"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
@@ -12,20 +12,21 @@
     <nz-alert
       *ngIf="isEditing"
       nzType="warning"
-      nzDescription="修改项目名称后对其设置的权限可能会失效"
+      i18n-nzDescription="@@org.project.permissionMayInvalidAfterOperation"
+      nzDescription="Permission may become invalid after this operation"
       nzShowIcon
       nzIconType="icons:icon-warning"
     ></nz-alert>
 
     <form nz-form [formGroup]="projectForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired>项目名称</nz-form-label>
-        <nz-form-control nzErrorTip="项目名称不能为空">
-          <input type="text" nz-input formControlName="name" placeholder="新项目的名称"/>
+        <nz-form-label nzRequired i18n="@@org.project.projectName">Project name</nz-form-label>
+        <nz-form-control nzErrorTip="Project name is mandatory!" i18n-nzErrorTip="@@org.project.projectNameMandatory">
+          <input type="text" nz-input formControlName="name" placeholder="Project name" i18n-placeholder="@@org.project.projectNamePlaceholder"/>
         </nz-form-control>
       </nz-form-item>
     </form>
-    <button class="submit-btn" [disabled]="!canTakeAction()" (click)="doSubmit()" nz-button [nzType]="'primary'" [nzLoading]="isLoading">{{isEditing ? '更新' : '创建'}}</button>
+    <button class="submit-btn" [disabled]="!canTakeAction()" (click)="doSubmit()" nz-button [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>

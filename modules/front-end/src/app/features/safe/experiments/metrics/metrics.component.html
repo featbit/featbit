@@ -1,22 +1,22 @@
-<div class="body">
+<div class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="按名字查找" [(ngModel)]="searchText" (ngModelChange)="onSearch()">
+          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="searchText" (ngModelChange)="onSearch()">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
         <nz-select [(ngModel)]="showType">
-          <nz-option nzValue="" nzLabel="展示所有 Metric"></nz-option>
-          <nz-option [nzValue]="customEventType" nzLabel="展示自定义事件的 Metric"></nz-option>
+          <nz-option nzValue="" i18n-nzLabel="@@common.all" nzLabel="All"></nz-option>
+          <nz-option [nzValue]="customEventType" i18n-nzLabel="@@expt.metric.custom-event-metric" nzLabel="With custom event"></nz-option>
         </nz-select>
       </div>
 
       <button nz-button nzType="primary" (click)="onCreateOrEditClick()">
         <i nz-icon nzType="icons:icon-add"></i>
-        添加 Metric
+        <ng-container i18n="@@expt.metric.add-metric">Add Metric</ng-container>
       </button>
     </div>
 
@@ -32,10 +32,10 @@
         <thead>
         <tr>
           <th nzWidth="20%">Metric</th>
-          <th nzWidth="20%">事件类型</th>
-          <th nzWidth="20%">事件名称</th>
-          <th nzWidth="20%">维护人</th>
-          <th>操作</th>
+          <th nzWidth="20%" i18n="@@expt.metric.event-type">Event type</th>
+          <th nzWidth="20%" i18n="@@expt.metric.event-name">Event name</th>
+          <th nzWidth="20%" i18n="@@expt.metric.maintainer">Maintainer</th>
+          <th i18n="@@common.actions">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -44,13 +44,15 @@
           <td>
             <span class="tag">
               <ng-container *ngIf="data.eventType === customEventType">
-                自定义事件: {{ data.customEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
+                <ng-container i18n="@@common.custom-event">Custom: </ng-container>
+                <ng-container *ngIf="data.customEventTrackOption === customEventTrackConversion" i18n="@@common.conversion">Conversion</ng-container>
+                <ng-container *ngIf="data.customEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
               </ng-container>
               <ng-container *ngIf="data.eventType === pageViewEventType">
-                Page View: 转化率
+                Page View: <ng-container i18n="@@common.conversion">Conversion</ng-container>
               </ng-container>
               <ng-container *ngIf="data.eventType === clickEventType">
-                Click: 转化率
+                Click: <ng-container i18n="@@common.conversion">Conversion</ng-container>
               </ng-container>
             </span>
           </td>
@@ -67,15 +69,15 @@
           </td>
           <td>{{ data.maintainerName }}</td>
           <td>
-            <a style="color: #23AD7F" (click)="onCreateOrEditClick(data)">编辑</a>
+            <a style="color: #23AD7F" (click)="onCreateOrEditClick(data)" i18n="@@common.edit">Edit</a>
             <nz-divider nzType="vertical"></nz-divider>
             <a
               style="color: #717D8A"
-              nz-popconfirm="确定删除吗?"
+              i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
               nzPopconfirmPlacement="bottomRight"
               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
               (nzOnConfirm)="onDeleteClick(data, errorMsgsTpl)" [nzIcon]="iconTplDelete">
-              删除
+              <ng-container i18n="@@common.remove">Remove</ng-container>
             </a>
             <ng-template #iconTplDelete>
               <i nz-icon nzType="question-circle" nzTheme="fill"></i>

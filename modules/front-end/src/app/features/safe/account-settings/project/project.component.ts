@@ -172,7 +172,7 @@ export class ProjectComponent implements OnInit {
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.messageService.success('复制成功')
+      () => this.messageService.success($localize `:@@common.copy-success:Copied`)
     );
   }
 }

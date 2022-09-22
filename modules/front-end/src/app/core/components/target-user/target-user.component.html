@@ -2,13 +2,13 @@
     <div class="top-title">
         <div class="prefix">{{type}}</div>
         <div class="suffix">
-            <span>{{selectedUserDetailList.length}} 个用户</span>
+            <span>{{selectedUserDetailList.length}} <ng-container i18n="@@common.num-users">user(s)</ng-container></span>
             <!-- <i nz-icon nzType="more" nzTheme="outline"></i> -->
         </div>
     </div>
     <div class="selected-target-users" nz-row *ngIf="selectedUserDetailList.length">
       <div nz-col class="target-user" *ngFor="let user of selectedUserDetailList">
-        <div nz-tooltip="点击编辑" class="inner-box" (click)="openEditModal(user)">
+        <div i18n-nz-tooltip="@@common.click-to-edit" nz-tooltip="Click to edit" class="inner-box" (click)="openEditModal(user)">
           {{user.name}}
         </div>
         <button nz-button nzType="default" [nzSize]="'large'" (click)="removeUser(user)"><i nz-icon nzType="close"></i></button>
@@ -16,7 +16,8 @@
     </div>
     <nz-select
       [nzSize]="'large'"
-      nzPlaceHolder="请选择目标用户"
+      i18n-nzPlaceHolder="@@target-user.select-targeting-users"
+      nzPlaceHolder="Select targeting users"
       nzShowSearch
       nzServerSearch
       [compareWith]="compareWith"
@@ -32,13 +33,14 @@
           [nzLabel]="item.name"
           [nzHide]="isSelected(item)">
           <div class="user-selection-item">
-            <div class="title">{{ item.isNew ? '新建用户 "' + item.name + '"' : item.name }}</div>
+            <div class="title">
+              <ng-container *ngIf="item.isNew" i18n="@@common.new-user">Create user</ng-container> {{ item.name }}</div>
             <div class="digest">{{getUserDigest(item)}}</div>
           </div>
         </nz-option>
       </ng-container>
       <nz-option *ngIf="isLoading" nzDisabled nzCustomContent>
-        <i nz-icon nzType="loading" class="loading-icon"></i> 数据加载中...
+        <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
       </nz-option>
     </nz-select>
 </section>
@@ -49,7 +51,7 @@
           [nzContent]="editModalContent"
           [nzFooter]="editModalFooter"
           (nzOnCancel)="closeEditModal()">
-  <ng-template #modalTitle>编辑用户信息</ng-template>
+  <ng-template #modalTitle><ng-container i18n="@@common.edit-targeting-user">Edit targeting user</ng-container></ng-template>
   <ng-template #editModalContent>
     <div class="info-item">
       <div class="label">KeyId</div>
@@ -70,7 +72,7 @@
   </ng-template>
 
   <ng-template #editModalFooter>
-    <button nz-button nzType="default" (click)="closeEditModal()">取消</button>
-    <button nz-button nzType="primary" [nzLoading]="saving" (click)="save()">保存</button>
+    <button nz-button nzType="default" (click)="closeEditModal()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" [nzLoading]="saving" (click)="save()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>

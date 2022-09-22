@@ -21,13 +21,16 @@ export class ProjectDrawerComponent implements OnInit {
   isEditing: boolean = false;
 
   isLoading: boolean = false;
+  title: string;
 
   @Input()
   set project(project: IProject) {
     this.isEditing = !!project;
-    if (project) {
+    if (this.isEditing) {
+      this.title = $localize `:@@org.project.editProject:Edit project`;
       this.patchForm(project);
     } else {
+      this.title = $localize `:@@org.project.addProject:Add project`;
       this.resetForm();
     }
     this._project = project;
@@ -107,7 +110,7 @@ export class ProjectDrawerComponent implements OnInit {
           updatedProject => {
             this.isLoading = false;
             this.close.emit({isEditing: true, project: updatedProject});
-            this.message.success('更新成功！');
+            this.message.success($localize `:@@org.project.projectUpdateSuccess:Project successfully updated`);
           },
           _ => {
             this.isLoading = false;
@@ -120,7 +123,7 @@ export class ProjectDrawerComponent implements OnInit {
           createdProject => {
             this.isLoading = false;
             this.close.emit({isEditing: false, project: createdProject});
-            this.message.success('创建成功！');
+            this.message.success($localize `:@@org.project.projectCreateSuccess:Project successfully created`);
           },
           _ => {
             this.isLoading = false;

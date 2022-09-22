@@ -2,7 +2,7 @@
   <div class="annotations">
     <div class="annotation">
       <div class="legend">
-        <div>进行中</div>
+        <div i18n="@@expt.overview.in-progress">In Progress</div>
         <div>{{ getExptCountByStatus(3) }}</div>
       </div>
       <div class="icon">
@@ -11,7 +11,7 @@
     </div>
     <div class="annotation">
       <div class="legend">
-        <div>暂停</div>
+        <div i18n="@@expt.overview.paused">Paused</div>
         <div>{{ getExptCountByStatus(2) }}</div>
       </div>
       <div class="icon">
@@ -20,7 +20,7 @@
     </div>
     <div class="annotation">
       <div class="legend">
-        <div>未开始</div>
+        <div i18n="@@expt.overview.not-started">Not Started</div>
         <div>{{ getExptCountByStatus(1) }}</div>
       </div>
       <div class="icon">
@@ -33,7 +33,7 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="通过开关名字查找" [(ngModel)]="searchText" (ngModelChange)="onSearch()">
+          <input nz-input type="text" placeholder="Filter by feature flag name" i18n-placeholder="@@expt.overview.filter-by-ff-name" [(ngModel)]="searchText" (ngModelChange)="onSearch()">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
@@ -42,7 +42,7 @@
 
       <button nz-button nzType="primary" (click)="onCreateClick()">
         <i nz-icon nzType="icons:icon-add"></i>
-        添加实验
+        <ng-container i18n="@@expt.overview.add-expt">Add Experiment</ng-container>
       </button>
     </div>
     <div class="table-wrapper">
@@ -57,12 +57,12 @@
                 style="margin-top: 20px;">
         <thead>
         <tr>
-          <th>开关名称</th>
-          <th>Metric 名称</th>
-          <th>Metric 事件名称</th>
-          <th>Metric 事件类型</th>
-          <th>当前状态</th>
-          <th nzAlign="center">操作</th>
+          <th i18n="@@expt.overview.ff-name">Feature flag name</th>
+          <th i18n="@@expt.overview.metric-name">Metric name</th>
+          <th i18n="@@expt.overview.event-name">Event name</th>
+          <th i18n="@@expt.overview.event-type">Event type</th>
+          <th i18n="@@expt.overview.status">Status</th>
+          <th nzAlign="center" i18n="@@common.actions">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -83,13 +83,15 @@
           <td>
             <span class="tag">
               <ng-container *ngIf="data.metric.eventType === customEventType">
-                自定义事件: {{ data.metric.customEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
+                <ng-container i18n="@@common.custom-event">Custom: </ng-container>
+                <ng-container *ngIf="data.metric.customEventTrackOption === customEventTrackConversion" i18n="@@common.conversion">Conversion</ng-container>
+                <ng-container *ngIf="data.metric.customEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
               </ng-container>
               <ng-container *ngIf="data.metric.eventType === pageViewEventType">
-                Page View: 转化率
+                PageView: <ng-container i18n="@@common.conversion">Conversion</ng-container>
               </ng-container>
               <ng-container *ngIf="data.metric.eventType === clickEventType">
-                Click: 转化率
+                Click: <ng-container i18n="@@common.conversion">Conversion</ng-container>
               </ng-container>
             </span>
           </td>
@@ -98,11 +100,11 @@
             <div *ngIf="data.status === 2" class="expt-status paused"></div>
             <div *ngIf="data.status === 1" class="expt-status not-started"></div>
             <div>
-              {{data.statusName}}
+              {{data.status | T: data.status: 'expt-status'}}
             </div>
           </td>
           <td style="text-align: center">
-            <a (click)="goToFeatureFlag(data.featureFlagId)">查看开关</a>
+            <a (click)="goToFeatureFlag(data.featureFlagId)" i18n="expt.overview.check-result">Check result</a>
           </td>
         </tr>
         </tbody>

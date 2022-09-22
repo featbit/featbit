@@ -137,25 +137,25 @@ export class PolicyEditorComponent {
       (p: IPolicy) => {
 
         this.policyService.updateStatements(p.id, statements).subscribe(() => {
-          this.message.success('复制成功！');
+          this.message.success($localize `:@@common.copy-success:Copied`);
           this.router.navigateByUrl(`/iam/policies/${encodeURIComponentFfc(p.id)}/permission`);
-        }, _ => this.message.error('复制失败'));
+        }, _ => this.message.error($localize `:@@common.operation-failed:Operation failed`));
       },
       _ => {
-        this.message.success('复制失败！');
+        this.message.success($localize `:@@common.operation-failed:Operation failed`);
       }
     )
   }
 
   saveStatements() {
     if (this.readonly) {
-      this.message.warning('由敏捷开关托管的策略不能被修改');
+      this.message.warning($localize `:@@iam.policies.details.managed-policies-cannot-be-modified:Managed policies cannot be modified`);
       return;
     }
 
     const isInvalid = this.statements.map(statement => statement.validate()).find(v => v);
     if (isInvalid) {
-      this.message.error('请确保已设置所有权限的资源和操作');
+      this.message.error($localize `:@@iam.policies.details.assure-resource-operation:Make sure resource and operation are set for all permissions`);
     } else {
       const payload = this.statements.map(statement => statement.getOutput());
       this.saveStatementsEvent.emit(payload);

@@ -5,30 +5,27 @@ import { IAMComponent } from './iam.component';
 const routes: Routes = [
   {
     path: '',
-    data: {
-      breadcrumb: '权限管理'
-    },
     component: IAMComponent,
     children: [
       {
         path: 'users',
-        loadChildren: () => import("./users/users.module").then(m => m.UsersModule),
+        loadChildren: () => import("./team/team.module").then(m => m.TeamModule),
         data: {
-          breadcrumb: '权限管理 - 团队'
+          breadcrumb: $localize `:@@ff.routing.team.pageTitle:IAM - Team`
         },
       },
       {
         path: 'groups',
         loadChildren: () => import("./groups/groups.module").then(m => m.GroupsModule),
         data: {
-          breadcrumb: '权限管理 - 组'
+          breadcrumb: $localize `:@@ff.routing.groups.pageTitle:IAM - Groups`
         },
       },
       {
         path: 'policies',
         loadChildren: () => import("./policies/policies.module").then(m => m.PoliciesModule),
         data: {
-          breadcrumb: '权限管理 - 策略'
+          breadcrumb: $localize `:@@ff.routing.policies.pageTitle:IAM - Policies`
         },
       },
     ]

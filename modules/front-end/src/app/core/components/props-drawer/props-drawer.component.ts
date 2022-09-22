@@ -86,10 +86,10 @@ export class PropsDrawerComponent {
         row.isSaving = false;
         row.isEditing = false;
 
-        this.message.success('添加成功');
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       }, () => {
         row.isSaving = false;
-        this.message.error('添加失败');
+        this.message.error($localize `:@@common.operation-failed:Operation failed`);
       });
   }
 
@@ -99,18 +99,18 @@ export class PropsDrawerComponent {
     this.envUserPropService.archiveTag(row.id).subscribe(() => {
       this.tags = this.tags.filter(tags => tags.id !== row.id);
       row.isDeleting = false;
-      this.message.success('删除成功');
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
     }, _ => {
       row.isDeleting = false;
-      this.message.error('删除失败');
+      this.message.error($localize `:@@common.operation-failed:Operation failed`);
     });
   }
 
   selectTag(row: IUserTag, value: string) {
     // newly created tag
-    if (value.startsWith('新建属性 ')){
+    if (value.startsWith($localize `:@@users.add-property:Create property `)){
       const propName = value
-        .replace('新建属性 ', '')
+        .replace($localize `:@@users.add-property:Create property `, '')
         .replace(/'/g, '');
 
       const newProp: IUserProp = {
@@ -125,8 +125,8 @@ export class PropsDrawerComponent {
       };
 
       this.envUserPropService.upsertProp(newProp).subscribe(() => {
-        this.message.success(`新建属性 ${propName} 成功`)
-      }, _ => this.message.error(`新建属性 ${propName} 失败`));
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`)
+      }, _ => this.message.error($localize `:@@common.operation-failed:Operation failed`));
 
       this.props = [...this.props, newProp];
       row.userProperty = propName;
@@ -146,7 +146,8 @@ export class PropsDrawerComponent {
     }
 
     if (this.tagProps.findIndex(x => x.startsWith(value)) === -1) {
-      this.tagProps = [`新建属性 '${value}'`];
+      const newProperty = $localize `:@@users.add-property:Create property `;
+      this.tagProps = [`${newProperty}'${value}'`];
     }
   }
 
@@ -188,20 +189,20 @@ export class PropsDrawerComponent {
     }
 
     this.envUserPropService.upsertProp(row).subscribe(() => {
-      this.message.success(row.isDigestField ? `标记成功` : '取消标记成功');
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
     }, _ => {
-      this.message.error('修改失败');
+      this.message.error($localize `:@@common.operation-failed:Operation failed`);
     });
   }
 
   saveProp(row: IUserProp, successCb?: Function) {
     if (!row.name) {
-      this.message.warning('属性名称不能为空');
+      this.message.warning($localize `:@@users.property-name-cannot-be-empty:Property name cannot be empty`);
       return;
     }
 
     if (this.props.find(x => x.name === row.name && x.id !== row.id)) {
-      this.message.warning(`属性 ${row.name} 已存在`);
+      this.message.warning($localize `:@@users.property-unavailable:Property exists`);
       return;
     }
 
@@ -211,11 +212,11 @@ export class PropsDrawerComponent {
       row.isSaving = false;
       row.isEditing = false;
 
-      this.message.success('保存成功');
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       successCb && successCb();
     }, _ => {
       row.isSaving = false;
-      this.message.error('保存失败');
+      this.message.error($localize `:@@common.operation-failed:Operation failed`);
     });
   }
 
@@ -229,11 +230,11 @@ export class PropsDrawerComponent {
 
     this.envUserPropService.archiveProp(row.id).subscribe(() => {
       this.props = this.props.filter(prop => prop.id !== row.id);
-      this.message.success("删除成功");
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       row.isDeleting = false;
     }, _ => {
       row.isDeleting = false;
-      this.message.error('删除失败');
+      this.message.error($localize `:@@common.operation-failed:Operation failed`);
     });
   }
 

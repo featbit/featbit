@@ -1,0 +1,26 @@
+<div class="body-container">
+  <div class="flag-container">
+    <user-setting></user-setting>
+  </div>
+  <nz-tabset nzLinkRouter class="tabs-container segment-flag">
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./groups']" queryParamsHandling="preserve" i18n="@@iam.team.details.groups">Groups</a>
+      <ng-template nz-tab>
+        <groups></groups>
+      </ng-template>
+    </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./direct-policies']" queryParamsHandling="preserve" i18n="@@iam.team.details.direct-policies">Direct policies</a>
+      <ng-template nz-tab>
+        <direct-policies></direct-policies>
+      </ng-template>
+    </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./inherited-policies']" queryParamsHandling="preserve" i18n="@@iam.team.details.inherited-policies">Inherited policies from groups</a>
+      <ng-template nz-tab>
+        <inherited-policies></inherited-policies>
+      </ng-template>
+    </nz-tab>
+  </nz-tabset>
+</div>
+

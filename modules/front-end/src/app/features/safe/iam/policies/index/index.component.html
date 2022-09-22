@@ -1,14 +1,14 @@
 <div class="table-content-area">
   <div class="table-search-area">
     <nz-input-group [nzPrefix]="prefixIconSearch">
-      <input nz-input type="text" placeholder="按名称筛选" [(ngModel)]="filter.name" (ngModelChange)="doSearch()">
+      <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch()" i18n-placeholder="@@iam.policies.idx.searchPlaceholder">
     </nz-input-group>
     <ng-template #prefixIconSearch>
       <i nz-icon nzType="icons:icon-search"></i>
     </ng-template>
     <button nz-button nzType="primary" (click)="showPolicyDrawer()">
       <i nz-icon nzType="icons:icon-add"></i>
-      添加
+      <ng-container i18n="@@iam.policies.idx.add">Add</ng-container>
     </button>
   </div>
   <div class="table-wrapper">
@@ -26,11 +26,11 @@
               >
       <thead>
       <tr>
-        <th>名称</th>
-        <th>类型</th>
-        <th>描述</th>
-        <th>资源名</th>
-        <th>操作</th>
+        <th i18n="@@common.name">Name</th>
+        <th i18n="@@common.type">Type</th>
+        <th i18n="@@common.description">Description</th>
+        <th i18n="@@common.rn">Resource name (RN)</th>
+        <th i18n="@@common.actions">Actions</th>
       </tr>
       </thead>
       <tbody>
@@ -46,14 +46,14 @@
           {{ resourceName(item) }}
         </td>
         <td>
-          <a class="primary-link-btn" (click)="navigateToDetail(item.id)">
-            详情
-          </a>
+          <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
           <nz-divider nzType="vertical"></nz-divider>
-          <a *ngIf="item.type !== 'FFCManaged'" style="color: #717D8A" nz-popconfirm="删除后不可恢复，确定要删除么？"
+          <a *ngIf="item.type !== 'FFCManaged'" style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="Can not be recovered, are you sure to remove it?"
              nzPopconfirmPlacement="bottomRight"
              [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-             (nzOnConfirm)="delete(item)" [nzIcon]="iconTplIamUser">删除</a>
+             (nzOnConfirm)="delete(item)" [nzIcon]="iconTplIamUser">
+            <ng-container i18n="@@common.remove">Remove</ng-container>
+          </a>
         </td>
       </tr>
       </tbody>

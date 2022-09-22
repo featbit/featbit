@@ -1,19 +1,19 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <nz-select class="middle-select" nzShowSearch nzAllowClear nzPlaceHolder="选择类别进行筛选" [(ngModel)]="filterTag"
+    <nz-select class="middle-select" nzShowSearch nzAllowClear i18n-nzPlaceHolder="@@filter-by-type" nzPlaceHolder="Filter by type" [(ngModel)]="filterTag"
       (ngModelChange)="filterRow()">
       <nz-option *ngFor="let item of tags" [nzLabel]="item" [nzValue]="item"></nz-option>
     </nz-select>
 
     <div class="search-inputs">
       <button class="sync-btn" nz-button nzType="primary" (click)="syncAll()" [nzLoading]="isSyncingAll"
-        nz-tooltip="对表格中现有条目进行数据同步" nzTooltipPlacement="top">
+        i18n-nz-tooltip="@@synchronize-to-all-addresses-in-table" nz-tooltip="Synchronize to all addresses in the table" nzTooltipPlacement="top">
         <i nz-icon nzType="icons:icon-sync"></i>
-        数据同步
+        <ng-container i18n="@@synchronize">Synchronize</ng-container>
       </button>
       <button nz-button nzType="primary" (click)="newRow()">
         <i nz-icon nzType="icons:icon-add" nzTheme="outline"></i>
-        新增同步地址
+        <ng-container i18n="@@add">Add</ng-container>
       </button>
     </div>
   </div>
@@ -22,11 +22,11 @@
       nzShowSizeChanger [nzPageSizeOptions]="[10, 20, 30]" [nzLoading]="isLoading">
       <thead>
         <tr>
-          <th nzWidth="10%">名称</th>
-          <th nzWidth="15%">类别</th>
-          <th nzWidth="30%">链接</th>
-          <th nzWidth="20%">操作</th>
-          <th style="text-align: center">备注</th>
+          <th nzWidth="10%" i18n="@@common.name">Name</th>
+          <th nzWidth="15%" i18n="@@common.type">Type</th>
+          <th nzWidth="30%" i18n="@@common.url">URL</th>
+          <th nzWidth="20%" i18n="@@common.actions">Actions</th>
+          <th style="text-align: center" i18n="@@common.comment">Comment</th>
         </tr>
       </thead>
       <tbody>
@@ -35,10 +35,10 @@
           <div *ngIf="row.isEditing, then editingRow else showRow"></div>
           <ng-template #editingRow>
             <td>
-              <input type="text" nz-input [(ngModel)]="row.key" placeholder="地址名称" />
+              <input type="text" nz-input [(ngModel)]="row.key" i18n-placeholder="@@name" placeholder="Name" />
             </td>
             <td>
-              <nz-select nzShowSearch nzAllowClear [nzDropdownRender]="newItemTpl" nzPlaceHolder="选择类别"
+              <nz-select nzShowSearch nzAllowClear [nzDropdownRender]="newItemTpl" i18n-nzPlaceHolder="@@select-type" nzPlaceHolder="Select type"
                 [(ngModel)]="row.tag">
                 <nz-option *ngFor="let item of tags" [nzLabel]="item" [nzValue]="item"></nz-option>
               </nz-select>
@@ -48,13 +48,13 @@
                   <input #addTagInput type="text" nz-input />
                   <a class="add-tag-link" (click)="newTag(addTagInput)">
                     <i nz-icon nzType="plus"></i>
-                    添加
+                    <ng-container i18n="@@add">Add</ng-container>
                   </a>
                 </div>
               </ng-template>
             </td>
             <td>
-              <input type="text" nz-input [(ngModel)]="row.value" placeholder="地址值" />
+              <input type="text" nz-input [(ngModel)]="row.value" i18n-placeholder="@@url" placeholder="URL" />
             </td>
           </ng-template>
           <ng-template #showRow>
@@ -86,7 +86,7 @@
             </button>
 
             <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger [nzIcon]="iconTpl"
-              nz-popconfirm="确定删除么?" (nzOnConfirm)="deleteRow(row)">
+              i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="deleteRow(row)">
               <i nz-icon nzType="delete" nzTheme="outline"></i>
               <ng-template #iconTpl>
                 <i nz-icon nzType="question-circle-o" style="color: red;"></i>
@@ -95,13 +95,13 @@
 
             <button nz-button nzSize="small" nzType="link" (click)="sync(row)" [nzLoading]="row.isSyncing">
               <i nz-icon [nzType]="'sync'"></i>
-              数据同步
+              <ng-container i18n="@@synchronize">Synchronize</ng-container>
             </button>
           </td>
 
-          <td>
-            <span style="color: #4CB287" *ngIf="row.syncResult?.success">成功, 同步时间 {{row.syncResult.time}}</span>
-            <span style="color: #ff7875" *ngIf="!row.syncResult?.success && row.syncResult?.time">失败, 同步时间
+          <td style="text-align: center">
+            <span style="color: #4CB287" *ngIf="row.syncResult?.success"><ng-container i18n>Succeeded at</ng-container> {{row.syncResult.time}}</span>
+            <span style="color: #ff7875" *ngIf="!row.syncResult?.success && row.syncResult?.time"><ng-container i18n="@@failure-sync-time">Failed at</ng-container>
               {{row.syncResult.time}}</span>
           </td>
         </tr>

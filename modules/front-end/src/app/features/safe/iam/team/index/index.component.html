@@ -1,0 +1,85 @@
+<div class="table-content-area">
+  <div class="table-search-area">
+    <nz-input-group [nzPrefix]="prefixIconSearch">
+      <input nz-input type="text" placeholder="Filter by mobile or Email" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch()" i18n-placeholder="@@iam.team.idx.searchPlaceholder">
+    </nz-input-group>
+    <ng-template #prefixIconSearch>
+      <i nz-icon nzType="icons:icon-search"></i>
+    </ng-template>
+    <button nz-button nzType="primary" (click)="openMemberDrawer()">
+      <i nz-icon nzType="icons:icon-add"></i>
+      <ng-container i18n="@@iam.team.idx.add">Add</ng-container>
+    </button>
+  </div>
+  <div class="table-wrapper">
+    <nz-table #table nzSize="small"
+              nzShowSizeChanger
+              [nzData]="pagedMember.items"
+              [nzFrontPagination]="false"
+              [nzLoading]="isLoading"
+              [nzTotal]="pagedMember.totalCount"
+              [(nzPageSize)]="filter.pageSize"
+              (nzPageSizeChange)="doSearch()"
+              [nzPageSizeOptions]="[10,20,30]"
+              [(nzPageIndex)]="filter.pageIndex"
+              (nzPageIndexChange)="doSearch()"
+              >
+      <thead>
+      <tr>
+        <th style="min-width: 100px" i18n="@@common.name">Name</th>
+        <th i18n="@@common.email">Email</th>
+        <th i18n="@@common.mobile">Mobile</th>
+        <th i18n="@@common.rn">Resource name (RN)</th>
+        <th i18n="@@iam.team.idx.group">Group</th>
+        <th i18n="@@iam.team.idx.initial-password">Initial password</th>
+        <th i18n="@@common.actions">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of table.data">
+        <td (click)="navigateToDetail(item.id)">{{ item.name ?? '--' }}</td>
+        <td (click)="navigateToDetail(item.id)">{{ item.email ?? '--' }}</td>
+        <td (click)="navigateToDetail(item.id)">{{ item.phoneNumber ?? '--' }}</td>
+        <td>
+          <i (click)="copyText(resourceName(item))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+          {{ resourceName(item) }}
+        </td>
+        <td>
+          <span class="tag" [nz-tooltip]="group.name" *ngFor="let group of item.groups.slice(0, 3)">
+            {{group.name}}
+          </span>
+          <ng-container *ngIf="item.groups.length > 3">
+            <span class="tag more-tags-item">
+              <ng-container i18n="@@iam.team.idx.etc">+</ng-container> {{ item.groups.length - 3 }} <ng-container i18n="@@iam.team.idx.entries">more</ng-container>
+            </span>
+          </ng-container>
+        </td>
+        <td>
+          <span *ngIf="item.initialPassword?.length > 0">
+            <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(item.initialPassword)"></i>
+            {{ item.initialPassword }}
+          </span>
+        </td>
+        <td>
+          <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
+          <ng-container *ngIf="canDelete(item)">
+            <nz-divider nzType="vertical"></nz-divider>
+            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="Can not be recovered, are you sure to remove it?"
+               nzPopconfirmPlacement="bottomRight"
+               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+               (nzOnConfirm)="deleteMember(item)" [nzIcon]="iconTplIamUser">
+              <ng-container i18n="@@common.remove">Remove</ng-container>
+            </a>
+          </ng-container>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+    <ng-template #iconTplIamUser>
+      <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+    </ng-template>
+  </div>
+</div>
+
+<app-member-drawer [visible]="memberDrawerVisible" (close)="memberDrawerClosed($event)"></app-member-drawer>
+

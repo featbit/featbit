@@ -6,9 +6,6 @@ import {IndexComponent} from "@features/safe/iam/groups/index/index.component";
 const routes: Routes = [
   {
     path: '',
-    data: {
-      breadcrumb: '权限管理 - 组'
-    },
     component: IndexComponent,
   }
 ];

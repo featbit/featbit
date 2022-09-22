@@ -21,7 +21,7 @@ export class IndexComponent implements OnInit {
   ) { }
 
   navigateToDetail(id: string) {
-    this.router.navigateByUrl(`/iam/groups/${encodeURIComponentFfc(id)}/users`);
+    this.router.navigateByUrl(`/iam/groups/${encodeURIComponentFfc(id)}/team`);
   }
 
   private search$ = new Subject();
@@ -75,15 +75,15 @@ export class IndexComponent implements OnInit {
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success('复制成功')
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }
 
   delete(group: IGroup) {
     this.groupService.delete(group.id).subscribe(() => {
-      this.message.success(`刪除成功`);
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.pagedGroup.items = this.pagedGroup.items.filter(it => it.id !== group.id);
       this.pagedGroup.totalCount--;
-    }, () => this.message.error('操作失败'))
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 }

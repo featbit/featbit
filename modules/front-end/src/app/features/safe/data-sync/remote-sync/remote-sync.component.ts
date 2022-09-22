@@ -110,7 +110,7 @@ export class RemoteSyncComponent implements OnInit {
       row.remark = '';
       row.isSaving = false;
       row.isEditing = false;
-      this.message.success('保存配置成功');
+      this.message.success($localize `Success`);
     });
   }
 
@@ -122,7 +122,7 @@ export class RemoteSyncComponent implements OnInit {
     let tasks = [];
     this.filteredSettings.forEach(row => {
       let task = this.dataSyncService.syncToRemote(row.id)
-        .pipe(catchError(error => of(`error: ${error.statusText} for url '${row.value}'`)));
+        .pipe(catchError(error => of(`error, sync url is '${row.value}'`)));
 
       tasks.push(task);
     });
@@ -144,7 +144,7 @@ export class RemoteSyncComponent implements OnInit {
       this.handleSyncResponse(row, response);
     }, error => {
       row.isSyncing = false;
-      this.message.error(`${error.status} ${error.statusText}, sync url is '${row.value}'`);
+      this.message.error(`error, sync url is '${row.value}'`);
     });
   }
 
@@ -178,7 +178,7 @@ export class RemoteSyncComponent implements OnInit {
       this.allSettings = this.allSettings.filter(d => d.id !== row.id);
       this.filteredSettings = this.filteredSettings.filter(d => d.id !== row.id);
 
-      this.message.success('删除配置成功');
+      this.message.success($localize `Success`);
 
       this.refreshTags(this.allSettings);
       row.isDeleting = false;

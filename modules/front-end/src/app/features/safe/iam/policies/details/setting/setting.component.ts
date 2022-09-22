@@ -42,15 +42,15 @@ export class SettingComponent implements OnInit {
 
   deletePolicy() {
     this.policyService.delete(this.policy.id).subscribe(() => {
-      this.message.success(`刪除成功`);
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.router.navigateByUrl(`/iam/policies`);
-    }, () => this.message.error('操作失败'))
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 
   saveSettings() {
     this.policyService.updateSetting(this.policy).subscribe(() => {
-      this.message.success("更新成功!");
-    }, errResponse => this.message.error(errResponse.error));
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    }, errResponse => this.message.error($localize `:@@common.operation-failed:Operation failed`));
   }
 
   isEditingTitle = false;
@@ -76,7 +76,7 @@ export class SettingComponent implements OnInit {
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success('复制成功')
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }
 }

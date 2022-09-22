@@ -2,17 +2,20 @@
   nzClosable="false"
   [nzExtra]="extra"
   [nzVisible]="visible"
-  nzPlacement="right" nzTitle="实验信息"
+  nzPlacement="right"
+  i18n-nzTitle="@@expt.overview.expt"
+  nzTitle="Experiment"
   [nzWidth]="500"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="experimentForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label>选择开关</nz-form-label>
-        <nz-form-control nzErrorTip="开关！">
+        <nz-form-label i18n="@@common.ff">Feature flag</nz-form-label>
+        <nz-form-control i18n-nzErrorTip="@@common.ff" nzErrorTip="Feature flag">
           <nz-input-group>
             <nz-select
-              nzPlaceHolder="选择开关"
+              i18n-nzPlaceHolder="@@expt.overview.select-ff"
+              nzPlaceHolder="Select feature flag"
               nzShowSearch
               nzServerSearch
               [compareWith]="compareWith"
@@ -30,7 +33,7 @@
               </ng-container>
               <nz-option *ngIf="isFeatureFlagsLoading" nzDisabled nzCustomContent>
                 <i nz-icon nzType="loading" class="loading-icon"></i>
-                数据加载中...
+                <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
             </nz-select>
             <ng-template #ffTemplate let-selected>
@@ -42,11 +45,11 @@
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label>选择 Metric</nz-form-label>
+        <nz-form-label>Metric</nz-form-label>
         <nz-form-control nzErrorTip="Metric!">
           <nz-input-group>
             <nz-select
-              nzPlaceHolder="选择 Metric"
+              nzPlaceHolder="Metric"
               nzShowSearch
               nzServerSearch
               formControlName="metricId"
@@ -58,18 +61,18 @@
               </ng-container>
               <nz-option *ngIf="isMetricsLoading" nzDisabled nzCustomContent>
                 <i nz-icon nzType="loading" class="loading-icon"></i>
-                数据加载中...
+                <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
             </nz-select>
           </nz-input-group>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label>选择基准特性</nz-form-label>
-        <nz-form-control nzErrorTip="基准特性！">
+        <nz-form-label i18n="@@common.baseline-variation">Baseline variation</nz-form-label>
+        <nz-form-control i18n-nzErrorTip="@@common.baseline-variation" nzErrorTip="Base variation">
           <nz-input-group>
             <div class="">
-              <nz-select nzPlaceHolder="选择基准特性" formControlName="baselineVariation">
+              <nz-select i18n-nzPlaceHolder="@@expt.overview.select-baseline-variation" nzPlaceHolder="Select baseline variation" formControlName="baselineVariation">
                 <nz-option
                   *ngFor="let o of currentVariations"
                   [nzValue]="o.localId"
@@ -80,7 +83,7 @@
           </nz-input-group>
         </nz-form-control>
       </nz-form-item>
-      <button nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading">确认</button>
+      <button nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
     </form>
   </ng-container>
   <ng-template #extra>

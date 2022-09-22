@@ -38,7 +38,7 @@ export class LocalSyncComponent {
     this.isDownloading = true;
     this.dataSyncService.download().subscribe(data => this.downloadFile(data), _ => {
       this.isDownloading = false;
-      this.message.error("数据下载失败！");
+      this.message.error($localize `Download failed`);
     });
   }
 

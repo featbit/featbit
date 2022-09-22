@@ -9,22 +9,16 @@ const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: '数据实验'
+      breadcrumb: $localize `:@@expt.expt:Experiments`
     },
     component: ExperimentsComponent,
     children: [
       {
         path: 'overview',
         component: OverviewComponent,
-        data: {
-          breadcrumb: '数据实验'
-        },
       }, {
         path: 'metrics',
         component: MetricsComponent,
-        data: {
-          breadcrumb: '数据实验'
-        },
       }, {
         path: '',
         redirectTo: '/experiments',

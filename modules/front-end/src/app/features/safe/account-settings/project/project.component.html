@@ -1,38 +1,38 @@
 <div class="standard-div">
-  <permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.ListProjects" [messageIfDeny]="'您没有查看项目列表的权限， 请联系账户管理员添加相关权限'">
+  <permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.ListProjects" i18n-messageIfDeny="@@org.project.projectListPermissionDenied" [messageIfDeny]="'You don\'t have permissions to read project list, please contact the admin to grant you the necessary permissions'">
     <div class="project-operations">
       <nz-input-group [nzPrefix]="orgIcon">
-        <input type="text" nz-input placeholder="按项目名字查找" [(ngModel)]="searchValue"/>
+        <input type="text" nz-input placeholder="Filter by name" [(ngModel)]="searchValue" i18n-placeholder="@@org.project.projectFilterPlacehoder"/>
         <ng-template #orgIcon>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
       </nz-input-group>
       <button class="standard-btn" nz-button nzType="primary" permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.CreateProject" (actionIfAllow)="onCreateProjectClick()">
         <i nz-icon nzType="icons:icon-add"></i>
-        添加项目
+        <ng-container i18n="@@org.project.addProject">Add project</ng-container>
       </button>
     </div>
     <div class="project-list">
       <div *ngFor="let project of projects | projectFilter: searchValue" class="project">
         <nz-card nzBorderless>
           <nz-descriptions nzTitle="{{project.name}}" [nzExtra]="extraTemplate"></nz-descriptions>
-          <permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.ListEnvs" [messageIfDeny]="'您没有查看该环境列表的权限， 请联系账户管理员添加相关权限'">
+          <permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.ListEnvs" i18n-messageIfDeny="@@org.project.envListPermissionDenied" [messageIfDeny]="'You don\'t have permissions to read env list, please contact the admin to grant you the necessary permissions'">
             <div class="env-list">
               <div *ngFor="let env of project.environments">
                 <div class="env">
                   <div class="env-basis">
                     <div>
-                      <div class="desc-name">环境名</div>
+                      <div class="desc-name" i18n="@@org.project.envName">Environment name</div>
                       <div class="desc-content">{{env.name}}</div>
                     </div>
                     <div>
-                      <div class="desc-name">描述</div>
+                      <div class="desc-name" i18n="@@org.project.description">Description</div>
                       <div class="desc-content">{{env.description}}</div>
                     </div>
                   </div>
                   <div class="env-secret">
                     <div>
-                      <div class="desc-name">Secret</div>
+                      <div class="desc-name" i18n="@@org.project.secret">Secret</div>
                       <div class="desc-content">
                         <nz-input-group [nzSuffix]="copySuffix">
                           <input readonly nz-input value="{{ env.secret }}">
@@ -47,14 +47,14 @@
                     <a
                        permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvInfo" (actionIfAllow)="onEditEnvClick(project, env)"
                     >
-                      <span style="color: #23AD7F;">编辑</span>
+                      <span style="color: #23AD7F;" i18n="@@org.project.edit">Edit</span>
                     </a>
                     <ng-container *ngIf="isEnvDeleteBtnVisible(env)">
                       <nz-divider nzType="vertical"></nz-divider>
-                      <a nz-popconfirm="确定删除吗?"
+                      <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
                          nzPopconfirmPlacement="bottomRight"
                          (nzOnConfirm)="onDeleteEnvClick(project, env)" [nzIcon]="iconTplEnv">
-                        <span style="color: #717D8A">删除</span>
+                        <span style="color: #717D8A" i18n="@@org.project.remove">Remove</span>
                       </a>
                     </ng-container>
                     <ng-template #iconTplEnv>
@@ -69,21 +69,22 @@
         <ng-template #extraTemplate>
           <button class="action-btn" nz-button nzType="default" nzSize="small" permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.UpdateProjectInfo" (actionIfAllow)="onEditProjectClick(project)">
             <i nz-icon nzType="icons:icon-edit"></i>
-            编辑
+            <ng-container i18n="@@org.project.edit">Edit</ng-container>
           </button>
           <button class="action-btn" nz-button nzType="default" nzSize="small"
                   *ngIf="currentProjectEnv?.projectId !== project.id"
-                  nz-popconfirm="确定删除吗?"
+                  i18n-nz-popconfirm="@@common.remove-confirm"
+                  nz-popconfirm="Can not be recovered, are you sure to remove it?"
                   nzPopconfirmPlacement="bottomRight"
                   (nzOnConfirm)="onDeleteProjectClick(project)">
             <i nz-icon nzType="icons:icon-delete"></i>
-            删除
+            <ng-container i18n="@@org.project.remove">Remove</ng-container>
           </button>
           <button class="action-btn" nz-button nzType="default" nzSize="small"
                   permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"
                   >
             <i style="color: #3CC798" nz-icon nzType="icons:icon-plus"></i>
-            添加环境
+            <ng-container i18n="@@org.project.addEnv">Add environment</ng-container>
           </button>
         </ng-template>
       </div>

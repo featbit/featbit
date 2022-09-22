@@ -3,15 +3,15 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
-          <input class="search-input" nz-input type="text" placeholder="按名称筛选" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
+          <input class="search-input" nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.groups.details.dp-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
       </div>
       <nz-select [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)" nzPlaceHolder="按状态筛选">
-        <nz-option [nzValue]="true" nzLabel="所有策略"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="当前组所拥有的策略"></nz-option>
+        <nz-option [nzValue]="true" nzLabel="All policies" i18n-nzLabel="@@iam.groups.details.all-policies"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="Policies binded to current group" i18n-nzLabel="@@iam.groups.details.current-policies"></nz-option>
       </nz-select>
     </div>
     <div class="table-wrapper">
@@ -26,10 +26,10 @@
                 (nzPageIndexChange)="doSearch()">
         <thead>
         <tr>
-          <th>名称</th>
-          <th>类型</th>
-          <th>描述</th>
-          <th>操作</th>
+          <th i18n="@@iam.team.details.name">Name</th>
+          <th i18n="@@iam.team.details.type">Type</th>
+          <th i18n="@@iam.team.details.description">Description</th>
+          <th i18n="@@common.actions">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -41,26 +41,23 @@
           </td>
           <td>{{item.description}}</td>
           <td>
-            <a class="primary-link-btn" (click)="navigateToPolicyDetail(item.id)">
-              查看
-            </a>
+            <a class="primary-link-btn" (click)="navigateToPolicyDetail(item.id)" i18n="@@common.details">Details</a>
             <nz-divider nzType="vertical"></nz-divider>
             <ng-container *ngIf="item.isGroupPolicy">
               <a style="color: #717D8A"
-                 nz-popconfirm="确定将该策略从组中移除么？"
+                 i18n-nz-popconfirm="@@iam.group.details.remove-policy-confirm"
+                 nz-popconfirm="Are you sure to remove the policy from the group?"
                  nzPopconfirmPlacement="bottomRight"
                  [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                  (nzOnConfirm)="removePolicy(item.id)" [nzIcon]="iconTplIamUser">
-                移除
+                <ng-container i18n="@@common.remove">Remove</ng-container>
               </a>
               <ng-template #iconTplIamUser>
                 <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
               </ng-template>
             </ng-container>
             <ng-container *ngIf="!item.isGroupPolicy">
-              <a class="primary-link-btn" (click)="addPolicy(item.id)">
-                添加
-              </a>
+              <a class="primary-link-btn" (click)="addPolicy(item.id)" i18n="@@common.add">Add</a>
             </ng-container>
           </td>
         </tr>

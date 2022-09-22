@@ -1,0 +1,70 @@
+<section class="body-container">
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <div class="search-inputs">
+        <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
+          <input class="search-input" nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.team.details.dp-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+      </div>
+      <nz-select [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)" nzPlaceHolder="按状态筛选">
+        <nz-option [nzValue]="true" nzLabel="All policies" i18n-nzLabel="@@iam.team.details.all-policies"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="Policies binded to current team member" i18n-nzLabel="@@iam.team.details.current-policies"></nz-option>
+      </nz-select>
+    </div>
+    <div class="table-wrapper">
+      <nz-table #table nzSize="small"
+                [nzData]="policies.items"
+                [nzFrontPagination]="false"
+                [nzLoading]="isLoading"
+                [nzTotal]="policies.totalCount"
+                [(nzPageSize)]="filter.pageSize"
+                (nzPageSizeChange)="doSearch()"
+                [(nzPageIndex)]="filter.pageIndex"
+                (nzPageIndexChange)="doSearch()"
+      >
+        <thead>
+        <tr>
+          <th i18n="@@iam.team.details.name">Name</th>
+          <th i18n="@@iam.team.details.type">Type</th>
+          <th i18n="@@iam.team.details.description">Description</th>
+          <th i18n="@@common.actions">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of table.data">
+          <td (click)="navigateToPolicy(item.id)">{{item.name}}</td>
+          <td>
+            <i *ngIf="item.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+            {{item.type | policyType}}
+          </td>
+          <td>{{item.description}}</td>
+          <td>
+            <a class="primary-link-btn" style="margin-right: 5px" (click)="navigateToPolicy(item.id)" i18n="@@common.details">Details</a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <ng-container *ngIf="item.isMemberPolicy">
+              <a style="color: #717D8A"
+                 i18n-nz-popconfirm="@@iam.team.details.remove-policy-from"
+                 nz-popconfirm="Are you sure to remove the policy from the member?"
+                 nzPopconfirmPlacement="bottomRight"
+                 [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                 (nzOnConfirm)="removePolicyFrom(item.id)" [nzIcon]="iconTplIamUser">
+                <ng-container i18n="@@common.remove">Remove</ng-container>
+              </a>
+              <ng-template #iconTplIamUser>
+                <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+              </ng-template>
+            </ng-container>
+            <ng-container *ngIf="!item.isMemberPolicy">
+              <a class="primary-link-btn" (click)="addPolicy(item.id)" i18n="@@common.add">Add</a>
+            </ng-container>
+          </td>
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+</section>
+

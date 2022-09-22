@@ -71,8 +71,8 @@ export class PoliciesComponent implements OnInit {
         return item;
       });
 
-      this.message.success('添加成功');
-    }, () => this.message.error('添加失败'));
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`));
   }
 
   removePolicy(policyId: string) {
@@ -85,8 +85,8 @@ export class PoliciesComponent implements OnInit {
         return item;
       });
 
-      this.message.success('移除成功');
-    }, () => this.message.error('移除失败'));
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`));
   }
 
   navigateToPolicyDetail(policyId: string) {

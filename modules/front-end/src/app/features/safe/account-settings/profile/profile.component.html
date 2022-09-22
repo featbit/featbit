@@ -1,10 +1,10 @@
 <div class="standard-div">
   <form nz-form [formGroup]="profileForm" class="" [nzLayout]="'vertical'" (ngSubmit)="updateProfile()">
     <nz-form-item>
-      <label for="email">邮箱</label>
-      <nz-form-control nzErrorTip="请输入邮箱！">
+      <label for="email" i18n="@@org.profile.email">Email</label>
+      <nz-form-control nzErrorTip="Email is mandatory!" i18n-nzErrorTip="@@org.profile.emailMandatory">
         <nz-input-group [nzPrefix]="emailPrefix">
-          <input id="email" type="text" nz-input formControlName="email" placeholder="邮箱"/>
+          <input id="email" type="text" nz-input formControlName="email" placeholder="Email" i18n-placeholder="@@org.profile.emailPlaceholder"/>
         </nz-input-group>
         <ng-template #emailPrefix>
           <i nz-icon nzType="icons:icon-email"></i>
@@ -12,10 +12,10 @@
       </nz-form-control>
     </nz-form-item>
     <nz-form-item>
-      <label for="phoneNumber">手机号</label>
-      <nz-form-control nzErrorTip="请输入手机号！">
+      <label for="phoneNumber" i18n="@@org.profile.mobile">Mobile</label>
+      <nz-form-control nzErrorTip="Mobile is mandatory!" i18n-nzErrorTip="@@org.profile.mobileMandatory">
         <nz-input-group [nzPrefix]="phonePrefix">
-          <input id="phoneNumber" type="text" nz-input formControlName="phoneNumber" placeholder="手机号"/>
+          <input id="phoneNumber" type="text" nz-input formControlName="phoneNumber" placeholder="Mobile" i18n-placeholder="@@org.profile.mobilePlaceholder"/>
         </nz-input-group>
         <ng-template #phonePrefix>
           <i nz-icon nzType="icons:icon-phone"></i>
@@ -25,7 +25,7 @@
 
     <button class="submit-btn" nz-button [nzType]="'primary'" [nzLoading]="isLoading">
       <i nz-icon nzType="icons:icon-sync"></i>
-      提交更新
+      <ng-container i18n="@@org.profile.save">Save</ng-container>
     </button>
   </form>
 </div>

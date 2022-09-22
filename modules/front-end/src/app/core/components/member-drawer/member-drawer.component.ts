@@ -130,7 +130,7 @@ export class MemberDrawerComponent {
       () => {
         this.isLoading = false;
         this.close.emit(true);
-        this.message.success('添加成员成功！');
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       },
       _ => {
         this.isLoading = false;

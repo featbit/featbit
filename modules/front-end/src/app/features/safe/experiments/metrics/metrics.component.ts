@@ -32,6 +32,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
   pageViewEventType: EventType = EventType.PageView;
   clickEventType: EventType = EventType.Click;
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
+  customEventTrackNumeric: CustomEventTrackOption = CustomEventTrackOption.Numeric;
 
   showType: '' | EventType = '';
 
@@ -76,7 +77,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         }
       }, _ => {
-        this.message.error("数据加载失败，请重试!");
+        this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
         this.isLoading = false;
       })
     });
@@ -123,15 +124,15 @@ export class MetricsComponent implements OnInit, OnDestroy {
     this.metricService.deleteMetric(this.currentProjectEnv.envId, metric.id).subscribe(res => {
       this.metricList = this.metricList.filter(m => metric.id !== m.id);
       this.isLoading = false;
-      this.message.success("成功删除 Metric!");
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
     }, err => {
       this.isLoading = false;
       if (!!err?.error?.messages) {
-        this.errorMsgTitle = '该 Metric 在以下开关的实验中被使用，请先删除实验';
+        this.errorMsgTitle = $localize `:@@expt.overview.metric-used-by-following-expt-remove-first:The Metric is used by the following experiments, please remove those experiments first`;
         this.errorMsgs = err?.error?.messages || [];
         this.message.create('', tpl, { nzDuration: 5000 });
       } else {
-        this.message.error('操作失败，请稍后重试！');
+        this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
       }
   });
   }

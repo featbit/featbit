@@ -9,10 +9,10 @@
     <div class="title">
       <ng-container *ngIf="!isEditingTitle">
         <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
-        <i class="edit-save" nz-tooltip="编辑用户组名称" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+        <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
       </ng-container>
       <ng-container *ngIf="isEditingTitle">
-        <input nz-input placeholder="名称..." [(ngModel)]="segmentDetail.name" />
+        <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
         <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
       </ng-container>
     </div>
@@ -22,7 +22,7 @@
         <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
       </ng-container>
       <ng-container *ngIf="isEditingDescription">
-        <textarea nz-input placeholder="描述..." [(ngModel)]="segmentDetail.description" [nzAutosize]="{ minRows: 3 }"></textarea>
+        <textarea nz-input i18n-placeholder="@@common.description" placeholder="Description" [(ngModel)]="segmentDetail.description" [nzAutosize]="{ minRows: 3 }"></textarea>
         <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
       </ng-container>
     </div>
@@ -31,7 +31,7 @@
     <div class="delete">
       <button nz-button nzType="default" (click)="openDeleteModal()">
         <i nz-icon nzType="icons:icon-delete"></i>
-        删除用户组
+        <ng-container i18n="@@segment.remove-segment">Remove segment</ng-container>
       </button>
     </div>
   </div>
@@ -44,14 +44,22 @@
           [nzFooter]="deleteModalFooter"
           (nzOnCancel)="closeDeleteModal()">
 
-  <ng-template #deleteModalTitle><span style="font-size:18px">删除用户组</span></ng-template>
+  <ng-template #deleteModalTitle><span style="font-size:18px"><ng-container i18n="@@segment.remove-segment">Remove segment</ng-container></span></ng-template>
 
   <ng-template #deleteModalContent>
-    <div style="font-size:15px">用户组<span style="font-weight:800;display:inline-block;margin:0 3px;">{{segmentDetail.name}}</span>将被永久删除，且删除后不可恢复！</div>
+    <div style="font-size:15px">
+      <ng-container i18n="@@common.segment">Segment</ng-container>
+      <span style="font-weight:800;display:inline-block;margin:0 3px;">{{segmentDetail.name}}</span>
+      <ng-container i18n="@@common.permanent-remove-msg">will be permanently removed, this operation cannot be recovered!</ng-container>
+    </div>
     <div *ngIf="flagReferences.length > 0" class="warning-message">
       <div class="warning">
         <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-        <div class="warning-content">该用户组在下边列出的 <span style="font-weight:800;display:inline-block;margin:0 3px;">{{flagReferences.length}}</span> 个开关中被引用，移除所有引用后方可删除！</div>
+        <div class="warning-content">
+          <ng-container i18n="@@segment.segment-used-by">This segment is used by following</ng-container>
+          <span style="font-weight:800;display:inline-block;margin:0 3px;"> {{flagReferences.length}} </span>
+          <ng-container i18n="@@segment.num-segment-remove-to-use">segment(s), remove all references before the segment can be safely removed!</ng-container>
+        </div>
       </div>
     </div>
     <div *ngFor="let flag of flagReferences" style="margin-top:5px">
@@ -60,7 +68,7 @@
   </ng-template>
 
   <ng-template #deleteModalFooter>
-    <button nz-button nzType="default" (click)="closeDeleteModal()">取消</button>
-    <button nz-button nzType="primary" [nzLoading]="deleting" [disabled]="flagReferences.length > 0" (click)="delete()">删除</button>
+    <button nz-button nzType="default" (click)="closeDeleteModal()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" [nzLoading]="deleting" [disabled]="flagReferences.length > 0" (click)="delete()" i18n="@@common.remove">Remove</button>
   </ng-template>
 </nz-modal>

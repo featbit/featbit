@@ -68,6 +68,7 @@ import {ServeMultistatesComponent} from "@core/components/find-rule/serve-multis
 import {RuleComponent} from "@core/components/find-rule/rule/rule.component";
 import {NzCardModule} from "ng-zorro-antd/card";
 import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-user-table/targeted-user-table.component";
+import {TranslationPipe} from "@core/pipes/translation.pipe";
 
 @NgModule({
   declarations: [
@@ -76,6 +77,7 @@ import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-us
     FfcDatePipe,
     PolicyTypePipe,
     ExtraUserColumnPipe,
+    TranslationPipe,
     PermissionCheckDirective,
 
     LocaleSwitcherComponent,
@@ -150,6 +152,7 @@ import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-us
     FfcDatePipe,
     PolicyTypePipe,
     ExtraUserColumnPipe,
+    TranslationPipe,
     PermissionCheckDirective,
 
     LocaleSwitcherComponent,

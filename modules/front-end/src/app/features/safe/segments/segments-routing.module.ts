@@ -6,7 +6,7 @@ const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: '用户组'
+      breadcrumb: $localize `:@@segments.segments:Segments`
     },
     component: SegmentsComponent,
     children: [
@@ -17,9 +17,6 @@ const routes: Routes = [
       {
         path: 'details/:id',
         loadChildren: () => import("./details/details.module").then(m => m.DetailsModule),
-        data: {
-          breadcrumb: '用户组'
-        }
       },
       {
         path: '',

@@ -1,20 +1,21 @@
 <div class="actions">
   <div class="top-title">
-    <div class="prefix">操作</div>
+    <div class="prefix" i18n="@@common.action">Action</div>
     <div class="suffix">
-      <span>{{selectedActions.length}} 个操作</span>
+      <span>{{selectedActions.length}} <ng-container i18n="@@common.num-actions">Action(s)</ng-container></span>
     </div>
   </div>
   <div class="selected-actions" *ngIf="selectedActions.length">
     <div nz-col class="action" *ngFor="let act of selectedActions">
       <div class="inner-box">
-        {{act.displayName}} ({{act.name}})
+        {{act.name | T: act.displayName : 'action'}} ({{act.name}})
       </div>
       <button nz-button nzType="default" [nzSize]="'large'" (click)="removeAction(act)"><i nz-icon nzType="close"></i></button>
     </div>
   </div>
   <nz-select [class]="{invalid: isInvalid}" #actionsSelector
-             nzPlaceHolder="请选择操作"
+             i18n-nzPlaceHolder="@@iam.policies.details.select-action"
+             nzPlaceHolder="Select action"
              nzShowSearch
              nzServerSearch
              [(ngModel)]="actionSelectModel"
@@ -25,10 +26,10 @@
       <nz-option
         nzCustomContent
         [nzValue]="action"
-        [nzLabel]="action.displayName"
+        [nzLabel]="action.name | T: action.displayName : 'action'"
         [nzHide]="isActionSelected(action)">
         <div class="action-selection-item">
-          <div class="title">{{ action.displayName }}</div>
+          <div class="title">{{ action.name | T: action.displayName: 'action'}}</div>
           <div class="digest">{{ getActionDigest(action) }}</div>
         </div>
       </nz-option>

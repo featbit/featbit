@@ -65,7 +65,7 @@ export class GroupDrawerComponent implements OnInit {
       () => {
         this.isSubmitting = false;
         this.close.emit(true);
-        this.message.success('添加成员成功！');
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.form.reset();
       },
       _ => {

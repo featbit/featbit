@@ -16,7 +16,7 @@ import { MessageQueueService } from '@services/message-queue.service';
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import featureFlagDiffer from '../../types/feature-flag-differ';
 import {USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP} from "@shared/constants";
-import {EnvUserFilter} from "@features/safe/switch-user/types/featureflag-user";
+import {EnvUserFilter} from "@features/safe/users/types/featureflag-user";
 
 @Component({
   selector: 'switch-targeting',

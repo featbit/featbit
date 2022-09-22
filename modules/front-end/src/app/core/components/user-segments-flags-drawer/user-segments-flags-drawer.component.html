@@ -7,15 +7,15 @@
   [nzWidth]="950"
   [nzVisible]="visible"
   (nzOnClose)="close.emit()">
-  <ng-template #drawTitle>开关和用户组：<span style="display:inline-block;padding: 0 5px; font-weight: 600">{{user?.name}} ({{user?.keyId}})</span></ng-template>
+  <ng-template #drawTitle><ng-container i18n="@@users.idx.ff-segments">Feature flags and segments</ng-container>: <span style="display:inline-block;padding: 0 5px; font-weight: 600">{{user?.name}} ({{user?.keyId}})</span></ng-template>
   <ng-container *nzDrawerContent>
     <nz-tabset class="no-bottom-line">
-      <nz-tab nzTitle="开关">
+      <nz-tab i18n-nzTitle="@@common.feature-flag" nzTitle="Feature flag">
         <div class="table-content-area">
           <div class="table-search-area">
             <div class="search-inputs">
               <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="按名称或 keyName 筛选" [(ngModel)]="flagFilter.name" (ngModelChange)="onSearchFlags()">
+                <input nz-input type="text" placeholder="Filter by name or keyName" i18n-placeholder="@@users.idx.filter-by-name-or-keyname" [(ngModel)]="flagFilter.name" (ngModelChange)="onSearchFlags()">
               </nz-input-group>
               <ng-template #prefixIconSearch>
                 <i nz-icon nzType="icons:icon-search"></i>
@@ -34,16 +34,16 @@
                       (nzPageIndexChange)="onSearchFlags()">
               <thead>
               <tr>
-                <th nzWidth="30%">名称</th>
+                <th nzWidth="30%" i18n="@@common.name">Name</th>
                 <th nzWidth="30%">KeyName</th>
-                <th nzWidth="30%">返回值</th>
-                <th>操作</th>
+                <th nzWidth="30%" i18n="@@common.variation">Variation</th>
+                <th i18n="@@common.actions">Actions</th>
               </tr>
               </thead>
               <tbody>
               <tr *ngFor="let item of flagstable.data">
                 <td>
-                  <span nz-tooltip="点击进入详情页">{{item.name}}</span>
+                  <span>{{item.name}}</span>
                 </td>
                 <td>
                   <i (click)="copyText($event, item.keyName)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
@@ -57,7 +57,7 @@
                   <i class="expand-icon" *ngIf="['json', 'string'].includes(item.variationDataType)" nz-icon nzType="expand" (click)="expandVariationOption(item.variation, item.variationDataType)"></i>
                 </td>
                 <td>
-                  <a style="color:#23AD7F;" (click)="onIntoFlagDetail(item)">详情</a>
+                  <a style="color:#23AD7F;" (click)="onIntoFlagDetail(item)" i18n="@@common.details">Details</a>
                 </td>
               </tr>
               </tbody>
@@ -66,12 +66,12 @@
         </div>
       </nz-tab>
 
-      <nz-tab nzTitle="用户组">
+      <nz-tab i18n-nzTitle="@@common.segments" nzTitle="Segments">
         <div class="table-content-area">
           <div class="table-search-area">
             <div class="search-inputs">
               <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="按名称筛选" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearchSegments()">
+                <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearchSegments()">
               </nz-input-group>
               <ng-template #prefixIconSearch>
                 <i nz-icon nzType="icons:icon-search"></i>
@@ -90,21 +90,21 @@
                       (nzPageIndexChange)="onSearchSegments()">
               <thead>
               <tr>
-                <th nzWidth="40%">名称</th>
-                <th nzWidth="40%">最近修改</th>
-                <th>操作</th>
+                <th nzWidth="40%" i18n="@@common.name">Name</th>
+                <th nzWidth="40%" i18n="@@common.last-updated">Last updated</th>
+                <th i18n="@@common.actions">Actions</th>
               </tr>
               </thead>
               <tbody>
               <tr *ngFor="let item of segstable.data">
                 <td>
-                  <span nz-tooltip="点击进入详情页">{{item.name}}</span>
+                  <span>{{item.name}}</span>
                 </td>
                 <td>
                   {{getLocalDate(item.updatedAt) | date: 'YYYY-MM-dd HH:mm:ss'}}
                 </td>
                 <td>
-                  <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)">详情</a>
+                  <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>
                 </td>
               </tr>
               </tbody>
@@ -128,15 +128,15 @@
   [nzFooter]="modalFooter"
   [(nzVisible)]="optionValueExpandVisible"
   (nzOnCancel)="optionValueExpandVisible=false">
-  <ng-template #modalTitle>开关返回值</ng-template>
+  <ng-template #modalTitle><ng-container i18n="@@common.variation"></ng-container></ng-template>
   <ng-template #modalContent>
     <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentVariationOption.variationValue" [nzEditorOption]="{ language: currentVariationDataType, theme: 'vs-dark' }"></nz-code-editor>
   </ng-template>
   <ng-template #modalFooter>
     <div style="display: flex;justify-content: space-between">
-      <button nz-button nzType="default" (click)="formatCode()">格式化</button>
+      <button nz-button nzType="default" (click)="formatCode()" i18n="@@common.format">Format</button>
       <div>
-        <button nz-button nzType="default" (click)="optionValueExpandVisible=false">关闭</button>
+        <button nz-button nzType="default" (click)="optionValueExpandVisible=false" i18n="@@common.close">Close</button>
       </div>
     </div>
   </ng-template>

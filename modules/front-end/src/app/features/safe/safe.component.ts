@@ -40,32 +40,32 @@ export class SafeComponent implements OnInit, OnDestroy {
   private setMenus(): void {
     this.menus = [
       {
-        title: $localize `Feature flags`,
+        title: $localize `:@@menu.FF:Feature flags`,
         icon: 'icons:icon-switch',
         path: '/switch-manage'
       },
       {
-        title: $localize `Archived feature flags`,
+        title: $localize `:@@menu.archivedFF:Archived feature flags`,
         icon: 'icons:icon-switch-archive',
         path: '/switch-archive'
       },
       {
-        title: $localize `Users`,
+        title: $localize `:@@menu.users:Users`,
         icon: 'icons:icon-switch-user',
-        path: '/switch-user'
+        path: '/users'
       },
       {
-        title: $localize `Segments`,
+        title: $localize `:@@menu.segments:Segments`,
         icon: 'icons:icon-segment',
         path: '/segments'
       },
       {
-        title: $localize `Experiments`,
+        title: $localize `:@@menu.experiments:Experiments`,
         icon: 'icons:icon-expt',
         path: '/experiments'
       },
       {
-        title: $localize `Data sync`,
+        title: $localize `:@@menu.data-sync:Data sync`,
         icon: 'icons:icon-data-sync',
         path: '/data-sync'
       },
@@ -73,27 +73,27 @@ export class SafeComponent implements OnInit, OnDestroy {
         line: true
       },
       {
-        title: $localize `Orgnization`,
+        title: $localize `:@@menu.organization:Orgnization`,
         icon: 'icons:icon-org',
         path: '/account-settings'
       },
       {
-        title: $localize `IAM`,
+        title: $localize `:@@menu.iam:IAM`,
         icon: 'icons:icon-user-permission',
         path: '/iam/users',
         children: [
           {
-            title: $localize `Team`,
+            title: $localize `:@@menu.iam.team:Team`,
             icon: '',
             path: '/iam/users'
           },
           {
-            title: $localize `Group`,
+            title: $localize `:@@menu.iam.group:Groups`,
             icon: '',
             path: '/iam/groups'
           },
           {
-            title: $localize `Policies`,
+            title: $localize `:@@menu.iam.policies:Policies`,
             icon: '',
             path: '/iam/policies'
           }
