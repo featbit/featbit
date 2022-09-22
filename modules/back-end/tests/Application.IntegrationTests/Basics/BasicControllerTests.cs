@@ -23,8 +23,8 @@ public class BasicControllerTests : IClassFixture<TestApp>
         Assert.True(v1.IsSuccessStatusCode);
         Assert.True(v2.IsSuccessStatusCode);
 
-        var v1Content = await v1.Content.ReadFromJsonAsync<ApiResponse>();
-        var v2Content = await v2.Content.ReadFromJsonAsync<ApiResponse>();
+        var v1Content = await v1.Content.ReadFromJsonAsync<ApiResponse<string>>();
+        var v2Content = await v2.Content.ReadFromJsonAsync<ApiResponse<string>>();
         
         Assert.NotNull(v1Content);
         Assert.NotNull(v2Content);

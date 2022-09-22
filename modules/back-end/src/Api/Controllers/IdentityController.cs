@@ -7,12 +7,12 @@ public class IdentityController : ApiControllerBase
     [HttpPost]
     [AllowAnonymous]
     [Route("login-by-password")]
-    public async Task<ApiResponse> LoginByPasswordAsync(LoginByPassword request)
+    public async Task<ApiResponse<LoginToken>> LoginByPasswordAsync(LoginByPassword request)
     {
         var loginResult = await Mediator.Send(request);
 
         return loginResult.Success
-            ? ApiResponse.Ok(new { token = loginResult.Token })
-            : ApiResponse.Error(loginResult.ErrorCode);
+            ? Ok(new LoginToken(loginResult.Token))
+            : Error<LoginToken>(loginResult.ErrorCode);
     }
 }

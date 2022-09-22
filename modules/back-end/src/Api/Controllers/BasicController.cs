@@ -8,14 +8,14 @@ namespace Api.Controllers;
 public class BasicController : ApiControllerBase
 {
     [HttpGet("string"), MapToApiVersion(1.0)]
-    public string GetStringV1()
+    public ApiResponse<string> GetStringV1()
     {
-        return "v1";
+        return Ok("v1");
     }
 
     [HttpGet("string"), MapToApiVersion(2.0)]
-    public string GetStringV2()
+    public ApiResponse<string> GetStringV2()
     {
-        return "v2";
+        return Ok("v2");
     }
 }

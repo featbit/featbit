@@ -1,9 +1,6 @@
-using Api.Filters;
-
 namespace Api.Controllers;
 
 [ApiController]
-[ApiActionFilter]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class ApiControllerBase : ControllerBase
 {
@@ -13,4 +10,8 @@ public class ApiControllerBase : ControllerBase
     {
         get { return _mediator ??= HttpContext.RequestServices.GetRequiredService<ISender>(); }
     }
+
+    protected static ApiResponse<TData> Ok<TData>(TData data) => ApiResponse<TData>.Ok(data);
+
+    protected static ApiResponse<TData> Error<TData>(string errorCode) => ApiResponse<TData>.Error(errorCode);
 }

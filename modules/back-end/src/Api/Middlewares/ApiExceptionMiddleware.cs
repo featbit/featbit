@@ -41,7 +41,7 @@ public class ApiExceptionMiddleware
             httpResponse.StatusCode = StatusCodes.Status400BadRequest;
 
             var errors = validationException.Errors.Select(x => x.ErrorCode);
-            var validationError = ApiResponse.Error(errors);
+            var validationError = ApiResponse<object>.Error(errors);
             await httpResponse.WriteAsJsonAsync(validationError);
 
             return;
@@ -49,7 +49,7 @@ public class ApiExceptionMiddleware
 
         // other exception
         httpResponse.StatusCode = StatusCodes.Status500InternalServerError;
-        var error = ApiResponse.Error(ErrorCodes.InternalServerError);
+        var error = ApiResponse<object>.Error(ErrorCodes.InternalServerError);
         await httpResponse.WriteAsJsonAsync(error);
     }
 }

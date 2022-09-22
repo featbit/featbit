@@ -1,16 +1,16 @@
 namespace Api.Controllers;
 
-public record ApiResponse
+public record ApiResponse<TData>
 {
     public bool Success { get; set; }
 
     public IEnumerable<string> Errors { get; set; } = Array.Empty<string>();
 
-    public object? Data { get; set; }
+    public TData? Data { get; set; }
 
-    public static ApiResponse Ok(object? data)
+    public static ApiResponse<TData> Ok(TData? data)
     {
-        return new ApiResponse
+        return new ApiResponse<TData>
         {
             Success = true,
             Errors = Array.Empty<string>(),
@@ -18,15 +18,15 @@ public record ApiResponse
         };
     }
 
-    public static ApiResponse Error(IEnumerable<string> errors)
+    public static ApiResponse<TData> Error(IEnumerable<string> errors)
     {
-        return new ApiResponse
+        return new ApiResponse<TData>
         {
             Success = false,
             Errors = errors,
-            Data = null
+            Data = default
         };
     }
 
-    public static ApiResponse Error(string error) => Error(new[] { error });
+    public static ApiResponse<TData> Error(string error) => Error(new[] { error });
 }
