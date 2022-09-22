@@ -18,4 +18,10 @@ public class BasicController : ApiControllerBase
     {
         return Ok("v2");
     }
+
+    [HttpGet("exception")]
+    public ApiResponse<string> ThrowException()
+    {
+        throw new Exception("exception message");
+    }
 }
