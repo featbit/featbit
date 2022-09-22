@@ -1,5 +1,19 @@
 version: "3.9"
 services:
+  ui:
+    image: featbit/ui
+    container_name: featbit-ui-dev
+    build:
+      context: ./modules/front-end
+      dockerfile: ./Dockerfile
+      args:
+        API_URL: http://localhost:5000
+    depends_on:
+      - api
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network  
   api:
     image: featbit/api
     container_name: featbit-api-dev
