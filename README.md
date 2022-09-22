@@ -10,7 +10,7 @@
 
 **FeatBit** is a scalable, high-performance **Feature Management** and **Progressive Experimentation** platform.
 
-Feature Management use cases: `Trunk-based development`, `Testing in production`, `Progressive & Targeted release`, `Kill switches`, `Faster incident resolution`, `Data & Cloud Migration`, etc.
+Feature Management use cases: `Testing in production`, `Progressive & Targeted release`, `Trunk-based development`, `Entitlement Management`, `Data & Cloud Migration`,  `Faster incident resolution`, etc.
     
 Progressive Experimentation, which provides the ability to get online and offline feedback as quickly as possible. Use cases: `Beta testing and qualitative feedback`, `Experimentation and A/B testing`.
 
