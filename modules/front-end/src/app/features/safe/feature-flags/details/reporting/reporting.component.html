@@ -16,7 +16,7 @@
       </nz-button-group>
       <div style="margin: 20px 0;text-align: center;">{{usage}}</div>
       <div class="chart-container" style="width:97%">
-        <nz-spin [nzSpinning]="isLoading" nzTip="数据加载中...">
+        <nz-spin [nzSpinning]="isLoading" i18n-nzTip="@@common.loading" nzTip="Loading...">
           <ng-container *ngIf="!isLoading">
             <g2-line-chart [defaultChartHeight]="600" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
           </ng-container>
