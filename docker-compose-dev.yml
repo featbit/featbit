@@ -2,7 +2,7 @@ version: "3.9"
 services:
   mongodb:
     image: mongo
-    container_name: mongodb
+    container_name: featbit-mongodb-dev
     restart: on-failure
     ports:
       - "27017:27017"
@@ -11,8 +11,8 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=password
       - MONGO_INITDB_DATABASE=featbit
     volumes:
-      - mongodb:/data/db
-      - ./infra/mongodb/docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - ./infra/mongodb/data/db:/data/db
+      - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
       - featbit-network
 
