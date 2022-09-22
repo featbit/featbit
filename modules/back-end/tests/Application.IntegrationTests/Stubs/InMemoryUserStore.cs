@@ -6,7 +6,7 @@ namespace Application.IntegrationTests.Stubs;
 public class TestUser
 {
     public const string Id = "id";
-    public const string Identity = "identity";
+    public const string Email = "test@email.com";
     public const string RealPassword = "pwd";
     public const string HashedPassword = "hashed-pwd";
 }
@@ -15,7 +15,7 @@ public class InMemoryUserStore : IUserStore
 {
     private readonly List<User> _users = new()
     {
-        new User(TestUser.Id, TestUser.Identity, TestUser.HashedPassword)
+        new User(TestUser.Id, TestUser.Email, TestUser.HashedPassword)
     };
 
     public Task<bool> UpdateAsync(User user)
@@ -26,8 +26,8 @@ public class InMemoryUserStore : IUserStore
         return Task.FromResult(true);
     }
 
-    public Task<User?> FindByIdentityAsync(string identity)
+    public Task<User?> FindByEmailAsync(string email)
     {
-        return Task.FromResult(_users.FirstOrDefault(x => x.Identity == identity));
+        return Task.FromResult(_users.FirstOrDefault(x => x.Email == email));
     }
 }

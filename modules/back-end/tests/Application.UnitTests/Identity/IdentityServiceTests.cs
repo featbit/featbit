@@ -57,10 +57,10 @@ public class IdentityServiceTests
             .Returns(PasswordVerificationResult.Success);
 
         _userStoreMock
-            .Setup(x => x.FindByIdentityAsync(user.Identity))
+            .Setup(x => x.FindByEmailAsync(user.Email))
             .Returns(Task.FromResult(user)!);
 
-        var loginResult = await _identityService.LoginByPasswordAsync(user.Identity, realPwd);
+        var loginResult = await _identityService.LoginByEmailAsync(user.Email, realPwd);
 
         Assert.True(loginResult.Success);
         Assert.Empty(loginResult.ErrorCode);

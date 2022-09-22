@@ -6,8 +6,8 @@ public class IdentityController : ApiControllerBase
 {
     [HttpPost]
     [AllowAnonymous]
-    [Route("login-by-password")]
-    public async Task<ApiResponse<LoginToken>> LoginByPasswordAsync(LoginByPassword request)
+    [Route("login-by-email")]
+    public async Task<ApiResponse<LoginToken>> LoginByEmailAsync(LoginByEmail request)
     {
         var loginResult = await Mediator.Send(request);
 

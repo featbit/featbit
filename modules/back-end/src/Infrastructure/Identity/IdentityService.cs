@@ -66,18 +66,18 @@ public class IdentityService : IIdentityService
         return handler.WriteToken(jwt);
     }
 
-    public async Task<LoginResult> LoginByPasswordAsync(string identity, string password)
+    public async Task<LoginResult> LoginByEmailAsync(string identity, string password)
     {
-        var user = await _store.FindByIdentityAsync(identity);
+        var user = await _store.FindByEmailAsync(identity);
         if (user == null)
         {
-            return LoginResult.Failed(ErrorCodes.IdentityNotExist);
+            return LoginResult.Failed(ErrorCodes.EmailNotExist);
         }
 
         var passwordMatch = await CheckPasswordAsync(user, password);
         if (!passwordMatch)
         {
-            return LoginResult.Failed(ErrorCodes.IdentityPasswordMismatch);
+            return LoginResult.Failed(ErrorCodes.PasswordMismatch);
         }
 
         var token = IssueToken(user);

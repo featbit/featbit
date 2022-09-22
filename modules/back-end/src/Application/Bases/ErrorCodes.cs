@@ -6,8 +6,9 @@ public static class ErrorCodes
     public const string InternalServerError = nameof(InternalServerError);
     
     // identity error codes
-    public const string IdentityIsRequired = nameof(IdentityIsRequired);
+    public const string EmailIsRequired = nameof(EmailIsRequired);
+    public const string EmailIsInvalid = nameof(EmailIsInvalid);
+    public const string EmailNotExist = nameof(EmailNotExist);
     public const string PasswordIsRequired = nameof(PasswordIsRequired);
-    public const string IdentityNotExist = nameof(IdentityNotExist);
-    public const string IdentityPasswordMismatch = nameof(IdentityPasswordMismatch);
+    public const string PasswordMismatch = nameof(PasswordMismatch);
 }

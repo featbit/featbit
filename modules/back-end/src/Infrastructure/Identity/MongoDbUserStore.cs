@@ -21,8 +21,8 @@ public class MongoDbUserStore : IUserStore
         return result.IsAcknowledged;
     }
 
-    public async Task<User?> FindByIdentityAsync(string identity)
+    public async Task<User?> FindByEmailAsync(string email)
     {
-        return await _users.AsQueryable().FirstOrDefaultAsync(x => x.Identity == identity);
+        return await _users.AsQueryable().FirstOrDefaultAsync(x => x.Email == email);
     }
 }

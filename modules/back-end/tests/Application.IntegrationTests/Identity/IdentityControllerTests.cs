@@ -16,20 +16,20 @@ public class IdentityControllerTests : IClassFixture<IdentityApp>
     }
 
     [Fact]
-    public async Task LoginByPassword_RequestValidation()
+    public async Task LoginByEmail_RequestValidation()
     {
-        var request = new LoginByPassword();
+        var request = new LoginByEmail();
         var response = await DoRequestAsync(request);
 
         await Verify(response);
     }
 
     [Fact]
-    public async Task LoginByPassword_Success()
+    public async Task LoginByEmail_Success()
     {
-        var request = new LoginByPassword
+        var request = new LoginByEmail
         {
-            Identity = TestUser.Identity,
+            Email = TestUser.Email,
             Password = TestUser.RealPassword
         };
         var response = await DoRequestAsync(request);
@@ -37,13 +37,13 @@ public class IdentityControllerTests : IClassFixture<IdentityApp>
         await Verify(response).ScrubLinesWithReplace(x => x.Split('.').Length == 3 ? "[Scrubbed JWT]" : x);
     }
 
-    private async Task<HttpResponseMessage> DoRequestAsync(LoginByPassword request)
+    private async Task<HttpResponseMessage> DoRequestAsync(LoginByEmail request)
     {
         var client = _app.CreateClient();
 
         var body = JsonSerializer.Serialize(request);
         var content = new StringContent(body, Encoding.UTF8, MediaTypeNames.Application.Json);
 
-        return await client.PostAsync("/api/v1/identity/login-by-password", content);
+        return await client.PostAsync("/api/v1/identity/login-by-email", content);
     }
 }

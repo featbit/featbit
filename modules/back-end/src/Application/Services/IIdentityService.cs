@@ -12,5 +12,5 @@ public interface IIdentityService
 
     string IssueToken(User user);
 
-    Task<LoginResult> LoginByPasswordAsync(string identity, string password);
+    Task<LoginResult> LoginByEmailAsync(string identity, string password);
 }

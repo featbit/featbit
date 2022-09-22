@@ -1,0 +1,34 @@
+﻿{
+  Version: 1.1,
+  Status: 400 Bad Request,
+  Headers: {
+    api-supported-versions: 1.0,
+    Cache-Control: no-store, no-cache,
+    Pragma: no-cache
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8,
+      Expires: -1
+    },
+    Value: {
+      data: null,
+      errors: [
+        EmailIsRequired,
+        PasswordIsRequired
+      ],
+      success: false
+    }
+  },
+  Request: {
+    Method: POST,
+    Uri: http://localhost/api/v1/identity/login-by-email,
+    Content: {
+      Headers: {
+        Content-Length: 26,
+        Content-Type: application/json; charset=utf-8
+      },
+      Value: 
+    }
+  }
+}

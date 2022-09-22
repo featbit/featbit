@@ -6,5 +6,5 @@ public interface IUserStore
 {
     Task<bool> UpdateAsync(User user);
 
-    Task<User?> FindByIdentityAsync(string identity);
+    Task<User?> FindByEmailAsync(string email);
 }

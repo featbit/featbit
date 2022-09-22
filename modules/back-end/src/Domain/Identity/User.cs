@@ -6,16 +6,16 @@ public class User
 {
     public string Id { get; set; }
 
-    public string Identity { get; set; }
+    public string Email { get; set; }
 
     public string Password { get; set; }
     
     public DateTime CreatedAt { get; set; }
 
-    public User(string id, string identity, string password)
+    public User(string id, string email, string password)
     {
         Id = id;
-        Identity = identity;
+        Email = email;
         Password = password;
         
         CreatedAt = DateTime.UtcNow;
@@ -26,7 +26,7 @@ public class User
         var claims = new List<Claim>
         {
             new("id", Id),
-            new("identity", Identity)
+            new("email", Email)
         };
 
         return claims;
