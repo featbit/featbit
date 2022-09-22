@@ -2763,14 +2763,23 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
           <context context-type="linenumber">22</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="common.last-24h" datatype="html">
+        <source>Last 24 hours</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="common.last-2h" datatype="html">
+        <source>Last 2 hours</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
           <context context-type="linenumber">24</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="common.last-30m" datatype="html">
+        <source>Last 30 minutes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
           <context context-type="linenumber">25</context>
