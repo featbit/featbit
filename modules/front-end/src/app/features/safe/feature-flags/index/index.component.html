@@ -3,37 +3,32 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group style="width: 220px" [nzPrefix]="prefixIconSearch">
-          <input  nz-input type="text" placeholder="按名称或 keyName 筛选" [(ngModel)]="switchFilterV2.name" (ngModelChange)="onSearchV2(true)">
+          <input  nz-input type="text" placeholder="Filter by name or keyName" i18n-placeholder="@@ff.idx.filter-by-name-and-keyname" [(ngModel)]="switchFilterV2.name" (ngModelChange)="onSearchV2(true)">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
         <switch-tag-tree-select (onSelect)="onSelectTagV2($event)" [tagTree]="tagTree"></switch-tag-tree-select>
-        <nz-select nzAllowClear [(ngModel)]="switchFilterV2.status" (ngModelChange)="onSearchV2(true)" nzPlaceHolder="按状态筛选">
-          <nz-option nzValue="Enabled" nzLabel="开启状态"></nz-option>
-          <nz-option nzValue="Disabled" nzLabel="关闭状态"></nz-option>
+        <nz-select nzAllowClear [(ngModel)]="switchFilterV2.status" (ngModelChange)="onSearchV2(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
+          <nz-option nzValue="Enabled" nzLabel="ON"></nz-option>
+          <nz-option nzValue="Disabled" nzLabel="OFF"></nz-option>
         </nz-select>
       </div>
       <div class="middle-btn">
         <button nz-button nzType="primary" (click)="this.createModalVisibleV2 = true">
           <i nz-icon nzType="icons:icon-add"></i>
-          添加开关
+          <ng-container i18n="@@common.add">Add</ng-container>
         </button>
         <button class="tag-tree-management" nz-button nzType="primary" (click)="tagTreeModalVisible = true">
           <i nz-icon nzType="icons:icon-setting"></i>
-          标签树管理
+          <ng-container i18n="@@common.tags">Tags</ng-container>
         </button>
         <button *ngIf="compareAndCopyFlag===true" class="more-action" nz-dropdown [nzDropdownMenu]="menu" >
           <i nz-icon nzType="icons:icon-menu"></i>
         </button>
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
-            <li nz-menu-item (click)="onIntoCompareAndCopy()">
-              开关对比
-            </li>
-            <li nz-menu-item (click)="openBatchCopyModal()">
-              复制到环境
-            </li>
+            <li nz-menu-item (click)="openBatchCopyModal()" i18n="@@ff.idx.copy-to-env">Copy to environment</li>
           </ul>
         </nz-dropdown-menu>
       </div>
@@ -57,13 +52,13 @@
         <thead>
         <tr>
           <th [nzChecked]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
-          <th>名称</th>
-          <th><span nz-tooltip="用于在代码中引用以获取开关返回值">KeyName</span></th>
-          <th>状态</th>
-          <th>标签</th>
-          <th>返回版本</th>
-          <th>最近修改</th>
-          <th>操作</th>
+          <th i18n="@@common.name">Name</th>
+          <th><span i18n-nz-tooltip="@@ff.use-keyName-in-code-to-get-variation" nz-tooltip="Use keyName in your code to get the feature flag variation">KeyName</span></th>
+          <th i18n="@@common.status">Status</th>
+          <th i18n="@@common.tags">Tags</th>
+          <th i18n="@@common.variations">Variations</th>
+          <th i18n="@@common.last-updated">Last updated</th>
+          <th i18n="@@common.actions">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -73,21 +68,26 @@
             (nzCheckedChange)="onItemChecked(theSwitch)"
           ></td>
           <td style="cursor:pointer" (click)="onIntoSwitchDetail(theSwitch)">
-              <span nz-tooltip="点击进入详情页">{{theSwitch.name}}</span>
+              <span>{{theSwitch.name}}</span>
           </td>
           <td>
             <i (click)="copyText($event, theSwitch.keyName)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
             {{theSwitch.keyName}}
           </td>
           <td>
-            <nz-switch
-              nz-popconfirm="确定要{{
-                theSwitch.status === 'Enabled'
-                ? '关闭该开关吗? 关闭后开关将返回处于关闭状态时的设定值。'
-                : '开启该开关吗? 开启后将按照目标条件匹配用户。'}}"
+            <nz-switch *ngIf="theSwitch.status === 'Enabled'"
+                       i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-disable-ff"
+              nz-popconfirm="Are you sure to turn it off? The variation returned would be changed when it is off"
               (nzOnConfirm)="onChangeSwitchStatus(theSwitch)"
               nzControl="true"
-              [ngModel]="theSwitch.status === 'Enabled'" nzCheckedChildren="开" nzUnCheckedChildren="关">
+              [ngModel]="theSwitch.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
+            </nz-switch>
+            <nz-switch *ngIf="theSwitch.status !== 'Enabled'"
+                       i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-enable-ff"
+              nz-popconfirm="Are you sure to turn it on? The matching targeting users' or rules' serving variation would be returned"
+              (nzOnConfirm)="onChangeSwitchStatus(theSwitch)"
+              nzControl="true"
+              [ngModel]="theSwitch.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
             </nz-switch>
           </td>
           <td style="max-width: 168px;">
@@ -105,14 +105,14 @@
               <div *ngIf="theSwitch.status==='Enabled' && theSwitch.variationOverview.variationsWhenOn.length > 1"
                    style="cursor: pointer;"
                    nz-tooltip
-                   nzTooltipTitle="此开关服务 {{theSwitch.variationOverview.variationsWhenOn.length}} 个版本：{{theSwitch.variationOverview.variationsWhenOnStr.join(' // ')}}"
+                   nzTooltipTitle="{{theSwitch.variationOverview.variationsWhenOnStr.join(' // ')}}"
                    >
                 <span *ngFor="let variationValue of theSwitch.variationOverview.variationsWhenOn; let key=index; ">
                   <span  class="variation-tip {{'tip-' + (variationValue.displayOrder - 1) % 9}}" style="margin-right:-3px;margin-bottom:2px;"></span>
                 </span>
                 <span style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{theSwitch.variationOverview.variationsWhenOn.length}} 个版本
+                  {{theSwitch.variationOverview.variationsWhenOn.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
                 </span>
               </div>
               <div *ngIf="theSwitch.status==='Disabled'" style="opacity: .5;">
@@ -126,7 +126,7 @@
           </td>
           <td>{{getLocalDate(theSwitch.lastModificationTime) | date: 'YYYY-MM-dd HH:mm'}}</td>
           <td class="table-operations" style="min-width: 50px;">
-              <a (click)="onIntoSwitchDetail(theSwitch)">详情</a>
+              <a (click)="onIntoSwitchDetail(theSwitch)" i18n="@@common.details">Details</a>
           </td>
         </tr>
         </tbody>
@@ -141,33 +141,33 @@
           [nzContent]="modalContent"
           [nzFooter]="modalFooter"
           (nzOnCancel)="this.closeCreateModalV2()">
-  <ng-template #modalTitle>新建开关</ng-template>
+  <ng-template #modalTitle><ng-container i18n="@@ff.idx.new-ff">New feature flag</ng-container></ng-template>
   <ng-template #modalContent>
     <form nz-form [formGroup]="switchFormV2" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired>开关名称</nz-form-label>
-        <nz-form-control nzHasFeedback nzValidatingTip="校验中..." [nzErrorTip]="switchNameErrorTpl">
-          <input nz-input formControlName="name" placeholder="请输入开关名称" />
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="switchNameErrorTpl">
+          <input nz-input formControlName="name" i18n-placeholder="@@common.name" placeholder="Name" />
           <ng-template #switchNameErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')">开关名称必填</ng-container>
-            <ng-container *ngIf="control.hasError('invalid_character')">开关名称不能包含 '__'</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')">该名称/KeyName已被使用</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')">名称校验失败</ng-container>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('invalid_character')" i18n="@@common.name-cannot-include---">Name cannot include '__'</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-keyName-unavailable">This name/KeyName is unavailable</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
           </ng-template>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
         <nz-form-label nzRequired>KeyName</nz-form-label>
-        <nz-form-control nz-tooltip="用于在代码中引用以获取开关返回值">
-          <input nz-input [value]="this.switchFormV2.get('name').value | switchKeyName" formControlName="keyName" placeholder="开关 keyName 由名称自动生成" />
+        <nz-form-control i18n-nz-tooltip="@@ff.use-keyName-in-code-to-get-variation" nz-tooltip="Use keyName in your code to get the feature flag variation">
+          <input nz-input [value]="this.switchFormV2.get('name').value | switchKeyName" formControlName="keyName" i18n-placeholder="@@ff.idx.keyName-generated-from-name" placeholder="keyName is generated from name" />
         </nz-form-control>
       </nz-form-item>
     </form>
   </ng-template>
 
   <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="this.closeCreateModalV2()">取消</button>
-    <button nz-button nzType="primary" [nzLoading]="this.creatingV2" [disabled]="!switchFormV2.valid" (click)="createSwitchV2()">确定</button>
+    <button nz-button nzType="default" (click)="this.closeCreateModalV2()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" [nzLoading]="this.creatingV2" [disabled]="!switchFormV2.valid" (click)="createSwitchV2()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>
 
@@ -179,7 +179,8 @@
   [nzCentered]="true"
   [nzBodyStyle]="{minHeight: '400px'}"
   nzWidth="1000px"
-  nzTitle="标签树管理"
+  i18n-nzTitle="@@common.tags"
+  nzTitle="Tags"
   nzMaskClosable="false">
   <ng-container *nzModalContent>
     <switch-tag-tree-view [tagTree]="tagTree"></switch-tag-tree-view>
@@ -194,13 +195,15 @@
   (nzOnOk)="batchCopy()"
   (nzOnCancel)="batchCopyVisible = false"
   [nzCentered]="true"
-  nzTitle="批量复制"
+  i18n-nzTitle="@@common.bulk-copy"
+  nzTitle="Bulk copy"
   nzWidth="820px"
   nzMaskClosable="false">
   <ng-container *nzModalContent>
     <nz-alert
       nzType="warning"
-      nzDescription="复制开关时仅复制以下信息：开关名称、KeyName、状态、返回值、默认规则。"
+      i18n-nzDescription="@@ff.idx.only-following-fields-are-copied"
+      nzDescription="Only following fields are copied: name, keyName, status, variation and default variation."
       nzShowIcon
       nzIconType="icons:icon-warning"
     ></nz-alert>
@@ -210,12 +213,12 @@
           <label nz-checkbox [(ngModel)]="item.checked">{{ item.name }}</label>
         </nz-list-item>
         <ng-template #flagHeader>
-          <span class="header">已选择的开关（共 {{ totalSelected }} 项）</span>
+          <span class="header"><ng-container i18n="@@ff.idx.selected-ff">Selected feature flags</ng-container>: {{ totalSelected }}</span>
         </ng-template>
       </nz-list>
       <div class="transfer-text">
         <i nz-icon nzType="icons:icon-copy-to"></i>
-        复制到
+        <ng-container i18n="@@common.copy-to">Copy to</ng-container>
       </div>
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
         <nz-list-item
@@ -225,7 +228,7 @@
           {{ env.name }}
         </nz-list-item>
         <ng-template #envHeader>
-          <span class="header">目标环境</span>
+          <span class="header" i18n="@@common.targeting-env">Targeting environment</span>
         </ng-template>
       </nz-list>
     </div>

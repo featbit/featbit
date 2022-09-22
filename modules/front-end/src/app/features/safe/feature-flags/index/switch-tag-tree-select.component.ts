@@ -7,7 +7,8 @@ import { SwitchTagTree } from "../types/switch-index";
   template: `
     <nz-tree-select
       class="tag-select"
-      nzPlaceHolder="按标签筛选"
+      i18n-nzPlaceHolder="@@ff.idx.filter-by-tags"
+      nzPlaceHolder="Filter by tags"
       [(ngModel)]="selectedTagIds"
       [nzNodes]="options"
       [nzMaxTagCount]="1"
@@ -17,7 +18,7 @@ import { SwitchTagTree } from "../types/switch-index";
       nzAllowClear
       (ngModelChange)="onSelect.emit(selectedTagIds)"
     ></nz-tree-select>
-    <ng-template #omittedPlaceHolder let-omittedValues>等共 {{ omittedValues.length + 1 }} 个</ng-template>
+    <ng-template #omittedPlaceHolder let-omittedValues><ng-container i18n="@@common.etc">+</ng-container> {{ omittedValues.length }} <ng-container i18n="@@common.entries">more</ng-container></ng-template>
   `,
   styleUrls: ['./switch-tag-tree-select.component.less']
 })

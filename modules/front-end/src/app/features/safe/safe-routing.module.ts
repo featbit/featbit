@@ -9,8 +9,8 @@ const routes: Routes = [
     component: SafeComponent,
     children: [
       {
-        path: 'switch-manage',
-        loadChildren: () => import("./switch-manage/switch-manage.module").then(m => m.SwitchManageModule)
+        path: 'feature-flags',
+        loadChildren: () => import("./feature-flags/feature-flags.module").then(m => m.FeatureFlagsModule)
       },
       {
         path: 'users',
@@ -64,7 +64,7 @@ const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: '/switch-manage',
+        redirectTo: '/feature-flags',
         pathMatch: 'full'
       }
     ]

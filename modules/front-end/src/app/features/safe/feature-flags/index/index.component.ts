@@ -23,10 +23,10 @@ import { NzNotificationService } from "ng-zorro-antd/notification";
 
 @Component({
   selector: 'index',
-  templateUrl: './switch-index.component.html',
-  styleUrls: ['./switch-index.component.less']
+  templateUrl: './index.component.html',
+  styleUrls: ['./index.component.less']
 })
-export class SwitchIndexComponent implements OnInit {
+export class IndexComponent implements OnInit {
 
   // tag tree
   tagTreeModalVisible: boolean = false;
@@ -101,7 +101,7 @@ export class SwitchIndexComponent implements OnInit {
   }
   openBatchCopyModal() {
     if (this.checkedItemKeys.size === 0) {
-      this.msg.warning('请先选择需要复制的开关');
+      this.msg.warning($localize `:@@ff.idx.select-ff-to-copy:Please select at least one feature flag to copy`);
       return;
     }
 
@@ -126,19 +126,17 @@ export class SwitchIndexComponent implements OnInit {
         this.checkedItemKeys.clear();
         this.refreshCheckedStatus();
 
+        let msg = $localize `:@@ff.idx.successfully-copied:Successfully copied`
+          + `<strong> ${copyToEnvResult.copiedCount} </strong>`
+          + $localize `:@@ff.idx.ff-to-env:feature flags to environment`
+          + `<strong> ${this.targetEnv.name} </strong>.`;
+
         if (copyToEnvResult.ignored.length > 0) {
-          this.notification.warning(
-            '复制结果',
-            `
-            成功复制<strong> ${copyToEnvResult.copiedCount} </strong>个开关到环境 <strong>${this.targetEnv.name}</strong>
-            <br/>以下开关由于<strong>目标环境已存在而被忽略</strong> <br/> ${copyToEnvResult.ignored.join(', ')}`,
-            { nzDuration: 0 }
-          );
+          msg += '<br/>' + $localize `:@@ff.idx.following-ff-exist-in-targeting-env:Following feature flags have been ignored as they are already in the targeting environment`
+            + `<br/> ${copyToEnvResult.ignored.join(', ')}`;
+          this.notification.warning($localize `:@@ff.idx.copy-result:Copy result`, msg, { nzDuration: 0 });
         } else {
-          this.notification.success(
-            '复制成功',
-            `成功复制 <strong>${copyToEnvResult.copiedCount}</strong> 个开关到环境 <strong>${this.targetEnv.name}</strong>`
-          );
+          this.notification.success($localize `:@@common.copy-success:Copied`,msg);
         }
       }, _ => {
         this.isCopying = false;
@@ -310,18 +308,22 @@ export class SwitchIndexComponent implements OnInit {
     if (data.status === 'Enabled') {
       this.switchServe.changeSwitchStatus(data.id, 'Disabled')
         .subscribe(_ => {
-          this.msg.success(`开关 ${data.name} 已切换至关闭状态`);
+          const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
+            data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
+          this.msg.success(msg);
           data.status = 'Disabled';
         }, _ => {
-          this.msg.error('开关状态切换失败!');
+          this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
         });
     } else if (data.status === 'Disabled') {
       this.switchServe.changeSwitchStatus(data.id, 'Enabled')
         .subscribe(_ => {
-          this.msg.success(`开关 ${data.name}已切换至开启状态`);
+          const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
+            data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
+          this.msg.success(msg);
           data.status = 'Enabled';
         }, _ => {
-          this.msg.error('开关状态切换失败!');
+          this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
         });
     }
   }
@@ -339,7 +341,7 @@ export class SwitchIndexComponent implements OnInit {
 
   // 路由跳转
   private toSwitchDetail(id: string) {
-    this.router.navigateByUrl(`/switch-manage/${encodeURIComponentFfc(id)}/targeting`);
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(id)}/targeting`);
   }
 
   // 转换本地时间
@@ -351,7 +353,7 @@ export class SwitchIndexComponent implements OnInit {
   // copy keyName
   copyText(event, text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.msg.success('复制成功')
+      () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
   }
 
@@ -367,7 +369,7 @@ export class SwitchIndexComponent implements OnInit {
           switchItem.tags = this.tagTree.getSwitchTags(switchItem.id);
         }
 
-        this.msg.success('保存成功!');
+        this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
       }, err => {
         this.msg.error(err.error);
       });

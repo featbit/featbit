@@ -4,33 +4,25 @@
   </div>
   <nz-tabset nzLinkRouter class="tabs-container segment-flag">
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./targeting']" queryParamsHandling="preserve">
-        目标条件
-      </a>
+      <a *nzTabLink nz-tab-link [routerLink]="['./targeting']" queryParamsHandling="preserve" i18n="@@ff.routing.details.targeting">Targeting</a>
       <ng-template nz-tab>
         <switch-targeting></switch-targeting>
       </ng-template>
     </nz-tab>
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./triggers']">
-        触发器
-      </a>
+      <a *nzTabLink nz-tab-link [routerLink]="['./triggers']" i18n="@@ff.routing.details.triggers">Triggers</a>
       <ng-template nz-tab>
         <switch-triggers></switch-triggers>
       </ng-template>
     </nz-tab>
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./experimentations']">
-        数据实验
-      </a>
+      <a *nzTabLink nz-tab-link [routerLink]="['./experimentations']" i18n="@@ff.routing.details.experimentation">Experimentation</a>
       <ng-template nz-tab>
         <switch-experimentations></switch-experimentations>
       </ng-template>
     </nz-tab>
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./reporting']">
-        统计报表
-      </a>
+      <a *nzTabLink nz-tab-link [routerLink]="['./reporting']" i18n="@@ff.routing.details.reporting">Reporting</a>
       <ng-template nz-tab>
         <switch-reporting></switch-reporting>
       </ng-template>

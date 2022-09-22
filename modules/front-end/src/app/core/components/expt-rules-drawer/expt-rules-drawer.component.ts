@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ISegment } from '@features/safe/segments/types/segments-index';
 import { ruleValueConfig, ruleType } from "@core/components/find-rule/ruleConfig";
-import { CSwitchParams, IRulePercentageRollout } from '@features/safe/switch-manage/types/switch-new';
+import { CSwitchParams, IRulePercentageRollout } from '@features/safe/feature-flags/types/switch-new';
 import { SegmentService } from '@services/segment.service';
 import { SwitchService } from '@services/switch.service';
 import { isNotPercentageRollout, isSegmentRule, isSingleOperator } from '@utils/index';

@@ -1,5 +1,5 @@
 ﻿import { NzTreeNodeOptions } from "ng-zorro-antd/core/tree/nz-tree-base-node";
-import { CSwitchParams, IVariationOption } from "@features/safe/switch-manage/types/switch-new";
+import { CSwitchParams, IVariationOption } from "@features/safe/feature-flags/types/switch-new";
 
 export interface SwitchListModel {
   items: SwitchListItem[];

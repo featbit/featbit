@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IJsonContent } from "@features/safe/switch-manage/types/switch-new";
+import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import { EnvUserService } from "@services/env-user.service";
 import { IUserType } from "@shared/types";
 import { Router } from "@angular/router";

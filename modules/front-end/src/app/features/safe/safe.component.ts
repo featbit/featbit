@@ -42,7 +42,7 @@ export class SafeComponent implements OnInit, OnDestroy {
       {
         title: $localize `:@@menu.FF:Feature flags`,
         icon: 'icons:icon-switch',
-        path: '/switch-manage'
+        path: '/feature-flags'
       },
       {
         title: $localize `:@@menu.archivedFF:Archived feature flags`,

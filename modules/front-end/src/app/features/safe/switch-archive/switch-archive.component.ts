@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { SwitchService } from '@services/switch.service';
 import { AccountService } from '@services/account.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { IFfParams } from "@features/safe/switch-manage/types/switch-new";
+import { IFfParams } from "@features/safe/feature-flags/types/switch-new";
 import { encodeURIComponentFfc } from "@utils/index";
 import { Router } from "@angular/router";
 import { SwitchV2Service } from "@services/switch-v2.service";
@@ -107,6 +107,6 @@ export class SwitchArchiveComponent implements OnInit {
   }
 
   navigateToDetail(theSwitch: IFfParams) {
-    this.router.navigateByUrl(`/switch-manage/${encodeURIComponentFfc(theSwitch.id)}/targeting`);
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(theSwitch.id)}/targeting`);
   }
 }

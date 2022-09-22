@@ -1,15 +1,15 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { SwitchManageComponent } from './switch-manage.component';
+import { FeatureFlagsComponent } from './feature-flags.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: SwitchManageComponent,
+    component: FeatureFlagsComponent,
     children: [
       {
         path: '',
-        loadChildren: () => import("./switch-index/switch-index.module").then(m => m.SwitchIndexModule)
+        loadChildren: () => import("./index/index.module").then(m => m.IndexModule)
       },
       {
         path: ':id',
@@ -17,7 +17,7 @@ const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: '/switch-manage',
+        redirectTo: '/feature-flags',
         pathMatch: 'full'
       }
     ]
@@ -30,4 +30,4 @@ const routes: Routes = [
   providers: [
   ]
 })
-export class SwitchManageRoutingModule { }
+export class FeatureFlagsRoutingModule { }

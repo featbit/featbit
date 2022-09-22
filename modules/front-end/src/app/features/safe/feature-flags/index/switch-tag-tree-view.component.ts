@@ -19,8 +19,7 @@ interface FlatNode {
   template: `
     <div class="container">
       <div class="trees">
-        <button style="margin-left: 17px" nz-button nzSize="small" nzType="text" (click)="newNode(undefined)">创建根节点
-        </button>
+        <button style="margin-left: 17px" nz-button nzSize="small" nzType="text" (click)="newNode(undefined)" i18n="@@ff.add-root-node">Add root node</button>
         <nz-tree-view [nzTreeControl]="treeControl" [nzDataSource]="dataSource" [trackBy]="trackBy">
           <nz-tree-node nzTreeNodePadding *nzTreeNodeDef="let node">
             <!-- caret down or placeholder -->
@@ -49,7 +48,8 @@ interface FlatNode {
             <!-- save operations -->
             <ng-template #saveOperations>
               <button nz-button nzType="text" nzSize="small"
-                      nz-tooltip="保存"
+                      i18n-nz-tooltip="@@common.save"
+                      nz-tooltip="Save"
                       (click)="saveNode(node)">
                 <i nz-icon nzType="save" nzTheme="outline"></i>
               </button>
@@ -58,14 +58,14 @@ interface FlatNode {
             <ng-template #editOperations>
               <!-- create -->
               <button nz-button nzType="text" nzSize="small"
-                      nz-tooltip="创建节点"
+                      i18n-nz-tooltip="@@ff.add-child-node"
+                      nz-tooltip="Add child node"
                       (click)="newNode(node)">
                 <i nz-icon nzType="plus" nzTheme="outline"></i>
               </button>
 
               <!-- update -->
               <button nz-button nzType="text" nzSize="small"
-                      nz-tooltip="修改名称"
                       (click)="editNode(node)">
                 <i nz-icon nzType="edit" nzTheme="outline"></i>
               </button>
@@ -73,7 +73,6 @@ interface FlatNode {
 
             <!-- delete operation -->
             <button nz-button nzType="text" nzSize="small" nzDanger
-                    nz-tooltip="删除节点"
                     (click)="deleteNode(node)">
               <i nz-icon nzType="delete" nzTheme="outline"></i>
             </button>
@@ -84,8 +83,9 @@ interface FlatNode {
         [nzDisabled]="!this.selectedNode"
         [nzDataSource]="transferItems"
         [nzShowSearch]="true"
-        [nzTitles]="['未关联', '已关联']"
-        nzSearchPlaceholder="按名称查找"
+        [nzTitles]="[unbinded, binded]"
+        i18n-nzSearchPlaceholder="@@common.filter-by-name"
+        nzSearchPlaceholder="Filter by name"
         [nzListStyle]="{ 'width.px': 300, 'height.px': 450 }"
         [nzRender]="render"
         (nzChange)="onTransfer($event)">
@@ -96,6 +96,8 @@ interface FlatNode {
   styleUrls: ['./switch-tag-tree-view.component.less']
 })
 export class SwitchTagTreeViewComponent implements OnInit {
+  binded = $localize `:@@common.binded:Binded`;
+  unbinded = $localize `:@@common.unbinded:Unbinded`;
 
   constructor(
     private message: NzMessageService,
@@ -248,7 +250,7 @@ export class SwitchTagTreeViewComponent implements OnInit {
 
   saveNode(node: FlatNode): void {
     if (node.name.trim() === '') {
-      this.message.warning('节点名称不能为空');
+      this.message.warning($localize `:@@ff.node-name-cannot-be-empty:Node name cannot be empty`);
       return;
     }
 

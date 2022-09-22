@@ -11,7 +11,6 @@ export class TriggersComponent implements OnInit, OnDestroy {
 
   private destory$: Subject<void> = new Subject();
   featureFlagId: string;
-  flagTriggerSubscriptionFlag: string = "基础版";
 
   constructor(
     private route: ActivatedRoute,

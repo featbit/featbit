@@ -1,7 +1,7 @@
 ﻿import { environment } from 'src/environments/environment';
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { SwitchTagTree } from "@features/safe/switch-manage/types/switch-index";
+import { SwitchTagTree } from "@features/safe/feature-flags/types/switch-index";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { getCurrentProjectEnv } from "@utils/project-env";

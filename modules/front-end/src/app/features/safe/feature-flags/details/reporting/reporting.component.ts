@@ -19,10 +19,10 @@ export class ReportingComponent implements OnInit {
 
   public selectedTimeSpanKey: string = 'P7D';
   public timeSpans = [
-    {key: 'P7D', value: '查看最近7天'},
-    {key: 'P1D', value: '查看最近24小时'},
-    {key: 'PT2H', value: '查看最近2小时'},
-    {key: 'PT30M', value: '查看最近30分钟'},
+    {key: 'P7D', value: $localize `:@@common.last-7d:Last 7 days`},
+    {key: 'P1D', value: $localize `:@@common.last-24h:Last 24 hours`},
+    {key: 'PT2H', value: $localize `:@@common.last-2h:Last 2 hours`},
+    {key: 'PT30M', value: $localize `:@@common.last-30m:Last 30 minutes`},
   ];
 
   chartConfig: ChartConfig;
@@ -53,7 +53,7 @@ export class ReportingComponent implements OnInit {
             userByVariationValue.aggregations.group_by_status.buckets.length > 0) {
             let buckets = userByVariationValue.aggregations.group_by_status.buckets;
             for (let i = 0; i < buckets.length; i++) {
-              userUsageStr += `| ${buckets[i].key}: ${buckets[i].doc_count} 次调用 `
+              userUsageStr += `| ${buckets[i].key}: ${buckets[i].doc_count} ` + $localize `:@@common.times-call:Times of call`
             }
             userUsageStr += "|";
           }
@@ -83,17 +83,17 @@ export class ReportingComponent implements OnInit {
           this.chartConfig = {
             source: data as any[],
             xAxis: {
-              name: '时间',
+              name: $localize `:@@common.times:Time`,
               field: 'time',
               position: 'end',
               scale: {type: "timeCat", nice: true, range: [0.05, 0.95], mask: 'YYYY-MM-DD HH:mm'}
             },
-            yAxis: {name: '调用次数', field: 'count', position: 'end', scale: {nice: true}},
+            yAxis: {name: $localize `:@@common.times-call:Times of call`, field: 'count', position: 'end', scale: {nice: true}},
             padding: [50, 50, 50, 70],
             toolTip: {
               tplFormatter: tpl => tpl
-                .replace("{name}", "调用次数")
-                .replace("{value}", "{value} 次")
+                .replace("{name}", $localize `:@@common.times-call:Times of call`)
+                .replace("{value}", "{value}")
             }
           };
 

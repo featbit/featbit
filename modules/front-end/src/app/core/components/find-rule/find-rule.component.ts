@@ -8,7 +8,7 @@ import {
   IJsonContent,
   IRulePercentageRollout,
   IVariationOption
-} from "@features/safe/switch-manage/types/switch-new";
+} from "@features/safe/feature-flags/types/switch-new";
 import { IUserProp } from "@shared/types";
 import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
 

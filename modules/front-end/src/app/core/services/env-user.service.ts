@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/users/types/featureflag-user";
 import { IUserType } from "@shared/types";
-import { IJsonContent } from "@features/safe/switch-manage/types/switch-new";
+import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 
 @Injectable({
   providedIn: 'root'

@@ -185,7 +185,7 @@ export class IndexComponent implements OnInit, OnDestroy {
 
   public openFlagPage(flagKeyName: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/switch-manage/${flagKeyName}/targeting`])
+      this.router.createUrlTree([`/feature-flags/${flagKeyName}/targeting`])
     );
 
     window.open(url, '_blank');

@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IAccount } from '@shared/types';
-import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from '@features/safe/switch-manage/types/experimentations';
+import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from '@features/safe/feature-flags/types/experimentations';
 import { MetricService } from '@services/metric.service';
 import { TeamService } from '@services/team.service';
 import { uuidv4 } from '@utils/index';

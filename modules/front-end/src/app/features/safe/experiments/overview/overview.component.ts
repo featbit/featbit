@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IProjectEnv } from '@shared//types';
 import { ExperimentService } from '@services/experiment.service';
-import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../../switch-manage/types/experimentations';
+import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../../feature-flags/types/experimentations';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Component({
@@ -90,7 +90,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   goToFeatureFlag(featureFlagId: string) {
-    this.router.navigateByUrl(`/switch-manage/${featureFlagId}/experimentations`);
+    this.router.navigateByUrl(`/feature-flags/${featureFlagId}/experimentations`);
   }
 
   goToMetric(metricId: string) {

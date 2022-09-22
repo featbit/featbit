@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { getPercentageFromRolloutPercentageArray, isNotPercentageRollout } from '@utils/index';
-import { IRulePercentageRollout, IVariationOption } from "@features/safe/switch-manage/types/switch-new";
+import { IRulePercentageRollout, IVariationOption } from "@features/safe/feature-flags/types/switch-new";
 
 interface IRulePercentageRolloutValue extends IRulePercentageRollout {
   percentageValue: number;

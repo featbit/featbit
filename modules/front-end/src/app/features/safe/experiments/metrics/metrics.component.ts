@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IAccount, IAccountUser, IProjectEnv } from '@shared/types';
 import { MetricService } from '@services/metric.service';
 import { TeamService } from '@services/team.service';
-import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from '../../switch-manage/types/experimentations';
+import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from '../../feature-flags/types/experimentations';
 import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Component({

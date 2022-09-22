@@ -7,7 +7,7 @@ import {CSwitchParams, IFfParams, IVariationOption, VariationDataTypeEnum} from 
 import {IZeroCode} from '../../types/zero-code';
 import {MessageQueueService} from '@services/message-queue.service';
 import {SwitchV2Service} from '@services/switch-v2.service';
-import {SwitchDetail, UpdateSettingPayload} from '@features/safe/switch-manage/types/switch-index';
+import {SwitchDetail, UpdateSettingPayload} from '@features/safe/feature-flags/types/switch-index';
 import {IProjectEnv} from '@shared/types';
 import {CURRENT_PROJECT} from '@utils/localstorage-keys';
 import {isNumeric, tryParseJSONObject} from "@utils/index";
@@ -36,19 +36,19 @@ export class SettingComponent implements OnInit {
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success('复制成功')
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }
 
   public currentSwitch: IFfParams = null;
-  public originalVariationOptions: IVariationOption[]; // this is used only for the return value when disabled
+  public originalVariationOptions: IVariationOption[];
   public variationOptions: IVariationOption[];
   public variationDataType: VariationDataTypeEnum = VariationDataTypeEnum.string;
   private temporaryStateId: number = -1;
-  public featureDetail: CSwitchParams;                      // 开关详情
+  public featureDetail: CSwitchParams;
   public isLoading = true;
   public isEditingTitle = false;
-  public switchStatus: boolean = true;  // 开关状态
+  public switchStatus: boolean = true;
   public isEditingVariationOptions = false;
   public id: string = null;
   public quickStartDeliverFlag: boolean = false;
@@ -157,7 +157,7 @@ export class SettingComponent implements OnInit {
 
   saveVariationOptions() {
     if (!this.validateVariationDataTypes()) {
-      this.message.error("返回值类型与所填写内容不匹配，请改正后再保存！");
+      this.message.error($localize `:@@ff.variation.type-value-not-match:The type and value of the variation don't match`);
       return;
     }
     this.toggleVariationOptionEditState();
@@ -205,29 +205,29 @@ export class SettingComponent implements OnInit {
 
   deleteVariationOptionRow(id: number): void {
     if(this.featureDetail.getTargetIndividuals()?.find(x => x.valueOption.localId === id)?.individuals?.length > 0) {
-      this.message.warning("该状态已经在目标用户中被使用，移除后方可删除！");
+      this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by targeting users, remove the reference before it can be safely removed`);
       return;
     }
 
     if(this.featureDetail.getFftuwmtr().length > 0 && this.featureDetail.getFftuwmtr().find(x => x.valueOptionsVariationRuleValues.find(y => y.valueOption.localId === id))) {
-      this.message.warning("该状态已经在匹配条件的规则中被使用，移除后方可删除！");
+      this.message.warning($localize `:@@ff.variation-used-by-rules:This variation is used by rules, remove the reference before it can be safely removed`);
       return;
     }
 
     if(this.featureDetail.getFFDefaultRulePercentageRollouts().length > 0 && this.featureDetail.getFFDefaultRulePercentageRollouts().find(x => x.valueOption.localId === id)) {
-      this.message.warning("该状态已经在默认返回值中被使用，移除后方可删除！");
+      this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by default rule, remove the reference before it can be safely removed`);
       return;
     }
 
     if(this.featureDetail.getFFVariationOptionWhenDisabled() !== null && this.featureDetail.getFFVariationOptionWhenDisabled().localId === id) {
-      this.message.warning("该状态已经在开关关闭后的返回值中被使用，移除后方可删除！");
+      this.message.warning($localize `:@@ff.variation-used-by-off:This variation is used by the value returned when the feature flag is OFF, remove the reference before it can be safely removed`);
       return;
     }
 
-    if (this.zeroCode !== null && this.zeroCode?.items?.find(it => it.variationOption.localId === id)) {
-      this.message.warning("该状态已经在零代码设置中被使用，移除后方可删除！");
-      return;
-    }
+    // if (this.zeroCode !== null && this.zeroCode?.items?.find(it => it.variationOption.localId === id)) {
+    //   this.message.warning("该状态已经在零代码设置中被使用，移除后方可删除！");
+    //   return;
+    // }
 
     this.variationOptions = this.variationOptions.filter(d => d.localId !== id);
   }
@@ -284,7 +284,7 @@ export class SettingComponent implements OnInit {
       .subscribe((result: IFfParams) => {
         this.currentSwitch = result;
         this.switchServe.setCurrentSwitch(result);
-        this.message.success("开关信息更新成功!");
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
         this.originalVariationOptions = [...this.variationOptions];
         cb && cb();
@@ -294,23 +294,27 @@ export class SettingComponent implements OnInit {
   // 存档
   onArchiveClick() {
     const disabledValue = this.currentSwitch.variationOptionWhenDisabled.variationValue;
+    const msg = $localize `:@@ff.when-archived-status-change-to-off:When archived, the status would be changed to`
+      + ' <strong>OFF</strong> '
+      + $localize `:@@ff.and-return-varation-change-to:and the returning variation would be changed to`
+      + ` <strong>${disabledValue}</strong>`;
 
     this.modal.confirm({
-      nzContent: `存档后开关将从开关列表中移除，开关将处于 <strong>关闭状态</strong> 且返回值将变为 <strong>${disabledValue}</strong> 。请您再次确认以避免给线上环境造成影响。`,
-      nzTitle: '确定存档开关么？',
+      nzContent: msg,
+      nzTitle: $localize `:@@ff.are-you-sure-to-archive-ff:Are you sure to archive this feature flag?`,
       nzCentered: true,
       nzClassName: 'information-modal-dialog',
       nzOnOk: () => {
         this.switchServe.archiveEnvFeatureFlag(this.currentSwitch.id, this.currentSwitch.name)
           .subscribe(
             _ => {
-              this.message.success('开关存档成功！');
+              this.message.success($localize `:@@common.operation-success:Operation succeeded`);
               this.isArchived = true;
               this.switchStatus = false;
               this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.id));
             },
             _ => {
-              this.message.error('开关存档失败，请稍后重试！');
+              this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
             }
           );
       }
@@ -320,7 +324,7 @@ export class SettingComponent implements OnInit {
   // 复位开关
   restoreFlag() {
     this.switchServe.unarchiveEnvFeatureFlag(this.id, this.currentSwitch.name).subscribe(_ => {
-      this.message.success('开关复位成功！');
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.isArchived = false;
       this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.id));
     });
@@ -330,10 +334,10 @@ export class SettingComponent implements OnInit {
   deleteFlag() {
     this.switchServeV2.delete(this.id).subscribe(success => {
       if (success) {
-        this.message.success('删除成功');
-        this.router.navigateByUrl('/switch-manage');
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.router.navigateByUrl('/feature-flags');
       } else {
-        this.message.error('删除失败，请联系运营人员。');
+        this.message.error($localize `:@@common.operation-failed:Operation failed`);
       }
     });
   }
@@ -347,12 +351,12 @@ export class SettingComponent implements OnInit {
 
   onExportVariationUsers(variation: IVariationOption) {
     this.isExportingVariationUsers = true;
-    const downloadFilename = `featureflag.co.${this.currentSwitch.name}_${variation.variationValue}.csv`;
+    const downloadFilename = `featbit.${this.currentSwitch.name}_${variation.variationValue}.csv`;
     this.switchServeV2.getUsersForVariation(this.currentSwitch.id, variation.localId).subscribe(data => {
       this.downloadFile(downloadFilename, data);
     }, _ => {
       this.isExportingVariationUsers = false;
-      this.message.error("数据下载失败！");
+      this.message.error($localize `:@@common.download-failed:Download failed`);
     });
   }
 
