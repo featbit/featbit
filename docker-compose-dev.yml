@@ -1,5 +1,20 @@
 version: "3.9"
 services:
+  api:
+    image: featbit/api
+    container_name: featbit-api-dev
+    build:
+      context: ./modules/back-end
+      dockerfile: ./deploy/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - mongodb
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
+
   mongodb:
     image: mongo
     container_name: featbit-mongodb-dev
@@ -28,6 +43,7 @@ services:
       - "6379:6379"
     volumes:
       - redis:/data
+
   zookeeper:
     image: bitnami/zookeeper:latest
     container_name: zookeeper
@@ -115,7 +131,7 @@ services:
     command:
       - infinity
     networks:
-      -   featbit-network
+      - featbit-network
 
 networks:
   featbit-network:
