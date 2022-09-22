@@ -53,7 +53,7 @@
         <tr>
           <th [nzChecked]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
           <th i18n="@@common.name">Name</th>
-          <th><span i18n-nz-tooltip="@@ff.idx.use-keyName-in-code-to-get-variation" nz-tooltip="Use keyName in your code to get the feature flag variation">KeyName</span></th>
+          <th><span i18n-nz-tooltip="@@ff.use-keyName-in-code-to-get-variation" nz-tooltip="Use keyName in your code to get the feature flag variation">KeyName</span></th>
           <th i18n="@@common.status">Status</th>
           <th i18n="@@common.tags">Tags</th>
           <th i18n="@@common.variations">Variations</th>
@@ -158,7 +158,7 @@
       </nz-form-item>
       <nz-form-item>
         <nz-form-label nzRequired>KeyName</nz-form-label>
-        <nz-form-control i18n-nz-tooltip="@@ff.idx.use-keyName-in-code-to-get-variation" nz-tooltip="Use keyName to in your code to get the feature flag variation">
+        <nz-form-control i18n-nz-tooltip="@@ff.use-keyName-in-code-to-get-variation" nz-tooltip="Use keyName in your code to get the feature flag variation">
           <input nz-input [value]="this.switchFormV2.get('name').value | switchKeyName" formControlName="keyName" i18n-placeholder="@@ff.idx.keyName-generated-from-name" placeholder="keyName is generated from name" />
         </nz-form-control>
       </nz-form-item>
