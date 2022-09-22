@@ -2214,6 +2214,10 @@
           <context context-type="linenumber">175</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
           <context context-type="linenumber">139</context>
         </context-group>
@@ -2966,10 +2970,6 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details-routing.module.ts</context>
           <context context-type="linenumber">35</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="ff.routing.details.experimentations" datatype="html">
-        <source>Experimentations</source>
-        <target>数据实验</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details.component.html</context>
           <context context-type="linenumber">19</context>
@@ -3138,15 +3138,6 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">144,145</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="2115592966120408375" datatype="html">
-        <source>Copied</source>
-        <target>复制成功</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">39</context>
-        </context-group>
-        <note priority="1" from="description">@common.copy-success</note>
       </trans-unit>
       <trans-unit id="ff.variation.type-value-not-match" datatype="html">
         <source>The type and value of the variation don&apos;t match</source>

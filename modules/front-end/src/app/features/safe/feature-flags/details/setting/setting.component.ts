@@ -36,7 +36,7 @@ export class SettingComponent implements OnInit {
 
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success($localize `:@common.copy-success:Copied`)
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }
 
