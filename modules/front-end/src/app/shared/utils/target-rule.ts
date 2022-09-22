@@ -1,4 +1,4 @@
-import { IFftuwmtrParams, IJsonContent } from "@features/safe/switch-manage/types/switch-new";
+import { IFftuwmtrParams, IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 
 export function handleRulesBeforeSave(rules: IFftuwmtrParams[]) {
   let filteredRules = rules.filter(rule => rule.ruleJsonContent.length > 0);

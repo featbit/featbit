@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { CSwitchParams, IFfParams, IPrequisiteFeatureFlag } from '@features/safe/switch-manage/types/switch-new';
+import { CSwitchParams, IFfParams, IPrequisiteFeatureFlag } from '@features/safe/feature-flags/types/switch-new';
 import { AccountService } from './account.service';
 
 @Injectable({
@@ -25,7 +25,7 @@ export class SwitchService {
     const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
     const envId = currentAccountProjectEnv.projectEnv.envId;
     if (this.envId && envId !== this.envId) {
-      this.router.navigateByUrl("/switch-manage");
+      this.router.navigateByUrl("/feature-flags");
     }
     this.envId = envId;
   }

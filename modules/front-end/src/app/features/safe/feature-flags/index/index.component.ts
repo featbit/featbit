@@ -23,10 +23,10 @@ import { NzNotificationService } from "ng-zorro-antd/notification";
 
 @Component({
   selector: 'index',
-  templateUrl: './switch-index.component.html',
-  styleUrls: ['./switch-index.component.less']
+  templateUrl: './index.component.html',
+  styleUrls: ['./index.component.less']
 })
-export class SwitchIndexComponent implements OnInit {
+export class IndexComponent implements OnInit {
 
   // tag tree
   tagTreeModalVisible: boolean = false;
@@ -339,7 +339,7 @@ export class SwitchIndexComponent implements OnInit {
 
   // 路由跳转
   private toSwitchDetail(id: string) {
-    this.router.navigateByUrl(`/switch-manage/${encodeURIComponentFfc(id)}/targeting`);
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(id)}/targeting`);
   }
 
   // 转换本地时间

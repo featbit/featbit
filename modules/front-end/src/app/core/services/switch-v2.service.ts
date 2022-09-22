@@ -7,10 +7,10 @@ import {
   SwitchDropdown,
   SwitchListModel,
   SwitchDetail, UpdateSettingPayload, CopyToEnvResult
-} from "@features/safe/switch-manage/types/switch-index";
+} from "@features/safe/feature-flags/types/switch-index";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
-import { IFfParams } from "@features/safe/switch-manage/types/switch-new";
+import { IFfParams } from "@features/safe/feature-flags/types/switch-new";
 import { encodeURIComponentFfc } from "@utils/index";
 
 @Injectable({

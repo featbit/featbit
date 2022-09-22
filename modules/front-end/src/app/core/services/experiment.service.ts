@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IExperiment, IExperimentIteration } from '@features/safe/switch-manage/types/experimentations';
+import { IExperiment, IExperimentIteration } from '@features/safe/feature-flags/types/experimentations';
 
 @Injectable({
   providedIn: 'root'

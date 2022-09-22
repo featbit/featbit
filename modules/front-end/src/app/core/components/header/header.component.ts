@@ -101,8 +101,8 @@ export class HeaderComponent implements OnInit {
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
 
-    if (this.router.url.indexOf("/switch-manage") > -1) {
-      this.router.navigateByUrl("/switch-manage");
+    if (this.router.url.indexOf("/feature-flags") > -1) {
+      this.router.navigateByUrl("/feature-flags");
     }
 
     setTimeout(() => window.location.reload(), 200);

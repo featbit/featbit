@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angu
 import { isSegmentRule } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { IJsonContent } from "@features/safe/switch-manage/types/switch-new";
+import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import { ruleType, ruleValueConfig, findIndex } from '../ruleConfig';
 import { ISegment, ISegmentListModel, SegmentListFilter } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';

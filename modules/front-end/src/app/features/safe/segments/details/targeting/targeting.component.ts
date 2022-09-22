@@ -6,7 +6,7 @@ import { SegmentService } from '@services/segment.service';
 import { IUserProp, IUserType } from '@shared/types';
 
 import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments-index';
-import { IFftuwmtrParams, IJsonContent } from "@features/safe/switch-manage/types/switch-new";
+import { IFftuwmtrParams, IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { EnvUserFilter } from "@features/safe/users/types/featureflag-user";
@@ -55,7 +55,7 @@ export class TargetingComponent {
 
   public openFlagPage(flagKeyName: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/switch-manage/${flagKeyName}/targeting`])
+      this.router.createUrlTree([`/feature-flags/${flagKeyName}/targeting`])
     );
 
     window.open(url, '_blank');

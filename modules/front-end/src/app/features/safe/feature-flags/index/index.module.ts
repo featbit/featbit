@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { SwitchIndexRoutingModule } from './switch-index-routing.module';
+import { IndexRoutingModule } from './index-routing.module';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { SwitchIndexComponent } from './switch-index.component';
+import { IndexComponent } from './index.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzModalModule  } from 'ng-zorro-antd/modal';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -32,7 +32,7 @@ import {CoreModule} from "@core/core.module";
 
 
 @NgModule({
-  declarations: [SwitchIndexComponent, SwitchTagTreeViewComponent, SwitchTagTreeSelectComponent],
+  declarations: [IndexComponent, SwitchTagTreeViewComponent, SwitchTagTreeSelectComponent],
   imports: [
     CommonModule,
     NzSelectModule,
@@ -44,7 +44,7 @@ import {CoreModule} from "@core/core.module";
     FormsModule,
     NzTableModule,
     NzSpinModule,
-    SwitchIndexRoutingModule,
+    IndexRoutingModule,
     NzSwitchModule,
     NzIconModule,
     NzTreeViewModule,
@@ -63,4 +63,4 @@ import {CoreModule} from "@core/core.module";
     NzNotificationModule
   ]
 })
-export class SwitchIndexModule { }
+export class IndexModule { }

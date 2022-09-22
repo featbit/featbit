@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'flags-manage',
   template: `<router-outlet></router-outlet>`
 })
-export class SwitchManageComponent {
+export class FeatureFlagsComponent {
   constructor(
   ) {
   }

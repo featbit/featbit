@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { environment } from 'src/environments/environment';
-import { FlagTriggerStatus, IFlagTrigger } from "@features/safe/switch-manage/types/flag-triggers";
+import { FlagTriggerStatus, IFlagTrigger } from "@features/safe/feature-flags/types/flag-triggers";
 
 @Injectable({
   providedIn: 'root'

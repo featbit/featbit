@@ -36,7 +36,7 @@ const routes: Routes = [
         }
       }, {
         path: '',
-        redirectTo: '/switch-manage',
+        redirectTo: '/feature-flags',
         pathMatch: 'full'
       }
     ]

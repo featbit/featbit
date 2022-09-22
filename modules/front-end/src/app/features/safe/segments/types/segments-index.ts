@@ -1,5 +1,5 @@
 ﻿import { IUserType } from "@shared/types";
-import { IFftuwmtrParams, IJsonContent } from "@features/safe/switch-manage/types/switch-new";
+import { IFftuwmtrParams, IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import { uuidv4 } from "@utils/index";
 import { handleRulesBeforeSave } from "@utils/target-rule";
 

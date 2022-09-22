@@ -8,9 +8,9 @@ import {SegmentService} from "@services/segment.service";
 import {Subject} from "rxjs";
 import {debounceTime} from "rxjs/operators";
 import {Router} from "@angular/router";
-import {SwitchListFilter, SwitchListModel} from "@features/safe/switch-manage/types/switch-index";
+import {SwitchListFilter, SwitchListModel} from "@features/safe/feature-flags/types/switch-index";
 import {SwitchV2Service} from "@services/switch-v2.service";
-import {IFfParams, IVariationOption} from "@features/safe/switch-manage/types/switch-new";
+import {IFfParams, IVariationOption} from "@features/safe/feature-flags/types/switch-new";
 import {editor} from "monaco-editor";
 
 @Component({
@@ -183,7 +183,7 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
   // 点击进入对应开关详情
   public onIntoFlagDetail(data: IFfParams) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/switch-manage/${encodeURIComponentFfc(data.id)}/targeting`])
+      this.router.createUrlTree([`/feature-flags/${encodeURIComponentFfc(data.id)}/targeting`])
     );
 
     window.open(url, '_blank');

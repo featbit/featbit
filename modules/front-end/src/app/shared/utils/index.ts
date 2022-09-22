@@ -1,6 +1,6 @@
 import { USER_PROFILE } from "./localstorage-keys";
 import {IAuthProps} from "../types";
-import {IJsonContent, IRulePercentageRollout} from "@features/safe/switch-manage/types/switch-new";
+import {IJsonContent, IRulePercentageRollout} from "@features/safe/feature-flags/types/switch-new";
 import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
 
 export function getAuth() : IAuthProps | null {

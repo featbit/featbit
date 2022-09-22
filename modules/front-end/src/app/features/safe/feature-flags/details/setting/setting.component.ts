@@ -7,7 +7,7 @@ import {CSwitchParams, IFfParams, IVariationOption, VariationDataTypeEnum} from 
 import {IZeroCode} from '../../types/zero-code';
 import {MessageQueueService} from '@services/message-queue.service';
 import {SwitchV2Service} from '@services/switch-v2.service';
-import {SwitchDetail, UpdateSettingPayload} from '@features/safe/switch-manage/types/switch-index';
+import {SwitchDetail, UpdateSettingPayload} from '@features/safe/feature-flags/types/switch-index';
 import {IProjectEnv} from '@shared/types';
 import {CURRENT_PROJECT} from '@utils/localstorage-keys';
 import {isNumeric, tryParseJSONObject} from "@utils/index";
@@ -331,7 +331,7 @@ export class SettingComponent implements OnInit {
     this.switchServeV2.delete(this.id).subscribe(success => {
       if (success) {
         this.message.success('删除成功');
-        this.router.navigateByUrl('/switch-manage');
+        this.router.navigateByUrl('/feature-flags');
       } else {
         this.message.error('删除失败，请联系运营人员。');
       }
