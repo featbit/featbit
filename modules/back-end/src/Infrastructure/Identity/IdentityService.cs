@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Application.Bases;
 using Domain.Users;
+using Infrastructure.Users;
 using Microsoft.Extensions.Options;
 using IdentityOptions = Domain.Identity.IdentityOptions;
 

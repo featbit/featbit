@@ -1,5 +1,5 @@
 using Domain.Users;
-using Infrastructure.Identity;
+using Infrastructure.Users;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;

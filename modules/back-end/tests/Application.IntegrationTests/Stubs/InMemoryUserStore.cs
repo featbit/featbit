@@ -1,5 +1,5 @@
 using Domain.Users;
-using Infrastructure.Identity;
+using Infrastructure.Users;
 
 namespace Application.IntegrationTests.Stubs;
 

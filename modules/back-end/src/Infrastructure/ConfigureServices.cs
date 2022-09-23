@@ -2,6 +2,7 @@ using Application.Services;
 using Domain.Users;
 using Infrastructure.Identity;
 using Infrastructure.MongoDb;
+using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection.Extensions;

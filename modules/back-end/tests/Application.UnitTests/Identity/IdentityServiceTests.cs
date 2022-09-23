@@ -1,5 +1,6 @@
 using Domain.Users;
 using Infrastructure.Identity;
+using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using IdentityOptions = Domain.Identity.IdentityOptions;
