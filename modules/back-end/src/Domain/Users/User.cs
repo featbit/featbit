@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace Domain.Identity;
+namespace Domain.Users;
 
 public class User
 {

@@ -1,4 +1,4 @@
-using Domain.Identity;
+using Domain.Users;
 
 namespace Infrastructure.Identity;
 

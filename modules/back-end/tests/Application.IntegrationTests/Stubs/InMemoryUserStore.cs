@@ -1,4 +1,4 @@
-using Domain.Identity;
+using Domain.Users;
 using Infrastructure.Identity;
 
 namespace Application.IntegrationTests.Stubs;

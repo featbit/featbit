@@ -1,5 +1,5 @@
 using Application.Services;
-using Domain.Identity;
+using Domain.Users;
 using Infrastructure.Identity;
 using Infrastructure.MongoDb;
 using Microsoft.AspNetCore.Identity;

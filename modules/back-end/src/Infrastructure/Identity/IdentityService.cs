@@ -1,11 +1,11 @@
 using System.Text;
 using Application.Identity;
 using Application.Services;
-using Domain.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Application.Bases;
+using Domain.Users;
 using Microsoft.Extensions.Options;
 using IdentityOptions = Domain.Identity.IdentityOptions;
 

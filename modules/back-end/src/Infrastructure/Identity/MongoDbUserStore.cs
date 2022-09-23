@@ -1,4 +1,4 @@
-using Domain.Identity;
+using Domain.Users;
 using Infrastructure.MongoDb;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;

@@ -1,5 +1,5 @@
 using Application.Identity;
-using Domain.Identity;
+using Domain.Users;
 using Microsoft.AspNetCore.Identity;
 
 namespace Application.Services;
