@@ -9,10 +9,11 @@ public static class ServicesRegister
     {
         // add services for controllers
         builder.Services.AddControllers();
-        
+
         // make all generated paths URLs are lowercase
         builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
-        
+
+        // api versioning
         builder.Services
             .AddApiVersioning(options => options.ReportApiVersions = true)
             .AddMvc()
@@ -26,6 +27,16 @@ public static class ServicesRegister
                 // can also be used to control the format of the API version in route templates
                 options.SubstituteApiVersionInUrl = true;
             });
+        
+        // cors
+        var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"].Split(',');
+        builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
+        {
+            policyBuilder
+                .WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();

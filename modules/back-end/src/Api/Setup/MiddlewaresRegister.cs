@@ -14,7 +14,7 @@ public static class MiddlewaresRegister
         // external use
         app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
 
-        // Configure the HTTP request pipeline.
+        // middlewares for dev environment
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -31,6 +31,9 @@ public static class MiddlewaresRegister
                 }
             });
         }
+
+        // enable cors
+        app.UseCors();
 
         app.MapControllers();
 
