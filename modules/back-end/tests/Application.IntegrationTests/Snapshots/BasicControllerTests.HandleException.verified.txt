@@ -19,5 +19,10 @@
       success: false
     }
   },
-  Request: http://localhost/api/v1/basic/exception
+  Request: {
+    Uri: http://localhost/api/v1/basic/exception,
+    Headers: {
+      Authorization: Bearer [Scrubbed Token]
+    }
+  }
 }

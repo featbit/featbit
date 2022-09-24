@@ -1,8 +1,8 @@
 namespace Domain.Identity;
 
-public record IdentityOptions
+public record JwtOptions
 {
-    public const string Identity = nameof(Identity);
+    public const string Jwt = nameof(Jwt);
 
     public string Issuer { get; set; } = string.Empty;
 

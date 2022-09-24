@@ -25,8 +25,8 @@ public class User
     {
         var claims = new List<Claim>
         {
-            new("id", Id),
-            new("email", Email)
+            new(UserClaims.Id, Id),
+            new(UserClaims.Email, Email)
         };
 
         return claims;

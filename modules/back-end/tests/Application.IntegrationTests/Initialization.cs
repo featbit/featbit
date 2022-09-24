@@ -12,6 +12,11 @@ public static class Initialization
             typeName: type.Name,
             methodName: method.Name)
         );
+
+        VerifierSettings.ScrubLinesWithReplace(
+            x => x.StartsWith("eyJ") && x.Split('.').Length == 3 ? "[Scrubbed JWT]" : x
+        );
+        VerifierSettings.ScrubLinesWithReplace(x => x.StartsWith("Bearer ") ? "Bearer [Scrubbed Token]" : x);
         
         VerifyHttp.Enable();
     }

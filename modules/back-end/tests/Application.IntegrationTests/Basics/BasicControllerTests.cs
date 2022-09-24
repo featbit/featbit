@@ -11,12 +11,26 @@ public class BasicControllerTests : IClassFixture<TestApp>
     }
 
     [Fact]
+    public async Task NeedAuthentication()
+    {
+        var response = await _app.GetAsync("api/v1/basic/authorized", authenticated: false);
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task Authorized()
+    {
+        var response = await _app.GetAsync("api/v1/basic/authorized", authenticated: true);
+
+        await Verify(response);
+    }
+
+    [Fact]
     public async Task ApiVersioning()
     {
-        var client = _app.CreateClient();
-
-        var v1 = await client.GetAsync("api/v1/basic/string");
-        var v2 = await client.GetAsync("api/v2/basic/string");
+        var v1 = await _app.GetAsync("api/v1/basic/string");
+        var v2 = await _app.GetAsync("api/v2/basic/string");
 
         await Verify(new { v1, v2 });
     }
@@ -24,9 +38,7 @@ public class BasicControllerTests : IClassFixture<TestApp>
     [Fact]
     public async Task HandleException()
     {
-        var client = _app.CreateClient();
-
-        var response = await client.GetAsync("api/v1/basic/exception");
+        var response = await _app.GetAsync("api/v1/basic/exception");
 
         await Verify(response);
     }

@@ -34,6 +34,10 @@ public static class MiddlewaresRegister
 
         // enable cors
         app.UseCors();
+        
+        // authentication & authorization
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapControllers();
 
