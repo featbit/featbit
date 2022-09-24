@@ -1,3 +1,4 @@
+using Domain.Organizations;
 using Domain.Users;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -25,7 +26,9 @@ public class MongoDbClient
 
     private readonly Dictionary<Type, string> _collectionNameMap = new()
     {
-        { typeof(User), "Users" }
+        { typeof(User), "Users" },
+        { typeof(Organization), "Organizations" },
+        { typeof(OrganizationUser), "OrganizationUsers" },
     };
 
     public IMongoCollection<TEntity> CollectionOf<TEntity>()
