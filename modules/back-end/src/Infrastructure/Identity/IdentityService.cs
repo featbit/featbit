@@ -1,13 +1,14 @@
 using System.Text;
 using Application.Identity;
 using Application.Services;
-using Domain.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using Application.Bases;
+using Domain.Identity;
+using Domain.Users;
+using Infrastructure.Users;
 using Microsoft.Extensions.Options;
-using IdentityOptions = Domain.Identity.IdentityOptions;
 
 namespace Infrastructure.Identity;
 
@@ -15,12 +16,12 @@ public class IdentityService : IIdentityService
 {
     private readonly IUserStore _store;
     private readonly IPasswordHasher<User> _passwordHasher;
-    private readonly IdentityOptions _options;
+    private readonly JwtOptions _options;
 
     public IdentityService(
         IUserStore store,
         IPasswordHasher<User> passwordHasher,
-        IOptions<IdentityOptions> options)
+        IOptions<JwtOptions> options)
     {
         _passwordHasher = passwordHasher;
         _store = store;

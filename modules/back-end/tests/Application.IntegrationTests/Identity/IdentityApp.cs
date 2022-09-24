@@ -1,14 +1,13 @@
-using Domain.Identity;
-using Infrastructure.Identity;
+using Domain.Users;
+using Infrastructure.Users;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Application.IntegrationTests.Identity;
 
-public class IdentityApp : WebApplicationFactory<Program>
+public class IdentityApp : TestApp
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {

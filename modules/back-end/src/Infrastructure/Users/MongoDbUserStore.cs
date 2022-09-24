@@ -1,9 +1,9 @@
-using Domain.Identity;
+using Domain.Users;
 using Infrastructure.MongoDb;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
-namespace Infrastructure.Identity;
+namespace Infrastructure.Users;
 
 public class MongoDbUserStore : IUserStore
 {

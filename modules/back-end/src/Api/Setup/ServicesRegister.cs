@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -27,7 +28,7 @@ public static class ServicesRegister
                 // can also be used to control the format of the API version in route templates
                 options.SubstituteApiVersionInUrl = true;
             });
-        
+
         // cors
         var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"].Split(',');
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
@@ -48,6 +49,11 @@ public static class ServicesRegister
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
         builder.Services.AddApplicationServices();
+
+        // replace default authorization result handler
+        var authorizationResultHandler =
+            ServiceDescriptor.Singleton<IAuthorizationMiddlewareResultHandler>(new ApiAuthorizationResultHandler());
+        builder.Services.Replace(authorizationResultHandler);
 
         return builder;
     }

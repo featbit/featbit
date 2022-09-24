@@ -1,6 +1,6 @@
-using Domain.Identity;
+using Domain.Users;
 
-namespace Infrastructure.Identity;
+namespace Infrastructure.Users;
 
 public interface IUserStore
 {

@@ -1,8 +1,9 @@
 using Domain.Identity;
+using Domain.Users;
 using Infrastructure.Identity;
+using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using IdentityOptions = Domain.Identity.IdentityOptions;
 
 namespace Application.UnitTests.Identity;
 
@@ -12,7 +13,7 @@ public class IdentityServiceTests
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock = new();
     private readonly IdentityService _identityService;
 
-    private readonly IdentityOptions _identityOptions = new()
+    private readonly JwtOptions _jwtOptions = new()
     {
         Issuer = "test runner",
         Audience = "test",
@@ -24,7 +25,7 @@ public class IdentityServiceTests
         _identityService = new IdentityService(
             _userStoreMock.Object,
             _passwordHasherMock.Object,
-            Options.Create(_identityOptions)
+            Options.Create(_jwtOptions)
         );
     }
 

@@ -1,3 +1,5 @@
+using Application.Users;
+
 namespace Api.Controllers;
 
 /// <summary>
@@ -7,6 +9,12 @@ namespace Api.Controllers;
 [ApiVersion(2.0)]
 public class BasicController : ApiControllerBase
 {
+    [HttpGet("authorized"), MapToApiVersion(1.0)]
+    public ApiResponse<ICurrentUser> Authorized()
+    {
+        return Ok(CurrentUser);
+    }
+
     [HttpGet("string"), MapToApiVersion(1.0)]
     public ApiResponse<string> GetStringV1()
     {
