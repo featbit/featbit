@@ -1,4 +1,5 @@
 using Api.Controllers;
+using Application.Bases;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.Net.Http.Headers;
@@ -25,7 +26,7 @@ public class ApiAuthorizationResultHandler : IAuthorizationMiddlewareResultHandl
             );
             response.StatusCode = StatusCodes.Status401Unauthorized;
 
-            var authError = ApiResponse<object>.Error("authentication failed");
+            var authError = ApiResponse<object>.Error(ErrorCodes.Unauthorized);
             await response.WriteAsJsonAsync(authError);
 
             return;
