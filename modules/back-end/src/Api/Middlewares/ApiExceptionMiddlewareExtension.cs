@@ -43,7 +43,7 @@ public static class ApiExceptionMiddlewareExtension
         {
             httpResponse.StatusCode = StatusCodes.Status404NotFound;
 
-            var entityNotFoundError = ApiResponse<object>.Error(entityNotFoundException.Message);
+            var entityNotFoundError = ApiResponse<object>.Error(ErrorCodes.ResourceNotFound);
             await httpResponse.WriteAsJsonAsync(entityNotFoundError);
 
             return;
