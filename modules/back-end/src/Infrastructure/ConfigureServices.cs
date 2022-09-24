@@ -55,6 +55,9 @@ public static class ConfigureServices
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]))
                 };
             });
+        
+        // custom services
+        services.AddScoped<IUserService, UserService>();
 
         return services;
     }
