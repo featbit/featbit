@@ -1,0 +1,26 @@
+﻿{
+  Version: 1.1,
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1.0
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      data: {
+        email: test@email.com,
+        id: id
+      },
+      errors: [],
+      success: true
+    }
+  },
+  Request: {
+    Uri: http://localhost/api/v1/user/profile,
+    Headers: {
+      Authorization: Bearer [Scrubbed Token]
+    }
+  }
+}
