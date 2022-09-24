@@ -4,6 +4,7 @@ using Domain.Identity;
 using Domain.Users;
 using Infrastructure.Identity;
 using Infrastructure.MongoDb;
+using Infrastructure.Organizations;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -58,6 +59,7 @@ public static class ConfigureServices
         
         // custom services
         services.AddScoped<IUserService, UserService>();
+        services.AddTransient<IOrganizationService, OrganizationService>();
 
         return services;
     }

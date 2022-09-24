@@ -9,6 +9,9 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        // automapper
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        
         // fluent validation
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
