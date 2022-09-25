@@ -89,7 +89,10 @@
               "localize": ["en"]
             },
             "zh": {
-              "localize": ["zh"]
+              "localize": ["zh"],
+              "styles": [
+                "src/styles-zh.less"
+              ]
             }
           },
           "defaultConfiguration": "production"
