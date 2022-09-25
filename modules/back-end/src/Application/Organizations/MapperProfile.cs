@@ -1,4 +1,3 @@
-using AutoMapper;
 using Domain.Organizations;
 
 namespace Application.Organizations;

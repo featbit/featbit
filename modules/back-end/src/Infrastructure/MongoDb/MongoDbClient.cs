@@ -1,4 +1,7 @@
+using Domain.Groups;
+using Domain.Members;
 using Domain.Organizations;
+using Domain.Policies;
 using Domain.Users;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -29,6 +32,11 @@ public class MongoDbClient
         { typeof(User), "Users" },
         { typeof(Organization), "Organizations" },
         { typeof(OrganizationUser), "OrganizationUsers" },
+        { typeof(Group), "Groups" },
+        { typeof(Policy), "Policies" },
+        { typeof(GroupMember), "GroupMembers" },
+        { typeof(GroupPolicy), "GroupPolicies" },
+        { typeof(MemberPolicy), "MemberPolicies" },
     };
 
     public IMongoCollection<TEntity> CollectionOf<TEntity>()

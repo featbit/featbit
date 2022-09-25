@@ -2,8 +2,9 @@ using System.Reflection;
 using Application.Bases.Behaviours;
 using Application.Users;
 
-// ReSharper disable once CheckNamespace
+// ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
+// ReSharper restore CheckNamespace
 
 public static class ConfigureServices
 {

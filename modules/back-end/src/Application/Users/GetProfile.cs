@@ -1,5 +1,3 @@
-using Application.Services;
-
 namespace Application.Users;
 
 public class GetProfile : IRequest<Profile>

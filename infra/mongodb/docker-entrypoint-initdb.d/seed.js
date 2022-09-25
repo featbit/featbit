@@ -41,7 +41,9 @@ db.OrganizationUsers.insertOne(
     {
         _id: "8bb885ec-2b68-4b07-894d-daacfb451743",
         organizationId: "c3290506-9ddb-4b58-96ae-5594f7937610",
-        userId: "a9013900-6c44-4aad-8e9a-568c2a429972"
+        userId: "a9013900-6c44-4aad-8e9a-568c2a429972",
+        invitorId: null,
+        initialPassword: null
     }
 )
 print('collection seeded: OrganizationUsers')

@@ -8,11 +8,7 @@ public class OrganizationUser
 
     public string UserId { get; set; }
 
-    public OrganizationUser(string organizationId, string userId)
-    {
-        Id = Guid.NewGuid().ToString();
-        
-        OrganizationId = organizationId;
-        UserId = userId;
-    }
+    public string InvitorId { get; set; }
+
+    public string InitialPassword { get; set; }
 }
