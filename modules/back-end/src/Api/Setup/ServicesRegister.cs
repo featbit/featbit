@@ -30,11 +30,10 @@ public static class ServicesRegister
             });
 
         // cors
-        var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"].Split(',');
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
         {
             policyBuilder
-                .WithOrigins(allowedOrigins)
+                .AllowAnyOrigin()
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         }));
