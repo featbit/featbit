@@ -14,7 +14,7 @@
     Value: {
       data: null,
       errors: [
-        resource "User" (not-exist-id) was not found.
+        ResourceNotFound
       ],
       success: false
     }
