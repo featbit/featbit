@@ -1,6 +1,3 @@
-using Application.Services;
-using AutoMapper;
-
 namespace Application.Organizations;
 
 public class GetUserOrganization : IRequest<IEnumerable<OrganizationVm>>

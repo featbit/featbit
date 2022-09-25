@@ -3,6 +3,7 @@ using Application.Services;
 using Domain.Identity;
 using Domain.Users;
 using Infrastructure.Identity;
+using Infrastructure.Members;
 using Infrastructure.MongoDb;
 using Infrastructure.Organizations;
 using Infrastructure.Users;
@@ -12,8 +13,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson.Serialization.Conventions;
 
-// ReSharper disable once CheckNamespace
+// ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
+// ReSharper restore CheckNamespace
 
 public static class ConfigureServices
 {
@@ -60,6 +62,7 @@ public static class ConfigureServices
         // custom services
         services.AddScoped<IUserService, UserService>();
         services.AddTransient<IOrganizationService, OrganizationService>();
+        services.AddTransient<IMemberService, MemberService>();
 
         return services;
     }

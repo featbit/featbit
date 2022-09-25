@@ -1,23 +1,8 @@
-using Application.Services;
-using AutoMapper;
-using Domain.Organizations;
-
 namespace Application.Organizations;
 
 public class GetOrganization : IRequest<OrganizationVm>
 {
     public string Id { get; set; }
-}
-
-public class OrganizationVm
-{
-    public string Id { get; set; }
-
-    public string Name { get; set; }
-
-    public bool Initialized { get; set; }
-
-    public Subscription Subscription { get; set; }
 }
 
 public class GetOrganizationHandler : IRequestHandler<GetOrganization, OrganizationVm>
