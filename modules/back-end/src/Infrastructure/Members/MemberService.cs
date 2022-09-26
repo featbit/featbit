@@ -70,7 +70,7 @@ public class MemberService : IMemberService
                 InitialPassword = organizationUser.InitialPassword,
             };
 
-        // email or phoneNumber filter
+        // email filter
         var searchText = filter.SearchText;
         if (!string.IsNullOrWhiteSpace(searchText))
         {
