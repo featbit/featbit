@@ -34,7 +34,7 @@ public class GroupController : ApiControllerBase
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(string organizationId, string name)
     {
-        var request = new IsNameUsed
+        var request = new IsGroupNameUsed
         {
             OrganizationId = organizationId,
             Name = name

@@ -7,6 +7,7 @@ using Infrastructure.Identity;
 using Infrastructure.Members;
 using Infrastructure.MongoDb;
 using Infrastructure.Organizations;
+using Infrastructure.Policies;
 using Infrastructure.Projects;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
@@ -67,6 +68,7 @@ public static class ConfigureServices
         services.AddTransient<IMemberService, MemberService>();
         services.AddTransient<IProjectService, ProjectService>();
         services.AddTransient<IGroupService, GroupService>();
+        services.AddTransient<IPolicyService, PolicyService>();
 
         return services;
     }
