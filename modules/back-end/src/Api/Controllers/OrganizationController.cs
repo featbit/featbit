@@ -16,7 +16,7 @@ public class OrganizationController : ApiControllerBase
     [HttpGet]
     public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetUserOrganizationAsync()
     {
-        var request = new GetUserOrganization { UserId = CurrentUser.Id };
+        var request = new GetOrganizationList { UserId = CurrentUser.Id };
 
         var vms = await Mediator.Send(request);
         return Ok(vms);
