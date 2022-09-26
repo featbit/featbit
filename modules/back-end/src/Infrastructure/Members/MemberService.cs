@@ -128,18 +128,18 @@ public class MemberService : IMemberService
         // aws document db not support '$let' operator which means we cannot operate on 'allGroupMembers' in the main query
         var query =
             from theGroup in groups
-            join groupMember in groupMembers 
+            join groupMember in groupMembers
                 on theGroup.Id equals groupMember.GroupId
                 into allGroupMembers
             where theGroup.OrganizationId == organizationId
             select new
             {
                 theGroup.Id,
-                theGroup.Name, 
+                theGroup.Name,
                 theGroup.Description,
                 GroupMembers = allGroupMembers
             };
-            
+
         if (!filter.GetAllGroups)
         {
             query = query.Where(x => x.GroupMembers.Any(y => y.MemberId == memberId));
@@ -204,5 +204,103 @@ public class MemberService : IMemberService
         // distinct by policy name
         var allPolicies = directPolicies.Concat(inheritedPolicies).GroupBy(x => x.Name).Select(x => x.First());
         return allPolicies;
+    }
+
+    public async Task<PagedResult<MemberPolicyVm>> GetDirectPoliciesAsync(
+        string organizationId,
+        string memberId,
+        MemberPolicyFilter filter)
+    {
+        var policies = _mongoDb.QueryableOf<Policy>();
+        var memberPolicies = _mongoDb.QueryableOf<MemberPolicy>();
+
+        var query =
+            from policy in policies
+            join memberPolicy in memberPolicies
+                on policy.Id equals memberPolicy.PolicyId
+                into allPolicyMembers
+            where policy.OrganizationId == organizationId || policy.Type == PolicyTypes.FfcManaged
+            select new
+            {
+                policy.Id,
+                policy.Name,
+                policy.Type,
+                policy.Description,
+                AllPolicyMembers = allPolicyMembers
+            };
+
+        if (!filter.GetAllPolicies)
+        {
+            query = query.Where(
+                x => x.AllPolicyMembers.Any(y => y.OrganizationId == organizationId && y.MemberId == memberId)
+            );
+        }
+
+        // name filter
+        var name = filter.Name;
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+        }
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip(filter.PageIndex * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        var vms = items.Select(x => new MemberPolicyVm
+        {
+            Id = x.Id.ToString(),
+            Name = x.Name,
+            Type = x.Type,
+            Description = x.Description,
+            IsMemberPolicy = x.AllPolicyMembers.Any(y => y.OrganizationId == organizationId && y.MemberId == memberId)
+        }).ToList();
+
+        return new PagedResult<MemberPolicyVm>(totalCount, vms);
+    }
+
+    public async Task<PagedResult<InheritedMemberPolicy>> GetInheritedPoliciesAsync(
+        string organizationId,
+        string memberId,
+        InheritedMemberPolicyFilter filter)
+    {
+        var groups = _mongoDb.QueryableOf<Group>();
+        var groupMembers = _mongoDb.QueryableOf<GroupMember>();
+        var groupPolicies = _mongoDb.QueryableOf<GroupPolicy>();
+        var policies = _mongoDb.QueryableOf<Policy>();
+
+        var query =
+            from theGroup in groups
+            join groupMember in groupMembers
+                on theGroup.Id equals groupMember.GroupId
+            join groupPolicy in groupPolicies
+                on theGroup.Id equals groupPolicy.GroupId
+            join policy in policies
+                on groupPolicy.PolicyId equals policy.Id
+            where groupMember.OrganizationId == organizationId && groupMember.MemberId == memberId
+            select new InheritedMemberPolicy
+            {
+                Id = policy.Id,
+                Name = policy.Name,
+                Description = policy.Description,
+                Type = policy.Type,
+                GroupName = theGroup.Name
+            };
+
+        var name = filter.Name;
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+        }
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip(filter.PageIndex * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<InheritedMemberPolicy>(totalCount, items);
     }
 }
