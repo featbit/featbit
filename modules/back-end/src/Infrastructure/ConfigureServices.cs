@@ -2,6 +2,7 @@ using System.Text;
 using Application.Services;
 using Domain.Identity;
 using Domain.Users;
+using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
 using Infrastructure.MongoDb;
@@ -65,6 +66,7 @@ public static class ConfigureServices
         services.AddTransient<IOrganizationService, OrganizationService>();
         services.AddTransient<IMemberService, MemberService>();
         services.AddTransient<IProjectService, ProjectService>();
+        services.AddTransient<IGroupService, GroupService>();
 
         return services;
     }
