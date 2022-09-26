@@ -1,22 +1,22 @@
 namespace Application.Groups;
 
-public class IsNameUsed : IRequest<bool>
+public class IsGroupNameUsed : IRequest<bool>
 {
     public string OrganizationId { get; set; }
 
     public string Name { get; set; }
 }
 
-public class IsNameUsedHandler : IRequestHandler<IsNameUsed, bool>
+public class IsGroupNameUsedHandler : IRequestHandler<IsGroupNameUsed, bool>
 {
     private readonly IGroupService _service;
 
-    public IsNameUsedHandler(IGroupService service)
+    public IsGroupNameUsedHandler(IGroupService service)
     {
         _service = service;
     }
     
-    public async Task<bool> Handle(IsNameUsed request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(IsGroupNameUsed request, CancellationToken cancellationToken)
     {
         var isNameUsed = await _service.IsNameUsedAsync(request.OrganizationId, request.Name);
 
