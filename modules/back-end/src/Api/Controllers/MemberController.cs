@@ -65,4 +65,38 @@ public class MemberController : ApiControllerBase
         var vms = await Mediator.Send(request);
         return Ok(vms);
     }
+
+    [HttpGet("{memberId}/direct-policies")]
+    public async Task<ApiResponse<PagedResult<MemberPolicyVm>>> GetDirectPoliciesAsync(
+        string organizationId,
+        string memberId,
+        [FromQuery] MemberPolicyFilter filter)
+    {
+        var request = new GetDirectPolicies
+        {
+            OrganizationId = organizationId,
+            MemberId = memberId,
+            Filter = filter
+        };
+
+        var policies = await Mediator.Send(request);
+        return Ok(policies);
+    }
+
+    [HttpGet("{memberId}/inherited-policies")]
+    public async Task<ApiResponse<PagedResult<InheritedMemberPolicy>>> GetInheritedPoliciesAsync(
+        string organizationId,
+        string memberId,
+        [FromQuery] InheritedMemberPolicyFilter filter)
+    {
+        var request = new GetInheritedPolicies
+        {
+            OrganizationId = organizationId,
+            MemberId = memberId,
+            Filter = filter
+        };
+
+        var policies = await Mediator.Send(request);
+        return Ok(policies);
+    }
 }

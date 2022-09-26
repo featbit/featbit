@@ -16,4 +16,8 @@ public interface IMemberService
     Task<PagedResult<MemberGroup>> GetGroupsAsync(string organizationId, string memberId, MemberGroupFilter filter);
 
     Task<IEnumerable<Policy>> GetPoliciesAsync(string organizationId, string memberId);
+    
+    Task<PagedResult<MemberPolicyVm>> GetDirectPoliciesAsync(string organizationId, string memberId, MemberPolicyFilter filter);
+    
+    Task<PagedResult<InheritedMemberPolicy>> GetInheritedPoliciesAsync(string organizationId, string memberId, InheritedMemberPolicyFilter filter);
 }

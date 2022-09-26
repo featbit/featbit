@@ -14,7 +14,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetUserOrganizationAsync()
+    public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetListAsync()
     {
         var request = new GetOrganizationList { UserId = CurrentUser.Id };
 
