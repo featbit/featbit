@@ -14,7 +14,7 @@ export class AccountProjectEnvResolver implements Resolve<any> {
   ) { }
 
   resolve(route: ActivatedRouteSnapshot): Observable<any> {
-    return this.accountService.getCurrentAccount().pipe(
+    return this.accountService.getCurrentOrganization().pipe(
         take(1),
         mergeMap((account: IOrganization) => {
             return this.projectService.getCurrentProjectEnv(account.id).pipe(

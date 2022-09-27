@@ -22,7 +22,7 @@ export class SwitchService {
   }
 
   private initEnvIds() {
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
     const envId = currentAccountProjectEnv.projectEnv.envId;
     if (this.envId && envId !== this.envId) {
       this.router.navigateByUrl("/feature-flags");

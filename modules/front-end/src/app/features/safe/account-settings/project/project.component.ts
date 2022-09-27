@@ -42,7 +42,7 @@ export class ProjectComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
     this.currentAccountId = currentAccountProjectEnv.account.id;
     this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
     const canListProjects = this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.ListProjects);

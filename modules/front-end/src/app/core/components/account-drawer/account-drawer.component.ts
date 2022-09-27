@@ -51,7 +51,7 @@ export class AccountDrawerComponent implements OnInit {
 
     const { organizationName } = this.accountForm.value;
 
-    this.accountService.postCreateAccount({ organizationName })
+    this.accountService.createOrganization({ organizationName })
       .pipe()
       .subscribe(
         res => {

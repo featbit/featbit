@@ -35,7 +35,7 @@ export class SwitchArchiveComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
     this.currentAccountId = currentAccountProjectEnv.account.id;
     this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
     this.init();

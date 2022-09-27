@@ -29,7 +29,7 @@ export class AuthGuard implements CanActivate {
 
       // check if account is initialized
       if (!url.startsWith("/initialization")) {
-        const accountProj = this.accountService.getCurrentAccountProjectEnv();
+        const accountProj = this.accountService.getCurrentOrganizationProjectEnv();
         if (accountProj.account?.initialized === false) {
           return this.router.parseUrl('/initialization');
         }
