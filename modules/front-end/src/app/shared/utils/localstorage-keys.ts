@@ -8,8 +8,8 @@ export function CURRENT_PROJECT(): string {
   return getLocalStorageKey('current-project', false);
 }
 
-export function CURRENT_ACCOUNT(): string {
-  return getLocalStorageKey('current-account', false);
+export function CURRENT_ORGANIZATION(): string {
+  return getLocalStorageKey('current-organization', false);
 }
 
 export function CURRENT_USER_FILTER_ATTRIBUTE(envId: number): string {

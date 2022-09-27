@@ -36,7 +36,7 @@
         <tr *ngFor="let item of table.data">
           <td (click)="navigateToPolicyDetail(item.id)">{{item.name}}</td>
           <td>
-            <i *ngIf="item.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+            <i *ngIf="item.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
             {{item.type | policyType}}
           </td>
           <td>{{item.description}}</td>

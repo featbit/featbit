@@ -4,5 +4,5 @@ public class PolicyTypes
 {
     public const string CustomerManaged = "CustomerManaged";
 
-    public const string FfcManaged = "FFCManaged";
+    public const string SysManaged = "SysManaged";
 }

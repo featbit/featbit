@@ -138,7 +138,7 @@ public class GroupService : IGroupService
             join groupPolicy in groupPolicies
                 on policy.Id equals groupPolicy.PolicyId
                 into allPolicyGroups
-            where policy.OrganizationId == organizationId || policy.Type == PolicyTypes.FfcManaged
+            where policy.OrganizationId == organizationId || policy.Type == PolicyTypes.SysManaged
             select new
             {
                 policy.Id,

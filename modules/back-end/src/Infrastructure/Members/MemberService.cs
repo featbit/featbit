@@ -179,7 +179,7 @@ public class MemberService : IMemberService
             from policy in policies
             join memberPolicy in memberPolicies
                 on policy.Id equals memberPolicy.PolicyId
-            where memberPolicy.OrganizationId == organizationId && memberPolicy.MemberId == memberId
+            where memberPolicy.OrganizationId == organizationId && memberPolicy.MemberId == memberId && policy.OrganizationId != null
             select policy;
 
         // inherited policies
@@ -195,9 +195,9 @@ public class MemberService : IMemberService
                 on theGroup.Id equals groupPolicy.GroupId
             join policy in policies
                 on groupPolicy.PolicyId equals policy.Id
-            where groupMember.OrganizationId == organizationId && groupMember.MemberId == memberId
+            where groupMember.OrganizationId == organizationId && groupMember.MemberId == memberId && policy.OrganizationId != null
             select policy;
-
+        
         var directPolicies = await directPolicyQuery.ToListAsync();
         var inheritedPolicies = await inheritedPolicyQuery.ToListAsync();
 
@@ -219,7 +219,7 @@ public class MemberService : IMemberService
             join memberPolicy in memberPolicies
                 on policy.Id equals memberPolicy.PolicyId
                 into allPolicyMembers
-            where policy.OrganizationId == organizationId || policy.Type == PolicyTypes.FfcManaged
+            where policy.OrganizationId == organizationId || policy.Type == PolicyTypes.SysManaged
             select new
             {
                 policy.Id,

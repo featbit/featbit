@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IOrganization, IProjectEnv, IAccountProjectEnv } from '@shared/types';
 import { ProjectService } from './project.service';
-import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
+import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Injectable({
   providedIn: 'root'
@@ -40,11 +40,11 @@ export class OrganizationService {
 
   switchOrganization(account: IOrganization) {
     if (!!account) {
-      localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(account));
+      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(account));
       const currentAccount = this.organizations.find(ws => ws.id == account.id);
       currentAccount.name = account.name;
     } else {
-      localStorage.setItem(CURRENT_ACCOUNT(), '');
+      localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
 
     this.projectService.clearCurrentProjectEnv();
@@ -53,23 +53,23 @@ export class OrganizationService {
 
   setOrganization(account: IOrganization) {
     if (!!account) {
-      localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(account));
+      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(account));
       const currentAccount = this.organizations.find(ws => ws.id == account.id);
       currentAccount.name = account.name;
     } else {
-      localStorage.setItem(CURRENT_ACCOUNT(), '');
+      localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
   }
 
   getCurrentOrganization(): Observable<IOrganization> {
     return new Observable(observer => {
-      const accountStr = localStorage.getItem(CURRENT_ACCOUNT());
+      const accountStr = localStorage.getItem(CURRENT_ORGANIZATION());
       if (this.organizations.length === 0 || !accountStr || JSON.parse(accountStr)?.plan === undefined) {
         this.getOrganizations().subscribe(res => {
           this.organizations = res as IOrganization[];
           if (!accountStr || JSON.parse(accountStr)?.plan === undefined) {
             const currentAcount = this.organizations[0];
-            localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(currentAcount));
+            localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentAcount));
             observer.next(currentAcount);
           } else {
             observer.next(this.organizations.find(ws => ws.id == JSON.parse(accountStr).id));
@@ -82,7 +82,7 @@ export class OrganizationService {
   }
 
   getCurrentOrganizationProjectEnv(): IAccountProjectEnv {
-    const account: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT())!);
+    const account: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION())!);
     const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT())!);
     return {
       account,

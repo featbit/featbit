@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { getAuth } from '@utils/index';
 import { IOrganization } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
-import { getCurrentAccount, getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 
@@ -38,7 +38,7 @@ export class AccountComponent implements OnInit {
     this.canUpdateOrgName = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.UpdateOrgName);
     this.allOrganizations = this.organizationService.organizations;
 
-    const currentOrganizationId = getCurrentAccount().id;
+    const currentOrganizationId = getCurrentOrganization().id;
     this.currentOrganization = this.allOrganizations.find(x => x.id == currentOrganizationId);
 
     this.initOrgForm();

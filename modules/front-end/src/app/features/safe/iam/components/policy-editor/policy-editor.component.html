@@ -9,7 +9,7 @@
     <ng-container i18n="@@common.save">Save</ng-container>
   </button>
 </div>
-<div class="policy-editor body-container standard-div" [class]="{ffcmanaged: readonly}">
+<div class="policy-editor body-container standard-div" [class]="{'sys-managed': readonly}">
   <div class="statements-banner">
     <div class="title" i18n="@@common.permissions">Permissions</div>
     <i nz-icon *ngIf="!readonly" (click)="addStatement()" nzType="icons:icon-add-outline"></i>
