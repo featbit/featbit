@@ -58,12 +58,12 @@ export class AccountComponent implements OnInit {
     this.creatAccountFormVisible = false;
     if (account) {
       this.accountService.accounts = [...this.accountService.accounts, account];
-      this.accountService.changeAccount(account);
+      this.accountService.switchOrganization(account);
     }
   }
 
   onAccountChange() {
-    this.accountService.changeAccount(this.currentAccount);
+    this.accountService.switchOrganization(this.currentAccount);
   }
 
   submitOrgForm() {
@@ -83,13 +83,13 @@ export class AccountComponent implements OnInit {
     const { id, initialized } = this.currentAccount;
 
     this.isLoading = true;
-    this.accountService.putUpdateAccount({ organizationName, id })
+    this.accountService.updateOrganization({ organizationName, id })
       .pipe()
       .subscribe(
         () => {
           this.isLoading = false;
           this.message.success($localize `:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
-          this.accountService.setAccount({ id, initialized, organizationName });
+          this.accountService.setOrganization({ id, initialized, organizationName });
         },
         () => {
           this.isLoading = false;

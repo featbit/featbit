@@ -18,17 +18,17 @@ export class OrganizationService {
     private projectService: ProjectService
   ) { }
 
-  getAccounts(): Observable<any> {
+  getOrganizations(): Observable<any> {
     const url = this.baseUrl;
     return this.http.get(url);
   }
 
-  postCreateAccount(params: any): Observable<any> {
+  createOrganization(params: any): Observable<any> {
     const url = this.baseUrl;
     return this.http.post(url, params);
   }
 
-  putUpdateAccount(params: any): Observable<any> {
+  updateOrganization(params: any): Observable<any> {
     const url = this.baseUrl;
     return this.http.put(url, params);
   }
@@ -38,7 +38,7 @@ export class OrganizationService {
     return this.http.post(url, params);
   }
 
-  changeAccount(account: IOrganization) {
+  switchOrganization(account: IOrganization) {
     if (!!account) {
       localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(account));
       const currentAccount = this.accounts.find(ws => ws.id == account.id);
@@ -51,7 +51,7 @@ export class OrganizationService {
     window.location.reload();
   }
 
-  setAccount(account: IOrganization) {
+  setOrganization(account: IOrganization) {
     if (!!account) {
       localStorage.setItem(CURRENT_ACCOUNT(), JSON.stringify(account));
       const currentAccount = this.accounts.find(ws => ws.id == account.id);
@@ -61,11 +61,11 @@ export class OrganizationService {
     }
   }
 
-  getCurrentAccount(): Observable<IOrganization> {
+  getCurrentOrganization(): Observable<IOrganization> {
     return new Observable(observer => {
       const accountStr = localStorage.getItem(CURRENT_ACCOUNT());
       if (this.accounts.length === 0 || !accountStr || JSON.parse(accountStr)?.plan === undefined) {
-        this.getAccounts().subscribe(res => {
+        this.getOrganizations().subscribe(res => {
           this.accounts = res as IOrganization[];
           if (!accountStr || JSON.parse(accountStr)?.plan === undefined) {
             const currentAcount = this.accounts[0];
@@ -81,7 +81,7 @@ export class OrganizationService {
     });
   }
 
-  getCurrentAccountProjectEnv(): IAccountProjectEnv {
+  getCurrentOrganizationProjectEnv(): IAccountProjectEnv {
     const account: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT())!);
     const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT())!);
     return {
