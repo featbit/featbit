@@ -2490,6 +2490,30 @@
           <context context-type="linenumber">92</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="permission.sys-managed" datatype="html">
+        <source>System Managed</source>
+        <target>系统托管</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/pipes/policy-type.pipe.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="permission.customer-managed" datatype="html">
+        <source>Customer Managed</source>
+        <target>客户托管</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/pipes/policy-type.pipe.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="permissions.need-permissions-to-operate" datatype="html">
+        <source>You don&apos;t have permissions to take this action, please contact the admin to grant you the necessary permissions</source>
+        <target>您未被授权进行该操作, 请联系账户管理员添加相关权限</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/permissions.service.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="2454050363478003966" datatype="html">
         <source>Login</source>
         <target>登录</target>

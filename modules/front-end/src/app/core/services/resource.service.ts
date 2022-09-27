@@ -12,8 +12,8 @@ export class ResourceService {
   constructor(private http: HttpClient) { }
 
   get baseUrl() {
-    const accountId = getCurrentOrganization().id;
-    return `${environment.url}/api/v1/accounts/${accountId}/resources`;
+    const organizationId = getCurrentOrganization().id;
+    return `${environment.url}/api/v1/organizations/${organizationId}/resources`;
   }
 
   getAll(type: ResourceTypeEnum, name: string): Observable<Resource[]> {

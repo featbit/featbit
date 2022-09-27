@@ -5,8 +5,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class PolicyTypePipe implements PipeTransform {
   typeDict = {
-    'SysManaged': '敏捷开关托管',
-    'CustomerManaged': '客户托管'
+    'SysManaged': $localize `:@@permission.sys-managed:System Managed`,
+    'CustomerManaged': $localize `:@@permission.customer-managed:Customer Managed`
   }
 
   transform(value: string): string {

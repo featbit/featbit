@@ -12,37 +12,37 @@ export class ProjectService {
   currentProjectEnvChanged$: Subject<void> = new Subject<void>();
   projectListChanged$: Subject<void> = new Subject<void>();
 
-  baseUrl = `${environment.url}/api/v1/organizations/#orginzationId/projects`;
+  baseUrl = `${environment.url}/api/v1/organizations/#organizationId/projects`;
 
 
   constructor(private http: HttpClient) { }
 
   // 获取 project 列表
-  public getProjects(orginzationId: number): Observable<IProject[]> {
-    const url = this.baseUrl.replace(/#orginzationId/ig, `${orginzationId}`);
+  public getProjects(organizationId: number): Observable<IProject[]> {
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
     return this.http.get<IProject[]>(url);
   }
 
-  getProject(orginzationId: number, projectId: number): Observable<IProject> {
-    const url = this.baseUrl.replace(/#orginzationId/ig, `${orginzationId}`) + `/${orginzationId}`;
+  getProject(organizationId: number, projectId: number): Observable<IProject> {
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${organizationId}`;
     return this.http.get<IProject>(url);
   }
 
   // 创建 project
-  postCreateProject(orginzationId: number, params): Observable<any> {
-    const url = this.baseUrl.replace(/#orginzationId/ig, `${orginzationId}`);
+  postCreateProject(organizationId: number, params): Observable<any> {
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
     return this.http.post(url, params);
   }
 
   // 更新 project
-  putUpdateProject(orginzationId: number, params): Observable<any> {
-    const url = this.baseUrl.replace(/#orginzationId/ig, `${orginzationId}`);
+  putUpdateProject(organizationId: number, params): Observable<any> {
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
     return this.http.put(url, params);
   }
 
   // 删除 project
-  removeProject(orginzationId: number, projectId: number): Observable<any> {
-    const url = this.baseUrl.replace(/#orginzationId/ig, `${orginzationId}`) + `/${projectId}`;
+  removeProject(organizationId: number, projectId: number): Observable<any> {
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${projectId}`;
     return this.http.delete(url);
   }
 
