@@ -7,7 +7,7 @@ import { SwitchService } from '@services/switch.service';
 import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IVariationOption, IRulePercentageRollout, IPrequisiteFeatureFlag, IFftuwmtrParams } from '../../types/switch-new';
 import { PendingChange } from '../../types/pending-changes';
 import { TeamService } from '@services/team.service';
-import { IAccount, IProjectEnv } from '@shared/types';
+import { IOrganization, IProjectEnv } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { EnvUserService } from '@services/env-user.service';
@@ -44,7 +44,7 @@ export class TargetingComponent implements OnInit {
   public targetIndividualsActive: boolean = false;
 
   public isArchived = false;
-  currentAccount: IAccount = null;
+  currentAccount: IOrganization = null;
   currentProjectEnv: IProjectEnv = null;
 
   approvalRequestEnabled: boolean = false;

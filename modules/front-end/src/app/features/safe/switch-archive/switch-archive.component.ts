@@ -3,7 +3,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Subject } from 'rxjs';
 import { SwitchService } from '@services/switch.service';
-import { AccountService } from '@services/account.service';
+import { OrganizationService } from '@services/organization.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IFfParams } from "@features/safe/feature-flags/types/switch-new";
 import { encodeURIComponentFfc } from "@utils/index";
@@ -28,7 +28,7 @@ export class SwitchArchiveComponent implements OnInit {
   constructor(
     private switchService: SwitchService,
     private switchV2Service: SwitchV2Service,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private modal: NzModalService,
     private message: NzMessageService,
     private router: Router

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { AccountService } from '@services/account.service';
+import { OrganizationService } from '@services/organization.service';
 
 @Component({
   selector: 'app-account-drawer',
@@ -19,7 +19,7 @@ export class AccountDrawerComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private message: NzMessageService
   ) { }
 

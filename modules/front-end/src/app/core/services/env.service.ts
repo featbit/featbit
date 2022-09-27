@@ -8,7 +8,7 @@ import { IEnvironment, IEnvKey } from '@shared/types';
   providedIn: 'root'
 })
 export class EnvService {
-  baseUrl = `${environment.url}/api/v2/accounts/#accountId/projects/#projectId/envs`;
+  baseUrl = `${environment.url}/api/v1/accounts/#accountId/projects/#projectId/envs`;
   envs: IEnvironment[] = [];
 
   constructor(private http: HttpClient) { }

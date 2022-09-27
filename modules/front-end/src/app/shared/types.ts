@@ -1,3 +1,9 @@
+export interface IResponse {
+  success: boolean,
+  errors: string[],
+  data: any
+}
+
 export interface IUserType {
   id: string;
   name: string;
@@ -63,7 +69,7 @@ export interface ISubscriptionPlan {
   type: string
 }
 
-export interface IAccount {
+export interface IOrganization {
   id: number,
   initialized: boolean,
   organizationName: string,
@@ -71,7 +77,7 @@ export interface IAccount {
 }
 
 export interface IAccountProjectEnv {
-  account: IAccount,
+  account: IOrganization,
   projectEnv: IProjectEnv
 }
 
@@ -98,11 +104,6 @@ export interface IEnvironment {
   mobileSecret: string
 }
 
-export interface ISubsriptionPlan {
-  id: string,
-  type: string
-}
-
 export interface IAccountUser {
   userId: string,
   userName: string,
@@ -125,8 +126,7 @@ export const EnvironmentSettingTypes = {
 }
 
 export enum EnvKeyNameEnum {
-  Secret = "Secret",
-  MobileSecret = "MobileSecret"
+  Secret = "Secret"
 }
 
 export interface IEnvKey {

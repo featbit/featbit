@@ -23,7 +23,7 @@ export class PolicyService {
 
   get baseUrl() {
     const accountId = getCurrentAccount().id;
-    return `${environment.url}/api/v2/accounts/${accountId}/policies`;
+    return `${environment.url}/api/v1/accounts/${accountId}/policies`;
   }
 
   getList(filter: PolicyFilter = new PolicyFilter()): Observable<IPagedPolicy> {

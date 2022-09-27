@@ -3,7 +3,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { IAccount } from '@shared/types';
+import { IOrganization } from '@shared/types';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from '@features/safe/feature-flags/types/experimentations';
 import { MetricService } from '@services/metric.service';
 import { TeamService } from '@services/team.service';
@@ -62,7 +62,7 @@ export class MetricDrawerComponent implements OnInit {
     private metricService: MetricService,
     private message: NzMessageService
   ) {
-    const currentAccount: IAccount = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
+    const currentAccount: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
 
     this.maintainerSearchChange$.pipe(
       debounceTime(500),

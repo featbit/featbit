@@ -1,7 +1,7 @@
 import { Component, OnInit} from '@angular/core';
 import { IProject, IEnvironment, IProjectEnv } from '@shared/types';
 import { ProjectService } from '@services/project.service';
-import { AccountService } from '@services/account.service';
+import { OrganizationService } from '@services/organization.service';
 import { EnvService } from '@services/env.service';
 import { NzMessageService } from "ng-zorro-antd/message";
 import {PermissionsService} from "@services/permissions.service";
@@ -35,7 +35,7 @@ export class ProjectComponent implements OnInit {
 
   constructor(
     private projectService: ProjectService,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private envService: EnvService,
     private messageService: NzMessageService,
     public permissionsService: PermissionsService

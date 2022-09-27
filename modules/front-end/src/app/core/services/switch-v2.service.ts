@@ -20,7 +20,7 @@ export class SwitchV2Service {
 
   get baseUrl() {
     const envId = getCurrentProjectEnv().envId;
-    return `${environment.url}/api/v2/envs/${envId}/feature-flag`;
+    return `${environment.url}/api/v1/envs/${envId}/feature-flag`;
   }
 
   constructor(private http: HttpClient) { }
