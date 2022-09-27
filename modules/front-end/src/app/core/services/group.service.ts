@@ -20,8 +20,8 @@ export class GroupService {
   constructor(private http: HttpClient) { }
 
   get baseUrl() {
-    const accountId = getCurrentOrganization().id;
-    return `${environment.url}/api/v1/accounts/${accountId}/groups`;
+    const organizationId = getCurrentOrganization().id;
+    return `${environment.url}/api/v1/organizations/${organizationId}/groups`;
   }
 
   getList(filter: GroupListFilter = new GroupListFilter()): Observable<IPagedGroup> {
