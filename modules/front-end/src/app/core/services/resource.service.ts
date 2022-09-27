@@ -13,7 +13,7 @@ export class ResourceService {
 
   get baseUrl() {
     const accountId = getCurrentAccount().id;
-    return `${environment.url}/api/v2/accounts/${accountId}/resources`;
+    return `${environment.url}/api/v1/accounts/${accountId}/resources`;
   }
 
   getAll(type: ResourceTypeEnum, name: string): Observable<Resource[]> {

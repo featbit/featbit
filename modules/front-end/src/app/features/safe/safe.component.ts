@@ -3,7 +3,7 @@ import { Subject } from 'rxjs';
 import { IAuthProps } from '@shared/types';
 import { IMenuItem } from '@core/components/menu/menu';
 import { getAuth } from '@shared/utils';
-import { UserService } from "@services/user.service";
+import {IdentityService} from "@services/identity.service";
 
 @Component({
   selector: 'app-safe',
@@ -19,7 +19,7 @@ export class SafeComponent implements OnInit, OnDestroy {
   private destory$: Subject<void> = new Subject();
 
   constructor(
-    private userService: UserService,
+    private identityService: IdentityService,
   ) {
     this.setMenus();
   }
@@ -104,6 +104,6 @@ export class SafeComponent implements OnInit, OnDestroy {
 
 
   public async logout() {
-    await this.userService.doLogoutUser();
+    await this.identityService.doLogoutUser();
   }
 }

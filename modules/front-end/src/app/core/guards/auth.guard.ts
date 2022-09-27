@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { getAuth } from '@shared/utils';
 import { LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
-import { AccountService } from '@core/services/account.service';
+import { OrganizationService } from '@services/organization.service';
 import {PermissionsService} from "@services/permissions.service";
 
 @Injectable({
@@ -12,7 +12,7 @@ export class AuthGuard implements CanActivate {
 
   constructor(
     private router: Router,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private permissionsService: PermissionsService
   ) { }
 

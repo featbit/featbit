@@ -20,8 +20,8 @@ export class MemberService {
   constructor(private http: HttpClient) { }
 
   get baseUrl() {
-    const accountId = getCurrentAccount().id;
-    return `${environment.url}/api/v2/accounts/${accountId}/members`;
+    const organizationId = getCurrentAccount().id;
+    return `${environment.url}/api/v1/organizations/${organizationId}/members`;
   }
 
   getList(filter: MemberFilter = new MemberFilter()): Observable<IPagedMember> {

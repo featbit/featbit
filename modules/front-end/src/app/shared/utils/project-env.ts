@@ -1,7 +1,7 @@
-import { IAccount, IProjectEnv } from "@shared/types";
+import { IOrganization, IProjectEnv } from "@shared/types";
 import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "./localstorage-keys";
 
-export function getCurrentAccount(): IAccount {
+export function getCurrentAccount(): IOrganization {
   const json = localStorage.getItem(CURRENT_ACCOUNT());
   if (json) {
     return JSON.parse(json);

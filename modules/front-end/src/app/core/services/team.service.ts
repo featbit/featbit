@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class TeamService {
-  baseUrl: string = `${environment.url}/api/v2/accounts/#accountId/members`;
+  baseUrl: string = `${environment.url}/api/v1/accounts/#accountId/members`;
 
   constructor(private http: HttpClient) { }
 

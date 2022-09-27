@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { getAuth } from '@utils/index';
-import { IAccount } from '@shared/types';
-import { AccountService } from '@services/account.service';
+import { IOrganization } from '@shared/types';
+import { OrganizationService } from '@services/organization.service';
 import { getCurrentAccount, getCurrentProjectEnv } from "@utils/project-env";
 import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
@@ -20,15 +20,15 @@ export class AccountComponent implements OnInit {
   validateOrgForm!: FormGroup;
 
   auth = getAuth();
-  currentAccount: IAccount;
-  allAccounts: IAccount[];
+  currentAccount: IOrganization;
+  allAccounts: IOrganization[];
 
   canUpdateOrgName: boolean = false;
 
   isLoading: boolean = false;
 
   constructor(
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private message: NzMessageService,
     private permissionsService: PermissionsService
   ) {
@@ -54,7 +54,7 @@ export class AccountComponent implements OnInit {
     this.creatAccountFormVisible = true;
   }
 
-  onCreateAccountClosed(account: IAccount) {
+  onCreateAccountClosed(account: IOrganization) {
     this.creatAccountFormVisible = false;
     if (account) {
       this.accountService.accounts = [...this.accountService.accounts, account];

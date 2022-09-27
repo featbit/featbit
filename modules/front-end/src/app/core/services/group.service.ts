@@ -21,7 +21,7 @@ export class GroupService {
 
   get baseUrl() {
     const accountId = getCurrentAccount().id;
-    return `${environment.url}/api/v2/accounts/${accountId}/groups`;
+    return `${environment.url}/api/v1/accounts/${accountId}/groups`;
   }
 
   getList(filter: GroupListFilter = new GroupListFilter()): Observable<IPagedGroup> {

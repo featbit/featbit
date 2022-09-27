@@ -12,7 +12,7 @@ export class EnvSettingService {
   get baseUrl() {
     const envId = getCurrentProjectEnv().envId;
 
-    return `${environment.url}/api/v2/envs/${envId}/settings`
+    return `${environment.url}/api/v1/envs/${envId}/settings`
   }
 
   constructor(private http: HttpClient) { }

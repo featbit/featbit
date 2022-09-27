@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { IAccount, IAccountUser, IProjectEnv } from '@shared/types';
+import { IOrganization, IAccountUser, IProjectEnv } from '@shared/types';
 import { MetricService } from '@services/metric.service';
 import { TeamService } from '@services/team.service';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from '../../feature-flags/types/experimentations';
@@ -24,7 +24,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
   accountMemberList: IAccountUser[] = [];
 
   currentProjectEnv: IProjectEnv = null;
-  currentAccount: IAccount = null;
+  currentAccount: IOrganization = null;
 
   currentMetric: IMetric;
 
