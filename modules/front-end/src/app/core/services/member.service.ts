@@ -47,7 +47,7 @@ export class MemberService {
     };
 
     return this.http.get<IPagedMemberGroup>(
-      `${this.baseUrl}/${id}/group`,
+      `${this.baseUrl}/${id}/groups`,
       {params: new HttpParams({fromObject: queryParam})}
     );
   }
