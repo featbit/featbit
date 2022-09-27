@@ -137,6 +137,114 @@ db.Policies.insertOne(
         updatedAt: new Date()
     }
 )
+
+db.Policies.insertOne(
+    {
+        _id: "f8047349-8eb3-4553-a365-109b3582cd9b",
+        organizationId: null,
+        name: "Organization owner",
+        description: "Includes all permissions, the policy is granted to the user who created the organization",
+        type: "SysManaged",
+        statements: [
+            {
+              _id: "452ec8b2-c4ae-443d-a8a7-4307e4f5cf97",
+              resourceType: "*",
+              effect: "allow",
+              actions: [
+                "*"
+              ],
+              resources: [
+                "*"
+              ]
+            }
+          ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+
+db.Policies.insertOne(
+    {
+        _id: "9af529cb-38b7-490e-98ae-e6ace2e83b05",
+        organizationId: null,
+        name: "Admin",
+        description: "Includes all permissions needed for an system administrator",
+        type: "SysManaged",
+        statements: [
+            {
+              _id: "d0c1d3c7-298c-4d09-bc33-e26ee5783c64",
+              resourceType: "general",
+              effect: "allow",
+              actions: [
+                "CanManageIAM"
+              ],
+              resources: [
+                "iam"
+              ]
+            },
+            {
+              _id: "5327d9c5-7a67-452d-9f00-fd0fdb8aaca2",
+              resourceType: "general",
+              effect: "allow",
+              actions: [
+                "UpdateOrgName"
+              ],
+              resources: [
+                "account"
+              ]
+            },
+            {
+              _id: "846dd70c-9076-4478-a85c-3a0d19fe2ef0",
+              resourceType: "general",
+              effect: "allow",
+              actions: [
+                "ListProjects",
+                "CreateProject",
+                "DeleteProject",
+                "AccessEnvs",
+                "UpdateProjectInfo",
+                "ListEnvs",
+                "CreateEnv",
+                "DeleteEnv",
+                "UpdateEnvInfo"
+              ],
+              resources: [
+                "project"
+              ]
+            }
+          ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+
+db.Policies.insertOne(
+    {
+        _id: "f8047349-8eb3-4553-a365-109b3582cd9c",
+        organizationId: null,
+        name: "Developer",
+        description: "Includes all permissions needed for an developer",
+        type: "SysManaged",
+        statements: [
+            {
+              _id: "2df9f848-b754-42af-8402-8930dae3a934",
+              resourceType: "general",
+              effect: "allow",
+              actions: [
+                "AccessEnvs",
+                "ListProjects",
+                "ListEnvs"
+              ],
+              resources: [
+                "project"
+              ]
+            }
+          ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+
 print('collection seeded: Policies')
 
 // seed group policy
@@ -147,6 +255,21 @@ db.GroupPolicies.insertOne(
         _id: "29d60a1e-aca3-4160-8876-557c3d6d4d2e",
         groupId: "92a0de88-899e-4bea-8668-1ad43b45f33d",
         policyId: "f8047349-8eb3-4553-a365-109b3582cd9a",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: GroupPolicies')
+
+// seed member policy
+print('clean and seed collection: MemberPolicies')
+db.MemberPolicies.deleteMany({})
+db.MemberPolicies.insertOne(
+    {
+        _id: "29d60a1e-aca3-4160-8876-557c3d6d4d11",
+        organizationId: "c3290506-9ddb-4b58-96ae-5594f7937610",
+        policyId: "f8047349-8eb3-4553-a365-109b3582cd9b",
+        memberId: "a9013900-6c44-4aad-8e9a-568c2a429972",
         createdAt: new Date(),
         updatedAt: new Date()
     }

@@ -1,5 +1,5 @@
 import { HttpClient } from "@angular/common/http";
-import { getCurrentAccount } from "@utils/project-env";
+import { getCurrentOrganization } from "@utils/project-env";
 import { environment } from "src/environments/environment";
 import { Resource, ResourceTypeEnum } from "@features/safe/iam/components/policy-editor/types";
 import { Observable } from "rxjs";
@@ -12,7 +12,7 @@ export class ResourceService {
   constructor(private http: HttpClient) { }
 
   get baseUrl() {
-    const accountId = getCurrentAccount().id;
+    const accountId = getCurrentOrganization().id;
     return `${environment.url}/api/v1/accounts/${accountId}/resources`;
   }
 

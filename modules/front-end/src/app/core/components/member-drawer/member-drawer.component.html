@@ -56,7 +56,7 @@
               formControlName="policyId">
               <ng-container *ngFor="let policy of policies.items">
                 <nz-option nzCustomContent *ngIf="!isPoliciesLoading" [nzLabel]="policy.name" [nzValue]="policy.id">
-                  <i *ngIf="policy.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+                  <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
                   {{ policy.name }}
                 </nz-option>
               </ng-container>

@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class PolicyTypePipe implements PipeTransform {
   typeDict = {
-    'FFCManaged': '敏捷开关托管',
+    'SysManaged': '敏捷开关托管',
     'CustomerManaged': '客户托管'
   }
 

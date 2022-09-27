@@ -8,7 +8,7 @@ import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric,
 import { MetricService } from '@services/metric.service';
 import { TeamService } from '@services/team.service';
 import { uuidv4 } from '@utils/index';
-import { CURRENT_ACCOUNT } from "@utils/localstorage-keys";
+import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'app-metric-drawer',
@@ -62,7 +62,7 @@ export class MetricDrawerComponent implements OnInit {
     private metricService: MetricService,
     private message: NzMessageService
   ) {
-    const currentAccount: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
+    const currentAccount: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
 
     this.maintainerSearchChange$.pipe(
       debounceTime(500),

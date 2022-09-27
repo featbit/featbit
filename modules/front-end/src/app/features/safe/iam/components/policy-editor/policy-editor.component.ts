@@ -109,7 +109,7 @@ export class PolicyEditorComponent {
 
   resourcesTypes: ResourceType[] = resourcesTypes;
   statements: PolicyStatementViewModel[] = [];
-  readonly: boolean; // true if FFCManaged
+  readonly: boolean; // true if SysManaged
 
   constructor(
     private router: Router,
@@ -125,7 +125,7 @@ export class PolicyEditorComponent {
   set _(policy: IPolicy) {
     if (policy) {
       this._policy = JSON.parse(JSON.stringify(policy));
-      this.readonly = policy.type === 'FFCManaged';
+      this.readonly = policy.type === 'SysManaged';
       this.statements = policy.statements.map(statement => new PolicyStatementViewModel(statement));
     }
   }

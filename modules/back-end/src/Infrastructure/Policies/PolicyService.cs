@@ -36,7 +36,7 @@ public class PolicyService : IPolicyService
     public async Task<PagedResult<Policy>> GetListAsync(string organizationId, PolicyFilter filter)
     {
         var query = _mongoDb.QueryableOf<Policy>()
-            .Where(x => x.OrganizationId == organizationId || x.Type == PolicyTypes.FfcManaged);
+            .Where(x => x.OrganizationId == organizationId || x.Type == PolicyTypes.SysManaged);
 
         var name = filter.Name;
         if (!string.IsNullOrWhiteSpace(name))
@@ -47,7 +47,7 @@ public class PolicyService : IPolicyService
         var totalCount = await query.CountAsync();
         var items = await query
             .Skip(filter.PageIndex * filter.PageSize)
-            .OrderByDescending(x => x.Id)
+            .OrderByDescending(x => x.CreatedAt)
             .Take(filter.PageSize)
             .ToListAsync();
 
@@ -139,8 +139,8 @@ public class PolicyService : IPolicyService
 
         if (!filter.GetAllMembers)
         {
-            // because we have FfcManaged policies that's **shared** between all accounts
-            // that means one policy can be used in many accounts, which means policyId:accountId = 1:*
+            // because we have SysManaged policies that's **shared** between all organizations
+            // that means one policy can be used in many organizations, which means policyId:organizationId = 1:*
             query = query.Where(
                 x => x.AllMemberPolicies.Any(y => y.OrganizationId == organizationId && y.PolicyId == policyId)
             );
