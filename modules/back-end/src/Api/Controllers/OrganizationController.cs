@@ -2,6 +2,7 @@ using Application.Organizations;
 
 namespace Api.Controllers;
 
+[Route("api/v{version:apiVersion}/organizations")]
 public class OrganizationController : ApiControllerBase
 {
     [HttpGet("{id}")]
