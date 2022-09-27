@@ -21,8 +21,8 @@
   <div class="row">
     <div class="row-title" i18n="@@org.org.switchorg">Switch organization</div>
     <div class="row-content">
-      <nz-select class="extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentAccount" (ngModelChange)="onAccountChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">
-        <nz-option *ngFor="let account of allAccounts" [nzLabel]="account.organizationName" [nzValue]="account"></nz-option>
+      <nz-select class="extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentOrganization" (ngModelChange)="onAccountChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">
+        <nz-option *ngFor="let account of allOrganizations" [nzLabel]="account.name" [nzValue]="account"></nz-option>
       </nz-select>
       <button class="create-org-btn" nz-button nzType="primary" (click)="onCreateAccountClick()">
         <i nz-icon nzType="icons:icon-add"></i>
@@ -32,4 +32,4 @@
   </div>
 </div>
 
-<app-account-drawer [visible]="creatAccountFormVisible" (close)="onCreateAccountClosed($event)"></app-account-drawer>
+<app-account-drawer [visible]="creatOrganizationFormVisible" (close)="onCreateAccountClosed($event)"></app-account-drawer>

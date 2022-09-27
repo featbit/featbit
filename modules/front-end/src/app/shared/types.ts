@@ -72,7 +72,7 @@ export interface ISubscriptionPlan {
 export interface IOrganization {
   id: number,
   initialized: boolean,
-  organizationName: string,
+  name: string,
   plan?: ISubscriptionPlan
 }
 

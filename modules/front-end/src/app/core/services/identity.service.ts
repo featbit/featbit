@@ -43,7 +43,7 @@ export class IdentityService {
 
       // store user profile
       this.userService.getProfile().subscribe((profile: IResponse) => {
-        localStorage.setItem(USER_PROFILE, JSON.stringify(profile.data));
+        localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
         this.accountService.getCurrentOrganization().subscribe(() => {
           resolve();
           const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
