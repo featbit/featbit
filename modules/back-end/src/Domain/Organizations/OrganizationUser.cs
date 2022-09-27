@@ -1,9 +1,7 @@
 namespace Domain.Organizations;
 
-public class OrganizationUser
+public class OrganizationUser : AuditedEntity
 {
-    public string Id { get; set; }
-    
     public string OrganizationId { get; set; }
 
     public string UserId { get; set; }

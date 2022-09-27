@@ -1,9 +1,7 @@
 namespace Domain.Groups;
 
-public class GroupMember
+public class GroupMember : AuditedEntity
 {
-    public string Id { get; set; }
-
     public string GroupId { get; set; }
 
     public string OrganizationId { get; set; }
