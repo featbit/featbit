@@ -11,7 +11,8 @@ db.Users.insertOne(
         _id: "a9013900-6c44-4aad-8e9a-568c2a429972",
         email: "test@featbit.com",
         password: "AQAAAAEAACcQAAAAELDHEjCrDQrmnAXU5C//mOLvUBJ7lnVFEMMFxNMDIIrF7xK8JDQKUifU3HH4gexNAQ==",
-        createAt: new Date()
+        createAt: new Date(),
+        updatedAt: new Date()
     }
 )
 print('collection seeded: Users')
@@ -29,7 +30,7 @@ db.Organizations.insertOne(
             type: "L100"
         },
         createdAt: new Date(),
-        updatedAt: null
+        updatedAt: new Date()
     }
 )
 print('collection seeded: Organizations')
@@ -42,8 +43,10 @@ db.OrganizationUsers.insertOne(
         _id: "8bb885ec-2b68-4b07-894d-daacfb451743",
         organizationId: "c3290506-9ddb-4b58-96ae-5594f7937610",
         userId: "a9013900-6c44-4aad-8e9a-568c2a429972",
-        invitorId: null,
-        initialPassword: null
+        invitorId: "",
+        initialPassword: "",
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
 )
 print('collection seeded: OrganizationUsers')
@@ -55,7 +58,9 @@ db.Projects.insertOne(
     {
         _id: "c0490315-0b90-4d9e-9c64-8c0bf9ea7944",
         organizationId: "c3290506-9ddb-4b58-96ae-5594f7937610",
-        name: "frontend"
+        name: "frontend",
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
 )
 print('collection seeded: Projects')
@@ -69,7 +74,9 @@ db.Environments.insertOne(
         projectId: "c0490315-0b90-4d9e-9c64-8c0bf9ea7944",
         name: "prod",
         description: "production environment",
-        secret: "MGU3LTNjNzUtNCUyMDIyMDkyNjAxMzgwNF9fNDZfXzkzX181N19fZGVmYXVsdF8zMDgwNw=="
+        secret: "MGU3LTNjNzUtNCUyMDIyMDkyNjAxMzgwNF9fNDZfXzkzX181N19fZGVmYXVsdF8zMDgwNw==",
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
 )
 db.Environments.insertOne(
@@ -78,7 +85,9 @@ db.Environments.insertOne(
         projectId: "c0490315-0b90-4d9e-9c64-8c0bf9ea7944",
         name: "dev",
         description: "development environment",
-        secret: "NzJlLTlkOGEtNCUyMDIyMDkyNjAxMzkyNF9fNDZfXzkzX181N19fZGVmYXVsdF9iYTA1NA=="
+        secret: "NzJlLTlkOGEtNCUyMDIyMDkyNjAxMzkyNF9fNDZfXzkzX181N19fZGVmYXVsdF9iYTA1NA==",
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
 )
 print('collection seeded: Environments')
@@ -93,7 +102,7 @@ db.Groups.insertOne(
         name: "tester-group",
         description: "a group for all testers",
         createdAt: new Date(),
-        updatedAt: null
+        updatedAt: new Date()
     }
 )
 print('collection seeded: Groups')
@@ -106,7 +115,9 @@ db.GroupMembers.insertOne(
         _id: "87e0da87-1d90-40d0-9412-df3b8a8fe703",
         groupId: "92a0de88-899e-4bea-8668-1ad43b45f33d",
         organizationId: "c3290506-9ddb-4b58-96ae-5594f7937610",
-        memberId: "a9013900-6c44-4aad-8e9a-568c2a429972"
+        memberId: "a9013900-6c44-4aad-8e9a-568c2a429972",
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
 )
 print('collection seeded: GroupMembers')
@@ -123,7 +134,7 @@ db.Policies.insertOne(
         type: "CustomerManaged",
         statements: [],
         createdAt: new Date(),
-        updatedAt: null
+        updatedAt: new Date()
     }
 )
 print('collection seeded: Policies')
@@ -135,7 +146,9 @@ db.GroupPolicies.insertOne(
     {
         _id: "29d60a1e-aca3-4160-8876-557c3d6d4d2e",
         groupId: "92a0de88-899e-4bea-8668-1ad43b45f33d",
-        policyId: "f8047349-8eb3-4553-a365-109b3582cd9a"
+        policyId: "f8047349-8eb3-4553-a365-109b3582cd9a",
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
 )
 print('collection seeded: GroupPolicies')
