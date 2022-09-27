@@ -8,10 +8,6 @@
           <context context-type="sourcefile">src/app/core/components/account-drawer/account-drawer.component.html</context>
           <context context-type="linenumber">8</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/account-settings/account/account.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
       </trans-unit>
       <trans-unit id="org.org.orgName" datatype="html">
         <source>Organization name</source>
@@ -1465,6 +1461,10 @@
           <context context-type="linenumber">242</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/account-settings/account/account.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">20</context>
         </context-group>
@@ -2407,7 +2407,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="org.org.updateOrgName" datatype="html">
-        <source>Update organization name</source>
+        <source>Update</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/account-settings/account/account.component.html</context>
           <context context-type="linenumber">17</context>
