@@ -15,7 +15,7 @@ import {IDENTITY_TOKEN} from "../../shared/utils/localstorage-keys";
 import {IResponse} from "@shared/types";
 
 @Injectable()
-export class TokenInterceptor implements HttpInterceptor {
+export class RequestResponseInterceptor implements HttpInterceptor {
 
   constructor(
     private message: NzMessageService,
@@ -30,12 +30,11 @@ export class TokenInterceptor implements HttpInterceptor {
     return next.handle(authedReq)
       .pipe(
         map(event => {
-          if (event instanceof HttpResponse) {
+          if (event instanceof HttpResponse && !event.url.endsWith('/login-by-email')) {
             const body = event.body as IResponse;
             if (!body.success && body.errors.length > 0) {
               this.message.error(body.errors.join('/'));
             } else {
-              console.log(event.body);
               event = event.clone({ body: event.body.data });
             }
           }

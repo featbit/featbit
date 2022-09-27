@@ -15,20 +15,20 @@ import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 })
 export class AccountComponent implements OnInit {
 
-  creatAccountFormVisible: boolean = false;
+  creatOrganizationFormVisible: boolean = false;
 
   validateOrgForm!: FormGroup;
 
   auth = getAuth();
-  currentAccount: IOrganization;
-  allAccounts: IOrganization[];
+  currentOrganization: IOrganization;
+  allOrganizations: IOrganization[];
 
   canUpdateOrgName: boolean = false;
 
   isLoading: boolean = false;
 
   constructor(
-    private accountService: OrganizationService,
+    private organizationService: OrganizationService,
     private message: NzMessageService,
     private permissionsService: PermissionsService
   ) {
@@ -36,34 +36,34 @@ export class AccountComponent implements OnInit {
 
   ngOnInit(): void {
     this.canUpdateOrgName = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.UpdateOrgName);
-    this.allAccounts = this.accountService.accounts;
+    this.allOrganizations = this.organizationService.organizations;
 
-    const currentAccountId = getCurrentAccount().id;
-    this.currentAccount = this.allAccounts.find(x => x.id == currentAccountId);
+    const currentOrganizationId = getCurrentAccount().id;
+    this.currentOrganization = this.allOrganizations.find(x => x.id == currentOrganizationId);
 
     this.initOrgForm();
   }
 
   initOrgForm() {
     this.validateOrgForm = new FormGroup({
-      organizationName: new FormControl(this.currentAccount.organizationName, [Validators.required]),
+      organizationName: new FormControl(this.currentOrganization.name, [Validators.required]),
     });
   }
 
   onCreateAccountClick() {
-    this.creatAccountFormVisible = true;
+    this.creatOrganizationFormVisible = true;
   }
 
   onCreateAccountClosed(account: IOrganization) {
-    this.creatAccountFormVisible = false;
+    this.creatOrganizationFormVisible = false;
     if (account) {
-      this.accountService.accounts = [...this.accountService.accounts, account];
-      this.accountService.switchOrganization(account);
+      this.organizationService.organizations = [...this.organizationService.organizations, account];
+      this.organizationService.switchOrganization(account);
     }
   }
 
   onAccountChange() {
-    this.accountService.switchOrganization(this.currentAccount);
+    this.organizationService.switchOrganization(this.currentOrganization);
   }
 
   submitOrgForm() {
@@ -80,16 +80,16 @@ export class AccountComponent implements OnInit {
       return;
     }
     const { organizationName } = this.validateOrgForm.value;
-    const { id, initialized } = this.currentAccount;
+    const { id, initialized } = this.currentOrganization;
 
     this.isLoading = true;
-    this.accountService.updateOrganization({ organizationName, id })
+    this.organizationService.updateOrganization({ organizationName, id })
       .pipe()
       .subscribe(
         () => {
           this.isLoading = false;
           this.message.success($localize `:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
-          this.accountService.setOrganization({ id, initialized, organizationName });
+          this.organizationService.setOrganization({ id, initialized, name: organizationName });
         },
         () => {
           this.isLoading = false;

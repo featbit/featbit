@@ -59,7 +59,7 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
-    await this.identityService.doLoginUser(response.token);
+    await this.identityService.doLoginUser(response.data.token);
     this.message.success($localize `Login with success`);
   }
 

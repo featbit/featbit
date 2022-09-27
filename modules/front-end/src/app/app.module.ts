@@ -4,7 +4,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
-import { TokenInterceptor } from "@interceptors/token.interceptor";
+import { RequestResponseInterceptor } from "@interceptors/request-response.interceptor";
 import { NZ_I18N, zh_CN, en_US } from "ng-zorro-antd/i18n";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { IconsProviderModule } from "./icons-provider.module";
@@ -46,7 +46,7 @@ import {AccountProjectEnvResolver} from "@services/account-preject-env-resolver.
       },
       deps: [LOCALE_ID]
     },
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: RequestResponseInterceptor, multi: true },
   ],
   bootstrap: [AppComponent]
 })
