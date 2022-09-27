@@ -10,7 +10,7 @@ import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
   providedIn: 'root'
 })
 export class OrganizationService {
-  baseUrl = `${environment.url}/api/v1/organization`;
+  baseUrl = `${environment.url}/api/v1/organizations`;
   organizations: IOrganization[] = [];
 
   constructor(
