@@ -1,10 +1,8 @@
 namespace Domain.Groups;
 
-public class GroupPolicy
+public class GroupPolicy : AuditedEntity
 {
-    public string Id { get; set; }
-    
     public string GroupId { get; set; }
-        
+
     public string PolicyId { get; set; }
 }
