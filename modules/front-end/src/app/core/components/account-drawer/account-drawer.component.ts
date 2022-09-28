@@ -10,7 +10,7 @@ import { OrganizationService } from '@services/organization.service';
 })
 export class AccountDrawerComponent implements OnInit {
 
-  accountForm: FormGroup;
+  orgForm: FormGroup;
 
   isLoading: boolean = false;
 
@@ -28,30 +28,30 @@ export class AccountDrawerComponent implements OnInit {
   }
 
   initForm() {
-    this.accountForm = this.fb.group({
-      organizationName: ['', [Validators.required]]
+    this.orgForm = this.fb.group({
+      name: ['', [Validators.required]]
     });
   }
 
   onClose() {
-    this.accountForm.reset();
+    this.orgForm.reset();
     this.close.emit();
   }
 
   doSubmit() {
-    if (this.accountForm.invalid) {
-      for (const i in this.accountForm.controls) {
-        this.accountForm.controls[i].markAsDirty();
-        this.accountForm.controls[i].updateValueAndValidity();
+    if (this.orgForm.invalid) {
+      for (const i in this.orgForm.controls) {
+        this.orgForm.controls[i].markAsDirty();
+        this.orgForm.controls[i].updateValueAndValidity();
       }
       return;
     }
 
     this.isLoading = true;
 
-    const { organizationName } = this.accountForm.value;
+    const { name } = this.orgForm.value;
 
-    this.accountService.createOrganization({ organizationName })
+    this.accountService.createOrganization({ name })
       .pipe()
       .subscribe(
         res => {

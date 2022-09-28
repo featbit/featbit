@@ -8,11 +8,11 @@
   nzTitle="Create organization"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
-    <form nz-form [formGroup]="accountForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+    <form nz-form [formGroup]="orgForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired i18n="@@org.org.orgName">Organization name</nz-form-label>
+        <nz-form-label nzRequired i18n="@@org.org.orgName">Name</nz-form-label>
         <nz-form-control i18n-nzErrorTip="@@org.org.orgMandatory" nzErrorTip="Organization name is mandatory!">
-          <input type="text" nz-input formControlName="organizationName" placeholder="Organization name" i18n-placeholder="@org.org.orgNamePlaceholder"/>
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@org.org.orgNamePlaceholder"/>
         </nz-form-control>
       </nz-form-item>
       <button nz-button class="submit-btn" nzType="primary" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
