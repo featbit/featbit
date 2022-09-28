@@ -1,4 +1,6 @@
 using Application.Services;
+using Domain.Groups;
+using Domain.Members;
 using Domain.Organizations;
 using Infrastructure.MongoDb;
 using MongoDB.Driver;
@@ -8,32 +10,72 @@ namespace Infrastructure.Organizations;
 
 public class OrganizationService : IOrganizationService
 {
-    private readonly IMongoCollection<Organization> _organizations;
-    private readonly IMongoCollection<OrganizationUser> _organizationUsers;
+    private readonly MongoDbClient _mongoDb;
 
-    public OrganizationService(MongoDbClient client)
+    public OrganizationService(MongoDbClient mongoDb)
     {
-        _organizations = client.CollectionOf<Organization>();
-        _organizationUsers = client.CollectionOf<OrganizationUser>();
+        _mongoDb = mongoDb;
     }
 
     public async Task<Organization> GetAsync(Guid id)
     {
-        return await _organizations.AsQueryable().FirstOrDefaultAsync(x => x.Id == id);
+        return await _mongoDb.QueryableOf<Organization>().FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<IEnumerable<Organization>> GetListAsync(Guid userId)
     {
-        var orgs = _organizations.AsQueryable();
-        var users = _organizationUsers.AsQueryable();
-        
+        var organizations = _mongoDb.QueryableOf<Organization>();
+        var users = _mongoDb.QueryableOf<OrganizationUser>();
+
         var query =
-            from org in orgs
+            from organization in organizations
             join user in users
-                on org.Id equals user.OrganizationId
+                on organization.Id equals user.OrganizationId
             where user.UserId == userId
-            select org;
+            select organization;
 
         return await query.ToListAsync();
+    }
+
+    public async Task<Organization> AddAsync(Organization organization)
+    {
+        await _mongoDb.CollectionOf<Organization>().InsertOneAsync(organization);
+
+        return organization;
+    }
+
+    public async Task<OrganizationUser> AddUserAsync(
+        OrganizationUser organizationUser,
+        ICollection<Guid>? policies,
+        ICollection<Guid>? groups)
+    {
+        // add organization user
+        await _mongoDb.CollectionOf<OrganizationUser>().InsertOneAsync(organizationUser);
+
+        // setup user policies and groups
+        var organizationId = organizationUser.OrganizationId;
+        var userId = organizationUser.UserId;
+
+        // add member policies
+        if (policies != null && policies.Any())
+        {
+            var memberPolicies = policies.Select(
+                policyId => new MemberPolicy(organizationId, userId, policyId)
+            );
+
+            await _mongoDb.CollectionOf<MemberPolicy>().InsertManyAsync(memberPolicies);
+        }
+
+        // add member to groups
+        if (groups != null && groups.Any())
+        {
+            var groupMembers = groups.Select(
+                groupId => new GroupMember(groupId, organizationId, userId)
+            ).ToList();
+
+            await _mongoDb.CollectionOf<GroupMember>().InsertManyAsync(groupMembers);
+        }
+
+        return organizationUser;
     }
 }
