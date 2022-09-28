@@ -4,7 +4,6 @@ import { Subject } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import {OrganizationService} from "@services/organization.service";
-import {encodeURIComponentFfc} from "@utils/index";
 
 @Component({
   selector: 'init-steps',
@@ -58,7 +57,7 @@ export class StepsComponent implements OnDestroy {
     this.organizationService.initialize(this.currentOrganizationId, { organizationName, projectName })
     .subscribe(({ flagKeyName }) => {
       this.organizationService.setOrganization({ id: this.currentOrganizationId, initialized: true, name: organizationName });
-      this.router.navigateByUrl(`/switch-manage/${encodeURIComponentFfc(flagKeyName)}/targeting`);
+      this.router.navigateByUrl(`/feature-flags`);
     }, _ => {
       this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
     })
