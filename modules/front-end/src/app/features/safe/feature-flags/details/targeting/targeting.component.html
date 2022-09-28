@@ -32,7 +32,7 @@
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
           <div class="title" i18n="@@ff.components.details.targeting.defaultrule">Default rule</div>
-          <i nz-tooltip="If the flag is turned on, the following variation is served" i18n-nz-tooltip="@@ff.components.details.targeting.defaultrule-tooltip" 
+          <i nz-tooltip="If the flag is turned on, the following variation is served" i18n-nz-tooltip="@@ff.components.details.targeting.defaultrule-tooltip"
              nz-icon nzType="icons:icon-info-outline"></i>
         </div>
         <div class="find-rule">
@@ -66,7 +66,7 @@
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
           <div class="title" i18n="@@ff.components.details.targeting.customizedrules">Target users who match these rules</div>
-          <i nz-tooltip="The default rule will be overridden when the rules are met" i18n-nz-tooltip="@@ff.components.details.targeting.coverdefaultrule-tooltip" 
+          <i nz-tooltip="The default rule will be overridden when the rules are met" i18n-nz-tooltip="@@ff.components.details.targeting.coverdefaultrule-tooltip"
              nz-icon nzType="icons:icon-info-outline"></i>
           <i nz-icon (click)="onAddRule()" nzType="icons:icon-add-outline"></i>
         </div>
@@ -168,7 +168,7 @@
     <span style="display:inline-box;color:red;margin-right:10px"
       *ngIf="!pendingChanges.hasInstruction()">只有在存在改动的情况下才可<span *ngIf="!isApprovalRequestModal">保存</span><span
         *ngIf="isApprovalRequestModal">提交审阅</span></span>
-    <button nz-button nzType="default" (click)="requestApprovalModalVisible=false">取消</button>
+    <button nz-button nzType="default" (click)="requestApprovalModalVisible=false" i18n="@@common.cancel">Cancel</button>
     <button [disabled]="!pendingChanges.hasInstruction()" *ngIf="!isApprovalRequestModal" nz-button nzType="primary"
       (click)="onSaveConditions()">保存改动</button>
     <button [disabled]="!pendingChanges.canSubmit()" *ngIf="isApprovalRequestModal" nz-button nzType="primary"
