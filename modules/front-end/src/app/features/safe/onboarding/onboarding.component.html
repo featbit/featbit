@@ -1,6 +1,6 @@
 <div class="main-container" [class]="{'menu-extended': menuExtended}">
   <div class="menu-container">
-    <app-menu [menus]="[]" [menuExtended]="menuExtended" [isInitialized]="false" (toggleMenu)="toggleMenu($event)" (logout)="logout()"></app-menu>
+    <app-menu [menus]="[{}]" [menuExtended]="menuExtended" [isInitialized]="false" (toggleMenu)="toggleMenu($event)" (logout)="logout()"></app-menu>
   </div>
   <section class="right-container main-body">
     <init-steps></init-steps>
