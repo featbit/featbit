@@ -5,8 +5,8 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/organizations")]
 public class OrganizationController : ApiControllerBase
 {
-    [HttpGet("{id}")]
-    public async Task<ApiResponse<OrganizationVm>> GetAsync(string id)
+    [HttpGet("{id:guid}")]
+    public async Task<ApiResponse<OrganizationVm>> GetAsync(Guid id)
     {
         var request = new GetOrganization { Id = id };
 

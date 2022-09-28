@@ -2,11 +2,11 @@ namespace Domain.Members;
 
 public class Member
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 
     public string Email { get; set; }
 
-    public string InvitorId { get; set; }
+    public Guid? InvitorId { get; set; }
 
     public string InitialPassword { get; set; }
 

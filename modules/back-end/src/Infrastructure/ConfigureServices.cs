@@ -12,9 +12,7 @@ using Infrastructure.Projects;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
-using MongoDB.Bson.Serialization.Conventions;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -27,20 +25,11 @@ public static class ConfigureServices
         IConfiguration configuration)
     {
         // mongodb
-        var conventions = new ConventionPack
-        {
-            new IgnoreExtraElementsConvention(true),
-            new CamelCaseElementNameConvention(),
-            new StringIdStoredAsObjectIdConvention(),
-            new StringObjectIdSerializerConvention()
-        };
-        ConventionRegistry.Register("global-conventions", conventions, _ => true);
-
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
 
         // identity
-        services.TryAddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserStore, MongoDbUserStore>();
         services.AddScoped<IIdentityService, IdentityService>();
 

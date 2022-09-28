@@ -3,11 +3,11 @@ using Application.Policies;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId}/policies")]
+[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/policies")]
 public class PolicyController : ApiControllerBase
 {
-    [HttpGet("{id}")]
-    public async Task<ApiResponse<PolicyVm>> GetAsync(string id)
+    [HttpGet("{id:guid}")]
+    public async Task<ApiResponse<PolicyVm>> GetAsync(Guid id)
     {
         var request = new GetPolicy
         {
@@ -20,7 +20,7 @@ public class PolicyController : ApiControllerBase
 
     [HttpGet]
     public async Task<ApiResponse<PagedResult<PolicyVm>>> GetListAsync(
-        string organizationId,
+        Guid organizationId,
         [FromQuery] PolicyFilter filter)
     {
         var request = new GetPolicyList
@@ -34,7 +34,7 @@ public class PolicyController : ApiControllerBase
     }
 
     [HttpGet("is-name-used")]
-    public async Task<ApiResponse<bool>> IsNameUsedAsync(string organizationId, string name)
+    public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid organizationId, string name)
     {
         var request = new IsPolicyNameUsed
         {
@@ -46,10 +46,10 @@ public class PolicyController : ApiControllerBase
         return Ok(isNameUsed);
     }
 
-    [HttpGet("{policyId}/groups")]
+    [HttpGet("{policyId:guid}/groups")]
     public async Task<ApiResponse<PagedResult<PolicyGroup>>> GetGroupsAsync(
-        string organizationId,
-        string policyId,
+        Guid organizationId,
+        Guid policyId,
         [FromQuery] PolicyGroupFilter filter)
     {
         var request = new GetPolicyGroup
@@ -63,10 +63,10 @@ public class PolicyController : ApiControllerBase
         return Ok(groups);
     }
 
-    [HttpGet("{policyId}/members")]
+    [HttpGet("{policyId:guid}/members")]
     public async Task<ApiResponse<PagedResult<PolicyMember>>> GetMembersAsync(
-        string organizationId,
-        string policyId,
+        Guid organizationId,
+        Guid policyId,
         [FromQuery] PolicyMemberFilter filter)
     {
         var request = new GetPolicyMember

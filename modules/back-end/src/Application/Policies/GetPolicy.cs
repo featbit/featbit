@@ -2,7 +2,7 @@ namespace Application.Policies;
 
 public class GetPolicy : IRequest<PolicyVm>
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 }
 
 public class GetPolicyHandler : IRequestHandler<GetPolicy, PolicyVm>

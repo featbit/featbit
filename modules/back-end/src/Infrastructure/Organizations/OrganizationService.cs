@@ -17,12 +17,12 @@ public class OrganizationService : IOrganizationService
         _organizationUsers = client.CollectionOf<OrganizationUser>();
     }
 
-    public async Task<Organization> GetAsync(string id)
+    public async Task<Organization> GetAsync(Guid id)
     {
         return await _organizations.AsQueryable().FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<IEnumerable<Organization>> GetUserOrganizationAsync(string userId)
+    public async Task<IEnumerable<Organization>> GetListAsync(Guid userId)
     {
         var orgs = _organizations.AsQueryable();
         var users = _organizationUsers.AsQueryable();

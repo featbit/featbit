@@ -2,7 +2,7 @@ namespace Application.Policies;
 
 public class PolicyMember
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 
     public string Email { get; set; }
 

@@ -16,7 +16,7 @@ public class ProjectService : IProjectService
         _mongoDb = mongoDb;
     }
 
-    public async Task<ProjectWithEnvs> GetAsync(string id)
+    public async Task<ProjectWithEnvs> GetAsync(Guid id)
     {
         var projects = _mongoDb.QueryableOf<Project>();
         var envs = _mongoDb.QueryableOf<Environment>();
@@ -36,7 +36,7 @@ public class ProjectService : IProjectService
         return await query.FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<ProjectWithEnvs>> GetListAsync(string organizationId)
+    public async Task<IEnumerable<ProjectWithEnvs>> GetListAsync(Guid organizationId)
     {
         var projects = _mongoDb.QueryableOf<Project>();
         var envs = _mongoDb.QueryableOf<Environment>();

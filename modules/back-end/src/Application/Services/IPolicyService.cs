@@ -6,13 +6,13 @@ namespace Application.Services;
 
 public interface IPolicyService
 {
-    Task<Policy> GetAsync(string id);
+    Task<Policy> GetAsync(Guid id);
 
-    Task<PagedResult<Policy>> GetListAsync(string organizationId, PolicyFilter filter);
+    Task<PagedResult<Policy>> GetListAsync(Guid organizationId, PolicyFilter filter);
 
-    Task<bool> IsNameUsedAsync(string organizationId, string name);
+    Task<bool> IsNameUsedAsync(Guid organizationId, string name);
 
-    Task<PagedResult<PolicyGroup>> GetGroupsAsync(string organizationId, string policyId, PolicyGroupFilter filter);
+    Task<PagedResult<PolicyGroup>> GetGroupsAsync(Guid organizationId, Guid policyId, PolicyGroupFilter filter);
 
-    Task<PagedResult<PolicyMember>> GetMembersAsync(string organizationId, string policyId, PolicyMemberFilter filter);
+    Task<PagedResult<PolicyMember>> GetMembersAsync(Guid organizationId, Guid policyId, PolicyMemberFilter filter);
 }

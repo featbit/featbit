@@ -4,7 +4,7 @@ namespace Application.Services;
 
 public interface IProjectService
 {
-    Task<ProjectWithEnvs> GetAsync(string id);
+    Task<ProjectWithEnvs> GetAsync(Guid id);
 
-    Task<IEnumerable<ProjectWithEnvs>> GetListAsync(string organizationId);
+    Task<IEnumerable<ProjectWithEnvs>> GetListAsync(Guid organizationId);
 }

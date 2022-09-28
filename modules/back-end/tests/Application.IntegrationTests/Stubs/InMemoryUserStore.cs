@@ -10,7 +10,7 @@ public class InMemoryUserStore : IUserStore
         TestUser.Instance()
     };
 
-    public Task<User?> FindByIdAsync(string id)
+    public Task<User?> FindByIdAsync(Guid id)
     {
         return Task.FromResult(_users.FirstOrDefault(x => x.Id == id));
     }

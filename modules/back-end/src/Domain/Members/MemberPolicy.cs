@@ -2,9 +2,9 @@ namespace Domain.Members;
 
 public class MemberPolicy : AuditedEntity
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
-    public string MemberId { get; set; }
+    public Guid MemberId { get; set; }
 
-    public string PolicyId { get; set; }
+    public Guid PolicyId { get; set; }
 }

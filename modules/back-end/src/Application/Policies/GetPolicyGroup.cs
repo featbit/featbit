@@ -4,9 +4,9 @@ namespace Application.Policies;
 
 public class GetPolicyGroup : IRequest<PagedResult<PolicyGroup>>
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
-    public string PolicyId { get; set; }
+    public Guid PolicyId { get; set; }
 
     public PolicyGroupFilter Filter { get; set; }
 }

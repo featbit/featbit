@@ -3,11 +3,11 @@ using Application.Groups;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId}/groups")]
+[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/groups")]
 public class GroupController : ApiControllerBase
 {
-    [HttpGet("{id}")]
-    public async Task<ApiResponse<GroupVm>> GetAsync(string id)
+    [HttpGet("{id:guid}")]
+    public async Task<ApiResponse<GroupVm>> GetAsync(Guid id)
     {
         var request = new GetGroup
         {
@@ -19,7 +19,7 @@ public class GroupController : ApiControllerBase
     }
     
     [HttpGet]
-    public async Task<ApiResponse<PagedResult<GroupVm>>> GetListAsync(string organizationId, [FromQuery] GroupFilter filter)
+    public async Task<ApiResponse<PagedResult<GroupVm>>> GetListAsync(Guid organizationId, [FromQuery] GroupFilter filter)
     {
         var request = new GetGroupList
         {
@@ -32,7 +32,7 @@ public class GroupController : ApiControllerBase
     }
     
     [HttpGet("is-name-used")]
-    public async Task<ApiResponse<bool>> IsNameUsedAsync(string organizationId, string name)
+    public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid organizationId, string name)
     {
         var request = new IsGroupNameUsed
         {
@@ -44,10 +44,10 @@ public class GroupController : ApiControllerBase
         return Ok(result);
     }
     
-    [HttpGet("{groupId}/members")]
+    [HttpGet("{groupId:guid}/members")]
     public async Task<ApiResponse<PagedResult<GroupMemberVm>>> GetMembersAsync(
-        string organizationId, 
-        string groupId, 
+        Guid organizationId, 
+        Guid groupId, 
         [FromQuery] GroupMemberFilter filter)
     {
         var request = new GetGroupMember
@@ -61,10 +61,10 @@ public class GroupController : ApiControllerBase
         return Ok(groupMembers);
     }
     
-    [HttpGet("{groupId}/policies")]
+    [HttpGet("{groupId:guid}/policies")]
     public async Task<ApiResponse<PagedResult<GroupPolicyVm>>> GetPoliciesAsync(
-        string organizationId, 
-        string groupId, 
+        Guid organizationId, 
+        Guid groupId, 
         [FromQuery] GroupPolicyFilter filter)
     {
         var request = new GetGroupPolicy

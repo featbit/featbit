@@ -4,7 +4,7 @@ namespace Application.Groups;
 
 public class GetGroupList : IRequest<PagedResult<GroupVm>>
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
     public GroupFilter Filter { get; set; }
 }

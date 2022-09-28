@@ -4,9 +4,9 @@ namespace Application.Members;
 
 public class GetDirectPolicies : IRequest<PagedResult<MemberPolicyVm>>
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
-    public string MemberId { get; set; }
+    public Guid MemberId { get; set; }
 
     public MemberPolicyFilter Filter { get; set; }
 }

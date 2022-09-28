@@ -4,9 +4,9 @@ namespace Application.IntegrationTests.Stubs;
 
 public class TestCurrentUser : ICurrentUser
 {
-    public string Id { get; }
+    public Guid Id { get; }
 
-    public TestCurrentUser(string id)
+    public TestCurrentUser(Guid id)
     {
         Id = id;
     }

@@ -6,13 +6,13 @@ namespace Application.Services;
 
 public interface IGroupService
 {
-    Task<Group> GetAsync(string id);
+    Task<Group> GetAsync(Guid id);
 
-    Task<PagedResult<Group>> GetListAsync(string organizationId, GroupFilter groupFilter);
+    Task<PagedResult<Group>> GetListAsync(Guid organizationId, GroupFilter groupFilter);
 
-    Task<bool> IsNameUsedAsync(string organizationId, string name);
+    Task<bool> IsNameUsedAsync(Guid organizationId, string name);
 
-    Task<PagedResult<GroupMemberVm>> GetMembersAsync(string organizationId, string groupId, GroupMemberFilter filter);
+    Task<PagedResult<GroupMemberVm>> GetMembersAsync(Guid organizationId, Guid groupId, GroupMemberFilter filter);
 
-    Task<PagedResult<GroupPolicyVm>> GetPoliciesAsync(string organizationId, string groupId, GroupPolicyFilter filter);
+    Task<PagedResult<GroupPolicyVm>> GetPoliciesAsync(Guid organizationId, Guid groupId, GroupPolicyFilter filter);
 }
