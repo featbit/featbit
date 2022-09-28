@@ -32,6 +32,14 @@
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
           <context context-type="linenumber">12</context>
         </context-group>
@@ -136,8 +144,16 @@
           <context context-type="linenumber">29</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.html</context>
           <context context-type="linenumber">27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
+          <context context-type="linenumber">23</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
@@ -205,7 +221,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
@@ -341,11 +357,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">46</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">81</context>
+          <context context-type="linenumber">63</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
@@ -768,6 +784,14 @@
           <context context-type="linenumber">31</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
           <context context-type="linenumber">25</context>
         </context-group>
@@ -789,7 +813,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.ts</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
@@ -1025,59 +1049,19 @@
         </context-group>
         <target>添加成员</target>
       </trans-unit>
-      <trans-unit id="iam.team.member-drawer.invitation-mode" datatype="html">
-        <source>Invitation mode</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">13</context>
-        </context-group>
-        <target>邀请方式</target>
-      </trans-unit>
-      <trans-unit id="iam.team.member-drawer.mobile" datatype="html">
-        <source>Mobile</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">24</context>
-        </context-group>
-        <target>电话</target>
-      </trans-unit>
       <trans-unit id="iam.team.member-drawer.email" datatype="html">
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">17</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">32</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <target>Email</target>
-      </trans-unit>
-      <trans-unit id="iam.team.member-drawer.invalid-mobile" datatype="html">
-        <source>Invalid mobile number</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
-        <target>请输入有效的手机号</target>
-      </trans-unit>
-      <trans-unit id="iam.team.member-drawer.mobile-placeholder" datatype="html">
-        <source>Mobile number</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <target>电话</target>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.invalid-email" datatype="html">
         <source>Invalid Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="linenumber">15</context>
         </context-group>
         <target>请输入有效的邮箱</target>
       </trans-unit>
@@ -1085,31 +1069,15 @@
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="linenumber">16</context>
         </context-group>
         <target>邮箱</target>
-      </trans-unit>
-      <trans-unit id="iam.team.member-drawer.name" datatype="html">
-        <source>Name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">40</context>
-        </context-group>
-        <target>名称</target>
-      </trans-unit>
-      <trans-unit id="iam.team.member-drawer.name-placeholder" datatype="html">
-        <source>Name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-        <target>名称</target>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.permissions" datatype="html">
         <source>Permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>权限</target>
       </trans-unit>
@@ -1117,7 +1085,7 @@
         <source>(Policy and group cannot be both empty)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>（策略和组不可同时为空）</target>
       </trans-unit>
@@ -1560,6 +1528,10 @@
           <context context-type="linenumber">55</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
           <context context-type="linenumber">61</context>
         </context-group>
@@ -1761,11 +1733,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">42</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">70</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -1833,11 +1805,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -2344,7 +2316,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">67</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -2717,6 +2689,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
           <context context-type="linenumber">30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <target>类型</target>
       </trans-unit>
@@ -3756,7 +3736,7 @@ Save &amp; Update        </source>
         <target>选择操作</target>
       </trans-unit>
       <trans-unit id="iam.policies.details.managed-policies-cannot-be-modified" datatype="html">
-        <source>Managed policies cannot be modified</source>
+        <source>System Managed policies cannot be modified</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
           <context context-type="linenumber">1</context>
@@ -3767,13 +3747,13 @@ Save &amp; Update        </source>
         </context-group>
         <target>系统托管策略不允许被修改</target>
       </trans-unit>
-      <trans-unit id="iam.policies.details.copy-policy" datatype="html">
-        <source>Copy policy</source>
+      <trans-unit id="common.copy" datatype="html">
+        <source>Copy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
           <context context-type="linenumber">5</context>
         </context-group>
-        <target>复制策略</target>
+        <target>复制</target>
       </trans-unit>
       <trans-unit id="common.permissions" datatype="html">
         <source>Permissions</source>
@@ -3922,7 +3902,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>按策略名称查找</target>
       </trans-unit>
       <trans-unit id="iam.groups.details.all-policies" datatype="html">
-        <source>All policies</source>
+        <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.html</context>
           <context context-type="linenumber">13</context>
@@ -3930,7 +3910,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>所有策略</target>
       </trans-unit>
       <trans-unit id="iam.groups.details.current-policies" datatype="html">
-        <source>Policies binded to current group</source>
+        <source>Affected to current group</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.html</context>
           <context context-type="linenumber">14</context>
@@ -3943,14 +3923,6 @@ Legal resource name (RN) cannot includeand :        </source>
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.html</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
-          <context context-type="linenumber">23</context>
-        </context-group>
         <target>名称</target>
       </trans-unit>
       <trans-unit id="iam.team.details.type" datatype="html">
@@ -3958,14 +3930,6 @@ Legal resource name (RN) cannot includeand :        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.html</context>
           <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
-          <context context-type="linenumber">25</context>
         </context-group>
         <target>类型</target>
       </trans-unit>
@@ -3976,16 +3940,8 @@ Legal resource name (RN) cannot includeand :        </source>
           <context context-type="linenumber">31</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
-          <context context-type="linenumber">32</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.html</context>
           <context context-type="linenumber">28</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
-          <context context-type="linenumber">26</context>
         </context-group>
         <target>描述</target>
       </trans-unit>
@@ -4017,7 +3973,7 @@ Legal resource name (RN) cannot includeand :        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
@@ -4026,7 +3982,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>资源名 （RN）</target>
       </trans-unit>
       <trans-unit id="iam.groups.details.team-filter-placeholder" datatype="html">
-        <source>Filter by mobile or Email</source>
+        <source>Filter by Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
           <context context-type="linenumber">5</context>
@@ -4034,7 +3990,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>按电话或邮箱查找</target>
       </trans-unit>
       <trans-unit id="iam.groups.details.all-members" datatype="html">
-        <source>All team members</source>
+        <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
           <context context-type="linenumber">11</context>
@@ -4042,7 +3998,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>所有成员</target>
       </trans-unit>
       <trans-unit id="iam.groups.details.current-members" datatype="html">
-        <source>Members included in current group</source>
+        <source>Contained by current group</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
           <context context-type="linenumber">12</context>
@@ -4078,10 +4034,6 @@ Legal resource name (RN) cannot includeand :        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
           <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
@@ -4154,7 +4106,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>按名称查找</target>
       </trans-unit>
       <trans-unit id="iam.policies.details.all-groups" datatype="html">
-        <source>All groups</source>
+        <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.html</context>
           <context context-type="linenumber">11</context>
@@ -4162,7 +4114,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>所有组</target>
       </trans-unit>
       <trans-unit id="iam.policies.details.current-groups" datatype="html">
-        <source>Groups current policy binded to</source>
+        <source>Groups with current policy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.html</context>
           <context context-type="linenumber">12</context>
@@ -4186,7 +4138,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>按邮箱或电话查找</target>
       </trans-unit>
       <trans-unit id="iam.policies.details.all-members" datatype="html">
-        <source>All team members</source>
+        <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
           <context context-type="linenumber">11</context>
@@ -4194,7 +4146,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>所有成员</target>
       </trans-unit>
       <trans-unit id="iam.policies.policies.current-members" datatype="html">
-        <source>Members current policy binded to</source>
+        <source>Members with current policy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
           <context context-type="linenumber">12</context>
@@ -4216,14 +4168,6 @@ Legal resource name (RN) cannot includeand :        </source>
           <context context-type="linenumber">4</context>
         </context-group>
         <target>按名字查找</target>
-      </trans-unit>
-      <trans-unit id="iam.policies.idx.add" datatype="html">
-        <source>Add</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
-          <context context-type="linenumber">11</context>
-        </context-group>
-        <target>添加</target>
       </trans-unit>
       <trans-unit id="iam.team.details.groups" datatype="html">
         <source>Groups</source>
@@ -4262,7 +4206,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>按策略名称查找</target>
       </trans-unit>
       <trans-unit id="iam.team.details.all-policies" datatype="html">
-        <source>All policies</source>
+        <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
           <context context-type="linenumber">13</context>
@@ -4270,7 +4214,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>所有策略</target>
       </trans-unit>
       <trans-unit id="iam.team.details.current-policies" datatype="html">
-        <source>Policies binded to current team member</source>
+        <source>Affected to current member</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
           <context context-type="linenumber">14</context>
@@ -4278,7 +4222,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>当前成员所拥有的策略</target>
       </trans-unit>
       <trans-unit id="iam.team.details.remove-policy-from" datatype="html">
-        <source>Are you sure to remove the policy from the member?</source>
+        <source>Are you sure to remove the policy from current member?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
           <context context-type="linenumber">50</context>
@@ -4294,7 +4238,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>按名称查找</target>
       </trans-unit>
       <trans-unit id="iam.team.details.all-groups" datatype="html">
-        <source>All groups</source>
+        <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.html</context>
           <context context-type="linenumber">11</context>
@@ -4302,7 +4246,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>所有组</target>
       </trans-unit>
       <trans-unit id="iam.team.details.current-groups" datatype="html">
-        <source>Groups including current team member</source>
+        <source>Containing current member</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.html</context>
           <context context-type="linenumber">12</context>
@@ -4342,7 +4286,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <target>名称</target>
       </trans-unit>
       <trans-unit id="iam.team.idx.searchPlaceholder" datatype="html">
-        <source>Filter by mobile or Email</source>
+        <source>Filter by Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
           <context context-type="linenumber">4</context>
@@ -4412,7 +4356,7 @@ Legal resource name (RN) cannot includeand :        </source>
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
           <context context-type="linenumber">17</context>
         </context-group>
-        <target>更新机构名称</target>
+        <target>更新名称</target>
       </trans-unit>
       <trans-unit id="org.org.switchorg" datatype="html">
         <source>Switch organization</source>
@@ -4486,35 +4430,11 @@ Legal resource name (RN) cannot includeand :        </source>
         </context-group>
         <target>邮箱</target>
       </trans-unit>
-      <trans-unit id="org.profile.mobile" datatype="html">
-        <source>Mobile</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <target>手机号</target>
-      </trans-unit>
-      <trans-unit id="org.profile.mobileMandatory" datatype="html">
-        <source>Mobile is mandatory!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <target>手机号不能为空</target>
-      </trans-unit>
-      <trans-unit id="org.profile.mobilePlaceholder" datatype="html">
-        <source>Mobile</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <target>手机号</target>
-      </trans-unit>
       <trans-unit id="org.profile.save" datatype="html">
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">16</context>
         </context-group>
         <target>保存</target>
       </trans-unit>
@@ -4524,17 +4444,13 @@ Legal resource name (RN) cannot includeand :        </source>
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
           <context context-type="linenumber">26</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">27</context>
-        </context-group>
         <target>未关联</target>
       </trans-unit>
       <trans-unit id="org.profile.profileUpdateSuccess" datatype="html">
         <source>Profile successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">46</context>
+          <context context-type="linenumber">45</context>
         </context-group>
         <target>个人信息更新成功</target>
       </trans-unit>
@@ -4542,7 +4458,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>This feature will be released soon!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <target>该功能正在开发中</target>
       </trans-unit>

@@ -1,7 +1,7 @@
 <div class="table-content-area">
   <div class="table-search-area">
     <nz-input-group [nzPrefix]="prefixIconSearch">
-      <input nz-input type="text" placeholder="Filter by mobile or Email" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch()" i18n-placeholder="@@iam.team.idx.searchPlaceholder">
+      <input nz-input type="text" placeholder="Filter by Email" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch()" i18n-placeholder="@@iam.team.idx.searchPlaceholder">
     </nz-input-group>
     <ng-template #prefixIconSearch>
       <i nz-icon nzType="icons:icon-search"></i>
@@ -58,6 +58,9 @@
           <span *ngIf="item.initialPassword?.length > 0">
             <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(item.initialPassword)"></i>
             {{ item.initialPassword }}
+          </span>
+          <span *ngIf="!item.initialPassword || item.initialPassword?.length === 0">
+            ******
           </span>
         </td>
         <td>

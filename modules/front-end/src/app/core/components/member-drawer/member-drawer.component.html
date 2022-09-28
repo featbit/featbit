@@ -9,37 +9,19 @@
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="memberForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
-      <nz-form-item>
-        <nz-form-label nzRequired i18n="@@iam.team.member-drawer.invitation-mode">Invitation mode</nz-form-label>
-        <nz-form-control>
-          <nz-radio-group formControlName="identityType" (ngModelChange)="onIdentityTypeChange($event)">
-            <label nz-radio nzValue="phoneNumber" i18n="@@iam.team.member-drawer.mobile">Mobile</label>
-            <label nz-radio nzValue="email" i18n="@@iam.team.member-drawer.email">Email</label>
-          </nz-radio-group>
-        </nz-form-control>
-      </nz-form-item>
-
-      <!-- phoneNumber -->
-      <nz-form-item *ngIf="memberForm.get('identityType').value === 'phoneNumber'">
-        <nz-form-label nzRequired i18n="@@iam.team.member-drawer.mobile">Mobile</nz-form-label>
-        <nz-form-control nzErrorTip="Invalid mobile number" i18n-nzErrorTip="@@iam.team.member-drawer.invalid-mobile">
-          <input type="text" nz-input formControlName="identity" placeholder="Mobile number" i18n-placeholder="@@iam.team.member-drawer.mobile-placeholder"/>
-        </nz-form-control>
-      </nz-form-item>
-
       <!-- email -->
-      <nz-form-item *ngIf="memberForm.get('identityType').value === 'email'">
+      <nz-form-item>
         <nz-form-label nzRequired i18n="@@iam.team.member-drawer.email">Email</nz-form-label>
         <nz-form-control nzErrorTip="Invalid Email" i18n-nzErrorTip="@@iam.team.member-drawer.invalid-email">
-          <input type="text" nz-input formControlName="identity" placeholder="Email" i18n-placeholder="@@iam.team.member-drawer.email-placeholder"/>
+          <input type="text" nz-input formControlName="email" placeholder="Email" i18n-placeholder="@@iam.team.member-drawer.email-placeholder"/>
         </nz-form-control>
       </nz-form-item>
 
       <!-- name -->
       <nz-form-item>
-        <nz-form-label i18n="@@iam.team.member-drawer.name">Name</nz-form-label>
+        <nz-form-label i18n="@@common.name">Name</nz-form-label>
         <nz-form-control>
-          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@iam.team.member-drawer.name-placeholder"/>
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-form-control>
       </nz-form-item>
 

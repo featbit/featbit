@@ -23,8 +23,7 @@ export class ProfileComponent {
     private fb: FormBuilder
   ) {
     this.profileForm = this.fb.group({
-      email: [this.auth.email ?? $localize `:@@org.profile.notProvided:Not provided`, [Validators.required, Validators.email]],
-      phoneNumber: [this.auth.phoneNumber ?? $localize `:@@org.profile.notProvided:Not provided`, [Validators.required]],
+      email: [this.auth.email ?? $localize `:@@org.profile.notProvided:Not provided`, [Validators.required, Validators.email]]
     });
   }
 

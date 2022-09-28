@@ -41,7 +41,7 @@ export class SettingComponent implements OnInit {
   }
 
   canDelete(): boolean {
-    return this.auth.email !== this.member.email || this.auth.phoneNumber !== this.member.phoneNumber;
+    return this.auth.email !== this.member.email;
   }
 
   deleteMember() {

@@ -2,14 +2,14 @@
   <div class="table-content-area">
     <div class="table-search-area">
       <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
-        <input class="search-input" nz-input type="text" placeholder="Filter by mobile or Email" i18n-placeholder="@@iam.groups.details.team-filter-placeholder" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch(true)">
+        <input class="search-input" nz-input type="text" placeholder="Filter by Email" i18n-placeholder="@@iam.groups.details.team-filter-placeholder" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch(true)">
       </nz-input-group>
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="icons:icon-search"></i>
       </ng-template>
-      <nz-select [(ngModel)]="filter.getAllMembers" (ngModelChange)="doSearch(true)" nzPlaceHolder="按状态筛选">
-        <nz-option [nzValue]="true" nzLabel="All team members" i18n-nzLabel="@@iam.groups.details.all-members"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="Members included in current group" i18n-nzLabel="@@iam.groups.details.current-members"></nz-option>
+      <nz-select class="team-filter" [(ngModel)]="filter.getAllMembers" (ngModelChange)="doSearch(true)">
+        <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.groups.details.all-members"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="Contained by current group" i18n-nzLabel="@@iam.groups.details.current-members"></nz-option>
       </nz-select>
     </div>
     <div class="table-wrapper">

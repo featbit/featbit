@@ -1,8 +1,8 @@
-<message *ngIf="readonly" [type]="'warning'" i18n-content="@@iam.policies.details.managed-policies-cannot-be-modified" content="Managed policies cannot be modified"></message>
+<message *ngIf="readonly" [type]="'warning'" i18n-content="@@iam.policies.details.managed-policies-cannot-be-modified" content="System Managed policies cannot be modified"></message>
 <div class="operations">
   <button class="standard-btn copy-btn" nz-button nzType="primary" (click)="copyPolicy()">
     <i nz-icon nzType="icons:icon-copy"></i>
-    <ng-container i18n="@@iam.policies.details.copy-policy">Copy policy</ng-container>
+    <ng-container i18n="@@common.copy">Copy</ng-container>
   </button>
   <button class="standard-btn" nz-button nzType="primary" (click)="saveStatements()">
     <i nz-icon nzType="icons:icon-save"></i>
