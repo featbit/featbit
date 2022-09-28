@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IOrganization, IProjectEnv, IAccountProjectEnv } from '@shared/types';
+import { IOrganization, IProjectEnv, IOrganizationProjectEnv } from '@shared/types';
 import { ProjectService } from './project.service';
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
@@ -51,11 +51,11 @@ export class OrganizationService {
     window.location.reload();
   }
 
-  setOrganization(account: IOrganization) {
-    if (!!account) {
-      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(account));
-      const currentAccount = this.organizations.find(ws => ws.id == account.id);
-      currentAccount.name = account.name;
+  setOrganization(organization: IOrganization) {
+    if (!!organization) {
+      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(organization));
+      const currentAccount = this.organizations.find(ws => ws.id == organization.id);
+      currentAccount.name = organization.name;
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
@@ -81,11 +81,11 @@ export class OrganizationService {
     });
   }
 
-  getCurrentOrganizationProjectEnv(): IAccountProjectEnv {
-    const account: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION())!);
+  getCurrentOrganizationProjectEnv(): IOrganizationProjectEnv {
+    const organization: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION())!);
     const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT())!);
     return {
-      account,
+      organization,
       projectEnv
     };
   }

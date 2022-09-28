@@ -81,7 +81,7 @@ export class IndexComponent implements OnInit {
   isUserPropsLoading: boolean = true;
   ngOnInit(): void {
     const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
-    this.currentAccountId = currentAccountProjectEnv.account.id;
+    this.currentAccountId = currentAccountProjectEnv.organization.id;
     this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
 
     const filterAndAttributeConfig: any = JSON.parse(localStorage.getItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId)) || '{}');

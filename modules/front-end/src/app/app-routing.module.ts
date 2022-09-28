@@ -11,6 +11,11 @@ const routes: Routes = [
     loadChildren: () => import("./features/login/login.module").then(m => m.LoginModule)
   },
   {
+    path: 'onboarding',
+    canActivate: [AuthGuard],
+    loadChildren: () => import("./features/safe/onboarding/onboarding.module").then(m => m.OnboardingModule),
+  },
+  {
     path: '',
     canActivate: [AuthGuard],
     loadChildren: () => import("./features/safe/safe.module").then(m => m.SafeModule),

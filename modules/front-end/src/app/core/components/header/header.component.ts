@@ -121,7 +121,7 @@ export class HeaderComponent implements OnInit {
   private selectCurrentProjectEnv() {
     const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
 
-    this.currentAccount = currentAccountProjectEnv.account;
+    this.currentAccount = currentAccountProjectEnv.organization;
     this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
 
     this.selectedProject = {

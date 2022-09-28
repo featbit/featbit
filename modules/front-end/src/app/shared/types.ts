@@ -75,8 +75,8 @@ export interface IOrganization {
   plan?: ISubscriptionPlan
 }
 
-export interface IAccountProjectEnv {
-  account: IOrganization,
+export interface IOrganizationProjectEnv {
+  organization: IOrganization,
   projectEnv: IProjectEnv
 }
 
