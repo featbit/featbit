@@ -7,7 +7,7 @@
     "start:zh": "ng serve --configuration=development,zh --port=4201",
     "build:dev": "ng build --localize --configuration development",
     "build:prod": "ng build --localize --configuration production",
-    "i18n": "ng extract-i18n --output-path src/locale && node generate-locales.js",
+    "i18n": "ng extract-i18n --output-path src/locale && locales-generator --l zh --bp ./src/locale",
     "test": "ng test",
     "test-coverage": "ng test --code-coverage"
   },
@@ -36,7 +36,7 @@
     "@angular/localize": "^14.2.0",
     "@types/jasmine": "~4.0.0",
     "@types/karma-coverage": "^2.0.1",
-    "fast-xml-parser": "^4.0.10",
+    "angular-locales-generator": "^1.0.0",
     "jasmine-core": "~4.3.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.1.0",
