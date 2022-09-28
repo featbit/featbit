@@ -30,7 +30,9 @@ public static class ConfigureServices
         var conventions = new ConventionPack
         {
             new IgnoreExtraElementsConvention(true),
-            new CamelCaseElementNameConvention()
+            new CamelCaseElementNameConvention(),
+            new StringIdStoredAsObjectIdConvention(),
+            new StringObjectIdSerializerConvention()
         };
         ConventionRegistry.Register("global-conventions", conventions, _ => true);
 
@@ -61,7 +63,7 @@ public static class ConfigureServices
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]))
                 };
             });
-        
+
         // custom services
         services.AddScoped<IUserService, UserService>();
         services.AddTransient<IOrganizationService, OrganizationService>();
