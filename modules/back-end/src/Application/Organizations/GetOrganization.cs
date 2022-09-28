@@ -2,7 +2,7 @@ namespace Application.Organizations;
 
 public class GetOrganization : IRequest<OrganizationVm>
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 }
 
 public class GetOrganizationHandler : IRequestHandler<GetOrganization, OrganizationVm>

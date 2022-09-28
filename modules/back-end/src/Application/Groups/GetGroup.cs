@@ -2,7 +2,7 @@ namespace Application.Groups;
 
 public class GetGroup : IRequest<GroupVm>
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 }
 
 public class GetGroupHandler : IRequestHandler<GetGroup, GroupVm>

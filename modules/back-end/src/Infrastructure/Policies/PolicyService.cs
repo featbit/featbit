@@ -22,18 +22,18 @@ public class PolicyService : IPolicyService
         _mongoDb = mongoDb;
     }
 
-    public async Task<Policy> GetAsync(string id)
+    public async Task<Policy> GetAsync(Guid id)
     {
         var policy = await _mongoDb.QueryableOf<Policy>().FirstOrDefaultAsync(x => x.Id == id);
         if (policy == null)
         {
-            throw new EntityNotFoundException(nameof(Policy), id);
+            throw new EntityNotFoundException(nameof(Policy), id.ToString());
         }
 
         return policy;
     }
 
-    public async Task<PagedResult<Policy>> GetListAsync(string organizationId, PolicyFilter filter)
+    public async Task<PagedResult<Policy>> GetListAsync(Guid organizationId, PolicyFilter filter)
     {
         var query = _mongoDb.QueryableOf<Policy>()
             .Where(x => x.OrganizationId == organizationId || x.Type == PolicyTypes.SysManaged);
@@ -54,7 +54,7 @@ public class PolicyService : IPolicyService
         return new PagedResult<Policy>(totalCount, items);
     }
 
-    public async Task<bool> IsNameUsedAsync(string organizationId, string name)
+    public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
     {
         var isNameUsed =
             await _mongoDb.QueryableOf<Policy>().AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
@@ -63,8 +63,8 @@ public class PolicyService : IPolicyService
     }
 
     public async Task<PagedResult<PolicyGroup>> GetGroupsAsync(
-        string organizationId,
-        string policyId,
+        Guid organizationId,
+        Guid policyId,
         PolicyGroupFilter filter)
     {
         var groups = _mongoDb.QueryableOf<Group>();
@@ -104,7 +104,7 @@ public class PolicyService : IPolicyService
 
         var vms = items.Select(x => new PolicyGroup
         {
-            Id = x.Id.ToString(),
+            Id = x.Id,
             Name = x.Name,
             Description = x.Description,
             IsPolicyGroup = x.AllGroupPolicies.Any(y => y.PolicyId == policyId)
@@ -114,8 +114,8 @@ public class PolicyService : IPolicyService
     }
 
     public async Task<PagedResult<PolicyMember>> GetMembersAsync(
-        string organizationId,
-        string policyId,
+        Guid organizationId,
+        Guid policyId,
         PolicyMemberFilter filter)
     {
         var users = _mongoDb.QueryableOf<User>();

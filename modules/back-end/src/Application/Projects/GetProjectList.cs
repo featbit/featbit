@@ -4,7 +4,7 @@ namespace Application.Projects;
 
 public class GetProjectList : IRequest<IEnumerable<ProjectWithEnvs>>
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 }
 
 public class GetProjectListHandler : IRequestHandler<GetProjectList, IEnumerable<ProjectWithEnvs>>

@@ -22,7 +22,7 @@ public class MemberService : IMemberService
         _mongoDb = mongoDb;
     }
 
-    public async Task<Member> GetAsync(string organizationId, string memberId)
+    public async Task<Member> GetAsync(Guid organizationId, Guid memberId)
     {
         var users = _mongoDb.QueryableOf<User>();
         var organizationUsers = _mongoDb.QueryableOf<OrganizationUser>();
@@ -52,7 +52,7 @@ public class MemberService : IMemberService
         return member;
     }
 
-    public async Task<PagedResult<Member>> GetListAsync(string organizationId, MemberFilter filter)
+    public async Task<PagedResult<Member>> GetListAsync(Guid organizationId, MemberFilter filter)
     {
         var users = _mongoDb.QueryableOf<User>();
         var organizationUsers = _mongoDb.QueryableOf<OrganizationUser>();
@@ -94,7 +94,7 @@ public class MemberService : IMemberService
         return new PagedResult<Member>(totalCount, items);
     }
 
-    public async Task<List<MemberGroup>> GetGroupsAsync(string organizationId, IEnumerable<string> memberIds)
+    public async Task<List<MemberGroup>> GetGroupsAsync(Guid organizationId, IEnumerable<Guid> memberIds)
     {
         var groups = _mongoDb.QueryableOf<Group>();
         var groupMembers = _mongoDb.QueryableOf<GroupMember>();
@@ -118,8 +118,8 @@ public class MemberService : IMemberService
     }
 
     public async Task<PagedResult<MemberGroup>> GetGroupsAsync(
-        string organizationId,
-        string memberId,
+        Guid organizationId,
+        Guid memberId,
         MemberGroupFilter filter)
     {
         var groups = _mongoDb.QueryableOf<Group>();
@@ -169,7 +169,7 @@ public class MemberService : IMemberService
         return new PagedResult<MemberGroup>(totalCount, memberGroups);
     }
 
-    public async Task<IEnumerable<Policy>> GetPoliciesAsync(string organizationId, string memberId)
+    public async Task<IEnumerable<Policy>> GetPoliciesAsync(Guid organizationId, Guid memberId)
     {
         // direct policies
         var policies = _mongoDb.QueryableOf<Policy>();
@@ -207,8 +207,8 @@ public class MemberService : IMemberService
     }
 
     public async Task<PagedResult<MemberPolicyVm>> GetDirectPoliciesAsync(
-        string organizationId,
-        string memberId,
+        Guid organizationId,
+        Guid memberId,
         MemberPolicyFilter filter)
     {
         var policies = _mongoDb.QueryableOf<Policy>();
@@ -262,8 +262,8 @@ public class MemberService : IMemberService
     }
 
     public async Task<PagedResult<InheritedMemberPolicy>> GetInheritedPoliciesAsync(
-        string organizationId,
-        string memberId,
+        Guid organizationId,
+        Guid memberId,
         InheritedMemberPolicyFilter filter)
     {
         var groups = _mongoDb.QueryableOf<Group>();

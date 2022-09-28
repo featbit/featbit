@@ -4,9 +4,9 @@ namespace Application.Members;
 
 public class GetMemberPolicy : IRequest<IEnumerable<PolicyVm>>
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
-    public string MemberId { get; set; }
+    public Guid MemberId { get; set; }
 }
 
 public class GetMemberPolicyHandler : IRequestHandler<GetMemberPolicy, IEnumerable<PolicyVm>>

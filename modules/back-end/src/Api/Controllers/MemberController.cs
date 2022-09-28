@@ -4,11 +4,11 @@ using Application.Policies;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId}/members")]
+[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/members")]
 public class MemberController : ApiControllerBase
 {
-    [HttpGet("{memberId}")]
-    public async Task<ApiResponse<MemberVm>> GetAsync(string organizationId, string memberId)
+    [HttpGet("{memberId:guid}")]
+    public async Task<ApiResponse<MemberVm>> GetAsync(Guid organizationId, Guid memberId)
     {
         var request = new GetMember
         {
@@ -22,12 +22,11 @@ public class MemberController : ApiControllerBase
 
     [HttpGet]
     public async Task<ApiResponse<PagedResult<MemberVm>>> GetListAsync(
-        string organizationId,
+        Guid organizationId,
         [FromQuery] MemberFilter filter)
     {
         var request = new GetMemberList
         {
-            CurrentUserId = CurrentUser.Id,
             OrganizationId = organizationId,
             Filter = filter
         };
@@ -36,10 +35,10 @@ public class MemberController : ApiControllerBase
         return Ok(members);
     }
 
-    [HttpGet("{memberId}/groups")]
+    [HttpGet("{memberId:guid}/groups")]
     public async Task<ApiResponse<PagedResult<MemberGroupVm>>> GetGroupsAsync(
-        string organizationId,
-        string memberId,
+        Guid organizationId,
+        Guid memberId,
         [FromQuery] MemberGroupFilter filter)
     {
         var request = new GetMemberGroup
@@ -53,8 +52,8 @@ public class MemberController : ApiControllerBase
         return Ok(groups);
     }
 
-    [HttpGet("{memberId}/policies")]
-    public async Task<ApiResponse<IEnumerable<PolicyVm>>> GetPoliciesAsync(string organizationId, string memberId)
+    [HttpGet("{memberId:guid}/policies")]
+    public async Task<ApiResponse<IEnumerable<PolicyVm>>> GetPoliciesAsync(Guid organizationId, Guid memberId)
     {
         var request = new GetMemberPolicy
         {
@@ -66,10 +65,10 @@ public class MemberController : ApiControllerBase
         return Ok(vms);
     }
 
-    [HttpGet("{memberId}/direct-policies")]
+    [HttpGet("{memberId:guid}/direct-policies")]
     public async Task<ApiResponse<PagedResult<MemberPolicyVm>>> GetDirectPoliciesAsync(
-        string organizationId,
-        string memberId,
+        Guid organizationId,
+        Guid memberId,
         [FromQuery] MemberPolicyFilter filter)
     {
         var request = new GetDirectPolicies
@@ -83,10 +82,10 @@ public class MemberController : ApiControllerBase
         return Ok(policies);
     }
 
-    [HttpGet("{memberId}/inherited-policies")]
+    [HttpGet("{memberId:guid}/inherited-policies")]
     public async Task<ApiResponse<PagedResult<InheritedMemberPolicy>>> GetInheritedPoliciesAsync(
-        string organizationId,
-        string memberId,
+        Guid organizationId,
+        Guid memberId,
         [FromQuery] InheritedMemberPolicyFilter filter)
     {
         var request = new GetInheritedPolicies

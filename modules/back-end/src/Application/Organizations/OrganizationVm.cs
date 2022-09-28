@@ -1,5 +1,3 @@
-using Domain.Organizations;
-
 namespace Application.Organizations;
 
 public class OrganizationVm
@@ -9,6 +7,4 @@ public class OrganizationVm
     public string Name { get; set; }
 
     public bool Initialized { get; set; }
-
-    public Subscription Subscription { get; set; }
 }

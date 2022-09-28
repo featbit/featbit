@@ -21,18 +21,18 @@ public class GroupService : IGroupService
         _mongoDb = mongoDb;
     }
 
-    public async Task<Group> GetAsync(string id)
+    public async Task<Group> GetAsync(Guid id)
     {
         var group = await _mongoDb.QueryableOf<Group>().FirstOrDefaultAsync(x => x.Id == id);
         if (group == null)
         {
-            throw new EntityNotFoundException(nameof(Group), id);
+            throw new EntityNotFoundException(nameof(Group), id.ToString());
         }
 
         return group;
     }
 
-    public async Task<PagedResult<Group>> GetListAsync(string organizationId, GroupFilter groupFilter)
+    public async Task<PagedResult<Group>> GetListAsync(Guid organizationId, GroupFilter groupFilter)
     {
         var filterBuilder = Builders<Group>.Filter;
 
@@ -65,7 +65,7 @@ public class GroupService : IGroupService
         return new PagedResult<Group>(totalCount, items);
     }
 
-    public async Task<bool> IsNameUsedAsync(string organizationId, string name)
+    public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
     {
         var isNameUsed =
             await _mongoDb.QueryableOf<Group>().AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
@@ -74,8 +74,8 @@ public class GroupService : IGroupService
     }
 
     public async Task<PagedResult<GroupMemberVm>> GetMembersAsync(
-        string organizationId,
-        string groupId,
+        Guid organizationId,
+        Guid groupId,
         GroupMemberFilter filter)
     {
         var members = _mongoDb.QueryableOf<User>();
@@ -126,8 +126,8 @@ public class GroupService : IGroupService
     }
 
     public async Task<PagedResult<GroupPolicyVm>> GetPoliciesAsync(
-        string organizationId, 
-        string groupId,
+        Guid organizationId, 
+        Guid groupId,
         GroupPolicyFilter filter)
     {
         var policies = _mongoDb.QueryableOf<Policy>();

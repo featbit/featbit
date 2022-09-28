@@ -2,7 +2,7 @@ namespace Application.Organizations;
 
 public class GetOrganizationList : IRequest<IEnumerable<OrganizationVm>>
 {
-    public string UserId { get; set; }
+    public Guid UserId { get; set; }
 }
 
 public class GetOrganizationListHandler : IRequestHandler<GetOrganizationList, IEnumerable<OrganizationVm>>
@@ -18,7 +18,7 @@ public class GetOrganizationListHandler : IRequestHandler<GetOrganizationList, I
 
     public async Task<IEnumerable<OrganizationVm>> Handle(GetOrganizationList request, CancellationToken cancellationToken)
     {
-        var organizations = await _organizationService.GetUserOrganizationAsync(request.UserId);
+        var organizations = await _organizationService.GetListAsync(request.UserId);
 
         return _mapper.Map<IEnumerable<OrganizationVm>>(organizations);
     }

@@ -14,7 +14,7 @@ public class MongoDbUserStore : IUserStore
         _users = mongo.CollectionOf<User>();
     }
 
-    public async Task<User?> FindByIdAsync(string id)
+    public async Task<User?> FindByIdAsync(Guid id)
     {
         return await _users.AsQueryable().FirstOrDefaultAsync(x => x.Id == id);
     }

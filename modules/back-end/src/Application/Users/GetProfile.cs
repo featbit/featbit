@@ -2,7 +2,7 @@ namespace Application.Users;
 
 public class GetProfile : IRequest<Profile>
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 }
 
 public class GetProfileHandler : IRequestHandler<GetProfile, Profile>

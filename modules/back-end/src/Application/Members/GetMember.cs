@@ -2,9 +2,9 @@ namespace Application.Members;
 
 public class GetMember : IRequest<MemberVm>
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
-    public string MemberId { get; set; }
+    public Guid MemberId { get; set; }
 }
 
 public class GetMemberHandler : IRequestHandler<GetMember, MemberVm>

@@ -4,7 +4,7 @@ namespace Application.Projects;
 
 public class GetProject : IRequest<ProjectWithEnvs>
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 }
 
 public class GetProjectHandler : IRequestHandler<GetProject, ProjectWithEnvs>

@@ -4,9 +4,9 @@ namespace Application.Members;
 
 public class GetMemberGroup : IRequest<PagedResult<MemberGroupVm>>
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
-    public string MemberId { get; set; }
+    public Guid MemberId { get; set; }
 
     public MemberGroupFilter Filter { get; set; }
 }

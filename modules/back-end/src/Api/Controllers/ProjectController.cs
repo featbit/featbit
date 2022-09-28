@@ -3,12 +3,12 @@ using Domain.Projects;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId}/projects")]
+[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/projects")]
 public class ProjectController : ApiControllerBase
 {
     [HttpGet]
-    [Route("{projectId}")]
-    public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(string projectId)
+    [Route("{projectId:guid}")]
+    public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(Guid projectId)
     {
         var request = new GetProject
         {
@@ -20,7 +20,7 @@ public class ProjectController : ApiControllerBase
     }
     
     [HttpGet]
-    public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync(string organizationId)
+    public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync(Guid organizationId)
     {
         var request = new GetProjectList
         {

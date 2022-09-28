@@ -2,7 +2,7 @@ namespace Domain.Groups;
 
 public class GroupPolicy : AuditedEntity
 {
-    public string GroupId { get; set; }
+    public Guid GroupId { get; set; }
 
-    public string PolicyId { get; set; }
+    public Guid PolicyId { get; set; }
 }

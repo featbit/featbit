@@ -4,16 +4,15 @@ db = db.getSiblingDB('featbit')
 print('seed started...')
 
 // seed ids
-const userId = ObjectId("6333a33c315364eead14253d");
+const userId = UUID("4526975f-4f6b-4420-9dde-84c276148832")
+const organizationId = UUID("67e2b2db-01ec-4725-9fd9-e5cc3d3a6b74")
+const projectId = UUID("5a2eaddd-34fb-4d59-831a-bd7fe427b802")
 
-const organizationId = ObjectId("6333a34a315364eead14253e");
-const projectId = ObjectId("6333a351315364eead14253f");
-
-const groupId = ObjectId("6333a358315364eead142540");
-const ownerPolicyId = ObjectId("6333a360315364eead142541");
-const administratorPolicyId = ObjectId("6333a37b315364eead142542");
-const developerPolicyId = ObjectId("6333a382315364eead142543");
-const testerPolicyId = ObjectId("6333a38e315364eead142544");
+const groupId = UUID("4dbea94d-a1cb-45e3-bab7-c5bf8f956f44")
+const ownerPolicyId = UUID("98881f6a-5c6c-4277-bcf7-fda94c538785")
+const administratorPolicyId = UUID("3e961f0f-6fd4-4cf4-910f-52d356f8cc08")
+const developerPolicyId = UUID("66f3687f-939d-4257-bd3f-c3553d39e1b6")
+const testerPolicyId = UUID("65244ccc-d336-44b2-b4ee-b24482ea6037")
 
 // seed user
 print('clean and seed collection: Users')
@@ -37,10 +36,6 @@ db.Organizations.insertOne(
         _id: organizationId,
         name: "playground",
         initialized: true,
-        subscription: {
-            _id: ObjectId(),
-            type: "L100"
-        },
         createdAt: new Date(),
         updatedAt: new Date()
     }
@@ -52,10 +47,10 @@ print('clean and seed collection: OrganizationUsers')
 db.OrganizationUsers.deleteMany({})
 db.OrganizationUsers.insertOne(
     {
-        _id: ObjectId(),
+        _id: UUID(),
         organizationId: organizationId,
         userId: userId,
-        invitorId: "",
+        invitorId: null,
         initialPassword: "",
         createdAt: new Date(),
         updatedAt: new Date()
@@ -82,7 +77,7 @@ print('clean and seed collection: Environments')
 db.Environments.deleteMany({})
 db.Environments.insertOne(
     {
-        _id: ObjectId(),
+        _id: UUID(),
         projectId: projectId,
         name: "prod",
         description: "production environment",
@@ -93,7 +88,7 @@ db.Environments.insertOne(
 )
 db.Environments.insertOne(
     {
-        _id: ObjectId(),
+        _id: UUID(),
         projectId: projectId,
         name: "dev",
         description: "development environment",
@@ -124,7 +119,7 @@ print('clean and seed collection: GroupMembers')
 db.GroupMembers.deleteMany({})
 db.GroupMembers.insertOne(
     {
-        _id: ObjectId(),
+        _id: UUID(),
         groupId: groupId,
         organizationId: organizationId,
         memberId: userId,
@@ -152,13 +147,13 @@ db.Policies.insertOne(
 db.Policies.insertOne(
     {
         _id: ownerPolicyId,
-        organizationId: "",
+        organizationId: null,
         name: "Owner",
         description: "Contains all permissions. This policy is granted to the user who created the organization",
         type: "SysManaged",
         statements: [
             {
-                _id: ObjectId(),
+                _id: "754a689a-3280-4769-b312-10958718402f",
                 resourceType: "*",
                 effect: "allow",
                 actions: ["*"],
@@ -172,27 +167,27 @@ db.Policies.insertOne(
 db.Policies.insertOne(
     {
         _id: administratorPolicyId,
-        organizationId: "",
+        organizationId: null,
         name: "Administrator",
         description: "Contains all the permissions required by a administrator",
         type: "SysManaged",
         statements: [
             {
-                _id: ObjectId(),
+                _id: "f73fa469-a97e-465d-8d6f-3f53bf4fe290",
                 resourceType: "general",
                 effect: "allow",
                 actions: ["CanManageIAM"],
                 resources: ["iam"]
             },
             {
-                _id: ObjectId(),
+                _id: "ba619151-0504-4deb-8341-e2db0ea99407",
                 resourceType: "general",
                 effect: "allow",
                 actions: ["UpdateOrgName"],
                 resources: ["account"]
             },
             {
-                _id: ObjectId(),
+                _id: "6164bebe-756e-4021-9e5b-f7e497ab893b",
                 resourceType: "general",
                 effect: "allow",
                 actions: [
@@ -216,13 +211,13 @@ db.Policies.insertOne(
 db.Policies.insertOne(
     {
         _id: developerPolicyId,
-        organizationId: "",
+        organizationId: null,
         name: "Developer",
         description: "Contains all the permissions required by a developer",
         type: "SysManaged",
         statements: [
             {
-                _id: ObjectId(),
+                _id: "a53eb0a6-9056-4932-b5db-f34cbcf7bdb7",
                 resourceType: "general",
                 effect: "allow",
                 actions: [
@@ -244,7 +239,7 @@ print('clean and seed collection: GroupPolicies')
 db.GroupPolicies.deleteMany({})
 db.GroupPolicies.insertOne(
     {
-        _id: ObjectId(),
+        _id: UUID(),
         groupId: groupId,
         policyId: testerPolicyId,
         createdAt: new Date(),
@@ -258,7 +253,7 @@ print('clean and seed collection: MemberPolicies')
 db.MemberPolicies.deleteMany({})
 db.MemberPolicies.insertOne(
     {
-        _id: ObjectId(),
+        _id: UUID(),
         organizationId: organizationId,
         policyId: ownerPolicyId,
         memberId: userId,

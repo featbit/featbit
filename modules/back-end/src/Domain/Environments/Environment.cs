@@ -2,7 +2,7 @@ namespace Domain.Environments;
 
 public class Environment : AuditedEntity
 {
-    public string ProjectId { get; set; }
+    public Guid ProjectId { get; set; }
 
     public string Name { get; set; }
 

@@ -12,12 +12,12 @@ public class CurrentUser : ICurrentUser
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public string Id
+    public Guid Id
     {
         get
         {
             var claim = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == UserClaims.Id);
-            return claim == null ? string.Empty : claim.Value;
+            return claim == null ? Guid.Empty : Guid.Parse(claim.Value);
         }
     }
 }

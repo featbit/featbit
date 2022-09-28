@@ -4,9 +4,9 @@ namespace Application.Members;
 
 public class GetInheritedPolicies : IRequest<PagedResult<InheritedMemberPolicy>>
 {
-    public string OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
-    public string MemberId { get; set; }
+    public Guid MemberId { get; set; }
 
     public InheritedMemberPolicyFilter Filter { get; set; }
 }

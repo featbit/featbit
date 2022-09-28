@@ -4,7 +4,7 @@ namespace Infrastructure.Users;
 
 public interface IUserStore
 {
-    Task<User?> FindByIdAsync(string id);
+    Task<User?> FindByIdAsync(Guid id);
 
     Task<bool> UpdateAsync(User user);
 

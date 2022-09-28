@@ -13,12 +13,12 @@ public class UserService : IUserService
         _users = users;
     }
     
-    public async Task<User> GetAsync(string id)
+    public async Task<User> GetAsync(Guid id)
     {
         var user = await _users.FindByIdAsync(id);
         if (user == null)
         {
-            throw new EntityNotFoundException(nameof(User), id);
+            throw new EntityNotFoundException(nameof(User), id.ToString());
         }
 
         return user;

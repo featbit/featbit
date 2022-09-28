@@ -4,5 +4,5 @@ namespace Application.Services;
 
 public interface IUserService
 {
-    Task<User> GetAsync(string id);
+    Task<User> GetAsync(Guid id);
 }
