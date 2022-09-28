@@ -169,7 +169,7 @@ db.Policies.insertOne(
         _id: administratorPolicyId,
         organizationId: null,
         name: "Administrator",
-        description: "Contains all the permissions required by a administrator",
+        description: "Contains all the permissions required by an administrator",
         type: "SysManaged",
         statements: [
             {
