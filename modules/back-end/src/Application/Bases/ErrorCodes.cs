@@ -15,4 +15,7 @@ public static class ErrorCodes
     public const string EmailNotExist = nameof(EmailNotExist);
     public const string PasswordIsRequired = nameof(PasswordIsRequired);
     public const string PasswordMismatch = nameof(PasswordMismatch);
+    
+    // common
+    public const string NameIsRequired = nameof(NameIsRequired);
 }

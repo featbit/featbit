@@ -22,4 +22,12 @@ public class OrganizationController : ApiControllerBase
         var vms = await Mediator.Send(request);
         return Ok(vms);
     }
+
+    [HttpPost]
+    public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
+    {
+        var organization = await Mediator.Send(request);
+
+        return Ok(organization);
+    }
 }
