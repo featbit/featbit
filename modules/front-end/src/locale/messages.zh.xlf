@@ -359,6 +359,138 @@
           <context context-type="linenumber">44</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="core.components.findrule.operators.istrue" datatype="html">
+        <source>is true</source>
+        <target>为真</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.isfalse" datatype="html">
+        <source>is false</source>
+        <target>为假</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.equals" datatype="html">
+        <source>equals</source>
+        <target>等于</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.notequal" datatype="html">
+        <source>not equal</source>
+        <target>不等于</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.lessthan" datatype="html">
+        <source>less than</source>
+        <target>小于</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.biggerthan" datatype="html">
+        <source>bigger than</source>
+        <target>大于</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.lessequalthan" datatype="html">
+        <source>less equal than</source>
+        <target>小于等于</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.biggerequalthan" datatype="html">
+        <source>bigger equal than</source>
+        <target>大于等于</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.isoneof" datatype="html">
+        <source>is one of</source>
+        <target>属于</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.notoneof" datatype="html">
+        <source>not one of</source>
+        <target>不属于</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.contains" datatype="html">
+        <source>contains</source>
+        <target>包含</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.notcontain" datatype="html">
+        <source>not contain</source>
+        <target>不包含</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.startwith" datatype="html">
+        <source>start with</source>
+        <target>以指定字符串开头</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.endswith" datatype="html">
+        <source>ends with</source>
+        <target>以指定字符串结尾</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.matchregex" datatype="html">
+        <source>match regex</source>
+        <target>正则匹配</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.notmatchregex" datatype="html">
+        <source>not match regex</source>
+        <target>正则不匹配</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="core.components.findrule.if" datatype="html">
         <source>If</source>
         <target>如果</target>
@@ -375,12 +507,88 @@
           <context context-type="linenumber">4</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="core.components.findrule.rule.selectuserproperty" datatype="html">
+        <source>Select property</source>
+        <target>选择用户属性</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.selectcondition" datatype="html">
+        <source>condition</source>
+        <target>选择条件</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.selectvalues" datatype="html">
+        <source>values</source>
+        <target>请选择备选值</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.pleaseinput" datatype="html">
+        <source>input string or number</source>
+        <target>请输入</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.inputnumber" datatype="html">
+        <source>input a number</source>
+        <target>请输入数字</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.segments" datatype="html">
+        <source>segments</source>
+        <target>请选择用户组</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.alloptions" datatype="html">
+        <source>total options</source>
+        <target>所有选项数</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="core.components.findrule.serve" datatype="html">
         <source>serve</source>
         <target>返回</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
           <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="app.components.findrule.selectvariation" datatype="html">
+        <source>variation</source>
+        <target>选择返回值</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="app.components.findrule.rolloutpercentage" datatype="html">
+        <source>Rollout percentage</source>
+        <target>百分比匹配</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
+          <context context-type="linenumber">11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.groups.group-drawer.title" datatype="html">
@@ -3328,12 +3536,32 @@
           <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="ff.components.details.targeting.defaultrule-tooltip" datatype="html">
+        <source>If the flag is turned on, the following variation is served</source>
+        <target>如果开关被开启则返回以下结果</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="ff.components.details.targeting.individualtargeting" datatype="html">
         <source>Individual targeting</source>
         <target>黑/白名单</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
           <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.components.details.targeting.coverdefaultrule-tooltip" datatype="html">
+        <source>The default rule will be overridden when the rules are met</source>
+        <target>满足规则后将覆盖原有的默认规则</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">69</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.customizedrules" datatype="html">
@@ -3669,6 +3897,18 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/switch-tag-tree-view.component.ts</context>
           <context context-type="linenumber">253</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.rule" datatype="html">
+        <source>Rule</source>
+        <target>规则</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/types/switch-new.ts</context>
+          <context context-type="linenumber">174</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
+          <context context-type="linenumber">91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.action" datatype="html">

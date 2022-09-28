@@ -32,7 +32,8 @@
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
           <div class="title" i18n="@@ff.components.details.targeting.defaultrule">Default rule</div>
-          <i nz-tooltip="如果开关被开启则返回以下结果" nz-icon nzType="icons:icon-info-outline"></i>
+          <i nz-tooltip="If the flag is turned on, the following variation is served" i18n-nz-tooltip="@@ff.components.details.targeting.defaultrule-tooltip" 
+             nz-icon nzType="icons:icon-info-outline"></i>
         </div>
         <div class="find-rule">
           <app-serve-multistates [variationOptions]="variationOptions"
@@ -50,7 +51,8 @@
             <i *ngIf="!targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive"
               nzType="icons:icon-arrow-right"></i>
           </div>
-          <i nz-tooltip="满足规则后将覆盖原有的默认规则" nz-icon nzType="icons:icon-info-outline"></i>
+          <i nz-tooltip="The default rule will be overridden when the rules are met" i18n-nz-tooltip="@@ff.components.details.targeting.coverdefaultrule-tooltip"
+             nz-icon nzType="icons:icon-info-outline"></i>
         </div>
         <div *ngIf="targetIndividualsActive" style="margin-left: -12px;margin-top: 16px">
           <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
@@ -64,7 +66,8 @@
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
           <div class="title" i18n="@@ff.components.details.targeting.customizedrules">Target users who match these rules</div>
-          <i nz-tooltip="满足规则后将覆盖原有的默认规则" nz-icon nzType="icons:icon-info-outline"></i>
+          <i nz-tooltip="The default rule will be overridden when the rules are met" i18n-nz-tooltip="@@ff.components.details.targeting.coverdefaultrule-tooltip" 
+             nz-icon nzType="icons:icon-info-outline"></i>
           <i nz-icon (click)="onAddRule()" nzType="icons:icon-add-outline"></i>
         </div>
         <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">

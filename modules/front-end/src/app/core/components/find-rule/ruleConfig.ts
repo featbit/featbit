@@ -23,81 +23,81 @@ export const ruleKeyConfig: ruleType[] = [
 
 export const ruleValueConfig: ruleType[] = [
     {
-        label: '为真',
+        label: $localize `:@@core.components.findrule.operators.istrue:is true`,
         value: 'IsTrue',
         type: '',
         default: 'IsTrue'
     },{
-        label: '为假',
+        label: $localize `:@@core.components.findrule.operators.isfalse:is false`,
         value: 'IsFalse',
         type: '',
         default: 'IsFalse'
     },{
-        label: '等于',
+        label: $localize `:@@core.components.findrule.operators.equals:equals`,
         value: 'Equal',
         type: 'string'
     },{
-        label: '不等于',
+        label: $localize `:@@core.components.findrule.operators.notequal:not equal`,
         value: 'NotEqual',
         type: 'string',
         default: ''
     },{
-        label: '小于',
+        label: $localize `:@@core.components.findrule.operators.lessthan:less than`,
         value: 'LessThan',
         type: 'number',
         default: ''
     },{
-        label: '大于',
+        label: $localize `:@@core.components.findrule.operators.biggerthan:bigger than`,
         value: 'BiggerThan',
         type: 'number',
         default: ''
     },{
-        label: '小于等于',
+        label: $localize `:@@core.components.findrule.operators.lessequalthan:less equal than`,
         value: 'LessEqualThan',
         type: 'number',
         default: ''
     },{
-        label: '大于等于',
+        label: $localize `:@@core.components.findrule.operators.biggerequalthan:bigger equal than`,
         value: 'BiggerEqualThan',
         type: 'number',
         default: ''
     },{
-        label: '属于',
+        label: $localize `:@@core.components.findrule.operators.isoneof:is one of`,
         value: 'IsOneOf',
         type: 'multi',
         default: ''
     },{
-        label: '不属于',
+        label: $localize `:@@core.components.findrule.operators.notoneof:not one of`,
         value: 'NotOneOf',
         type: 'multi',
         default: ''
     },{
-        label: '包含',
+        label: $localize `:@@core.components.findrule.operators.contains:contains`,
         value: 'Contains',
         type: 'string',
         default: ''
     },{
-        label: '不包含',
+        label: $localize `:@@core.components.findrule.operators.notcontain:not contain`,
         value: 'NotContain',
         type: 'string',
         default: ''
     },{
-        label: '以指定字符串开头',
+        label: $localize `:@@core.components.findrule.operators.startwith:start with`,
         value: 'StartsWith',
         type: 'string',
         default: ''
     },{
-        label: '以指定字符串结尾',
+        label: $localize `:@@core.components.findrule.operators.endswith:ends with`,
         value: 'EndsWith',
         type: 'string',
         default: ''
     },{
-      label: '正则匹配',
+      label: $localize `:@@core.components.findrule.operators.matchregex:match regex`,
       value: 'MatchRegex',
       type: 'regex',
       default: ''
     },{
-      label: '正则不匹配',
+      label: $localize `:@@core.components.findrule.operators.notmatchregex:not match regex`,
       value: 'NotMatchRegex',
       type: 'regex',
       default: ''

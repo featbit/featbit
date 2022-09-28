@@ -7,71 +7,71 @@ const normalizeFn = (ff: IFeatureFlag): IFlatFeatureFlag => {
   const result: IFlatFeatureFlag = JSON.parse(JSON.stringify(ff));
 
   result.targetIndividuals = ff.targetIndividuals.map((t: ITargetIndividual) => ({
-      variationId: t.valueOption.variationValue,
-      valueOption: t.valueOption,
-      individuals: t.individuals
+    variationId: t.valueOption.variationValue,
+    valueOption: t.valueOption,
+    individuals: t.individuals
   }));
 
   result.defaultRulePercentageRollouts = ff.ff.defaultRulePercentageRollouts.map(r => ({
-      variationId: r.valueOption.variationValue,
-      valueOption: r.valueOption,
-      rolloutPercentage: `${convertIntervalToPercentage(r.rolloutPercentage)}`,
-      exptRollout: r.exptRollout
+    variationId: r.valueOption.variationValue,
+    valueOption: r.valueOption,
+    rolloutPercentage: `${convertIntervalToPercentage(r.rolloutPercentage)}`,
+    exptRollout: r.exptRollout
   }));
 
   delete result['ff']['defaultRulePercentageRollouts'];
 
 
   result.fftuwmtr = ff.fftuwmtr.map(rule => {
-      const { isIncludedInExpt, ruleId, ruleName } = rule;
-      const result: IFlatRule = { isIncludedInExpt, ruleId, ruleName } as IFlatRule;
+    const { isIncludedInExpt, ruleId, ruleName } = rule;
+    const result: IFlatRule = { isIncludedInExpt, ruleId, ruleName } as IFlatRule;
 
-      const _rule = JSON.parse(JSON.stringify(rule));
-      _rule.valueOptionsVariationRuleValues = _rule.valueOptionsVariationRuleValues.map(v => ({
-          valueOption: v.valueOption,
-          rolloutPercentage: `${convertIntervalToPercentage(v.rolloutPercentage)}`,
-          exptRollout: v.exptRollout,
-      }));
+    const _rule = JSON.parse(JSON.stringify(rule));
+    _rule.valueOptionsVariationRuleValues = _rule.valueOptionsVariationRuleValues.map(v => ({
+      valueOption: v.valueOption,
+      rolloutPercentage: `${convertIntervalToPercentage(v.rolloutPercentage)}`,
+      exptRollout: v.exptRollout,
+    }));
 
-      _rule.ruleJsonContent = _rule.ruleJsonContent.map(r => {
-        const { operation, property, value } = r;
-        return {
-            operation,
-            property,
-            type: ruleValueConfig.find(r => r.value === operation)?.type,
-            value: isSegmentClause(property) || isMultiValueOperation(operation!) ? JSON.parse(value) : value
-        }
+    _rule.ruleJsonContent = _rule.ruleJsonContent.map(r => {
+      const { operation, property, value } = r;
+      return {
+        operation,
+        property,
+        type: ruleValueConfig.find(r => r.value === operation)?.type,
+        value: isSegmentClause(property) || isMultiValueOperation(operation!) ? JSON.parse(value) : value
+      }
+    });
+
+    result.ruleJsonContent = [rule.ruleJsonContent.reduce((acc, cur) => {
+      const { operation, property, value } = cur;
+      acc['id'] += `${property}_${operation || ''}_${value}}`;
+
+      acc.rule = _rule;
+
+      acc.items.push({
+        operation,
+        property,
+        type: ruleValueConfig.find(r => r.value === operation)?.type,
+        value: isSegmentClause(property) || isMultiValueOperation(operation!) ? JSON.parse(value) : value
       });
 
-      result.ruleJsonContent = [rule.ruleJsonContent.reduce((acc, cur) => {
-          const { operation, property, value } = cur;
-          acc['id'] += `${property}_${operation || ''}_${value}}`;
+      return acc;
+    }, { id: '', items: [] } as IFlatRuleClausesWrapper)];
 
-          acc.rule = _rule;
+    result.valueOptionsVariationRuleValues = [rule.valueOptionsVariationRuleValues.reduce((acc, cur) => {
+      acc.id += `${cur.exptRollout}_${cur.rolloutPercentage}_${cur.valueOption.variationValue}`;
+      acc.rule = _rule;
+      acc.items.push({
+        valueOption: cur.valueOption,
+        rolloutPercentage: `${convertIntervalToPercentage(cur.rolloutPercentage)}`,
+        exptRollout: cur.exptRollout,
+      });
 
-          acc.items.push({
-              operation,
-              property,
-              type: ruleValueConfig.find(r => r.value === operation)?.type,
-              value: isSegmentClause(property) || isMultiValueOperation(operation!) ? JSON.parse(value) : value
-          });
+      return acc;
+    }, { id: '', items: [] } as IFlatVariationOptionsWrapper)];
 
-          return acc;
-      }, {id: '', items: []} as IFlatRuleClausesWrapper)];
-
-      result.valueOptionsVariationRuleValues = [rule.valueOptionsVariationRuleValues.reduce((acc, cur) => {
-          acc.id += `${cur.exptRollout}_${cur.rolloutPercentage}_${cur.valueOption.variationValue}`;
-          acc.rule = _rule;
-          acc.items.push({
-              valueOption: cur.valueOption,
-              rolloutPercentage: `${convertIntervalToPercentage(cur.rolloutPercentage)}`,
-              exptRollout: cur.exptRollout,
-          });
-
-          return acc;
-      }, {id: '', items: []} as IFlatVariationOptionsWrapper)];
-
-      return result
+    return result
   });
 
   return result;
@@ -81,41 +81,41 @@ const deNormalizeFn = (ff: IFlatFeatureFlag): IFeatureFlag => {
   const result = JSON.parse(JSON.stringify(ff));
 
   result.targetIndividuals = ff.targetIndividuals.map((t: IFlatTargetIndividual) => ({
-      valueOption: t.valueOption,
-      individuals: t.individuals
+    valueOption: t.valueOption,
+    individuals: t.individuals
   }));
 
   result.ff.defaultRulePercentageRollouts = ff.defaultRulePercentageRollouts.map((rule: IFlatRuleValue) => {
-      const { exptRollout, rolloutPercentage, valueOption } = rule;
-      return {
-          exptRollout,
-          rolloutPercentage: convertPercentageToInterval(rolloutPercentage),
-          valueOption
-      };
+    const { exptRollout, rolloutPercentage, valueOption } = rule;
+    return {
+      exptRollout,
+      rolloutPercentage: convertPercentageToInterval(rolloutPercentage),
+      valueOption
+    };
   });
 
   delete result['defaultRulePercentageRollouts'];
 
   result.fftuwmtr = ff.fftuwmtr.map((rule: IFlatRule) => {
-      const { isIncludedInExpt, ruleId, ruleName } = rule;
-      const result: IRule = { isIncludedInExpt, ruleId, ruleName } as IRule;
+    const { isIncludedInExpt, ruleId, ruleName } = rule;
+    const result: IRule = { isIncludedInExpt, ruleId, ruleName } as IRule;
 
-      result.ruleJsonContent = rule.ruleJsonContent[0]?.items?.map(clause => {
-          const { operation, property, value } = clause;
-          return {
-              operation,
-              property,
-              value: isSegmentClause(property) || isMultiValueOperation(operation!) ? JSON.stringify(value) : value as string
-          }
-      });
+    result.ruleJsonContent = rule.ruleJsonContent[0]?.items?.map(clause => {
+      const { operation, property, value } = clause;
+      return {
+        operation,
+        property,
+        value: isSegmentClause(property) || isMultiValueOperation(operation!) ? JSON.stringify(value) : value as string
+      }
+    });
 
-      result.valueOptionsVariationRuleValues = rule.valueOptionsVariationRuleValues[0]?.items?.map(r => ({
-          valueOption: r.valueOption,
-          rolloutPercentage: convertPercentageToInterval(r.rolloutPercentage),
-          exptRollout: r.exptRollout
-      }));
+    result.valueOptionsVariationRuleValues = rule.valueOptionsVariationRuleValues[0]?.items?.map(r => ({
+      valueOption: r.valueOption,
+      rolloutPercentage: convertPercentageToInterval(r.rolloutPercentage),
+      exptRollout: r.exptRollout
+    }));
 
-      return result
+    return result
   });
 
   return result;
@@ -144,105 +144,105 @@ const translation: Translation = {
 
 const translationConfigs = [
   {
-      order: 1,
-      keyPathPatterns: [['defaultRulePercentageRollouts', '*'], ['defaultRulePercentageRollouts', '*', 'rolloutPercentage']],
-      getContentFunc: function (ops: IReadableChange[], translations: Translation) { // do not use arrow function because we need this
-          const op = ops.filter(op => op.change.type !== Operation.REMOVE).map((op: any) => {
-              const key = op.keyPath[1];
-              const value = getTypeOfObj(op.change.value) === "Object" ? op.change.value.rolloutPercentage : op.change.value;
-              return `${key} (${value}%)`;
-          })
+    order: 1,
+    keyPathPatterns: [['defaultRulePercentageRollouts', '*'], ['defaultRulePercentageRollouts', '*', 'rolloutPercentage']],
+    getContentFunc: function (ops: IReadableChange[], translations: Translation) { // do not use arrow function because we need this
+      const op = ops.filter(op => op.change.type !== Operation.REMOVE).map((op: any) => {
+        const key = op.keyPath[1];
+        const value = getTypeOfObj(op.change.value) === "Object" ? op.change.value.rolloutPercentage : op.change.value;
+        return `${key} (${value}%)`;
+      })
 
-          const opCode = 'SET';
+      const opCode = 'SET';
 
-          return generateHtmlFromReadableOp({
-              title: translations[this.code],
-              content: `<div class="serve-values">${translations[opCode]} <div class="serve-value">${op.join('</div><div class="serve-value">')}</div></div>`
-          });
-      },
-      code: 'DEFAULT_VARIATION'
+      return generateHtmlFromReadableOp({
+        title: translations[this.code],
+        content: `<div class="serve-values">${translations[opCode]} <div class="serve-value">${op.join('</div><div class="serve-value">')}</div></div>`
+      });
+    },
+    code: 'DEFAULT_VARIATION'
   },
   {
-      order: 2,
-      keyPathPatterns: [
-          ["targetIndividuals", "*", "individuals","*"],
-          ['targetIndividuals', '*', 'individuals', '*', 'name']],
-      getContentFunc: function (ops: IReadableChange[], translations: Translation) { // do not use arrow function because we need this
+    order: 2,
+    keyPathPatterns: [
+      ["targetIndividuals", "*", "individuals", "*"],
+      ['targetIndividuals', '*', 'individuals', '*', 'name']],
+    getContentFunc: function (ops: IReadableChange[], translations: Translation) { // do not use arrow function because we need this
 
-          const contentArr = ops.map((op: IReadableChange) => {
-              let key: string;
-              switch (op.change.type) {
-                  case Operation.ADD:
-                      key = op.keyPath[1];
-                      return `${translations['TO']} ${key} ${translations['ADD']} ${op.change.value.name}`;
-                  case Operation.REMOVE:
-                      key = op.keyPath[1];
-                      return `${translations['FROM']} ${key} ${translations['REMOVE']} ${op.change.value.name}`;
-                  case Operation.UPDATE:
-                      key = op.keyPath[1];
-                      return `${key} ${translations['IN']} ${translations['RENAME']} ${op.change.oldValue} ${translations['AS']} ${op.change.value}`;
-                  default:
-                      return null;
-              }
-          }).filter(c => c!== null);
+      const contentArr = ops.map((op: IReadableChange) => {
+        let key: string;
+        switch (op.change.type) {
+          case Operation.ADD:
+            key = op.keyPath[1];
+            return `${translations['TO']} ${key} ${translations['ADD']} ${op.change.value.name}`;
+          case Operation.REMOVE:
+            key = op.keyPath[1];
+            return `${translations['FROM']} ${key} ${translations['REMOVE']} ${op.change.value.name}`;
+          case Operation.UPDATE:
+            key = op.keyPath[1];
+            return `${key} ${translations['IN']} ${translations['RENAME']} ${op.change.oldValue} ${translations['AS']} ${op.change.value}`;
+          default:
+            return null;
+        }
+      }).filter(c => c !== null);
 
-          return generateHtmlFromReadableOp({
-              title: translations[this.code],
-              content: contentArr.map((c) => `<div class="ffc-diff-content-item ffc-diff-content-item-individual">${c}</div>`).join('')
-          });
-      },
-      code: 'TARGET_INDIVIDUALS'
+      return generateHtmlFromReadableOp({
+        title: translations[this.code],
+        content: contentArr.map((c) => `<div class="ffc-diff-content-item ffc-diff-content-item-individual">${c}</div>`).join('')
+      });
+    },
+    code: 'TARGET_INDIVIDUALS'
   },
   {
-      order: 3,
-      keyPathPatterns: [
-          ['fftuwmtr', '*'],
-          ['fftuwmtr', '*', 'ruleJsonContent', '*'],
-          ['fftuwmtr', '*', 'valueOptionsVariationRuleValues', '*']
-      ],
-      getContentFunc: function (this: ITranslationConfig, ops: IReadableChange[], translations: Translation) { // do not use arrow function because we need this
+    order: 3,
+    keyPathPatterns: [
+      ['fftuwmtr', '*'],
+      ['fftuwmtr', '*', 'ruleJsonContent', '*'],
+      ['fftuwmtr', '*', 'valueOptionsVariationRuleValues', '*']
+    ],
+    getContentFunc: function (this: ITranslationConfig, ops: IReadableChange[], translations: Translation) { // do not use arrow function because we need this
 
-          const ruleAddOrRemove = ops.filter(op => isKeyPathExactMatchPattern(op.keyPath, [this.keyPathPatterns[0]])).map((op: IReadableChange) => {
-              const rule = op.change.value;
-              switch (op.change.type) {
-                  case Operation.ADD:
-                      return `<div class="ffc-diff-content-item ffc-diff-content-item-rule">
+      const ruleAddOrRemove = ops.filter(op => isKeyPathExactMatchPattern(op.keyPath, [this.keyPathPatterns[0]])).map((op: IReadableChange) => {
+        const rule = op.change.value;
+        switch (op.change.type) {
+          case Operation.ADD:
+            return `<div class="ffc-diff-content-item ffc-diff-content-item-rule">
                           <div class="ffc-diff-rule-name">${translations['ADD_RULE']} ${rule.ruleName}</div>
                           <div class="ffc-diff-rule-description">${generateRuleDescription(rule.ruleJsonContent[0].items, rule.valueOptionsVariationRuleValues[0].items, translations)}</div>
                       </div>`;
-                  case Operation.REMOVE:
-                      return `<div class="ffc-diff-content-item ffc-diff-content-item-rule">
+          case Operation.REMOVE:
+            return `<div class="ffc-diff-content-item ffc-diff-content-item-rule">
                           <div class="ffc-diff-rule-name">${translations['REMOVE_RULE']} ${op.change.value.ruleName}</div>
                           <div class="ffc-diff-rule-description">${generateRuleDescription(rule.ruleJsonContent[0].items, rule.valueOptionsVariationRuleValues[0].items, translations)}</div>
                       </div>`;
-                  default:
-                      return null;
-              }
+          default:
+            return null;
+        }
 
-          }).filter(c => c!== null);
+      }).filter(c => c !== null);
 
-          const ruleUpateDict = ops.filter(op => isKeyPathExactMatchPattern(op.keyPath, [this.keyPathPatterns[1], this.keyPathPatterns[2]]))
-                               .filter(op => op.change.type === Operation.ADD).map(op => op)
-                               .reduce((acc, cur) => {
-                                  (acc[cur.keyPath[1]] = acc[cur.keyPath[1]] || []).push(cur);
-                                  return acc;
-                              }, {});
+      const ruleUpateDict = ops.filter(op => isKeyPathExactMatchPattern(op.keyPath, [this.keyPathPatterns[1], this.keyPathPatterns[2]]))
+        .filter(op => op.change.type === Operation.ADD).map(op => op)
+        .reduce((acc, cur) => {
+          (acc[cur.keyPath[1]] = acc[cur.keyPath[1]] || []).push(cur);
+          return acc;
+        }, {});
 
-          const ruleUpate = Object.keys(ruleUpateDict).map(ruleId => {
-              const op = ruleUpateDict[ruleId][0];
-              const rule = op.change.value.rule;
-              return `<div class="ffc-diff-content-item ffc-diff-content-item-rule">
+      const ruleUpate = Object.keys(ruleUpateDict).map(ruleId => {
+        const op = ruleUpateDict[ruleId][0];
+        const rule = op.change.value.rule;
+        return `<div class="ffc-diff-content-item ffc-diff-content-item-rule">
                   <div class="ffc-diff-rule-name">${translations['UPDATE_RULE']} ${rule.ruleName}</div>
                   <div class="ffc-diff-rule-description">${generateRuleDescription(rule.ruleJsonContent, rule.valueOptionsVariationRuleValues, translations)}</div>
               </div>`;
-          });
+      });
 
-          return generateHtmlFromReadableOp({
-              title: translations[this.code],
-              content: [...ruleAddOrRemove, ...ruleUpate].join('')
-          });
-      },
-      code: 'RULES'
+      return generateHtmlFromReadableOp({
+        title: translations[this.code],
+        content: [...ruleAddOrRemove, ...ruleUpate].join('')
+      });
+    },
+    code: 'RULES'
   }
 ]
 
@@ -320,22 +320,22 @@ const generateRuleDescription = (ruleJsonContent: IFlatRuleClause[], valueOption
   const serveStr = `<div class="serve-value">${valueOptionsVariationRuleValues.map(v => `${v.valueOption.variationValue} (${v.rolloutPercentage}%)`).join('</div><div class="serve-value">')}</div>`;
 
   const clausesStr = '<div class="ffc-diff-rule-clause">' +
-                      ruleJsonContent.map(clause => {
-                          const clauseType: string = isSegmentClause(clause.property) ? 'multi': ruleValueConfig.filter((rule) => rule.value === clause.operation)[0].type;
-                          const valueStr = !isSingleOperator(clause.type!) ? `<div class="value-item">${clauseType === "multi" ? (clause.value as string[]).join('</span><span class="ant-tag">') : clause.value}</div>` : clause.value;
+    ruleJsonContent.map(clause => {
+      const clauseType: string = isSegmentClause(clause.property) ? 'multi' : ruleValueConfig.filter((rule) => rule.value === clause.operation)[0].type;
+      const valueStr = !isSingleOperator(clause.type!) ? `<div class="value-item">${clauseType === "multi" ? (clause.value as string[]).join('</span><span class="ant-tag">') : clause.value}</div>` : clause.value;
 
-                          return `<div class="condition-keyword">${translations['IF']}</div> ${clause.property} ${clause.operation} ${valueStr}`;
-                       }).join(`</div><div class="condition-keyword">${translations['AND']}</div><div class="ffc-diff-rule-clause">`) +
-                      '</div>';
+      return `<div class="condition-keyword">${translations['IF']}</div> ${clause.property} ${clause.operation} ${valueStr}`;
+    }).join(`</div><div class="condition-keyword">${translations['AND']}</div><div class="ffc-diff-rule-clause">`) +
+    '</div>';
 
   return `<div class="ffc-diff-rule-clauses">${clausesStr}</div><div class="ffc-diff-rule-serve"><div class="condition-keyword">${translations['SERVE']}</div><div class="serve-values">${serveStr}</div></div>`;
 }
 
 const isMultiValueOperation = (op: string): boolean => {
   switch (op) {
-      case 'IsOneOf':
-      case 'NotOneOf':
-          return true;
+    case 'IsOneOf':
+    case 'NotOneOf':
+      return true;
   }
 
   return false;
@@ -416,88 +416,88 @@ interface IFlatRule {
 }
 
 interface IFlatFeatureFlag {
-  targetIndividuals: IFlatTargetIndividual [],
+  targetIndividuals: IFlatTargetIndividual[],
   defaultRulePercentageRollouts: IFlatRuleValue[],
   fftuwmtr: IFlatRule[]
 }
 
 const ruleValueConfig = [
   {
-      label: '为真',
-      value: 'IsTrue',
-      type: '',
-      default: 'IsTrue'
-  },{
-      label: '为假',
-      value: 'IsFalse',
-      type: '',
-      default: 'IsFalse'
-  },{
-      label: '等于',
-      value: 'Equal',
-      type: 'string'
-  },{
-      label: '不等于',
-      value: 'NotEqual',
-      type: 'string',
-      default: ''
-  },{
-      label: '小于',
-      value: 'LessThan',
-      type: 'number',
-      default: ''
-  },{
-      label: '大于',
-      value: 'BiggerThan',
-      type: 'number',
-      default: ''
-  },{
-      label: '小于等于',
-      value: 'LessEqualThan',
-      type: 'number',
-      default: ''
-  },{
-      label: '大于等于',
-      value: 'BiggerEqualThan',
-      type: 'number',
-      default: ''
-  },{
-      label: '属于',
-      value: 'IsOneOf',
-      type: 'multi',
-      default: ''
-  },{
-      label: '不属于',
-      value: 'NotOneOf',
-      type: 'multi',
-      default: ''
-  },{
-      label: '包含',
-      value: 'Contains',
-      type: 'string',
-      default: ''
-  },{
-      label: '不包含',
-      value: 'NotContain',
-      type: 'string',
-      default: ''
-  },{
-      label: '以指定字符串开头',
-      value: 'StartsWith',
-      type: 'string',
-      default: ''
-  },{
-      label: '以指定字符串结尾',
-      value: 'EndsWith',
-      type: 'string',
-      default: ''
-  },{
-    label: '正则匹配',
+    label: $localize`:@@core.components.findrule.operators.istrue:is true`,
+    value: 'IsTrue',
+    type: '',
+    default: 'IsTrue'
+  }, {
+    label: $localize`:@@core.components.findrule.operators.isfalse:is false`,
+    value: 'IsFalse',
+    type: '',
+    default: 'IsFalse'
+  }, {
+    label: $localize`:@@core.components.findrule.operators.equals:equals`,
+    value: 'Equal',
+    type: 'string'
+  }, {
+    label: $localize`:@@core.components.findrule.operators.notequal:not equal`,
+    value: 'NotEqual',
+    type: 'string',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.lessthan:less than`,
+    value: 'LessThan',
+    type: 'number',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.biggerthan:bigger than`,
+    value: 'BiggerThan',
+    type: 'number',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.lessequalthan:less equal than`,
+    value: 'LessEqualThan',
+    type: 'number',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.biggerequalthan:bigger equal than`,
+    value: 'BiggerEqualThan',
+    type: 'number',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.isoneof:is one of`,
+    value: 'IsOneOf',
+    type: 'multi',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.notoneof:not one of`,
+    value: 'NotOneOf',
+    type: 'multi',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.contains:contains`,
+    value: 'Contains',
+    type: 'string',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.notcontain:not contain`,
+    value: 'NotContain',
+    type: 'string',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.startwith:start with`,
+    value: 'StartsWith',
+    type: 'string',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.endswith:ends with`,
+    value: 'EndsWith',
+    type: 'string',
+    default: ''
+  }, {
+    label: $localize`:@@core.components.findrule.operators.matchregex:match regex`,
     value: 'MatchRegex',
     type: 'regex',
     default: ''
-  },{
-    label: '正则不匹配',
+  }, {
+    label: $localize`:@@core.components.findrule.operators.notmatchregex:not match regex`,
     value: 'NotMatchRegex',
     type: 'regex',
     default: ''

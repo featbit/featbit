@@ -171,7 +171,7 @@ export class CSwitchParams {
     public addFftuwmtr() {
         this.fftuwmtr.push({
             ruleId: uuidv4(),
-            ruleName: '规则' + (this.fftuwmtr.length + 1),
+            ruleName: ($localize `:@@common.rule:Rule`) + ' ' + (this.fftuwmtr.length + 1),
             ruleJsonContent: [],
             valueOptionsVariationRuleValues: [],
         })
