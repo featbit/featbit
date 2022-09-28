@@ -4,11 +4,11 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { OrganizationService } from '@services/organization.service';
 
 @Component({
-  selector: 'app-account-drawer',
-  templateUrl: './account-drawer.component.html',
-  styleUrls: ['./account-drawer.component.less']
+  selector: 'organization-drawer',
+  templateUrl: './organization-drawer.component.html',
+  styleUrls: ['./organization-drawer.component.less']
 })
-export class AccountDrawerComponent implements OnInit {
+export class OrganizationDrawerComponent implements OnInit {
 
   orgForm: FormGroup;
 

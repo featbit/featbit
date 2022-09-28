@@ -47,7 +47,7 @@ import {MemberDrawerComponent} from "@core/components/member-drawer/member-drawe
 import {MessageComponent} from "@core/components/message/message.component";
 import {GroupDrawerComponent} from "@core/components/group-drawer/group-drawer.component";
 import {PolicyDrawerComponent} from "@core/components/policy-drawer/policy-drawer.component";
-import {AccountDrawerComponent} from "@core/components/account-drawer/account-drawer.component";
+import {OrganizationDrawerComponent} from "@core/components/organization-drawer/organization-drawer.component";
 import {EnvDrawerComponent} from "@core/components/env-drawer/env-drawer.component";
 import {PermissionCheckComponent} from "@core/components/permission-check/permission-check.component";
 import {ProjectDrawerComponent} from "@core/components/project-drawer/project-drawer.component";
@@ -85,7 +85,7 @@ import {TranslationPipe} from "@core/pipes/translation.pipe";
     MessageComponent,
     GroupDrawerComponent,
     PolicyDrawerComponent,
-    AccountDrawerComponent,
+    OrganizationDrawerComponent,
     EnvDrawerComponent,
     PermissionCheckComponent,
     ProjectDrawerComponent,
@@ -160,7 +160,7 @@ import {TranslationPipe} from "@core/pipes/translation.pipe";
     MessageComponent,
     GroupDrawerComponent,
     PolicyDrawerComponent,
-    AccountDrawerComponent,
+    OrganizationDrawerComponent,
     EnvDrawerComponent,
     PermissionCheckComponent,
     ProjectDrawerComponent,

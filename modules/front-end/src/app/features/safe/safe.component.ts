@@ -75,7 +75,7 @@ export class SafeComponent implements OnInit, OnDestroy {
       {
         title: $localize `:@@menu.organization:Organization`,
         icon: 'icons:icon-org',
-        path: '/account-settings'
+        path: '/organizations'
       },
       {
         title: $localize `:@@menu.iam:IAM`,

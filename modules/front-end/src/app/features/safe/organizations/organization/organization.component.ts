@@ -4,16 +4,16 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { getAuth } from '@utils/index';
 import { IOrganization } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
-import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentOrganization } from "@utils/project-env";
 import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 
 @Component({
-  selector: 'app-account',
-  templateUrl: './account.component.html',
-  styleUrls: ['./account.component.less']
+  selector: 'organization',
+  templateUrl: './organization.component.html',
+  styleUrls: ['./organization.component.less']
 })
-export class AccountComponent implements OnInit {
+export class OrganizationComponent implements OnInit {
 
   creatOrganizationFormVisible: boolean = false;
 

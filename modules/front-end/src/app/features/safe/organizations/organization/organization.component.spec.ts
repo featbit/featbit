@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AccountDrawerComponent } from './account-drawer.component';
+import { OrganizationComponent } from './organization.component';
 
-describe('AccountDrawerComponent', () => {
-  let component: AccountDrawerComponent;
-  let fixture: ComponentFixture<AccountDrawerComponent>;
+describe('SelfInfoComponent', () => {
+  let component: OrganizationComponent;
+  let fixture: ComponentFixture<OrganizationComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ AccountDrawerComponent ]
+      declarations: [ OrganizationComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AccountDrawerComponent);
+    fixture = TestBed.createComponent(OrganizationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

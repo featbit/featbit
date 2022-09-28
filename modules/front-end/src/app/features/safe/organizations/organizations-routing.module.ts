@@ -1,18 +1,18 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AccountSettingsComponent } from './account-settings.component';
-import { AccountComponent } from './account/account.component';
+import { OrganizationsComponent } from './organizations.component';
+import { OrganizationComponent  } from './organization/organization.component';
 import { ProfileComponent } from './profile/profile.component';
 import { ProjectComponent } from './project/project.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: AccountSettingsComponent,
+    component: OrganizationsComponent,
     children: [
       {
-        path: 'org',
-        component: AccountComponent
+        path: '',
+        component: OrganizationComponent
       }, {
         path: 'projects',
         component: ProjectComponent,
@@ -32,4 +32,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class AccountSettingsRoutingModule { }
+export class OrganizationsRoutingModule { }

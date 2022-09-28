@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { AccountSettingsRoutingModule } from './account-settings-routing.module';
-import { AccountSettingsComponent } from './account-settings.component';
+import { OrganizationsRoutingModule } from './organizations-routing.module';
+import { OrganizationsComponent } from './organizations.component';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { ProfileComponent } from './profile/profile.component';
-import { AccountComponent } from './account/account.component';
+import { OrganizationComponent } from './organization/organization.component';
 import { ProjectComponent } from './project/project.component';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
@@ -32,8 +32,8 @@ import {CoreModule} from "@core/core.module";
 
 @NgModule({
   declarations: [
-    AccountSettingsComponent,
-    AccountComponent,
+    OrganizationsComponent,
+    OrganizationComponent,
     ProfileComponent,
     ProjectComponent,
     ProjectFilterPipe
@@ -63,8 +63,8 @@ import {CoreModule} from "@core/core.module";
     NzTagModule,
     ScrollingModule,
     ReactiveFormsModule,
-    AccountSettingsRoutingModule,
+    OrganizationsRoutingModule,
     CoreModule
   ]
 })
-export class AccountSettingsModule { }
+export class OrganizationsModule { }
