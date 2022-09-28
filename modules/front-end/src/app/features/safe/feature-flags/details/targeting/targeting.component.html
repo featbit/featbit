@@ -3,13 +3,13 @@
     <div class="banner">
       <div class="placeholder"></div>
       <div class="action-btns">
-        <button nz-button nzType="primary" (click)="onSetExptRulesClick()">
+        <button nz-button nzType="primary" (click)="onSetExptRulesClick()" i18n="@@ff.components.details.targeting.setabtestrule">
           <i nz-icon nzType="filter" nzTheme="outline"></i>
-          A/B 测试分流设置
+          Set ab test rule
         </button>
-        <button nz-button nzType="primary" class="save-btn" (click)="onSaveConditionsOld()">
+        <button nz-button nzType="primary" class="save-btn" (click)="onSaveConditionsOld()" i18n="@@ff.components.details.targeting.save">
           <i nz-icon nzType="icons:icon-save"></i>
-          保存设置
+          Save & Update
         </button>
         <button class="more-action" nzType="primary" nz-dropdown [nzDropdownMenu]="menu">
           <i nz-icon nzType="icons:icon-menu"></i>
@@ -17,12 +17,12 @@
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu style="margin-top: 8px;min-width: 100px;">
             <li *ngIf="approvalRequestEnabled" (click)="onRequestApproval()" nz-menu-item
-                style="text-align: center;display: block;">
-              请求审阅
+                style="text-align: center;display: block;" i18n="@@ff.components.details.targeting.changerequest">
+              Change request
             </li>
             <li nz-menu-item (click)="onFlagScheduler()"
-                style="text-align: center;display: block;">
-              定时发布
+                style="text-align: center;display: block;" i18n="@@ff.components.details.targeting.scheduling">
+              Scheduling
             </li>
           </ul>
         </nz-dropdown-menu>
@@ -31,7 +31,7 @@
     <div class="content-container">
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
-          <div class="title">默认规则</div>
+          <div class="title" i18n="@@ff.components.details.targeting.defaultrule">Default rule</div>
           <i nz-tooltip="如果开关被开启则返回以下结果" nz-icon nzType="icons:icon-info-outline"></i>
         </div>
         <div class="find-rule">
@@ -44,7 +44,7 @@
       <div class="standard-div target-users" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
           <div class="title-wraper">
-            <div class="title">目标用户</div>
+            <div class="title" i18n="@@ff.components.details.targeting.individualtargeting">Individual targeting</div>
             <i *ngIf="targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive"
               nzType="icons:icon-arrow-down"></i>
             <i *ngIf="!targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive"
@@ -63,7 +63,7 @@
       </div>
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
-          <div class="title">自定义规则</div>
+          <div class="title" i18n="@@ff.components.details.targeting.customizedrules">Target users who match these rules</div>
           <i nz-tooltip="满足规则后将覆盖原有的默认规则" nz-icon nzType="icons:icon-info-outline"></i>
           <i nz-icon (click)="onAddRule()" nzType="icons:icon-add-outline"></i>
         </div>

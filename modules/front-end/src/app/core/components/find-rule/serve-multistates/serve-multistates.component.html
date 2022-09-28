@@ -1,6 +1,6 @@
 <section class="rule-item">
   <div *ngIf="!serveSingleOption" class="rule-serve" [class.single-select]="serveSingleOption">
-    <div class="tip">返回</div>
+    <div class="tip" i18n="@@core.components.findrule.serve">serve</div>
     <div class="select">
       <nz-select [(ngModel)]="selectedValueOptionId" (ngModelChange)="modelChange()" nzPlaceHolder="选择返回值">
         <nz-option *ngFor="let variationOption of availableVariationOptions; let i = index" nzCustomContent [nzValue]="variationOption.localId" [nzLabel]="variationOption.variationValue">
