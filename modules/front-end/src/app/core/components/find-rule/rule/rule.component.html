@@ -4,13 +4,15 @@
     <div class="tip" i18n="@@core.components.findrule.and">and</div>
   </ng-template>
   <div class="select">
-    <nz-select nzShowSearch nzPlaceHolder="选择用户属性" [(ngModel)]="ruleContent.property" (ngModelChange)="onPropertyChange()">
+    <nz-select nzShowSearch nzPlaceHolder="Select property" i18n-nzPlaceHolder="@@core.components.findrule.rule.selectuserproperty"
+               [(ngModel)]="ruleContent.property" (ngModelChange)="onPropertyChange()">
       <nz-option *ngFor="let userProp of userProps" [nzValue]="userProp.name" [nzLabel]="userProp.name"></nz-option>
     </nz-select>
   </div>
   <div class="select" *ngIf="!isSegmentRule">
     <nz-select
-      nzPlaceHolder="选择条件"
+      nzPlaceHolder="condition"
+      i18n-nzPlaceHolder="@@core.components.findrule.rule.selectcondition"
       nzShowSearch
       [(ngModel)]="ruleContent.operation"
       (ngModelChange)="onOperationChange()">
@@ -19,7 +21,10 @@
   </div>
   <ng-container [ngSwitch]="ruleContent.type" *ngIf="!isSegmentRule">
     <ng-template #presetSelect>
-      <nz-select style="min-width: 200px" nzShowSearch nzPlaceHolder="请选择备选值" [(ngModel)]="ruleContent.value" (ngModelChange)="onDebounceTimeModelChange()">
+      <nz-select style="min-width: 200px" nzShowSearch 
+                nzPlaceHolder="values" 
+                i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
+                [(ngModel)]="ruleContent.value" (ngModelChange)="onDebounceTimeModelChange()">
         <nz-option
           *ngFor="let presetValue of currentUserProp.presetValues"
           [nzLabel]="presetValue.description"
@@ -29,12 +34,16 @@
     </ng-template>
     <ng-container *ngSwitchCase="'string'">
       <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <input class="standard-bordered-input" nz-input [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" placeholder="请输入"/>
+        <input class="standard-bordered-input" nz-input [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" 
+               placeholder="input string or number"
+               i18n-placeholder="@@core.components.findrule.rule.pleaseinput" />
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="'number'">
       <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <input class="standard-bordered-input" nz-input type="number" [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" placeholder="请输入数字"/>
+        <input class="standard-bordered-input" nz-input type="number" [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" 
+               placeholder="input a number"
+               i18n-placeholder="@@core.components.findrule.rule.inputnumber"/>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="'regex'">
@@ -47,7 +56,8 @@
         <div class="multi-select">
           <nz-select style="min-width: 200px"
             [nzMode]="multiSelectMode"
-            nzPlaceHolder="请输入备选值"
+            nzPlaceHolder="values"
+            i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
             nzShowSearch
             [(ngModel)]="ruleContent.multipleValue"
             [nzMaxTagPlaceholder]="omittedPlaceHolder"
@@ -66,7 +76,8 @@
   <ng-container *ngIf="isSegmentRule">
     <nz-select class="multi-select" style="min-width: 200px;"
       nzMode="multiple"
-      nzPlaceHolder="请选择用户组"
+      nzPlaceHolder="segments"
+      i18n-nzPlaceHolder="@@core.components.findrule.rule.segments"
       nzAllowClear
       nzShowSearch
       nzServerSearch
@@ -92,9 +103,11 @@
   </ng-container>
   <ng-template #omittedPlaceHolder>
     <div class="ant-select-selection-item-content"
-         nz-popover="所有选项" [nzPopoverContent]="allSelectedItems" nzPopoverOverlayClassName="selected-items-popover">
+         nz-popover="total options" 
+         i18n-nz-popover="@@core.components.findrule.rule.alloptions"
+         [nzPopoverContent]="allSelectedItems" nzPopoverOverlayClassName="selected-items-popover">
     <span class="more-select-selection-item">
-      等共 {{ ruleContent.multipleValue.length }} 项
+      {{ ruleContent.multipleValue.length }}
       <i nz-icon nzType="expand"></i>
     </span>
       <ng-template #allSelectedItems>

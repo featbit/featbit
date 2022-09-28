@@ -458,11 +458,78 @@
           <context context-type="linenumber">4</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="core.components.findrule.rule.selectuserproperty" datatype="html">
+        <source>Select property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.selectcondition" datatype="html">
+        <source>condition</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.selectvalues" datatype="html">
+        <source>values</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.pleaseinput" datatype="html">
+        <source>input string or number</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.inputnumber" datatype="html">
+        <source>input a number</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.segments" datatype="html">
+        <source>segments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.alloptions" datatype="html">
+        <source>total options</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="core.components.findrule.serve" datatype="html">
         <source>serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
           <context context-type="linenumber">3</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="app.components.findrule.selectvariation" datatype="html">
+        <source>variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="app.components.findrule.rolloutpercentage" datatype="html">
+        <source>Rollout percentage</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
+          <context context-type="linenumber">11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.groups.group-drawer.title" datatype="html">
@@ -3511,6 +3578,17 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/switch-tag-tree-view.component.ts</context>
           <context context-type="linenumber">253</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.rule" datatype="html">
+        <source>Rule</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/types/switch-new.ts</context>
+          <context context-type="linenumber">174</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
+          <context context-type="linenumber">91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.action" datatype="html">

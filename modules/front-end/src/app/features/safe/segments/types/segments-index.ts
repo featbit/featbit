@@ -88,7 +88,7 @@ export class Segment {
   newRule() {
     this.rules.push({
       ruleId: uuidv4(),
-      ruleName: '规则' + (this.rules.length + 1),
+      ruleName: ($localize `:@@common.rule:Rule`) + ' ' + (this.rules.length + 1),
       ruleJsonContent: [],
       valueOptionsVariationRuleValues: [
         {
