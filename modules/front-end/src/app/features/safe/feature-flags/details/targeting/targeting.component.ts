@@ -310,13 +310,13 @@ export class TargetingComponent implements OnInit {
 
     this.switchServe.updateSwitch(this.featureDetail)
       .subscribe((result) => {
-        this.msg.success("修改成功!");
+        this.msg.success($localize `:@@common.save-success:Saved Successfully`);
         this.loadFeatureFlag(result.data);
         this.requestApprovalModalVisible = false;
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.switchId));
         this.isLoading = false;
       }, _ => {
-        this.msg.error("修改失败!");
+        this.msg.error($localize `:@@common.save-fial:Failed to Save`);
         this.requestApprovalModalVisible = true;
         this.isLoading = false;
       })

@@ -1,7 +1,7 @@
 <section class="rule-item">
-  <div class="tip" *ngIf="isFirst; else andTemplate;">如果</div>
+  <div class="tip" *ngIf="isFirst; else andTemplate;" i18n="@@core.components.findrule.if">If</div>
   <ng-template #andTemplate>
-    <div class="tip">并且</div>
+    <div class="tip" i18n="@@core.components.findrule.and">and</div>
   </ng-template>
   <div class="select">
     <nz-select nzShowSearch nzPlaceHolder="选择用户属性" [(ngModel)]="ruleContent.property" (ngModelChange)="onPropertyChange()">

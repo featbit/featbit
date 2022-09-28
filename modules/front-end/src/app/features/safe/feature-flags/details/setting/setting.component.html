@@ -51,7 +51,7 @@
         <span><ng-container i18n="@@ff.ff-is">The feature flag is</ng-container>&nbsp;<span *ngIf="switchStatus">ON</span><span *ngIf="!switchStatus">OFF</span></span>
       </div>
       <div class="disabled-variation">
-        <span class="label" i18n="@@ff.if-off-return">If OFF, return</span>
+        <span class="label" i18n="@@ff.if-off-return">If OFF, serve</span>
         <nz-select
           [compareWith]="compareWith"
           [(ngModel)]="currentSwitch.variationOptionWhenDisabled"
