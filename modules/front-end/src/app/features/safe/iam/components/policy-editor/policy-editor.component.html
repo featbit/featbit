@@ -22,7 +22,7 @@
             <div class="title" i18n="@@iam.policies.details.resource-type">Resource type</div>
             <div style="display:flex;justify-content: flex-end;">
               <button *ngIf="!readonly" class="action-btn" nz-button nzType="default" nzSize="small"
-                      i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
+                      i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                       nzPopconfirmPlacement="bottomRight"
                       (nzOnConfirm)="removeStatement(statement)">
                 <i nz-icon nzType="icons:icon-delete"></i>

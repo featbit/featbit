@@ -9,7 +9,7 @@
       </nz-input-group>
       <button class="standard-btn" nz-button nzType="primary" permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.CreateProject" (actionIfAllow)="onCreateProjectClick()">
         <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@org.project.addProject">Add project</ng-container>
+        <ng-container i18n="@@common.add">Add</ng-container>
       </button>
     </div>
     <div class="project-list">
@@ -44,17 +44,15 @@
                     </div>
                   </div>
                   <div class="env-operations">
-                    <a
-                       permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvInfo" (actionIfAllow)="onEditEnvClick(project, env)"
-                    >
+                    <a permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvInfo" (actionIfAllow)="onEditEnvClick(project, env)">
                       <span style="color: #23AD7F;" i18n="@@org.project.edit">Edit</span>
                     </a>
                     <ng-container *ngIf="isEnvDeleteBtnVisible(env)">
                       <nz-divider nzType="vertical"></nz-divider>
-                      <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
+                      <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                          nzPopconfirmPlacement="bottomRight"
                          (nzOnConfirm)="onDeleteEnvClick(project, env)" [nzIcon]="iconTplEnv">
-                        <span style="color: #717D8A" i18n="@@org.project.remove">Remove</span>
+                        <span style="color: #717D8A" i18n="@@common.remove">Remove</span>
                       </a>
                     </ng-container>
                     <ng-template #iconTplEnv>
@@ -74,11 +72,11 @@
           <button class="action-btn" nz-button nzType="default" nzSize="small"
                   *ngIf="currentProjectEnv?.projectId !== project.id"
                   i18n-nz-popconfirm="@@common.remove-confirm"
-                  nz-popconfirm="Can not be recovered, are you sure to remove it?"
+                  nz-popconfirm="This operation cannot be reverted, are you sure to remove it??"
                   nzPopconfirmPlacement="bottomRight"
                   (nzOnConfirm)="onDeleteProjectClick(project)">
             <i nz-icon nzType="icons:icon-delete"></i>
-            <ng-container i18n="@@org.project.remove">Remove</ng-container>
+            <ng-container i18n="@@common.remove">Remove</ng-container>
           </button>
           <button class="action-btn" nz-button nzType="default" nzSize="small"
                   permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"

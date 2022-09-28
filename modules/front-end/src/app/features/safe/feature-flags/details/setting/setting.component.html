@@ -17,7 +17,7 @@
          nz-popconfirm="Are you sure to recover this feature flag?"
          (nzOnConfirm)="restoreFlag()">&nbsp;<ng-container i18n="@@ff.recover">Recover</ng-container>&nbsp;</a>
       <ng-container i="@@common.or">or</ng-container>
-      <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;<ng-container i18n="@@common.permanetly-remove">Permanetly Remove</ng-container>&nbsp;</a>
+      <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;<ng-container i18n="@@common.permanetly-remove">Permanetly Remove</ng-container>&nbsp;</a>
       <ng-container i18n="@@ff.the-ff">the feature flag</ng-container>
     </div>
   </div>
@@ -107,7 +107,7 @@
         <i class="expand-icon" *ngIf="!isEditingVariationOptions && ['json', 'string'].includes(variationDataType)" nz-icon nzType="expand" (click)="expandVariationOption(variationOption, true)"></i>
         <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variationOption.variationValue)"></i>
         <div *ngIf="isEditingVariationOptions">
-          <span class="delete-icon-wrapper" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(variationOption.localId)">
+          <span class="delete-icon-wrapper" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(variationOption.localId)">
             <i nz-icon nzType="icons:icon-delete"></i>
           </span>
         </div>
