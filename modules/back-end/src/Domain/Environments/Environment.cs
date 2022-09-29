@@ -32,4 +32,12 @@ public class Environment : AuditedEntity
             return Convert.ToBase64String(textBytes);
         }
     }
+
+    public void Update(string name, string description)
+    {
+        Name = name;
+        Description = description;
+        
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
