@@ -71,8 +71,7 @@ export interface ISubscriptionPlan {
 export interface IOrganization {
   id: number,
   initialized: boolean,
-  name: string,
-  plan?: ISubscriptionPlan
+  name: string
 }
 
 export interface IOrganizationProjectEnv {

@@ -40,4 +40,14 @@ public class OrganizationController : ApiControllerBase
 
         return Ok(success);
     }
+    
+    [HttpPost("{id:guid}/onboarding")]
+    public async Task<ApiResponse<bool>> Onboarding(Guid id, [FromBody] Onboarding request)
+    {
+        request.OrganizationId = id;
+        
+        var success = await Mediator.Send(request);
+
+        return Ok(success);
+    }
 }

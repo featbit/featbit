@@ -9,4 +9,12 @@ public class Environment : AuditedEntity
     public string Description { get; set; }
 
     public string Secret { get; set; }
+
+    public Environment(Guid projectId, string name, string description, string secret)
+    {
+        ProjectId = projectId;
+        Name = name;
+        Description = description;
+        Secret = secret;
+    }
 }

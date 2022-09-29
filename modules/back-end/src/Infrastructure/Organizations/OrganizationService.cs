@@ -42,6 +42,18 @@ public class OrganizationService : IOrganizationService
         await _mongoDb.CollectionOf<Organization>().InsertOneAsync(organization);
     }
 
+    public async Task UpdateAsync(Organization organization)
+    {
+        var org = await this.GetAsync(organization.Id);
+        
+        if (org == null)
+        {
+            return;
+        }
+
+        await _mongoDb.CollectionOf<Organization>().ReplaceOneAsync(o => o.Id == org.Id, org);
+    }
+
     public async Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid>? policies,

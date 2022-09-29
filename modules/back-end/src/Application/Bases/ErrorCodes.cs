@@ -18,4 +18,9 @@ public static class ErrorCodes
     
     // common
     public const string NameIsRequired = nameof(NameIsRequired);
+    
+    // onboarding
+    public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
+    public const string ProjectNameRequired = nameof(ProjectNameRequired);
+    public const string EnvironmentsRequired = nameof(EnvironmentsRequired);
 }

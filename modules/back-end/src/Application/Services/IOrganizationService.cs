@@ -10,6 +10,8 @@ public interface IOrganizationService
 
     Task AddAsync(Organization organization);
 
+    Task UpdateAsync(Organization organization);
+    
     Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid> policies = null,

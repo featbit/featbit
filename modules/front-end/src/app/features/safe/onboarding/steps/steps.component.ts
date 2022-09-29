@@ -53,8 +53,9 @@ export class StepsComponent implements OnDestroy {
 
   done(): void {
     const { organizationName, projectName } = this.step0Form.value;
+    const environments = ['Dev', 'Prod'];
 
-    this.organizationService.initialize(this.currentOrganizationId, { organizationName, projectName })
+    this.organizationService.onboarding(this.currentOrganizationId, { organizationName, projectName, environments })
     .subscribe(({ flagKeyName }) => {
       this.organizationService.setOrganization({ id: this.currentOrganizationId, initialized: true, name: organizationName });
       this.router.navigateByUrl(`/feature-flags`);

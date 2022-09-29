@@ -55,4 +55,19 @@ public class ProjectService : IProjectService
 
         return await query.ToListAsync();
     }
+    
+    public async Task<ProjectWithEnvs> AddWithEnvsAsync(Project project, ICollection<string> environments)
+    {
+        await _mongoDb.CollectionOf<Project>().InsertOneAsync(project);
+
+        var envs = environments.Select(env => new Environment(project.Id, env, env, env));
+        await _mongoDb.CollectionOf<Environment>().InsertManyAsync(envs);
+
+        return new ProjectWithEnvs
+        {
+            Id = project.Id,
+            Name = project.Name,
+            Environments = envs
+        };
+    }
 }
