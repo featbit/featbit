@@ -50,4 +50,13 @@ public class OrganizationController : ApiControllerBase
 
         return Ok(success);
     }
+    
+    [HttpPut("{id:guid}")]
+    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(Guid id, UpdateOrganization request)
+    {
+        request.Id = id;
+
+        var organization = await Mediator.Send(request);
+        return Ok(organization);
+    }
 }
