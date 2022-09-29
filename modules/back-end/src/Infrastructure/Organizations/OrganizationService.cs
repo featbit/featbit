@@ -37,24 +37,30 @@ public class OrganizationService : IOrganizationService
         return await query.ToListAsync();
     }
 
-    public async Task<Organization> AddAsync(Organization organization)
+    public async Task AddAsync(Organization organization)
     {
         await _mongoDb.CollectionOf<Organization>().InsertOneAsync(organization);
-
-        return organization;
     }
 
-    public async Task<OrganizationUser> AddUserAsync(
+    public async Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid>? policies,
         ICollection<Guid>? groups)
     {
-        // add organization user
-        await _mongoDb.CollectionOf<OrganizationUser>().InsertOneAsync(organizationUser);
-
-        // setup user policies and groups
         var organizationId = organizationUser.OrganizationId;
         var userId = organizationUser.UserId;
+        
+        // if organization user already exists
+        var existingUser = await _mongoDb.QueryableOf<OrganizationUser>().FirstOrDefaultAsync(
+            x => x.OrganizationId == organizationId && x.UserId == userId
+        );
+        if (existingUser != null)
+        {
+            return;
+        }
+
+        // add organization user
+        await _mongoDb.CollectionOf<OrganizationUser>().InsertOneAsync(organizationUser);
 
         // add member policies
         if (policies != null && policies.Any())
@@ -75,7 +81,5 @@ public class OrganizationService : IOrganizationService
 
             await _mongoDb.CollectionOf<GroupMember>().InsertManyAsync(groupMembers);
         }
-
-        return organizationUser;
     }
 }

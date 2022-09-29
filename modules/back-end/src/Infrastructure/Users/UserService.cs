@@ -23,4 +23,9 @@ public class UserService : IUserService
 
         return user;
     }
+
+    public async Task<User?> FindByEmailAsync(string email)
+    {
+        return await _users.FindByEmailAsync(email);
+    }
 }

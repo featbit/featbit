@@ -15,6 +15,12 @@ public class InMemoryUserStore : IUserStore
         return Task.FromResult(_users.FirstOrDefault(x => x.Id == id));
     }
 
+    public Task AddAsync(User user)
+    {
+        _users.Add(user);
+        return Task.CompletedTask;
+    }
+
     public Task<bool> UpdateAsync(User user)
     {
         _users.RemoveAll(x => x.Id == user.Id);

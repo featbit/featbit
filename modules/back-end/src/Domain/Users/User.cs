@@ -8,6 +8,9 @@ public class User : AuditedEntity
 
     public string Password { get; set; }
 
+    /// <summary>
+    /// for test project use only
+    /// </summary>
     public User(Guid id, string email, string password)
     {
         Id = id;

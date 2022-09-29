@@ -30,4 +30,14 @@ public class OrganizationController : ApiControllerBase
 
         return Ok(organization);
     }
+    
+    [HttpPost("{id:guid}/add-user-by-email")]
+    public async Task<ApiResponse<bool>> AddMemberByEmailAsync(Guid id, [FromBody] AddUserByEmail request)
+    {
+        request.OrganizationId = id;
+        
+        var success = await Mediator.Send(request);
+
+        return Ok(success);
+    }
 }
