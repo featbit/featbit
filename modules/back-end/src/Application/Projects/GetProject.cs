@@ -18,6 +18,6 @@ public class GetProjectHandler : IRequestHandler<GetProject, ProjectWithEnvs>
     
     public async Task<ProjectWithEnvs> Handle(GetProject request, CancellationToken cancellationToken)
     {
-        return await _service.GetAsync(request.Id);
+        return await _service.GetWithEnvsAsync(request.Id);
     }
 }

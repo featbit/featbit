@@ -52,12 +52,7 @@ public class OnboardingHandler : IRequestHandler<Onboarding, bool>
         organization.Update(request.OrganizationName, true);
         await _organizationService.UpdateAsync(organization);
 
-        var project = new Project
-        {
-            OrganizationId = organization.Id,
-            Name = request.ProjectName
-        };
-
+        var project = new Project(organization.Id, request.ProjectName);
         await _projectService.AddWithEnvsAsync(project, request.Environments);
 
         return true;

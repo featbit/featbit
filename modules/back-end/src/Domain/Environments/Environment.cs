@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Domain.Environments;
 
 public class Environment : AuditedEntity
@@ -10,11 +12,24 @@ public class Environment : AuditedEntity
 
     public string Secret { get; set; }
 
-    public Environment(Guid projectId, string name, string description, string secret)
+    public Environment(Guid projectId, string name, string description = "")
     {
+        Id = Guid.NewGuid();
+        
         ProjectId = projectId;
         Name = name;
         Description = description;
-        Secret = secret;
+        Secret = NewSecret();
+
+        string NewSecret(string device = "default")
+        {
+            var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            var originText =
+                $"{time}/{Id}/{device}";
+
+            var textBytes = Encoding.UTF8.GetBytes(originText);
+            return Convert.ToBase64String(textBytes);
+        }
     }
 }
