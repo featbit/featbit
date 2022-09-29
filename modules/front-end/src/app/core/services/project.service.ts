@@ -4,18 +4,16 @@ import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
+import {MessageQueueService} from "@services/message-queue.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
-  currentProjectEnvChanged$: Subject<void> = new Subject<void>();
-  projectListChanged$: Subject<void> = new Subject<void>();
-
   baseUrl = `${environment.url}/api/v1/organizations/#organizationId/projects`;
 
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private messageQueueService: MessageQueueService,) { }
 
   // 获取 project 列表
   public getProjects(organizationId: number): Observable<IProject[]> {
@@ -49,7 +47,7 @@ export class ProjectService {
   // update or set current project env
   upsertCurrentProjectEnvLocally(project: IProjectEnv) {
     localStorage.setItem(CURRENT_PROJECT(), JSON.stringify(project));
-    this.currentProjectEnvChanged$.next();
+    this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
   }
 
   // update current project env by partial object

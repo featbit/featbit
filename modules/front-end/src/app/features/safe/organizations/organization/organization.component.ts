@@ -92,7 +92,7 @@ export class OrganizationComponent implements OnInit {
           this.isLoading = false;
           this.message.success($localize `:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
           this.organizationService.setOrganization({ id, initialized, name });
-          this.messageQueueService.emit(this.messageQueueService.topics.ORG_NAME_CHANGED);
+          this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
         () => {
           this.isLoading = false;

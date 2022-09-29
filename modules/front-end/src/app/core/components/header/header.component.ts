@@ -43,11 +43,6 @@ export class HeaderComponent implements OnInit {
   ) {
     breadcrumbService.breadcrumbs$.subscribe((bc: Breadcrumb[]) => this.pageTitle = bc.at(-1)?.label);
     //this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
-    this.messageQueueService.subscribe(this.messageQueueService.topics.ORG_NAME_CHANGED, () => {
-      const orgProject = this.organizationService.getCurrentOrganizationProjectEnv();
-
-      this.currentOrganization = orgProject.organization;
-    });
   }
 
   ngOnInit(): void {
@@ -59,14 +54,14 @@ export class HeaderComponent implements OnInit {
     this.selectCurrentProjectEnv();
     this.setAllProjects();
 
-    this.projectService.projectListChanged$
-      .subscribe(_ => {
-        this.setAllProjects();
-        this.selectCurrentProjectEnv();
-      });
+    this.messageQueueService.subscribe(this.messageQueueService.topics.PROJECT_LIST_CHANGED, () => {
+      this.setAllProjects();
+      this.selectCurrentProjectEnv();
+    });
 
-    this.projectService.currentProjectEnvChanged$
-      .subscribe(_ => this.selectCurrentProjectEnv());
+    this.messageQueueService.subscribe(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED, () => {
+      this.selectCurrentProjectEnv();
+    });
   }
 
   canListProjects = false;

@@ -7,6 +7,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
+import {MessageQueueService} from "@services/message-queue.service";
 
 @Component({
   selector: 'app-project',
@@ -34,6 +35,7 @@ export class ProjectComponent implements OnInit {
   projects: IProject[] = [];
 
   constructor(
+    private messageQueueService: MessageQueueService,
     private projectService: ProjectService,
     private accountService: OrganizationService,
     private envService: EnvService,
@@ -98,7 +100,7 @@ export class ProjectComponent implements OnInit {
       project.environments = project.environments.filter(e => e.id !== env.id);
       this.messageService.success($localize `:@@org.project.env-remove-success:Environment successfully removed`);
       // emit project list change event
-      this.projectService.projectListChanged$.next();
+      this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
     })
   }
 
@@ -114,7 +116,7 @@ export class ProjectComponent implements OnInit {
       this.projects = this.projects.filter(item => item.id !== project.id);
       this.messageService.success($localize `:@@org.project.project-remove-success:Project successfully removed`);
       // emit project list change event
-      this.projectService.projectListChanged$.next();
+      this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
     });
   }
 
@@ -142,7 +144,7 @@ export class ProjectComponent implements OnInit {
     }
 
     // emit project list change event
-    this.projectService.projectListChanged$.next();
+    this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
   }
 
   envClosed(data: any) {
@@ -162,7 +164,7 @@ export class ProjectComponent implements OnInit {
     }
 
     // emit project list change event
-    this.projectService.projectListChanged$.next();
+    this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
   }
 
   copyText(text: string) {
