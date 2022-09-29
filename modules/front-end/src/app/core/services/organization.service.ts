@@ -29,7 +29,7 @@ export class OrganizationService {
   }
 
   updateOrganization(params: any): Observable<any> {
-    const url = this.baseUrl;
+    const url = `${this.baseUrl}/${params.id}`;
     return this.http.put(url, params);
   }
 

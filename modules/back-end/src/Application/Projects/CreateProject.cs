@@ -32,7 +32,7 @@ public class CreateProjectHandler : IRequestHandler<CreateProject, ProjectWithEn
     {
         var project = new Project(request.OrganizationId, request.Name);
 
-        var projectWithEnvs = await _service.AddWithEnvsAsync(project, new[] { "production", "test" });
+        var projectWithEnvs = await _service.AddWithEnvsAsync(project, new[] { "Prod", "Dev" });
         return projectWithEnvs;
     }
 }

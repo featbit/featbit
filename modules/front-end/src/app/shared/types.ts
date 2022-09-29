@@ -98,8 +98,7 @@ export interface IEnvironment {
   projectId: number,
   name: string,
   description: string,
-  secret: string,
-  mobileSecret: string
+  secret: string
 }
 
 export interface IAccountUser {

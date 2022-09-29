@@ -40,7 +40,7 @@ export class ProjectDrawerComponent implements OnInit {
     return this._project;
   }
 
-  @Input() currentAccountId: number;
+  @Input() currentOrganizationId: number;
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
 
@@ -105,7 +105,7 @@ export class ProjectDrawerComponent implements OnInit {
 
     if (this.isEditing) {
       this.projectService
-        .putUpdateProject(this.currentAccountId, {name, id: this.project.id})
+        .putUpdateProject(this.currentOrganizationId, {name, id: this.project.id})
         .subscribe(
           updatedProject => {
             this.isLoading = false;
@@ -118,7 +118,7 @@ export class ProjectDrawerComponent implements OnInit {
         );
     } else {
       this.projectService
-        .postCreateProject(this.currentAccountId, {name})
+        .postCreateProject(this.currentOrganizationId, {name})
         .subscribe(
           createdProject => {
             this.isLoading = false;

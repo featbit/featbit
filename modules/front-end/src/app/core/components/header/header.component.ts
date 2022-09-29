@@ -7,6 +7,7 @@ import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
 import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 import {NzMessageService} from "ng-zorro-antd/message";
+import {MessageQueueService} from "@services/message-queue.service";
 
 @Component({
   selector: 'app-header',
@@ -20,7 +21,7 @@ export class HeaderComponent implements OnInit {
   cannotReadProjectsMsg: string;
   cannotReadEnvsMsg: string;
   currentProjectEnv: IProjectEnv;
-  currentAccount: IOrganization;
+  currentOrganization: IOrganization;
 
   allProjects: IProject[];
   selectedProject: IProject;
@@ -33,14 +34,20 @@ export class HeaderComponent implements OnInit {
   flags = {};
   constructor(
     private router: Router,
-    private accountService: OrganizationService,
+    private organizationService: OrganizationService,
     private projectService: ProjectService,
     private message: NzMessageService,
     private readonly breadcrumbService: BreadcrumbService,
-    private permissionsService: PermissionsService
+    private permissionsService: PermissionsService,
+    private messageQueueService: MessageQueueService,
   ) {
     breadcrumbService.breadcrumbs$.subscribe((bc: Breadcrumb[]) => this.pageTitle = bc.at(-1)?.label);
     //this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
+    this.messageQueueService.subscribe(this.messageQueueService.topics.ORG_NAME_CHANGED, () => {
+      const orgProject = this.organizationService.getCurrentOrganizationProjectEnv();
+
+      this.currentOrganization = orgProject.organization;
+    });
   }
 
   ngOnInit(): void {
@@ -119,10 +126,10 @@ export class HeaderComponent implements OnInit {
   }
 
   private selectCurrentProjectEnv() {
-    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
+    const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
 
-    this.currentAccount = currentAccountProjectEnv.organization;
-    this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
+    this.currentOrganization = currentOrganizationProjectEnv.organization;
+    this.currentProjectEnv = currentOrganizationProjectEnv.projectEnv;
 
     this.selectedProject = {
       id: this.currentProjectEnv.projectId,
@@ -135,7 +142,7 @@ export class HeaderComponent implements OnInit {
   }
 
   private setAllProjects() {
-    this.projectService.getProjects(this.currentAccount.id)
+    this.projectService.getProjects(this.currentOrganization.id)
       .subscribe(projects => this.allProjects = projects);
   }
 }

@@ -11,7 +11,8 @@ export class MessageQueueService {
   topics = {
     FLAG_SETTING_CHANGED: (key: string) => `flag_setting_changed:${key}`,
     FLAG_TARGETING_CHANGED: (key: string) => `flag_targeting_changed:${key}`,
-    POLICY_CHANGED: (key: string) => `policy_changed:${key}`
+    POLICY_CHANGED: (key: string) => `policy_changed:${key}`,
+    ORG_NAME_CHANGED: 'org_name_changed'
   };
 
   public events: Events;

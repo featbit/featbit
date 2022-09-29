@@ -1,0 +1,15 @@
+<nz-modal [(nzVisible)]="isVisible"
+          [nzCentered]="true"
+          [nzContent]="editModalContent"
+          [nzFooter]="editModalFooter"
+          (nzOnCancel)="onClose()">
+  <ng-template #editModalContent>
+    content
+  </ng-template>
+
+  <ng-template #editModalFooter>
+    <button nz-button nzType="primary" (click)="onClose()">
+      <span i18n="@@common.get-started">Get started</span>
+    </button>
+  </ng-template>
+</nz-modal>

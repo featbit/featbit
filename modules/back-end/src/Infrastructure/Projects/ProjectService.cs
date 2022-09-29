@@ -42,6 +42,7 @@ public class ProjectService : MongoDbServiceBase<Project>, IProjectService
             join env in envs
                 on project.Id equals env.ProjectId into allEnvs
             where project.OrganizationId == organizationId
+            orderby project.CreatedAt descending
             select new ProjectWithEnvs
             {
                 Id = project.Id,

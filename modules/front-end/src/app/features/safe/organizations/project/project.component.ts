@@ -28,7 +28,7 @@ export class ProjectComponent implements OnInit {
   searchValue: string;
 
   // current project env
-  currentAccountId: number;
+  currentOrganizationId: number;
   currentProjectEnv: IProjectEnv;
 
   projects: IProject[] = [];
@@ -43,12 +43,12 @@ export class ProjectComponent implements OnInit {
 
   ngOnInit(): void {
     const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
-    this.currentAccountId = currentAccountProjectEnv.organization.id;
+    this.currentOrganizationId = currentAccountProjectEnv.organization.id;
     this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
     const canListProjects = this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.ListProjects);
     if (canListProjects) {
       this.projectService
-        .getProjects(this.currentAccountId)
+        .getProjects(this.currentOrganizationId)
         .subscribe(projects => this.projects = projects);
     }
   }
@@ -94,11 +94,9 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
-    this.envService.removeEnv(this.currentAccountId, project.id, env.id).subscribe(() => {
-      this.envService.getEnvs(this.currentAccountId, env.projectId).subscribe((envs: IEnvironment[]) => {
-        project.environments = envs;
-      });
-
+    this.envService.removeEnv(project.id, env.id).subscribe(() => {
+      project.environments = project.environments.filter(e => e.id !== env.id);
+      this.messageService.success($localize `:@@org.project.env-remove-success:Environment successfully removed`);
       // emit project list change event
       this.projectService.projectListChanged$.next();
     })
@@ -111,10 +109,10 @@ export class ProjectComponent implements OnInit {
      return;
     }
 
-    this.projectService.removeProject(this.currentAccountId, project.id).subscribe(() => {
+    this.projectService.removeProject(this.currentOrganizationId, project.id).subscribe(() => {
       // remove the deleted project from list
       this.projects = this.projects.filter(item => item.id !== project.id);
-
+      this.messageService.success($localize `:@@org.project.project-remove-success:Project successfully removed`);
       // emit project list change event
       this.projectService.projectListChanged$.next();
     });
@@ -143,22 +141,19 @@ export class ProjectComponent implements OnInit {
       this.projects.unshift(data.project);
     }
 
-    // close after do nothing
-    else {
-
-    }
-
     // emit project list change event
     this.projectService.projectListChanged$.next();
   }
 
   envClosed(data: any) {
     this.creatEditEnvFormVisible = false;
-    this.envService
-      .getEnvs(this.currentAccountId, this.env.projectId)
-      .subscribe((envs: IEnvironment[]) => {
-        this.project.environments = envs;
-      });
+
+    if (data.isEditing) {
+      this.project.environments = this.project.environments.map(e => e.id === data.env.id ? { ...e, ...data.env } : e);
+      this.env = { ...this.env, ...data.env };
+    } else {
+      this.project.environments.push(data.env);
+    }
 
     // if is editing current env
     if (data.isEditing && this.currentProjectEnv.envId == this.env.id) {

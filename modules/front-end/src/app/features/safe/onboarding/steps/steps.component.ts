@@ -58,7 +58,7 @@ export class StepsComponent implements OnDestroy {
     this.organizationService.onboarding(this.currentOrganizationId, { organizationName, projectName, environments })
     .subscribe(({ flagKeyName }) => {
       this.organizationService.setOrganization({ id: this.currentOrganizationId, initialized: true, name: organizationName });
-      this.router.navigateByUrl(`/feature-flags`);
+      this.router.navigateByUrl(`/feature-flags?status=init`);
     }, _ => {
       this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
     })

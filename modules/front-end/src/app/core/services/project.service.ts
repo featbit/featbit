@@ -36,7 +36,7 @@ export class ProjectService {
 
   // 更新 project
   putUpdateProject(organizationId: number, params): Observable<any> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
+    const url = `${this.baseUrl.replace(/#organizationId/ig, `${organizationId}`)}/${params.id}`;
     return this.http.put(url, params);
   }
 
