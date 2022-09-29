@@ -14,6 +14,11 @@ public class MongoDbUserStore : IUserStore
         _users = mongo.CollectionOf<User>();
     }
 
+    public async Task<User?> FindByIdAsync(Guid id)
+    {
+        return await _users.AsQueryable().FirstOrDefaultAsync(x => x.Id == id);
+    }
+
     public async Task<bool> UpdateAsync(User user)
     {
         var result = await _users.ReplaceOneAsync(x => x.Id == user.Id, user);

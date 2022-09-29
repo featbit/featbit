@@ -20,9 +20,9 @@
 
     <form nz-form [formGroup]="projectForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired i18n="@@org.project.projectName">Project name</nz-form-label>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
         <nz-form-control nzErrorTip="Project name is mandatory!" i18n-nzErrorTip="@@org.project.projectNameMandatory">
-          <input type="text" nz-input formControlName="name" placeholder="Project name" i18n-placeholder="@@org.project.projectNamePlaceholder"/>
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-form-control>
       </nz-form-item>
     </form>

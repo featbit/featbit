@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
-import { UserService } from "@services/user.service";
+import {IdentityService} from "@services/identity.service";
 
 @Component({
   selector: 'app-do-login',
@@ -18,7 +18,7 @@ export class DoLoginComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private userService: UserService,
+    private identityService: IdentityService,
     private router: Router,
     private message: NzMessageService
   ) { }
@@ -45,7 +45,7 @@ export class DoLoginComponent implements OnInit {
     this.isLogin = true;
 
     const {identity, password} = this.pwdLoginForm.value;
-    this.userService.loginByPassword(identity, password).subscribe(
+    this.identityService.loginByEmail(identity, password).subscribe(
       response => this.handleResponse(response),
       error => this.handleError(error)
     )
@@ -59,7 +59,7 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
-    await this.userService.doLoginUser(response.token);
+    await this.identityService.doLoginUser(response.data.token);
     this.message.success($localize `Login with success`);
   }
 

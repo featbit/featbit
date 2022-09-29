@@ -7,9 +7,9 @@ import { SwitchService } from '@services/switch.service';
 import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IVariationOption, IRulePercentageRollout, IPrequisiteFeatureFlag, IFftuwmtrParams } from '../../types/switch-new';
 import { PendingChange } from '../../types/pending-changes';
 import { TeamService } from '@services/team.service';
-import { IAccount, IProjectEnv } from '@shared/types';
+import { IOrganization, IProjectEnv } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
+import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { MessageQueueService } from '@services/message-queue.service';
@@ -44,7 +44,7 @@ export class TargetingComponent implements OnInit {
   public targetIndividualsActive: boolean = false;
 
   public isArchived = false;
-  currentAccount: IAccount = null;
+  currentAccount: IOrganization = null;
   currentProjectEnv: IProjectEnv = null;
 
   approvalRequestEnabled: boolean = false;
@@ -167,7 +167,7 @@ export class TargetingComponent implements OnInit {
     this.switchId = detail.id;
 
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
-    this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
+    this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
     const currentUrl = this.route.snapshot['_routerState'].url;
     this.pendingChanges = new PendingChange(
       this.teamService,

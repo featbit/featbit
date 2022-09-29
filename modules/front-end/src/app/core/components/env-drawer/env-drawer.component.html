@@ -19,9 +19,9 @@
 
     <form nz-form [formGroup]="envForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
-        <nz-form-label nzRequired i18n="@@org.project.envName">Environment name</nz-form-label>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
         <nz-form-control nzErrorTip="Environment name is mandatory!" i18n-nzErrorTip="@@org.project.envNameMandatory">
-          <input type="text" nz-input formControlName="name" placeholder="Environment name" i18n-placeholder="@@org.project.envNamePlaceholder"/>
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>

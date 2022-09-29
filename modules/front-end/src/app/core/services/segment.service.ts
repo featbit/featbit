@@ -20,7 +20,7 @@ export class SegmentService {
   public envId: number;
 
   get baseUrl() {
-    return `${environment.url}/api/v2/envs/${this.envId}/segments`;
+    return `${environment.url}/api/v1/envs/${this.envId}/segments`;
   }
 
   constructor(private http: HttpClient) {

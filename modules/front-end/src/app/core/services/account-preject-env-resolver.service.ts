@@ -3,20 +3,20 @@ import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { take, mergeMap } from 'rxjs/operators';
 import { ProjectService } from '@services/project.service';
-import { AccountService } from '@services/account.service';
-import { IAccount, IProjectEnv } from '@shared/types';
+import { OrganizationService } from '@services/organization.service';
+import { IOrganization, IProjectEnv } from '@shared/types';
 
 @Injectable()
 export class AccountProjectEnvResolver implements Resolve<any> {
   constructor(
     private projectService: ProjectService,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
   ) { }
 
   resolve(route: ActivatedRouteSnapshot): Observable<any> {
-    return this.accountService.getCurrentAccount().pipe(
+    return this.accountService.getCurrentOrganization().pipe(
         take(1),
-        mergeMap((account: IAccount) => {
+        mergeMap((account: IOrganization) => {
             return this.projectService.getCurrentProjectEnv(account.id).pipe(
               take(1),
               mergeMap((projectEnv: IProjectEnv) => {

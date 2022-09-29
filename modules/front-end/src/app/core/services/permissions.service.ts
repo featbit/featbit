@@ -10,7 +10,7 @@ import {EffectEnum, ResourceTypeEnum} from "@features/safe/iam/components/policy
 export class PermissionsService {
   private permissions: IPolicyStatement[];
 
-  genericDenyMessage: string = '您未被授权进行该操作, 请联系账户管理员添加相关权限';
+  genericDenyMessage: string = $localize `:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`;
 
   constructor(private memberSvc: MemberService) {
   }

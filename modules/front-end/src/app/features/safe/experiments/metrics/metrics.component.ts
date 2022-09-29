@@ -3,11 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { IAccount, IAccountUser, IProjectEnv } from '@shared/types';
+import { IOrganization, IAccountUser, IProjectEnv } from '@shared/types';
 import { MetricService } from '@services/metric.service';
 import { TeamService } from '@services/team.service';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from '../../feature-flags/types/experimentations';
-import { CURRENT_ACCOUNT, CURRENT_PROJECT } from "@utils/localstorage-keys";
+import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'experiments-metrics',
@@ -24,7 +24,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
   accountMemberList: IAccountUser[] = [];
 
   currentProjectEnv: IProjectEnv = null;
-  currentAccount: IAccount = null;
+  currentAccount: IOrganization = null;
 
   currentMetric: IMetric;
 
@@ -43,7 +43,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
     private metricService: MetricService
   ) {
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
-    this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ACCOUNT()));
+    this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
 
   //   const metricId = this.route.snapshot.queryParams['id'];
   //   if (metricId) {

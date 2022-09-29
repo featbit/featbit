@@ -7,9 +7,9 @@
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="icons:icon-search"></i>
       </ng-template>
-      <nz-select [(ngModel)]="filter.getAllMembers" (ngModelChange)="doSearch(true)" nzPlaceHolder="按状态筛选">
-        <nz-option [nzValue]="true" nzLabel="All team members" i18n-nzLabel="@@iam.policies.details.all-members"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="Members current policy binded to" i18n-nzLabel="@@iam.policies.policies.current-members"></nz-option>
+      <nz-select class="team-filter" [(ngModel)]="filter.getAllMembers" (ngModelChange)="doSearch(true)">
+        <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.policies.details.all-members"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="Members with current policy" i18n-nzLabel="@@iam.policies.policies.current-members"></nz-option>
       </nz-select>
     </div>
     <div class="table-wrapper">

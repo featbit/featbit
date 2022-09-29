@@ -1,7 +1,7 @@
 <div class="table-content-area">
   <div class="table-search-area">
     <nz-input-group [nzPrefix]="prefixIconSearch">
-      <input nz-input type="text" placeholder="Filter by mobile or Email" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch()" i18n-placeholder="@@iam.team.idx.searchPlaceholder">
+      <input nz-input type="text" placeholder="Filter by Email" [(ngModel)]="filter.searchText" (ngModelChange)="doSearch()" i18n-placeholder="@@iam.team.idx.searchPlaceholder">
     </nz-input-group>
     <ng-template #prefixIconSearch>
       <i nz-icon nzType="icons:icon-search"></i>
@@ -59,12 +59,15 @@
             <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(item.initialPassword)"></i>
             {{ item.initialPassword }}
           </span>
+          <span *ngIf="!item.initialPassword || item.initialPassword?.length === 0">
+            ******
+          </span>
         </td>
         <td>
           <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
           <ng-container *ngIf="canDelete(item)">
             <nz-divider nzType="vertical"></nz-divider>
-            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="Can not be recovered, are you sure to remove it?"
+            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="This operation cannot be reverted, are you sure to remove it??"
                nzPopconfirmPlacement="bottomRight"
                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                (nzOnConfirm)="deleteMember(item)" [nzIcon]="iconTplIamUser">

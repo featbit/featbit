@@ -24,10 +24,6 @@
       <div class="value">{{member.email ?? '--'}}</div>
     </div>
     <div class="item">
-      <div class="label" i18n="@@common.mobile">Mobile</div>
-      <div class="value">{{member.phoneNumber ?? '--'}}</div>
-    </div>
-    <div class="item">
       <div class="label" i18n="@@common.rn">Resource name (RN)</div>
       <div class="value">
         <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(member.resourceName)"></i>
@@ -39,7 +35,7 @@
   <ng-container *ngIf="!isLoading && canDelete()">
     <div class="block" *ngIf="!isLoading; else loadingTem;" >
       <div class="delete">
-        <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
+        <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it??"
                 nzPopconfirmPlacement="bottomRight"
                 [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                 (nzOnConfirm)="deleteMember()" [nzIcon]="iconTplIamUser">

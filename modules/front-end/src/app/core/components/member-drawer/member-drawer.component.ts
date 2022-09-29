@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { phoneNumberValidator } from "@utils/form-validators";
+import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import { MemberService } from "@services/member.service";
 import { PolicyService } from "@services/policy.service";
 import { IPagedPolicy, PolicyFilter } from "@features/safe/iam/types/policy";
@@ -46,8 +46,7 @@ export class MemberDrawerComponent {
     this.getGroups();
 
     this.memberForm = this.fb.group({
-      identityType: ['phoneNumber', [Validators.required]],
-      identity: ['', [phoneNumberValidator, Validators.required]],
+      email: ['', [phoneNumberOrEmailValidator, Validators.required]],
       policyId: [''],
       groupId: [''],
       name: ''
@@ -74,23 +73,8 @@ export class MemberDrawerComponent {
     }, () => this.isGroupsLoading = false);
   }
 
-  onIdentityTypeChange(identityType) {
-    const control = this.memberForm.get('identity');
-
-    if (identityType === 'email') {
-      control.setValidators([Validators.email, Validators.required]);
-    }
-
-    if (identityType === 'phoneNumber') {
-      control.setValidators([phoneNumberValidator, Validators.required]);
-    }
-
-    control.updateValueAndValidity();
-  }
-
   onClose() {
     this.isPermissionInvalid = false;
-    this.memberForm.reset({ identityType: 'phoneNumber' });
     this.close.emit();
   }
 
@@ -121,12 +105,12 @@ export class MemberDrawerComponent {
       return;
     }
 
-    let { policyId, groupId, identity, identityType, name } = this.memberForm.value;
+    let { policyId, groupId, email, name } = this.memberForm.value;
     const policyIds = !!policyId ? [policyId] : [];
     const groupIds = !!groupId ? [groupId] : [];
 
     this.isLoading = true;
-    this.memberService.create({identity, identityType, policyIds, groupIds, name, role: 'Admin'}).subscribe(
+    this.memberService.create({email, policyIds, groupIds, name}).subscribe(
       () => {
         this.isLoading = false;
         this.close.emit(true);

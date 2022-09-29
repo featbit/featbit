@@ -9,9 +9,9 @@
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
       </div>
-      <nz-select [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)" nzPlaceHolder="按状态筛选">
-        <nz-option [nzValue]="true" nzLabel="All policies" i18n-nzLabel="@@iam.team.details.all-policies"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="Policies binded to current team member" i18n-nzLabel="@@iam.team.details.current-policies"></nz-option>
+      <nz-select class="policy-filter" [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)">
+        <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.team.details.all-policies"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="Affected to current member" i18n-nzLabel="@@iam.team.details.current-policies"></nz-option>
       </nz-select>
     </div>
     <div class="table-wrapper">
@@ -27,9 +27,9 @@
       >
         <thead>
         <tr>
-          <th i18n="@@iam.team.details.name">Name</th>
-          <th i18n="@@iam.team.details.type">Type</th>
-          <th i18n="@@iam.team.details.description">Description</th>
+          <th i18n="@@common.name">Name</th>
+          <th i18n="@@common.type">Type</th>
+          <th i18n="@@common.description">Description</th>
           <th i18n="@@common.actions">Actions</th>
         </tr>
         </thead>
@@ -37,7 +37,7 @@
         <tr *ngFor="let item of table.data">
           <td (click)="navigateToPolicy(item.id)">{{item.name}}</td>
           <td>
-            <i *ngIf="item.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+            <i *ngIf="item.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
             {{item.type | policyType}}
           </td>
           <td>{{item.description}}</td>
@@ -47,7 +47,7 @@
             <ng-container *ngIf="item.isMemberPolicy">
               <a style="color: #717D8A"
                  i18n-nz-popconfirm="@@iam.team.details.remove-policy-from"
-                 nz-popconfirm="Are you sure to remove the policy from the member?"
+                 nz-popconfirm="Are you sure to remove the policy from current member?"
                  nzPopconfirmPlacement="bottomRight"
                  [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                  (nzOnConfirm)="removePolicyFrom(item.id)" [nzIcon]="iconTplIamUser">

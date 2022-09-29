@@ -1,0 +1,25 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right"
+  [nzWidth]="500"
+  i18n-nzTitle="@@org.org.createOrg"
+  nzTitle="Create organization"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <form nz-form [formGroup]="orgForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control i18n-nzErrorTip="@@org.org.orgMandatory" nzErrorTip="Organization name is mandatory!">
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button class="submit-btn" nzType="primary" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
+    </form>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
+

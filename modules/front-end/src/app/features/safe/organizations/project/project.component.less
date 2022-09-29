@@ -1,0 +1,107 @@
+@import "src/variables";
+
+.project-operations {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  nz-input-group {
+    width: 520px;
+    border-radius: 32px;
+  }
+}
+
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: calc(100% - 32px);
+  margin-top: 24px;
+
+  .project {
+    nz-card {
+      border-radius: 20px;
+    }
+
+    .action-btn {
+      height: 32px;
+      padding: 0 16px;
+      background: white;
+      border: 1px solid @grey20-color;
+      border-radius: 33px;
+      color: @grey50-color;
+      font-size: 14px;
+
+      i {
+        vertical-align: middle;
+        font-size: 20px;
+      }
+
+      &:hover {
+        color: @primary-color;
+      }
+    }
+
+    .env-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .env {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 24px;
+        background: @grey5-color;
+        border-radius: 10px;
+
+        .env-basis {
+          max-width: 230px;
+          min-width: 100px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .desc-name {
+          margin-bottom: 8px;
+          font-size: 16px;
+          color: @grey70-color;
+        }
+
+        .desc-content {
+          color: @grey50-color;
+          margin-bottom: 12px;
+        }
+
+        .env-secret {
+          nz-input-group {
+            padding: 8px 12px;
+            min-width: 620px;
+
+            input {
+              color: @grey50-color;
+            }
+
+            .copy-icon {
+              color: @grey40-color;
+
+              &:hover {
+                color: @primary-color;
+              }
+            }
+          }
+        }
+
+        .env-operations {
+          font-size: 14px;
+          line-height: 150%;
+          min-width: 133px;
+          align-self: center;
+          display: flex;
+          justify-content: flex-end;
+        }
+      }
+    }
+  }
+}

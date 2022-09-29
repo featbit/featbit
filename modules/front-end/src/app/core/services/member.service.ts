@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { getCurrentAccount } from "@utils/project-env";
+import { getCurrentOrganization } from "@utils/project-env";
 import { environment } from "src/environments/environment";
 import { Observable } from "rxjs";
 import {
@@ -20,8 +20,8 @@ export class MemberService {
   constructor(private http: HttpClient) { }
 
   get baseUrl() {
-    const accountId = getCurrentAccount().id;
-    return `${environment.url}/api/v2/accounts/${accountId}/members`;
+    const organizationId = getCurrentOrganization().id;
+    return `${environment.url}/api/v1/organizations/${organizationId}/members`;
   }
 
   getList(filter: MemberFilter = new MemberFilter()): Observable<IPagedMember> {
@@ -47,7 +47,7 @@ export class MemberService {
     };
 
     return this.http.get<IPagedMemberGroup>(
-      `${this.baseUrl}/${id}/group`,
+      `${this.baseUrl}/${id}/groups`,
       {params: new HttpParams({fromObject: queryParam})}
     );
   }

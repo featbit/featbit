@@ -1,15 +1,15 @@
-<message *ngIf="readonly" [type]="'warning'" i18n-content="@@iam.policies.details.managed-policies-cannot-be-modified" content="Managed policies cannot be modified"></message>
+<message *ngIf="readonly" [type]="'warning'" i18n-content="@@iam.policies.details.managed-policies-cannot-be-modified" content="System Managed policies cannot be modified"></message>
 <div class="operations">
   <button class="standard-btn copy-btn" nz-button nzType="primary" (click)="copyPolicy()">
     <i nz-icon nzType="icons:icon-copy"></i>
-    <ng-container i18n="@@iam.policies.details.copy-policy">Copy policy</ng-container>
+    <ng-container i18n="@@common.copy">Copy</ng-container>
   </button>
   <button class="standard-btn" nz-button nzType="primary" (click)="saveStatements()">
     <i nz-icon nzType="icons:icon-save"></i>
     <ng-container i18n="@@common.save">Save</ng-container>
   </button>
 </div>
-<div class="policy-editor body-container standard-div" [class]="{ffcmanaged: readonly}">
+<div class="policy-editor body-container standard-div" [class]="{'sys-managed': readonly}">
   <div class="statements-banner">
     <div class="title" i18n="@@common.permissions">Permissions</div>
     <i nz-icon *ngIf="!readonly" (click)="addStatement()" nzType="icons:icon-add-outline"></i>
@@ -22,7 +22,7 @@
             <div class="title" i18n="@@iam.policies.details.resource-type">Resource type</div>
             <div style="display:flex;justify-content: flex-end;">
               <button *ngIf="!readonly" class="action-btn" nz-button nzType="default" nzSize="small"
-                      i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
+                      i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                       nzPopconfirmPlacement="bottomRight"
                       (nzOnConfirm)="removeStatement(statement)">
                 <i nz-icon nzType="icons:icon-delete"></i>

@@ -64,7 +64,7 @@ export class IndexComponent implements OnInit {
   }
 
   canDelete(member: IMember): boolean {
-    return this.auth.email !== member.email || this.auth.phoneNumber !== member.phoneNumber;
+    return this.auth.email !== member.email;
   }
 
   deleteMember(member: IMember) {

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { CSwitchParams, IFfParams, IPrequisiteFeatureFlag } from '@features/safe/feature-flags/types/switch-new';
-import { AccountService } from './account.service';
+import { OrganizationService } from './organization.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,14 +15,14 @@ export class SwitchService {
 
   constructor(
     private http: HttpClient,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private router: Router
   ) {
     this.initEnvIds();
   }
 
   private initEnvIds() {
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
     const envId = currentAccountProjectEnv.projectEnv.envId;
     if (this.envId && envId !== this.envId) {
       this.router.navigateByUrl("/feature-flags");

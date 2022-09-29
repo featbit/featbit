@@ -2,17 +2,21 @@ using System.Text;
 using Application.Services;
 using Domain.Identity;
 using Domain.Users;
+using Infrastructure.Groups;
 using Infrastructure.Identity;
+using Infrastructure.Members;
 using Infrastructure.MongoDb;
+using Infrastructure.Organizations;
+using Infrastructure.Policies;
+using Infrastructure.Projects;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
-using MongoDB.Bson.Serialization.Conventions;
 
-// ReSharper disable once CheckNamespace
+// ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
+// ReSharper restore CheckNamespace
 
 public static class ConfigureServices
 {
@@ -21,18 +25,11 @@ public static class ConfigureServices
         IConfiguration configuration)
     {
         // mongodb
-        var conventions = new ConventionPack
-        {
-            new IgnoreExtraElementsConvention(true),
-            new CamelCaseElementNameConvention()
-        };
-        ConventionRegistry.Register("global-conventions", conventions, _ => true);
-
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
 
         // identity
-        services.TryAddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserStore, MongoDbUserStore>();
         services.AddScoped<IIdentityService, IdentityService>();
 
@@ -55,6 +52,14 @@ public static class ConfigureServices
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]))
                 };
             });
+
+        // custom services
+        services.AddScoped<IUserService, UserService>();
+        services.AddTransient<IOrganizationService, OrganizationService>();
+        services.AddTransient<IMemberService, MemberService>();
+        services.AddTransient<IProjectService, ProjectService>();
+        services.AddTransient<IGroupService, GroupService>();
+        services.AddTransient<IPolicyService, PolicyService>();
 
         return services;
     }

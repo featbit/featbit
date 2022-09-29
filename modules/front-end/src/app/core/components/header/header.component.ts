@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IAuthProps, IAccount, IProject, IEnvironment, IProjectEnv } from '@shared/types';
-import { AccountService } from '@services/account.service';
+import { IAuthProps, IOrganization, IProject, IEnvironment, IProjectEnv } from '@shared/types';
+import { OrganizationService } from '@services/organization.service';
 import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
@@ -20,7 +20,7 @@ export class HeaderComponent implements OnInit {
   cannotReadProjectsMsg: string;
   cannotReadEnvsMsg: string;
   currentProjectEnv: IProjectEnv;
-  currentAccount: IAccount;
+  currentAccount: IOrganization;
 
   allProjects: IProject[];
   selectedProject: IProject;
@@ -33,7 +33,7 @@ export class HeaderComponent implements OnInit {
   flags = {};
   constructor(
     private router: Router,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private projectService: ProjectService,
     private message: NzMessageService,
     private readonly breadcrumbService: BreadcrumbService,
@@ -119,9 +119,9 @@ export class HeaderComponent implements OnInit {
   }
 
   private selectCurrentProjectEnv() {
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
+    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
 
-    this.currentAccount = currentAccountProjectEnv.account;
+    this.currentAccount = currentAccountProjectEnv.organization;
     this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
 
     this.selectedProject = {

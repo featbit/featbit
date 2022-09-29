@@ -2,30 +2,37 @@ using System.Security.Claims;
 
 namespace Domain.Users;
 
-public class User
+public class User : AuditedEntity
 {
-    public string Id { get; set; }
-
     public string Email { get; set; }
 
     public string Password { get; set; }
-    
-    public DateTime CreatedAt { get; set; }
 
-    public User(string id, string email, string password)
+    public User(Guid id, string email, string password)
     {
         Id = id;
+        
         Email = email;
         Password = password;
-        
+
         CreatedAt = DateTime.UtcNow;
+        UpdatedAt = CreatedAt;
+    }
+
+    public User(string email, string password)
+    {
+        Email = email;
+        Password = password;
+
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = CreatedAt;
     }
 
     public IEnumerable<Claim> Claims()
     {
         var claims = new List<Claim>
         {
-            new(UserClaims.Id, Id),
+            new(UserClaims.Id, Id.ToString()),
             new(UserClaims.Email, Email)
         };
 

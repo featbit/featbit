@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { AccountService } from '@services/account.service';
+import { OrganizationService } from '@services/organization.service';
 import { debounceTime } from 'rxjs/operators';
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { IUserProp, IUserType } from "@shared/types";
@@ -33,7 +33,7 @@ export class IndexComponent implements OnInit {
 
   constructor(
     private envUserService: EnvUserService,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private envUserPropService: EnvUserPropService,
     private router: Router
   ) {
@@ -80,8 +80,8 @@ export class IndexComponent implements OnInit {
 
   isUserPropsLoading: boolean = true;
   ngOnInit(): void {
-    const currentAccountProjectEnv = this.accountService.getCurrentAccountProjectEnv();
-    this.currentAccountId = currentAccountProjectEnv.account.id;
+    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
+    this.currentAccountId = currentAccountProjectEnv.organization.id;
     this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
 
     const filterAndAttributeConfig: any = JSON.parse(localStorage.getItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId)) || '{}');

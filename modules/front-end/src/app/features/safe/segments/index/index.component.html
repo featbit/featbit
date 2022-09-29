@@ -117,7 +117,7 @@
   </ng-template>
 
   <ng-template #deleteModalFooter>
-    <button nz-button nzType="default" (click)="this.closeDeleteModal()" i18n="@@common.cancel">取消</button>
+    <button nz-button nzType="default" (click)="this.closeDeleteModal()" i18n="@@common.cancel">Cancel</button>
     <button nz-button nzType="primary" [nzLoading]="this.deleting"
       [disabled]="currentDeletingSegmentFlagReferences.length > 0"
       (click)="delete(currentDeletingSegment.id)" i18n="@@common.remove">Remove</button>

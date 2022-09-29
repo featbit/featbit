@@ -48,8 +48,8 @@ const routes: Routes = [
         },
       },
       {
-        path: 'account-settings',
-        loadChildren: () => import("./account-settings/account-settings.module").then(m => m.AccountSettingsModule),
+        path: 'organizations',
+        loadChildren: () => import("./organizations/organizations.module").then(m => m.OrganizationsModule),
         data: {
           breadcrumb: $localize `:@@organization:Organization`
         },

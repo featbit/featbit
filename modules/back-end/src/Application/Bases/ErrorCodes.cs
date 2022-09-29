@@ -4,6 +4,10 @@ public static class ErrorCodes
 {
     // general
     public const string InternalServerError = nameof(InternalServerError);
+    public const string Unauthorized = nameof(Unauthorized);
+    
+    // application
+    public const string ResourceNotFound = nameof(ResourceNotFound);
     
     // identity error codes
     public const string EmailIsRequired = nameof(EmailIsRequired);
@@ -11,4 +15,7 @@ public static class ErrorCodes
     public const string EmailNotExist = nameof(EmailNotExist);
     public const string PasswordIsRequired = nameof(PasswordIsRequired);
     public const string PasswordMismatch = nameof(PasswordMismatch);
+    
+    // common
+    public const string NameIsRequired = nameof(NameIsRequired);
 }

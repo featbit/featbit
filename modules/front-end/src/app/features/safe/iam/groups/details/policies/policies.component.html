@@ -9,9 +9,9 @@
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
       </div>
-      <nz-select [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)" nzPlaceHolder="按状态筛选">
-        <nz-option [nzValue]="true" nzLabel="All policies" i18n-nzLabel="@@iam.groups.details.all-policies"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="Policies binded to current group" i18n-nzLabel="@@iam.groups.details.current-policies"></nz-option>
+      <nz-select class="policy-filter" [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)">
+        <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.groups.details.all-policies"></nz-option>
+        <nz-option [nzValue]="false" nzLabel="Affected to current group" i18n-nzLabel="@@iam.groups.details.current-policies"></nz-option>
       </nz-select>
     </div>
     <div class="table-wrapper">
@@ -36,7 +36,7 @@
         <tr *ngFor="let item of table.data">
           <td (click)="navigateToPolicyDetail(item.id)">{{item.name}}</td>
           <td>
-            <i *ngIf="item.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+            <i *ngIf="item.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
             {{item.type | policyType}}
           </td>
           <td>{{item.description}}</td>

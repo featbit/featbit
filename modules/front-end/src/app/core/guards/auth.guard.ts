@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { getAuth } from '@shared/utils';
 import { LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
-import { AccountService } from '@core/services/account.service';
+import { OrganizationService } from '@services/organization.service';
 import {PermissionsService} from "@services/permissions.service";
 
 @Injectable({
@@ -12,7 +12,7 @@ export class AuthGuard implements CanActivate {
 
   constructor(
     private router: Router,
-    private accountService: AccountService,
+    private accountService: OrganizationService,
     private permissionsService: PermissionsService
   ) { }
 
@@ -29,8 +29,8 @@ export class AuthGuard implements CanActivate {
 
       // check if account is initialized
       if (!url.startsWith("/initialization")) {
-        const accountProj = this.accountService.getCurrentAccountProjectEnv();
-        if (accountProj.account?.initialized === false) {
+        const accountProj = this.accountService.getCurrentOrganizationProjectEnv();
+        if (accountProj.organization?.initialized === false) {
           return this.router.parseUrl('/initialization');
         }
       }

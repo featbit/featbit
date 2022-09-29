@@ -1,5 +1,6 @@
 using Api.Controllers;
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Api.Middlewares;
@@ -33,6 +34,17 @@ public static class ApiExceptionMiddlewareExtension
             var errors = validationException.Errors.Select(x => x.ErrorCode);
             var validationError = ApiResponse<object>.Error(errors);
             await httpResponse.WriteAsJsonAsync(validationError);
+
+            return;
+        }
+        
+        // EntityNotFound exception
+        if (ex is EntityNotFoundException entityNotFoundException)
+        {
+            httpResponse.StatusCode = StatusCodes.Status404NotFound;
+
+            var entityNotFoundError = ApiResponse<object>.Error(ErrorCodes.ResourceNotFound);
+            await httpResponse.WriteAsJsonAsync(entityNotFoundError);
 
             return;
         }

@@ -9,7 +9,7 @@ import {
   IPagedGroupMember, IPagedGroupPolicy
 } from "@features/safe/iam/types/group";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { getCurrentAccount } from "@utils/project-env";
+import { getCurrentOrganization } from "@utils/project-env";
 import { environment } from "src/environments/environment";
 import { catchError } from "rxjs/operators";
 
@@ -20,8 +20,8 @@ export class GroupService {
   constructor(private http: HttpClient) { }
 
   get baseUrl() {
-    const accountId = getCurrentAccount().id;
-    return `${environment.url}/api/v2/accounts/${accountId}/groups`;
+    const organizationId = getCurrentOrganization().id;
+    return `${environment.url}/api/v1/organizations/${organizationId}/groups`;
   }
 
   getList(filter: GroupListFilter = new GroupListFilter()): Observable<IPagedGroup> {

@@ -16,7 +16,7 @@ import {
 import { SwitchV2Service } from "@services/switch-v2.service";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { getCurrentAccount, getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { ProjectService } from "@services/project.service";
 import { IEnvironment } from "@shared/types";
 import { NzNotificationService } from "ng-zorro-antd/notification";
@@ -291,7 +291,7 @@ export class IndexComponent implements OnInit {
     this.$searchV2.next();
 
     // get current envs
-    const curAccountId = getCurrentAccount().id;
+    const curAccountId = getCurrentOrganization().id;
     const curProjectId = currentProjectEnv.projectId;
     const curEnvId = currentProjectEnv.envId;
 

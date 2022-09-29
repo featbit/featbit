@@ -1,0 +1,95 @@
+<div class="standard-div">
+  <permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.ListProjects" i18n-messageIfDeny="@@org.project.projectListPermissionDenied" [messageIfDeny]="'You don\'t have permissions to read project list, please contact the admin to grant you the necessary permissions'">
+    <div class="project-operations">
+      <nz-input-group [nzPrefix]="orgIcon">
+        <input type="text" nz-input placeholder="Filter by name" [(ngModel)]="searchValue" i18n-placeholder="@@org.project.projectFilterPlacehoder"/>
+        <ng-template #orgIcon>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+      </nz-input-group>
+      <button class="standard-btn" nz-button nzType="primary" permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.CreateProject" (actionIfAllow)="onCreateProjectClick()">
+        <i nz-icon nzType="icons:icon-add"></i>
+        <ng-container i18n="@@common.add">Add</ng-container>
+      </button>
+    </div>
+    <div class="project-list">
+      <div *ngFor="let project of projects | projectFilter: searchValue" class="project">
+        <nz-card nzBorderless>
+          <nz-descriptions nzTitle="{{project.name}}" [nzExtra]="extraTemplate"></nz-descriptions>
+          <permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.ListEnvs" i18n-messageIfDeny="@@org.project.envListPermissionDenied" [messageIfDeny]="'You don\'t have permissions to read env list, please contact the admin to grant you the necessary permissions'">
+            <div class="env-list">
+              <div *ngFor="let env of project.environments">
+                <div class="env">
+                  <div class="env-basis">
+                    <div>
+                      <div class="desc-name" i18n="@@org.project.envName">Environment name</div>
+                      <div class="desc-content">{{env.name}}</div>
+                    </div>
+                    <div>
+                      <div class="desc-name" i18n="@@org.project.description">Description</div>
+                      <div class="desc-content">{{env.description}}</div>
+                    </div>
+                  </div>
+                  <div class="env-secret">
+                    <div>
+                      <div class="desc-name" i18n="@@org.project.secret">Secret</div>
+                      <div class="desc-content">
+                        <nz-input-group [nzSuffix]="copySuffix">
+                          <input readonly nz-input value="{{ env.secret }}">
+                        </nz-input-group>
+                        <ng-template #copySuffix>
+                          <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(env.secret)"></i>
+                        </ng-template>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="env-operations">
+                    <a permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvInfo" (actionIfAllow)="onEditEnvClick(project, env)">
+                      <span style="color: #23AD7F;" i18n="@@org.project.edit">Edit</span>
+                    </a>
+                    <ng-container *ngIf="isEnvDeleteBtnVisible(env)">
+                      <nz-divider nzType="vertical"></nz-divider>
+                      <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                         nzPopconfirmPlacement="bottomRight"
+                         (nzOnConfirm)="onDeleteEnvClick(project, env)" [nzIcon]="iconTplEnv">
+                        <span style="color: #717D8A" i18n="@@common.remove">Remove</span>
+                      </a>
+                    </ng-container>
+                    <ng-template #iconTplEnv>
+                      <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+                    </ng-template>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </permission-check>
+        </nz-card>
+        <ng-template #extraTemplate>
+          <button class="action-btn" nz-button nzType="default" nzSize="small" permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.UpdateProjectInfo" (actionIfAllow)="onEditProjectClick(project)">
+            <i nz-icon nzType="icons:icon-edit"></i>
+            <ng-container i18n="@@org.project.edit">Edit</ng-container>
+          </button>
+          <button class="action-btn" nz-button nzType="default" nzSize="small"
+                  *ngIf="currentProjectEnv?.projectId !== project.id"
+                  i18n-nz-popconfirm="@@common.remove-confirm"
+                  nz-popconfirm="This operation cannot be reverted, are you sure to remove it??"
+                  nzPopconfirmPlacement="bottomRight"
+                  (nzOnConfirm)="onDeleteProjectClick(project)">
+            <i nz-icon nzType="icons:icon-delete"></i>
+            <ng-container i18n="@@common.remove">Remove</ng-container>
+          </button>
+          <button class="action-btn" nz-button nzType="default" nzSize="small"
+                  permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"
+                  >
+            <i style="color: #3CC798" nz-icon nzType="icons:icon-plus"></i>
+            <ng-container i18n="@@org.project.addEnv">Add environment</ng-container>
+          </button>
+        </ng-template>
+      </div>
+    </div>
+  </permission-check>
+
+</div>
+
+<app-project-drawer [visible]="creatEditProjectFormVisible" [currentAccountId]="currentAccountId" (close)="projectClosed($event)" [project]="project"></app-project-drawer>
+<app-env-drawer [visible]="creatEditEnvFormVisible" [currentAccountId]="currentAccountId" [rn]="getEnvRN(project, env)" (close)="envClosed($event)" [env]="env"></app-env-drawer>

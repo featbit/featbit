@@ -40,7 +40,7 @@
 
   <div class="block" *ngIf="!isLoading; else loadingTem;" >
     <div class="delete">
-      <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
+      <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it??"
               nzPopconfirmPlacement="bottomRight"
               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
               (nzOnConfirm)="deleteGroup()" [nzIcon]="iconTplIamUser">

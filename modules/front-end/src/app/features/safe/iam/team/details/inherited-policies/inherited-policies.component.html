@@ -20,10 +20,10 @@
                 (nzPageIndexChange)="doSearch(false)">
         <thead>
         <tr>
-          <th i18n="@@iam.team.details.name">Name</th>
+          <th i18n="@@common.name">Name</th>
           <th i18n="@@iam.team.details.groups">Groups</th>
-          <th i18n="@@iam.team.details.type">Type</th>
-          <th i18n="@@iam.team.details.description">Description</th>
+          <th i18n="@@common.type">Type</th>
+          <th i18n="@@common.description">Description</th>
           <th i18n="@@common.actions">Actions</th>
         </tr>
         </thead>
@@ -32,7 +32,7 @@
           <td (click)="navigateToPolicy(item.id)">{{item.name}}</td>
           <td>{{item.groupName}}</td>
           <td>
-            <i *ngIf="item.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+            <i *ngIf="item.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
             {{item.type | policyType}}
           </td>
           <td>{{item.description}}</td>

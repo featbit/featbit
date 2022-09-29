@@ -1,10 +1,8 @@
 export interface IMember {
   id: string;
   email: string;
-  phoneNumber: string;
   invitorId: string;
   initialPassword?: string;
-  role: string;
   groups: IMemberGroup[];
   name: string;
   // frontend use only
@@ -63,7 +61,7 @@ export interface IPagedMember {
 }
 
 export function memberRn(member: IMember) {
-  const identity = member.email ?? member.phoneNumber;
+  const identity = member.email;
   return `member/${identity}`;
 }
 

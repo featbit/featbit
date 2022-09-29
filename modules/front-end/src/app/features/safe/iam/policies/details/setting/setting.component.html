@@ -32,7 +32,7 @@
     <div class="item">
       <div class="label" i18n="@@common.type">Type</div>
       <div class="value">
-        <i *ngIf="policy.type === 'FFCManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+        <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
         {{policy.type | policyType}}
       </div>
     </div>
@@ -46,9 +46,9 @@
   </div>
 
   <ng-container *ngIf="!isLoading; else loadingTem;">
-    <div class="block"  *ngIf="policy.type !== 'FFCManaged'">
+    <div class="block"  *ngIf="policy.type !== 'SysManaged'">
       <div class="delete">
-        <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="Can not be recovered, are you sure to remove it?"
+        <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it??"
                 nzPopconfirmPlacement="bottomRight"
                 [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                 (nzOnConfirm)="deletePolicy()" [nzIcon]="iconTpl">
