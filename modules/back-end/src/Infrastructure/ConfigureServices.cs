@@ -5,7 +5,6 @@ using Domain.Users;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
-using Infrastructure.MongoDb;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;

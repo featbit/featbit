@@ -1,4 +1,3 @@
-using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Groups;
 using Application.Services;
@@ -6,30 +5,15 @@ using Domain.Groups;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Users;
-using Infrastructure.MongoDb;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Groups;
 
-public class GroupService : IGroupService
+public class GroupService : MongoDbServiceBase<Group>, IGroupService
 {
-    private readonly MongoDbClient _mongoDb;
-
-    public GroupService(MongoDbClient mongoDb)
+    public GroupService(MongoDbClient mongoDb) : base(mongoDb)
     {
-        _mongoDb = mongoDb;
-    }
-
-    public async Task<Group> GetAsync(Guid id)
-    {
-        var group = await _mongoDb.QueryableOf<Group>().FirstOrDefaultAsync(x => x.Id == id);
-        if (group == null)
-        {
-            throw new EntityNotFoundException(nameof(Group), id.ToString());
-        }
-
-        return group;
     }
 
     public async Task<PagedResult<Group>> GetListAsync(Guid organizationId, GroupFilter groupFilter)
@@ -50,7 +34,7 @@ public class GroupService : IGroupService
             filters.Add(nameFilter);
         }
 
-        var collection = _mongoDb.CollectionOf<Group>();
+        var collection = MongoDb.CollectionOf<Group>();
         var filter = filterBuilder.And(filters);
 
         var totalCount = await collection.CountDocumentsAsync(filter);
@@ -67,8 +51,7 @@ public class GroupService : IGroupService
 
     public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
     {
-        var isNameUsed =
-            await _mongoDb.QueryableOf<Group>().AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
+        var isNameUsed = await AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
 
         return isNameUsed;
     }
@@ -78,9 +61,9 @@ public class GroupService : IGroupService
         Guid groupId,
         GroupMemberFilter filter)
     {
-        var members = _mongoDb.QueryableOf<User>();
-        var organizationUsers = _mongoDb.QueryableOf<OrganizationUser>();
-        var groupMembers = _mongoDb.QueryableOf<GroupMember>();
+        var members = MongoDb.QueryableOf<User>();
+        var organizationUsers = MongoDb.QueryableOf<OrganizationUser>();
+        var groupMembers = MongoDb.QueryableOf<GroupMember>();
 
         var query =
             from member in members
@@ -126,12 +109,12 @@ public class GroupService : IGroupService
     }
 
     public async Task<PagedResult<GroupPolicyVm>> GetPoliciesAsync(
-        Guid organizationId, 
+        Guid organizationId,
         Guid groupId,
         GroupPolicyFilter filter)
     {
-        var policies = _mongoDb.QueryableOf<Policy>();
-        var groupPolicies = _mongoDb.QueryableOf<GroupPolicy>();
+        var policies = MongoDb.QueryableOf<Policy>();
+        var groupPolicies = MongoDb.QueryableOf<GroupPolicy>();
 
         var query =
             from policy in policies

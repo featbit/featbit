@@ -1,4 +1,3 @@
-using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Policies;
 using Application.Services;
@@ -7,35 +6,20 @@ using Domain.Members;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Users;
-using Infrastructure.MongoDb;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Policies;
 
-public class PolicyService : IPolicyService
+public class PolicyService : MongoDbServiceBase<Policy>, IPolicyService
 {
-    private readonly MongoDbClient _mongoDb;
-
-    public PolicyService(MongoDbClient mongoDb)
+    public PolicyService(MongoDbClient mongoDb) : base(mongoDb)
     {
-        _mongoDb = mongoDb;
-    }
-
-    public async Task<Policy> GetAsync(Guid id)
-    {
-        var policy = await _mongoDb.QueryableOf<Policy>().FirstOrDefaultAsync(x => x.Id == id);
-        if (policy == null)
-        {
-            throw new EntityNotFoundException(nameof(Policy), id.ToString());
-        }
-
-        return policy;
     }
 
     public async Task<PagedResult<Policy>> GetListAsync(Guid organizationId, PolicyFilter filter)
     {
-        var query = _mongoDb.QueryableOf<Policy>()
+        var query = MongoDb.QueryableOf<Policy>()
             .Where(x => x.OrganizationId == organizationId || x.Type == PolicyTypes.SysManaged);
 
         var name = filter.Name;
@@ -56,8 +40,7 @@ public class PolicyService : IPolicyService
 
     public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
     {
-        var isNameUsed =
-            await _mongoDb.QueryableOf<Policy>().AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
+        var isNameUsed = await AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
 
         return isNameUsed;
     }
@@ -67,8 +50,8 @@ public class PolicyService : IPolicyService
         Guid policyId,
         PolicyGroupFilter filter)
     {
-        var groups = _mongoDb.QueryableOf<Group>();
-        var groupPolicies = _mongoDb.QueryableOf<GroupPolicy>();
+        var groups = MongoDb.QueryableOf<Group>();
+        var groupPolicies = MongoDb.QueryableOf<GroupPolicy>();
 
         var query =
             from theGroup in groups
@@ -118,9 +101,9 @@ public class PolicyService : IPolicyService
         Guid policyId,
         PolicyMemberFilter filter)
     {
-        var users = _mongoDb.QueryableOf<User>();
-        var organizationUsers = _mongoDb.QueryableOf<OrganizationUser>();
-        var memberPolicies = _mongoDb.QueryableOf<MemberPolicy>();
+        var users = MongoDb.QueryableOf<User>();
+        var organizationUsers = MongoDb.QueryableOf<OrganizationUser>();
+        var memberPolicies = MongoDb.QueryableOf<MemberPolicy>();
 
         var query =
             from user in users
