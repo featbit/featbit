@@ -17,4 +17,6 @@ public interface IOrganizationService
         ICollection<Guid> policies = null,
         ICollection<Guid> groups = null
     );
+
+    Task DeleteAsync(Guid id);
 }
