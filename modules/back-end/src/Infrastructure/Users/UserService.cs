@@ -28,4 +28,9 @@ public class UserService : IUserService
     {
         return await _users.FindByEmailAsync(email);
     }
+
+    public async Task UpdateAsync(User user)
+    {
+        await _users.UpdateAsync(user);
+    }
 }

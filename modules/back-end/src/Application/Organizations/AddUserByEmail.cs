@@ -21,6 +21,7 @@ public class AddUserByEmailValidator : AbstractValidator<AddUserByEmail>
     public AddUserByEmailValidator()
     {
         RuleFor(x => x.Email)
+            .NotEmpty().WithErrorCode(ErrorCodes.EmailIsRequired)
             .EmailAddress().WithErrorCode(ErrorCodes.EmailIsInvalid);
     }
 }
