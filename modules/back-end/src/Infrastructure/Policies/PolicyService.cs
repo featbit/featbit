@@ -17,6 +17,20 @@ public class PolicyService : MongoDbServiceBase<Policy>, IPolicyService
     {
     }
 
+    public async Task DeleteAsync(Guid id)
+    {
+        // delete policy 
+        await MongoDb.CollectionOf<Policy>().DeleteOneAsync(x => x.Id == id);
+
+        // delete policy groups
+        await MongoDb.CollectionOf<GroupPolicy>()
+            .DeleteManyAsync(x => x.PolicyId == id);
+
+        // delete policy members
+        await MongoDb.CollectionOf<MemberPolicy>()
+            .DeleteManyAsync(x => x.PolicyId == id);
+    }
+
     public async Task<PagedResult<Policy>> GetListAsync(Guid organizationId, PolicyFilter filter)
     {
         var query = MongoDb.QueryableOf<Policy>()

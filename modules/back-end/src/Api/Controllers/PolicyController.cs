@@ -1,5 +1,6 @@
 using Application.Bases.Models;
 using Application.Policies;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
@@ -44,6 +45,49 @@ public class PolicyController : ApiControllerBase
 
         var isNameUsed = await Mediator.Send(request);
         return Ok(isNameUsed);
+    }
+
+    [HttpPost]
+    public async Task<ApiResponse<PolicyVm>> CreateAsync(Guid organizationId, CreatePolicy request)
+    {
+        request.OrganizationId = organizationId;
+
+        var policy = await Mediator.Send(request);
+        return Ok(policy);
+    }
+
+    [HttpPut("{policyId:guid}/settings")]
+    public async Task<ApiResponse<PolicyVm>> UpdateSettingAsync(Guid policyId, UpdatePolicySetting request)
+    {
+        request.PolicyId = policyId;
+
+        var policy = await Mediator.Send(request);
+        return Ok(policy);
+    }
+
+    [HttpPut("{policyId:guid}/statements")]
+    public async Task<ApiResponse<PolicyVm>> UpdateStatementsAsync(Guid policyId, ICollection<PolicyStatement> statements)
+    {
+        var request = new UpdatePolicyStatements
+        {
+            PolicyId = policyId,
+            Statements = statements
+        };
+
+        var policy = await Mediator.Send(request);
+        return Ok(policy);
+    }
+
+    [HttpDelete("{policyId:guid}")]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid policyId)
+    {
+        var request = new DeletePolicy
+        {
+            PolicyId = policyId
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
     }
 
     [HttpGet("{policyId:guid}/groups")]

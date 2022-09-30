@@ -23,4 +23,7 @@ public static class ErrorCodes
     public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
     public const string ProjectNameRequired = nameof(ProjectNameRequired);
     public const string EnvironmentsRequired = nameof(EnvironmentsRequired);
+    
+    // policy
+    public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
 }
