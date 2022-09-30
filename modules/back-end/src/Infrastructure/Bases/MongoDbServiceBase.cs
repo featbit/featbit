@@ -20,7 +20,7 @@ public class MongoDbServiceBase<TEntity> where TEntity : Entity
         var entity = await FindOneAsync(x => x.Id == id);
         if (entity == null)
         {
-            throw new EntityNotFoundException(nameof(TEntity), id.ToString());
+            throw new EntityNotFoundException(typeof(TEntity).Name, id.ToString());
         }
 
         return entity;

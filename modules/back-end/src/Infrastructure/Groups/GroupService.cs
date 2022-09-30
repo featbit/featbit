@@ -16,6 +16,18 @@ public class GroupService : MongoDbServiceBase<Group>, IGroupService
     {
     }
 
+    public async Task DeleteAsync(Guid id)
+    {
+        // delete group
+        await MongoDb.CollectionOf<Group>().DeleteOneAsync(x => x.Id == id);
+
+        // delete group member
+        await MongoDb.CollectionOf<GroupMember>().DeleteManyAsync(x => x.GroupId == id);
+
+        // delete group policy
+        await MongoDb.CollectionOf<GroupPolicy>().DeleteManyAsync(x => x.GroupId == id);
+    }
+
     public async Task<PagedResult<Group>> GetListAsync(Guid organizationId, GroupFilter groupFilter)
     {
         var filterBuilder = Builders<Group>.Filter;
@@ -159,5 +171,45 @@ public class GroupService : MongoDbServiceBase<Group>, IGroupService
         }).ToList();
 
         return new PagedResult<GroupPolicyVm>(totalCount, vms);
+    }
+
+    public async Task AddMemberAsync(Guid organizationId, Guid groupId, Guid memberId)
+    {
+        var existed = await MongoDb.QueryableOf<GroupMember>()
+            .AnyAsync(x => x.OrganizationId == organizationId && x.GroupId == groupId && x.MemberId == memberId);
+        if (existed)
+        {
+            return;
+        }
+
+        var groupMember = new GroupMember(groupId, organizationId, memberId);
+
+        await MongoDb.CollectionOf<GroupMember>().InsertOneAsync(groupMember);
+    }
+
+    public async Task RemoveMemberAsync(Guid groupId, Guid memberId)
+    {
+        await MongoDb.CollectionOf<GroupMember>()
+            .DeleteOneAsync(x => x.GroupId == groupId && x.MemberId == memberId);
+    }
+
+    public async Task AddPolicyAsync(Guid groupId, Guid policyId)
+    {
+        var existed = await MongoDb.QueryableOf<GroupPolicy>()
+            .AnyAsync(x => x.GroupId == groupId && x.PolicyId == policyId);
+        if (existed)
+        {
+            return;
+        }
+
+        var groupPolicy = new GroupPolicy(groupId, policyId);
+
+        await MongoDb.CollectionOf<GroupPolicy>().InsertOneAsync(groupPolicy);
+    }
+
+    public async Task RemovePolicyAsync(Guid groupId, Guid policyId)
+    {
+        await MongoDb.CollectionOf<GroupPolicy>()
+            .DeleteOneAsync(x => x.GroupId == groupId && x.PolicyId == policyId);
     }
 }
