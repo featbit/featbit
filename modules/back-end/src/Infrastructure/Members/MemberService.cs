@@ -197,7 +197,7 @@ public class MemberService : IMemberService
                 on groupPolicy.PolicyId equals policy.Id
             where groupMember.OrganizationId == organizationId && groupMember.MemberId == memberId
             select policy;
-        
+
         var directPolicies = await directPolicyQuery.ToListAsync();
         var inheritedPolicies = await inheritedPolicyQuery.ToListAsync();
 
@@ -302,5 +302,25 @@ public class MemberService : IMemberService
             .ToListAsync();
 
         return new PagedResult<InheritedMemberPolicy>(totalCount, items);
+    }
+
+    public async Task AddPolicyAsync(MemberPolicy policy)
+    {
+        var existed = await _mongoDb.QueryableOf<MemberPolicy>().AnyAsync(
+            x => x.OrganizationId == policy.OrganizationId && x.MemberId == policy.MemberId && x.PolicyId == policy.PolicyId
+        );
+        if (existed)
+        {
+            return;
+        }
+        
+        await _mongoDb.CollectionOf<MemberPolicy>().InsertOneAsync(policy);
+    }
+
+    public async Task RemovePolicyAsync(Guid organizationId, Guid memberId, Guid policyId)
+    {
+        await _mongoDb.CollectionOf<MemberPolicy>().DeleteOneAsync(
+            x => x.OrganizationId == organizationId && x.MemberId == memberId && x.PolicyId == policyId
+        );
     }
 }
