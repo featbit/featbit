@@ -30,27 +30,36 @@ public class OrganizationController : ApiControllerBase
 
         return Ok(organization);
     }
-    
+
     [HttpPost("{id:guid}/add-user-by-email")]
     public async Task<ApiResponse<bool>> AddMemberByEmailAsync(Guid id, [FromBody] AddUserByEmail request)
     {
         request.OrganizationId = id;
-        
+
         var success = await Mediator.Send(request);
 
         return Ok(success);
     }
-    
+
+    [HttpPut("{id:guid}/remove-user")]
+    public async Task<ApiResponse<bool>> RemoveMemberAsync(Guid id, RemoveUser request)
+    {
+        request.OrganizationId = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
     [HttpPost("{id:guid}/onboarding")]
     public async Task<ApiResponse<bool>> Onboarding(Guid id, [FromBody] Onboarding request)
     {
         request.OrganizationId = id;
-        
+
         var success = await Mediator.Send(request);
 
         return Ok(success);
     }
-    
+
     [HttpPut("{id:guid}")]
     public async Task<ApiResponse<OrganizationVm>> UpdateAsync(Guid id, UpdateOrganization request)
     {

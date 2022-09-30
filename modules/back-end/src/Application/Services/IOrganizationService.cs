@@ -11,12 +11,14 @@ public interface IOrganizationService
     Task AddAsync(Organization organization);
 
     Task UpdateAsync(Organization organization);
-    
+
     Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid> policies = null,
         ICollection<Guid> groups = null
     );
+
+    Task RemoveUserAsync(Guid organizationId, Guid userId);
 
     Task DeleteAsync(Guid id);
 }

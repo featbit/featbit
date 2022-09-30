@@ -72,6 +72,24 @@ public class OrganizationService : MongoDbServiceBase<Organization>, IOrganizati
         }
     }
 
+    public async Task RemoveUserAsync(Guid organizationId, Guid userId)
+    {
+        // delete organization user
+        await MongoDb.CollectionOf<OrganizationUser>().DeleteManyAsync(
+            x => x.OrganizationId == organizationId && x.UserId == userId
+        );
+
+        // delete member policies
+        await MongoDb.CollectionOf<MemberPolicy>().DeleteManyAsync(
+            x => x.OrganizationId == organizationId && x.MemberId == userId
+        );
+
+        // delete member groups
+        await MongoDb.CollectionOf<GroupMember>().DeleteManyAsync(
+            x => x.OrganizationId == organizationId && x.MemberId == userId
+        );
+    }
+
     public async Task DeleteAsync(Guid id)
     {
         // delete organization
@@ -79,13 +97,13 @@ public class OrganizationService : MongoDbServiceBase<Organization>, IOrganizati
 
         // delete organization user
         await MongoDb.CollectionOf<OrganizationUser>().DeleteManyAsync(x => x.OrganizationId == id);
-        
+
         // delete organization policies & groups
         await MongoDb.CollectionOf<Policy>().DeleteManyAsync(x => x.OrganizationId == id);
         await MongoDb.CollectionOf<MemberPolicy>().DeleteManyAsync(x => x.OrganizationId == id);
         await MongoDb.CollectionOf<Group>().DeleteManyAsync(x => x.OrganizationId == id);
         await MongoDb.CollectionOf<GroupMember>().DeleteManyAsync(x => x.OrganizationId == id);
-        
+
         // delete projects & related environments
         var projectIds = await MongoDb.QueryableOf<Project>()
             .Where(x => x.OrganizationId == id)
