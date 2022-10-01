@@ -9,13 +9,8 @@
     <div class="item title">
       <div class="label" i18n="@@common.name">Name</div>
       <div class="value">
-        <ng-container *ngIf="!isEditingTitle">
+        <ng-container>
           <div [nz-tooltip] class="text">{{member.name ?? '--'}}</div>
-          <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
-        </ng-container>
-        <ng-container *ngIf="isEditingTitle">
-          <input nz-input placeholder="Name" i18n-placeholder="@@iam.team.details.name-placeholder" [(ngModel)]="member.name" />
-          <i class="edit-save" (click)="onSaveSwitch()" nz-icon nzType="icons:icon-save"></i>
         </ng-container>
       </div>
     </div>
