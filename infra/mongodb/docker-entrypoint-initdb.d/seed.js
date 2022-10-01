@@ -22,7 +22,7 @@ db.Users.insertOne(
         _id: userId,
         email: "test@featbit.com",
         password: "AQAAAAEAACcQAAAAELDHEjCrDQrmnAXU5C//mOLvUBJ7lnVFEMMFxNMDIIrF7xK8JDQKUifU3HH4gexNAQ==",
-        name: null,
+        name: "",
         createAt: new Date(),
         updatedAt: new Date()
     }
