@@ -5,6 +5,7 @@ import { IAuthProps } from "@shared/types";
 import { getAuth } from "@utils/index";
 import { IMember, memberRn } from "@features/safe/iam/types/member";
 import { MemberService } from "@services/member.service";
+import {UserService} from "@services/user.service";
 
 @Component({
   selector: 'user-setting',
@@ -20,6 +21,7 @@ export class SettingComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private message: NzMessageService,
+    private userService: UserService,
     private memberService: MemberService,
     private router: Router
   ) { }
@@ -52,10 +54,10 @@ export class SettingComponent implements OnInit {
   }
 
   updateMember() {
-    this.memberService.update(this.member.id, {
-      name: this.member.name
-    }).subscribe(() => {
+    const { email, name } = this.member;
+    this.userService.updateProfile({ email, name }).subscribe((profile) => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+      this.userService.updateLocaleProfile(profile as IAuthProps);
     }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 

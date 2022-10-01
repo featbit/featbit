@@ -4,6 +4,7 @@ namespace Application.Users;
 
 public class UpdateProfile : IRequest<Profile>
 {
+    public string Name { get; set; }
     public string Email { get; set; }
 }
 
@@ -32,7 +33,7 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfile, Profile>
     {
         var user = await _service.GetAsync(_currentUser.Id);
 
-        user.Update(request.Email);
+        user.Update(request.Email, request.Name);
 
         await _service.UpdateAsync(user);
 

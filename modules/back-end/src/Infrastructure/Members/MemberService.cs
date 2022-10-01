@@ -36,6 +36,7 @@ public class MemberService : IMemberService
             {
                 Id = user.Id,
                 Email = user.Email,
+                Name = user.Name,
                 InvitorId = organizationUser.InvitorId,
                 InitialPassword = organizationUser.InitialPassword,
             };
@@ -66,6 +67,7 @@ public class MemberService : IMemberService
             {
                 Id = user.Id,
                 Email = user.Email,
+                Name = user.Name,
                 InvitorId = organizationUser.InvitorId,
                 InitialPassword = organizationUser.InitialPassword,
             };

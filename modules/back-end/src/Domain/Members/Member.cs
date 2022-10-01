@@ -6,6 +6,8 @@ public class Member
 
     public string Email { get; set; }
 
+    public string Name { get; set; }
+
     public Guid? InvitorId { get; set; }
 
     public string InitialPassword { get; set; }

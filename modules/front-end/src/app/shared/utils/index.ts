@@ -6,8 +6,7 @@ import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
 export function getAuth() : IAuthProps | null {
   const auth = localStorage.getItem(USER_PROFILE);
   if (!auth) return null;
-  const profile = JSON.parse(auth);
-  return { name: profile.email, ...profile };
+  return JSON.parse(auth);
 }
 
 export function getLocalStorageKey(key: string, isUserIndependant: boolean): string {

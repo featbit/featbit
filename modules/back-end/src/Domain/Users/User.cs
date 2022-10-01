@@ -46,9 +46,10 @@ public class User : AuditedEntity
         return claims;
     }
 
-    public void Update(string email)
+    public void Update(string email, string name)
     {
         Email = email;
+        Name = name;
         
         UpdatedAt = DateTime.UtcNow;
     }

@@ -3,11 +3,11 @@
     <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
       <nz-form-item>
         <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
-          <nz-input-group [nzPrefix]="userPrefix">
-            <input type="text" nz-input formControlName="identity" i18n-placeholder placeholder="username"/>
+          <nz-input-group [nzPrefix]="emailPrefix">
+            <input type="text" nz-input formControlName="identity" i18n-placeholder="@@common.email" placeholder="Email"/>
           </nz-input-group>
-          <ng-template #userPrefix>
-            <i nz-icon nzType="icons:icon-user"></i>
+          <ng-template #emailPrefix>
+            <i nz-icon nzType="icons:icon-email"></i>
           </ng-template>
           <ng-template #invalidPhoneNumberOrEmail let-control>
             <ng-container *ngIf="control.hasError('required')" i18n>username is mandatory</ng-container>

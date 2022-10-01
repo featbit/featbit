@@ -1,6 +1,17 @@
 <div class="standard-div">
   <form nz-form [formGroup]="profileForm" class="" [nzLayout]="'vertical'" (ngSubmit)="updateProfile()">
     <nz-form-item>
+      <label for="name" i18n="@@common.name">Name</label>
+      <nz-form-control>
+        <nz-input-group [nzPrefix]="userPrefix">
+          <input id="name" type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+        </nz-input-group>
+        <ng-template #userPrefix>
+          <i nz-icon nzType="icons:icon-user"></i>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
       <label for="email" i18n="@@org.profile.email">Email</label>
       <nz-form-control nzErrorTip="Email is mandatory!" i18n-nzErrorTip="@@org.profile.emailMandatory">
         <nz-input-group [nzPrefix]="emailPrefix">
