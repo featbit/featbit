@@ -32,14 +32,6 @@
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">22</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">24</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
           <context context-type="linenumber">12</context>
         </context-group>
@@ -221,7 +213,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">61</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
@@ -297,7 +289,7 @@
         <source>Environment successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">108</context>
         </context-group>
         <target>环境更新成功</target>
       </trans-unit>
@@ -305,7 +297,7 @@
         <source>Environment successfully created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">122</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>环境创建成功</target>
       </trans-unit>
@@ -313,7 +305,7 @@
         <source>Successfully regenerated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <target>重新生成 secret 成功</target>
       </trans-unit>
@@ -357,11 +349,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">46</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">55</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
@@ -813,7 +805,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.ts</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
@@ -1021,7 +1013,7 @@
         <source>You don&apos;t have permissions to read project list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">52</context>
         </context-group>
         <target>您没有查看项目列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -1029,7 +1021,7 @@
         <source>You don&apos;t have permissions to read environment list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">53</context>
         </context-group>
         <target>您没有查看该环境列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -1037,7 +1029,7 @@
         <source>You don&apos;t have permissions to read project and environment list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">53</context>
         </context-group>
         <target>您没有查看项目环境列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -1077,7 +1069,7 @@
         <source>Permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">21</context>
         </context-group>
         <target>权限</target>
       </trans-unit>
@@ -1085,11 +1077,11 @@
         <source>(Policy and group cannot be both empty)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">21</context>
         </context-group>
         <target>（策略和组不可同时为空）</target>
       </trans-unit>
-      <trans-unit id="4086606389696938932" datatype="html">
+      <trans-unit id="common.account" datatype="html">
         <source>Account</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
@@ -1097,7 +1089,7 @@
         </context-group>
         <target>账户管理</target>
       </trans-unit>
-      <trans-unit id="4915431133669985304" datatype="html">
+      <trans-unit id="common.profile" datatype="html">
         <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
@@ -1105,13 +1097,13 @@
         </context-group>
         <target>个人信息</target>
       </trans-unit>
-      <trans-unit id="3797778920049399855" datatype="html">
+      <trans-unit id="common.logout" datatype="html">
         <source>Logout</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
           <context context-type="linenumber">103</context>
         </context-group>
-        <target>退出登录</target>
+        <target>退出</target>
       </trans-unit>
       <trans-unit id="expt.metric.name-cannot-be-empty" datatype="html">
         <source>Metric name cannot be empty</source>
@@ -2432,7 +2424,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">175</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <target>复制成功</target>
       </trans-unit>
@@ -3744,7 +3736,7 @@ Save &amp; Update        </source>
         <target>选择操作</target>
       </trans-unit>
       <trans-unit id="iam.policies.details.managed-policies-cannot-be-modified" datatype="html">
-        <source>System Managed policies cannot be modified</source>
+        <source>System Managed policies cannot be modified. If needed, you can make a copy and modify it for your own needs.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
           <context context-type="linenumber">1</context>
@@ -3753,7 +3745,7 @@ Save &amp; Update        </source>
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
           <context context-type="linenumber">152</context>
         </context-group>
-        <target>系统托管策略不允许被修改</target>
+        <target>系统托管策略不允许被修改。 如确有需要，可以复制以后再根据需求进行修改。</target>
       </trans-unit>
       <trans-unit id="common.copy" datatype="html">
         <source>Copy</source>
@@ -4341,6 +4333,14 @@ Legal resource name (RN) cannot includeand :        </source>
         </context-group>
         <target>项</target>
       </trans-unit>
+      <trans-unit id="common.get-started" datatype="html">
+        <source>Get started</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target>开始使用</target>
+      </trans-unit>
       <trans-unit id="onboarding.create-org-project" datatype="html">
         <source>Create organization and project</source>
         <context-group purpose="location">
@@ -4418,7 +4418,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Organization name updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">93</context>
         </context-group>
         <target>机构名称更新成功！</target>
       </trans-unit>
@@ -4482,7 +4482,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Not provided</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">26</context>
+          <context context-type="linenumber">28</context>
         </context-group>
         <target>未关联</target>
       </trans-unit>
@@ -4490,7 +4490,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Profile successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">45</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <target>个人信息更新成功</target>
       </trans-unit>
@@ -4498,7 +4498,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>This feature will be released soon!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">56</context>
         </context-group>
         <target>该功能正在开发中</target>
       </trans-unit>
@@ -4545,6 +4545,22 @@ Legal resource name (RN) cannot includeand :        </source>
           <context context-type="linenumber">70</context>
         </context-group>
         <target>编辑</target>
+      </trans-unit>
+      <trans-unit id="org.project.env-remove-success" datatype="html">
+        <source>Environment successfully removed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
+          <context context-type="linenumber">101</context>
+        </context-group>
+        <target>环境创建成功</target>
+      </trans-unit>
+      <trans-unit id="org.project.project-remove-success" datatype="html">
+        <source>Project successfully removed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+        <target>项目删除成功</target>
       </trans-unit>
       <trans-unit id="segments" datatype="html">
         <source>Segments</source>

@@ -4,13 +4,20 @@ namespace Api.Controllers;
 
 public class UserController : ApiControllerBase
 {
-    [HttpGet]
-    [Route("profile")]
+    [HttpGet("profile")]
     public async Task<ApiResponse<Profile>> GetProfileAsync()
     {
-        var request = new GetProfile { Id = CurrentUser.Id };
-        
+        var request = new GetProfile();
+
         var profile = await Mediator.Send(request);
+        return Ok(profile);
+    }
+
+    [HttpPut("profile")]
+    public async Task<ApiResponse<Profile>> UpdateProfileAsync(UpdateProfile request)
+    {
+        var profile = await Mediator.Send(request);
+
         return Ok(profile);
     }
 }

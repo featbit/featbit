@@ -5,6 +5,7 @@ import { IAuthProps } from "@shared/types";
 import { getAuth } from "@utils/index";
 import { IMember, memberRn } from "@features/safe/iam/types/member";
 import { MemberService } from "@services/member.service";
+import {UserService} from "@services/user.service";
 
 @Component({
   selector: 'user-setting',
@@ -20,6 +21,7 @@ export class SettingComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private message: NzMessageService,
+    private userService: UserService,
     private memberService: MemberService,
     private router: Router
   ) { }
@@ -51,14 +53,6 @@ export class SettingComponent implements OnInit {
     }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 
-  updateMember() {
-    this.memberService.update(this.member.id, {
-      name: this.member.name
-    }).subscribe(() => {
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
-  }
-
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
@@ -67,10 +61,5 @@ export class SettingComponent implements OnInit {
 
   toggleTitleEditState(): void {
     this.isEditingTitle = !this.isEditingTitle;
-  }
-
-  onSaveSwitch(cb?: Function) {
-    this.isEditingTitle = !this.isEditingTitle;
-    this.updateMember();
   }
 }

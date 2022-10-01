@@ -98,4 +98,32 @@ public class MemberController : ApiControllerBase
         var policies = await Mediator.Send(request);
         return Ok(policies);
     }
+
+    [HttpPut("{memberId:guid}/add-policy/{policyId:guid}")]
+    public async Task<ApiResponse<bool>> AddPolicyAsync(Guid organizationId, Guid memberId, Guid policyId)
+    {
+        var request = new AddMemberPolicy
+        {
+            OrganizationId = organizationId,
+            MemberId = memberId,
+            PolicyId = policyId
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [HttpPut("{memberId:guid}/remove-policy/{policyId:guid}")]
+    public async Task<ApiResponse<bool>> RemovePolicyAsync(Guid organizationId, Guid memberId, Guid policyId)
+    {
+        var request = new RemoveMemberPolicy
+        {
+            OrganizationId = organizationId,
+            MemberId = memberId,
+            PolicyId = policyId
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }

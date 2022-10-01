@@ -91,5 +91,5 @@
 
 </div>
 
-<app-project-drawer [visible]="creatEditProjectFormVisible" [currentAccountId]="currentAccountId" (close)="projectClosed($event)" [project]="project"></app-project-drawer>
-<app-env-drawer [visible]="creatEditEnvFormVisible" [currentAccountId]="currentAccountId" [rn]="getEnvRN(project, env)" (close)="envClosed($event)" [env]="env"></app-env-drawer>
+<app-project-drawer [visible]="creatEditProjectFormVisible" [currentOrganizationId]="currentOrganizationId" (close)="projectClosed($event)" [project]="project"></app-project-drawer>
+<app-env-drawer [visible]="creatEditEnvFormVisible" [currentOrganizationId]="currentOrganizationId" [rn]="getEnvRN(project, env)" (close)="envClosed($event)" [env]="env"></app-env-drawer>

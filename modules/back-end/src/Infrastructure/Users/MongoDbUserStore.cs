@@ -19,6 +19,11 @@ public class MongoDbUserStore : IUserStore
         return await _users.AsQueryable().FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task AddAsync(User user)
+    {
+        await _users.InsertOneAsync(user);
+    }
+
     public async Task<bool> UpdateAsync(User user)
     {
         var result = await _users.ReplaceOneAsync(x => x.Id == user.Id, user);

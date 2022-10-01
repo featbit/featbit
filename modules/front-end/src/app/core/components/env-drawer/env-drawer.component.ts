@@ -41,7 +41,7 @@ export class EnvDrawerComponent implements OnInit {
     return this._env;
   }
 
-  @Input() currentAccountId: number;
+  @Input() currentOrganizationId: number;
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
 
@@ -96,16 +96,15 @@ export class EnvDrawerComponent implements OnInit {
     const projectId = this.env.projectId;
 
     if (this.isEditing) {
-      this.envService.putUpdateEnv(this.currentAccountId, this.env.projectId, {
+      this.envService.putUpdateEnv(this.env.projectId, {
         name,
         description,
-        id: this.env.id,
-        projectId
+        id: this.env.id
       }).pipe()
         .subscribe(
-          () => {
+          ({id, secret}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: true, env: { name }});
+            this.close.emit({isEditing: true, env: { name, description, id, projectId, secret }});
             this.message.success($localize `:@@org.project.envUpdateSuccess:Environment successfully updated`);
           },
           () => {
@@ -113,12 +112,12 @@ export class EnvDrawerComponent implements OnInit {
           }
         );
     } else {
-      this.envService.postCreateEnv(this.currentAccountId, this.env.projectId, { name, description, projectId })
+      this.envService.postCreateEnv(this.env.projectId, { name, description, projectId })
         .pipe()
         .subscribe(
-          () => {
+          ({id, secret}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: false, env: { name }});
+            this.close.emit({isEditing: false, env: { name, description, id, projectId, secret }});
             this.message.success($localize `:@@org.project.envCreateSuccess:Environment successfully created`);
           },
           () => {
@@ -129,7 +128,7 @@ export class EnvDrawerComponent implements OnInit {
   }
 
   onRegenerate(keyName: EnvKeyNameEnum) {
-    this.envService.putUpdateEnvKey(this.currentAccountId, this.env.projectId, this.env.id,
+    this.envService.putUpdateEnvKey(this.env.projectId, this.env.id,
       {keyName: keyName, keyValue: this.env.secret}
     ).subscribe(
       (envKey: IEnvKey) => {

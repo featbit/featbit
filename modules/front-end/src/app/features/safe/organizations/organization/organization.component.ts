@@ -7,6 +7,7 @@ import { OrganizationService } from '@services/organization.service';
 import { getCurrentOrganization } from "@utils/project-env";
 import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
+import { MessageQueueService } from '@core/services/message-queue.service';
 
 @Component({
   selector: 'organization',
@@ -28,6 +29,7 @@ export class OrganizationComponent implements OnInit {
   isLoading: boolean = false;
 
   constructor(
+    private messageQueueService: MessageQueueService,
     private organizationService: OrganizationService,
     private message: NzMessageService,
     private permissionsService: PermissionsService
@@ -46,7 +48,7 @@ export class OrganizationComponent implements OnInit {
 
   initOrgForm() {
     this.validateOrgForm = new FormGroup({
-      organizationName: new FormControl(this.currentOrganization.name, [Validators.required]),
+      name: new FormControl(this.currentOrganization.name, [Validators.required]),
     });
   }
 
@@ -54,11 +56,11 @@ export class OrganizationComponent implements OnInit {
     this.creatOrganizationFormVisible = true;
   }
 
-  onCreateAccountClosed(account: IOrganization) {
+  onCreateAccountClosed(organization: IOrganization) {
     this.creatOrganizationFormVisible = false;
-    if (account) {
-      this.organizationService.organizations = [...this.organizationService.organizations, account];
-      this.organizationService.switchOrganization(account);
+    if (organization) {
+      this.organizationService.organizations = [...this.organizationService.organizations, organization];
+      this.organizationService.switchOrganization(organization);
     }
   }
 
@@ -79,17 +81,18 @@ export class OrganizationComponent implements OnInit {
       }
       return;
     }
-    const { organizationName } = this.validateOrgForm.value;
+    const { name } = this.validateOrgForm.value;
     const { id, initialized } = this.currentOrganization;
 
     this.isLoading = true;
-    this.organizationService.updateOrganization({ organizationName, id })
+    this.organizationService.updateOrganization({ name, id })
       .pipe()
       .subscribe(
         () => {
           this.isLoading = false;
           this.message.success($localize `:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
-          this.organizationService.setOrganization({ id, initialized, name: organizationName });
+          this.organizationService.setOrganization({ id, initialized, name });
+          this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
         () => {
           this.isLoading = false;

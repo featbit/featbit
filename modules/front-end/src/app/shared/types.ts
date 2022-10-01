@@ -63,16 +63,10 @@ export interface IAuthProps {
   name: string;
 }
 
-export interface ISubscriptionPlan {
-  id: string,
-  type: string
-}
-
 export interface IOrganization {
   id: number,
   initialized: boolean,
-  name: string,
-  plan?: ISubscriptionPlan
+  name: string
 }
 
 export interface IOrganizationProjectEnv {
@@ -99,8 +93,7 @@ export interface IEnvironment {
   projectId: number,
   name: string,
   description: string,
-  secret: string,
-  mobileSecret: string
+  secret: string
 }
 
 export interface IAccountUser {

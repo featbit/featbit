@@ -52,10 +52,6 @@ export class MemberService {
     );
   }
 
-  create(payload): Observable<boolean> {
-    return this.http.post<boolean>(this.baseUrl, payload);
-  }
-
   delete(id: string): Observable<boolean> {
     return this.http.delete<boolean>(`${this.baseUrl}/${id}`);
   }

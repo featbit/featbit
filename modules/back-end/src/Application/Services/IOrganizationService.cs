@@ -8,11 +8,17 @@ public interface IOrganizationService
 
     Task<IEnumerable<Organization>> GetListAsync(Guid userId);
 
-    Task<Organization> AddAsync(Organization organization);
+    Task AddAsync(Organization organization);
 
-    Task<OrganizationUser> AddUserAsync(
+    Task UpdateAsync(Organization organization);
+
+    Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid> policies = null,
         ICollection<Guid> groups = null
     );
+
+    Task RemoveUserAsync(Guid organizationId, Guid userId);
+
+    Task DeleteAsync(Guid id);
 }

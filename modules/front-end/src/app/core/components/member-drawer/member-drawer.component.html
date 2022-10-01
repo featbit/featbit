@@ -17,14 +17,6 @@
         </nz-form-control>
       </nz-form-item>
 
-      <!-- name -->
-      <nz-form-item>
-        <nz-form-label i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control>
-          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
-        </nz-form-control>
-      </nz-form-item>
-
       <nz-form-item>
         <nz-form-label nzRequired><ng-container i18n="@@iam.team.member-drawer.permissions">Permissions</ng-container> <span style="margin-left: 4px; color: #ff4d4f" *ngIf="isPermissionInvalid" i18n="@@iam.team.member-drawer.policy-group-set-at-least-one">(Policy and group cannot be both empty)</span></nz-form-label>
         <nz-form-control>

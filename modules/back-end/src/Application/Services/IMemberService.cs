@@ -20,4 +20,8 @@ public interface IMemberService
     Task<PagedResult<MemberPolicyVm>> GetDirectPoliciesAsync(Guid organizationId, Guid memberId, MemberPolicyFilter filter);
     
     Task<PagedResult<InheritedMemberPolicy>> GetInheritedPoliciesAsync(Guid organizationId, Guid memberId, InheritedMemberPolicyFilter filter);
+
+    Task AddPolicyAsync(MemberPolicy policy);
+
+    Task RemovePolicyAsync(Guid organizationId, Guid memberId, Guid policyId);
 }

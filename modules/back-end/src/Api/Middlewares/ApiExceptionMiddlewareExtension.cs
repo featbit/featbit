@@ -39,12 +39,23 @@ public static class ApiExceptionMiddlewareExtension
         }
         
         // EntityNotFound exception
-        if (ex is EntityNotFoundException entityNotFoundException)
+        if (ex is EntityNotFoundException)
         {
             httpResponse.StatusCode = StatusCodes.Status404NotFound;
 
             var entityNotFoundError = ApiResponse<object>.Error(ErrorCodes.ResourceNotFound);
             await httpResponse.WriteAsJsonAsync(entityNotFoundError);
+
+            return;
+        }
+
+        // BusinessException
+        if (ex is BusinessException businessException)
+        {
+            httpResponse.StatusCode = StatusCodes.Status422UnprocessableEntity;
+
+            var businessError = ApiResponse<object>.Error(businessException.Message);
+            await httpResponse.WriteAsJsonAsync(businessError);
 
             return;
         }

@@ -27,11 +27,11 @@ export class AuthGuard implements CanActivate {
     if (auth) {
       await this.permissionsService.fetchPolicies(auth.id);
 
-      // check if account is initialized
-      if (!url.startsWith("/initialization")) {
-        const accountProj = this.accountService.getCurrentOrganizationProjectEnv();
-        if (accountProj.organization?.initialized === false) {
-          return this.router.parseUrl('/initialization');
+      // check if organization is initialized
+      if (!url.startsWith("/onboarding")) {
+        const orgProj = this.accountService.getCurrentOrganizationProjectEnv();
+        if (orgProj.organization?.initialized === false) {
+          return this.router.parseUrl('/onboarding');
         }
       }
 

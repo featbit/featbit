@@ -1,4 +1,3 @@
-using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Groups;
 using Application.Services;
@@ -6,30 +5,27 @@ using Domain.Groups;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Users;
-using Infrastructure.MongoDb;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Groups;
 
-public class GroupService : IGroupService
+public class GroupService : MongoDbServiceBase<Group>, IGroupService
 {
-    private readonly MongoDbClient _mongoDb;
-
-    public GroupService(MongoDbClient mongoDb)
+    public GroupService(MongoDbClient mongoDb) : base(mongoDb)
     {
-        _mongoDb = mongoDb;
     }
 
-    public async Task<Group> GetAsync(Guid id)
+    public async Task DeleteAsync(Guid id)
     {
-        var group = await _mongoDb.QueryableOf<Group>().FirstOrDefaultAsync(x => x.Id == id);
-        if (group == null)
-        {
-            throw new EntityNotFoundException(nameof(Group), id.ToString());
-        }
+        // delete group
+        await MongoDb.CollectionOf<Group>().DeleteOneAsync(x => x.Id == id);
 
-        return group;
+        // delete group member
+        await MongoDb.CollectionOf<GroupMember>().DeleteManyAsync(x => x.GroupId == id);
+
+        // delete group policy
+        await MongoDb.CollectionOf<GroupPolicy>().DeleteManyAsync(x => x.GroupId == id);
     }
 
     public async Task<PagedResult<Group>> GetListAsync(Guid organizationId, GroupFilter groupFilter)
@@ -50,7 +46,7 @@ public class GroupService : IGroupService
             filters.Add(nameFilter);
         }
 
-        var collection = _mongoDb.CollectionOf<Group>();
+        var collection = MongoDb.CollectionOf<Group>();
         var filter = filterBuilder.And(filters);
 
         var totalCount = await collection.CountDocumentsAsync(filter);
@@ -67,8 +63,7 @@ public class GroupService : IGroupService
 
     public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
     {
-        var isNameUsed =
-            await _mongoDb.QueryableOf<Group>().AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
+        var isNameUsed = await AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
 
         return isNameUsed;
     }
@@ -78,9 +73,9 @@ public class GroupService : IGroupService
         Guid groupId,
         GroupMemberFilter filter)
     {
-        var members = _mongoDb.QueryableOf<User>();
-        var organizationUsers = _mongoDb.QueryableOf<OrganizationUser>();
-        var groupMembers = _mongoDb.QueryableOf<GroupMember>();
+        var members = MongoDb.QueryableOf<User>();
+        var organizationUsers = MongoDb.QueryableOf<OrganizationUser>();
+        var groupMembers = MongoDb.QueryableOf<GroupMember>();
 
         var query =
             from member in members
@@ -126,12 +121,12 @@ public class GroupService : IGroupService
     }
 
     public async Task<PagedResult<GroupPolicyVm>> GetPoliciesAsync(
-        Guid organizationId, 
+        Guid organizationId,
         Guid groupId,
         GroupPolicyFilter filter)
     {
-        var policies = _mongoDb.QueryableOf<Policy>();
-        var groupPolicies = _mongoDb.QueryableOf<GroupPolicy>();
+        var policies = MongoDb.QueryableOf<Policy>();
+        var groupPolicies = MongoDb.QueryableOf<GroupPolicy>();
 
         var query =
             from policy in policies
@@ -176,5 +171,45 @@ public class GroupService : IGroupService
         }).ToList();
 
         return new PagedResult<GroupPolicyVm>(totalCount, vms);
+    }
+
+    public async Task AddMemberAsync(Guid organizationId, Guid groupId, Guid memberId)
+    {
+        var existed = await MongoDb.QueryableOf<GroupMember>()
+            .AnyAsync(x => x.OrganizationId == organizationId && x.GroupId == groupId && x.MemberId == memberId);
+        if (existed)
+        {
+            return;
+        }
+
+        var groupMember = new GroupMember(groupId, organizationId, memberId);
+
+        await MongoDb.CollectionOf<GroupMember>().InsertOneAsync(groupMember);
+    }
+
+    public async Task RemoveMemberAsync(Guid groupId, Guid memberId)
+    {
+        await MongoDb.CollectionOf<GroupMember>()
+            .DeleteOneAsync(x => x.GroupId == groupId && x.MemberId == memberId);
+    }
+
+    public async Task AddPolicyAsync(Guid groupId, Guid policyId)
+    {
+        var existed = await MongoDb.QueryableOf<GroupPolicy>()
+            .AnyAsync(x => x.GroupId == groupId && x.PolicyId == policyId);
+        if (existed)
+        {
+            return;
+        }
+
+        var groupPolicy = new GroupPolicy(groupId, policyId);
+
+        await MongoDb.CollectionOf<GroupPolicy>().InsertOneAsync(groupPolicy);
+    }
+
+    public async Task RemovePolicyAsync(Guid groupId, Guid policyId)
+    {
+        await MongoDb.CollectionOf<GroupPolicy>()
+            .DeleteOneAsync(x => x.GroupId == groupId && x.PolicyId == policyId);
     }
 }

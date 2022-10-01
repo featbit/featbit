@@ -67,9 +67,9 @@ public class IdentityService : IIdentityService
         return handler.WriteToken(jwt);
     }
 
-    public async Task<LoginResult> LoginByEmailAsync(string identity, string password)
+    public async Task<LoginResult> LoginByEmailAsync(string email, string password)
     {
-        var user = await _store.FindByEmailAsync(identity);
+        var user = await _store.FindByEmailAsync(email);
         if (user == null)
         {
             return LoginResult.Failed(ErrorCodes.EmailNotExist);
@@ -83,5 +83,16 @@ public class IdentityService : IIdentityService
 
         var token = IssueToken(user);
         return LoginResult.Ok(token);
+    }
+
+    public async Task<RegisterResult> RegisterByEmailAsync(string email, string password)
+    {
+        var hashedPwd = _passwordHasher.HashPassword(null!, password);
+        var user = new User(email, hashedPwd);
+
+        await _store.AddAsync(user);
+
+        var token = IssueToken(user);
+        return RegisterResult.Ok(user.Id, token);
     }
 }

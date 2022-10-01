@@ -10,6 +10,8 @@ public static class ErrorCodes
     public const string ResourceNotFound = nameof(ResourceNotFound);
     
     // identity error codes
+    public const string MethodIsRequired = nameof(MethodIsRequired);
+    public const string MethodIsInvalid = nameof(MethodIsInvalid);
     public const string EmailIsRequired = nameof(EmailIsRequired);
     public const string EmailIsInvalid = nameof(EmailIsInvalid);
     public const string EmailNotExist = nameof(EmailNotExist);
@@ -18,4 +20,15 @@ public static class ErrorCodes
     
     // common
     public const string NameIsRequired = nameof(NameIsRequired);
+    
+    // onboarding
+    public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
+    public const string ProjectNameRequired = nameof(ProjectNameRequired);
+    public const string EnvironmentsRequired = nameof(EnvironmentsRequired);
+    
+    // policy
+    public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
+    
+    // resource
+    public const string TypeIsRequired = nameof(TypeIsRequired);
 }

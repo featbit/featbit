@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { getAuth } from '@utils/index';
 import { UserService } from "@services/user.service";
+import {IAuthProps} from "@shared/types";
 
 @Component({
   selector: 'app-profile',
@@ -23,7 +24,8 @@ export class ProfileComponent {
     private fb: FormBuilder
   ) {
     this.profileForm = this.fb.group({
-      email: [this.auth.email ?? $localize `:@@org.profile.notProvided:Not provided`, [Validators.required, Validators.email]]
+      email: [this.auth.email, [Validators.required, Validators.email]],
+      name: [this.auth.name]
     });
   }
 
@@ -38,11 +40,15 @@ export class ProfileComponent {
     }
 
     this.isLoading = true;
-    this.userService.updateProfile('no-value-yet')
+
+    const { email, name } = this.profileForm.value;
+
+    this.userService.updateProfile({ email, name })
       .subscribe(
-        _ => {
+        (profile) => {
           this.isLoading = false;
           this.message.success($localize `:@@org.profile.profileUpdateSuccess:Profile successfully updated`);
+          this.userService.updateLocaleProfile(profile as IAuthProps);
         },
         _ => {
           this.isLoading = false;

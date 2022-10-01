@@ -83,7 +83,7 @@
     <button nzType="text" nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="topCenter">
       <span class="icon-text-btn">
         <i nz-icon nzType="icons:icon-setting"></i>
-        <span class="menu-item-title" i18n>Account</span>
+        <span class="menu-item-title" i18n="@@common.account">Account</span>
       </span>
     </button>
     <nz-dropdown-menu #menu="nzDropdownMenu">
@@ -96,11 +96,11 @@
         </li>
         <li *ngIf="isInitialized" nz-menu-item [routerLink]="['/account-settings/profile']">
           <i nz-icon nzType="icons:icon-user"></i>
-          <ng-container i18n>Profile</ng-container>
+          <ng-container i18n="@@common.profile">Profile</ng-container>
         </li>
         <li nz-menu-item (click)="logout.emit()">
           <i nz-icon nzType="icons:icon-logout"></i>
-          <ng-container i18n>Logout</ng-container>
+          <ng-container i18n="@@common.logout">Logout</ng-container>
         </li>
         <li style="height: 12px; margin: 0 20px">
           <span class="line"></span>

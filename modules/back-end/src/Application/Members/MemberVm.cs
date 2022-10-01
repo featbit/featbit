@@ -6,6 +6,8 @@ public class MemberVm
 
     public string Email { get; set; }
 
+    public string Name { get; set; }
+
     public string InvitorId { get; set; }
 
     public string InitialPassword { get; set; }

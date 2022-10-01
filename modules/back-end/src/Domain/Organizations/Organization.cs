@@ -11,4 +11,19 @@ public class Organization : AuditedEntity
         Name = name;
         Initialized = false;
     }
+
+    public void Update(string name)
+    {
+        Name = name;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Update(string name, bool initialized)
+    {
+        Name = name;
+        Initialized = initialized;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

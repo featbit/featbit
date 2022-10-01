@@ -22,6 +22,7 @@ db.Users.insertOne(
         _id: userId,
         email: "test@featbit.com",
         password: "AQAAAAEAACcQAAAAELDHEjCrDQrmnAXU5C//mOLvUBJ7lnVFEMMFxNMDIIrF7xK8JDQKUifU3HH4gexNAQ==",
+        name: "",
         createAt: new Date(),
         updatedAt: new Date()
     }
@@ -79,8 +80,8 @@ db.Environments.insertOne(
     {
         _id: UUID(),
         projectId: projectId,
-        name: "prod",
-        description: "production environment",
+        name: "Prod",
+        description: "Production environment",
         secret: "MGU3LTNjNzUtNCUyMDIyMDkyNjAxMzgwNF9fNDZfXzkzX181N19fZGVmYXVsdF8zMDgwNw==",
         createdAt: new Date(),
         updatedAt: new Date()
@@ -90,8 +91,8 @@ db.Environments.insertOne(
     {
         _id: UUID(),
         projectId: projectId,
-        name: "dev",
-        description: "development environment",
+        name: "Dev",
+        description: "Development environment",
         secret: "NzJlLTlkOGEtNCUyMDIyMDkyNjAxMzkyNF9fNDZfXzkzX181N19fZGVmYXVsdF9iYTA1NA==",
         createdAt: new Date(),
         updatedAt: new Date()

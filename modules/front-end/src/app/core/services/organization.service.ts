@@ -29,12 +29,17 @@ export class OrganizationService {
   }
 
   updateOrganization(params: any): Observable<any> {
-    const url = this.baseUrl;
+    const url = `${this.baseUrl}/${params.id}`;
     return this.http.put(url, params);
   }
 
-  initialize(id: any, params: any): Observable<any> {
-    const url = `${this.baseUrl}/${id}/initialize`;
+  addUser(params: any): Observable<any> {
+    const url = `${this.baseUrl}/${params.organizationId}/add-user`;
+    return this.http.post<boolean>(url, params);
+  }
+
+  onboarding(organizationId: any, params: any): Observable<any> {
+    const url = `${this.baseUrl}/${organizationId}/onboarding`;
     return this.http.post(url, params);
   }
 
@@ -63,20 +68,20 @@ export class OrganizationService {
 
   getCurrentOrganization(): Observable<IOrganization> {
     return new Observable(observer => {
-      const accountStr = localStorage.getItem(CURRENT_ORGANIZATION());
-      if (this.organizations.length === 0 || !accountStr || JSON.parse(accountStr)?.plan === undefined) {
+      const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
+      if (this.organizations.length === 0 || !orgStr || JSON.parse(orgStr)?.plan === undefined) {
         this.getOrganizations().subscribe(res => {
           this.organizations = res as IOrganization[];
-          if (!accountStr || JSON.parse(accountStr)?.plan === undefined) {
-            const currentAcount = this.organizations[0];
-            localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentAcount));
-            observer.next(currentAcount);
+          if (!orgStr) {
+            const currentOrg = this.organizations[0];
+            localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrg));
+            observer.next(currentOrg);
           } else {
-            observer.next(this.organizations.find(ws => ws.id == JSON.parse(accountStr).id));
+            observer.next(this.organizations.find(ws => ws.id == JSON.parse(orgStr).id));
           }
         });
       } else {
-        observer.next(this.organizations.find(ws => ws.id == JSON.parse(accountStr).id));
+        observer.next(this.organizations.find(ws => ws.id == JSON.parse(orgStr).id));
       }
     });
   }

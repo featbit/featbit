@@ -2,13 +2,14 @@ using System.Text;
 using Application.Services;
 using Domain.Identity;
 using Domain.Users;
+using Infrastructure.Environments;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
-using Infrastructure.MongoDb;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
+using Infrastructure.Resources;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -60,7 +61,9 @@ public static class ConfigureServices
         services.AddTransient<IProjectService, ProjectService>();
         services.AddTransient<IGroupService, GroupService>();
         services.AddTransient<IPolicyService, PolicyService>();
-
+        services.AddTransient<IEnvironmentService, EnvironmentService>();
+        services.AddTransient<IResourceService, ResourceService>();
+        
         return services;
     }
 }

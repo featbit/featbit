@@ -3,12 +3,17 @@ import { SafeRoutingModule } from './safe-routing.module';
 import { SafeComponent } from './safe.component';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import {CoreModule} from "@core/core.module";
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import {CompleteComponent} from "@features/safe/onboarding/complete/complete.component";
+import {NzButtonModule} from "ng-zorro-antd/button";
 
 @NgModule({
-  declarations: [SafeComponent],
+  declarations: [SafeComponent, CompleteComponent],
   imports: [
     CoreModule,
     NzBreadCrumbModule,
+    NzModalModule,
+    NzButtonModule,
     SafeRoutingModule
   ],
   providers: [
