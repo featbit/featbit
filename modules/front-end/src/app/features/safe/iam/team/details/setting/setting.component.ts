@@ -53,14 +53,6 @@ export class SettingComponent implements OnInit {
     }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 
-  updateMember() {
-    const { email, name } = this.member;
-    this.userService.updateProfile({ email, name }).subscribe((profile) => {
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.userService.updateLocaleProfile(profile as IAuthProps);
-    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
-  }
-
   copyText(text: string) {
     navigator.clipboard.writeText(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
@@ -69,10 +61,5 @@ export class SettingComponent implements OnInit {
 
   toggleTitleEditState(): void {
     this.isEditingTitle = !this.isEditingTitle;
-  }
-
-  onSaveSwitch(cb?: Function) {
-    this.isEditingTitle = !this.isEditingTitle;
-    this.updateMember();
   }
 }

@@ -10,7 +10,7 @@
       <div class="label" i18n="@@common.name">Name</div>
       <div class="value">
         <ng-container>
-          <div [nz-tooltip] class="text">{{member.name ?? '--'}}</div>
+          <div [nz-tooltip] class="text">{{member.name || member.email || '--'}}</div>
         </ng-container>
       </div>
     </div>
