@@ -63,11 +63,6 @@ export interface IAuthProps {
   name: string;
 }
 
-export interface ISubscriptionPlan {
-  id: string,
-  type: string
-}
-
 export interface IOrganization {
   id: number,
   initialized: boolean,

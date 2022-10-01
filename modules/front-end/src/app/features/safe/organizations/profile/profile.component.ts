@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { getAuth } from '@utils/index';
 import { UserService } from "@services/user.service";
+import {USER_PROFILE} from "@utils/localstorage-keys";
+import {IAuthProps} from "@shared/types";
 
 @Component({
   selector: 'app-profile',
@@ -38,11 +40,15 @@ export class ProfileComponent {
     }
 
     this.isLoading = true;
-    this.userService.updateProfile('no-value-yet')
+
+    const { email } = this.profileForm.value;
+
+    this.userService.updateProfile({ email })
       .subscribe(
-        _ => {
+        (profile) => {
           this.isLoading = false;
           this.message.success($localize `:@@org.profile.profileUpdateSuccess:Profile successfully updated`);
+          this.userService.updateLocaleProfile(profile as IAuthProps);
         },
         _ => {
           this.isLoading = false;

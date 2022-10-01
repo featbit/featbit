@@ -13,7 +13,8 @@ export class MessageQueueService {
     FLAG_TARGETING_CHANGED: (key: string) => `flag_targeting_changed:${key}`,
     POLICY_CHANGED: (key: string) => `policy_changed:${key}`,
     CURRENT_ORG_PROJECT_ENV_CHANGED: 'current_org_project_env_changed',
-    PROJECT_LIST_CHANGED: 'project_list_changed'
+    PROJECT_LIST_CHANGED: 'project_list_changed',
+    USER_PROFILE_CHANGED: 'user_profile_changed'
   };
 
   public events: Events;
