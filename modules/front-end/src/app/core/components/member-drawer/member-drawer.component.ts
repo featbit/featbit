@@ -2,11 +2,11 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
-import { MemberService } from "@services/member.service";
 import { PolicyService } from "@services/policy.service";
 import { IPagedPolicy, PolicyFilter } from "@features/safe/iam/types/policy";
 import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
 import { GroupService } from "@services/group.service";
+import {OrganizationService} from "@services/organization.service";
 
 @Component({
   selector: 'app-member-drawer',
@@ -17,7 +17,7 @@ export class MemberDrawerComponent {
 
   isPoliciesLoading = true;
   policyFilter: PolicyFilter = new PolicyFilter(null, 1, 50);
-
+  organizationId: number;
   policies: IPagedPolicy = {
     items: [],
     totalCount: 0
@@ -36,11 +36,15 @@ export class MemberDrawerComponent {
   memberForm: FormGroup;
   constructor(
     private fb: FormBuilder,
-    private memberService: MemberService,
+    private organizationService: OrganizationService,
     private message: NzMessageService,
     private policyService: PolicyService,
     private groupService: GroupService
   ) {
+    this.organizationService.getCurrentOrganization().subscribe(() => {
+      const { organization } = this.organizationService.getCurrentOrganizationProjectEnv();
+      this.organizationId = organization.id;
+    });
 
     this.getPolicies();
     this.getGroups();
@@ -48,8 +52,7 @@ export class MemberDrawerComponent {
     this.memberForm = this.fb.group({
       email: ['', [phoneNumberOrEmailValidator, Validators.required]],
       policyId: [''],
-      groupId: [''],
-      name: ''
+      groupId: ['']
     });
   }
 
@@ -105,12 +108,13 @@ export class MemberDrawerComponent {
       return;
     }
 
-    let { policyId, groupId, email, name } = this.memberForm.value;
+    let { policyId, groupId, email } = this.memberForm.value;
     const policyIds = !!policyId ? [policyId] : [];
     const groupIds = !!groupId ? [groupId] : [];
+    const method = 'Email';
 
     this.isLoading = true;
-    this.memberService.create({email, policyIds, groupIds, name}).subscribe(
+    this.organizationService.addUser({ organizationId: this.organizationId, method, email, policyIds, groupIds }).subscribe(
       () => {
         this.isLoading = false;
         this.close.emit(true);

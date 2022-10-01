@@ -1,7 +1,5 @@
 import {Component, OnDestroy, OnInit} from "@angular/core";
-import {getAuth} from "@utils/index";
 import {ActivatedRoute} from "@angular/router";
-import {IdentityService} from "@services/identity.service";
 import {Subject} from "rxjs";
 
 

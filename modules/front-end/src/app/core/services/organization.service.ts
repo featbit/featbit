@@ -33,6 +33,11 @@ export class OrganizationService {
     return this.http.put(url, params);
   }
 
+  addUser(params: any): Observable<any> {
+    const url = `${this.baseUrl}/${params.organizationId}/add-user`;
+    return this.http.post<boolean>(url, params);
+  }
+
   onboarding(organizationId: any, params: any): Observable<any> {
     const url = `${this.baseUrl}/${organizationId}/onboarding`;
     return this.http.post(url, params);

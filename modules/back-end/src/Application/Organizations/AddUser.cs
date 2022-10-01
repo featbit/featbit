@@ -5,8 +5,11 @@ using Domain.Users;
 
 namespace Application.Organizations;
 
-public class AddUserByEmail : IRequest<bool>
+public class AddUser : IRequest<bool>
 {
+    // possible values: email
+    public string Method { get; set; }
+    
     public Guid OrganizationId { get; set; }
 
     public string Email { get; set; }
@@ -16,24 +19,28 @@ public class AddUserByEmail : IRequest<bool>
     public ICollection<Guid> GroupIds { get; set; }
 }
 
-public class AddUserByEmailValidator : AbstractValidator<AddUserByEmail>
+public class AddUserValidator : AbstractValidator<AddUser>
 {
-    public AddUserByEmailValidator()
+    public AddUserValidator()
     {
+        RuleFor(x => x.Method)
+            .NotEmpty().WithErrorCode(ErrorCodes.MethodIsRequired)
+            .Equal(x => "Email").WithErrorCode(ErrorCodes.MethodIsInvalid);
+        
         RuleFor(x => x.Email)
             .NotEmpty().WithErrorCode(ErrorCodes.EmailIsRequired)
             .EmailAddress().WithErrorCode(ErrorCodes.EmailIsInvalid);
     }
 }
 
-public class AddUserByEmailHandler : IRequestHandler<AddUserByEmail, bool>
+public class AddUserHandler : IRequestHandler<AddUser, bool>
 {
     private readonly IOrganizationService _organizationService;
     private readonly IUserService _userService;
     private readonly IIdentityService _identityService;
     private readonly ICurrentUser _currentUser;
 
-    public AddUserByEmailHandler(
+    public AddUserHandler(
         IOrganizationService organizationService,
         IUserService userService,
         IIdentityService identityService,
@@ -45,7 +52,7 @@ public class AddUserByEmailHandler : IRequestHandler<AddUserByEmail, bool>
         _identityService = identityService;
     }
 
-    public async Task<bool> Handle(AddUserByEmail request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(AddUser request, CancellationToken cancellationToken)
     {
         var email = request.Email;
         

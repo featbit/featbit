@@ -31,8 +31,8 @@ public class OrganizationController : ApiControllerBase
         return Ok(organization);
     }
 
-    [HttpPost("{id:guid}/add-user-by-email")]
-    public async Task<ApiResponse<bool>> AddMemberByEmailAsync(Guid id, [FromBody] AddUserByEmail request)
+    [HttpPost("{id:guid}/add-user")]
+    public async Task<ApiResponse<bool>> AddMemberByEmailAsync(Guid id, [FromBody] AddUser request)
     {
         request.OrganizationId = id;
 
