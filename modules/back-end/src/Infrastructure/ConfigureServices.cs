@@ -9,6 +9,7 @@ using Infrastructure.Members;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
+using Infrastructure.Resources;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -61,7 +62,8 @@ public static class ConfigureServices
         services.AddTransient<IGroupService, GroupService>();
         services.AddTransient<IPolicyService, PolicyService>();
         services.AddTransient<IEnvironmentService, EnvironmentService>();
-
+        services.AddTransient<IResourceService, ResourceService>();
+        
         return services;
     }
 }

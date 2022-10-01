@@ -28,4 +28,7 @@ public static class ErrorCodes
     
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
+    
+    // resource
+    public const string TypeIsRequired = nameof(TypeIsRequired);
 }
