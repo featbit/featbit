@@ -13,7 +13,7 @@ public class User : AuditedEntity
     /// <summary>
     /// for test project use only
     /// </summary>
-    public User(Guid id, string email, string password, string name)
+    public User(Guid id, string email, string password, string name = "")
     {
         Id = id;
         
@@ -25,7 +25,7 @@ public class User : AuditedEntity
         UpdatedAt = CreatedAt;
     }
 
-    public User(string email, string password, string name)
+    public User(string email, string password, string name = "")
     {
         Email = email;
         Password = password;
