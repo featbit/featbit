@@ -156,6 +156,14 @@
           <context context-type="linenumber">29</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
           <context context-type="linenumber">15</context>
         </context-group>
@@ -949,11 +957,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">51</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
@@ -1653,7 +1657,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">35</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -1729,11 +1733,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">70</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -1801,11 +1805,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -2068,11 +2072,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">51</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="linenumber">53</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
@@ -2316,7 +2316,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -2416,7 +2416,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">58</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
@@ -2464,13 +2464,29 @@
         </context-group>
         <target>登录</target>
       </trans-unit>
-      <trans-unit id="193324215946023286" datatype="html">
-        <source>username</source>
+      <trans-unit id="common.email" datatype="html">
+        <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
           <context context-type="linenumber">7,8</context>
         </context-group>
-        <target>用户名</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <target>邮箱</target>
       </trans-unit>
       <trans-unit id="8056544210376488" datatype="html">
         <source>username is mandatory</source>
@@ -3973,11 +3989,11 @@ Legal resource name (RN) cannot includeand :        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">27</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">32</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <target>资源名 （RN）</target>
       </trans-unit>
@@ -4005,26 +4021,6 @@ Legal resource name (RN) cannot includeand :        </source>
         </context-group>
         <target>当前组所包含的成员</target>
       </trans-unit>
-      <trans-unit id="common.email" datatype="html">
-        <source>Email</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
-          <context context-type="linenumber">28</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">23</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <target>邮箱</target>
-      </trans-unit>
       <trans-unit id="common.mobile" datatype="html">
         <source>Mobile</source>
         <context-group purpose="location">
@@ -4034,10 +4030,6 @@ Legal resource name (RN) cannot includeand :        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
           <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">31</context>
         </context-group>
         <target>电话</target>
       </trans-unit>
@@ -4277,14 +4269,6 @@ Legal resource name (RN) cannot includeand :        </source>
         </context-group>
         <target>按名称查找</target>
       </trans-unit>
-      <trans-unit id="iam.team.details.name-placeholder" datatype="html">
-        <source>Name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">17</context>
-        </context-group>
-        <target>名称</target>
-      </trans-unit>
       <trans-unit id="iam.team.idx.searchPlaceholder" datatype="html">
         <source>Filter by Email</source>
         <context-group purpose="location">
@@ -4305,7 +4289,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Group</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <target>组</target>
       </trans-unit>
@@ -4313,7 +4297,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Initial password</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <target>初始密码</target>
       </trans-unit>
@@ -4321,7 +4305,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>+</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">51</context>
         </context-group>
         <target>及另外</target>
       </trans-unit>
@@ -4329,15 +4313,55 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>more</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">51</context>
         </context-group>
         <target>项</target>
+      </trans-unit>
+      <trans-unit id="onboarding.complete.title" datatype="html">
+        <source>We&apos;ve created a project for</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>您成功为机构</target>
+      </trans-unit>
+      <trans-unit id="onboarding.complete.title-suffix" datatype="html">
+        <source>.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>创建了一个项目。</target>
+      </trans-unit>
+      <trans-unit id="onboarding.complete.first-paragraph" datatype="html">
+        <source>Projects start with two default environments:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <target>我们为您的项目创建了两个默认环境，分别为：</target>
+      </trans-unit>
+      <trans-unit id="onboarding.complete.second-paragraph" datatype="html">
+        <source>Each environment has its own SDK secret, you can develop and test in Dev before rolling out to Prod.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <target>每个环境拥有自己的 SDk secret, 您可以在 Dev 环境中进行开发和测试，完成后再发布到 Prod 环境。</target>
+      </trans-unit>
+      <trans-unit id="onboarding.complete.third-paragrah" datatype="html">
+        <source>Next, let&apos;s how to get started.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+        <target>接下来，然我们开始学些如何创建并使用开关。</target>
       </trans-unit>
       <trans-unit id="common.get-started" datatype="html">
         <source>Get started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="linenumber">28</context>
         </context-group>
         <target>开始使用</target>
       </trans-unit>
@@ -4450,7 +4474,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">4</context>
+          <context context-type="linenumber">15</context>
         </context-group>
         <target>邮箱</target>
       </trans-unit>
@@ -4458,7 +4482,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Email is mandatory!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">5</context>
+          <context context-type="linenumber">16</context>
         </context-group>
         <target>邮箱不能为空</target>
       </trans-unit>
@@ -4466,7 +4490,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">7</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <target>邮箱</target>
       </trans-unit>
@@ -4474,17 +4498,9 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">27</context>
         </context-group>
         <target>保存</target>
-      </trans-unit>
-      <trans-unit id="org.profile.notProvided" datatype="html">
-        <source>Not provided</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">28</context>
-        </context-group>
-        <target>未关联</target>
       </trans-unit>
       <trans-unit id="org.profile.profileUpdateSuccess" datatype="html">
         <source>Profile successfully updated</source>

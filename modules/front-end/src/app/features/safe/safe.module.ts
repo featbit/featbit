@@ -6,7 +6,7 @@ import {CoreModule} from "@core/core.module";
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import {CompleteComponent} from "@features/safe/onboarding/complete/complete.component";
 import {NzButtonModule} from "ng-zorro-antd/button";
-
+import { NzTypographyModule } from 'ng-zorro-antd/typography';
 @NgModule({
   declarations: [SafeComponent, CompleteComponent],
   imports: [
@@ -14,6 +14,7 @@ import {NzButtonModule} from "ng-zorro-antd/button";
     NzBreadCrumbModule,
     NzModalModule,
     NzButtonModule,
+    NzTypographyModule,
     SafeRoutingModule
   ],
   providers: [
