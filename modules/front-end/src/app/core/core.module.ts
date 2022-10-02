@@ -69,6 +69,8 @@ import {RuleComponent} from "@core/components/find-rule/rule/rule.component";
 import {NzCardModule} from "ng-zorro-antd/card";
 import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-user-table/targeted-user-table.component";
 import {TranslationPipe} from "@core/pipes/translation.pipe";
+import {GuideComponent} from "@core/components/guide/guide.component";
+import {NzTypographyModule} from "ng-zorro-antd/typography";
 
 @NgModule({
   declarations: [
@@ -102,7 +104,8 @@ import {TranslationPipe} from "@core/pipes/translation.pipe";
     FindRuleComponent,
     ServeMultistatesComponent,
     RuleComponent,
-    TargetedUserTableComponent
+    TargetedUserTableComponent,
+    GuideComponent
   ],
   imports: [
     CommonModule,
@@ -141,7 +144,8 @@ import {TranslationPipe} from "@core/pipes/translation.pipe";
     NzImageModule,
     NzPopoverModule,
     NzCodeEditorModule,
-    NzCardModule
+    NzCardModule,
+    NzTypographyModule
   ],
   exports: [
     CommonModule,
@@ -177,7 +181,8 @@ import {TranslationPipe} from "@core/pipes/translation.pipe";
     FindRuleComponent,
     ServeMultistatesComponent,
     RuleComponent,
-    TargetedUserTableComponent
+    TargetedUserTableComponent,
+    GuideComponent
   ]
 })
 export class CoreModule { }

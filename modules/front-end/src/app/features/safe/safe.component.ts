@@ -15,6 +15,7 @@ export class SafeComponent implements OnInit, OnDestroy {
   public menus: IMenuItem[] = [];
   public auth: IAuthProps;
   public menuExtended: boolean = true;
+  public isGuideVisible = false;
 
   private destory$: Subject<void> = new Subject();
 
@@ -35,6 +36,10 @@ export class SafeComponent implements OnInit, OnDestroy {
 
   toggleMenu(extended: boolean) {
     this.menuExtended = extended;
+  }
+
+  onCompleteModalClose() {
+    this.isGuideVisible = true;
   }
 
   private setMenus(): void {

@@ -1,8 +1,8 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {Subject} from "rxjs";
 import {OrganizationService} from "@services/organization.service";
-import {IOrganization, IOrganizationProjectEnv} from "@shared/types";
+import {IOrganization} from "@shared/types";
 
 
 
@@ -13,6 +13,9 @@ import {IOrganization, IOrganizationProjectEnv} from "@shared/types";
 })
 export class CompleteComponent implements OnInit, OnDestroy {
   private destroy$: Subject<void> = new Subject();
+
+  @Output()
+  close: EventEmitter<any> = new EventEmitter();
 
   public isVisible: boolean = false;
   public currentOrg: IOrganization;
@@ -34,7 +37,9 @@ export class CompleteComponent implements OnInit, OnDestroy {
 
   onClose() {
     this.isVisible = false;
+    this.close.emit();
   }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
