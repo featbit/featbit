@@ -1,3 +1,4 @@
+using Domain.EndUsers;
 using Domain.Groups;
 using Domain.Members;
 using Domain.Organizations;
@@ -5,10 +6,6 @@ using Domain.Policies;
 using Domain.Projects;
 using Domain.Users;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.IdGenerators;
-using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Environment = Domain.Environments.Environment;
@@ -36,12 +33,14 @@ public class MongoDbClient
     private readonly Dictionary<Type, string> _collectionNameMap = new()
     {
         { typeof(User), "Users" },
-        
+
         { typeof(Organization), "Organizations" },
         { typeof(OrganizationUser), "OrganizationUsers" },
         { typeof(Project), "Projects" },
         { typeof(Environment), "Environments" },
-        
+        { typeof(EndUser), "EndUsers" },
+        { typeof(EndUserProperty), "EndUserProperties" },
+
         { typeof(Group), "Groups" },
         { typeof(Policy), "Policies" },
         { typeof(GroupMember), "GroupMembers" },

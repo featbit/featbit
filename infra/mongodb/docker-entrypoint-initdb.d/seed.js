@@ -7,6 +7,8 @@ print('seed started...')
 const userId = UUID("4526975f-4f6b-4420-9dde-84c276148832")
 const organizationId = UUID("67e2b2db-01ec-4725-9fd9-e5cc3d3a6b74")
 const projectId = UUID("5a2eaddd-34fb-4d59-831a-bd7fe427b802")
+const prodEnvId = UUID("8dc61769-5af3-4d9f-8cb3-d7342e24c3eb")
+const devEnvId = UUID("ad99d259-1f50-4ed9-a002-7c65e25487df")
 
 const groupId = UUID("4dbea94d-a1cb-45e3-bab7-c5bf8f956f44")
 const ownerPolicyId = UUID("98881f6a-5c6c-4277-bcf7-fda94c538785")
@@ -78,7 +80,7 @@ print('clean and seed collection: Environments')
 db.Environments.deleteMany({})
 db.Environments.insertOne(
     {
-        _id: UUID(),
+        _id: prodEnvId,
         projectId: projectId,
         name: "Prod",
         description: "Production environment",
@@ -89,7 +91,7 @@ db.Environments.insertOne(
 )
 db.Environments.insertOne(
     {
-        _id: UUID(),
+        _id: devEnvId,
         projectId: projectId,
         name: "Dev",
         description: "Development environment",
@@ -99,6 +101,136 @@ db.Environments.insertOne(
     }
 )
 print('collection seeded: Environments')
+
+// seed end-user properties
+print('clean and seed collection: EndUserProperties')
+db.EndUserProperties.deleteMany({})
+
+// insert built-in end-user property (keyId & name)
+db.EndUserProperties.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        name: 'keyId',
+        presetValues: [],
+        usePresetValuesOnly: false,
+        isBuiltIn: true,
+        isDigestField: true,
+        remark: "User identifier in this environment",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUserProperties.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        name: 'name',
+        presetValues: [],
+        usePresetValuesOnly: false,
+        isBuiltIn: true,
+        isDigestField: false,
+        remark: "",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUserProperties.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        name: 'keyId',
+        presetValues: [],
+        usePresetValuesOnly: false,
+        isBuiltIn: true,
+        isDigestField: true,
+        remark: "User identifier in this environment",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUserProperties.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        name: 'name',
+        presetValues: [],
+        usePresetValuesOnly: false,
+        isBuiltIn: true,
+        isDigestField: false,
+        remark: "",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+
+// insert custom end-user property (email)
+db.EndUserProperties.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        name: 'email',
+        presetValues: [],
+        usePresetValuesOnly: false,
+        isBuiltIn: false,
+        isDigestField: false,
+        remark: "",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUserProperties.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        name: 'email',
+        presetValues: [],
+        usePresetValuesOnly: false,
+        isBuiltIn: false,
+        isDigestField: false,
+        remark: "",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: EndUserProperties')
+
+// seed end-user
+print('clean and seed collection: EndUsers')
+db.EndUsers.deleteMany({})
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        keyId: "dev-bot-id",
+        name: "dev-bot",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "dev-bot@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        keyId: "prod-bot-id",
+        name: "prod-bot",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "prod-bot@featbit.com"
+            }
+        ]
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: EndUsers')
 
 // seed group
 print('clean and seed collection: Groups')

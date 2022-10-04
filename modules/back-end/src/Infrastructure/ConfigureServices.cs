@@ -2,6 +2,7 @@ using System.Text;
 using Application.Services;
 using Domain.Identity;
 using Domain.Users;
+using Infrastructure.EndUsers;
 using Infrastructure.Environments;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
@@ -63,6 +64,7 @@ public static class ConfigureServices
         services.AddTransient<IPolicyService, PolicyService>();
         services.AddTransient<IEnvironmentService, EnvironmentService>();
         services.AddTransient<IResourceService, ResourceService>();
+        services.AddTransient<IEndUserService, EndUserService>();
         
         return services;
     }
