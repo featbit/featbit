@@ -31,6 +31,11 @@ public class MongoDbServiceBase<TEntity> where TEntity : Entity
         return await MongoDb.QueryableOf<TEntity>().FirstOrDefaultAsync(predicate);
     }
 
+    public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
+    {
+        return await MongoDb.QueryableOf<TEntity>().Where(predicate).ToListAsync();
+    }
+
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
     {
         return await MongoDb.QueryableOf<TEntity>().AnyAsync(predicate);

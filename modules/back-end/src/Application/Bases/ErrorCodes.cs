@@ -31,4 +31,8 @@ public static class ErrorCodes
     
     // resource
     public const string TypeIsRequired = nameof(TypeIsRequired);
+    
+    // end user
+    public const string KeyIdIsRequired = nameof(KeyIdIsRequired);
+    public const string CannotModifyBuiltInProperty = nameof(CannotModifyBuiltInProperty);
 }
