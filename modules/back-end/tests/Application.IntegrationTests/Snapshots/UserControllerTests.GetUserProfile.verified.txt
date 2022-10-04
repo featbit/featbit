@@ -11,7 +11,8 @@
     Value: {
       data: {
         email: test@email.com,
-        id: Guid_1
+        id: Guid_1,
+        name: 
       },
       errors: [],
       success: true
