@@ -19,6 +19,7 @@ public class SegmentController : ApiControllerBase
         return Ok(segment);
     }
 
+    [HttpGet]
     public async Task<ApiResponse<PagedResult<SegmentVm>>> GetListAsync(Guid envId, [FromQuery] SegmentFilter filter)
     {
         var request = new GetSegmentList
