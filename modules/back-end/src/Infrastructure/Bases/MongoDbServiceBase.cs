@@ -10,9 +10,15 @@ public class MongoDbServiceBase<TEntity> where TEntity : Entity
 {
     public MongoDbClient MongoDb { get; }
 
+    public IMongoCollection<TEntity> Collection { get; }
+
+    public IMongoQueryable<TEntity> Queryable { get; }
+
     public MongoDbServiceBase(MongoDbClient mongoDb)
     {
         MongoDb = mongoDb;
+        Collection = MongoDb.CollectionOf<TEntity>();
+        Queryable = MongoDb.QueryableOf<TEntity>();
     }
 
     public async Task<TEntity> GetAsync(Guid id)

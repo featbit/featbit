@@ -5,10 +5,10 @@ public static class ErrorCodes
     // general
     public const string InternalServerError = nameof(InternalServerError);
     public const string Unauthorized = nameof(Unauthorized);
-    
+
     // application
     public const string ResourceNotFound = nameof(ResourceNotFound);
-    
+
     // identity error codes
     public const string MethodIsRequired = nameof(MethodIsRequired);
     public const string MethodIsInvalid = nameof(MethodIsInvalid);
@@ -17,22 +17,25 @@ public static class ErrorCodes
     public const string EmailNotExist = nameof(EmailNotExist);
     public const string PasswordIsRequired = nameof(PasswordIsRequired);
     public const string PasswordMismatch = nameof(PasswordMismatch);
-    
+
     // common
     public const string NameIsRequired = nameof(NameIsRequired);
-    
+
     // onboarding
     public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
     public const string ProjectNameRequired = nameof(ProjectNameRequired);
     public const string EnvironmentsRequired = nameof(EnvironmentsRequired);
-    
+
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
-    
+
     // resource
     public const string TypeIsRequired = nameof(TypeIsRequired);
-    
+
     // end user
     public const string KeyIdIsRequired = nameof(KeyIdIsRequired);
     public const string CannotModifyBuiltInProperty = nameof(CannotModifyBuiltInProperty);
+
+    // segment
+    public const string SegmentCannotReferenceSegmentRule = nameof(SegmentCannotReferenceSegmentRule);
 }
