@@ -225,7 +225,7 @@ db.EndUsers.insertOne(
                 name: "email",
                 value: "prod-bot@featbit.com"
             }
-        ]
+        ],
         createdAt: new Date(),
         updatedAt: new Date()
     }
