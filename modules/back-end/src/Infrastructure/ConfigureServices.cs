@@ -11,6 +11,7 @@ using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
 using Infrastructure.Resources;
+using Infrastructure.Segments;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -65,6 +66,7 @@ public static class ConfigureServices
         services.AddTransient<IEnvironmentService, EnvironmentService>();
         services.AddTransient<IResourceService, ResourceService>();
         services.AddTransient<IEndUserService, EndUserService>();
+        services.AddTransient<ISegmentService, SegmentService>();
         
         return services;
     }

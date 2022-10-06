@@ -4,6 +4,7 @@ using Domain.Members;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Projects;
+using Domain.Segments;
 using Domain.Users;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -40,6 +41,7 @@ public class MongoDbClient
         { typeof(Environment), "Environments" },
         { typeof(EndUser), "EndUsers" },
         { typeof(EndUserProperty), "EndUserProperties" },
+        { typeof(Segment), "Segments" },
 
         { typeof(Group), "Groups" },
         { typeof(Policy), "Policies" },

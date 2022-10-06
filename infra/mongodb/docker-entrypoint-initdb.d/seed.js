@@ -195,6 +195,85 @@ db.EndUserProperties.insertOne(
 )
 print('collection seeded: EndUserProperties')
 
+// seed segments
+print('clean and seed collection: Segments')
+db.Segments.deleteMany({})
+db.Segments.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        name: "[prod] tester-group",
+        description: "this is a tester group",
+        included: ["prod-bot-id"],
+        excluded: ["anonymous"],
+        rules: [
+            {
+                _id: "e5080546-dd53-4c9e-bf46-65a4897199c3",
+                name: "match by name",
+                ruleItems: [
+                    {
+                        property: "name",
+                        op: "EndsWith",
+                        value: "T"
+                    }
+                ],
+                isIncludedInExpt: true,
+                variations: [
+                    {
+                        exptRollout: 1.0,
+                        rolloutPercentage: [0, 1],
+                        value: {
+                            localId: 1,
+                            value: "true"
+                        }
+                    }
+                ]
+            }
+        ],
+        isArchived: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.Segments.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        name: "[dev] tester-group",
+        description: "this is a tester group",
+        included: ["dev-bot-id"],
+        excluded: ["anonymous"],
+        rules: [
+            {
+                _id: "78d03b8b-9cc8-4860-8cd7-449fbeb8ebbe",
+                name: "match by name",
+                ruleItems: [
+                    {
+                        property: "name",
+                        op: "EndsWith",
+                        value: "T"
+                    }
+                ],
+                isIncludedInExpt: true,
+                variations: [
+                    {
+                        exptRollout: 1.0,
+                        rolloutPercentage: [0, 1],
+                        value: {
+                            localId: 1,
+                            value: "true"
+                        }
+                    }
+                ]
+            }
+        ],
+        isArchived: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: Segments')
+
 // seed end-user
 print('clean and seed collection: EndUsers')
 db.EndUsers.deleteMany({})
