@@ -220,7 +220,7 @@ db.Segments.insertOne(
                 ],
                 variations: [
                     {
-                        localId: "a9d0f931-36be-460e-9020-f3b86e221509",
+                        _id: "a9d0f931-36be-460e-9020-f3b86e221509",
                         value: "true",
                         rollout: [0, 1],
                         exptRollout: 1.0

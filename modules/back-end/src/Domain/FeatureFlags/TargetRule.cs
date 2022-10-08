@@ -10,5 +10,5 @@ public class TargetRule
 
     public ICollection<Condition> Conditions { get; set; }
 
-    public ICollection<Variation> Variations { get; set; }
+    public ICollection<RolloutVariation> Variations { get; set; }
 }
