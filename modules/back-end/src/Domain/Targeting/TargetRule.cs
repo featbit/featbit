@@ -8,9 +8,9 @@ public class TargetRule
 
     public string Name { get; set; }
 
-    public bool IncludedInExpt { get; set; } = true;
+    public bool IncludedInExpt { get; set; }
 
-    public ICollection<Condition> Conditions { get; set; } = Array.Empty<Condition>();
+    public ICollection<Condition> Conditions { get; set; }
 
-    public ICollection<RolloutVariation> Variations { get; set; } = Array.Empty<RolloutVariation>();
+    public ICollection<RolloutVariation> Variations { get; set; }
 }

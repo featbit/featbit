@@ -252,6 +252,79 @@ db.Segments.insertOne(
 )
 print('collection seeded: Segments')
 
+// seed feature flag
+print('clean and seed collection: FeatureFlags')
+db.FeatureFlags.deleteMany({})
+db.FeatureFlags.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        name: "use new algorithm",
+        key: "use-new-algorithm",
+        variationType: "boolean",
+        variations: [
+            {
+                _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+                value: "true"
+            },
+            {
+                _id: "9d336c3a-0733-4b96-b950-f66172e8a4b1",
+                value: "false"
+            }
+        ],
+        targetUsers: [
+            {
+                keyIds: ["truthy-user-id"],
+                variationId: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+            },
+            {
+                keyIds: ["falsy-user-id", "anonymous"],
+                variationId: "9d336c3a-0733-4b96-b950-f66172e8a4b1"
+            }
+        ],
+        rules: [
+            {
+                _id: "823650b1-fae2-40f1-8f8b-53be026f9f8a",
+                name: "match by name",
+                includedInExpt: true,
+                conditions: [
+                    {
+                        property: "name",
+                        op: "Contains",
+                        value: "tester"
+                    }
+                ],
+                variations: [
+                    {
+                        _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+                        rollout: [0, 1],
+                        exptRollout: 1
+                    }
+                ]
+            }
+        ],
+        isEnabled: false,
+        disabledVariationId: "9d336c3a-0733-4b96-b950-f66172e8a4b1",
+        fallthrough: {
+            includedInExpt: true,
+            variations: [
+                {
+                    _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+                    rollout: [0, 1],
+                    exptRollout: 1
+                }
+            ]
+        },
+        exptIncludeAllTargets: true,
+        isArchived: false,
+        creatorId: userId,
+        createdAt: new Date(),
+        updatorId: userId,
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: FeatureFlags')
+
 // seed end-user
 print('clean and seed collection: EndUsers')
 db.EndUsers.deleteMany({})
