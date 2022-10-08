@@ -14,7 +14,7 @@ const routes: Routes = [
       },
       {
         path: 'users',
-        loadChildren: () => import("./users/users.module").then(m => m.UsersModule),
+        loadChildren: () => import("./end-users/end-users.module").then(m => m.EndUsersModule),
         data: {
           breadcrumb: $localize `:@@users:Users`
         },

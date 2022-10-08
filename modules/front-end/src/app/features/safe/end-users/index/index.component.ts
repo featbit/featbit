@@ -5,7 +5,7 @@ import { OrganizationService } from '@services/organization.service';
 import { debounceTime } from 'rxjs/operators';
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { IUserProp, IUserType } from "@shared/types";
-import { EnvUserFilter } from "@features/safe/users/types/featureflag-user";
+import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 import { CURRENT_USER_FILTER_ATTRIBUTE } from "@utils/localstorage-keys";
 import { EnvUserService } from "@services/env-user.service";
 

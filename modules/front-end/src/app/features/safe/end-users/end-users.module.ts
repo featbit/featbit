@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { UsersRoutingModule } from './users-routing.module';
-import { UsersComponent } from './users.component';
+import { EndUsersRoutingModule } from './end-users-routing.module';
+import { EndUsersComponent } from './end-users.component';
 import { DetailsComponent } from './details/details.component';
 import { IndexComponent } from './index/index.component';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -20,7 +20,7 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
 import {CoreModule} from "@core/core.module";
 
 @NgModule({
-  declarations: [UsersComponent, DetailsComponent, IndexComponent],
+  declarations: [EndUsersComponent, DetailsComponent, IndexComponent],
     imports: [
       CommonModule,
       FormsModule,
@@ -30,7 +30,7 @@ import {CoreModule} from "@core/core.module";
       NzDrawerModule,
       NzButtonModule,
       NzSpinModule,
-      UsersRoutingModule,
+      EndUsersRoutingModule,
       NzIconModule,
       NzGridModule,
       NzSelectModule,
@@ -39,4 +39,4 @@ import {CoreModule} from "@core/core.module";
       NzDividerModule
     ]
 })
-export class UsersModule { }
+export class EndUsersModule { }

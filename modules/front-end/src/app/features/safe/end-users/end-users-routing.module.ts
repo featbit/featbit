@@ -13,7 +13,7 @@ const routes: Routes = [
     component: DetailsComponent,
     resolve: { envUser: DetailsResolver },
     data: {
-      breadcrumb: (data: any) => `${data.envUser?.name || "用户详情"}`, // dynamic
+      breadcrumb: (data: any) => data.envUser?.name || data.envUser?.keyId,
     }
   }
 ];
@@ -22,4 +22,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class UsersRoutingModule { }
+export class EndUsersRoutingModule { }

@@ -9,7 +9,7 @@ import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments-i
 import { IFftuwmtrParams, IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import { EnvUserFilter } from "@features/safe/users/types/featureflag-user";
+import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 
 @Component({
   selector: 'segment-targeting',

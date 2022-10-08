@@ -55,7 +55,7 @@ export class SafeComponent implements OnInit, OnDestroy {
         path: '/switch-archive'
       },
       {
-        title: $localize `:@@menu.users:Users`,
+        title: $localize `:@@menu.end-users:End users`,
         icon: 'icons:icon-switch-user',
         path: '/users'
       },
