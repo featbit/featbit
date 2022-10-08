@@ -323,6 +323,74 @@ db.FeatureFlags.insertOne(
         updatedAt: new Date()
     }
 )
+db.FeatureFlags.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        name: "use new algorithm",
+        key: "use-new-algorithm",
+        variationType: "boolean",
+        variations: [
+            {
+                _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+                value: "true"
+            },
+            {
+                _id: "e11b9358-f965-4858-be7b-258eaf92056e",
+                value: "false"
+            }
+        ],
+        targetUsers: [
+            {
+                keyIds: ["truthy-user-id"],
+                variationId: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+            },
+            {
+                keyIds: ["falsy-user-id", "anonymous"],
+                variationId: "e11b9358-f965-4858-be7b-258eaf92056e"
+            }
+        ],
+        rules: [
+            {
+                _id: "823650b1-fae2-40f1-8f8b-53be026f9f8a",
+                name: "match by name",
+                includedInExpt: true,
+                conditions: [
+                    {
+                        property: "name",
+                        op: "Contains",
+                        value: "tester"
+                    }
+                ],
+                variations: [
+                    {
+                        _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+                        rollout: [0, 1],
+                        exptRollout: 1
+                    }
+                ]
+            }
+        ],
+        isEnabled: false,
+        disabledVariationId: "e11b9358-f965-4858-be7b-258eaf92056e",
+        fallthrough: {
+            includedInExpt: true,
+            variations: [
+                {
+                    _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+                    rollout: [0, 1],
+                    exptRollout: 1
+                }
+            ]
+        },
+        exptIncludeAllTargets: true,
+        isArchived: false,
+        creatorId: userId,
+        createdAt: new Date(),
+        updatorId: userId,
+        updatedAt: new Date()
+    }
+)
 print('collection seeded: FeatureFlags')
 
 // seed end-user
