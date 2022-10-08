@@ -36,10 +36,10 @@
              nz-icon nzType="icons:icon-info-outline"></i>
         </div>
         <div class="find-rule">
-          <app-serve-multistates [variationOptions]="variationOptions"
+          <app-serve-multistates-v1 [variationOptions]="variationOptions"
             [rulePercentageRollouts]="featureDetail?.getFFDefaultRulePercentageRollouts()"
             (onPercentageChange)="onDefaultRulePercentageRolloutsChange($event)">
-          </app-serve-multistates>
+          </app-serve-multistates-v1>
         </div>
       </div>
       <div class="standard-div target-users" *ngIf="!isLoading; else loadingTem;">
@@ -73,11 +73,11 @@
         <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
           <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index; trackBy: trackRuleById;">
             <div class="drop-box rule" cdkDrag>
-              <find-rule [data]="condition" [userProps]="userProps" (deleteRule)="onDeleteRule(key)"
+              <find-rule-v1 [data]="condition" [userProps]="userProps" (deleteRule)="onDeleteRule(key)"
                 (ruleConfigChange)="onRuleConfigChange($event, key)" (updateRuleName)="condition.ruleName = $event"
                 [variationOptions]="variationOptions"
                 (onPercentageChangeMultistates)="onPercentageChangeMultistates($event, key)">
-              </find-rule>
+              </find-rule-v1>
             </div>
           </ng-container>
         </div>

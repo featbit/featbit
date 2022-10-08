@@ -70,6 +70,14 @@ import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-us
 import {TranslationPipe} from "@core/pipes/translation.pipe";
 import {GuideComponent} from "@core/components/guide/guide.component";
 import {NzTypographyModule} from "ng-zorro-antd/typography";
+import {FindRuleV1Component} from "@core/components/find-rule-v1/find-rule-v1.component";
+import {
+  TargetedUserTableV1Component
+} from "@core/components/find-rule-v1/targeted-user-table-v1/targeted-user-table-v1.component";
+import {RuleV1Component} from "@core/components/find-rule-v1/rule-v1/rule-v1.component";
+import {
+  ServeMultistatesV1Component
+} from "@core/components/find-rule-v1/serve-multistates-v1/serve-multistates-v1.component";
 
 @NgModule({
   declarations: [
@@ -100,9 +108,13 @@ import {NzTypographyModule} from "ng-zorro-antd/typography";
     UserSegmentsFlagsDrawerComponent,
     TargetUserComponent,
     FindRuleComponent,
+    FindRuleV1Component,
     ServeMultistatesComponent,
+    ServeMultistatesV1Component,
     RuleComponent,
+    RuleV1Component,
     TargetedUserTableComponent,
+    TargetedUserTableV1Component,
     GuideComponent
   ],
   imports: [
@@ -176,9 +188,13 @@ import {NzTypographyModule} from "ng-zorro-antd/typography";
     UserSegmentsFlagsDrawerComponent,
     TargetUserComponent,
     FindRuleComponent,
+    FindRuleV1Component,
     ServeMultistatesComponent,
+    ServeMultistatesV1Component,
     RuleComponent,
+    RuleV1Component,
     TargetedUserTableComponent,
+    TargetedUserTableV1Component,
     GuideComponent
   ]
 })

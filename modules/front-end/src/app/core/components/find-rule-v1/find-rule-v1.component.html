@@ -1,0 +1,53 @@
+<section class="find-rule">
+  <nz-card style="margin-bottom: 10px;font-size: 16px; border-radius: 20px" [nzTitle]="titleTemplate">
+    <ng-container *ngFor="let ruleContent of ruleContentList; let key=index; let first=first; let last=last; trackBy: trackByFunction">
+      <app-rule-v1
+        [ruleContent]="ruleContent"
+        [isFirst]="first"
+        [isLast]="last"
+        [segmentList]="segmentList"
+        [userProps]="userProps"
+        (addRule)="onAddRule()"
+        (deleteRule)="onDeleteRuleItem(key)"
+        (ruleChange)="onRuleChange($event, key)">
+      </app-rule-v1>
+    </ng-container>
+
+    <app-serve-multistates-v1
+      [serveSingleOption]="serveSingleOption"
+      [variationOptions]="variationOptions"
+      [rulePercentageRollouts]="rulePercentageRollouts"
+      (onPercentageChange)="onPercentageChangeMultistates.next($event)">
+    </app-serve-multistates-v1>
+  </nz-card>
+
+  <ng-template #titleTemplate>
+    <div style="display:flex;justify-content: flex-start;">
+      <input type="text" class="standard-bordered-input" nz-input style="width: 500px;height: 36px;" [(ngModel)]="ruleName" (ngModelChange)="onRuleNameChange()" />
+      <div class="rule-title" style="margin-left: 16px;" *ngIf="canViewTargetedUsers()">
+        <i i18n-nz-tooltip="@@common.view-matched-users" nz-tooltip="View matched users" nz-icon nzType="icons:icon-targeted-user" (click)="viewTargetedUsers()"></i>
+      </div>
+      <div class="rule-title" style="margin-left: 12px;">
+        <i nz-icon
+          i18n-nz-popconfirm="@@common.remove-rule-confirm"
+          nz-popconfirm="Are you sure to remove the rule?"
+          nzType="icons:icon-delete"
+          nzPopconfirmPlacement="bottomRight"
+          [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+          (nzOnConfirm)="confirm()"></i>
+      </div>
+    </div>
+  </ng-template>
+
+  <nz-modal
+    i18n-nzTitle="@@common.matching-users"
+    nzTitle="Matching users"
+    [(nzVisible)]="targetedUsersModalVisible"
+    (nzOnCancel)="targetedUsersModalVisible = false"
+    nzWidth="800px"
+    [nzFooter]=null>
+    <ng-container *nzModalContent>
+      <targeted-user-table-v1 [rules]="ruleContentList"></targeted-user-table-v1>
+    </ng-container>
+  </nz-modal>
+</section>
