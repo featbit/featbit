@@ -6,10 +6,10 @@ import { SegmentService } from '@services/segment.service';
 import { IUserProp, IUserType } from '@shared/types';
 
 import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments-index';
-import { IFftuwmtrParams, IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import {ICondition, IRule} from "@shared/rules";
 
 @Component({
   selector: 'segment-targeting',
@@ -39,9 +39,9 @@ export class TargetingComponent {
         if (result) {
           this.id = result.id;
           this.loadSegment(result);
-          this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
-            this.flagReferences = [...flags];
-          });
+          // this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
+          //   this.flagReferences = [...flags];
+          // });
         }
       })
     })
@@ -107,8 +107,8 @@ export class TargetingComponent {
 
   userProps: IUserProp[] = [];
 
-  trackRuleById(_, rule: IFftuwmtrParams) {
-    return rule.ruleId;
+  trackRuleById(_, rule: IRule) {
+    return rule.id;
   }
 
   addRule() {
@@ -119,8 +119,8 @@ export class TargetingComponent {
     this.segmentDetail.removeRule(index);
   }
 
-  onRuleConfigChange(config: IJsonContent[], index: number) {
-    this.segmentDetail.updateRuleItem(config, index);
+  onRuleConfigChange(conditions: ICondition[], index: number) {
+    this.segmentDetail.updateRuleItem(conditions, index);
   }
 
   onDrop(event: CdkDragDrop<string[]>) {

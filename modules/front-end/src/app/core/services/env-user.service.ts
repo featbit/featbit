@@ -30,7 +30,7 @@ export class EnvUserService {
   // get users by key ids
   public getUsersByKeyIds(keyIds: string[]): Observable<any> {
     const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/by-keyIds`;
-    return this.http.post(url, { keyIds });
+    return this.http.get(url, {params: new HttpParams({fromObject: { keyIds }})});
   }
 
   // upsert users
