@@ -63,7 +63,7 @@ import {
 } from "@core/components/user-segments-flags-drawer/user-segments-flags-drawer.component";
 import {TargetUserComponent} from "@core/components/target-user/target-user.component";
 import {FindRuleComponent} from "@core/components/find-rule/find-rule.component";
-import {ServeMultistatesComponent} from "@core/components/find-rule/serve-multistates/serve-multistates.component";
+import {ServeComponent} from "@core/components/find-rule/serve/serve.component";
 import {RuleComponent} from "@core/components/find-rule/rule/rule.component";
 import {NzCardModule} from "ng-zorro-antd/card";
 import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-user-table/targeted-user-table.component";
@@ -78,7 +78,7 @@ import {RuleV1Component} from "@core/components/find-rule-v1/rule-v1/rule-v1.com
 import {
   ServeMultistatesV1Component
 } from "@core/components/find-rule-v1/serve-multistates-v1/serve-multistates-v1.component";
-import {RuleVariationValuePipe} from "@core/components/find-rule/serve-multistates/rule-variation-value.pipe";
+import {RuleVariationValuePipe} from "@core/components/find-rule/serve/rule-variation-value.pipe";
 
 @NgModule({
   declarations: [
@@ -112,7 +112,7 @@ import {RuleVariationValuePipe} from "@core/components/find-rule/serve-multistat
     TargetUserComponent,
     FindRuleComponent,
     FindRuleV1Component,
-    ServeMultistatesComponent,
+    ServeComponent,
     ServeMultistatesV1Component,
     RuleComponent,
     RuleV1Component,
@@ -194,7 +194,7 @@ import {RuleVariationValuePipe} from "@core/components/find-rule/serve-multistat
     TargetUserComponent,
     FindRuleComponent,
     FindRuleV1Component,
-    ServeMultistatesComponent,
+    ServeComponent,
     ServeMultistatesV1Component,
     RuleComponent,
     RuleV1Component,

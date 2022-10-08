@@ -7,11 +7,11 @@ interface IRuleVariationValue extends IRuleVariation {
 }
 
 @Component({
-  selector: 'app-serve-multistates',
-  templateUrl: './serve-multistates.component.html',
-  styleUrls: ['./serve-multistates.component.less']
+  selector: 'app-serve',
+  templateUrl: './serve.component.html',
+  styleUrls: ['./serve.component.less']
 })
-export class ServeMultistatesComponent implements OnInit {
+export class ServeComponent implements OnInit {
 
   @Input() ruleVariations: IRuleVariation[] = [];
 

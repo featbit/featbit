@@ -13,11 +13,11 @@
       </app-rule>
     </ng-container>
     <ng-container *ngIf="variationOptions.length > 0">
-      <app-serve-multistates
+      <app-serve
         [variationOptions]="variationOptions"
         [ruleVariations]="variations"
         (onPercentageChange)="onPercentageChangeMultistates.next($event)">
-      </app-serve-multistates>
+      </app-serve>
     </ng-container>
   </nz-card>
 
