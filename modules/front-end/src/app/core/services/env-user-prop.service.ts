@@ -3,8 +3,7 @@ import { getCurrentProjectEnv } from "@utils/project-env";
 import { environment } from "src/environments/environment";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { IEnvUserProperty, IUserProp } from "@shared/types";
-import { map } from "rxjs/operators";
+import { IUserProp } from "@shared/types";
 
 @Injectable({
   providedIn: 'root'
@@ -13,31 +12,27 @@ export class EnvUserPropService {
   get baseUrl() {
     const envId = getCurrentProjectEnv().envId;
 
-    return `${environment.url}/api/v1/envs/${envId}/user-property`
+    return `${environment.url}/api/v1/envs/${envId}/end-user-properties`
   }
 
   constructor(private http: HttpClient) {
   }
 
-  get(): Observable<IEnvUserProperty> {
-    return this.http.get<IEnvUserProperty>(this.baseUrl);
-  }
-
-  getProp(): Observable<IUserProp[]> {
-    return this.get().pipe(map(userProp => userProp.userProperties.filter(x => !x.isArchived)))
+  get(): Observable<IUserProp[]> {
+    return this.http.get<IUserProp[]>(this.baseUrl);
   }
 
   upsertProp(prop: IUserProp) {
     const {id, name, presetValues, usePresetValuesOnly, isDigestField, remark} = prop;
 
     return this.http.put(
-      `${this.baseUrl}/props/${id}/upsert`,
+      `${this.baseUrl}/${id}/upsert`,
       {name, presetValues, usePresetValuesOnly, isDigestField, remark}
     );
   }
 
   archiveProp(id: string) {
-    return this.http.put(`${this.baseUrl}/props/${id}/archive`, {});
+    return this.http.delete(`${this.baseUrl}/${id}`, {});
   }
 
   upsertTag(tagId: string, source: string, requestProperty: string, userProperty: string) {

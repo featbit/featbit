@@ -3,214 +3,118 @@
   [nzExtra]="extra"
   nzPlacement="right"
   i18n-nzTitle="@@users.idx.customized-user-properties"
-  nzTitle="Customized user properties"
+  nzTitle="End user properties"
   [nzBodyStyle]="{'padding-top': '12px'}"
   [nzWidth]="850"
   [nzVisible]="visible"
   (nzOnClose)="close.emit()">
   <ng-container *nzDrawerContent>
-    <nz-tabset class="no-bottom-line">
-      <nz-tab i18n-nzTitle="@@users.user-properties" nzTitle="User properties">
-        <div class="table-content-area">
-          <div class="table-search-area">
-            <div class="search-inputs">
-              <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="propSearchText" (ngModelChange)="searchProp()">
-              </nz-input-group>
-              <ng-template #prefixIconSearch>
-                <i nz-icon nzType="icons:icon-search"></i>
-              </ng-template>
-            </div>
-
-            <button class="standard-btn" nz-button nzType="primary" (click)="newProp()">
-              <i nz-icon nzType="icons:icon-add"></i>
-              <ng-container i18n="@@common.add">Add</ng-container>
-            </button>
-          </div>
-          <div class="table-wrapper">
-            <nz-table #propTable
-                      nzTableLayout="fixed"
-                      nzSize="small"
-                      nzFrontPagination
-                      nzShowPagination
-                      [nzData]="displayedProps"
-                      [(nzPageIndex)]="propsPageIndex"
-                      [nzLoading]="isLoading">
-              <thead>
-              <tr>
-                <th nzWidth="150px" i18n="@@common.name">Name</th>
-                <th nzWidth="130px">
-                  <ng-container i18n="@@users.idx.mark-as-digest-field">Mark as digest field</ng-container>
-                  <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@users.idx.used-to-display-user-digest-info" nz-tooltip="Used to display user's digest information"></i>
-                </th>
-                <th nzAlign="center" nzWidth="190px" i18n="@@common.comment">Comment</th>
-                <th i18n="@@common.actions">Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr *ngFor="let row of propTable.data; index as index">
-                <div *ngIf="row.isBuiltIn, then builtInPropRow else customPropRow"></div>
-                <ng-template #builtInPropRow>
-                  <td>{{row.name}}</td>
-                  <td style="text-align: center">
-                    <label nzDisabled nz-checkbox [(ngModel)]="row.isDigestField"></label>
-                  </td>
-                  <td>{{row.remark}}</td>
-                  <td i18n="@@users.idx.built-in-property">Built in property</td>
-                </ng-template>
-                <ng-template #customPropRow>
-                  <div *ngIf="row.isEditing, then editingPropRow else showPropRow"></div>
-                  <ng-template #showPropRow>
-                    <td nzEllipsis>
-                      <span nz-tooltip="{{row.name}}">{{row.name}}</span>
-                    </td>
-                    <td style="text-align: center">
-                      <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)"></label>
-                    </td>
-                    <td style="text-align: center" nzEllipsis i18n-nz-tooltip="@@users.idx.click-to-edit-set-comment" nz-tooltip="Click to set/modify comment" (click)="editProp(row)">
-                      {{row.remark}}
-                    </td>
-                  </ng-template>
-                  <ng-template #editingPropRow>
-                    <td *ngIf="row.isNew">
-                      <input nz-input [(ngModel)]="row.name" i18n-placeholder="@@common.name" placeholder="Name">
-                    </td>
-                    <td *ngIf="!row.isNew" nzEllipsis>
-                      <span nz-tooltip="{{row.name}}">{{row.name}}</span>
-                    </td>
-                    <td style="text-align: center">
-                      <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)">
-                      </label>
-                    </td>
-                    <td>
-                      <input [(ngModel)]="row.remark" nz-input i18n="@@common.comment" placeholder="Comment">
-                    </td>
-                  </ng-template>
-                  <td class="row-operations">
-                    <button nz-button nzSize="default" nzType="link" *ngIf="row.isEditing"
-                            [nzLoading]="row.isSaving" (click)="saveProp(row)">
-                      <i nz-icon nzType="save" nzTheme="outline"></i> <ng-container i18n="@@common.save">Save</ng-container>
-                    </button>
-
-                    <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
-                            [nzIcon]="iconTpl" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="archiveProp(row)">
-                      <i nz-icon nzType="delete" nzTheme="outline"></i> <ng-container i18n="@@common.remove">Remove</ng-container>
-                      <ng-template #iconTpl>
-                        <i nz-icon nzType="question-circle-o" style="color: red;"></i>
-                      </ng-template>
-                    </button>
-
-                    <button nz-button nzSize="default" nzType="link" (click)="cancelEditProp(row)" *ngIf="row.isEditing"
-                            style="color: #717D8A;">
-                      <i nz-icon nzType="close" nzTheme="outline"></i> <ng-container i18n="@@common.cancel">Cancel</ng-container>
-                    </button>
-
-                    <button nz-button nzSize="default" nzType="link" (click)="openPropPresetValuesModal(row)"
-                            *ngIf="!row.isEditing">
-                      <i nz-icon nzType="edit" nzTheme="outline"></i>
-                      <ng-container i18n="@@users.idx.preset-value">Preset value</ng-container>（<span>{{row?.presetValues?.length || 0}}</span>）
-                    </button>
-                  </td>
-                </ng-template>
-              </tr>
-              </tbody>
-            </nz-table>
-          </div>
+    <div class="table-content-area">
+      <div class="table-search-area">
+        <div class="search-inputs">
+          <nz-input-group [nzPrefix]="prefixIconSearch">
+            <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="propSearchText" (ngModelChange)="searchProp()">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
         </div>
-      </nz-tab>
 
-      <nz-tab i18n-nzTitle="@@users.idx.user-tags" nzTitle="User tags">
-        <div class="table-operations">
-          <button class="standard-btn" nz-button nzType="primary" (click)="newTag()">
-            <i nz-icon nzType="icons:icon-add" nzTheme="outline"></i>
-            <ng-container i18n="@@common.add">Add</ng-container>
-          </button>
-        </div>
-        <div class="table-content-area">
-          <div class="table-wrapper">
-            <nz-table #tagTable class="editable-table"
-                      nzSize="small"
-                      nzFrontPagination
-                      nzShowPagination
-                      [nzData]="tags"
-                      [nzLoading]="isLoading">
-              <thead>
-              <tr>
-                <th nzWidth="30%" i18n="@@users.idx.request-field">Request field</th>
-                <th nzWidth="25%" i18n="@@users.idx.source">Source</th>
-                <th nzWidth="25%" i18n="@@users.idx.user-property">User property</th>
-                <th nzWidth="20%" i18n="@@common.actions">Actions</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr *ngFor="let row of tagTable.data" class="editable-row">
-                <div *ngIf="row.isEditing, then editingTagRow else showTagRow"></div>
-                <ng-template #editingTagRow>
-                  <td>
-                    <input [(ngModel)]="row.requestProperty" nz-input placeholder="E.g. x-request-id"/>
-                  </td>
-                  <td>
-                    <nz-select [(ngModel)]="row.source">
-                      <nz-option *ngFor="let source of sources" [nzLabel]="source" [nzValue]="source"></nz-option>
-                    </nz-select>
-                  </td>
-                  <td>
-                    <nz-select
-                      nzShowSearch
-                      (nzOnSearch)="searchTag($event)"
-                      [ngModel]="row.userProperty"
-                      (ngModelChange)="selectTag(row, $event)">
-                      <ng-container *ngFor="let prop of tagProps">
-                        <nz-option nzCustomContent [nzValue]="prop" [nzLabel]="prop" [nzHide]="propUsed(prop)">
-                          {{ prop }}
-                        </nz-option>
-                      </ng-container>
-                    </nz-select>
-                  </td>
-                </ng-template>
-                <ng-template #showTagRow>
-                  <td>
-                    <div class="editable-cell" (click)="editTag(row)">
-                      <span>{{ row.requestProperty }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="editable-cell" (click)="editTag(row)">
-                      <span>{{ row.source }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="editable-cell" (click)="editTag(row)">
-                      <span>{{ row.userProperty }}</span>
-                    </div>
-                  </td>
-                </ng-template>
-
-                <td>
-                  <button nz-button nzSize="default" nzType="link" (click)="editTag(row)" *ngIf="!row.isEditing">
-                    <i nz-icon nzType="edit" nzTheme="outline"></i>
-                  </button>
-
-                  <button nz-button nzSize="default" nzType="link" *ngIf="row.isEditing"
-                          [nzLoading]="row.isSaving" (click)="saveTag(row)">
-                    <i nz-icon nzType="save" nzTheme="outline"></i>
-                  </button>
-
-                  <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
-                          [nzIcon]="iconTpl" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteTag(row)">
-                    <i nz-icon nzType="delete" nzTheme="outline"></i>
-                    <ng-template #iconTpl>
-                      <i nz-icon nzType="question-circle-o" style="color: red;"></i>
-                    </ng-template>
-                  </button>
+        <button class="standard-btn" nz-button nzType="primary" (click)="newProp()">
+          <i nz-icon nzType="icons:icon-add"></i>
+          <ng-container i18n="@@common.add">Add</ng-container>
+        </button>
+      </div>
+      <div class="table-wrapper">
+        <nz-table #propTable
+                  nzTableLayout="fixed"
+                  nzSize="small"
+                  nzFrontPagination
+                  nzShowPagination
+                  [nzData]="displayedProps"
+                  [(nzPageIndex)]="propsPageIndex"
+                  [nzLoading]="isLoading">
+          <thead>
+          <tr>
+            <th nzWidth="150px" i18n="@@common.name">Name</th>
+            <th nzWidth="130px">
+              <ng-container i18n="@@users.idx.mark-as-digest-field">Mark as digest field</ng-container>
+              <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@users.idx.used-to-display-user-digest-info" nz-tooltip="Used to display user's digest information"></i>
+            </th>
+            <th nzAlign="center" nzWidth="190px" i18n="@@common.comment">Comment</th>
+            <th i18n="@@common.actions">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let row of propTable.data; index as index">
+            <div *ngIf="row.isBuiltIn, then builtInPropRow else customPropRow"></div>
+            <ng-template #builtInPropRow>
+              <td>{{row.name}}</td>
+              <td style="text-align: center">
+                <label nzDisabled nz-checkbox [(ngModel)]="row.isDigestField"></label>
+              </td>
+              <td>{{row.remark}}</td>
+              <td i18n="@@users.idx.built-in-property">Built in property</td>
+            </ng-template>
+            <ng-template #customPropRow>
+              <div *ngIf="row.isEditing, then editingPropRow else showPropRow"></div>
+              <ng-template #showPropRow>
+                <td nzEllipsis>
+                  <span nz-tooltip="{{row.name}}">{{row.name}}</span>
                 </td>
-              </tr>
-              </tbody>
-            </nz-table>
-          </div>
-        </div>
-      </nz-tab>
-    </nz-tabset>
+                <td style="text-align: center">
+                  <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)"></label>
+                </td>
+                <td style="text-align: center" nzEllipsis i18n-nz-tooltip="@@users.idx.click-to-edit-set-comment" nz-tooltip="Click to set/modify comment" (click)="editProp(row)">
+                  {{row.remark}}
+                </td>
+              </ng-template>
+              <ng-template #editingPropRow>
+                <td *ngIf="row.isNew">
+                  <input nz-input [(ngModel)]="row.name" i18n-placeholder="@@common.name" placeholder="Name">
+                </td>
+                <td *ngIf="!row.isNew" nzEllipsis>
+                  <span nz-tooltip="{{row.name}}">{{row.name}}</span>
+                </td>
+                <td style="text-align: center">
+                  <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)">
+                  </label>
+                </td>
+                <td>
+                  <input [(ngModel)]="row.remark" nz-input i18n="@@common.comment" placeholder="Comment">
+                </td>
+              </ng-template>
+              <td class="row-operations">
+                <button nz-button nzSize="default" nzType="link" *ngIf="row.isEditing"
+                        [nzLoading]="row.isSaving" (click)="saveProp(row)">
+                  <i nz-icon nzType="save" nzTheme="outline"></i> <ng-container i18n="@@common.save">Save</ng-container>
+                </button>
+
+                <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
+                        [nzIcon]="iconTpl" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="archiveProp(row)">
+                  <i nz-icon nzType="delete" nzTheme="outline"></i> <ng-container i18n="@@common.remove">Remove</ng-container>
+                  <ng-template #iconTpl>
+                    <i nz-icon nzType="question-circle-o" style="color: red;"></i>
+                  </ng-template>
+                </button>
+
+                <button nz-button nzSize="default" nzType="link" (click)="cancelEditProp(row)" *ngIf="row.isEditing"
+                        style="color: #717D8A;">
+                  <i nz-icon nzType="close" nzTheme="outline"></i> <ng-container i18n="@@common.cancel">Cancel</ng-container>
+                </button>
+
+                <button nz-button nzSize="default" nzType="link" (click)="openPropPresetValuesModal(row)"
+                        *ngIf="!row.isEditing">
+                  <i nz-icon nzType="edit" nzTheme="outline"></i>
+                  <ng-container i18n="@@users.idx.preset-value">Preset value</ng-container>（<span>{{row?.presetValues?.length || 0}}</span>）
+                </button>
+              </td>
+            </ng-template>
+          </tr>
+          </tbody>
+        </nz-table>
+      </div>
+    </div>
   </ng-container>
   <ng-template #extra>
     <i (click)="close.emit()" nz-icon nzType="icons:icon-close"></i>

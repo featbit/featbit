@@ -22,20 +22,20 @@ export class EnvUserService {
   }
 
   get(id: string): Observable<IUserType> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/users/${id}`;
+    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/${id}`;
 
     return this.http.get<IUserType>(url);
   }
 
   // get users by key ids
   public getUsersByKeyIds(keyIds: string[]): Observable<any> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/users/byKeyIds`;
+    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/by-keyIds`;
     return this.http.post(url, { keyIds });
   }
 
   // upsert users
   public upsert(params): Observable<any> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/users`;
+    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users`;
     return this.http.put(url, { ...params });
   }
 
@@ -47,7 +47,7 @@ export class EnvUserService {
       pageSize: filter.pageSize,
     };
 
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/users/search`;
+    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users`;
     return this.http.get<EnvUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
   }
 
@@ -75,7 +75,7 @@ export class EnvUserService {
       .set('pageIndex', pageIndex)
       .set('pageSize', pageSize);
 
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/users/rest-search`;
+    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/rest-search`;
     return this.http.get<EnvUserPagedResult>(url, { params: params });
   }
 }

@@ -39,7 +39,7 @@ export class DetailsComponent implements OnInit {
 
     this.listenerResolveData();
 
-    this.envUserPropService.getProp().subscribe(props => this.envUserProps = props);
+    this.envUserPropService.get().subscribe(props => this.envUserProps = props);
   }
 
   getPropRemark(propName: string) {

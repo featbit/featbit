@@ -106,7 +106,7 @@ export class TargetingComponent implements OnInit {
 
   private initData(complete?: Function) {
     forkJoin([
-      this.envUserPropService.getProp(),
+      this.envUserPropService.get(),
       this.switchServe.getSwitchList(this.switchServe.envId)
     ]).subscribe((result) => {
       if (result) {
