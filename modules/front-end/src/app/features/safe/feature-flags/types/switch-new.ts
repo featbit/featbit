@@ -128,7 +128,7 @@ export class CSwitchParams {
         this.fftiuForTrue = data.fftiuForTrue;
         this.fftuwmtr = data.fftuwmtr;
 
-        this.variationOptions = data.variationOptions?.sort((a, b) => a.displayOrder - b.displayOrder);
+        this.variationOptions = [...data.variationOptions];
         this.variationDataType = data.variationDataType || VariationDataTypeEnum.string;
         this.targetIndividuals = data.targetIndividuals;
 

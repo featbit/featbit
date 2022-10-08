@@ -178,7 +178,6 @@ export class SettingComponent implements OnInit {
       ...this.variationOptions,
       {
         localId: this.temporaryStateId,
-        displayOrder: null,
         value: null
       }
     ];
@@ -209,12 +208,12 @@ export class SettingComponent implements OnInit {
       return;
     }
 
-    if(this.featureDetail.getFftuwmtr().length > 0 && this.featureDetail.getFftuwmtr().find(x => x.variations.find(y => y.valueOption.localId === id))) {
+    if(this.featureDetail.getFftuwmtr().length > 0 && this.featureDetail.getFftuwmtr().find(x => x.variations.find(y => y.localId === id))) {
       this.message.warning($localize `:@@ff.variation-used-by-rules:This variation is used by rules, remove the reference before it can be safely removed`);
       return;
     }
 
-    if(this.featureDetail.getFFDefaultRulePercentageRollouts().length > 0 && this.featureDetail.getFFDefaultRulePercentageRollouts().find(x => x.valueOption.localId === id)) {
+    if(this.featureDetail.getFFDefaultRulePercentageRollouts().length > 0 && this.featureDetail.getFFDefaultRulePercentageRollouts().find(x => x.localId === id)) {
       this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by default rule, remove the reference before it can be safely removed`);
       return;
     }
@@ -273,8 +272,6 @@ export class SettingComponent implements OnInit {
         maxId += 1;
         e.localId = maxId;
       }
-
-      e.displayOrder = i + 1;
     });
 
 

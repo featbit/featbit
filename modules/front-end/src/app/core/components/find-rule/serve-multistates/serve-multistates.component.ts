@@ -35,7 +35,7 @@ export class ServeMultistatesComponent implements OnInit {
   ngOnInit(): void {
 
     if (isNotPercentageRollout(this.rulePercentageRollouts)) {
-      this.selectedValueOptionId = this.rulePercentageRollouts[0]?.valueOption.localId || null;
+      this.selectedValueOptionId = this.rulePercentageRollouts[0]?.localId || null;
       this.rulePercentageRolloutValues = this.availableVariationOptions.map((v, idx) => ({
         rolloutPercentage: [0, idx === 0 ? 1 : 0],
         valueOption: Object.assign({}, v),
@@ -44,14 +44,14 @@ export class ServeMultistatesComponent implements OnInit {
     } else {
       this.selectedValueOptionId = -1;
       this.rulePercentageRolloutValues = this.availableVariationOptions.map(v => {
-        const rule = this.rulePercentageRollouts.find(x => x.valueOption.localId === v.localId);
+        const rule = this.rulePercentageRollouts.find(x => x.localId === v.localId);
         const result = {
           rolloutPercentage: [0, 0],
           valueOption: Object.assign({}, v),
           percentageValue: 0
         }
         if (rule) {
-            result.rolloutPercentage = [rule.rolloutPercentage[0], rule.rolloutPercentage[1]];
+            result.rolloutPercentage = [rule.rollout[0], rule.rollout[1]];
             result.percentageValue = getPercentageFromRolloutPercentageArray(result.rolloutPercentage);
         }
         return result;

@@ -1,11 +1,11 @@
-import { IFftuwmtrParams, IJsonContent } from "@features/safe/feature-flags/types/switch-new";
+import {ICondition, ISegmentRule} from "@shared/rules";
 
-export function handleRulesBeforeSave(rules: IFftuwmtrParams[]) {
+export function handleRulesBeforeSave(rules: ISegmentRule[]) {
   let filteredRules = rules.filter(rule => rule.conditions.length > 0);
 
   // handle rule value
-  filteredRules.forEach((rule: IFftuwmtrParams) => {
-    rule.conditions.forEach((rule: IJsonContent) => {
+  filteredRules.forEach((rule: ISegmentRule) => {
+    rule.conditions.forEach((rule: ICondition) => {
       if(rule.type === 'multi') {
         rule.value = JSON.stringify(rule.multipleValue);
       }
