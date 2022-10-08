@@ -8,7 +8,7 @@ public class TargetRule
 
     public bool IncludedInExpt { get; set; } = true;
 
-    public ICollection<RuleItem> RuleItems { get; set; }
+    public ICollection<Condition> Conditions { get; set; }
 
     public ICollection<Variation> Variations { get; set; }
 }

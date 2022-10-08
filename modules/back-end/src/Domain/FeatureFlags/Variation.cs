@@ -2,7 +2,7 @@ namespace Domain.FeatureFlags;
 
 public class Variation
 {
-    public int LocalId { get; set; }
+    public string LocalId { get; set; }
 
     public string Value { get; set; }
 

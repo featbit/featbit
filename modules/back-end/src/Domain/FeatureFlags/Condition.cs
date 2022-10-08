@@ -2,7 +2,7 @@ using Domain.Segments;
 
 namespace Domain.FeatureFlags;
 
-public class RuleItem
+public class Condition
 {
     public string Property { get; set; }
 
@@ -10,7 +10,7 @@ public class RuleItem
 
     public string Value { get; set; }
 
-    public bool IsSegmentRule()
+    public bool IsSegmentCondition()
     {
         var isSegmentProperty = SegmentConsts.RuleProperties.Contains(Property);
 

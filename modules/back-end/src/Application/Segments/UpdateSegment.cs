@@ -29,9 +29,9 @@ public class UpdateSegmentValidator : AbstractValidator<UpdateSegment>
         RuleFor(x => x.Rules)
             .Must(rules =>
             {
-                var allRuleItems = rules.SelectMany(x => x.RuleItems);
-                return allRuleItems.All(x => !x.IsSegmentRule());
-            }).WithErrorCode(ErrorCodes.SegmentCannotReferenceSegmentRule);
+                var conditions = rules.SelectMany(x => x.Conditions);
+                return conditions.All(x => !x.IsSegmentCondition());
+            }).WithErrorCode(ErrorCodes.SegmentCannotReferenceSegmentCondition);
     }
 }
 

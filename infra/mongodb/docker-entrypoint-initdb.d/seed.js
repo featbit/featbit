@@ -211,7 +211,7 @@ db.Segments.insertOne(
                 _id: "e5080546-dd53-4c9e-bf46-65a4897199c3",
                 name: "match by name",
                 includedInExpt: true,
-                ruleItems: [
+                conditions: [
                     {
                         property: "name",
                         op: "EndsWith",
@@ -220,7 +220,7 @@ db.Segments.insertOne(
                 ],
                 variations: [
                     {
-                        localId: 1,
+                        localId: "a9d0f931-36be-460e-9020-f3b86e221509",
                         value: "true",
                         rollout: [0, 1],
                         exptRollout: 1.0

@@ -37,5 +37,5 @@ public static class ErrorCodes
     public const string CannotModifyBuiltInProperty = nameof(CannotModifyBuiltInProperty);
 
     // segment
-    public const string SegmentCannotReferenceSegmentRule = nameof(SegmentCannotReferenceSegmentRule);
+    public const string SegmentCannotReferenceSegmentCondition = nameof(SegmentCannotReferenceSegmentCondition);
 }
