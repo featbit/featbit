@@ -205,7 +205,7 @@ db.Segments.insertOne(
         name: "[prod] tester-group",
         description: "this is a tester group",
         included: ["prod-bot-id"],
-        excluded: ["anonymous"],
+        excluded: [],
         rules: [
             {
                 _id: "e5080546-dd53-4c9e-bf46-65a4897199c3",
@@ -231,7 +231,7 @@ db.Segments.insertOne(
         name: "[dev] tester-group",
         description: "this is a tester group",
         included: ["dev-bot-id"],
-        excluded: ["anonymous"],
+        excluded: [],
         rules: [
             {
                 _id: "78d03b8b-9cc8-4860-8cd7-449fbeb8ebbe",
