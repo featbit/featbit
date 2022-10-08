@@ -22,7 +22,7 @@ export class ProjectService {
   }
 
   getProject(organizationId: string, projectId: string): Observable<IProject> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${organizationId}`;
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${projectId}`;
     return this.http.get<IProject>(url);
   }
 

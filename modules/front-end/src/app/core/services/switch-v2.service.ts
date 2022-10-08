@@ -3,10 +3,10 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 import {
-  SwitchListFilter,
-  SwitchDropdown,
-  SwitchListModel,
-  SwitchDetail, UpdateSettingPayload, CopyToEnvResult
+  IFeatureFlagListFilter,
+  IFeatureFlagDropdown,
+  IFeatureFlagListModel,
+  IFeatureFlagDetail, UpdateSettingPayload, CopyToEnvResult
 } from "@features/safe/feature-flags/types/switch-index";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
@@ -25,17 +25,17 @@ export class SwitchV2Service {
 
   constructor(private http: HttpClient) { }
 
-  getDetail(id: string): Observable<SwitchDetail> {
-    return this.http.get<SwitchDetail>(`${this.baseUrl}/${id}/detail`);
+  getDetail(id: string): Observable<IFeatureFlagDetail> {
+    return this.http.get<IFeatureFlagDetail>(`${this.baseUrl}/${id}/detail`);
   }
 
-  getDropDown(): Observable<SwitchDropdown[]> {
+  getDropDown(): Observable<IFeatureFlagDropdown[]> {
     const url = `${this.baseUrl}/dropdown`;
 
-    return this.http.get<SwitchDropdown[]>(url);
+    return this.http.get<IFeatureFlagDropdown[]>(url);
   }
 
-  getList(filter: SwitchListFilter = new SwitchListFilter()): Observable<SwitchListModel> {
+  getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
     const queryParam = {
       name: filter.name ?? '',
       status: filter.status ?? '',
@@ -44,13 +44,13 @@ export class SwitchV2Service {
       pageSize: filter.pageSize,
     };
 
-    return this.http.get<SwitchListModel>(
+    return this.http.get<IFeatureFlagListModel>(
       this.baseUrl,
       {params: new HttpParams({fromObject: queryParam})}
     );
   }
 
-  getListForUser(filter: SwitchListFilter = new SwitchListFilter()): Observable<SwitchListModel> {
+  getListForUser(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
     const queryParam = {
       name: filter.name ?? '',
       status: filter.status ?? '',
@@ -59,13 +59,13 @@ export class SwitchV2Service {
       pageSize: filter.pageSize,
     };
 
-    return this.http.get<SwitchListModel>(
+    return this.http.get<IFeatureFlagListModel>(
       `${this.baseUrl}/${filter.userKeyId}`,
       {params: new HttpParams({fromObject: queryParam})}
     );
   }
 
-  getListV20220621(filter: SwitchListFilter = new SwitchListFilter()): Observable<SwitchListModel> {
+  getListV20220621(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
     const queryParam = {
       name: filter.name ?? '',
       status: filter.status ?? '',
@@ -74,7 +74,7 @@ export class SwitchV2Service {
       pageSize: filter.pageSize,
     };
 
-    return this.http.get<SwitchListModel>(
+    return this.http.get<IFeatureFlagListModel>(
       this.baseUrl + '/v20220621',
       {params: new HttpParams({fromObject: queryParam})}
     );

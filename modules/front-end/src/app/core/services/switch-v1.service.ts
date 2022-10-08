@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { CSwitchParams, IFfParams, IPrequisiteFeatureFlag } from '@features/safe/feature-flags/types/switch-new';
+import { FeatureFlagParams, IFfParams, IPrequisiteFeatureFlag } from '@features/safe/feature-flags/types/switch-new';
 import { OrganizationService } from './organization.service';
 
 @Injectable({
@@ -86,7 +86,7 @@ export class SwitchV1Service {
   }
 
   // 修改开关
-  public updateSwitch(param: CSwitchParams): Observable<any> {
+  public updateSwitch(param: FeatureFlagParams): Observable<any> {
     const switchDetail = param.getSwicthDetail();
     const url = environment.url + `/FeatureFlags/UpdateMultiOptionSupportedFeatureFlag`;
     return this.http.put(url, { ...param, ff: { ...switchDetail } });

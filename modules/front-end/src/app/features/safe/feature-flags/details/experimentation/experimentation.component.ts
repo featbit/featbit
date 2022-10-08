@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from '@services/experiment.service';
 import { SwitchV1Service } from '@services/switch-v1.service';
-import { CSwitchParams, IVariationOption } from '../../types/switch-new';
+import { FeatureFlagParams, IVariationOption } from '../../types/switch-new';
 import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment, IExperimentIteration, IExperimentIterationResult } from '../../types/experimentations';
 import * as moment from 'moment';
 import { isNumber } from '@utils/index';
@@ -19,7 +19,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   featureFlagId: string;
   currentVariationOptions: IVariationOption[] = [];
-  currentFeatureFlag: CSwitchParams = null;
+  currentFeatureFlag: FeatureFlagParams = null;
   isInitLoading = true;
   experimentation: string;
   onGoingExperiments: IExperiment[] = [];
@@ -46,7 +46,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   ) {
     const ffId: string = decodeURIComponent(this.route.snapshot.params['id']);
     this.switchServe.getSwitchDetail(ffId).subscribe(res => {
-      this.currentFeatureFlag = new CSwitchParams(res);
+      this.currentFeatureFlag = new FeatureFlagParams(res);
       this.currentVariationOptions = this.currentFeatureFlag.getVariationOptions();
     });
   }
