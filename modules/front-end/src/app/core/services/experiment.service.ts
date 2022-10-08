@@ -16,7 +16,7 @@ export class ExperimentService {
   ) {}
 
   // 获取 custom events 列表
-  public getCustomEvents(envId: number, lastItem?: string, searchText?: string): Observable<string[]> {
+  public getCustomEvents(envId: string, lastItem?: string, searchText?: string): Observable<string[]> {
     let url = this.baseUrl + '/Events/#envId'.replace(/#envId/ig, `${envId}`);
     let queryStr = '';
     if (lastItem !== undefined && lastItem !== null && lastItem.trim().length > 0) {
@@ -41,7 +41,7 @@ export class ExperimentService {
   }
 
   // 获取 experiment 结果
-  getExperimentResult(envId: number, params): Observable<any> {
+  getExperimentResult(envId: string, params): Observable<any> {
     const url = this.baseUrl + `/launchQuery/${envId}`;
     return this.http.post(url, params);
   }
@@ -58,27 +58,27 @@ export class ExperimentService {
     return this.http.get(url, { params });
   }
 
-  startIteration(envId: number, experimentId: string): Observable<any> {
+  startIteration(envId: string, experimentId: string): Observable<any> {
     const url = this.baseUrl + `/${envId}/${experimentId}`;
     return this.http.put(url, {});
   }
 
-  stopIteration(envId: number, experimentId: string, iterationId: string): Observable<any> {
+  stopIteration(envId: string, experimentId: string, iterationId: string): Observable<any> {
     const url = this.baseUrl + `/${envId}/${experimentId}/${iterationId}`;
     return this.http.put(url, {});
   }
 
-  getIterationResults(envId: number, params): Observable<IExperimentIteration[]> {
+  getIterationResults(envId: string, params): Observable<IExperimentIteration[]> {
     const url = this.baseUrl + `/${envId}`;
     return this.http.post<IExperimentIteration[]>(url, params);
   }
 
-  archiveExperiment(envId: number, experimentId: string): Observable<any> {
+  archiveExperiment(envId: string, experimentId: string): Observable<any> {
     const url = this.baseUrl + `/${envId}/${experimentId}`;
     return this.http.delete(url);
   }
 
-  archiveExperimentData(envId: number, experimentId: string): Observable<any> {
+  archiveExperimentData(envId: string, experimentId: string): Observable<any> {
     const url = this.baseUrl + `/${envId}/${experimentId}/data`;
     return this.http.delete(url);
   }

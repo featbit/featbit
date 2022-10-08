@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {SwitchService} from '@services/switch.service';
+import {SwitchV1Service} from '@services/switch-v1.service';
 import {map} from 'rxjs/operators';
 import { ChartConfig } from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
 
@@ -29,7 +29,7 @@ export class ReportingComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchService
+    private switchServe: SwitchV1Service
   ) {
     this.switchId = this.route.snapshot.params['id'];
   }

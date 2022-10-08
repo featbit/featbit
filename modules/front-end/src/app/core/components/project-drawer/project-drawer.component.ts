@@ -40,7 +40,7 @@ export class ProjectDrawerComponent implements OnInit {
     return this._project;
   }
 
-  @Input() currentOrganizationId: number;
+  @Input() currentOrganizationId: string;
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
 

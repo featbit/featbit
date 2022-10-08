@@ -13,27 +13,27 @@ export class EnvService {
 
   constructor(private http: HttpClient) { }
 
-  public getEnvs(projectId: number): Observable<IEnvironment[]> {
+  public getEnvs(projectId: string): Observable<IEnvironment[]> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`);
     return this.http.get<IEnvironment[]>(url);
   }
 
-  postCreateEnv(projectId: number, params): Observable<any> {
+  postCreateEnv(projectId: string, params): Observable<any> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`);
     return this.http.post(url, params);
   }
 
-  putUpdateEnv(projectId: number, params): Observable<any> {
+  putUpdateEnv(projectId: string, params): Observable<any> {
     const url = `${this.baseUrl.replace(/#projectId/ig, `${projectId}`)}/${params.id}`;
     return this.http.put(url, params);
   }
 
-  putUpdateEnvKey(projectId: number, envId: number, params: IEnvKey): Observable<IEnvKey> {
+  putUpdateEnvKey(projectId: string, envId: string, params: IEnvKey): Observable<IEnvKey> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}/key`;
     return this.http.put<IEnvKey>(url, params);
   }
 
-  removeEnv(projectId: number, envId: number): Observable<any> {
+  removeEnv(projectId: string, envId: string): Observable<any> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}`;
     return this.http.delete(url);
   }

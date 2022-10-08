@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { forkJoin } from 'rxjs';
-import { SwitchService } from '@services/switch.service';
+import { SwitchV1Service } from '@services/switch-v1.service';
 import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IVariationOption, IRulePercentageRollout, IPrequisiteFeatureFlag, IFftuwmtrParams } from '../../types/switch-new';
 import { PendingChange } from '../../types/pending-changes';
 import { TeamService } from '@services/team.service';
@@ -75,7 +75,7 @@ export class TargetingComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchService,
+    private switchServe: SwitchV1Service,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService,

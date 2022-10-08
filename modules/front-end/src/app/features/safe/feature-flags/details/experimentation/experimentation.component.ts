@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from '@services/experiment.service';
-import { SwitchService } from '@services/switch.service';
+import { SwitchV1Service } from '@services/switch-v1.service';
 import { CSwitchParams, IVariationOption } from '../../types/switch-new';
 import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment, IExperimentIteration, IExperimentIterationResult } from '../../types/experimentations';
 import * as moment from 'moment';
@@ -40,7 +40,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchService,
+    private switchServe: SwitchV1Service,
     private message: NzMessageService,
     private experimentService: ExperimentService
   ) {

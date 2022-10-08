@@ -30,12 +30,12 @@ export class MetricService {
     return this.http.get(url, { params });
   }
 
-  getMetric(envId: number, id: string): Observable<any> {
+  getMetric(envId: string, id: string): Observable<any> {
     const url = this.baseUrl + `/${envId}/${id}`;
     return this.http.get(url);
   }
 
-  deleteMetric(envId: number, id: string): Observable<any> {
+  deleteMetric(envId: string, id: string): Observable<any> {
     const url = this.baseUrl + `/${envId}/${id}`;
     return this.http.delete(url);
   }

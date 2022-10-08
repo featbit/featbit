@@ -14,7 +14,7 @@ export class StepsComponent implements OnDestroy {
 
   private destroy$: Subject<void> = new Subject();
   currentStep = 0;
-  currentOrganizationId: number;
+  currentOrganizationId: string;
   step0Form: FormGroup;
 
   constructor(

@@ -26,8 +26,8 @@ export enum InstructionKindEnum {
 export interface IPendingChange {
   id: string;
   featureFlagId: string;
-  envId: number;
-  projectId: number;
+  envId: string;
+  projectId: string;
   updatedAt: string;
   createdAt: string;
   instructions: IInstruction[];
@@ -62,7 +62,7 @@ export class PendingChange {
   private ffList = [];
   public categorizedInstructions: any = [];
 
-  constructor(private teamService: TeamService, private accountId: number, public projectEnv: IProjectEnv, public featureFlag: IFfParams, variationOptions: IVariationOption[], private parentUrl: string){
+  constructor(private teamService: TeamService, private accountId: string, public projectEnv: IProjectEnv, public featureFlag: IFfParams, variationOptions: IVariationOption[], private parentUrl: string){
     this.data = {
       projectId: projectEnv.projectId,
       envId: projectEnv.projectId,

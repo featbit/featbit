@@ -2,7 +2,7 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {NzModalService} from 'ng-zorro-antd/modal';
-import {SwitchService} from '@services/switch.service';
+import {SwitchV1Service} from '@services/switch-v1.service';
 import {CSwitchParams, IFfParams, IVariationOption, VariationDataTypeEnum} from '../../types/switch-new';
 import {IZeroCode} from '../../types/zero-code';
 import {MessageQueueService} from '@services/message-queue.service';
@@ -59,7 +59,7 @@ export class SettingComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchService,
+    private switchServe: SwitchV1Service,
     private switchServeV2: SwitchV2Service,
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,

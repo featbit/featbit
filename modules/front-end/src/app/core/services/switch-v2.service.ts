@@ -92,7 +92,7 @@ export class SwitchV2Service {
     return this.http.put<IFfParams>(url, payload);
   }
 
-  copyToEnv(targetEnvId: number, flagIds: string[]): Observable<CopyToEnvResult> {
+  copyToEnv(targetEnvId: string, flagIds: string[]): Observable<CopyToEnvResult> {
     const url = `${this.baseUrl}/copy-to-env/${targetEnvId}`;
 
     return this.http.post<CopyToEnvResult>(url, flagIds);

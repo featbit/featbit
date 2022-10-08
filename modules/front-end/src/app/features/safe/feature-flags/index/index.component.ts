@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { SwitchService } from '@services/switch.service';
+import { SwitchV1Service } from '@services/switch-v1.service';
 import { IFfParams } from '../types/switch-new';
 import { encodeURIComponentFfc } from '@shared/utils';
 import { SwitchTagTreeService } from "@services/switch-tag-tree.service";
@@ -257,7 +257,7 @@ export class IndexComponent implements OnInit {
 
   constructor(
     private router: Router,
-    public switchServe: SwitchService,
+    public switchServe: SwitchV1Service,
     private switchV2Service: SwitchV2Service,
     private msg: NzMessageService,
     private switchTagTreeService: SwitchTagTreeService,

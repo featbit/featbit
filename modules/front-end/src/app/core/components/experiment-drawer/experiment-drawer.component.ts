@@ -8,7 +8,7 @@ import { IExperiment } from '@features/safe/feature-flags/types/experimentations
 import { IVariationOption } from '@features/safe/feature-flags/types/switch-new';
 import { ExperimentService } from '@services/experiment.service';
 import { MetricService } from '@services/metric.service';
-import { SwitchService } from '@services/switch.service';
+import { SwitchV1Service } from '@services/switch-v1.service';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 
 
@@ -49,7 +49,7 @@ export class ExperimentDrawerComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private metricService: MetricService,
-    private switchService: SwitchService,
+    private switchService: SwitchV1Service,
     private experimentService: ExperimentService,
     private message: NzMessageService
   ) {

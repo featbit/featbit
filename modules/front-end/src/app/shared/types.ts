@@ -44,7 +44,7 @@ export interface IAuthProps {
 }
 
 export interface IOrganization {
-  id: number,
+  id: string,
   initialized: boolean,
   name: string
 }
@@ -55,22 +55,22 @@ export interface IOrganizationProjectEnv {
 }
 
 export interface IProjectEnv {
-  projectId: number,
+  projectId: string,
   projectName: string,
-  envId: number,
+  envId: string,
   envName: string,
   envSecret: string
 }
 
 export interface IProject {
-  id: number,
+  id: string,
   name: string,
   environments: IEnvironment[]
 }
 
 export interface IEnvironment {
-  id: number,
-  projectId: number,
+  id: string,
+  projectId: string,
   name: string,
   description: string,
   secret: string
