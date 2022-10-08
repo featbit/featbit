@@ -2,7 +2,7 @@
   <nz-card style="margin-bottom: 10px;font-size: 16px; border-radius: 20px" [nzTitle]="titleTemplate">
     <ng-container *ngFor="let condition of conditions; let key=index; let first=first; let last=last; trackBy: trackByFunction">
       <app-rule
-        [ruleContent]="condition"
+        [condition]="condition"
         [isFirst]="first"
         [isLast]="last"
         [segmentList]="segmentList"
