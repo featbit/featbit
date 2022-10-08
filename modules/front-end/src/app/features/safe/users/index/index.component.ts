@@ -29,7 +29,6 @@ export class IndexComponent implements OnInit {
   segmentsAndFlagsVisible: boolean = false;
 
   filter: EnvUserFilter = new EnvUserFilter();
-  builtInUserProps = ['KeyId', 'Email', 'Name'];
 
   constructor(
     private envUserService: EnvUserService,
@@ -70,7 +69,7 @@ export class IndexComponent implements OnInit {
 
   onSearchExtraColumns(value: string = ''){
     const regex = new RegExp(value || '', 'ig');
-    this.filteredExtraColumns = this.props.filter(p => regex.test(p.name)).map(p => p.name);
+    this.filteredExtraColumns = this.props.filter(p => !p.isBuiltIn && regex.test(p.name)).map(p => p.name);
   }
 
   props: IUserProp[];
@@ -88,10 +87,10 @@ export class IndexComponent implements OnInit {
     this.filter.properties = filterAndAttributeConfig?.properties || [];
     this.extraColumns = filterAndAttributeConfig?.attributes || [];
 
-    this.envUserPropService.get().subscribe(prop => {
-      this.props = prop.userProperties.filter(x => !x.isArchived);
+    this.envUserPropService.get().subscribe(props => {
+      this.props = [...props];
       this.filteredProps = this.props.map(p => p.name);
-      this.filteredExtraColumns = this.props.map(p => p.name);
+      this.filteredExtraColumns = this.props.filter(p => !p.isBuiltIn).map(p => p.name);
       this.isUserPropsLoading = false;
     })
 

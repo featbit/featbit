@@ -52,7 +52,7 @@ export class TargetUserComponent implements OnInit {
   isLoadingProps: boolean = true;
   props: IUserProp[] = [];
   getProps() {
-    this.envUserPropService.getProp().subscribe(props => {
+    this.envUserPropService.get().subscribe(props => {
       this.props = props;
       this.isLoadingProps = false;
     });

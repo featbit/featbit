@@ -53,7 +53,7 @@
                    [(ngModel)]="extraColumns"
                    (ngModelChange)="storeFilterAndAttribute()"
                    (nzOnSearch)="onSearchExtraColumns($event)">
-          <ng-container *ngFor="let item of filteredExtraColumns | extraUserColumn: builtInUserProps">
+          <ng-container *ngFor="let item of filteredExtraColumns">
             <nz-option *ngIf="!isUserPropsLoading" nzCustomContent [nzValue]="item" [nzLabel]="item">{{item}}</nz-option>
           </ng-container>
           <nz-option *ngIf="isUserPropsLoading" nzDisabled nzCustomContent>
@@ -88,7 +88,7 @@
       </div>
       <button nz-button nzType="primary" (click)="onPropsSettingClick()">
         <i nz-icon nzType="icons:icon-setting"></i>
-        <ng-container i18n="@@users.idx.manage-properties">Manage properties</ng-container>
+        <ng-container i18n="@@users.idx.manage-properties">Properties</ng-container>
       </button>
     </div>
     <div class="table-wrapper">
@@ -108,7 +108,7 @@
               <th>Name</th>
               <th>KeyId</th>
               <th>Email</th>
-              <th *ngFor="let prop of extraColumns | extraUserColumn: builtInUserProps">{{prop}}</th>
+              <th *ngFor="let prop of extraColumns">{{prop}}</th>
               <th i18n="@@common.actions">Actions</th>
             </tr>
         </thead>
@@ -120,7 +120,7 @@
               </td>
               <td>{{ user.keyId }}</td>
               <td>{{ user.email }}</td>
-              <td *ngFor="let prop of extraColumns | extraUserColumn: builtInUserProps">{{getCustomizePropertyValue(user, prop)}}</td>
+              <td *ngFor="let prop of extraColumns">{{getCustomizePropertyValue(user, prop)}}</td>
               <td>
                 <a class="primary-link-btn" (click)="onSegmentsAndFlagsClick(user)" i18n="@@users.idx.ff-segments">Feature flags and segments</a>
                 <nz-divider nzType="vertical"></nz-divider>

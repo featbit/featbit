@@ -40,7 +40,6 @@ import {NzCodeEditorModule} from "ng-zorro-antd/code-editor";
 import {PercentagePipe} from "@core/pipes/percentage.pipe";
 import {FfcDatePipe} from "@core/pipes/ffcdate.pipe";
 import {PolicyTypePipe} from "@core/pipes/policy-type.pipe";
-import {ExtraUserColumnPipe} from "@core/pipes/extra-user-column.pipe";
 import {PermissionCheckDirective} from "@core/directives/permission-check.directive";
 import {LocaleSwitcherComponent} from "@core/components/locale-switcher/locale-switcher.component";
 import {MemberDrawerComponent} from "@core/components/member-drawer/member-drawer.component";
@@ -78,7 +77,6 @@ import {NzTypographyModule} from "ng-zorro-antd/typography";
     PercentagePipe,
     FfcDatePipe,
     PolicyTypePipe,
-    ExtraUserColumnPipe,
     TranslationPipe,
     PermissionCheckDirective,
 
@@ -155,7 +153,6 @@ import {NzTypographyModule} from "ng-zorro-antd/typography";
     PercentagePipe,
     FfcDatePipe,
     PolicyTypePipe,
-    ExtraUserColumnPipe,
     TranslationPipe,
     PermissionCheckDirective,
 

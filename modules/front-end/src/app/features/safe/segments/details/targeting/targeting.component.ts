@@ -47,7 +47,7 @@ export class TargetingComponent {
     })
 
     // user properties
-    this.envUserPropService.getProp().subscribe(properties => {
+    this.envUserPropService.get().subscribe(properties => {
       this.userProps = properties;
       this.isUserPropsLoading = false;
     }, () => this.isUserPropsLoading = false);

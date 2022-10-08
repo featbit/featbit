@@ -12,7 +12,6 @@ export const USER_IS_IN_SEGMENT_USER_PROP: IUserProp = {
   presetValues: [],
   usePresetValuesOnly: false,
   isBuiltIn: true,
-  isArchived: false,
   isDigestField: false,
   remark: ''
 };
@@ -23,7 +22,6 @@ export const USER_IS_NOT_IN_SEGMENT_USER_PROP: IUserProp = {
   presetValues: [],
   usePresetValuesOnly: false,
   isBuiltIn: true,
-  isArchived: false,
   isDigestField: false,
   remark: ''
 };

@@ -1,10 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { environment } from "src/environments/environment";
-
-interface Step {
-  title: string;
-  description: string
-}
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'guide-drawer',
