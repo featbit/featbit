@@ -1,6 +1,6 @@
 using Application.Bases;
-using Domain.FeatureFlags;
 using Domain.Segments;
+using Domain.Targeting;
 
 namespace Application.Segments;
 
@@ -16,7 +16,7 @@ public class UpdateSegment : IRequest<Segment>
 
     public IEnumerable<string> Excluded { get; set; } = Array.Empty<string>();
 
-    public ICollection<TargetRule> Rules { get; set; } = Array.Empty<TargetRule>();
+    public ICollection<MatchRule> Rules { get; set; } = Array.Empty<MatchRule>();
 }
 
 public class UpdateSegmentValidator : AbstractValidator<UpdateSegment>

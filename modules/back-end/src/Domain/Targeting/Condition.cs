@@ -1,6 +1,6 @@
 using Domain.Segments;
 
-namespace Domain.FeatureFlags;
+namespace Domain.Targeting;
 
 public class Condition
 {

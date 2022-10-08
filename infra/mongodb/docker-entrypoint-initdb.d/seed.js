@@ -210,20 +210,11 @@ db.Segments.insertOne(
             {
                 _id: "e5080546-dd53-4c9e-bf46-65a4897199c3",
                 name: "match by name",
-                includedInExpt: true,
                 conditions: [
                     {
                         property: "name",
                         op: "EndsWith",
                         value: "T"
-                    }
-                ],
-                variations: [
-                    {
-                        _id: "a9d0f931-36be-460e-9020-f3b86e221509",
-                        value: "true",
-                        rollout: [0, 1],
-                        exptRollout: 1.0
                     }
                 ]
             }
@@ -245,22 +236,11 @@ db.Segments.insertOne(
             {
                 _id: "78d03b8b-9cc8-4860-8cd7-449fbeb8ebbe",
                 name: "match by name",
-                ruleItems: [
+                conditions: [
                     {
                         property: "name",
                         op: "EndsWith",
                         value: "T"
-                    }
-                ],
-                isIncludedInExpt: true,
-                variations: [
-                    {
-                        exptRollout: 1.0,
-                        rolloutPercentage: [0, 1],
-                        value: {
-                            localId: 1,
-                            value: "true"
-                        }
                     }
                 ]
             }

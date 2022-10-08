@@ -1,4 +1,4 @@
-using Domain.FeatureFlags;
+using Domain.Targeting;
 
 namespace Domain.Segments;
 
@@ -14,7 +14,7 @@ public class Segment : AuditedEntity
 
     public IEnumerable<string> Excluded { get; set; }
 
-    public ICollection<TargetRule> Rules { get; set; }
+    public ICollection<MatchRule> Rules { get; set; }
 
     public bool IsArchived { get; set; }
 
@@ -23,7 +23,7 @@ public class Segment : AuditedEntity
         string name,
         IEnumerable<string> included,
         IEnumerable<string> excluded,
-        ICollection<TargetRule> rules,
+        ICollection<MatchRule> rules,
         string description)
     {
         EnvId = envId;
@@ -41,7 +41,7 @@ public class Segment : AuditedEntity
         string name,
         IEnumerable<string> included,
         IEnumerable<string> excluded,
-        ICollection<TargetRule> rules,
+        ICollection<MatchRule> rules,
         string description)
     {
         Name = name;
