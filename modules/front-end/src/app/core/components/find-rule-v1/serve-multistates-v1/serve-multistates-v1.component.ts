@@ -7,11 +7,11 @@ interface IRulePercentageRolloutValue extends IRulePercentageRollout {
 }
 
 @Component({
-  selector: 'app-serve-multistates',
-  templateUrl: './serve-multistates.component.html',
-  styleUrls: ['./serve-multistates.component.less']
+  selector: 'app-serve-multistates-v1',
+  templateUrl: './serve-multistates-v1.component.html',
+  styleUrls: ['./serve-multistates-v1.component.less']
 })
-export class ServeMultistatesComponent implements OnInit {
+export class ServeMultistatesV1Component implements OnInit {
 
   @Input() serveSingleOption: boolean = false;
   @Input() rulePercentageRollouts: IRulePercentageRollout[] = [];

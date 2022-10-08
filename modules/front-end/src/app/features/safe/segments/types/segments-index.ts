@@ -1,7 +1,6 @@
 ﻿import { IUserType } from "@shared/types";
-import { IFftuwmtrParams, IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import { uuidv4 } from "@utils/index";
-import { handleRulesBeforeSave } from "@utils/target-rule";
+import {handleRulesBeforeSave, ICondition, IRule} from "@shared/rules";
 
 export interface ISegmentListModel {
   items: ISegment[];
@@ -15,7 +14,7 @@ export interface ISegment {
   updatedAt: Date;
   included: string[];
   excluded: string[];
-  rules: IFftuwmtrParams[];
+  rules: IRule[];
   isArchived: boolean;
 }
 
@@ -81,25 +80,15 @@ export class Segment {
     return this._excludedUsers;
   }
 
-  get rules(): IFftuwmtrParams[] {
+  get rules(): IRule[] {
     return this.data.rules;
   }
 
   newRule() {
     this.rules.push({
-      ruleId: uuidv4(),
-      ruleName: ($localize `:@@common.rule:Rule`) + ' ' + (this.rules.length + 1),
-      ruleJsonContent: [],
-      valueOptionsVariationRuleValues: [
-        {
-          rolloutPercentage: [0, 1],
-          valueOption: {
-            localId: 1,
-            displayOrder: 1,
-            variationValue: "true"
-          }
-        }
-      ],
+      id: uuidv4(),
+      name: ($localize `:@@common.rule:Rule`) + ' ' + (this.rules.length + 1),
+      conditions: []
     });
   }
 
@@ -107,7 +96,7 @@ export class Segment {
     this.rules.splice(index, 1);
   }
 
-  updateRuleItem(config: IJsonContent[], index: number) {
-    this.rules[index].ruleJsonContent = config;
+  updateRuleConditions(condition: ICondition[], index: number) {
+    this.rules[index].conditions = condition;
   }
 }

@@ -4,7 +4,7 @@ import { IProjectEnv } from "@shared/types";
 import { TeamService } from "@services/team.service";
 import { IUserType } from "@shared/types";
 import { isNotPercentageRollout, isSegmentRule, isSingleOperator } from "@shared/utils";
-import { ruleValueConfig, ruleType } from "@core/components/find-rule/ruleConfig";
+import { ruleOps, IRuleOp } from "@core/components/find-rule/ruleConfig";
 import { IFfParams, IFfpParams, IFftuwmtrParams, IJsonContent, IPrequisiteFeatureFlag, IRulePercentageRollout, IVariationOption } from "./switch-new";
 
 export enum InstructionKindEnum {
@@ -307,7 +307,7 @@ export class PendingChange {
       const result = {
         ruleJsonContent: f.ruleJsonContent.map(item => {
           const isSegment = isSegmentRule(item);
-          let ruleType: string = isSegment ? 'multi': ruleValueConfig.filter((rule: ruleType) => rule.value === item.operation)[0].type;
+          let ruleType: string = isSegment ? 'multi': ruleOps.filter((rule: IRuleOp) => rule.value === item.operation)[0].type;
 
           let multipleValue: string[] = [];
 

@@ -63,13 +63,22 @@ import {
 } from "@core/components/user-segments-flags-drawer/user-segments-flags-drawer.component";
 import {TargetUserComponent} from "@core/components/target-user/target-user.component";
 import {FindRuleComponent} from "@core/components/find-rule/find-rule.component";
-import {ServeMultistatesComponent} from "@core/components/find-rule/serve-multistates/serve-multistates.component";
+import {ServeComponent} from "@core/components/find-rule/serve/serve.component";
 import {RuleComponent} from "@core/components/find-rule/rule/rule.component";
 import {NzCardModule} from "ng-zorro-antd/card";
 import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-user-table/targeted-user-table.component";
 import {TranslationPipe} from "@core/pipes/translation.pipe";
 import {GuideComponent} from "@core/components/guide/guide.component";
 import {NzTypographyModule} from "ng-zorro-antd/typography";
+import {FindRuleV1Component} from "@core/components/find-rule-v1/find-rule-v1.component";
+import {
+  TargetedUserTableV1Component
+} from "@core/components/find-rule-v1/targeted-user-table-v1/targeted-user-table-v1.component";
+import {RuleV1Component} from "@core/components/find-rule-v1/rule-v1/rule-v1.component";
+import {
+  ServeMultistatesV1Component
+} from "@core/components/find-rule-v1/serve-multistates-v1/serve-multistates-v1.component";
+import {RuleVariationValuePipe} from "@core/components/find-rule/serve/rule-variation-value.pipe";
 
 @NgModule({
   declarations: [
@@ -78,6 +87,8 @@ import {NzTypographyModule} from "ng-zorro-antd/typography";
     FfcDatePipe,
     PolicyTypePipe,
     TranslationPipe,
+    RuleVariationValuePipe,
+
     PermissionCheckDirective,
 
     LocaleSwitcherComponent,
@@ -100,9 +111,13 @@ import {NzTypographyModule} from "ng-zorro-antd/typography";
     UserSegmentsFlagsDrawerComponent,
     TargetUserComponent,
     FindRuleComponent,
-    ServeMultistatesComponent,
+    FindRuleV1Component,
+    ServeComponent,
+    ServeMultistatesV1Component,
     RuleComponent,
+    RuleV1Component,
     TargetedUserTableComponent,
+    TargetedUserTableV1Component,
     GuideComponent
   ],
   imports: [
@@ -154,6 +169,8 @@ import {NzTypographyModule} from "ng-zorro-antd/typography";
     FfcDatePipe,
     PolicyTypePipe,
     TranslationPipe,
+    RuleVariationValuePipe,
+
     PermissionCheckDirective,
 
     LocaleSwitcherComponent,
@@ -176,9 +193,13 @@ import {NzTypographyModule} from "ng-zorro-antd/typography";
     UserSegmentsFlagsDrawerComponent,
     TargetUserComponent,
     FindRuleComponent,
-    ServeMultistatesComponent,
+    FindRuleV1Component,
+    ServeComponent,
+    ServeMultistatesV1Component,
     RuleComponent,
+    RuleV1Component,
     TargetedUserTableComponent,
+    TargetedUserTableV1Component,
     GuideComponent
   ]
 })

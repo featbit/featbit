@@ -1,11 +1,27 @@
-export interface IRuleOp {
+export interface ruleType {
     label: string;
     value: string;
     type?: string;
     default?: string;
 }
 
-export const ruleOps: IRuleOp[] = [
+export const ruleKeyConfig: ruleType[] = [
+    {
+        label: 'KeyId',
+        value: 'KeyId'
+    },{
+        label: 'Name',
+        value: 'Name'
+    },{
+        label: 'Email',
+        value: 'Email'
+    },{
+        label: 'Customized Properties',
+        value: 'Properties'
+    }
+]
+
+export const ruleValueConfig: ruleType[] = [
     {
         label: $localize `:@@core.components.findrule.operators.istrue:is true`,
         value: 'IsTrue',
@@ -89,5 +105,5 @@ export const ruleOps: IRuleOp[] = [
 ]
 
 export function findIndex(id: string) {
-    return ruleOps.findIndex((item: IRuleOp) => item.value === id);
+    return ruleValueConfig.findIndex((item: ruleType) => item.value === id);
 }

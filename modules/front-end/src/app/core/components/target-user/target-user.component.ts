@@ -70,15 +70,7 @@ export class TargetUserComponent implements OnInit {
     for (const prop of digestProps) {
       const propName = prop.name;
 
-      let propValue = '';
-      if (USER_BUILT_IN_PROPERTIES.includes(propName)) {
-        // lowercase first letter of propName to get object name
-        const fieldName = propName.charAt(0).toLowerCase() + propName.slice(1);
-        propValue = user[fieldName] ?? '--';
-      } else {
-        const customizedPropertyValue = user.customizedProperties?.find(x => x.name === propName)?.value;
-        propValue = customizedPropertyValue ? customizedPropertyValue : '--';
-      }
+      let propValue = user[propName] || user.customizedProperties?.find(x => x.name === propName)?.value || '--';
 
       digests.push(`${propName}: ${propValue}`);
     }

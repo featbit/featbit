@@ -5,26 +5,26 @@
   </ng-template>
   <div class="select">
     <nz-select nzShowSearch nzPlaceHolder="Select property" i18n-nzPlaceHolder="@@core.components.findrule.rule.selectuserproperty"
-               [(ngModel)]="condition.property" (ngModelChange)="onPropertyChange()">
+               [(ngModel)]="ruleContent.property" (ngModelChange)="onPropertyChange()">
       <nz-option *ngFor="let userProp of userProps" [nzValue]="userProp.name" [nzLabel]="userProp.name"></nz-option>
     </nz-select>
   </div>
   <div class="select" *ngIf="!isSegmentRule">
     <nz-select
-      nzPlaceHolder="Select operation"
-      i18n-nzPlaceHolder="@@core.components.findrule.rule.select-operation"
+      nzPlaceHolder="condition"
+      i18n-nzPlaceHolder="@@core.components.findrule.rule.selectcondition"
       nzShowSearch
-      [(ngModel)]="condition.op"
+      [(ngModel)]="ruleContent.operation"
       (ngModelChange)="onOperationChange()">
       <nz-option *ngFor="let rule of ruleValueConfig" [nzValue]="rule.value" [nzLabel]="rule.label"></nz-option>
     </nz-select>
   </div>
-  <ng-container [ngSwitch]="condition.type" *ngIf="!isSegmentRule">
+  <ng-container [ngSwitch]="ruleContent.type" *ngIf="!isSegmentRule">
     <ng-template #presetSelect>
-      <nz-select style="min-width: 200px" nzShowSearch
-                 nzPlaceHolder="values"
-                 i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
-                 [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()">
+      <nz-select style="min-width: 200px" nzShowSearch 
+                nzPlaceHolder="values" 
+                i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
+                [(ngModel)]="ruleContent.value" (ngModelChange)="onDebounceTimeModelChange()">
         <nz-option
           *ngFor="let presetValue of currentUserProp.presetValues"
           [nzLabel]="presetValue.description"
@@ -34,21 +34,21 @@
     </ng-template>
     <ng-container *ngSwitchCase="'string'">
       <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()"
+        <input class="standard-bordered-input" nz-input [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" 
                placeholder="input string or number"
                i18n-placeholder="@@core.components.findrule.rule.pleaseinput" />
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="'number'">
       <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <input class="standard-bordered-input" nz-input type="number" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()"
+        <input class="standard-bordered-input" nz-input type="number" [(ngModel)]="ruleContent.value"  (ngModelChange)="onDebounceTimeModelChange()" 
                placeholder="input a number"
                i18n-placeholder="@@core.components.findrule.rule.inputnumber"/>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="'regex'">
       <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" placeholder="Eg. ^foo$"/>
+        <input class="standard-bordered-input" nz-input [(ngModel)]="ruleContent.value" (ngModelChange)="onDebounceTimeModelChange()" placeholder="Eg. ^foo$"/>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="'multi'">
@@ -59,7 +59,7 @@
             nzPlaceHolder="values"
             i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
             nzShowSearch
-            [(ngModel)]="condition.multipleValue"
+            [(ngModel)]="ruleContent.multipleValue"
             [nzMaxTagPlaceholder]="omittedPlaceHolder"
             [nzMaxTagCount] = "2"
             (ngModelChange)="onModelChange()">
@@ -84,7 +84,7 @@
       [nzMaxTagCount]="2"
       [nzMaxTagPlaceholder]="omittedPlaceHolder"
       [nzCustomTemplate]="multipleTemplate"
-      [(ngModel)]="condition.multipleValue"
+      [(ngModel)]="ruleContent.multipleValue"
       (ngModelChange)="onModelChange()"
       (nzFocus)="onSearchSegments('')"
       (nzOnSearch)="onSearchSegments($event)">
@@ -103,16 +103,16 @@
   </ng-container>
   <ng-template #omittedPlaceHolder>
     <div class="ant-select-selection-item-content"
-         nz-popover="total options"
+         nz-popover="total options" 
          i18n-nz-popover="@@core.components.findrule.rule.alloptions"
          [nzPopoverContent]="allSelectedItems" nzPopoverOverlayClassName="selected-items-popover">
     <span class="more-select-selection-item">
-      {{ condition.multipleValue.length }}
+      {{ ruleContent.multipleValue.length }}
       <i nz-icon nzType="expand"></i>
     </span>
       <ng-template #allSelectedItems>
         <div class="more-select-items">
-          <span class="more-select-item-content" *ngFor="let value of condition.multipleValue;">
+          <span class="more-select-item-content" *ngFor="let value of ruleContent.multipleValue;">
             <span class="more-select-item-content-text" [nz-tooltip]="getValueDescription(value)">{{ getValueDescription(value) }}</span>
             <i (click)="onRemoveMultiValue(value)" nz-icon nzType="close"></i>
           </span>

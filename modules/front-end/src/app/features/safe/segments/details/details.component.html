@@ -4,9 +4,7 @@
   </div>
   <nz-tabset nzLinkRouter class="tabs-container segment-flag">
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./targeting']">
-        目标条件
-      </a>
+      <a *nzTabLink nz-tab-link [routerLink]="['./targeting']" queryParamsHandling="preserve" i18n="@@ff.routing.details.targeting">Targeting</a>
       <ng-template nz-tab>
         <segment-targeting></segment-targeting>
       </ng-template>

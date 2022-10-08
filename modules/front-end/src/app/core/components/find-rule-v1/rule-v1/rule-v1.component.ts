@@ -2,18 +2,18 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angu
 import { isSegmentRule } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { IRuleOp, ruleOps, findIndex } from '../ruleConfig';
+import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
+import { ruleType, ruleValueConfig, findIndex } from '../ruleConfig';
 import { ISegment, ISegmentListModel, SegmentListFilter } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { IUserProp } from "@shared/types";
-import {ICondition} from "@shared/rules";
 
 @Component({
-  selector: 'app-rule',
-  templateUrl: './rule.component.html',
-  styleUrls: ['./rule.component.less']
+  selector: 'app-rule-v1',
+  templateUrl: './rule-v1.component.html',
+  styleUrls: ['./rule-v1.component.less']
 })
-export class RuleComponent  {
+export class RuleV1Component {
 
   private inputs = new Subject<any>();
 
@@ -33,31 +33,31 @@ export class RuleComponent  {
   @Input() isFirst: boolean;
   @Input() isLast: boolean;
 
-  @Input("condition")
-  set content(data: ICondition) {
+  @Input("ruleContent")
+  set content(data: IJsonContent) {
     this.isSegmentRule = isSegmentRule(data);
-    this.condition = { ...data };
+    this.ruleContent = { ...data };
   }
 
   isSegmentRule: boolean = false;
-  condition: ICondition;
+  ruleContent: IJsonContent;
 
   @Input() userProps: IUserProp[];
   get currentUserProp(): IUserProp {
-    const userProp = this.userProps.find(prop => prop.name === this.condition.property);
+    const userProp = this.userProps.find(prop => prop.name === this.ruleContent.property);
 
     // adapt to existing value that preset values don't contain
     if (userProp.usePresetValuesOnly) {
-      if (this.condition.value && userProp.presetValues.findIndex(x => x.value === this.condition.value) === -1) {
+      if (this.ruleContent.value && userProp.presetValues.findIndex(x => x.value === this.ruleContent.value) === -1) {
         userProp.presetValues.push({
           id: '',
-          value: this.condition.value,
-          description: this.condition.value
+          value: this.ruleContent.value,
+          description: this.ruleContent.value
         })
       }
 
-      if (this.condition.multipleValue) {
-        this.condition.multipleValue.forEach(value => {
+      if (this.ruleContent.multipleValue) {
+        this.ruleContent.multipleValue.forEach(value => {
           if (userProp.presetValues.findIndex(x => x.value === value) === -1) {
             userProp.presetValues.push({
               id: '',
@@ -75,14 +75,14 @@ export class RuleComponent  {
     return this.currentUserProp.usePresetValuesOnly ? 'multiple' : 'tags';
   }
 
-  @Output() addRule = new EventEmitter();
-  @Output() deleteRule = new EventEmitter();
-  @Output() ruleChange = new EventEmitter<ICondition>();
+  @Output() addRule = new EventEmitter();                           // 添加条件
+  @Output() deleteRule = new EventEmitter();                        // 删除条件
+  @Output() ruleChange = new EventEmitter<IJsonContent>();       // 刷新数据
 
-  public ruleValueConfig: IRuleOp[] = [];
+  public ruleValueConfig: ruleType[] = [];
 
   constructor(private segmentService: SegmentService, private cdr: ChangeDetectorRef) {
-    this.ruleValueConfig = ruleOps;
+    this.ruleValueConfig = ruleValueConfig;
     this.inputs.pipe(
       debounceTime(500)
     ).subscribe(e => {
@@ -112,30 +112,30 @@ export class RuleComponent  {
   }
 
   onOperationChange() {
-    let result = findIndex(this.condition.op);
-    this.condition.type = this.ruleValueConfig[result].type;
-    this.condition.value = this.ruleValueConfig[result].default;
+    let result = findIndex(this.ruleContent.operation);
+    this.ruleContent.type = this.ruleValueConfig[result].type;
+    this.ruleContent.value = this.ruleValueConfig[result].default;
 
-    this.ruleChange.next(this.condition);
+    this.ruleChange.next(this.ruleContent);
   }
 
   onRemoveMultiValue(val) {
-    this.condition.multipleValue = this.condition.multipleValue.filter(v => v !== val);
-    this.ruleChange.next(this.condition);
+    this.ruleContent.multipleValue = this.ruleContent.multipleValue.filter(v => v !== val);
+    this.ruleChange.next(this.ruleContent);
     this.cdr.detectChanges();
   }
 
   public onPropertyChange() {
-    this.isSegmentRule = isSegmentRule(this.condition);
+    this.isSegmentRule = isSegmentRule(this.ruleContent);
 
-    let result = findIndex(this.condition.op);
-    this.condition.value = this.ruleValueConfig[result]?.default;
-    this.condition.multipleValue = [];
+    let result = findIndex(this.ruleContent.operation);
+    this.ruleContent.value = this.ruleValueConfig[result]?.default;
+    this.ruleContent.multipleValue = [];
 
     if (this.isSegmentRule) {
-      this.condition.type = 'multi';
+      this.ruleContent.type = 'multi';
     } else {
-      this.condition.type = this.ruleValueConfig[result]?.type;
+      this.ruleContent.type = this.ruleValueConfig[result]?.type;
     }
 
     this.onModelChange();
@@ -143,13 +143,13 @@ export class RuleComponent  {
 
   // 数据改变，触发数据刷新
   public onModelChange() {
-    this.ruleChange.next(this.condition);
+    this.ruleChange.next(this.ruleContent);
     this.onDebounceTimeModelChange();
   }
 
   // 需要节流的数据
   public onDebounceTimeModelChange() {
-    this.inputs.next(this.condition);
+    this.inputs.next(this.ruleContent);
   }
 
   getValueDescription(value: string): string {

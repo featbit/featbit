@@ -32,9 +32,9 @@ export class SettingComponent {
         if (result) {
           this.id = result.id;
           this.loadSegment(result);
-          this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
-            this.flagReferences = [...flags];
-          });
+          // this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
+          //   this.flagReferences = [...flags];
+          // });
         }
       })
     })

@@ -2,6 +2,7 @@ import { USER_PROFILE } from "./localstorage-keys";
 import {IAuthProps} from "../types";
 import {IJsonContent, IRulePercentageRollout} from "@features/safe/feature-flags/types/switch-new";
 import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
+import {ICondition} from "@shared/rules";
 
 export function getAuth() : IAuthProps | null {
   const auth = localStorage.getItem(USER_PROFILE);
@@ -82,7 +83,7 @@ export function encodeURIComponentFfc(url: string): string {
   return encodeURIComponent(url).replace(/\(/g, "%28").replace(/\)/g, '%29');
 }
 
-export function isSegmentRule(rule: IJsonContent): boolean {
+export function isSegmentRule(rule: ICondition | any): boolean {
   const segmentRuleProperties = [USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT];
 
   return segmentRuleProperties.includes(rule.property);
