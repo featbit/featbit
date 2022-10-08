@@ -4,6 +4,7 @@ using Domain.Identity;
 using Domain.Users;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
+using Infrastructure.FeatureFlags;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
@@ -67,6 +68,7 @@ public static class ConfigureServices
         services.AddTransient<IResourceService, ResourceService>();
         services.AddTransient<IEndUserService, EndUserService>();
         services.AddTransient<ISegmentService, SegmentService>();
+        services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         
         return services;
     }
