@@ -22,7 +22,7 @@ export class TargetingComponent {
   public isLoading: boolean = true;
   public isUserPropsLoading: boolean = true;
   public id: string;
-  public targetIndividualsActive = true;
+  public targetUsersActive = true;
 
   public flagReferences: ISegmentFlagReference[] = [];
   constructor(
@@ -119,8 +119,8 @@ export class TargetingComponent {
     this.segmentDetail.removeRule(index);
   }
 
-  onRuleConfigChange(conditions: ICondition[], index: number) {
-    this.segmentDetail.updateRuleItem(conditions, index);
+  onRuleConditionsChange(conditions: ICondition[], index: number) {
+    this.segmentDetail.updateRuleConditions(conditions, index);
   }
 
   onDrop(event: CdkDragDrop<string[]>) {

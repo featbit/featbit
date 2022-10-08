@@ -78,6 +78,7 @@ import {RuleV1Component} from "@core/components/find-rule-v1/rule-v1/rule-v1.com
 import {
   ServeMultistatesV1Component
 } from "@core/components/find-rule-v1/serve-multistates-v1/serve-multistates-v1.component";
+import {RuleVariationValuePipe} from "@core/components/find-rule/serve-multistates/rule-variation-value.pipe";
 
 @NgModule({
   declarations: [
@@ -86,6 +87,8 @@ import {
     FfcDatePipe,
     PolicyTypePipe,
     TranslationPipe,
+    RuleVariationValuePipe,
+
     PermissionCheckDirective,
 
     LocaleSwitcherComponent,
@@ -166,6 +169,8 @@ import {
     FfcDatePipe,
     PolicyTypePipe,
     TranslationPipe,
+    RuleVariationValuePipe,
+
     PermissionCheckDirective,
 
     LocaleSwitcherComponent,

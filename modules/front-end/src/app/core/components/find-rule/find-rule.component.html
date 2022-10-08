@@ -1,8 +1,8 @@
 <section class="find-rule">
   <nz-card style="margin-bottom: 10px;font-size: 16px; border-radius: 20px" [nzTitle]="titleTemplate">
-    <ng-container *ngFor="let ruleContent of ruleContentList; let key=index; let first=first; let last=last; trackBy: trackByFunction">
+    <ng-container *ngFor="let condition of conditions; let key=index; let first=first; let last=last; trackBy: trackByFunction">
       <app-rule
-        [ruleContent]="ruleContent"
+        [ruleContent]="condition"
         [isFirst]="first"
         [isLast]="last"
         [segmentList]="segmentList"
@@ -12,18 +12,18 @@
         (ruleChange)="onRuleChange($event, key)">
       </app-rule>
     </ng-container>
-
-    <app-serve-multistates
-      [serveSingleOption]="serveSingleOption"
-      [variationOptions]="variationOptions"
-      [rulePercentageRollouts]="rulePercentageRollouts"
-      (onPercentageChange)="onPercentageChangeMultistates.next($event)">
-    </app-serve-multistates>
+    <ng-container *ngIf="variationOptions.length > 0">
+      <app-serve-multistates
+        [variationOptions]="variationOptions"
+        [ruleVariations]="variations"
+        (onPercentageChange)="onPercentageChangeMultistates.next($event)">
+      </app-serve-multistates>
+    </ng-container>
   </nz-card>
 
   <ng-template #titleTemplate>
     <div style="display:flex;justify-content: flex-start;">
-      <input type="text" class="standard-bordered-input" nz-input style="width: 500px;height: 36px;" [(ngModel)]="ruleName" (ngModelChange)="onRuleNameChange()" />
+      <input type="text" class="standard-bordered-input" nz-input style="width: 500px;height: 36px;" [(ngModel)]="name" (ngModelChange)="onRuleNameChange()" />
       <div class="rule-title" style="margin-left: 16px;" *ngIf="canViewTargetedUsers()">
         <i i18n-nz-tooltip="@@common.view-matched-users" nz-tooltip="View matched users" nz-icon nzType="icons:icon-targeted-user" (click)="viewTargetedUsers()"></i>
       </div>
@@ -39,15 +39,15 @@
     </div>
   </ng-template>
 
-  <nz-modal
-    i18n-nzTitle="@@common.matching-users"
-    nzTitle="Matching users"
-    [(nzVisible)]="targetedUsersModalVisible"
-    (nzOnCancel)="targetedUsersModalVisible = false"
-    nzWidth="800px"
-    [nzFooter]=null>
-    <ng-container *nzModalContent>
-      <targeted-user-table [rules]="ruleContentList"></targeted-user-table>
-    </ng-container>
-  </nz-modal>
+<!--  <nz-modal-->
+<!--    i18n-nzTitle="@@common.matching-users"-->
+<!--    nzTitle="Matching users"-->
+<!--    [(nzVisible)]="targetedUsersModalVisible"-->
+<!--    (nzOnCancel)="targetedUsersModalVisible = false"-->
+<!--    nzWidth="800px"-->
+<!--    [nzFooter]=null>-->
+<!--    <ng-container *nzModalContent>-->
+<!--      <targeted-user-table [rules]="conditions"></targeted-user-table>-->
+<!--    </ng-container>-->
+<!--  </nz-modal>-->
 </section>

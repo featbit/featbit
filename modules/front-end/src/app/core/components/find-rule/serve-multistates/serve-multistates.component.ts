@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { getPercentageFromRolloutPercentageArray, isNotPercentageRollout } from '@utils/index';
-import { IRulePercentageRollout, IVariationOption } from "@features/safe/feature-flags/types/switch-new";
+import { getPercentageFromRolloutPercentageArray } from '@utils/index';
+import { IRuleVariation, isNotPercentageRollout, IVariation} from "@shared/rules";
 
-interface IRulePercentageRolloutValue extends IRulePercentageRollout {
+interface IRuleVariationValue extends IRuleVariation {
   percentageValue: number;
 }
 
@@ -13,46 +13,44 @@ interface IRulePercentageRolloutValue extends IRulePercentageRollout {
 })
 export class ServeMultistatesComponent implements OnInit {
 
-  @Input() serveSingleOption: boolean = false;
-  @Input() rulePercentageRollouts: IRulePercentageRollout[] = [];
+  @Input() ruleVariations: IRuleVariation[] = [];
 
-  availableVariationOptions: IVariationOption[] = [];
+  availableVariations: IVariation[] = [];
   @Input()
-  set variationOptions(value: IVariationOption[]) {
-    this.availableVariationOptions = [...value];
+  set variationOptions(value: IVariation[]) {
+    this.availableVariations = [...value];
 
     this.ngOnInit();
   }
 
-  @Output() onPercentageChange = new EventEmitter<IRulePercentageRollout[]>();
+  @Output() onPercentageChange = new EventEmitter<IRuleVariation[]>();
 
-  selectedValueOptionId: number = -1;
-  rulePercentageRolloutValues: IRulePercentageRolloutValue[] = [];
-  result: IRulePercentageRollout[] = [];
+  selectedVariationId: string = '';
+  ruleVariationValues: IRuleVariationValue[] = [];
+  result: IRuleVariation[] = [];
 
   constructor() { }
 
   ngOnInit(): void {
-
-    if (isNotPercentageRollout(this.rulePercentageRollouts)) {
-      this.selectedValueOptionId = this.rulePercentageRollouts[0]?.valueOption.localId || null;
-      this.rulePercentageRolloutValues = this.availableVariationOptions.map((v, idx) => ({
-        rolloutPercentage: [0, idx === 0 ? 1 : 0],
-        valueOption: Object.assign({}, v),
+    if (isNotPercentageRollout(this.ruleVariations)) {
+      this.selectedVariationId = this.ruleVariations[0]?.id || null;
+      this.ruleVariationValues = this.availableVariations.map((v, idx) => ({
+        rollout: [0, idx === 0 ? 1 : 0],
+        id: v.id,
         percentageValue: idx === 0 ? 100 : 0
       }));
     } else {
-      this.selectedValueOptionId = -1;
-      this.rulePercentageRolloutValues = this.availableVariationOptions.map(v => {
-        const rule = this.rulePercentageRollouts.find(x => x.valueOption.localId === v.localId);
+      this.selectedVariationId = '';
+      this.ruleVariationValues = this.availableVariations.map(v => {
+        const rule = this.ruleVariations.find(x => x.id === v.id);
         const result = {
-          rolloutPercentage: [0, 0],
-          valueOption: Object.assign({}, v),
+          rollout: [0, 0],
+          id: v.id,
           percentageValue: 0
         }
         if (rule) {
-            result.rolloutPercentage = [rule.rolloutPercentage[0], rule.rolloutPercentage[1]];
-            result.percentageValue = getPercentageFromRolloutPercentageArray(result.rolloutPercentage);
+            result.rollout = [rule.rollout[0], rule.rollout[1]];
+            result.percentageValue = getPercentageFromRolloutPercentageArray(result.rollout);
         }
         return result;
       });
@@ -60,20 +58,21 @@ export class ServeMultistatesComponent implements OnInit {
   }
 
   public modelChange() {
-    if(this.selectedValueOptionId === -1) {
-      let currentRolloutPercentage = [0, 0];
-      this.result = this.rulePercentageRolloutValues.map(r => {
-        currentRolloutPercentage = [currentRolloutPercentage[1], parseFloat((currentRolloutPercentage[1] + r.percentageValue / 100.0).toFixed(2))]
+    if(this.selectedVariationId === '') {
+      let currentRollout = [0, 0];
+      this.result = this.ruleVariationValues.map(r => {
+        currentRollout = [currentRollout[1], parseFloat((currentRollout[1] + r.percentageValue / 100.0).toFixed(2))]
         return {
-          rolloutPercentage: currentRolloutPercentage,
-          valueOption: r.valueOption
+          rollout: currentRollout,
+          id: r.id
         };
       });
     } else {
+      const variation = this.availableVariations.find(x => x.id === this.selectedVariationId);
       this.result = [
         {
-          rolloutPercentage: [0, 1],
-          valueOption: this.availableVariationOptions.find(x => x.localId === this.selectedValueOptionId)
+          rollout: [0, 1],
+          id: variation.id
         }
       ];
     }
@@ -81,7 +80,6 @@ export class ServeMultistatesComponent implements OnInit {
     this.onOutputPercentage();
   }
 
-  // 抛出事件
   private onOutputPercentage() {
     this.onPercentageChange.next(Array.from(this.result));
   }

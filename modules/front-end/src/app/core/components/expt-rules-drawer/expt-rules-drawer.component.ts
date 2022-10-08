@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ISegment } from '@features/safe/segments/types/segments-index';
-import { ruleValueConfig, ruleType } from "@core/components/find-rule/ruleConfig";
+import { ruleOps, IRuleOp } from "@core/components/find-rule/ruleConfig";
 import { CSwitchParams, IRulePercentageRollout } from '@features/safe/feature-flags/types/switch-new';
 import { SegmentService } from '@services/segment.service';
 import { SwitchService } from '@services/switch.service';
@@ -41,7 +41,7 @@ export class ExptRulesDrawerComponent {
           const result = {
             ruleJsonContent: f.ruleJsonContent.map(item => {
               const isSegment = isSegmentRule(item);
-              let ruleType: string = isSegment ? 'multi': ruleValueConfig.filter((rule: ruleType) => rule.value === item.operation)[0].type;
+              let ruleType: string = isSegment ? 'multi': ruleOps.filter((rule: IRuleOp) => rule.value === item.operation)[0].type;
 
               let multipleValue: string[] = [];
 

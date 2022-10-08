@@ -96,7 +96,7 @@ export class Segment {
     this.rules.splice(index, 1);
   }
 
-  updateRuleItem(condition: ICondition[], index: number) {
+  updateRuleConditions(condition: ICondition[], index: number) {
     this.rules[index].conditions = condition;
   }
 }

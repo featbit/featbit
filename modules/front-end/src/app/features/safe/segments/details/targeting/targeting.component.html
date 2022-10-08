@@ -27,11 +27,11 @@
         <div class="rule-banner">
           <div class="title-wraper">
             <div class="title" i18n="@@common.targeting-users">Targeting users</div>
-            <i *ngIf="targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive" nzType="icons:icon-arrow-down"></i>
-            <i *ngIf="!targetIndividualsActive" nz-icon (click)="targetIndividualsActive = !targetIndividualsActive" nzType="icons:icon-arrow-right"></i>
+            <i *ngIf="targetUsersActive" nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-down"></i>
+            <i *ngIf="!targetUsersActive" nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-right"></i>
           </div>
         </div>
-        <div *ngIf="targetIndividualsActive" style="margin-left: -12px;margin-top: 16px">
+        <div *ngIf="targetUsersActive" style="margin-left: -12px;margin-top: 16px">
           <div class="content">
             <target-user
               i18n-type="@@common.including-users"
@@ -65,12 +65,11 @@
           <ng-container *ngFor="let rule of segmentDetail.rules; let index=index; trackBy: trackRuleById;">
             <div class="drop-box rule" cdkDrag>
               <find-rule
-                [serveSingleOption]="true"
                 [data]="rule"
                 [userProps]="userProps"
                 (deleteRule)="deleteRule(index)"
-                (ruleConfigChange)="onRuleConfigChange($event, index)"
-                (updateRuleName)="rule.ruleName = $event">
+                (ruleConfigChange)="onRuleConditionsChange($event, index)"
+                (updateRuleName)="rule.name = $event">
               </find-rule>
             </div>
           </ng-container>

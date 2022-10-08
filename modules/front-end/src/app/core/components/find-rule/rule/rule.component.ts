@@ -3,7 +3,7 @@ import { isSegmentRule } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
-import { ruleType, ruleValueConfig, findIndex } from '../ruleConfig';
+import { IRuleOp, ruleOps, findIndex } from '../ruleConfig';
 import { ISegment, ISegmentListModel, SegmentListFilter } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { IUserProp } from "@shared/types";
@@ -79,10 +79,10 @@ export class RuleComponent  {
   @Output() deleteRule = new EventEmitter();                        // 删除条件
   @Output() ruleChange = new EventEmitter<IJsonContent>();       // 刷新数据
 
-  public ruleValueConfig: ruleType[] = [];
+  public ruleValueConfig: IRuleOp[] = [];
 
   constructor(private segmentService: SegmentService, private cdr: ChangeDetectorRef) {
-    this.ruleValueConfig = ruleValueConfig;
+    this.ruleValueConfig = ruleOps;
     this.inputs.pipe(
       debounceTime(500)
     ).subscribe(e => {

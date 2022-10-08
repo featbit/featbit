@@ -85,8 +85,9 @@ export interface ITargetIndividualForVariationOption {
 export interface IRulePercentageRollout {
   rolloutPercentage: number[]; // only two elements, start and end
   valueOption: IVariationOption;
-  percentage?: number; // the percentage representation of rolloutPercentage // only for display usage
   exptRollout?: number; // 0.45 means 45% TODO this is not optional
+
+  percentage?: number; // the percentage representation of rolloutPercentage // only for display usage
   exptPercentage?: number;  // the percentage representation of exptRollout // only for display usage
 }
 
