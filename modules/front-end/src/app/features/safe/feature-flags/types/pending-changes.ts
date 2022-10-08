@@ -305,7 +305,7 @@ export class PendingChange {
   private preprocessFftuwmtr(fftuwmtr: IFftuwmtrParams[]): IFftuwmtrParams[] {
     return fftuwmtr.map(f => {
       const result = {
-        ruleJsonContent: f.ruleJsonContent.map(item => {
+        ruleJsonContent: f.conditions.map(item => {
           const isSegment = isSegmentRule(item);
           let ruleType: string = isSegment ? 'multi': ruleValueConfig.filter((rule: ruleType) => rule.value === item.operation)[0].type;
 
@@ -327,7 +327,7 @@ export class PendingChange {
     fftuwmtr = this.preprocessFftuwmtr(fftuwmtr);
 
     this.originalFFData.fftuwmtr.forEach((t, idx) => {
-      const found = fftuwmtr.find(f => t.ruleId === f.ruleId);
+      const found = fftuwmtr.find(f => t.id === f.id);
       if (found) {
         // if (JSON.stringify(found.ruleJsonContent) !== JSON.stringify(t.ruleJsonContent)) {
         //   this.upInsertInstruction({
@@ -337,7 +337,7 @@ export class PendingChange {
         //   });
         // }
 
-        if (JSON.stringify(found.ruleJsonContent) !== JSON.stringify(t.ruleJsonContent) || JSON.stringify(found.valueOptionsVariationRuleValues) !== JSON.stringify(t.valueOptionsVariationRuleValues)) {
+        if (JSON.stringify(found.conditions) !== JSON.stringify(t.conditions) || JSON.stringify(found.variations) !== JSON.stringify(t.variations)) {
           this.upInsertInstruction(this.generateRuleInstruction(InstructionKindEnum.UpdateRuleVariationOrRollout, found, idx))
           // let instruction;
           // if (isNotPercentageRollout(found.valueOptionsVariationRuleValues)) { // single value
@@ -363,26 +363,26 @@ export class PendingChange {
       }
     });
 
-    fftuwmtr.filter(f => !this.originalFFData.fftuwmtr.find(t => t.ruleId === f.ruleId))
+    fftuwmtr.filter(f => !this.originalFFData.fftuwmtr.find(t => t.id === f.id))
             .forEach((r, idx) => this.upInsertInstruction(this.generateRuleInstruction(InstructionKindEnum.AddRule, r, this.originalFFData.fftuwmtr.length + idx)));
   }
 
   private generateRuleInstruction(kind: InstructionKindEnum, rule: IFftuwmtrParams, idx: number): IInstruction {
     const instruction: IInstruction = {
       kind,
-      ruleId: rule.ruleId,
-      clauses: rule.ruleJsonContent,
+      ruleId: rule.id,
+      clauses: rule.conditions,
       extra: {
         ruleName: `规则${idx + 1}`
       }
     };
 
-    if (isNotPercentageRollout(rule.valueOptionsVariationRuleValues)) {
-      instruction['variationOptionId'] = rule.valueOptionsVariationRuleValues[0].valueOption.localId;
+    if (isNotPercentageRollout(rule.variations)) {
+      instruction['variationOptionId'] = rule.variations[0].localId;
     } else {
-      instruction['rolloutVariationPercentage'] = [...rule.valueOptionsVariationRuleValues];
-      instruction['rolloutWeights'] = rule.valueOptionsVariationRuleValues.reduce((acc, curr: IRulePercentageRollout) => {
-        acc[curr.valueOption.localId] = parseFloat((curr.rolloutPercentage[1] - curr.rolloutPercentage[0]).toFixed(2));
+      instruction['rolloutVariationPercentage'] = [...rule.variations];
+      instruction['rolloutWeights'] = rule.variations.reduce((acc, curr: IRulePercentageRollout) => {
+        acc[curr.localId] = parseFloat((curr.rollout[1] - curr.rollout[0]).toFixed(2));
         return acc;
       }, {});
     }
@@ -396,7 +396,7 @@ export class PendingChange {
       if (isNotPercentageRollout(fallThroughVariations)) { // single value
           instruction = {
             kind: InstructionKindEnum.UpdateFallthroughVariationOrRollout,
-            variationOptionId: fallThroughVariations[0].valueOption.localId,
+            variationOptionId: fallThroughVariations[0].localId,
           };
       } else { // percentage rollout
           instruction = {
@@ -404,7 +404,7 @@ export class PendingChange {
             variationOptionId: null,
             rolloutVariationPercentage: [...fallThroughVariations],
             rolloutWeights: fallThroughVariations.reduce((acc, curr: IRulePercentageRollout) => {
-                acc[curr.valueOption.localId] = parseFloat((curr.rolloutPercentage[1] - curr.rolloutPercentage[0]).toFixed(2));
+                acc[curr.localId] = parseFloat((curr.rollout[1] - curr.rollout[0]).toFixed(2));
                 return acc;
               }, {})
           };

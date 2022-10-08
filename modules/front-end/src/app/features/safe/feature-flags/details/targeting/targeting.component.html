@@ -56,9 +56,9 @@
         </div>
         <div *ngIf="targetIndividualsActive" style="margin-left: -12px;margin-top: 16px">
           <div class="content" *ngFor="let variationOption of variationOptions; let i = index">
-            <target-user [type]="variationOption.variationValue" [tipIdx]="i" [userList]="userList"
-              [selectedUserDetailList]="targetIndividuals[variationOption.localId]" (search)="onSearchUser($event)"
-              (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)">
+            <target-user [type]="variationOption.value" [tipIdx]="i" [userList]="userList"
+                         [selectedUserDetailList]="targetIndividuals[variationOption.localId]" (search)="onSearchUser($event)"
+                         (onSelectedUserListChange)="onMultistatesSelectedUserListChange($event, variationOption.localId)">
             </target-user>
           </div>
         </div>
@@ -74,7 +74,7 @@
           <ng-container *ngFor="let condition of featureDetail?.getFftuwmtr(); let key=index; trackBy: trackRuleById;">
             <div class="drop-box rule" cdkDrag>
               <find-rule [data]="condition" [userProps]="userProps" (deleteRule)="onDeleteRule(key)"
-                (ruleConfigChange)="onRuleConfigChange($event, key)" (updateRuleName)="condition.ruleName = $event"
+                (ruleConfigChange)="onRuleConfigChange($event, key)" (updateRuleName)="condition.name = $event"
                 [variationOptions]="variationOptions"
                 (onPercentageChangeMultistates)="onPercentageChangeMultistates($event, key)">
               </find-rule>

@@ -87,17 +87,14 @@ export class Segment {
 
   newRule() {
     this.rules.push({
-      ruleId: uuidv4(),
-      ruleName: ($localize `:@@common.rule:Rule`) + ' ' + (this.rules.length + 1),
-      ruleJsonContent: [],
-      valueOptionsVariationRuleValues: [
+      id: uuidv4(),
+      name: ($localize `:@@common.rule:Rule`) + ' ' + (this.rules.length + 1),
+      conditions: [],
+      variations: [
         {
-          rolloutPercentage: [0, 1],
-          valueOption: {
-            localId: 1,
-            displayOrder: 1,
-            variationValue: "true"
-          }
+          rollout: [0, 1],
+          localId: 1,
+          value: "true"
         }
       ],
     });
@@ -108,6 +105,6 @@ export class Segment {
   }
 
   updateRuleItem(config: IJsonContent[], index: number) {
-    this.rules[index].ruleJsonContent = config;
+    this.rules[index].conditions = config;
   }
 }

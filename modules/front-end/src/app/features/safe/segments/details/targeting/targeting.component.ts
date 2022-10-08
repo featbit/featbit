@@ -39,9 +39,9 @@ export class TargetingComponent {
         if (result) {
           this.id = result.id;
           this.loadSegment(result);
-          this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
-            this.flagReferences = [...flags];
-          });
+          // this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
+          //   this.flagReferences = [...flags];
+          // });
         }
       })
     })
@@ -100,7 +100,7 @@ export class TargetingComponent {
         this.loadSegment(result);
         this.isLoading = false;
     }, _ => {
-      this.msg.error("修改失败!");
+      this.msg.error($localize `:@@common.eperation-failed:Operation failed`);
       this.isLoading = false;
     })
   }
@@ -108,7 +108,7 @@ export class TargetingComponent {
   userProps: IUserProp[] = [];
 
   trackRuleById(_, rule: IFftuwmtrParams) {
-    return rule.ruleId;
+    return rule.id;
   }
 
   addRule() {

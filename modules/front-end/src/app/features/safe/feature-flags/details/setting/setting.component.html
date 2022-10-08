@@ -58,8 +58,8 @@
           (ngModelChange)="onChangeDisabledStatusVariationOption()"
           i18n-nzPlaceHolder="@@ff.select-variation"
           nzPlaceHolder="Select variation">
-          <nz-option *ngFor="let variationOption of originalVariationOptions" nzCustomContent [nzValue]="variationOption" [nzLabel]="variationOption.variationValue">
-              {{variationOption.variationValue}}
+          <nz-option *ngFor="let variationOption of originalVariationOptions" nzCustomContent [nzValue]="variationOption" [nzLabel]="variationOption.value">
+              {{variationOption.value}}
           </nz-option>
         </nz-select>
       </div>
@@ -93,19 +93,19 @@
       <div class="option-line" *ngFor="let variationOption of variationOptions; let key=index; trackBy: trackById;">
         <div class="left">
           <div class="variation-tip {{'tip-' + key % 9}}"></div>
-          <div class="variation-value" *ngIf="!isEditingVariationOptions">{{variationOption.variationValue}}</div>
+          <div class="variation-value" *ngIf="!isEditingVariationOptions">{{variationOption.value}}</div>
           <ng-container *ngIf="isEditingVariationOptions">
             <nz-input-group *ngIf="['json', 'string'].includes(variationDataType)" [nzSuffix]="suffixIconButton" [class]="{'invalid': variationOption.isInvalid}">
-              <input type="text" nz-input [(ngModel)]="variationOption.variationValue" />
+              <input type="text" nz-input [(ngModel)]="variationOption.value" />
             </nz-input-group>
             <ng-template #suffixIconButton>
               <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(variationOption)"></i>
             </ng-template>
-            <input class="simple" *ngIf="!['json', 'string'].includes(variationDataType)" type="text" nz-input [(ngModel)]="variationOption.variationValue" [class]="{'invalid': variationOption.isInvalid}"/>
+            <input class="simple" *ngIf="!['json', 'string'].includes(variationDataType)" type="text" nz-input [(ngModel)]="variationOption.value" [class]="{'invalid': variationOption.isInvalid}"/>
           </ng-container>
         </div>
         <i class="expand-icon" *ngIf="!isEditingVariationOptions && ['json', 'string'].includes(variationDataType)" nz-icon nzType="expand" (click)="expandVariationOption(variationOption, true)"></i>
-        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variationOption.variationValue)"></i>
+        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variationOption.value)"></i>
         <div *ngIf="isEditingVariationOptions">
           <span class="delete-icon-wrapper" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationOptionRow(variationOption.localId)">
             <i nz-icon nzType="icons:icon-delete"></i>
@@ -158,7 +158,7 @@
   (nzOnCancel)="optionValueExpandVisible=false">
   <ng-template #modalTitle><ng-container i18n="@@common.varation"></ng-container>Variation</ng-template>
   <ng-template #modalContent>
-    <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentEditingVariationOption.variationValue" [nzEditorOption]="{ language: variationDataType, theme: 'vs-dark' }"></nz-code-editor>
+    <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentEditingVariationOption.value" [nzEditorOption]="{ language: variationDataType, theme: 'vs-dark' }"></nz-code-editor>
   </ng-template>
   <ng-template #modalFooter>
     <div style="display: flex;justify-content: space-between">

@@ -172,7 +172,7 @@ export class IndexComponent implements OnInit {
           for (let i = 0; i < switches.items.length; i++) {
             let item = switches.items[i];
             item.variationOverview.variationsWhenOn = item.variationOverview.variationsWhenOn.sort(function(a, b){return a.localId - b.localId;});
-            item.variationOverview.variationsWhenOnStr =  item.variationOverview.variationsWhenOn.map(p=>p.variationValue);
+            item.variationOverview.variationsWhenOnStr =  item.variationOverview.variationsWhenOn.map(p=>p.value);
           }
         }
         this.switchListModel = switches;

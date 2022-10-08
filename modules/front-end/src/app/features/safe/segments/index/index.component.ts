@@ -29,10 +29,13 @@ export class IndexComponent implements OnInit, OnDestroy {
   deleteValidation(segment: ISegment) {
     this.currentDeletingSegment = segment;
     this.currentDeletingSegmentFlagReferences = [];
-    this.segmentService.getFeatureFlagReferences(segment.id).subscribe((flags: ISegmentFlagReference[]) => {
-      this.currentDeletingSegmentFlagReferences = [...flags];
-      this.deleteModalVisible = true;
-    });
+    // this.segmentService.getFeatureFlagReferences(segment.id).subscribe((flags: ISegmentFlagReference[]) => {
+    //   this.currentDeletingSegmentFlagReferences = [...flags];
+    //   this.deleteModalVisible = true;
+    // });
+
+    // TODO remove this line when the above code is uncommented
+    this.deleteModalVisible = true;
   }
 
   closeDeleteModal() {

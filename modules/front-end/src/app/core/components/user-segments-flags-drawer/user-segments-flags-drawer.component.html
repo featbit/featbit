@@ -130,7 +130,7 @@
   (nzOnCancel)="optionValueExpandVisible=false">
   <ng-template #modalTitle><ng-container i18n="@@common.variation"></ng-container></ng-template>
   <ng-template #modalContent>
-    <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentVariationOption.variationValue" [nzEditorOption]="{ language: currentVariationDataType, theme: 'vs-dark' }"></nz-code-editor>
+    <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentVariationOption.value" [nzEditorOption]="{ language: currentVariationDataType, theme: 'vs-dark' }"></nz-code-editor>
   </ng-template>
   <ng-template #modalFooter>
     <div style="display: flex;justify-content: space-between">

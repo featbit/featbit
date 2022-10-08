@@ -265,7 +265,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
           uniqueUsers: !isNumber(found.uniqueUsers) ? '--' : found.uniqueUsers,
           totalEvents: !isNumber(found.totalEvents) ? '--' : found.totalEvents,
           average: !isNumber(found.average) ? '--' : found.average,
-          variationValue: option.variationValue,
+          variationValue: option.value,
           pValue: !isNumber(found.pValue) ? '--' : found.pValue,
           confidenceInterval: !found.confidenceInterval ? [-1, -1] : found.confidenceInterval.map(x => Math.max(0, x)),
           isEmpty: false,
@@ -290,7 +290,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   private createEmptyIterationResult(option: IVariationOption, baselineVariation: string): Partial<IExperimentIterationResult> {
     return {
       isEmpty: true,
-      variationValue: option.variationValue,
+      variationValue: option.value,
       confidenceInterval: [-1, -1],
       isBaseline: baselineVariation === `${option.localId}`
     };

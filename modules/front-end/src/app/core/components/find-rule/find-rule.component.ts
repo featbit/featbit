@@ -28,11 +28,11 @@ export class FindRuleComponent {
 
   @Input()
   set data(value: IFftuwmtrParams) {
-    this.ruleName = value.ruleName;
-    this.rulePercentageRollouts = value.valueOptionsVariationRuleValues;
+    this.ruleName = value.name;
+    this.rulePercentageRollouts = value.variations;
     this.ruleContentList = [];
     // 新创建的
-    if(value.ruleJsonContent.length === 0) {
+    if(value.conditions.length === 0) {
       this.ruleContentList.push({
         property: '',
         operation: '',
@@ -40,7 +40,7 @@ export class FindRuleComponent {
         multipleValue: []
       });
     } else {
-      const segmentIds = value.ruleJsonContent.flatMap((item: IJsonContent) => {
+      const segmentIds = value.conditions.flatMap((item: IJsonContent) => {
         const isSegment = isSegmentRule(item);
         let ruleType: string = isSegment ? 'multi': ruleValueConfig.filter((rule: ruleType) => rule.value === item.operation)[0].type;
 

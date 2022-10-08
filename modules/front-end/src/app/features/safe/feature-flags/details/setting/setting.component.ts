@@ -179,7 +179,7 @@ export class SettingComponent implements OnInit {
       {
         localId: this.temporaryStateId,
         displayOrder: null,
-        variationValue: null
+        value: null
       }
     ];
 
@@ -209,7 +209,7 @@ export class SettingComponent implements OnInit {
       return;
     }
 
-    if(this.featureDetail.getFftuwmtr().length > 0 && this.featureDetail.getFftuwmtr().find(x => x.valueOptionsVariationRuleValues.find(y => y.valueOption.localId === id))) {
+    if(this.featureDetail.getFftuwmtr().length > 0 && this.featureDetail.getFftuwmtr().find(x => x.variations.find(y => y.valueOption.localId === id))) {
       this.message.warning($localize `:@@ff.variation-used-by-rules:This variation is used by rules, remove the reference before it can be safely removed`);
       return;
     }
@@ -233,7 +233,7 @@ export class SettingComponent implements OnInit {
   }
 
   isValidVariationOption(v: IVariationOption): boolean {
-    return !!v && v.variationValue !== null && v.variationValue.trim() !== '' && this.validateVariationDataType(v.variationValue);
+    return !!v && v.value !== null && v.value.trim() !== '' && this.validateVariationDataType(v.value);
   }
 
   validateVariationDataTypes(): boolean {
@@ -293,7 +293,7 @@ export class SettingComponent implements OnInit {
 
   // 存档
   onArchiveClick() {
-    const disabledValue = this.currentSwitch.variationOptionWhenDisabled.variationValue;
+    const disabledValue = this.currentSwitch.variationOptionWhenDisabled.value;
     const msg = $localize `:@@ff.when-archived-status-change-to-off:When archived, the status would be changed to`
       + ' <strong>OFF</strong> '
       + $localize `:@@ff.and-return-varation-change-to:and the returning variation would be changed to`
@@ -351,7 +351,7 @@ export class SettingComponent implements OnInit {
 
   onExportVariationUsers(variation: IVariationOption) {
     this.isExportingVariationUsers = true;
-    const downloadFilename = `featbit.${this.currentSwitch.name}_${variation.variationValue}.csv`;
+    const downloadFilename = `featbit.${this.currentSwitch.name}_${variation.value}.csv`;
     this.switchServeV2.getUsersForVariation(this.currentSwitch.id, variation.localId).subscribe(data => {
       this.downloadFile(downloadFilename, data);
     }, _ => {

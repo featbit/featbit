@@ -66,7 +66,7 @@ export class SwitchArchiveComponent implements OnInit {
   onUnArchive(ff: IFfParams) {
     this.switchLoading = true;
 
-    const disabledValue = ff.variationOptionWhenDisabled.variationValue;
+    const disabledValue = ff.variationOptionWhenDisabled.value;
     this.modal.confirm({
       nzContent: `开关复位后将<strong>处于关闭状态</strong>，开关返回值将是 <strong>${disabledValue}</strong> 。请您再次确认以避免给线上环境造成影响。`,
       nzTitle: '确定复位开关么？',

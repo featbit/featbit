@@ -25,7 +25,7 @@ import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
 })
 export class TargetingComponent implements OnInit {
   trackRuleById(_, rule: IFftuwmtrParams) {
-    return rule.ruleId;
+    return rule.id;
   }
 
   public switchStatus: 'Enabled' | 'Disabled' = 'Enabled';  // 开关状态
@@ -156,8 +156,8 @@ export class TargetingComponent implements OnInit {
     if (this.featureDetail.getFFDefaultRulePercentageRollouts().length === 0) {
       this.featureDetail.setFFDefaultRulePercentageRollouts([
         {
-          rolloutPercentage: [0, 1],
-          valueOption: this.variationOptions[0]
+          rollout: [0, 1],
+          ...this.variationOptions[0]
         }
       ]);
     }

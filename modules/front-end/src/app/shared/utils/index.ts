@@ -60,7 +60,7 @@ export function tryParseJSONObject (jsonString: string): Object | false {
 };
 
 export function isNotPercentageRollout(rulePercentageRollouts: IRulePercentageRollout[]) : boolean {
-  return rulePercentageRollouts.length === 0 || (rulePercentageRollouts.length === 1 && rulePercentageRollouts[0].rolloutPercentage.length === 2 && rulePercentageRollouts[0].rolloutPercentage[0] === 0 && rulePercentageRollouts[0].rolloutPercentage[1] === 1);
+  return rulePercentageRollouts.length === 0 || (rulePercentageRollouts.length === 1 && rulePercentageRollouts[0].rollout.length === 2 && rulePercentageRollouts[0].rollout[0] === 0 && rulePercentageRollouts[0].rollout[1] === 1);
 }
 
 export function getPercentageFromRolloutPercentageArray(arr: number[]): number {

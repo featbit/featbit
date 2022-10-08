@@ -61,17 +61,16 @@ export interface IJsonContent {
 }
 
 export interface IFftuwmtrParams {
-    ruleId: string;
-    ruleName: string;
-    ruleJsonContent: IJsonContent[];
-    valueOptionsVariationRuleValues: IRulePercentageRollout[];
-    isIncludedInExpt?: boolean; // TODO this is not optional
+    id: string;
+    name: string;
+    conditions: IJsonContent[];
+    variations: IRulePercentageRollout[];
+    includedInExpt?: boolean; // TODO this is not optional
 }
 
 export interface IVariationOption {
   localId: number;
-  displayOrder: number;
-  variationValue: string;
+  value: string;
 
   // ui only
   isInvalid?: boolean
@@ -83,11 +82,14 @@ export interface ITargetIndividualForVariationOption {
 }
 
 export interface IRulePercentageRollout {
-  rolloutPercentage: number[]; // only two elements, start and end
-  valueOption: IVariationOption;
-  percentage?: number; // the percentage representation of rolloutPercentage // only for display usage
+  localId: number;
+  value: string;
+  rollout: number[]; // only two elements, start and end
   exptRollout?: number; // 0.45 means 45% TODO this is not optional
-  exptPercentage?: number;  // the percentage representation of exptRollout // only for display usage
+
+  // UI only
+  percentage?: number; // the percentage representation of rolloutPercentage
+  exptPercentage?: number;  // the percentage representation of exptRollout
 }
 
 export enum VariationDataTypeEnum {
@@ -170,10 +172,10 @@ export class CSwitchParams {
     // 添加匹配规则
     public addFftuwmtr() {
         this.fftuwmtr.push({
-            ruleId: uuidv4(),
-            ruleName: ($localize `:@@common.rule:Rule`) + ' ' + (this.fftuwmtr.length + 1),
-            ruleJsonContent: [],
-            valueOptionsVariationRuleValues: [],
+            id: uuidv4(),
+            name: ($localize `:@@common.rule:Rule`) + ' ' + (this.fftuwmtr.length + 1),
+            conditions: [],
+            variations: [],
         })
     }
 
@@ -187,10 +189,10 @@ export class CSwitchParams {
           return result;
         });
 
-        this.fftuwmtr = this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0);
+        this.fftuwmtr = this.fftuwmtr.filter(f => f.conditions.length > 0);
 
         this.fftuwmtr.forEach((item: IFftuwmtrParams) => {
-            item.ruleJsonContent.forEach((rule: IJsonContent) => {
+            item.conditions.forEach((rule: IJsonContent) => {
                 if(rule.type === 'multi') {
                     rule.value = JSON.stringify(rule.multipleValue);
                 }
@@ -237,11 +239,11 @@ export class CSwitchParams {
 
         // 设置字段信息
     public setConditionConfig(value: IJsonContent[], index: number) {
-        this.fftuwmtr[index].ruleJsonContent = [...value];
+        this.fftuwmtr[index].conditions = [...value];
     }
 
     public setRuleValueOptionsVariationRuleValues(value: IRulePercentageRollout[], index: number) {
-      this.fftuwmtr[index].valueOptionsVariationRuleValues = Array.from(value);
+      this.fftuwmtr[index].variations = Array.from(value);
     }
 
     public checkMultistatesPercentage(): string[]  {
@@ -258,7 +260,7 @@ export class CSwitchParams {
       }
 
       const defaultRulePercentage = this.ff.defaultRulePercentageRollouts?.reduce((acc, curr: IRulePercentageRollout) => {
-        return acc + (curr.rolloutPercentage[1] - curr.rolloutPercentage[0]);
+        return acc + (curr.rollout[1] - curr.rollout[0]);
       }, 0);
 
       if (defaultRulePercentage !== undefined && defaultRulePercentage !== 1) {
@@ -266,9 +268,9 @@ export class CSwitchParams {
       }
 
       // fftuwmtr
-      this.fftuwmtr.filter(f => f.ruleJsonContent.length > 0).forEach((item: IFftuwmtrParams) => {
-          const percentage = item.valueOptionsVariationRuleValues.reduce((acc, curr: IRulePercentageRollout) => {
-              return acc + (curr.rolloutPercentage[1] - curr.rolloutPercentage[0]);
+      this.fftuwmtr.filter(f => f.conditions.length > 0).forEach((item: IFftuwmtrParams) => {
+          const percentage = item.variations.reduce((acc, curr: IRulePercentageRollout) => {
+              return acc + (curr.rollout[1] - curr.rollout[0]);
           }, 0);
 
           if (percentage !== 1) {
