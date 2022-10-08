@@ -210,6 +210,7 @@ db.Segments.insertOne(
             {
                 _id: "e5080546-dd53-4c9e-bf46-65a4897199c3",
                 name: "match by name",
+                includedInExpt: true,
                 ruleItems: [
                     {
                         property: "name",
@@ -217,15 +218,12 @@ db.Segments.insertOne(
                         value: "T"
                     }
                 ],
-                isIncludedInExpt: true,
                 variations: [
                     {
-                        exptRollout: 1.0,
-                        rolloutPercentage: [0, 1],
-                        value: {
-                            localId: 1,
-                            value: "true"
-                        }
+                        localId: 1,
+                        value: "true",
+                        rollout: [0, 1],
+                        exptRollout: 1.0
                     }
                 ]
             }

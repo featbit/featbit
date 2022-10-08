@@ -6,9 +6,9 @@ public class TargetRule
 
     public string Name { get; set; }
 
-    public ICollection<RuleItem> RuleItems { get; set; }
+    public bool IncludedInExpt { get; set; } = true;
 
-    public bool IsIncludedInExpt { get; set; } = true;
+    public ICollection<RuleItem> RuleItems { get; set; }
 
     public ICollection<Variation> Variations { get; set; }
 }
