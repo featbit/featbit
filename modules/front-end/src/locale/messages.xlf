@@ -411,12 +411,20 @@
       <trans-unit id="common.view-matched-users" datatype="html">
         <source>View matched users</source>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/find-rule-v1.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/find-rule.component.html</context>
           <context context-type="linenumber">28</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.remove-rule-confirm" datatype="html">
         <source>Are you sure to remove the rule?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/find-rule-v1.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/find-rule.component.html</context>
           <context context-type="linenumber">33</context>
@@ -425,124 +433,16 @@
       <trans-unit id="common.matching-users" datatype="html">
         <source>Matching users</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/find-rule.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/find-rule-v1.component.html</context>
           <context context-type="linenumber">44</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.istrue" datatype="html">
-        <source>is true</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.isfalse" datatype="html">
-        <source>is false</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.equals" datatype="html">
-        <source>equals</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">36</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.notequal" datatype="html">
-        <source>not equal</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">40</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.lessthan" datatype="html">
-        <source>less than</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">45</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.biggerthan" datatype="html">
-        <source>bigger than</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">50</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.lessequalthan" datatype="html">
-        <source>less equal than</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">55</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.biggerequalthan" datatype="html">
-        <source>bigger equal than</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">60</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.isoneof" datatype="html">
-        <source>is one of</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">65</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.notoneof" datatype="html">
-        <source>not one of</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">70</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.contains" datatype="html">
-        <source>contains</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">75</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.notcontain" datatype="html">
-        <source>not contain</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">80</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.startwith" datatype="html">
-        <source>start with</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">85</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.endswith" datatype="html">
-        <source>ends with</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">90</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.matchregex" datatype="html">
-        <source>match regex</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">95</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.notmatchregex" datatype="html">
-        <source>not match regex</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">100</context>
         </context-group>
       </trans-unit>
       <trans-unit id="core.components.findrule.if" datatype="html">
         <source>If</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">2</context>
@@ -551,12 +451,20 @@
       <trans-unit id="core.components.findrule.and" datatype="html">
         <source>and</source>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">4</context>
         </context-group>
       </trans-unit>
       <trans-unit id="core.components.findrule.rule.selectuserproperty" datatype="html">
         <source>Select property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">7</context>
@@ -565,12 +473,20 @@
       <trans-unit id="core.components.findrule.rule.selectcondition" datatype="html">
         <source>condition</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
           <context context-type="linenumber">14</context>
         </context-group>
       </trans-unit>
       <trans-unit id="core.components.findrule.rule.selectvalues" datatype="html">
         <source>values</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">25</context>
@@ -583,12 +499,20 @@
       <trans-unit id="core.components.findrule.rule.pleaseinput" datatype="html">
         <source>input string or number</source>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">38</context>
         </context-group>
       </trans-unit>
       <trans-unit id="core.components.findrule.rule.inputnumber" datatype="html">
         <source>input a number</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">45</context>
@@ -597,6 +521,10 @@
       <trans-unit id="core.components.findrule.rule.segments" datatype="html">
         <source>segments</source>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">79</context>
         </context-group>
@@ -604,29 +532,228 @@
       <trans-unit id="core.components.findrule.rule.alloptions" datatype="html">
         <source>total options</source>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/rule-v1/rule-v1.component.html</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.istrue" datatype="html">
+        <source>is true</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.isfalse" datatype="html">
+        <source>is false</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.equals" datatype="html">
+        <source>equals</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.notequal" datatype="html">
+        <source>not equal</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.lessthan" datatype="html">
+        <source>less than</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.biggerthan" datatype="html">
+        <source>bigger than</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.lessequalthan" datatype="html">
+        <source>less equal than</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.biggerequalthan" datatype="html">
+        <source>bigger equal than</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.isoneof" datatype="html">
+        <source>is one of</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.notoneof" datatype="html">
+        <source>not one of</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.contains" datatype="html">
+        <source>contains</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.notcontain" datatype="html">
+        <source>not contain</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.startwith" datatype="html">
+        <source>start with</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.endswith" datatype="html">
+        <source>ends with</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.matchregex" datatype="html">
+        <source>match regex</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.operators.notmatchregex" datatype="html">
+        <source>not match regex</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/ruleConfig.ts</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
+          <context context-type="linenumber">84</context>
         </context-group>
       </trans-unit>
       <trans-unit id="core.components.findrule.serve" datatype="html">
         <source>serve</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/serve-multistates-v1/serve-multistates-v1.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/serve/serve.component.html</context>
           <context context-type="linenumber">3</context>
         </context-group>
       </trans-unit>
       <trans-unit id="app.components.findrule.selectvariation" datatype="html">
         <source>variation</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/serve-multistates-v1/serve-multistates-v1.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/serve/serve.component.html</context>
           <context context-type="linenumber">6</context>
         </context-group>
       </trans-unit>
       <trans-unit id="app.components.findrule.rolloutpercentage" datatype="html">
         <source>Rollout percentage</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/serve-multistates/serve-multistates.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/find-rule-v1/serve-multistates-v1/serve-multistates-v1.component.html</context>
           <context context-type="linenumber">11</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/serve/serve.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.select-operation" datatype="html">
+        <source>Select operation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">14</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.groups.group-drawer.title" datatype="html">
@@ -812,7 +939,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">372</context>
+          <context context-type="linenumber">356</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -1350,11 +1477,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
-          <context context-type="linenumber">130</context>
+          <context context-type="linenumber">122</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
-          <context context-type="linenumber">160</context>
+          <context context-type="linenumber">152</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
@@ -2243,11 +2370,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">139</context>
+          <context context-type="linenumber">186</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">356</context>
+          <context context-type="linenumber">341</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -2841,6 +2968,10 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details.component.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/details.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="ff.routing.details.reporting" datatype="html">
         <source>Reporting</source>
@@ -3218,8 +3349,8 @@
           <context context-type="linenumber">8</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.idx.filter-by-name-and-keyname" datatype="html">
-        <source>Filter by name or keyName</source>
+      <trans-unit id="ff.idx.filter-by-name-and-key" datatype="html">
+        <source>Filter by name or key</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">6</context>
@@ -3375,71 +3506,71 @@
         <source>Please select at least one feature flag to copy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">151</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.successfully-copied" datatype="html">
         <source>Successfully copied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">176</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.ff-to-env" datatype="html">
         <source>feature flags to environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">131</context>
+          <context context-type="linenumber">178</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.following-ff-exist-in-targeting-env" datatype="html">
         <source>Following feature flags have been ignored as they are already in the targeting environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">135</context>
+          <context context-type="linenumber">182</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.copy-result" datatype="html">
         <source>Copy result</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">137</context>
+          <context context-type="linenumber">184</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.the-status-of-ff" datatype="html">
         <source>The status of feature flag </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">311</context>
+          <context context-type="linenumber">299</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">321</context>
+          <context context-type="linenumber">309</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.changed-to-off" datatype="html">
         <source>is changed to OFF</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">312</context>
+          <context context-type="linenumber">300</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.status-change-failed" datatype="html">
         <source>Failed to change feature flag status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">316</context>
+          <context context-type="linenumber">304</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">326</context>
+          <context context-type="linenumber">314</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.changed-to-on" datatype="html">
         <source>is changed to ON</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">322</context>
+          <context context-type="linenumber">310</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.filter-by-tags" datatype="html">
@@ -3502,11 +3633,11 @@
         <source>Rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/types/switch-new.ts</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">175</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">90</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.action" datatype="html">
