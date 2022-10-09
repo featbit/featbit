@@ -34,4 +34,13 @@ public class FeatureFlagController : ApiControllerBase
         var flag = await Mediator.Send(request);
         return Ok(flag);
     }
+
+    [HttpPost]
+    public async Task<ApiResponse<FeatureFlag>> CreateAsync(Guid envId, CreateFeatureFlag request)
+    {
+        request.EnvId = envId;
+
+        var flag = await Mediator.Send(request);
+        return Ok(flag);
+    }
 }

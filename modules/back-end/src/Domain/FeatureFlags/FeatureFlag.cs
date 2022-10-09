@@ -1,4 +1,5 @@
 using Domain.Targeting;
+using Domain.Utils;
 
 namespace Domain.FeatureFlags;
 
@@ -24,9 +25,48 @@ public class FeatureFlag : FullAuditedEntity
 
     public Fallthrough Fallthrough { get; set; }
 
-    public bool ExptIncludeAllTargets { get; set; } = true;
+    public bool ExptIncludeAllTargets { get; set; }
 
     public bool IsArchived { get; set; }
+
+    public FeatureFlag(Guid envId, string name, Guid currentUserId) : base(currentUserId)
+    {
+        EnvId = envId;
+
+        Name = name;
+        Key = name.Replace(new[] { ' ', '.', ':', '_', '\'', '/', '\\' }, '-');
+
+        var falsyVariationId = Guid.NewGuid().ToString();
+        var truthyVariationId = Guid.NewGuid().ToString();
+        VariationType = "boolean";
+        Variations = new List<Variation>
+        {
+            new(truthyVariationId, "true"),
+            new(falsyVariationId, "false")
+        };
+
+        TargetUsers = Array.Empty<TargetUser>();
+        Rules = Array.Empty<TargetRule>();
+
+        IsEnabled = false;
+        DisabledVariationId = falsyVariationId;
+        Fallthrough = new Fallthrough
+        {
+            IncludedInExpt = true,
+            Variations = new List<RolloutVariation>
+            {
+                new()
+                {
+                    Id = truthyVariationId,
+                    Rollout = new double[] { 0, 1 },
+                    ExptRollout = 1
+                }
+            }
+        };
+        ExptIncludeAllTargets = true;
+
+        IsArchived = false;
+    }
 
     public Serves Serves()
     {
@@ -50,7 +90,7 @@ public class FeatureFlag : FullAuditedEntity
             .Select(x => x.Value);
 
         // variations when disabled
-        var disabledVariation = Variations.Single(x => x.Id == DisabledVariationId).Value;
+        var disabledVariation = Variations.First(x => x.Id == DisabledVariationId).Value;
 
         var serves = new Serves
         {
