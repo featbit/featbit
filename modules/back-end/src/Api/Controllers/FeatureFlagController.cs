@@ -55,4 +55,16 @@ public class FeatureFlagController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
+    {
+        var request = new DeleteFeatureFlag
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }

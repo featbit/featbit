@@ -15,4 +15,6 @@ public interface IFeatureFlagService
     Task AddAsync(FeatureFlag flag);
 
     Task UpdateAsync(FeatureFlag flag);
+
+    Task DeleteAsync(Guid id);
 }

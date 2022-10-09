@@ -74,4 +74,9 @@ public class FeatureFlagService : MongoDbServiceBase<FeatureFlag>, IFeatureFlagS
 
         return flag;
     }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        await Collection.DeleteOneAsync(x => x.Id == id);
+    }
 }
