@@ -1,3 +1,4 @@
+using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Application.Services;
@@ -61,5 +62,16 @@ public class FeatureFlagService : MongoDbServiceBase<FeatureFlag>, IFeatureFlagS
         var items = await itemsQuery.ToListAsync();
 
         return new PagedResult<FeatureFlag>(totalCount, items);
+    }
+
+    public async Task<FeatureFlag> GetAsync(Guid envId, string key)
+    {
+        var flag = await FindOneAsync(x => x.EnvId == envId && x.Key == key);
+        if (flag == null)
+        {
+            throw new EntityNotFoundException(nameof(FeatureFlag), $"{envId}-{key}");
+        }
+
+        return flag;
     }
 }

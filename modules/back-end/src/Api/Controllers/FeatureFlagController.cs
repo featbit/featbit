@@ -1,5 +1,6 @@
 using Application.Bases.Models;
 using Application.FeatureFlags;
+using Domain.FeatureFlags;
 
 namespace Api.Controllers;
 
@@ -19,5 +20,18 @@ public class FeatureFlagController : ApiControllerBase
 
         var flags = await Mediator.Send(request);
         return Ok(flags);
+    }
+
+    [HttpGet("{key}")]
+    public async Task<ApiResponse<FeatureFlag>> GetAsync(Guid envId, string key)
+    {
+        var request = new GetFeatureFlag
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var flag = await Mediator.Send(request);
+        return Ok(flag);
     }
 }
