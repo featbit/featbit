@@ -7,4 +7,9 @@ public class RolloutVariation
     public double[] Rollout { get; set; }
 
     public double ExptRollout { get; set; }
+
+    public bool IsEmpty()
+    {
+        return Rollout[1] - Rollout[0] == 0;
+    }
 }

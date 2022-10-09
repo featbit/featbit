@@ -1,3 +1,5 @@
+using Domain.FeatureFlags;
+
 namespace Application.FeatureFlags;
 
 public class FeatureFlagVm
@@ -13,4 +15,6 @@ public class FeatureFlagVm
     public string VariationType { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public Serves Serves { get; set; }
 }
