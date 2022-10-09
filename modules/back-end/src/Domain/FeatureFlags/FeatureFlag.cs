@@ -99,4 +99,12 @@ public class FeatureFlag : FullAuditedEntity
         };
         return serves;
     }
+
+    public void Archive(Guid currentUserId)
+    {
+        IsArchived = true;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
 }

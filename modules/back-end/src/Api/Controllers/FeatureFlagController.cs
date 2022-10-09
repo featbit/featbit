@@ -43,4 +43,16 @@ public class FeatureFlagController : ApiControllerBase
         var flag = await Mediator.Send(request);
         return Ok(flag);
     }
+
+    [HttpPut("{id:guid}/archive")]
+    public async Task<ApiResponse<bool>> ArchiveAsync(Guid id)
+    {
+        var request = new ArchiveFeatureFlag
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }
