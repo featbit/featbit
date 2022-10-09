@@ -5,7 +5,7 @@ import {getCurrentProjectEnv} from "@utils/project-env";
 import {IFfParams} from "@features/safe/feature-flags/types/switch-new";
 import {Observable, of} from "rxjs";
 import {
-  CopyToEnvResult,
+  ICopyToEnvResult,
   IFeatureFlagListFilter,
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/switch-index";
@@ -69,9 +69,9 @@ export class FeatureFlagService {
     return this.http.post(this.baseUrl, body);
   }
 
-  public copyToEnv(targetEnvId: string, flagIds: string[]): Observable<CopyToEnvResult> {
+  public copyToEnv(targetEnvId: string, flagIds: string[]): Observable<ICopyToEnvResult> {
     const url = `${this.baseUrl}/copy-to-env/${targetEnvId}`;
 
-    return this.http.post<CopyToEnvResult>(url, flagIds);
+    return this.http.post<ICopyToEnvResult>(url, flagIds);
   }
 }

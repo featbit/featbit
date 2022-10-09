@@ -78,14 +78,14 @@
             {{featureFlag.key}}
           </td>
           <td>
-            <nz-switch *ngIf="featureFlag.status === 'Enabled'"
+            <nz-switch *ngIf="featureFlag.isEnabled"
                        i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-disable-ff"
                        nz-popconfirm="Are you sure to turn it off? The variation returned would be changed when it is off"
                        (nzOnConfirm)="onChangeFeatureFlagStatus(featureFlag)"
                        nzControl="true"
                        [ngModel]="featureFlag.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
             </nz-switch>
-            <nz-switch *ngIf="featureFlag.status !== 'Enabled'"
+            <nz-switch *ngIf="!featureFlag.isEnabled"
                        i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-enable-ff"
                        nz-popconfirm="Are you sure to turn it on? The matching targeting users' or rules' serving variation would be returned"
                        (nzOnConfirm)="onChangeFeatureFlagStatus(featureFlag)"
@@ -98,14 +98,14 @@
           </td>
           <td>
             <div style="min-width: 60px;" >
-              <div *ngIf="featureFlag.status==='Enabled' && featureFlag.variationOverview.variationsWhenOn.length === 1">
-                <span class="variation-tip {{'tip-' + (featureFlag.variationOverview.variationsWhenOn[0].displayOrder - 1) % 9}}" style="margin-bottom:2px;"></span>
+              <div *ngIf="featureFlag.isEnabled && featureFlag.variationOverview?.variationsWhenOn?.length === 1">
+                <span class="variation-tip {{'tip-' + (featureFlag.variationOverview?.variationsWhenOn[0].displayOrder - 1) % 9}}" style="margin-bottom:2px;"></span>
                 <span style="margin-left: 0px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.variationOverview.variationsWhenOn[0].variationValue}}
                 </span>
               </div>
-              <div *ngIf="featureFlag.status==='Enabled' && featureFlag.variationOverview.variationsWhenOn.length > 1"
+              <div *ngIf="featureFlag.isEnabled && featureFlag.variationOverview?.variationsWhenOn?.length > 1"
                    style="cursor: pointer;"
                    nz-tooltip
                    nzTooltipTitle="{{featureFlag.variationOverview.variationsWhenOnStr.join(' // ')}}"
@@ -115,19 +115,19 @@
                 </span>
                 <span style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{featureFlag.variationOverview.variationsWhenOn.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
+                  {{featureFlag.variationOverview?.variationsWhenOn?.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
                 </span>
               </div>
-              <div *ngIf="featureFlag.status==='Disabled'" style="opacity: .5;">
+              <div *ngIf="!featureFlag.isEnabled" style="opacity: .5;">
                 <span class="variation-tip tip-9" style="margin-bottom:2px;background-color:darkgray;"></span>
                 <span style="margin-left: 0px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{featureFlag.variationOverview.variationWhenOff.variationValue}}
+                  {{featureFlag.variationOverview?.variationWhenOff?.variationValue}}
                 </span>
               </div>
             </div>
           </td>
-          <td>{{getLocalDate(featureFlag.lastModificationTime) | date: 'YYYY-MM-dd HH:mm'}}</td>
+          <td>{{getLocalDate(featureFlag.updatedAt) | date: 'YYYY-MM-dd HH:mm'}}</td>
           <td class="table-operations" style="min-width: 50px;">
               <a (click)="onIntoFeatureFlagDetail(featureFlag)" i18n="@@common.details">Details</a>
           </td>

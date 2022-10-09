@@ -9,16 +9,15 @@ export interface IFeatureFlagListModel {
 export interface IFeatureFlagListItem {
   id: string;
   name: string;
-  keyName: string;
+  key: string;
   tags: string[];
-  status: string;
-  lastModificationTime: Date;
-  variationOverview: VariationOverview,
-  variation: IVariationOption,
-  variationDataType: string
+  isEnabled: boolean;
+  updatedAt: Date;
+  variationType: string;
+  variationOverview: IVariationOverview,
 }
 
-export interface VariationOverview {
+export interface IVariationOverview {
   variationWhenOff: IVariationOption,
   variationsWhenOn: IVariationOption[],
   variationsWhenOnStr: string[]
@@ -30,7 +29,7 @@ export interface IFeatureFlagListCheckItem {
   checked: boolean;
 }
 
-export interface CopyToEnvResult {
+export interface ICopyToEnvResult {
   copiedCount: number;
   ignored: string[];
 }
@@ -77,7 +76,7 @@ export interface IFeatureFlagDetail {
   tags: string[];
 }
 
-export interface UpdateSettingPayload {
+export interface IUpdateSettingPayload {
   name: string;
   status: string;
   variationOptionWhenDisabled: IVariationOption;

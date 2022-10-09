@@ -7,7 +7,7 @@ import {FeatureFlagParams, IFfParams, IVariationOption, VariationDataTypeEnum} f
 import {IZeroCode} from '../../types/zero-code';
 import {MessageQueueService} from '@services/message-queue.service';
 import {SwitchV2Service} from '@services/switch-v2.service';
-import {IFeatureFlagDetail, UpdateSettingPayload} from '@features/safe/feature-flags/types/switch-index';
+import {IFeatureFlagDetail, IUpdateSettingPayload} from '@features/safe/feature-flags/types/switch-index';
 import {IProjectEnv} from '@shared/types';
 import {CURRENT_PROJECT} from '@utils/localstorage-keys';
 import {isNumeric, tryParseJSONObject} from "@utils/index";
@@ -262,7 +262,7 @@ export class SettingComponent implements OnInit {
   // 更新开关名字
   onSaveSwitch(cb?: Function) {
     const { id, name, variationOptionWhenDisabled } = this.currentSwitch;
-    const payload: UpdateSettingPayload = {name, status: this.featureDetail.getFeatureStatus(), variationOptionWhenDisabled } as UpdateSettingPayload;
+    const payload: IUpdateSettingPayload = {name, status: this.featureDetail.getFeatureStatus(), variationOptionWhenDisabled } as IUpdateSettingPayload;
 
     payload.variationDataType = this.variationDataType || VariationDataTypeEnum.string;
     this.variationOptions = this.variationOptions.filter(v => !v.isInvalid);

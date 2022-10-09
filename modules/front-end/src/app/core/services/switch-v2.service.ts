@@ -6,7 +6,7 @@ import {
   IFeatureFlagListFilter,
   IFeatureFlagDropdown,
   IFeatureFlagListModel,
-  IFeatureFlagDetail, UpdateSettingPayload, CopyToEnvResult
+  IFeatureFlagDetail, IUpdateSettingPayload, ICopyToEnvResult
 } from "@features/safe/feature-flags/types/switch-index";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
@@ -86,16 +86,16 @@ export class SwitchV2Service {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  updateSetting(id: string, payload: UpdateSettingPayload): Observable<IFfParams> {
+  updateSetting(id: string, payload: IUpdateSettingPayload): Observable<IFfParams> {
     const url = `${this.baseUrl}/${id}/setting`;
 
     return this.http.put<IFfParams>(url, payload);
   }
 
-  copyToEnv(targetEnvId: string, flagIds: string[]): Observable<CopyToEnvResult> {
+  copyToEnv(targetEnvId: string, flagIds: string[]): Observable<ICopyToEnvResult> {
     const url = `${this.baseUrl}/copy-to-env/${targetEnvId}`;
 
-    return this.http.post<CopyToEnvResult>(url, flagIds);
+    return this.http.post<ICopyToEnvResult>(url, flagIds);
   }
 
   delete(id: string): Observable<boolean> {
