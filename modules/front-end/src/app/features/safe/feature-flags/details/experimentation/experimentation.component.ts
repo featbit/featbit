@@ -2,8 +2,8 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from '@services/experiment.service';
-import { SwitchService } from '@services/switch.service';
-import { CSwitchParams, IVariationOption } from '../../types/switch-new';
+import { SwitchV1Service } from '@services/switch-v1.service';
+import { FeatureFlagParams, IVariationOption } from '../../types/switch-new';
 import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment, IExperimentIteration, IExperimentIterationResult } from '../../types/experimentations';
 import * as moment from 'moment';
 import { isNumber } from '@utils/index';
@@ -19,7 +19,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   featureFlagId: string;
   currentVariationOptions: IVariationOption[] = [];
-  currentFeatureFlag: CSwitchParams = null;
+  currentFeatureFlag: FeatureFlagParams = null;
   isInitLoading = true;
   experimentation: string;
   onGoingExperiments: IExperiment[] = [];
@@ -40,13 +40,13 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchService,
+    private switchServe: SwitchV1Service,
     private message: NzMessageService,
     private experimentService: ExperimentService
   ) {
     const ffId: string = decodeURIComponent(this.route.snapshot.params['id']);
     this.switchServe.getSwitchDetail(ffId).subscribe(res => {
-      this.currentFeatureFlag = new CSwitchParams(res);
+      this.currentFeatureFlag = new FeatureFlagParams(res);
       this.currentVariationOptions = this.currentFeatureFlag.getVariationOptions();
     });
   }

@@ -98,7 +98,7 @@ export enum VariationDataTypeEnum {
   boolean = 'boolean',
 }
 
-export class CSwitchParams {
+export class FeatureFlagParams {
     private id: string;
     private environmentId: number;
     private objectType: string;
@@ -114,7 +114,7 @@ export class CSwitchParams {
     private exptIncludeAllRules: boolean;
     private isArchived = false;
 
-    constructor(data: CSwitchParams) {
+    constructor(data: FeatureFlagParams) {
 
         this.id = data.id;
         this.environmentId = data.environmentId;

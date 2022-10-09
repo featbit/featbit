@@ -3,19 +3,19 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group style="width: 220px" [nzPrefix]="prefixIconSearch">
-          <input  nz-input type="text" placeholder="Filter by name or keyName" i18n-placeholder="@@ff.idx.filter-by-name-and-keyname" [(ngModel)]="switchFilterV2.name" (ngModelChange)="onSearchV2(true)">
+          <input nz-input type="text" placeholder="Filter by name or key" i18n-placeholder="@@ff.idx.filter-by-name-and-key" [(ngModel)]="featureFlagFilter.name" (ngModelChange)="onSearch(true)">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
-        <switch-tag-tree-select (onSelect)="onSelectTagV2($event)" [tagTree]="tagTree"></switch-tag-tree-select>
-        <nz-select nzAllowClear [(ngModel)]="switchFilterV2.status" (ngModelChange)="onSearchV2(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
+        <switch-tag-tree-select (onSelect)="onSelectTag($event)" [tagTree]="tagTree"></switch-tag-tree-select>
+        <nz-select nzAllowClear [(ngModel)]="featureFlagFilter.status" (ngModelChange)="onSearch(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
           <nz-option nzValue="Enabled" nzLabel="ON"></nz-option>
           <nz-option nzValue="Disabled" nzLabel="OFF"></nz-option>
         </nz-select>
       </div>
       <div class="middle-btn">
-        <button nz-button nzType="primary" (click)="this.createModalVisibleV2 = true">
+        <button nz-button nzType="primary" (click)="this.createModalVisible = true">
           <i nz-icon nzType="icons:icon-add"></i>
           <ng-container i18n="@@common.add">Add</ng-container>
         </button>
@@ -39,21 +39,24 @@
         #table
         nzSize="small"
         nzShowSizeChanger
-        [nzData]="switchListModel.items"
+        [nzData]="featureFlagListModel.items"
         [nzFrontPagination]="false"
-        [nzLoading]="v2Loading"
-        [nzTotal]="switchListModel.totalCount"
-        [(nzPageSize)]="switchFilterV2.pageSize"
-        (nzPageSizeChange)="onSearchV2()"
+        [nzLoading]="Loading"
+        [nzTotal]="featureFlagListModel.totalCount"
+        [(nzPageSize)]="featureFlagFilter.pageSize"
+        (nzPageSizeChange)="onSearch()"
         [nzPageSizeOptions]="[10,20,30]"
-        [(nzPageIndex)]="switchFilterV2.pageIndex"
-        (nzPageIndexChange)="onSearchV2()"
+        [(nzPageIndex)]="featureFlagFilter.pageIndex"
+        (nzPageIndexChange)="onSearch()"
         (nzCurrentPageDataChange)="onCurrentPageDataChange($event)">
         <thead>
         <tr>
           <th [nzChecked]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
           <th i18n="@@common.name">Name</th>
-          <th><span i18n-nz-tooltip="@@ff.use-keyName-in-code-to-get-variation" nz-tooltip="Use keyName in your code to get the feature flag variation">KeyName</span></th>
+          <th>
+            Key
+            <i nz-icon i18n-nz-tooltip="@@ff.use-key-in-code-to-get-variation" nz-tooltip="Use key in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
+          </th>
           <th i18n="@@common.status">Status</th>
           <th i18n="@@common.tags">Tags</th>
           <th i18n="@@common.variations">Variations</th>
@@ -62,71 +65,71 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let theSwitch of table.data">
+        <tr *ngFor="let featureFlag of table.data">
           <td
-            [nzChecked]="itemChecked(theSwitch)"
-            (nzCheckedChange)="onItemChecked(theSwitch)"
+            [nzChecked]="itemChecked(featureFlag)"
+            (nzCheckedChange)="onItemChecked(featureFlag)"
           ></td>
-          <td style="cursor:pointer" (click)="onIntoSwitchDetail(theSwitch)">
-              <span>{{theSwitch.name}}</span>
+          <td style="cursor:pointer" (click)="onIntoFeatureFlagDetail(featureFlag)">
+              <span>{{featureFlag.name}}</span>
           </td>
           <td>
-            <i (click)="copyText($event, theSwitch.keyName)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
-            {{theSwitch.keyName}}
+            <i (click)="copyText($event, featureFlag.key)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+            {{featureFlag.key}}
           </td>
           <td>
-            <nz-switch *ngIf="theSwitch.status === 'Enabled'"
+            <nz-switch *ngIf="featureFlag.isEnabled"
                        i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-disable-ff"
-              nz-popconfirm="Are you sure to turn it off? The variation returned would be changed when it is off"
-              (nzOnConfirm)="onChangeSwitchStatus(theSwitch)"
-              nzControl="true"
-              [ngModel]="theSwitch.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
+                       nz-popconfirm="Are you sure to turn it off? The variation returned would be changed when it is off"
+                       (nzOnConfirm)="onChangeFeatureFlagStatus(featureFlag)"
+                       nzControl="true"
+                       [ngModel]="featureFlag.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
             </nz-switch>
-            <nz-switch *ngIf="theSwitch.status !== 'Enabled'"
+            <nz-switch *ngIf="!featureFlag.isEnabled"
                        i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-enable-ff"
-              nz-popconfirm="Are you sure to turn it on? The matching targeting users' or rules' serving variation would be returned"
-              (nzOnConfirm)="onChangeSwitchStatus(theSwitch)"
-              nzControl="true"
-              [ngModel]="theSwitch.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
+                       nz-popconfirm="Are you sure to turn it on? The matching targeting users' or rules' serving variation would be returned"
+                       (nzOnConfirm)="onChangeFeatureFlagStatus(featureFlag)"
+                       nzControl="true"
+                       [ngModel]="featureFlag.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
             </nz-switch>
           </td>
           <td style="max-width: 168px;">
-            <span class="tag" *ngFor="let tag of theSwitch.tags">{{tag}}</span>
+            <span class="tag" *ngFor="let tag of featureFlag.tags">{{tag}}</span>
           </td>
           <td>
             <div style="min-width: 60px;" >
-              <div *ngIf="theSwitch.status==='Enabled' && theSwitch.variationOverview.variationsWhenOn.length === 1">
-                <span class="variation-tip {{'tip-' + (theSwitch.variationOverview.variationsWhenOn[0].displayOrder - 1) % 9}}" style="margin-bottom:2px;"></span>
+              <div *ngIf="featureFlag.isEnabled && featureFlag.variationOverview?.variationsWhenOn?.length === 1">
+                <span class="variation-tip {{'tip-' + (featureFlag.variationOverview?.variationsWhenOn[0].displayOrder - 1) % 9}}" style="margin-bottom:2px;"></span>
                 <span style="margin-left: 0px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{theSwitch.variationOverview.variationsWhenOn[0].variationValue}}
+                  {{featureFlag.variationOverview.variationsWhenOn[0].variationValue}}
                 </span>
               </div>
-              <div *ngIf="theSwitch.status==='Enabled' && theSwitch.variationOverview.variationsWhenOn.length > 1"
+              <div *ngIf="featureFlag.isEnabled && featureFlag.variationOverview?.variationsWhenOn?.length > 1"
                    style="cursor: pointer;"
                    nz-tooltip
-                   nzTooltipTitle="{{theSwitch.variationOverview.variationsWhenOnStr.join(' // ')}}"
+                   nzTooltipTitle="{{featureFlag.variationOverview.variationsWhenOnStr.join(' // ')}}"
                    >
-                <span *ngFor="let variationValue of theSwitch.variationOverview.variationsWhenOn; let key=index; ">
+                <span *ngFor="let variationValue of featureFlag.variationOverview.variationsWhenOn; let key=index; ">
                   <span  class="variation-tip {{'tip-' + (variationValue.displayOrder - 1) % 9}}" style="margin-right:-3px;margin-bottom:2px;"></span>
                 </span>
                 <span style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{theSwitch.variationOverview.variationsWhenOn.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
+                  {{featureFlag.variationOverview?.variationsWhenOn?.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
                 </span>
               </div>
-              <div *ngIf="theSwitch.status==='Disabled'" style="opacity: .5;">
+              <div *ngIf="!featureFlag.isEnabled" style="opacity: .5;">
                 <span class="variation-tip tip-9" style="margin-bottom:2px;background-color:darkgray;"></span>
                 <span style="margin-left: 0px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{theSwitch.variationOverview.variationWhenOff.variationValue}}
+                  {{featureFlag.variationOverview?.variationWhenOff?.variationValue}}
                 </span>
               </div>
             </div>
           </td>
-          <td>{{getLocalDate(theSwitch.lastModificationTime) | date: 'YYYY-MM-dd HH:mm'}}</td>
+          <td>{{getLocalDate(featureFlag.updatedAt) | date: 'YYYY-MM-dd HH:mm'}}</td>
           <td class="table-operations" style="min-width: 50px;">
-              <a (click)="onIntoSwitchDetail(theSwitch)" i18n="@@common.details">Details</a>
+              <a (click)="onIntoFeatureFlagDetail(featureFlag)" i18n="@@common.details">Details</a>
           </td>
         </tr>
         </tbody>
@@ -135,15 +138,15 @@
   </div>
 </section>
 
-<nz-modal [nzVisible]="createModalVisibleV2"
+<nz-modal [nzVisible]="createModalVisible"
           [nzTitle]="modalTitle"
           [nzCentered]="true"
           [nzContent]="modalContent"
           [nzFooter]="modalFooter"
-          (nzOnCancel)="this.closeCreateModalV2()">
+          (nzOnCancel)="this.closeCreateModal()">
   <ng-template #modalTitle><ng-container i18n="@@ff.idx.new-ff">New feature flag</ng-container></ng-template>
   <ng-template #modalContent>
-    <form nz-form [formGroup]="switchFormV2" nzLayout="vertical">
+    <form nz-form [formGroup]="featureFlagForm" nzLayout="vertical">
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
         <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="switchNameErrorTpl">
@@ -157,17 +160,17 @@
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label nzRequired>KeyName</nz-form-label>
-        <nz-form-control i18n-nz-tooltip="@@ff.use-keyName-in-code-to-get-variation" nz-tooltip="Use keyName in your code to get the feature flag variation">
-          <input nz-input [value]="this.switchFormV2.get('name').value | switchKeyName" formControlName="keyName" i18n-placeholder="@@ff.idx.keyName-generated-from-name" placeholder="keyName is generated from name" />
+        <nz-form-label nzRequired>Key</nz-form-label>
+        <nz-form-control i18n-nz-tooltip="@@ff.use-key-in-code-to-get-variation" nz-tooltip="Use key in your code to get the feature flag variation">
+          <input nz-input [value]="this.featureFlagForm.get('name').value | switchKeyName" formControlName="keyName" i18n-placeholder="@@ff.idx.keyName-generated-from-name" placeholder="keyName is generated from name" />
         </nz-form-control>
       </nz-form-item>
     </form>
   </ng-template>
 
   <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="this.closeCreateModalV2()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="this.creatingV2" [disabled]="!switchFormV2.valid" (click)="createSwitchV2()" i18n="@@common.save">Save</button>
+    <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!featureFlagForm.valid" (click)="createFeatureFlag()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>
 

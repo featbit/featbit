@@ -11,7 +11,7 @@ import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
   providedIn: 'root'
 })
 export class EnvUserService {
-  public envId: number = null;
+  public envId: string = null;
 
   constructor(private http: HttpClient) {
     this.envId = getCurrentProjectEnv().envId;

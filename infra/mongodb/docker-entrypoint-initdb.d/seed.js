@@ -205,7 +205,7 @@ db.Segments.insertOne(
         name: "[prod] tester-group",
         description: "this is a tester group",
         included: ["prod-bot-id"],
-        excluded: ["anonymous"],
+        excluded: [],
         rules: [
             {
                 _id: "e5080546-dd53-4c9e-bf46-65a4897199c3",
@@ -231,7 +231,7 @@ db.Segments.insertOne(
         name: "[dev] tester-group",
         description: "this is a tester group",
         included: ["dev-bot-id"],
-        excluded: ["anonymous"],
+        excluded: [],
         rules: [
             {
                 _id: "78d03b8b-9cc8-4860-8cd7-449fbeb8ebbe",
@@ -251,6 +251,147 @@ db.Segments.insertOne(
     }
 )
 print('collection seeded: Segments')
+
+// seed feature flag
+print('clean and seed collection: FeatureFlags')
+db.FeatureFlags.deleteMany({})
+db.FeatureFlags.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        name: "use new algorithm",
+        key: "use-new-algorithm",
+        variationType: "boolean",
+        variations: [
+            {
+                _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+                value: "true"
+            },
+            {
+                _id: "9d336c3a-0733-4b96-b950-f66172e8a4b1",
+                value: "false"
+            }
+        ],
+        targetUsers: [
+            {
+                keyIds: ["truthy-user-id"],
+                variationId: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+            },
+            {
+                keyIds: ["falsy-user-id", "anonymous"],
+                variationId: "9d336c3a-0733-4b96-b950-f66172e8a4b1"
+            }
+        ],
+        rules: [
+            {
+                _id: "823650b1-fae2-40f1-8f8b-53be026f9f8a",
+                name: "match by name",
+                includedInExpt: true,
+                conditions: [
+                    {
+                        property: "name",
+                        op: "Contains",
+                        value: "tester"
+                    }
+                ],
+                variations: [
+                    {
+                        _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+                        rollout: [0, 1],
+                        exptRollout: 1
+                    }
+                ]
+            }
+        ],
+        isEnabled: false,
+        disabledVariationId: "9d336c3a-0733-4b96-b950-f66172e8a4b1",
+        fallthrough: {
+            includedInExpt: true,
+            variations: [
+                {
+                    _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+                    rollout: [0, 1],
+                    exptRollout: 1
+                }
+            ]
+        },
+        exptIncludeAllTargets: true,
+        isArchived: false,
+        creatorId: userId,
+        createdAt: new Date(),
+        updatorId: userId,
+        updatedAt: new Date()
+    }
+)
+db.FeatureFlags.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        name: "use new algorithm",
+        key: "use-new-algorithm",
+        variationType: "boolean",
+        variations: [
+            {
+                _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+                value: "true"
+            },
+            {
+                _id: "e11b9358-f965-4858-be7b-258eaf92056e",
+                value: "false"
+            }
+        ],
+        targetUsers: [
+            {
+                keyIds: ["truthy-user-id"],
+                variationId: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+            },
+            {
+                keyIds: ["falsy-user-id", "anonymous"],
+                variationId: "e11b9358-f965-4858-be7b-258eaf92056e"
+            }
+        ],
+        rules: [
+            {
+                _id: "823650b1-fae2-40f1-8f8b-53be026f9f8a",
+                name: "match by name",
+                includedInExpt: true,
+                conditions: [
+                    {
+                        property: "name",
+                        op: "Contains",
+                        value: "tester"
+                    }
+                ],
+                variations: [
+                    {
+                        _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+                        rollout: [0, 1],
+                        exptRollout: 1
+                    }
+                ]
+            }
+        ],
+        isEnabled: false,
+        disabledVariationId: "e11b9358-f965-4858-be7b-258eaf92056e",
+        fallthrough: {
+            includedInExpt: true,
+            variations: [
+                {
+                    _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+                    rollout: [0, 1],
+                    exptRollout: 1
+                }
+            ]
+        },
+        exptIncludeAllTargets: true,
+        isArchived: false,
+        creatorId: userId,
+        createdAt: new Date(),
+        updatorId: userId,
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: FeatureFlags')
 
 // seed end-user
 print('clean and seed collection: EndUsers')

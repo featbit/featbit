@@ -2,12 +2,12 @@ import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {NzModalService} from 'ng-zorro-antd/modal';
-import {SwitchService} from '@services/switch.service';
-import {CSwitchParams, IFfParams, IVariationOption, VariationDataTypeEnum} from '../../types/switch-new';
+import {SwitchV1Service} from '@services/switch-v1.service';
+import {FeatureFlagParams, IFfParams, IVariationOption, VariationDataTypeEnum} from '../../types/switch-new';
 import {IZeroCode} from '../../types/zero-code';
 import {MessageQueueService} from '@services/message-queue.service';
 import {SwitchV2Service} from '@services/switch-v2.service';
-import {SwitchDetail, UpdateSettingPayload} from '@features/safe/feature-flags/types/switch-index';
+import {IFeatureFlagDetail, IUpdateSettingPayload} from '@features/safe/feature-flags/types/switch-index';
 import {IProjectEnv} from '@shared/types';
 import {CURRENT_PROJECT} from '@utils/localstorage-keys';
 import {isNumeric, tryParseJSONObject} from "@utils/index";
@@ -45,7 +45,7 @@ export class SettingComponent implements OnInit {
   public variationOptions: IVariationOption[];
   public variationDataType: VariationDataTypeEnum = VariationDataTypeEnum.string;
   private temporaryStateId: number = -1;
-  public featureDetail: CSwitchParams;
+  public featureDetail: FeatureFlagParams;
   public isLoading = true;
   public isEditingTitle = false;
   public switchStatus: boolean = true;
@@ -59,7 +59,7 @@ export class SettingComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchService,
+    private switchServe: SwitchV1Service,
     private switchServeV2: SwitchV2Service,
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
@@ -94,8 +94,8 @@ export class SettingComponent implements OnInit {
   }
 
   private loadData() {
-    this.switchServeV2.getDetail(this.id).subscribe((result: SwitchDetail) => {
-      this.featureDetail = new CSwitchParams(result.featureFlag);
+    this.switchServeV2.getDetail(this.id).subscribe((result: IFeatureFlagDetail) => {
+      this.featureDetail = new FeatureFlagParams(result.featureFlag);
       this.tags = result.tags || [];
 
       this.initSwitchStatus();
@@ -262,7 +262,7 @@ export class SettingComponent implements OnInit {
   // 更新开关名字
   onSaveSwitch(cb?: Function) {
     const { id, name, variationOptionWhenDisabled } = this.currentSwitch;
-    const payload: UpdateSettingPayload = {name, status: this.featureDetail.getFeatureStatus(), variationOptionWhenDisabled } as UpdateSettingPayload;
+    const payload: IUpdateSettingPayload = {name, status: this.featureDetail.getFeatureStatus(), variationOptionWhenDisabled } as IUpdateSettingPayload;
 
     payload.variationDataType = this.variationDataType || VariationDataTypeEnum.string;
     this.variationOptions = this.variationOptions.filter(v => !v.isInvalid);

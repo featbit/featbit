@@ -2,9 +2,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ISegment } from '@features/safe/segments/types/segments-index';
 import { ruleOps, IRuleOp } from "@core/components/find-rule/ruleConfig";
-import { CSwitchParams, IRulePercentageRollout } from '@features/safe/feature-flags/types/switch-new';
+import { FeatureFlagParams, IRulePercentageRollout } from '@features/safe/feature-flags/types/switch-new';
 import { SegmentService } from '@services/segment.service';
-import { SwitchService } from '@services/switch.service';
+import { SwitchV1Service } from '@services/switch-v1.service';
 import { isNotPercentageRollout, isSegmentRule, isSingleOperator } from '@utils/index';
 
 @Component({
@@ -83,7 +83,7 @@ export class ExptRulesDrawerComponent {
       }
 
       this.initExperimentRollout(data.ff.defaultRulePercentageRollouts);
-      this._ff = new CSwitchParams(data);
+      this._ff = new FeatureFlagParams(data);
     }
   }
 
@@ -182,7 +182,7 @@ export class ExptRulesDrawerComponent {
   }
 
   constructor(
-    private switchServe: SwitchService,
+    private switchServe: SwitchV1Service,
     private segmentService: SegmentService,
     private message: NzMessageService
   ) {

@@ -29,7 +29,7 @@ export class ProjectComponent implements OnInit {
   searchValue: string;
 
   // current project env
-  currentOrganizationId: number;
+  currentOrganizationId: string;
   currentProjectEnv: IProjectEnv;
 
   projects: IProject[] = [];

@@ -3,14 +3,14 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { CSwitchParams, IFfParams, IPrequisiteFeatureFlag } from '@features/safe/feature-flags/types/switch-new';
+import { FeatureFlagParams, IFfParams, IPrequisiteFeatureFlag } from '@features/safe/feature-flags/types/switch-new';
 import { OrganizationService } from './organization.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SwitchService {
-  public envId: number = null;
+export class SwitchV1Service {
+  public envId: string = null;
   public currentSwitch: IFfParams = null;
 
   constructor(
@@ -34,7 +34,7 @@ export class SwitchService {
   }
 
   // 获取开关列表
-  public getSwitchList(id: number): Observable<any> {
+  public getSwitchList(id: string): Observable<any> {
     const url = environment.url + `/FeatureFlags/GetEnvironmentFeatureFlags/${id}`;
     return this.http.get(url);
   }
@@ -80,13 +80,13 @@ export class SwitchService {
   }
 
   // 搜索开关
-  public queryFeatureFlags(envId: number, params: any): Observable<any> {
+  public queryFeatureFlags(envId: string, params: any): Observable<any> {
     const url = environment.url + `/FeatureFlags/search/${envId}`;
     return this.http.get(url, { params });
   }
 
   // 修改开关
-  public updateSwitch(param: CSwitchParams): Observable<any> {
+  public updateSwitch(param: FeatureFlagParams): Observable<any> {
     const switchDetail = param.getSwicthDetail();
     const url = environment.url + `/FeatureFlags/UpdateMultiOptionSupportedFeatureFlag`;
     return this.http.put(url, { ...param, ff: { ...switchDetail } });
@@ -111,7 +111,7 @@ export class SwitchService {
   }
 
   // 获取以存档的开关
-  public getArchiveSwitch(id: number, params: any): Observable<any> {
+  public getArchiveSwitch(id: string, params: any): Observable<any> {
     const url = environment.url + `/FeatureFlags/GetEnvironmentArchivedFeatureFlags/${id}`;
     return this.http.get(url, { params });
   }

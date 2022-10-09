@@ -3,8 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { forkJoin } from 'rxjs';
-import { SwitchService } from '@services/switch.service';
-import { CSwitchParams, IFfParams, IFfpParams, IJsonContent, IVariationOption, IRulePercentageRollout, IPrequisiteFeatureFlag, IFftuwmtrParams } from '../../types/switch-new';
+import { SwitchV1Service } from '@services/switch-v1.service';
+import { FeatureFlagParams, IFfParams, IFfpParams, IJsonContent, IVariationOption, IRulePercentageRollout, IPrequisiteFeatureFlag, IFftuwmtrParams } from '../../types/switch-new';
 import { PendingChange } from '../../types/pending-changes';
 import { TeamService } from '@services/team.service';
 import { IOrganization, IProjectEnv } from '@shared/types';
@@ -30,7 +30,7 @@ export class TargetingComponent implements OnInit {
 
   public switchStatus: 'Enabled' | 'Disabled' = 'Enabled';  // 开关状态
   public featureList: IPrequisiteFeatureFlag[] = [];                     // 开关列表
-  public featureDetail: CSwitchParams;                      // 开关详情
+  public featureDetail: FeatureFlagParams;                      // 开关详情
   public upperFeatures: IFfpParams[] = [];                  // 上游开关列表
   public userList: IUserType[] = [];                        // 用户列表
 
@@ -62,7 +62,7 @@ export class TargetingComponent implements OnInit {
   onSetExptRulesClosed(data: any) {
     if (data.isSaved) {
       this.isLoading = true;
-      this.switchServe.getSwitchDetail(this.featureDetail.getSwicthDetail().id).subscribe((result: CSwitchParams) => {
+      this.switchServe.getSwitchDetail(this.featureDetail.getSwicthDetail().id).subscribe((result: FeatureFlagParams) => {
         this.loadFeatureFlag(result);
         this.isLoading = false;
       }, () => {
@@ -75,7 +75,7 @@ export class TargetingComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchService,
+    private switchServe: SwitchV1Service,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService,
@@ -96,7 +96,7 @@ export class TargetingComponent implements OnInit {
   }
 
   fetchFlag(complete?: Function) {
-    this.switchServe.getSwitchDetail(this.switchId).subscribe((result: CSwitchParams) => {
+    this.switchServe.getSwitchDetail(this.switchId).subscribe((result: FeatureFlagParams) => {
       this.loadFeatureFlag(result);
       this.initData(complete);
     }, () => {
@@ -130,10 +130,10 @@ export class TargetingComponent implements OnInit {
     })
   }
 
-  private originalData: CSwitchParams;
-  private loadFeatureFlag(ff: CSwitchParams) {
-    this.originalData = new CSwitchParams(JSON.parse(JSON.stringify(ff)));
-    this.featureDetail = new CSwitchParams(ff);
+  private originalData: FeatureFlagParams;
+  private loadFeatureFlag(ff: FeatureFlagParams) {
+    this.originalData = new FeatureFlagParams(JSON.parse(JSON.stringify(ff)));
+    this.featureDetail = new FeatureFlagParams(ff);
     this.isArchived = this.featureDetail.getIsArchived();
     // set prerequiste
     const upperFeatures = this.featureDetail.getUpperFeatures().map(u => {

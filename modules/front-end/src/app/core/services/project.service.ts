@@ -16,30 +16,30 @@ export class ProjectService {
   constructor(private http: HttpClient, private messageQueueService: MessageQueueService,) { }
 
   // 获取 project 列表
-  public getProjects(organizationId: number): Observable<IProject[]> {
+  public getProjects(organizationId: string): Observable<IProject[]> {
     const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
     return this.http.get<IProject[]>(url);
   }
 
-  getProject(organizationId: number, projectId: number): Observable<IProject> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${organizationId}`;
+  getProject(organizationId: string, projectId: string): Observable<IProject> {
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${projectId}`;
     return this.http.get<IProject>(url);
   }
 
   // 创建 project
-  postCreateProject(organizationId: number, params): Observable<any> {
+  postCreateProject(organizationId: string, params): Observable<any> {
     const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
     return this.http.post(url, params);
   }
 
   // 更新 project
-  putUpdateProject(organizationId: number, params): Observable<any> {
+  putUpdateProject(organizationId: string, params): Observable<any> {
     const url = `${this.baseUrl.replace(/#organizationId/ig, `${organizationId}`)}/${params.id}`;
     return this.http.put(url, params);
   }
 
   // 删除 project
-  removeProject(organizationId: number, projectId: number): Observable<any> {
+  removeProject(organizationId: string, projectId: string): Observable<any> {
     const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${projectId}`;
     return this.http.delete(url);
   }
@@ -70,7 +70,7 @@ export class ProjectService {
   }
 
   // get current project env for account
-  getCurrentProjectEnv(orginzationId: number): Observable<IProjectEnv> {
+  getCurrentProjectEnv(orginzationId: string): Observable<IProjectEnv> {
     return new Observable(observer => {
       const localCurrentProjectEnv = this.getLocalCurrentProjectEnv();
       if (localCurrentProjectEnv) {

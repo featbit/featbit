@@ -1,41 +1,40 @@
 ﻿import { NzTreeNodeOptions } from "ng-zorro-antd/core/tree/nz-tree-base-node";
-import { CSwitchParams, IVariationOption } from "@features/safe/feature-flags/types/switch-new";
+import { FeatureFlagParams, IVariationOption } from "@features/safe/feature-flags/types/switch-new";
 
-export interface SwitchListModel {
-  items: SwitchListItem[];
+export interface IFeatureFlagListModel {
+  items: IFeatureFlagListItem[];
   totalCount: number;
 }
 
-export interface SwitchListItem {
+export interface IFeatureFlagListItem {
   id: string;
   name: string;
-  keyName: string;
+  key: string;
   tags: string[];
-  status: string;
-  lastModificationTime: Date;
-  variationOverview: VariationOverview,
-  variation: IVariationOption,
-  variationDataType: string
+  isEnabled: boolean;
+  updatedAt: Date;
+  variationType: string;
+  variationOverview: IVariationOverview,
 }
 
-export interface VariationOverview {
+export interface IVariationOverview {
   variationWhenOff: IVariationOption,
   variationsWhenOn: IVariationOption[],
   variationsWhenOnStr: string[]
 }
 
-export interface SwitchListCheckItem {
+export interface IFeatureFlagListCheckItem {
   id: string;
   name: string;
   checked: boolean;
 }
 
-export interface CopyToEnvResult {
+export interface ICopyToEnvResult {
   copiedCount: number;
   ignored: string[];
 }
 
-export class SwitchListFilter {
+export class IFeatureFlagListFilter {
   name?: string;
   userKeyId?: string;
   status?: string;
@@ -59,25 +58,25 @@ export class SwitchListFilter {
   }
 }
 
-export interface SwitchTagTreeNode {
+export interface IFeatureFlagTagTreeNode {
   id: number;
   name: string;
   value: string[];
-  children: SwitchTagTreeNode[];
+  children: IFeatureFlagTagTreeNode[];
   isEditing?: boolean;
 }
 
-export interface SwitchDropdown {
+export interface IFeatureFlagDropdown {
   key: string;
   value: string;
 }
 
-export interface SwitchDetail {
-  featureFlag: CSwitchParams;
+export interface IFeatureFlagDetail {
+  featureFlag: FeatureFlagParams;
   tags: string[];
 }
 
-export interface UpdateSettingPayload {
+export interface IUpdateSettingPayload {
   name: string;
   status: string;
   variationOptionWhenDisabled: IVariationOption;
@@ -85,11 +84,11 @@ export interface UpdateSettingPayload {
   variationDataType: string;
 }
 
-export class SwitchTagTree {
-  trees: SwitchTagTreeNode[];
+export class FeatureFlagTagTree {
+  trees: IFeatureFlagTagTreeNode[];
   private _maxNodeId: number;
 
-  constructor(nodes: SwitchTagTreeNode[]) {
+  constructor(nodes: IFeatureFlagTagTreeNode[]) {
     this.trees = nodes;
     this._maxNodeId = this.getTreesMaxNodeId();
   }
@@ -104,7 +103,7 @@ export class SwitchTagTree {
     return options;
   }
 
-  tagTreeNodeOption(node: SwitchTagTreeNode): NzTreeNodeOptions {
+  tagTreeNodeOption(node: IFeatureFlagTagTreeNode): NzTreeNodeOptions {
     return {
       key: node.id.toString(),
       title: node.name,
@@ -121,7 +120,7 @@ export class SwitchTagTree {
     return maxNodeId;
   }
 
-  getTreeMaxNodeId(node: SwitchTagTreeNode, maxNodeId: number): number {
+  getTreeMaxNodeId(node: IFeatureFlagTagTreeNode, maxNodeId: number): number {
     if (node.id > maxNodeId) {
       maxNodeId = node.id;
     }
@@ -141,7 +140,7 @@ export class SwitchTagTree {
     return this.trees.length;
   }
 
-  parentNode(childNode: SwitchTagTreeNode): SwitchTagTreeNode | null {
+  parentNode(childNode: IFeatureFlagTagTreeNode): IFeatureFlagTagTreeNode | null {
     const stack = [...this.trees];
     while (stack.length > 0) {
       const node = stack.pop()!;
@@ -159,7 +158,7 @@ export class SwitchTagTree {
     return null;
   };
 
-  createNode(name: string, parentNode: SwitchTagTreeNode): SwitchTagTreeNode {
+  createNode(name: string, parentNode: IFeatureFlagTagTreeNode): IFeatureFlagTagTreeNode {
     const node = {
       id: this.getNewId(),
       name: name,
@@ -172,7 +171,7 @@ export class SwitchTagTree {
     return node;
   }
 
-  insertNode(node: SwitchTagTreeNode, parentNode: SwitchTagTreeNode): SwitchTagTreeNode {
+  insertNode(node: IFeatureFlagTagTreeNode, parentNode: IFeatureFlagTagTreeNode): IFeatureFlagTagTreeNode {
     // insert child node
     if (parentNode) {
       parentNode.children = parentNode.children || [];
@@ -186,14 +185,14 @@ export class SwitchTagTree {
     return node;
   }
 
-  updateNode(node: SwitchTagTreeNode, newName: string) {
+  updateNode(node: IFeatureFlagTagTreeNode, newName: string) {
     node.name = newName;
     if (node.id === -1) {
       node.id = this.getNewId();
     }
   }
 
-  deleteNode(node: SwitchTagTreeNode) {
+  deleteNode(node: IFeatureFlagTagTreeNode) {
     const parentNode = this.parentNode(node);
     if (parentNode && parentNode.children) {
       // delete child node
@@ -204,23 +203,23 @@ export class SwitchTagTree {
     }
   }
 
-  getSwitchTags(theSwitchId: string): string[] {
+  getFeatureFlagTags(theSwitchId: string): string[] {
     let tags = [];
 
     for (const tree of this.trees) {
-      this.getSwitchTagsRecursive(tree, theSwitchId, tags);
+      this.getFeatureFlagTagsRecursive(tree, theSwitchId, tags);
     }
 
     return tags;
   }
 
-  getSwitchTagsRecursive(node: SwitchTagTreeNode, theSwitchId: string, tags: string[]) {
+  getFeatureFlagTagsRecursive(node: IFeatureFlagTagTreeNode, theSwitchId: string, tags: string[]) {
     if (node.value && node.value.find(switchId => switchId === theSwitchId)) {
       tags.push(node.name);
     }
 
     for (const child of node.children) {
-      this.getSwitchTagsRecursive(child, theSwitchId, tags);
+      this.getFeatureFlagTagsRecursive(child, theSwitchId, tags);
     }
   }
 }

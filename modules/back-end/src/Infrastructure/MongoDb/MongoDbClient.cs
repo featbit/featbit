@@ -1,4 +1,5 @@
 using Domain.EndUsers;
+using Domain.FeatureFlags;
 using Domain.Groups;
 using Domain.Members;
 using Domain.Organizations;
@@ -42,6 +43,7 @@ public class MongoDbClient
         { typeof(EndUser), "EndUsers" },
         { typeof(EndUserProperty), "EndUserProperties" },
         { typeof(Segment), "Segments" },
+        { typeof(FeatureFlag), "FeatureFlags" },
 
         { typeof(Group), "Groups" },
         { typeof(Policy), "Policies" },

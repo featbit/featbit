@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { Subject } from 'rxjs';
-import { SwitchService } from '@services/switch.service';
+import { SwitchV1Service } from '@services/switch-v1.service';
 import { OrganizationService } from '@services/organization.service';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IFfParams } from "@features/safe/feature-flags/types/switch-new";
@@ -18,15 +18,15 @@ import { SwitchV2Service } from "@services/switch-v2.service";
 export class SwitchArchiveComponent implements OnInit {
 
   private search$ = new Subject<any>();
-  currentEnvId: number;
-  currentAccountId: number;
+  currentEnvId: string;
+  currentAccountId: string;
   searchText: string = '';
   isLoading: boolean = true;
   switchLoading: boolean = false;
   switchLists: IFfParams[] = [];
 
   constructor(
-    private switchService: SwitchService,
+    private switchService: SwitchV1Service,
     private switchV2Service: SwitchV2Service,
     private accountService: OrganizationService,
     private modal: NzModalService,

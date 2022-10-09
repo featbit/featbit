@@ -4,7 +4,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { FlatTreeControl } from '@angular/cdk/tree';
 import { NzTreeFlatDataSource, NzTreeFlattener } from 'ng-zorro-antd/tree-view';
 import { NzMessageService } from "ng-zorro-antd/message";
-import { SwitchTagTree, SwitchTagTreeNode } from "../types/switch-index";
+import { FeatureFlagTagTree, IFeatureFlagTagTreeNode } from "../types/switch-index";
 import { SwitchV2Service } from "@services/switch-v2.service";
 
 interface FlatNode {
@@ -160,7 +160,7 @@ export class SwitchTagTreeViewComponent implements OnInit {
 
   //#region tree view
 
-  private transformer = (node: SwitchTagTreeNode, level: number): FlatNode => {
+  private transformer = (node: IFeatureFlagTagTreeNode, level: number): FlatNode => {
     const existingNode = this.nestedNodeMap.get(node);
     const flatNode =
       existingNode && existingNode.id === node.id
@@ -176,9 +176,9 @@ export class SwitchTagTreeViewComponent implements OnInit {
     return flatNode;
   };
 
-  private _tagTree: SwitchTagTree = new SwitchTagTree([]);
+  private _tagTree: FeatureFlagTagTree = new FeatureFlagTagTree([]);
   @Input()
-  set tagTree(tree: SwitchTagTree) {
+  set tagTree(tree: FeatureFlagTagTree) {
     if (tree) {
       this._tagTree = tree;
     }
@@ -188,9 +188,9 @@ export class SwitchTagTreeViewComponent implements OnInit {
     return this._tagTree;
   }
 
-  flatNodeMap = new Map<FlatNode, SwitchTagTreeNode>();
-  nestedNodeMap = new Map<SwitchTagTreeNode, FlatNode>();
-  selectedNode: SwitchTagTreeNode;
+  flatNodeMap = new Map<FlatNode, IFeatureFlagTagTreeNode>();
+  nestedNodeMap = new Map<IFeatureFlagTagTreeNode, FlatNode>();
+  selectedNode: IFeatureFlagTagTreeNode;
   selectListSelection = new SelectionModel<FlatNode>(false);
   treeControl = new FlatTreeControl<FlatNode>(
     node => node.level,
@@ -225,7 +225,7 @@ export class SwitchTagTreeViewComponent implements OnInit {
   }
 
   newNode(node: FlatNode): void {
-    let parentNode: SwitchTagTreeNode = undefined;
+    let parentNode: IFeatureFlagTagTreeNode = undefined;
     if (node) {
       parentNode = this.flatNodeMap.get(node);
       this.treeControl.expand(node);

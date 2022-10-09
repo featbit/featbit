@@ -17,7 +17,7 @@ export class MemberDrawerComponent {
 
   isPoliciesLoading = true;
   policyFilter: PolicyFilter = new PolicyFilter(null, 1, 50);
-  organizationId: number;
+  organizationId: string;
   policies: IPagedPolicy = {
     items: [],
     totalCount: 0

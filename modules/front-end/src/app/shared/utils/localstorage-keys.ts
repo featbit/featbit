@@ -12,7 +12,7 @@ export function CURRENT_ORGANIZATION(): string {
   return getLocalStorageKey('current-organization', false);
 }
 
-export function CURRENT_USER_FILTER_ATTRIBUTE(envId: number): string {
+export function CURRENT_USER_FILTER_ATTRIBUTE(envId: string): string {
   return `${getLocalStorageKey('current-user-search-filter-attribute', false)}_${envId}`;
 }
 

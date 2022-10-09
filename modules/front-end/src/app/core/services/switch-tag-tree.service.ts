@@ -1,7 +1,7 @@
 ﻿import { environment } from 'src/environments/environment';
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { SwitchTagTree } from "@features/safe/feature-flags/types/switch-index";
+import { FeatureFlagTagTree } from "@features/safe/feature-flags/types/switch-index";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 import { getCurrentProjectEnv } from "@utils/project-env";
@@ -21,16 +21,16 @@ export class SwitchTagTreeService {
   }
 
   // get switch tag tree
-  getTree(): Observable<SwitchTagTree> {
+  getTree(): Observable<FeatureFlagTagTree> {
     return this.http.get(this.baseUrl).pipe(
-      map((res: any) => new SwitchTagTree(res.trees))
+      map((res: any) => new FeatureFlagTagTree(res.trees))
     );
   }
 
   // save switch tag tree
-  saveTree(tree: SwitchTagTree): Observable<SwitchTagTree> {
+  saveTree(tree: FeatureFlagTagTree): Observable<FeatureFlagTagTree> {
     return this.http.put(this.baseUrl, tree.trees).pipe(
-      map((res: any) => new SwitchTagTree(res.trees))
+      map((res: any) => new FeatureFlagTagTree(res.trees))
     );
   }
 }

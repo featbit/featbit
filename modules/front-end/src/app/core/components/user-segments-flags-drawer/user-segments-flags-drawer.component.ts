@@ -8,7 +8,7 @@ import {SegmentService} from "@services/segment.service";
 import {Subject} from "rxjs";
 import {debounceTime} from "rxjs/operators";
 import {Router} from "@angular/router";
-import {SwitchListFilter, SwitchListModel} from "@features/safe/feature-flags/types/switch-index";
+import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
 import {SwitchV2Service} from "@services/switch-v2.service";
 import {IFfParams, IVariationOption} from "@features/safe/feature-flags/types/switch-new";
 import {editor} from "monaco-editor";
@@ -69,7 +69,7 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
   }
 
   isFlagsLoading: boolean = false;
-  flagFilter: SwitchListFilter = new SwitchListFilter();
+  flagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
   $searchFlags: Subject<void> = new Subject();
 
   onSearchFlags() {
@@ -86,7 +86,7 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
     });
   }
 
-  flagListModel: SwitchListModel = {
+  flagListModel: IFeatureFlagListModel = {
     items: [],
     totalCount: 0
   };
@@ -97,7 +97,7 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
 
     this.switchV2Service
       .getListForUser(this.flagFilter)
-      .subscribe((flags: SwitchListModel) => {
+      .subscribe((flags: IFeatureFlagListModel) => {
         this.flagListModel = flags;
         this.isFlagsLoading = false;
       });
@@ -156,7 +156,7 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
         items: [],
         totalCount: 0
       };
-      this.flagFilter = new SwitchListFilter();
+      this.flagFilter = new IFeatureFlagListFilter();
       this.$searchFlags.next();
     }
     this._visible = visible;

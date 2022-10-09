@@ -18,8 +18,8 @@ import { EnvUserService } from "@services/env-user.service";
 export class IndexComponent implements OnInit {
   $search: Subject<void> = new Subject();
 
-  currentEnvId: number;
-  currentAccountId: number;
+  currentEnvId: string;
+  currentAccountId: string;
 
   list = [];
   totalCount: number;

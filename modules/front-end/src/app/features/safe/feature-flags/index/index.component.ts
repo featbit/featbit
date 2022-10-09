@@ -2,24 +2,23 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { SwitchService } from '@services/switch.service';
 import { IFfParams } from '../types/switch-new';
 import { encodeURIComponentFfc } from '@shared/utils';
 import { SwitchTagTreeService } from "@services/switch-tag-tree.service";
 import {
-  SwitchListCheckItem,
-  SwitchListFilter,
-  SwitchListItem,
-  SwitchListModel,
-  SwitchTagTree
+  IFeatureFlagListCheckItem,
+  IFeatureFlagListFilter,
+  IFeatureFlagListItem,
+  IFeatureFlagListModel,
+  FeatureFlagTagTree
 } from "../types/switch-index";
-import { SwitchV2Service } from "@services/switch-v2.service";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { ProjectService } from "@services/project.service";
 import { IEnvironment } from "@shared/types";
 import { NzNotificationService } from "ng-zorro-antd/notification";
+import {FeatureFlagService} from "@services/feature-flag.service";
 
 @Component({
   selector: 'index',
@@ -28,13 +27,61 @@ import { NzNotificationService } from "ng-zorro-antd/notification";
 })
 export class IndexComponent implements OnInit {
 
+  constructor(
+    private router: Router,
+    private featureFlagService: FeatureFlagService,
+    private msg: NzMessageService,
+    private switchTagTreeService: SwitchTagTreeService,
+    private fb: FormBuilder,
+    private projectService: ProjectService,
+    private notification: NzNotificationService
+  ) {
+    this.featureFlagForm = this.fb.group({
+      name: ['', [this.featureFlagNameValidator], [this.featureFlagNameAsyncValidator], 'change'],
+      keyName: [{ value: '', disabled: true }, [Validators.required]]
+    });
+
+    this.compareAndCopyFlag = false;
+  }
+
+  ngOnInit(): void {
+    let currentProjectEnv = getCurrentProjectEnv();
+
+    this.featureFlagService.envId = currentProjectEnv.envId;
+
+    // // get switch tag tree
+    // this.switchTagTreeService.getTree()
+    //   .subscribe(res => this.tagTree = res);
+
+    // get switch list
+    this.$search.pipe(
+      debounceTime(400)
+    ).subscribe(() => {
+      this.loadFeatureFlagList();
+    });
+    this.$search.next();
+
+    // get current envs
+    const curAccountId = getCurrentOrganization().id;
+    const curProjectId = currentProjectEnv.projectId;
+    const curEnvId = currentProjectEnv.envId;
+
+    this.projectService.getProject(curAccountId, curProjectId)
+      .pipe(map(project => project.environments))
+      .subscribe(envs => {
+        this.envs = envs.filter(x => x.id !== curEnvId);
+        this.targetEnv = this.envs[0];
+      });
+  }
+
   // tag tree
   tagTreeModalVisible: boolean = false;
-  tagTree: SwitchTagTree = new SwitchTagTree([]);
+  tagTree: FeatureFlagTagTree = new FeatureFlagTagTree([]);
 
   // table selection
   allChecked: boolean = false;
   indeterminate: boolean = false;
+
   onAllChecked(checked: boolean): void {
     this.listOfCurrentPageData
       .forEach(item => this.updateCheckedSet(this.getItemKey(item), checked));
@@ -42,8 +89,8 @@ export class IndexComponent implements OnInit {
     this.refreshCheckedStatus();
   }
 
-  listOfCurrentPageData: SwitchListItem[] = [];
-  onCurrentPageDataChange(data: SwitchListItem[]) {
+  listOfCurrentPageData: IFeatureFlagListItem[] = [];
+  onCurrentPageDataChange(data: IFeatureFlagListItem[]) {
     this.listOfCurrentPageData = data;
     this.refreshCheckedStatus();
   }
@@ -55,7 +102,7 @@ export class IndexComponent implements OnInit {
     this.indeterminate = !this.allChecked && currentPageData.some(item => this.itemChecked(item));
   }
 
-  getItemKey(item: SwitchListItem) {
+  getItemKey(item: IFeatureFlagListItem) {
     return `${item.id};${item.name};`;
   }
 
@@ -64,7 +111,7 @@ export class IndexComponent implements OnInit {
     return { id, name };
   }
 
-  itemChecked(item: SwitchListItem): boolean {
+  itemChecked(item: IFeatureFlagListItem): boolean {
     const key = this.getItemKey(item);
 
     return this.checkedItemKeys.has(key);
@@ -79,7 +126,7 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  onItemChecked(item: SwitchListItem): void {
+  onItemChecked(item: IFeatureFlagListItem): void {
     const key = this.getItemKey(item);
     const checked = this.checkedItemKeys.has(key);
 
@@ -89,7 +136,7 @@ export class IndexComponent implements OnInit {
 
   // batch copy
   batchCopyVisible: boolean = false;
-  checkedItems: SwitchListCheckItem[] = [];
+  checkedItems: IFeatureFlagListCheckItem[] = [];
   get totalSelected() {
     return this.checkedItems.filter(x => x.checked).length;
   }
@@ -118,7 +165,7 @@ export class IndexComponent implements OnInit {
   batchCopy() {
     this.isCopying = true;
 
-    this.switchV2Service
+    this.featureFlagService
       .copyToEnv(this.targetEnv.id, this.checkedItems.filter(x => x.checked).map(x => x.id))
       .subscribe(copyToEnvResult => {
         this.isCopying = false;
@@ -143,67 +190,57 @@ export class IndexComponent implements OnInit {
       });
   }
 
-  //#region v2 switch list
+  //#region switch list
 
-  switchListModel: SwitchListModel = {
+  featureFlagListModel: IFeatureFlagListModel = {
     items: [],
     totalCount: 0
   };
 
-  v2Loading: boolean = true;
+  Loading: boolean = true;
   compareAndCopyFlag: boolean = true;
 
-  loadSwitchListV2() {
-    this.v2Loading = true;
-    this.switchV2Service
-      .getList(this.switchFilterV2)
-      .subscribe((switches: SwitchListModel) => {
-        this.switchListModel = switches;
-        this.v2Loading = false;
+  loadFeatureFlagList() {
+    this.Loading = true;
+    this.featureFlagService
+      .getList(this.featureFlagFilter)
+      .subscribe((featureFlags: IFeatureFlagListModel) => {
+        // if (featureFlags && featureFlags.items && featureFlags.items.length > 0) {
+        //   for (let i = 0; i < featureFlags.items.length; i++) {
+        //     let item = featureFlags.items[i];
+        //     item.variationOverview.variationsWhenOn = item.variationOverview.variationsWhenOn.sort(function(a, b){return a.localId - b.localId;});
+        //     item.variationOverview.variationsWhenOnStr =  item.variationOverview.variationsWhenOn.map(p=>p.variationValue);
+        //   }
+        // }
+        this.featureFlagListModel = featureFlags;
+        this.Loading = false;
       });
   }
 
-  loadSwitchListV20220621() {
-    this.v2Loading = true;
-    this.switchV2Service
-      .getListV20220621(this.switchFilterV2)
-      .subscribe((switches: SwitchListModel) => {
-        if (switches && switches.items && switches.items.length > 0) {
-          for (let i = 0; i < switches.items.length; i++) {
-            let item = switches.items[i];
-            item.variationOverview.variationsWhenOn = item.variationOverview.variationsWhenOn.sort(function(a, b){return a.localId - b.localId;});
-            item.variationOverview.variationsWhenOnStr =  item.variationOverview.variationsWhenOn.map(p=>p.variationValue);
-          }
-        }
-        this.switchListModel = switches;
-        this.v2Loading = false;
-      });
+  featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
+
+  onSelectTag(nodeIds: number[]) {
+    this.featureFlagFilter.tagIds = nodeIds;
+
+    this.onSearch();
   }
 
-  switchFilterV2: SwitchListFilter = new SwitchListFilter();
+  $search: Subject<void> = new Subject();
 
-  onSelectTagV2(nodeIds: number[]) {
-    this.switchFilterV2.tagIds = nodeIds;
-
-    this.onSearchV2();
-  }
-
-  $searchV2: Subject<void> = new Subject();
-
-  onSearchV2(resetPage?: boolean) {
+  onSearch(resetPage?: boolean) {
     if (resetPage) {
-      this.switchFilterV2.pageIndex = 1;
+      this.featureFlagFilter.pageIndex = 1;
     }
-    this.$searchV2.next();
+    this.$search.next();
   }
 
   //#endregion
 
-  //#region v2 create switch
-  createModalVisibleV2: boolean = false;
-  switchFormV2: FormGroup;
+  //#region create switch
+  createModalVisible: boolean = false;
+  featureFlagForm: FormGroup;
 
-  switchNameValidator = (control: FormControl) => {
+  featureFlagNameValidator = (control: FormControl) => {
     const name = control.value;
     if (!name) {
       return { error: true, required: true };
@@ -214,9 +251,9 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  switchNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+  featureFlagNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
-    switchMap(value => this.switchV2Service.isNameUsed(value as string)),
+    switchMap(value => this.featureFlagService.isNameUsed(value as string)),
     map(isNameUsed => {
       switch (isNameUsed) {
         case true:
@@ -230,83 +267,34 @@ export class IndexComponent implements OnInit {
     first()
   );
 
-  creatingV2: boolean = false;
+  creating: boolean = false;
 
-  createSwitchV2() {
-    this.creatingV2 = true;
+  createFeatureFlag() {
+    this.creating = true;
 
-    const name = this.switchFormV2.get('name').value;
+    const name = this.featureFlagForm.get('name').value;
 
-    this.switchServe.createNewSwitch(name)
+    this.featureFlagService.create(name)
       .subscribe((result: IFfParams) => {
-        this.switchServe.setCurrentSwitch(result);
-        this.toSwitchDetail(result.id);
-        this.creatingV2 = false;
+        this.featureFlagService.setCurrentFeatureFlag(result);
+        this.toFeatureFlagDetail(result.id);
+        this.creating = false;
       }, err => {
         this.msg.error(err.error);
-        this.creatingV2 = false;
+        this.creating = false;
       });
   }
 
-  closeCreateModalV2() {
-    this.createModalVisibleV2 = false;
-    this.switchFormV2.reset();
+  closeCreateModal() {
+    this.createModalVisible = false;
+    this.featureFlagForm.reset();
   }
 
   //#endregion
 
-  constructor(
-    private router: Router,
-    public switchServe: SwitchService,
-    private switchV2Service: SwitchV2Service,
-    private msg: NzMessageService,
-    private switchTagTreeService: SwitchTagTreeService,
-    private fb: FormBuilder,
-    private projectService: ProjectService,
-    private notification: NzNotificationService
-  ) {
-    this.switchFormV2 = this.fb.group({
-      name: ['', [this.switchNameValidator], [this.switchNameAsyncValidator], 'change'],
-      keyName: [{ value: '', disabled: true }, [Validators.required]]
-    });
-
-    this.compareAndCopyFlag = false;
-  }
-
-  ngOnInit(): void {
-    let currentProjectEnv = getCurrentProjectEnv();
-
-    this.switchServe.envId = currentProjectEnv.envId;
-
-    // get switch tag tree
-    this.switchTagTreeService.getTree()
-      .subscribe(res => this.tagTree = res);
-
-    // get switch list
-    this.$searchV2.pipe(
-      debounceTime(400)
-    ).subscribe(() => {
-      this.loadSwitchListV20220621();
-    });
-    this.$searchV2.next();
-
-    // get current envs
-    const curAccountId = getCurrentOrganization().id;
-    const curProjectId = currentProjectEnv.projectId;
-    const curEnvId = currentProjectEnv.envId;
-
-    this.projectService.getProject(curAccountId, curProjectId)
-      .pipe(map(project => project.environments))
-      .subscribe(envs => {
-        this.envs = envs.filter(x => x.id !== curEnvId);
-        this.targetEnv = this.envs[0];
-      });
-  }
-
-  // 切换开关状态
-  onChangeSwitchStatus(data: IFfParams): void {
+  onChangeFeatureFlagStatus(data: IFfParams): void {
     if (data.status === 'Enabled') {
-      this.switchServe.changeSwitchStatus(data.id, 'Disabled')
+      this.featureFlagService.changeFeatureFlagStatus(data.id, 'Disabled')
         .subscribe(_ => {
           const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
             data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
@@ -316,7 +304,7 @@ export class IndexComponent implements OnInit {
           this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
         });
     } else if (data.status === 'Disabled') {
-      this.switchServe.changeSwitchStatus(data.id, 'Enabled')
+      this.featureFlagService.changeFeatureFlagStatus(data.id, 'Enabled')
         .subscribe(_ => {
           const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
             data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
@@ -328,19 +316,16 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  // 点击进入对应开关详情
-  public onIntoSwitchDetail(data: IFfParams) {
-    this.switchServe.setCurrentSwitch(data);
-    this.toSwitchDetail(data.id);
+  public onIntoFeatureFlagDetail(data: IFfParams) {
+    this.featureFlagService.setCurrentFeatureFlag(data);
+    this.toFeatureFlagDetail(data.id);
   }
 
-  // 点击进入对比与复制开关页面
   public onIntoCompareAndCopy() {
     this.router.navigateByUrl('/compare-and-copy');
   }
 
-  // 路由跳转
-  private toSwitchDetail(id: string) {
+  private toFeatureFlagDetail(id: string) {
     this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(id)}/targeting`);
   }
 
@@ -357,7 +342,6 @@ export class IndexComponent implements OnInit {
     );
   }
 
-  // 保存标签树
   saveTagTree() {
     this.switchTagTreeService.saveTree(this.tagTree)
       .subscribe(savedTagTree => {
@@ -365,8 +349,8 @@ export class IndexComponent implements OnInit {
         this.tagTree = savedTagTree;
 
         // update switch tags when save tagTree
-        for (const switchItem of this.switchListModel.items) {
-          switchItem.tags = this.tagTree.getSwitchTags(switchItem.id);
+        for (const item of this.featureFlagListModel.items) {
+          item.tags = this.tagTree.getFeatureFlagTags(item.id);
         }
 
         this.msg.success($localize `:@@common.operation-success:Operation succeeded`);

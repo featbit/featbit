@@ -36,7 +36,7 @@ export interface ITargetUrl {
 export interface IMetric {
   id?: string,
   name: string,
-  envId: number,
+  envId: string,
   description: string,
   maintainerUserId: string,
   eventName: string,
@@ -50,7 +50,7 @@ export interface IMetric {
 
 export interface IExperiment {
   id?: string,
-  envId: number,
+  envId: string,
   featureFlagId: string,
   featureFlagName?: string,
   metricId: string,

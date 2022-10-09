@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzTreeNodeOptions } from "ng-zorro-antd/core/tree/nz-tree-base-node";
-import { SwitchTagTree } from "../types/switch-index";
+import { FeatureFlagTagTree } from "../types/switch-index";
 
 @Component({
   selector: 'switch-tag-tree-select',
@@ -27,7 +27,7 @@ export class SwitchTagTreeSelectComponent {
   selectedTagIds: number[];
 
   @Input()
-  set tagTree(tree: SwitchTagTree) {
+  set tagTree(tree: FeatureFlagTagTree) {
     if (tree) {
       this.options = tree.toTreeSelectNodes();
     }

@@ -17,7 +17,7 @@ import { catchError } from "rxjs/operators";
 export class SegmentService {
 
   public current: ISegment = null;
-  public envId: number;
+  public envId: string;
 
   get baseUrl() {
     return `${environment.url}/api/v1/envs/${this.envId}/segments`;
