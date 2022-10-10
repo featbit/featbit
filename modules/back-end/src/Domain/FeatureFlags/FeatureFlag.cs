@@ -134,4 +134,20 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
     }
+
+    public void UpdateTargeting(
+        ICollection<TargetUser> targetUsers,
+        ICollection<TargetRule> rules,
+        Fallthrough fallthrough,
+        bool exptIncludeAllTargets,
+        Guid currentUserId)
+    {
+        TargetUsers = targetUsers;
+        Rules = rules;
+        Fallthrough = fallthrough;
+        ExptIncludeAllTargets = exptIncludeAllTargets;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
 }

@@ -110,4 +110,13 @@ public class FeatureFlagController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
+
+    [HttpPut("{id:guid}/targeting")]
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid id, UpdateTargeting request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }
