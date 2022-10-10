@@ -67,4 +67,22 @@ public class FeatureFlagController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
+
+    [HttpPut("{id:guid}/settings")]
+    public async Task<ApiResponse<bool>> UpdateSettingAsync(Guid id, UpdateSettingRequest request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [HttpPut("{id:guid}/variations")]
+    public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid id, UpdateVariationsRequest request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }

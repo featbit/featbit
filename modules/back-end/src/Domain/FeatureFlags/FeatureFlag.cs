@@ -38,7 +38,7 @@ public class FeatureFlag : FullAuditedEntity
 
         var falsyVariationId = Guid.NewGuid().ToString();
         var truthyVariationId = Guid.NewGuid().ToString();
-        VariationType = "boolean";
+        VariationType = VariationTypes.Boolean;
         Variations = new List<Variation>
         {
             new(truthyVariationId, "true"),
@@ -103,6 +103,25 @@ public class FeatureFlag : FullAuditedEntity
     public void Archive(Guid currentUserId)
     {
         IsArchived = true;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
+
+    public void UpdateSetting(string name, bool isEnabled, string disabledVariationId, Guid currentUserId)
+    {
+        Name = name;
+        IsEnabled = isEnabled;
+        DisabledVariationId = disabledVariationId;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
+
+    public void UpdateVariations(string variationType, ICollection<Variation> variations, Guid currentUserId)
+    {
+        VariationType = variationType;
+        Variations = variations;
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
