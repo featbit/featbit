@@ -205,7 +205,7 @@ db.Segments.insertOne(
         name: "[prod] tester-group",
         description: "this is a tester group",
         included: ["prod-bot-id"],
-        excluded: [],
+        excluded: ["anonymous"],
         rules: [
             {
                 _id: "e5080546-dd53-4c9e-bf46-65a4897199c3",
@@ -231,7 +231,7 @@ db.Segments.insertOne(
         name: "[dev] tester-group",
         description: "this is a tester group",
         included: ["dev-bot-id"],
-        excluded: [],
+        excluded: ["anonymous"],
         rules: [
             {
                 _id: "78d03b8b-9cc8-4860-8cd7-449fbeb8ebbe",
@@ -422,6 +422,70 @@ db.EndUsers.insertOne(
             {
                 name: "email",
                 value: "prod-bot@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        keyId: "anonymous",
+        name: "anonymous",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "anonymous@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        keyId: "anonymous",
+        name: "anonymous",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "anonymous@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        keyId: "falsy-user-id",
+        name: "falsy-user",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "falsy-user@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        keyId: "falsy-user-id",
+        name: "falsy-user",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "falsy-user@featbit.com"
             }
         ],
         createdAt: new Date(),
