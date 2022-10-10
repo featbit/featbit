@@ -1,4 +1,3 @@
-using Application.Organizations;
 using Application.Resources;
 
 namespace Api.Controllers;
@@ -7,9 +6,11 @@ namespace Api.Controllers;
 public class ResourceController : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ApiResponse<IEnumerable<ResourceVm>>> GetListAsync(Guid organizationId, [FromQuery] ResourceFilter filter)
+    public async Task<ApiResponse<IEnumerable<ResourceVm>>> GetListAsync(
+        Guid organizationId,
+        [FromQuery] ResourceFilter filter)
     {
-        var request = new GetResourceList()
+        var request = new GetResourceList
         {
             OrganizationId = organizationId,
             Filter = filter

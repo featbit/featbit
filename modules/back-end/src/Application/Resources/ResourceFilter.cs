@@ -1,10 +1,8 @@
-using Application.Bases.Models;
-
 namespace Application.Resources;
 
-public class ResourceFilter : PagedRequest
+public class ResourceFilter
 {
     public string Type { get; set; }
-    
+
     public string Name { get; set; }
 }
