@@ -15,7 +15,7 @@ Feature Management use cases: `Testing in production`, `Progressive & Targeted r
 Progressive Experimentation, which provides the ability to get online and offline feedback as quickly as possible. Use cases: `Beta testing and qualitative feedback`, `Experimentation and A/B testing`.
 
 ### Our Philosophy
-◆  **Empower All teams to Deliver, Control and Experiment with their software**. 
+◆  **Empower All teams to Deliver, Control, Experiment with and Monetize their software**. 
 
 ◆  Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome.
 
