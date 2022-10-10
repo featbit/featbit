@@ -69,6 +69,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    [HttpPut("{id:guid}/un-archive")]
+    public async Task<ApiResponse<bool>> UnArchiveAsync(Guid id)
+    {
+        var request = new UnArchiveFeatureFlag
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {

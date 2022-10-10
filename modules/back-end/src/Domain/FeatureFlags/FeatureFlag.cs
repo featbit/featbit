@@ -108,6 +108,14 @@ public class FeatureFlag : FullAuditedEntity
         UpdatorId = currentUserId;
     }
 
+    public void UnArchive(Guid currentUserId)
+    {
+        IsArchived = false;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
+
     public void UpdateSetting(string name, bool isEnabled, string disabledVariationId, Guid currentUserId)
     {
         Name = name;
