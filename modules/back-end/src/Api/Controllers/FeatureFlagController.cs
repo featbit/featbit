@@ -35,6 +35,19 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flag);
     }
 
+    [HttpGet("is-key-used")]
+    public async Task<ApiResponse<bool>> IsKeyUsedAsync(Guid envId, string key)
+    {
+        var request = new IsFeatureFlagKeyUsed
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var isUsed = await Mediator.Send(request);
+        return Ok(isUsed);
+    }
+
     [HttpPost]
     public async Task<ApiResponse<FeatureFlag>> CreateAsync(Guid envId, CreateFeatureFlag request)
     {

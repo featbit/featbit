@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
@@ -11,6 +12,8 @@ public interface IFeatureFlagService
     Task<FeatureFlag> GetAsync(Guid id);
 
     Task<FeatureFlag> GetAsync(Guid envId, string key);
+
+    Task<bool> AnyAsync(Expression<Func<FeatureFlag, bool>> predicate);
 
     Task AddAsync(FeatureFlag flag);
 
