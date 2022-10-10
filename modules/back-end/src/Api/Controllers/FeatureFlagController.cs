@@ -94,7 +94,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpPut("{id:guid}/settings")]
-    public async Task<ApiResponse<bool>> UpdateSettingAsync(Guid id, UpdateSettingRequest request)
+    public async Task<ApiResponse<bool>> UpdateSettingAsync(Guid id, UpdateSetting request)
     {
         request.Id = id;
 
@@ -103,7 +103,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpPut("{id:guid}/variations")]
-    public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid id, UpdateVariationsRequest request)
+    public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid id, UpdateVariations request)
     {
         request.Id = id;
 

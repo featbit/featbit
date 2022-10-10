@@ -4,7 +4,7 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateVariationsRequest : IRequest<bool>
+public class UpdateVariations : IRequest<bool>
 {
     public Guid Id { get; set; }
 
@@ -13,16 +13,16 @@ public class UpdateVariationsRequest : IRequest<bool>
     public ICollection<Variation> Variations { get; set; }
 }
 
-public class UpdateVariationsRequestValidator : AbstractValidator<UpdateVariationsRequest>
+public class UpdateVariationsValidator : AbstractValidator<UpdateVariations>
 {
-    public UpdateVariationsRequestValidator()
+    public UpdateVariationsValidator()
     {
         RuleFor(x => x.VariationType)
             .Must(VariationTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidVariationType);
     }
 }
 
-public class UpdateVariationsHandler : IRequestHandler<UpdateVariationsRequest, bool>
+public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
 {
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
@@ -33,7 +33,7 @@ public class UpdateVariationsHandler : IRequestHandler<UpdateVariationsRequest, 
         _currentUser = currentUser;
     }
 
-    public async Task<bool> Handle(UpdateVariationsRequest request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UpdateVariations request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.Id);
         flag.UpdateVariations(request.VariationType, request.Variations, _currentUser.Id);

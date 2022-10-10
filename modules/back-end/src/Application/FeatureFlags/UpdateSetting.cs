@@ -3,7 +3,7 @@ using Application.Users;
 
 namespace Application.FeatureFlags;
 
-public class UpdateSettingRequest : IRequest<bool>
+public class UpdateSetting : IRequest<bool>
 {
     public Guid Id { get; set; }
 
@@ -14,27 +14,27 @@ public class UpdateSettingRequest : IRequest<bool>
     public string DisabledVariationId { get; set; }
 }
 
-public class UpdateSettingRequestValidator : AbstractValidator<UpdateSettingRequest>
+public class UpdateSettingValidator : AbstractValidator<UpdateSetting>
 {
-    public UpdateSettingRequestValidator()
+    public UpdateSettingValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
     }
 }
 
-public class UpdateSettingRequestHandler : IRequestHandler<UpdateSettingRequest, bool>
+public class UpdateSettingHandler : IRequestHandler<UpdateSetting, bool>
 {
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
 
-    public UpdateSettingRequestHandler(IFeatureFlagService service, ICurrentUser currentUser)
+    public UpdateSettingHandler(IFeatureFlagService service, ICurrentUser currentUser)
     {
         _service = service;
         _currentUser = currentUser;
     }
 
-    public async Task<bool> Handle(UpdateSettingRequest request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(UpdateSetting request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.Id);
         flag.UpdateSetting(request.Name, request.IsEnabled, request.DisabledVariationId, _currentUser.Id);
