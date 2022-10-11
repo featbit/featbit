@@ -15,6 +15,10 @@ const ownerPolicyId = UUID("98881f6a-5c6c-4277-bcf7-fda94c538785")
 const administratorPolicyId = UUID("3e961f0f-6fd4-4cf4-910f-52d356f8cc08")
 const developerPolicyId = UUID("66f3687f-939d-4257-bd3f-c3553d39e1b6")
 const testerPolicyId = UUID("65244ccc-d336-44b2-b4ee-b24482ea6037")
+const devFlagId = UUID("a04d1329-103d-4fcf-9e2e-9af284c800c2")
+const devFlagTriggerId = UUID("4a64e73c-2392-4c6b-a77a-c4e8b4e5e510")
+const prodFlagId = UUID("b8a5715d-fa0a-4f5c-a5fe-794087c5e957")
+const prodFlagTriggerId = UUID("56dd787d-cdce-4d60-8870-21ffadc3af45")
 
 // seed user
 print('clean and seed collection: Users')
@@ -257,7 +261,7 @@ print('clean and seed collection: FeatureFlags')
 db.FeatureFlags.deleteMany({})
 db.FeatureFlags.insertOne(
     {
-        _id: UUID(),
+        _id: prodFlagId,
         envId: prodEnvId,
         name: "use new algorithm",
         key: "use-new-algorithm",
@@ -325,7 +329,7 @@ db.FeatureFlags.insertOne(
 )
 db.FeatureFlags.insertOne(
     {
-        _id: UUID(),
+        _id: devFlagId,
         envId: devEnvId,
         name: "use new algorithm",
         key: "use-new-algorithm",
@@ -657,3 +661,38 @@ db.MemberPolicies.insertOne(
     }
 )
 print('collection seeded: GroupPolicies')
+
+// seed triggers
+print('clean and seed collection: Triggers')
+db.Triggers.deleteMany({})
+db.Triggers.insertOne(
+    {
+        _id: devFlagTriggerId,
+        targetId: devFlagId,
+        type: "feature-flag-general",
+        action: "turn-on",
+        token: "NTg4MzIzMjg0NTY2MQPOdkSpIja0ynesTotOXlEA",
+        description: "this trigger will turn on flag",
+        isEnabled: true,
+        triggeredTimes: 0,
+        lastTriggeredAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.Triggers.insertOne(
+    {
+        _id: prodFlagTriggerId,
+        targetId: prodFlagId,
+        type: "feature-flag-general",
+        action: "turn-on",
+        token: "MjA3NDUzMjg0NTY2MQfXjdVs7NYE2IcCH_rcOvRQ",
+        description: "this trigger will turn on flag",
+        isEnabled: true,
+        triggeredTimes: 0,
+        lastTriggeredAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: Triggers')

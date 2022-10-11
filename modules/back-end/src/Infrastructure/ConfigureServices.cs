@@ -13,6 +13,7 @@ using Infrastructure.Policies;
 using Infrastructure.Projects;
 using Infrastructure.Resources;
 using Infrastructure.Segments;
+using Infrastructure.Triggers;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -69,6 +70,7 @@ public static class ConfigureServices
         services.AddTransient<IEndUserService, EndUserService>();
         services.AddTransient<ISegmentService, SegmentService>();
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
+        services.AddTransient<ITriggerService, TriggerService>();
         
         return services;
     }

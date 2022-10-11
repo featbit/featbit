@@ -6,6 +6,7 @@ using Domain.Organizations;
 using Domain.Policies;
 using Domain.Projects;
 using Domain.Segments;
+using Domain.Triggers;
 using Domain.Users;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -44,6 +45,7 @@ public class MongoDbClient
         { typeof(EndUserProperty), "EndUserProperties" },
         { typeof(Segment), "Segments" },
         { typeof(FeatureFlag), "FeatureFlags" },
+        { typeof(Trigger), "Triggers" },
 
         { typeof(Group), "Groups" },
         { typeof(Policy), "Policies" },

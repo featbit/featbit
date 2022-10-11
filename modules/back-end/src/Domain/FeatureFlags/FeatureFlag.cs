@@ -1,5 +1,4 @@
 using Domain.Targeting;
-using Domain.Utils;
 
 namespace Domain.FeatureFlags;
 

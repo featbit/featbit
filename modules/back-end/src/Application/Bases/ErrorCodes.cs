@@ -42,4 +42,10 @@ public static class ErrorCodes
     // feature flag
     public const string CannotDeleteUnArchivedFeatureFlag = nameof(CannotDeleteUnArchivedFeatureFlag);
     public const string InvalidVariationType = nameof(InvalidVariationType);
+
+    // triggers
+    public const string InvalidTriggerType = nameof(InvalidTriggerType);
+    public const string InvalidTriggerAction = nameof(InvalidTriggerAction);
+    public const string InvalidTriggerToken = nameof(InvalidTriggerToken);
+    public const string TriggerTokenNotMatchOrHasExpired = nameof(TriggerTokenNotMatchOrHasExpired);
 }
