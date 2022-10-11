@@ -15,10 +15,15 @@ const ownerPolicyId = UUID("98881f6a-5c6c-4277-bcf7-fda94c538785")
 const administratorPolicyId = UUID("3e961f0f-6fd4-4cf4-910f-52d356f8cc08")
 const developerPolicyId = UUID("66f3687f-939d-4257-bd3f-c3553d39e1b6")
 const testerPolicyId = UUID("65244ccc-d336-44b2-b4ee-b24482ea6037")
+
 const devFlagId = UUID("a04d1329-103d-4fcf-9e2e-9af284c800c2")
 const devFlagTriggerId = UUID("4a64e73c-2392-4c6b-a77a-c4e8b4e5e510")
 const prodFlagId = UUID("b8a5715d-fa0a-4f5c-a5fe-794087c5e957")
 const prodFlagTriggerId = UUID("56dd787d-cdce-4d60-8870-21ffadc3af45")
+const devSegmentIdStr = "7efe5d05-aae2-4983-bf09-eaa4551a774e"
+const devSegmentId = UUID(devSegmentIdStr)
+const prodSegmentIdStr = "33d2ade3-ba23-4f46-b774-72507db4133a"
+const prodSegmentId = UUID(prodSegmentIdStr)
 
 // seed user
 print('clean and seed collection: Users')
@@ -204,7 +209,7 @@ print('clean and seed collection: Segments')
 db.Segments.deleteMany({})
 db.Segments.insertOne(
     {
-        _id: UUID(),
+        _id: prodSegmentId,
         envId: prodEnvId,
         name: "[prod] tester-group",
         description: "this is a tester group",
@@ -230,7 +235,7 @@ db.Segments.insertOne(
 )
 db.Segments.insertOne(
     {
-        _id: UUID(),
+        _id: devSegmentId,
         envId: devEnvId,
         name: "[dev] tester-group",
         description: "this is a tester group",
@@ -288,7 +293,7 @@ db.FeatureFlags.insertOne(
         ],
         rules: [
             {
-                _id: "823650b1-fae2-40f1-8f8b-53be026f9f8a",
+                _id: "abd5edff-8868-4011-aa50-80fe9bcbf91a",
                 name: "match by name",
                 includedInExpt: true,
                 conditions: [
@@ -303,6 +308,18 @@ db.FeatureFlags.insertOne(
                         _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
                         rollout: [0, 1],
                         exptRollout: 1
+                    }
+                ]
+            },
+            {
+                _id: "6c665b20-a8a1-4ce0-b8fc-a46818cc9c52",
+                name: "match by segment",
+                includedInExpt: true,
+                conditions: [
+                    {
+                        property: "User is in segment",
+                        op: "",
+                        value: `[\"${prodSegmentIdStr}\"]`
                     }
                 ]
             }
@@ -371,6 +388,18 @@ db.FeatureFlags.insertOne(
                         _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
                         rollout: [0, 1],
                         exptRollout: 1
+                    }
+                ]
+            },
+            {
+                _id: "af346856-837a-4b59-96f2-20a73ba5445e",
+                name: "match by segment",
+                includedInExpt: true,
+                conditions: [
+                    {
+                        property: "User is in segment",
+                        op: "",
+                        value: `[\"${devSegmentIdStr}\"]`
                     }
                 ]
             }

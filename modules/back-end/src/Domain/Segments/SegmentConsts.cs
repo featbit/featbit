@@ -6,5 +6,5 @@ public class SegmentConsts
 
     public const string IsNotInSegment = "User is not in segment";
 
-    public static readonly string[] RuleProperties = { IsInSegment, IsNotInSegment };
+    public static readonly string[] ConditionProperties = { IsInSegment, IsNotInSegment };
 }
