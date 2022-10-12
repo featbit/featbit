@@ -1,11 +1,10 @@
-using Application.Services;
 using Domain.Triggers;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Triggers;
 
-public class TriggerService : MongoDbServiceBase<Trigger>, ITriggerService
+public class TriggerService : MongoDbService<Trigger>, ITriggerService
 {
     public TriggerService(MongoDbClient mongoDb) : base(mongoDb)
     {

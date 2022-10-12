@@ -6,7 +6,7 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Bases;
 
-public class MongoDbServiceBase<TEntity> where TEntity : Entity
+public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
 {
     public MongoDbClient MongoDb { get; }
 
@@ -14,7 +14,7 @@ public class MongoDbServiceBase<TEntity> where TEntity : Entity
 
     public IMongoQueryable<TEntity> Queryable { get; }
 
-    public MongoDbServiceBase(MongoDbClient mongoDb)
+    public MongoDbService(MongoDbClient mongoDb)
     {
         MongoDb = mongoDb;
         Collection = MongoDb.CollectionOf<TEntity>();
@@ -47,9 +47,14 @@ public class MongoDbServiceBase<TEntity> where TEntity : Entity
         return await Queryable.AnyAsync(predicate);
     }
 
-    public async Task AddAsync(TEntity entity)
+    public async Task AddOneAsync(TEntity entity)
     {
         await Collection.InsertOneAsync(entity);
+    }
+
+    public async Task AddManyAsync(IEnumerable<TEntity> entities)
+    {
+        await Collection.InsertManyAsync(entities);
     }
 
     public async Task UpdateAsync(TEntity replacement)

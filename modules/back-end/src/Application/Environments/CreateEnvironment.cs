@@ -36,7 +36,7 @@ public class CreateEnvironmentHandler : IRequestHandler<CreateEnvironment, Envir
     {
         var env = new Environment(request.ProjectId, request.Name, request.Description);
 
-        await _service.AddAsync(env);
+        await _service.AddOneAsync(env);
 
         return _mapper.Map<EnvironmentVm>(env);
     }

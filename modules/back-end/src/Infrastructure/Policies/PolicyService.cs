@@ -1,6 +1,5 @@
 using Application.Bases.Models;
 using Application.Policies;
-using Application.Services;
 using Domain.Groups;
 using Domain.Members;
 using Domain.Organizations;
@@ -11,7 +10,7 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Policies;
 
-public class PolicyService : MongoDbServiceBase<Policy>, IPolicyService
+public class PolicyService : MongoDbService<Policy>, IPolicyService
 {
     public PolicyService(MongoDbClient mongoDb) : base(mongoDb)
     {
@@ -50,13 +49,6 @@ public class PolicyService : MongoDbServiceBase<Policy>, IPolicyService
             .ToListAsync();
 
         return new PagedResult<Policy>(totalCount, items);
-    }
-
-    public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
-    {
-        var isNameUsed = await AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
-
-        return isNameUsed;
     }
 
     public async Task<PagedResult<PolicyGroup>> GetGroupsAsync(

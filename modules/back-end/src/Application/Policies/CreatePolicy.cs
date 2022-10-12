@@ -36,7 +36,7 @@ public class CreatePolicyHandler : IRequestHandler<CreatePolicy, PolicyVm>
     {
         var policy = new Policy(request.OrganizationId, request.Name, request.Description);
 
-        await _service.AddAsync(policy);
+        await _service.AddOneAsync(policy);
 
         return _mapper.Map<PolicyVm>(policy);
     }

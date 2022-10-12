@@ -1,4 +1,3 @@
-using Application.Services;
 using Domain.Groups;
 using Domain.Members;
 using Domain.Organizations;
@@ -10,7 +9,7 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Organizations;
 
-public class OrganizationService : MongoDbServiceBase<Organization>, IOrganizationService
+public class OrganizationService : MongoDbService<Organization>, IOrganizationService
 {
     public OrganizationService(MongoDbClient mongoDb) : base(mongoDb)
     {

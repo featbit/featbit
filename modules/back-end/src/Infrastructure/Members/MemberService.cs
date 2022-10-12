@@ -1,13 +1,11 @@
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Members;
-using Application.Services;
 using Domain.Groups;
 using Domain.Members;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Users;
-using Infrastructure.MongoDb;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 

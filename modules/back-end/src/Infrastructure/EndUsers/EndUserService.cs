@@ -2,14 +2,13 @@ using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.EndUsers;
-using Application.Services;
 using Domain.EndUsers;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.EndUsers;
 
-public class EndUserService : MongoDbServiceBase<EndUser>, IEndUserService
+public class EndUserService : MongoDbService<EndUser>, IEndUserService
 {
     public EndUserService(MongoDbClient mongoDb) : base(mongoDb)
     {

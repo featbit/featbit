@@ -1,6 +1,5 @@
 using Application.Bases.Models;
 using Application.Segments;
-using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using MongoDB.Driver;
@@ -8,7 +7,7 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Segments;
 
-public class SegmentService : MongoDbServiceBase<Segment>, ISegmentService
+public class SegmentService : MongoDbService<Segment>, ISegmentService
 {
     public SegmentService(MongoDbClient mongoDb) : base(mongoDb)
     {

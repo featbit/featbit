@@ -45,7 +45,7 @@ public class CreateTriggerHandler : IRequestHandler<CreateTrigger, Trigger>
             request.Description
         );
 
-        await _service.AddAsync(trigger);
+        await _service.AddOneAsync(trigger);
 
         return trigger;
     }

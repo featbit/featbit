@@ -2,15 +2,9 @@ using Domain.Organizations;
 
 namespace Application.Services;
 
-public interface IOrganizationService
+public interface IOrganizationService : IService<Organization>
 {
-    Task<Organization> GetAsync(Guid id);
-
     Task<IEnumerable<Organization>> GetListAsync(Guid userId);
-
-    Task AddAsync(Organization organization);
-
-    Task UpdateAsync(Organization organization);
 
     Task AddUserAsync(
         OrganizationUser organizationUser,

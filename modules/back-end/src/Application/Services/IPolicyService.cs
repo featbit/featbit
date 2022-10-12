@@ -4,19 +4,11 @@ using Domain.Policies;
 
 namespace Application.Services;
 
-public interface IPolicyService
+public interface IPolicyService : IService<Policy>
 {
-    Task<Policy> GetAsync(Guid id);
-
-    Task AddAsync(Policy policy);
-
-    Task UpdateAsync(Policy policy);
-
     Task DeleteAsync(Guid id);
 
     Task<PagedResult<Policy>> GetListAsync(Guid organizationId, PolicyFilter filter);
-
-    Task<bool> IsNameUsedAsync(Guid organizationId, string name);
 
     Task<PagedResult<PolicyGroup>> GetGroupsAsync(Guid organizationId, Guid policyId, PolicyGroupFilter filter);
 

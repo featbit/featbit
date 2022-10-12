@@ -34,7 +34,7 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = new FeatureFlag(request.EnvId, request.Name, _currentUser.Id);
-        await _service.AddAsync(flag);
+        await _service.AddOneAsync(flag);
 
         return flag;
     }

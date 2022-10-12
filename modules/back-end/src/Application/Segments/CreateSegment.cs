@@ -52,7 +52,7 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
     public async Task<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
     {
         var segment = request.AsSegment();
-        await _service.AddAsync(segment);
+        await _service.AddOneAsync(segment);
 
         return segment;
     }

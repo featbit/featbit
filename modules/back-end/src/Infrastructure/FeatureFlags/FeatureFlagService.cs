@@ -1,13 +1,12 @@
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
-using Application.Services;
 using Domain.FeatureFlags;
 using MongoDB.Driver;
 
 namespace Infrastructure.FeatureFlags;
 
-public class FeatureFlagService : MongoDbServiceBase<FeatureFlag>, IFeatureFlagService
+public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagService
 {
     public FeatureFlagService(MongoDbClient mongoDb) : base(mongoDb)
     {

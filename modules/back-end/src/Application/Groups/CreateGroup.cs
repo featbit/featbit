@@ -36,7 +36,7 @@ public class CreateGroupHandler : IRequestHandler<CreateGroup, GroupVm>
     {
         var group = new Group(request.OrganizationId, request.Name, request.Description);
 
-        await _service.AddAsync(group);
+        await _service.AddOneAsync(group);
 
         return _mapper.Map<GroupVm>(group);
     }

@@ -38,7 +38,7 @@ public class CopyToEnvHandler : IRequestHandler<CopyToEnv, CopyToEnvResult>
         {
             targetFlag.CopyToEnv(request.TargetEnvId, _currentUser.Id);
 
-            await _service.AddAsync(targetFlag);
+            await _service.AddOneAsync(targetFlag);
         }
 
         var result = new CopyToEnvResult(targetFlags.Length, duplicateKeys);
