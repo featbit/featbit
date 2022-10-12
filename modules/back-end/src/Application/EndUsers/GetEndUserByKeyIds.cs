@@ -20,6 +20,6 @@ public class GetEndUserByKeyIdsHandler : IRequestHandler<GetEndUserByKeyIds, IEn
     
     public async Task<IEnumerable<EndUser>> Handle(GetEndUserByKeyIds request, CancellationToken cancellationToken)
     {
-        return await _service.FindAsync(x => x.EnvId == request.EnvId && request.KeyIds.Contains(x.KeyId));
+        return await _service.FindManyAsync(x => x.EnvId == request.EnvId && request.KeyIds.Contains(x.KeyId));
     }
 }

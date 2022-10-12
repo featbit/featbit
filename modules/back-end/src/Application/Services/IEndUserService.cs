@@ -11,7 +11,7 @@ public interface IEndUserService
 
     Task<PagedResult<EndUser>> GetListAsync(Guid envId, EndUserFilter filter);
 
-    Task<IEnumerable<EndUser>> FindAsync(Expression<Func<EndUser, bool>> filter);
+    Task<ICollection<EndUser>> FindManyAsync(Expression<Func<EndUser, bool>> filter);
 
     Task<EndUser> UpsertAsync(EndUser user);
 

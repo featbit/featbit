@@ -149,4 +149,23 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
     }
+
+    public void CopyToEnv(Guid targetEnvId, Guid currentUserId)
+    {
+        // clear id
+        Id = Guid.Empty;
+
+        // change envId
+        EnvId = targetEnvId;
+
+        // clear targeting
+        TargetUsers = Array.Empty<TargetUser>();
+        Rules = Array.Empty<TargetRule>();
+
+        // change audited properties
+        CreatedAt = DateTime.UtcNow;
+        CreatorId = currentUserId;
+        UpdatedAt = CreatedAt;
+        UpdatorId = currentUserId;
+    }
 }

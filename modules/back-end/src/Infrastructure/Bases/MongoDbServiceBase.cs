@@ -34,27 +34,26 @@ public class MongoDbServiceBase<TEntity> where TEntity : Entity
 
     public async Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> predicate)
     {
-        return await MongoDb.QueryableOf<TEntity>().FirstOrDefaultAsync(predicate);
+        return await Queryable.FirstOrDefaultAsync(predicate);
     }
 
-    public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
+    public async Task<ICollection<TEntity>> FindManyAsync(Expression<Func<TEntity, bool>> predicate)
     {
-        return await MongoDb.QueryableOf<TEntity>().Where(predicate).ToListAsync();
+        return await Queryable.Where(predicate).ToListAsync();
     }
 
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
     {
-        return await MongoDb.QueryableOf<TEntity>().AnyAsync(predicate);
+        return await Queryable.AnyAsync(predicate);
     }
 
     public async Task AddAsync(TEntity entity)
     {
-        await MongoDb.CollectionOf<TEntity>().InsertOneAsync(entity);
+        await Collection.InsertOneAsync(entity);
     }
 
     public async Task UpdateAsync(TEntity replacement)
     {
-        await MongoDb.CollectionOf<TEntity>()
-            .ReplaceOneAsync(entity => entity.Id == replacement.Id, replacement);
+        await Collection.ReplaceOneAsync(entity => entity.Id == replacement.Id, replacement);
     }
 }

@@ -15,6 +15,8 @@ public interface IFeatureFlagService
 
     Task<bool> AnyAsync(Expression<Func<FeatureFlag, bool>> predicate);
 
+    Task<ICollection<FeatureFlag>> FindManyAsync(Expression<Func<FeatureFlag, bool>> predicate);
+
     Task AddAsync(FeatureFlag flag);
 
     Task UpdateAsync(FeatureFlag flag);
