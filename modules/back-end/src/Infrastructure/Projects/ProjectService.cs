@@ -1,4 +1,3 @@
-using Application.Services;
 using Domain.Projects;
 using MongoDB.Driver;
 using Environment = Domain.Environments.Environment;
@@ -6,7 +5,7 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Projects;
 
-public class ProjectService : MongoDbServiceBase<Project>, IProjectService
+public class ProjectService : MongoDbService<Project>, IProjectService
 {
     public ProjectService(MongoDbClient mongoDb) : base(mongoDb)
     {

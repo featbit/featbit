@@ -35,6 +35,19 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flag);
     }
 
+    [HttpGet("is-key-used")]
+    public async Task<ApiResponse<bool>> IsKeyUsedAsync(Guid envId, string key)
+    {
+        var request = new IsFeatureFlagKeyUsed
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var isUsed = await Mediator.Send(request);
+        return Ok(isUsed);
+    }
+
     [HttpPost]
     public async Task<ApiResponse<FeatureFlag>> CreateAsync(Guid envId, CreateFeatureFlag request)
     {
@@ -56,6 +69,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    [HttpPut("{id:guid}/un-archive")]
+    public async Task<ApiResponse<bool>> UnArchiveAsync(Guid id)
+    {
+        var request = new UnArchiveFeatureFlag
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
@@ -66,5 +91,47 @@ public class FeatureFlagController : ApiControllerBase
 
         var success = await Mediator.Send(request);
         return Ok(success);
+    }
+
+    [HttpPut("{id:guid}/settings")]
+    public async Task<ApiResponse<bool>> UpdateSettingAsync(Guid id, UpdateSetting request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [HttpPut("{id:guid}/variations")]
+    public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid id, UpdateVariations request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [HttpPut("{id:guid}/targeting")]
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid id, UpdateTargeting request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [HttpPost("copy-to-env/{targetEnvId:guid}")]
+    public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(
+        Guid targetEnvId,
+        [FromBody] ICollection<Guid> flagIds)
+    {
+        var request = new CopyToEnv
+        {
+            TargetEnvId = targetEnvId,
+            FlagIds = flagIds
+        };
+
+        var copyToEnvResult = await Mediator.Send(request);
+        return Ok(copyToEnvResult);
     }
 }

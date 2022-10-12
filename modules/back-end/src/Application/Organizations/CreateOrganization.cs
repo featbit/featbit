@@ -39,7 +39,7 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
     {
         // add new organization
         var organization = new Organization(request.Name);
-        await _service.AddAsync(organization);
+        await _service.AddOneAsync(organization);
         
         // add user to organization
         var organizationUser = new OrganizationUser(organization.Id, _currentUser.Id);

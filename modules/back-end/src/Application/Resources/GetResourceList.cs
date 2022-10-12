@@ -1,7 +1,4 @@
 using Application.Bases;
-using Application.Organizations;
-using Application.Users;
-using Domain.Projects;
 
 namespace Application.Resources;
 
@@ -23,20 +20,19 @@ public class GetResourceListValidator : AbstractValidator<GetResourceList>
 
 public class GetResourceListHandler : IRequestHandler<GetResourceList, IEnumerable<ResourceVm>>
 {
-    private readonly IResourceService _resourceService;
+    private readonly IResourceService _service;
     private readonly IMapper _mapper;
-    
-    public GetResourceListHandler(
-        IResourceService resourceService,
-        IMapper mapper)
+
+    public GetResourceListHandler(IResourceService service, IMapper mapper)
     {
-        _resourceService = resourceService;
+        _service = service;
         _mapper = mapper;
     }
 
     public async Task<IEnumerable<ResourceVm>> Handle(GetResourceList request, CancellationToken cancellationToken)
     {
-        var resources = await _resourceService.GetResourcesAsync(request.OrganizationId, request.Filter.Type, request.Filter.Name);
+        var resources = await _service.GetResourcesAsync(request.OrganizationId, request.Filter);
+
         return _mapper.Map<IEnumerable<ResourceVm>>(resources);
     }
 }

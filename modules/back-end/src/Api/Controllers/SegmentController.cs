@@ -86,4 +86,18 @@ public class SegmentController : ApiControllerBase
         var isNameUsed = await Mediator.Send(request);
         return Ok(isNameUsed);
     }
+
+    [HttpGet]
+    [Route("{id:guid}/flag-references")]
+    public async Task<ApiResponse<IEnumerable<FlagReference>>> GetFlagReferencesAsync(Guid envId, Guid id)
+    {
+        var request = new GetFlagReferences
+        {
+            EnvId = envId,
+            Id = id
+        };
+
+        var references = await Mediator.Send(request);
+        return Ok(references);
+    }
 }

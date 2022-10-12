@@ -1,13 +1,13 @@
 using Application.Bases.Models;
 using Application.Segments;
-using Application.Services;
+using Domain.FeatureFlags;
 using Domain.Segments;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Segments;
 
-public class SegmentService : MongoDbServiceBase<Segment>, ISegmentService
+public class SegmentService : MongoDbService<Segment>, ISegmentService
 {
     public SegmentService(MongoDbClient mongoDb) : base(mongoDb)
     {
@@ -28,7 +28,8 @@ public class SegmentService : MongoDbServiceBase<Segment>, ISegmentService
         var name = userFilter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            var nameFilter = filterBuilder.Where(segment => segment.Name.StartsWith(name, StringComparison.CurrentCultureIgnoreCase));
+            var nameFilter = filterBuilder.Where(segment =>
+                segment.Name.StartsWith(name, StringComparison.CurrentCultureIgnoreCase));
             filters.Add(nameFilter);
         }
 
@@ -53,5 +54,28 @@ public class SegmentService : MongoDbServiceBase<Segment>, ISegmentService
             .ToListAsync();
 
         return segments;
+    }
+
+    public async Task<IEnumerable<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id)
+    {
+        var segmentId = id.ToString();
+
+        var query = MongoDb.QueryableOf<FeatureFlag>().Where(flag =>
+            flag.EnvId == envId &&
+            flag.Rules.Any(rule =>
+                rule.Conditions.Any(condition =>
+                    SegmentConsts.ConditionProperties.Contains(condition.Property) &&
+                    condition.Value.Contains(segmentId)
+                )
+            )
+        ).Select(x => new FlagReference
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Key = x.Key
+        });
+
+        var flags = await query.ToListAsync();
+        return flags;
     }
 }

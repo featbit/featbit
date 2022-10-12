@@ -1,5 +1,4 @@
 using Application.Bases.Models;
-using Application.Organizations;
 using Domain.Resources;
 
 namespace Application.Resources;

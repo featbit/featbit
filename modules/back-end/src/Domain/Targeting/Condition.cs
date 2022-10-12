@@ -12,7 +12,7 @@ public class Condition
 
     public bool IsSegmentCondition()
     {
-        var isSegmentProperty = SegmentConsts.RuleProperties.Contains(Property);
+        var isSegmentProperty = SegmentConsts.ConditionProperties.Contains(Property);
 
         return isSegmentProperty;
     }

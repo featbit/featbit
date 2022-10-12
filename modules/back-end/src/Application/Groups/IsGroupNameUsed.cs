@@ -15,10 +15,11 @@ public class IsGroupNameUsedHandler : IRequestHandler<IsGroupNameUsed, bool>
     {
         _service = service;
     }
-    
+
     public async Task<bool> Handle(IsGroupNameUsed request, CancellationToken cancellationToken)
     {
-        var isNameUsed = await _service.IsNameUsedAsync(request.OrganizationId, request.Name);
+        var isNameUsed =
+            await _service.AnyAsync(x => x.OrganizationId == request.OrganizationId && x.Name == request.Name);
 
         return isNameUsed;
     }

@@ -1,6 +1,5 @@
 using Application.Bases.Models;
 using Application.Groups;
-using Application.Services;
 using Domain.Groups;
 using Domain.Organizations;
 using Domain.Policies;
@@ -10,7 +9,7 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Groups;
 
-public class GroupService : MongoDbServiceBase<Group>, IGroupService
+public class GroupService : MongoDbService<Group>, IGroupService
 {
     public GroupService(MongoDbClient mongoDb) : base(mongoDb)
     {
@@ -59,13 +58,6 @@ public class GroupService : MongoDbServiceBase<Group>, IGroupService
         var items = await itemsQuery.ToListAsync();
 
         return new PagedResult<Group>(totalCount, items);
-    }
-
-    public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
-    {
-        var isNameUsed = await AnyAsync(x => x.OrganizationId == organizationId && x.Name == name);
-
-        return isNameUsed;
     }
 
     public async Task<PagedResult<GroupMemberVm>> GetMembersAsync(

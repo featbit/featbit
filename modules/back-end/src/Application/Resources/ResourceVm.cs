@@ -1,4 +1,4 @@
-﻿namespace Application.Organizations;
+﻿namespace Application.Resources;
 
 public class ResourceVm
 {

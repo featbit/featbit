@@ -1,5 +1,4 @@
 using Domain.Targeting;
-using Domain.Utils;
 
 namespace Domain.FeatureFlags;
 
@@ -38,7 +37,7 @@ public class FeatureFlag : FullAuditedEntity
 
         var falsyVariationId = Guid.NewGuid().ToString();
         var truthyVariationId = Guid.NewGuid().ToString();
-        VariationType = "boolean";
+        VariationType = VariationTypes.Boolean;
         Variations = new List<Variation>
         {
             new(truthyVariationId, "true"),
@@ -105,6 +104,68 @@ public class FeatureFlag : FullAuditedEntity
         IsArchived = true;
 
         UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
+
+    public void UnArchive(Guid currentUserId)
+    {
+        IsArchived = false;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
+
+    public void UpdateSetting(string name, bool isEnabled, string disabledVariationId, Guid currentUserId)
+    {
+        Name = name;
+        IsEnabled = isEnabled;
+        DisabledVariationId = disabledVariationId;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
+
+    public void UpdateVariations(string variationType, ICollection<Variation> variations, Guid currentUserId)
+    {
+        VariationType = variationType;
+        Variations = variations;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
+
+    public void UpdateTargeting(
+        ICollection<TargetUser> targetUsers,
+        ICollection<TargetRule> rules,
+        Fallthrough fallthrough,
+        bool exptIncludeAllTargets,
+        Guid currentUserId)
+    {
+        TargetUsers = targetUsers;
+        Rules = rules;
+        Fallthrough = fallthrough;
+        ExptIncludeAllTargets = exptIncludeAllTargets;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
+
+    public void CopyToEnv(Guid targetEnvId, Guid currentUserId)
+    {
+        // clear id
+        Id = Guid.Empty;
+
+        // change envId
+        EnvId = targetEnvId;
+
+        // clear targeting
+        TargetUsers = Array.Empty<TargetUser>();
+        Rules = Array.Empty<TargetRule>();
+
+        // change audited properties
+        CreatedAt = DateTime.UtcNow;
+        CreatorId = currentUserId;
+        UpdatedAt = CreatedAt;
         UpdatorId = currentUserId;
     }
 }

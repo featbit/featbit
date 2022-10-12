@@ -16,6 +16,15 @@ const administratorPolicyId = UUID("3e961f0f-6fd4-4cf4-910f-52d356f8cc08")
 const developerPolicyId = UUID("66f3687f-939d-4257-bd3f-c3553d39e1b6")
 const testerPolicyId = UUID("65244ccc-d336-44b2-b4ee-b24482ea6037")
 
+const devFlagId = UUID("a04d1329-103d-4fcf-9e2e-9af284c800c2")
+const devFlagTriggerId = UUID("4a64e73c-2392-4c6b-a77a-c4e8b4e5e510")
+const prodFlagId = UUID("b8a5715d-fa0a-4f5c-a5fe-794087c5e957")
+const prodFlagTriggerId = UUID("56dd787d-cdce-4d60-8870-21ffadc3af45")
+const devSegmentIdStr = "7efe5d05-aae2-4983-bf09-eaa4551a774e"
+const devSegmentId = UUID(devSegmentIdStr)
+const prodSegmentIdStr = "33d2ade3-ba23-4f46-b774-72507db4133a"
+const prodSegmentId = UUID(prodSegmentIdStr)
+
 // seed user
 print('clean and seed collection: Users')
 db.Users.deleteMany({})
@@ -200,12 +209,12 @@ print('clean and seed collection: Segments')
 db.Segments.deleteMany({})
 db.Segments.insertOne(
     {
-        _id: UUID(),
+        _id: prodSegmentId,
         envId: prodEnvId,
         name: "[prod] tester-group",
         description: "this is a tester group",
         included: ["prod-bot-id"],
-        excluded: [],
+        excluded: ["anonymous"],
         rules: [
             {
                 _id: "e5080546-dd53-4c9e-bf46-65a4897199c3",
@@ -226,12 +235,12 @@ db.Segments.insertOne(
 )
 db.Segments.insertOne(
     {
-        _id: UUID(),
+        _id: devSegmentId,
         envId: devEnvId,
         name: "[dev] tester-group",
         description: "this is a tester group",
         included: ["dev-bot-id"],
-        excluded: [],
+        excluded: ["anonymous"],
         rules: [
             {
                 _id: "78d03b8b-9cc8-4860-8cd7-449fbeb8ebbe",
@@ -257,7 +266,7 @@ print('clean and seed collection: FeatureFlags')
 db.FeatureFlags.deleteMany({})
 db.FeatureFlags.insertOne(
     {
-        _id: UUID(),
+        _id: prodFlagId,
         envId: prodEnvId,
         name: "use new algorithm",
         key: "use-new-algorithm",
@@ -284,7 +293,7 @@ db.FeatureFlags.insertOne(
         ],
         rules: [
             {
-                _id: "823650b1-fae2-40f1-8f8b-53be026f9f8a",
+                _id: "abd5edff-8868-4011-aa50-80fe9bcbf91a",
                 name: "match by name",
                 includedInExpt: true,
                 conditions: [
@@ -299,6 +308,18 @@ db.FeatureFlags.insertOne(
                         _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
                         rollout: [0, 1],
                         exptRollout: 1
+                    }
+                ]
+            },
+            {
+                _id: "6c665b20-a8a1-4ce0-b8fc-a46818cc9c52",
+                name: "match by segment",
+                includedInExpt: true,
+                conditions: [
+                    {
+                        property: "User is in segment",
+                        op: "",
+                        value: `[\"${prodSegmentIdStr}\"]`
                     }
                 ]
             }
@@ -325,7 +346,7 @@ db.FeatureFlags.insertOne(
 )
 db.FeatureFlags.insertOne(
     {
-        _id: UUID(),
+        _id: devFlagId,
         envId: devEnvId,
         name: "use new algorithm",
         key: "use-new-algorithm",
@@ -367,6 +388,18 @@ db.FeatureFlags.insertOne(
                         _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
                         rollout: [0, 1],
                         exptRollout: 1
+                    }
+                ]
+            },
+            {
+                _id: "af346856-837a-4b59-96f2-20a73ba5445e",
+                name: "match by segment",
+                includedInExpt: true,
+                conditions: [
+                    {
+                        property: "User is in segment",
+                        op: "",
+                        value: `[\"${devSegmentIdStr}\"]`
                     }
                 ]
             }
@@ -422,6 +455,70 @@ db.EndUsers.insertOne(
             {
                 name: "email",
                 value: "prod-bot@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        keyId: "anonymous",
+        name: "anonymous",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "anonymous@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        keyId: "anonymous",
+        name: "anonymous",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "anonymous@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: devEnvId,
+        keyId: "falsy-user-id",
+        name: "falsy-user",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "falsy-user@featbit.com"
+            }
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.EndUsers.insertOne(
+    {
+        _id: UUID(),
+        envId: prodEnvId,
+        keyId: "falsy-user-id",
+        name: "falsy-user",
+        customizedProperties: [
+            {
+                name: "email",
+                value: "falsy-user@featbit.com"
             }
         ],
         createdAt: new Date(),
@@ -593,3 +690,38 @@ db.MemberPolicies.insertOne(
     }
 )
 print('collection seeded: GroupPolicies')
+
+// seed triggers
+print('clean and seed collection: Triggers')
+db.Triggers.deleteMany({})
+db.Triggers.insertOne(
+    {
+        _id: devFlagTriggerId,
+        targetId: devFlagId,
+        type: "feature-flag-general",
+        action: "turn-on",
+        token: "NTg4MzIzMjg0NTY2MQPOdkSpIja0ynesTotOXlEA",
+        description: "this trigger will turn on flag",
+        isEnabled: true,
+        triggeredTimes: 0,
+        lastTriggeredAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+db.Triggers.insertOne(
+    {
+        _id: prodFlagTriggerId,
+        targetId: prodFlagId,
+        type: "feature-flag-general",
+        action: "turn-on",
+        token: "MjA3NDUzMjg0NTY2MQfXjdVs7NYE2IcCH_rcOvRQ",
+        description: "this trigger will turn on flag",
+        isEnabled: true,
+        triggeredTimes: 0,
+        lastTriggeredAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: Triggers')

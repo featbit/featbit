@@ -6,7 +6,7 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Bases;
 
-public class MongoDbServiceBase<TEntity> where TEntity : Entity
+public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
 {
     public MongoDbClient MongoDb { get; }
 
@@ -14,7 +14,7 @@ public class MongoDbServiceBase<TEntity> where TEntity : Entity
 
     public IMongoQueryable<TEntity> Queryable { get; }
 
-    public MongoDbServiceBase(MongoDbClient mongoDb)
+    public MongoDbService(MongoDbClient mongoDb)
     {
         MongoDb = mongoDb;
         Collection = MongoDb.CollectionOf<TEntity>();
@@ -34,27 +34,31 @@ public class MongoDbServiceBase<TEntity> where TEntity : Entity
 
     public async Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> predicate)
     {
-        return await MongoDb.QueryableOf<TEntity>().FirstOrDefaultAsync(predicate);
+        return await Queryable.FirstOrDefaultAsync(predicate);
     }
 
-    public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
+    public async Task<ICollection<TEntity>> FindManyAsync(Expression<Func<TEntity, bool>> predicate)
     {
-        return await MongoDb.QueryableOf<TEntity>().Where(predicate).ToListAsync();
+        return await Queryable.Where(predicate).ToListAsync();
     }
 
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
     {
-        return await MongoDb.QueryableOf<TEntity>().AnyAsync(predicate);
+        return await Queryable.AnyAsync(predicate);
     }
 
-    public async Task AddAsync(TEntity entity)
+    public async Task AddOneAsync(TEntity entity)
     {
-        await MongoDb.CollectionOf<TEntity>().InsertOneAsync(entity);
+        await Collection.InsertOneAsync(entity);
+    }
+
+    public async Task AddManyAsync(IEnumerable<TEntity> entities)
+    {
+        await Collection.InsertManyAsync(entities);
     }
 
     public async Task UpdateAsync(TEntity replacement)
     {
-        await MongoDb.CollectionOf<TEntity>()
-            .ReplaceOneAsync(entity => entity.Id == replacement.Id, replacement);
+        await Collection.ReplaceOneAsync(entity => entity.Id == replacement.Id, replacement);
     }
 }
