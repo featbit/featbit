@@ -8,6 +8,7 @@ public static class ErrorCodes
 
     // application
     public const string ResourceNotFound = nameof(ResourceNotFound);
+    public const string InvalidJson = nameof(InvalidJson);
 
     // identity error codes
     public const string MethodIsRequired = nameof(MethodIsRequired);

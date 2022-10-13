@@ -94,6 +94,16 @@ db.Environments.insertOne(
         name: "Prod",
         description: "Production environment",
         secret: "MGU3LTNjNzUtNCUyMDIyMDkyNjAxMzgwNF9fNDZfXzkzX181N19fZGVmYXVsdF8zMDgwNw==",
+        settings: [
+            {
+                "_id": "31bbd183-dae6-493f-9101-3669f89b2104",
+                "type": "sync-urls",
+                "key": "prod-sdk",
+                "value": "https://prod-domain/api/public/feature-flag/init",
+                "tag": "prod",
+                "remark": "true,1653892892330"
+            }
+        ],
         createdAt: new Date(),
         updatedAt: new Date()
     }
@@ -105,6 +115,16 @@ db.Environments.insertOne(
         name: "Dev",
         description: "Development environment",
         secret: "NzJlLTlkOGEtNCUyMDIyMDkyNjAxMzkyNF9fNDZfXzkzX181N19fZGVmYXVsdF9iYTA1NA==",
+        settings: [
+            {
+                "_id": "65eb3930-f463-4b12-b1c8-9681a12c730b",
+                "type": "sync-urls",
+                "key": "dev-sdk",
+                "value": "https://dev-domain/api/public/feature-flag/init",
+                "tag": "dev",
+                "remark": "false,1651557493592"
+            }
+        ],
         createdAt: new Date(),
         updatedAt: new Date()
     }

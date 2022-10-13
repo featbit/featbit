@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Domain.EndUsers;
 
 public class EndUser : AuditedEntity
@@ -28,5 +30,32 @@ public class EndUser : AuditedEntity
         CustomizedProperties = customizedProperties ?? Array.Empty<EndUserCustomizedProperty>();
 
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public bool ValueEquals(EndUser other)
+    {
+        if (other == null)
+        {
+            return false;
+        }
+
+        var strEquals = ToString() == other.ToString();
+        return strEquals;
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append($"envId:{EnvId},keyId:{KeyId},name:{Name}");
+
+        if (CustomizedProperties != null)
+        {
+            foreach (var customizedProperty in CustomizedProperties)
+            {
+                sb.Append($",{customizedProperty.Name}:{customizedProperty.Value}");
+            }
+        }
+
+        return sb.ToString();
     }
 }

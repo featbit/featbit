@@ -1,3 +1,4 @@
+using Domain.Environments;
 using MongoDB.Driver;
 using Environment = Domain.Environments.Environment;
 
@@ -12,5 +13,12 @@ public class EnvironmentService : MongoDbService<Environment>, IEnvironmentServi
     public async Task DeleteAsync(Guid id)
     {
         await MongoDb.CollectionOf<Environment>().DeleteOneAsync(x => x.Id == id);
+    }
+
+    public async Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type)
+    {
+        var environment = await GetAsync(envId);
+
+        return environment.Settings.Where(x => x.Type == type);
     }
 }
