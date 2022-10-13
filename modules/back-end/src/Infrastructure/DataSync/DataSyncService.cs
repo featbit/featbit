@@ -1,5 +1,7 @@
 using Domain.DataSync;
 using Domain.EndUsers;
+using Domain.FeatureFlags;
+using Domain.Segments;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -49,6 +51,25 @@ public class DataSyncService : IDataSyncService
 
         // add new user property
         await AddNewPropsAsync(envId, data.UserProperties);
+    }
+
+    public async Task<RemoteSyncPayload> GetRemoteSyncPayloadAsync(Guid envId)
+    {
+        var flags = await _mongoDb.QueryableOf<FeatureFlag>()
+            .Where(x => x.EnvId == envId && !x.IsArchived)
+            .ToListAsync();
+
+        var segments = await _mongoDb.QueryableOf<Segment>()
+            .Where(x => x.EnvId == envId && !x.IsArchived)
+            .ToListAsync();
+
+        var payload = new RemoteSyncPayload
+        {
+            FeatureFlags = flags,
+            Segments = segments
+        };
+
+        return payload;
     }
 
     private async Task UpsertUsersAsync(Guid envId, IEnumerable<EndUserSyncData> inputUsers)

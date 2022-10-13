@@ -42,4 +42,9 @@ public class Setting
         Tag = newSetting.Tag;
         Remark = newSetting.Remark;
     }
+
+    public void WriteRemark(string remark)
+    {
+        Remark = remark ?? string.Empty;
+    }
 }

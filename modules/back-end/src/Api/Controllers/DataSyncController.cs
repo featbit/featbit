@@ -55,4 +55,17 @@ public class DataSyncController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
+
+    [HttpPut("to-remote")]
+    public async Task<ApiResponse<string>> SyncToRemoteAsync(Guid envId, string settingId)
+    {
+        var request = new SyncToRemote
+        {
+            EnvId = envId,
+            SettingId = settingId
+        };
+
+        var payload = await Mediator.Send(request);
+        return Ok(payload);
+    }
 }

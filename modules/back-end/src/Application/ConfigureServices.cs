@@ -25,6 +25,9 @@ public static class ConfigureServices
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
 
+        // add httpclient services
+        services.AddHttpClient();
+
         return services;
     }
 }
