@@ -1,7 +1,7 @@
 using System.Text;
-using Application.Services;
 using Domain.Identity;
 using Domain.Users;
+using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
 using Infrastructure.FeatureFlags;
@@ -71,6 +71,7 @@ public static class ConfigureServices
         services.AddTransient<ISegmentService, SegmentService>();
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
+        services.AddTransient<IDataSyncService, DataSyncService>();
         
         return services;
     }
