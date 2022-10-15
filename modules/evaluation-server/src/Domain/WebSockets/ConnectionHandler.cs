@@ -75,10 +75,11 @@ public partial class ConnectionHandler
             return;
         }
 
+        // currently we only process text messages
         if (message.Type == WebSocketMessageType.Text)
         {
             // do echo
-            await connection.SendAsync(message.Bytes, WebSocketMessageType.Text, CancellationToken);
+            await connection.SendAsync(message, CancellationToken);
         }
     }
 
