@@ -18,7 +18,7 @@ public class ConnectionManagerTests
 
         _webSocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
         var connection =
-            new Connection(_webSocketMock.Object, 1, ConnectionType.Server, ConnectionVersion.V2, 1662395291241);
+            new Connection(_webSocketMock.Object, 1, ConnectionType.Server, ConnectionVersion.V2);
 
         // add connection
         manager.Add(connection);

@@ -13,7 +13,7 @@ public class ConnectionStoreTests
     {
         var store = new ConnectionStore();
         var connection = 
-            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, ConnectionVersion.V1, 1661907157706);
+            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, ConnectionVersion.V1);
         
         Assert.Null(store[connection.Id]);
         
@@ -27,7 +27,7 @@ public class ConnectionStoreTests
     {
         var store = new ConnectionStore();
         var connection = 
-            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, ConnectionVersion.V1, 1661907157706);
+            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, ConnectionVersion.V1);
         store.Add(connection);
         
         Assert.NotNull(store[connection.Id]);

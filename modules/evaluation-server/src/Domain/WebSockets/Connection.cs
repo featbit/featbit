@@ -19,7 +19,13 @@ public class Connection
 
     public long CloseAt { get; private set; }
 
-    public Connection(WebSocket webSocket, int envId, string type, string version, long connectAt)
+    public Connection(
+        WebSocket webSocket,
+        int envId,
+        string type,
+        string version,
+        long? connectAt = null,
+        long? closeAt = null)
     {
         Id = Guid.NewGuid().ToString("D");
 
@@ -27,8 +33,8 @@ public class Connection
         EnvId = envId;
         Type = type;
         Version = version;
-        ConnectAt = connectAt;
-        CloseAt = 0;
+        ConnectAt = connectAt ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        CloseAt = closeAt ?? 0;
     }
 
     public async Task SendAsync(Message message, CancellationToken cancellationToken)
