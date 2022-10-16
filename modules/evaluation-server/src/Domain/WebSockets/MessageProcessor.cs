@@ -3,12 +3,12 @@ using System.Net.WebSockets;
 
 namespace Domain.WebSockets;
 
-public class MessageProcessor
+public class MessageProcessor : IMessageProcessor
 {
     private const int DefaultBufferSize = 4 * 1024;
     private const int MaxMessageFragment = 8;
 
-    public event Func<Connection, Message, Task>? OnMessageAsync;
+    public event Func<Connection, Message, CancellationToken, Task>? OnMessageAsync;
 
     public event Action<Connection, string>? OnError;
 
@@ -16,7 +16,7 @@ public class MessageProcessor
     {
         async Task RaiseMessageEvent(Message message)
         {
-            await (OnMessageAsync?.Invoke(connection, message) ?? Task.CompletedTask);
+            await (OnMessageAsync?.Invoke(connection, message, token) ?? Task.CompletedTask);
         }
 
         void RaiseErrorEvent(string error)

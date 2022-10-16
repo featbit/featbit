@@ -3,42 +3,38 @@ using Microsoft.Extensions.Logging;
 
 namespace Domain.WebSockets;
 
-public partial class ConnectionHandler
+public partial class ConnectionHandler : IConnectionHandler
 {
-    private readonly ConnectionManager _connectionManager;
-    private readonly MessageProcessor _messageProcessor;
+    private readonly IConnectionManager _connectionManager;
+    private readonly IMessageProcessor _messageProcessor;
     private readonly ILogger<ConnectionHandler> _logger;
 
-    private CancellationToken? _cancellationToken;
-    public CancellationToken CancellationToken
-    {
-        get => _cancellationToken ?? CancellationToken.None;
-        set => _cancellationToken ??= value;
-    }
-
-    public ConnectionHandler(ConnectionManager connectionManager, ILogger<ConnectionHandler> logger)
+    public ConnectionHandler(
+        IConnectionManager connectionManager,
+        IMessageProcessor messageProcessor,
+        ILogger<ConnectionHandler> logger)
     {
         _connectionManager = connectionManager;
 
-        _messageProcessor = new MessageProcessor();
+        _messageProcessor = messageProcessor;
         _messageProcessor.OnMessageAsync += OnMessageAsync;
         _messageProcessor.OnError += OnError;
 
         _logger = logger;
     }
 
-    public async Task ProcessAsync(Connection connection)
+    public async Task OnConnectedAsync(Connection connection, CancellationToken cancellationToken)
     {
-        // register connection
-        _connectionManager.Register(connection);
+        // add connection
+        _connectionManager.Add(connection);
 
-        // process websocket message
+        // start listen websocket message
         var ws = connection.WebSocket;
-        while (ws.State == WebSocketState.Open && !CancellationToken.IsCancellationRequested)
+        while (ws.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
         {
             try
             {
-                await _messageProcessor.StartAsync(connection, CancellationToken);
+                await _messageProcessor.StartAsync(connection, cancellationToken);
             }
             catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
             {
@@ -54,14 +50,18 @@ public partial class ConnectionHandler
             }
         }
 
-        await _connectionManager.RemoveAsync(
-            connection,
+        // close connection
+        await connection.CloseAsync(
             ws.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
-            ws.CloseStatusDescription ?? string.Empty
+            ws.CloseStatusDescription ?? string.Empty,
+            DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
         );
+
+        // remove connection
+        _connectionManager.Remove(connection);
     }
 
-    public async Task OnMessageAsync(Connection connection, Message message)
+    public async Task OnMessageAsync(Connection connection, Message message, CancellationToken cancellationToken)
     {
         if (message.Type == WebSocketMessageType.Close)
         {
@@ -79,7 +79,7 @@ public partial class ConnectionHandler
         if (message.Type == WebSocketMessageType.Text)
         {
             // do echo
-            await connection.SendAsync(message, CancellationToken);
+            await connection.SendAsync(message, cancellationToken);
         }
     }
 

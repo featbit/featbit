@@ -22,7 +22,7 @@ public class StreamingMiddleware
         _next = next;
     }
 
-    public async Task InvokeAsync(HttpContext context, ConnectionHandler handler)
+    public async Task InvokeAsync(HttpContext context, IConnectionHandler handler)
     {
         var request = context.Request;
 
@@ -53,8 +53,6 @@ public class StreamingMiddleware
         }
 
         // use ApplicationStopping token (note that this won't work if handler's cancellation token has been set before)
-        handler.CancellationToken = _applicationLifetime.ApplicationStopping;
-        
-        await handler.ProcessAsync(connection);
+        await handler.OnConnectedAsync(connection, _applicationLifetime.ApplicationStopping);
     }
 }

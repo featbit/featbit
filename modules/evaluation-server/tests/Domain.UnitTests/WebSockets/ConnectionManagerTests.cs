@@ -12,29 +12,24 @@ public class ConnectionManagerTests
     private readonly Mock<WebSocket> _webSocketMock = new();
 
     [Fact]
-    public async Task Register_And_Remove()
+    public void Add_And_Remove()
     {
         var manager = new ConnectionManager(_logger);
 
         _webSocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
         var connection =
             new Connection(_webSocketMock.Object, 1, ConnectionType.Server, ConnectionVersion.V2, 1662395291241);
-        
-        // registration
-        manager.Register(connection);
+
+        // add connection
+        manager.Add(connection);
         Assert.Equal(LogLevel.Trace, _logger.Level);
         Assert.Null(_logger.Ex);
-        Assert.Equal($"{connection.Id}: connection registered. Details: {connection}", _logger.Message);
+        Assert.Equal($"{connection.Id}: connection added. Details: {connection}", _logger.Message);
 
-        // removal
-        await manager.RemoveAsync(connection, WebSocketCloseStatus.NormalClosure, "");
+        // remove connection
+        manager.Remove(connection);
         Assert.Equal(LogLevel.Trace, _logger.Level);
         Assert.Null(_logger.Ex);
-        Assert.Equal($"{connection.Id}: connection removed", _logger.Message);
-
-        _webSocketMock.Verify(
-            x => x.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None),
-            Times.Once
-        );
+        Assert.Equal($"{connection.Id}: connection removed.", _logger.Message);
     }
 }
