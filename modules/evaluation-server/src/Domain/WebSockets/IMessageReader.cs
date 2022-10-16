@@ -1,6 +1,6 @@
 namespace Domain.WebSockets;
 
-public interface IMessageProcessor
+public interface IMessageReader
 {
     event Func<Connection, Message, CancellationToken, Task>? OnMessageAsync;
 

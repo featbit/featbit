@@ -6,19 +6,19 @@ namespace Domain.WebSockets;
 public partial class ConnectionHandler : IConnectionHandler
 {
     private readonly IConnectionManager _connectionManager;
-    private readonly IMessageProcessor _messageProcessor;
+    private readonly IMessageReader _messageReader;
     private readonly ILogger<ConnectionHandler> _logger;
 
     public ConnectionHandler(
         IConnectionManager connectionManager,
-        IMessageProcessor messageProcessor,
+        IMessageReader messageReader,
         ILogger<ConnectionHandler> logger)
     {
         _connectionManager = connectionManager;
 
-        _messageProcessor = messageProcessor;
-        _messageProcessor.OnMessageAsync += OnMessageAsync;
-        _messageProcessor.OnError += OnError;
+        _messageReader = messageReader;
+        _messageReader.OnMessageAsync += OnMessageAsync;
+        _messageReader.OnError += OnError;
 
         _logger = logger;
     }
@@ -34,7 +34,7 @@ public partial class ConnectionHandler : IConnectionHandler
         {
             try
             {
-                await _messageProcessor.StartAsync(connection, cancellationToken);
+                await _messageReader.StartAsync(connection, cancellationToken);
             }
             catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
             {
