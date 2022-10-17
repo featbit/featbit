@@ -12,13 +12,13 @@ public class ConnectionManagerTests
     private readonly Mock<WebSocket> _webSocketMock = new();
 
     [Fact]
-    public void Add_And_Remove()
+    public void AddAndRemove()
     {
         var manager = new ConnectionManager(_logger);
 
         _webSocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
         var connection =
-            new Connection(_webSocketMock.Object, 1, ConnectionType.Server, ConnectionVersion.V2);
+            new Connection(_webSocketMock.Object, Guid.NewGuid(), ConnectionType.Server, ConnectionVersion.V2);
 
         // add connection
         manager.Add(connection);

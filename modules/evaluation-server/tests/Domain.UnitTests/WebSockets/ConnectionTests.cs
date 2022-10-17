@@ -8,11 +8,12 @@ public class ConnectionTests
 {
     private readonly Mock<WebSocket> _webSocketMock = new();
     private readonly Connection _connection;
+    private readonly Guid _envId = new("33055a8d-4ec6-4bb9-9edb-43524c4bbd5e");
 
     public ConnectionTests()
     {
         _connection =
-            new Connection(_webSocketMock.Object, 1, ConnectionType.Client, ConnectionVersion.V1, 1662395291241);
+            new Connection(_webSocketMock.Object, _envId, ConnectionType.Client, ConnectionVersion.V1, 1662395291241);
     }
 
     [Fact]
@@ -22,7 +23,7 @@ public class ConnectionTests
 
         Assert.True(Guid.TryParse(_connection.Id, out _));
         Assert.Equal(WebSocketState.Open, _connection.WebSocket.State);
-        Assert.Equal(1, _connection.EnvId);
+        Assert.Equal(_envId, _connection.EnvId);
         Assert.Equal(ConnectionType.Client, _connection.Type);
         Assert.Equal(ConnectionVersion.V1, _connection.Version);
         Assert.Equal(1662395291241, _connection.ConnectAt);
@@ -33,9 +34,9 @@ public class ConnectionTests
     public void ConnectionToString()
     {
         _webSocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
-        
+
         Assert.Equal(
-            $"id={_connection.Id},envId=1,sdkType=client,version=1,status=Open,connectAt=1662395291241,closeAt=0",
+            $"id={_connection.Id},envId={_envId},sdkType=client,version=1,status=Open,connectAt=1662395291241,closeAt=0",
             _connection.ToString()
         );
     }

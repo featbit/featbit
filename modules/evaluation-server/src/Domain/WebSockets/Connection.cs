@@ -9,7 +9,7 @@ public class Connection
 
     public WebSocket WebSocket { get; }
 
-    public int EnvId { get; }
+    public Guid EnvId { get; }
 
     public string Type { get; }
 
@@ -21,7 +21,7 @@ public class Connection
 
     public Connection(
         WebSocket webSocket,
-        int envId,
+        Guid envId,
         string type,
         string version,
         long? connectAt = null,

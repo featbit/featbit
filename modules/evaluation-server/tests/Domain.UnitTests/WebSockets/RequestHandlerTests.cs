@@ -9,16 +9,11 @@ public class RequestHandlerTests
     [Theory]
     [ClassData(typeof(Requests))]
     public void Should_Validate_Request(
-        WebSocket webSocket, 
-        string sdkType, 
-        string version, 
-        string tokenString, 
-        long currentTimestamp, 
-        bool isValid)
+        WebSocket webSocket, string sdkType, string version, string tokenString, long currentTimestamp, bool isValid)
     {
         Connection? TryAcceptRequest() =>
             RequestHandler.TryAcceptRequest(webSocket, sdkType, version, tokenString, currentTimestamp);
-        
+
         if (isValid)
         {
             Assert.NotNull(TryAcceptRequest());
@@ -36,23 +31,22 @@ public class Requests : TheoryData<WebSocket, string, string, string, long, bool
     {
         const string sdkType = "client";
         const string version = "";
-        const string token =
-            "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ";
-        const long tokenCreatedAt = 1661907157706;
+        const string token = TestData.DevStreamingTokenString;
+        var tokenCreatedAt = TestData.DevStreamingToken.Timestamp;
 
         // mocked websockets
         var openedWebsocketMock = new Mock<WebSocket>();
         openedWebsocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
-        
+
         var abortedWebsocketMock = new Mock<WebSocket>();
         abortedWebsocketMock.Setup(x => x.State).Returns(WebSocketState.Closed);
-        
+
         var openedWebsocket = openedWebsocketMock.Object;
         var abortedWebsocket = abortedWebsocketMock.Object;
-        
+
         // valid
         Add(openedWebsocket, sdkType, version, token, tokenCreatedAt, true);
-        
+
         // invalid websocket
         Add(null!, sdkType, version, token, tokenCreatedAt, false);
         Add(abortedWebsocket, sdkType, version, token, tokenCreatedAt, false);
@@ -65,7 +59,7 @@ public class Requests : TheoryData<WebSocket, string, string, string, long, bool
 
         // invalid token string
         Add(openedWebsocket, sdkType, version, "invalid-token-string", tokenCreatedAt, false);
-        
+
         // invalid timestamp (after/before 31s)
         Add(openedWebsocket, sdkType, version, token, tokenCreatedAt + 31 * 1000, false);
         Add(openedWebsocket, sdkType, version, token, tokenCreatedAt - 31 * 1000, false);

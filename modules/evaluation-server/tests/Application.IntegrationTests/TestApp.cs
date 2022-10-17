@@ -25,12 +25,11 @@ public class TestApp : WebApplicationFactory<Program>
         var ws = await client.ConnectAsync(streamingUri, CancellationToken.None);
         return ws;
     }
-    
+
     public async Task<WebSocket> ConnectWithTokenAsync()
     {
-        const string token =
-            "QPXBHMWIxLWQ0NWUtNCUyMDIyMDgwMjA2MzUzNl9fMTYxX18yMDRQQBDDBUQXBHXXQDfXzQyMV9fZGVmYXVsdF84ZDBmZQ";
-        const long tokenCreatedAt = 1661907157706;
+        const string token = "QWSBHgpnOV3wI3kKAO9q9viC0wQWQQBDDDQBZWPXDQSdKZrVAf2U6gAnxl4lSH3w";
+        const long tokenCreatedAt = 1666018247603;
 
         return await ConnectAsync(tokenCreatedAt, $"?type=client&version=2&token={token}");
     }
