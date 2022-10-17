@@ -1,16 +1,12 @@
 ﻿#nullable disable
 
-namespace Domain;
+namespace Domain.Core;
 
 public class User
 {
-    public string UserKeyId { get; set; }
+    public string KeyId { get; set; }
 
-    public string UserName { get; set; }
-
-    public string Email { get; set; }
-
-    public string Country { get; set; }
+    public string Name { get; set; }
 
     public List<CustomizedProperty> CustomizedProperties { get; set; } = new();
 }
