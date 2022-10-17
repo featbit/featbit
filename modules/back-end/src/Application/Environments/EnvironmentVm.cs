@@ -1,3 +1,5 @@
+using Domain.Environments;
+
 namespace Application.Environments;
 
 public class EnvironmentVm
@@ -8,5 +10,5 @@ public class EnvironmentVm
 
     public string Description { get; set; }
 
-    public string Secret { get; set; }
+    public ICollection<Secret> Secrets { get; set; }
 }

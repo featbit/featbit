@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace Domain.Environments;
 
 public class Environment : AuditedEntity
@@ -10,7 +8,7 @@ public class Environment : AuditedEntity
 
     public string Description { get; set; }
 
-    public string Secret { get; set; }
+    public ICollection<Secret> Secrets { get; set; }
 
     public ICollection<Setting> Settings { get; set; }
 
@@ -21,19 +19,11 @@ public class Environment : AuditedEntity
         ProjectId = projectId;
         Name = name;
         Description = description;
-        Secret = NewSecret();
-        Settings = Array.Empty<Setting>();
-
-        string NewSecret(string device = "default")
+        Secrets = new List<Secret>
         {
-            var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-            var originText =
-                $"{time}/{Id}/{device}";
-
-            var textBytes = Encoding.UTF8.GetBytes(originText);
-            return Convert.ToBase64String(textBytes);
-        }
+            new(Id, SecretTypes.Default)
+        };
+        Settings = Array.Empty<Setting>();
     }
 
     public void Update(string name, string description)

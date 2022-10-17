@@ -93,7 +93,12 @@ db.Environments.insertOne(
         projectId: projectId,
         name: "Prod",
         description: "Production environment",
-        secret: "MGU3LTNjNzUtNCUyMDIyMDkyNjAxMzgwNF9fNDZfXzkzX181N19fZGVmYXVsdF8zMDgwNw==",
+        secrets: [
+            {
+                type: "default",
+                value: "v3faJy3RCUO8d-EJiVdN6waRfGjfNan02Ms9c0LiTD6w"
+            }
+        ],
         settings: [
             {
                 "_id": "31bbd183-dae6-493f-9101-3669f89b2104",
@@ -114,7 +119,12 @@ db.Environments.insertOne(
         projectId: projectId,
         name: "Dev",
         description: "Development environment",
-        secret: "NzJlLTlkOGEtNCUyMDIyMDkyNjAxMzkyNF9fNDZfXzkzX181N19fZGVmYXVsdF9iYTA1NA==",
+        secrets: [
+            {
+                type: "default",
+                value: "gpnOV3wI3kKAO9q9viC0wQWdKZrVAf2U6gAnxl4lSH3w"
+            }
+        ],
         settings: [
             {
                 "_id": "65eb3930-f463-4b12-b1c8-9681a12c730b",
