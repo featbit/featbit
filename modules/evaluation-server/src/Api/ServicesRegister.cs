@@ -22,6 +22,7 @@ public static class ServicesRegister
         builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
         builder.Services.AddSingleton<IMessageReader, MessageReader>();
         builder.Services.AddScoped<IConnectionHandler, ConnectionHandler>();
+        builder.Services.AddTransient<IMessageHandler, MessageHandler>();
 
         return builder;
     }

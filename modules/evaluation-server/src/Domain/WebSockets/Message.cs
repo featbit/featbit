@@ -1,4 +1,5 @@
 using System.Net.WebSockets;
+using System.Text;
 
 namespace Domain.WebSockets;
 
@@ -10,7 +11,12 @@ public class Message
 
     public static readonly Message Close = new(ReadOnlyMemory<byte>.Empty, WebSocketMessageType.Close);
 
-    public readonly ReadOnlyMemory<byte> Bytes;
+    public static readonly Message Pong = new(
+        Encoding.UTF8.GetBytes("{\"messageType\":\"pong\",\"data\":{}}"),
+        WebSocketMessageType.Text
+    );
+
+    public ReadOnlyMemory<byte> Bytes;
 
     public readonly WebSocketMessageType Type;
 
