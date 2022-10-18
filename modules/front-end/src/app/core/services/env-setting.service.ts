@@ -22,10 +22,7 @@ export class EnvSettingService {
   }
 
   upsert(settings: EnvironmentSetting[]): Observable<EnvironmentSetting[]> {
-    return this.http.put<EnvironmentSetting[]>(this.baseUrl, {
-      "envId": getCurrentProjectEnv().envId,
-      "settings": settings
-    });
+    return this.http.put<EnvironmentSetting[]>(this.baseUrl, { settings });
   }
 
   delete(settingId: string): Observable<EnvironmentSetting[]> {
