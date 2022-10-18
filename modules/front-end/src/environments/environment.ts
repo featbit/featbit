@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  url: 'https://api-dev.featureflag.co'
+  url: 'http://localhost:5000'
 };
