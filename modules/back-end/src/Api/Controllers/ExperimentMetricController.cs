@@ -17,7 +17,7 @@ public class ExperimentMetricController : ApiControllerBase
             Filter = filter
         };
 
-        var flags = await Mediator.Send(request);
-        return Ok(flags);
+        var metrics = await Mediator.Send(request);
+        return Ok(metrics);
     }
 }

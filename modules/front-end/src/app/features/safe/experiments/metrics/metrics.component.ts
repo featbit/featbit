@@ -45,14 +45,14 @@ export class MetricsComponent implements OnInit, OnDestroy {
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
 
-  //   const metricId = this.route.snapshot.queryParams['id'];
-  //   if (metricId) {
-  //     this.metricService.getMetric(this.currentProjectEnv.envId, metricId).subscribe(res => {
-  //       if (res) {
-  //         this.onCreateOrEditClick(res);
-  //       }
-  //     });
-  //   }
+    //   const metricId = this.route.snapshot.queryParams['id'];
+    //   if (metricId) {
+    //     this.metricService.getMetric(this.currentProjectEnv.envId, metricId).subscribe(res => {
+    //       if (res) {
+    //         this.onCreateOrEditClick(res);
+    //       }
+    //     });
+    //   }
   }
 
   ngOnInit(): void {
@@ -69,15 +69,20 @@ export class MetricsComponent implements OnInit, OnDestroy {
       distinctUntilChanged()
     ).subscribe(e => {
       this.isLoading = true;
-      this.metricService.getMetrics({envId: this.currentProjectEnv.envId, searchText: e}).subscribe((result: any) => {
-        if(result) {
-          this.metricList = result;
+      this.metricService.getMetrics({
+        envId: this.currentProjectEnv.envId,
+        pageIndex: 0,
+        pageSize: 2000,
+        name: e
+      }).subscribe((result: any) => {
+        if (result) {
+          this.metricList = result.items;
           this.setMaintainerNames();
         } else {
           this.isLoading = false;
         }
       }, _ => {
-        this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
+        this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`);
         this.isLoading = false;
       })
     });
@@ -89,7 +94,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
     this.metricList = this.metricList.map(m => {
       const match = this.accountMemberList.find(r => r.userId === m.maintainerUserId);
       if (match) {
-        return Object.assign({}, m, { maintainerName: match.userName});
+        return Object.assign({}, m, { maintainerName: match.userName });
       } else {
         unMatchedUserIds.push(m.maintainerUserId);
         return Object.assign({}, m);
@@ -100,7 +105,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
       this.teamService.getMembers(this.currentAccount.id).subscribe((result) => {
         this.accountMemberList = result;
         this.metricList = this.metricList.map(m => {
-          return Object.assign({}, m, { maintainerName: result.find(r => r.userId === m.maintainerUserId)?.userName});
+          return Object.assign({}, m, { maintainerName: result.find(r => r.userId === m.maintainerUserId)?.userName });
         });
         this.isLoading = false;
       }, _ => {
@@ -124,17 +129,17 @@ export class MetricsComponent implements OnInit, OnDestroy {
     this.metricService.deleteMetric(this.currentProjectEnv.envId, metric.id).subscribe(res => {
       this.metricList = this.metricList.filter(m => metric.id !== m.id);
       this.isLoading = false;
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+      this.message.success($localize`:@@common.operation-success:Operation succeeded`);
     }, err => {
       this.isLoading = false;
       if (!!err?.error?.messages) {
-        this.errorMsgTitle = $localize `:@@expt.overview.metric-used-by-following-expt-remove-first:The Metric is used by the following experiments, please remove those experiments first`;
+        this.errorMsgTitle = $localize`:@@expt.overview.metric-used-by-following-expt-remove-first:The Metric is used by the following experiments, please remove those experiments first`;
         this.errorMsgs = err?.error?.messages || [];
         this.message.create('', tpl, { nzDuration: 5000 });
       } else {
-        this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
+        this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
       }
-  });
+    });
   }
 
   onDetailViewClosed(data: any) {

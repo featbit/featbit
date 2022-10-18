@@ -3,17 +3,24 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IMetric } from '@features/safe/feature-flags/types/experimentations';
+import { getCurrentProjectEnv } from '@utils/project-env';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MetricService {
+  public envId: string = null;
 
-  baseUrl: string = environment.url + '/api/metrics';
+  get baseUrl() {
+    return environment.url + `/api/v1/envs/${this.envId}/experiment-metrics`;
+  }
+  // baseUrl: string = environment.url + `/api/v1/envs/${this.envId}/experiment-metrics`;
 
   constructor(
     private http: HttpClient
-  ) {}
+  ) {
+    this.envId = getCurrentProjectEnv().envId;
+  }
 
   createMetric(params: IMetric): Observable<any> {
     const url = this.baseUrl;

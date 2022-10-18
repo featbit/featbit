@@ -6,7 +6,7 @@ public class ExperimentMetricVm
 {
     public string Id { get; set; }
     public string Name { get; set; }
-    public int EnvId { get; set; }
+    public Guid EnvId { get; set; }
     public string Description { get; set; }
     public string MaintainerUserId { get; set; }
     public string EventName { get; set; }

@@ -22,7 +22,7 @@ public class GetExperimentMetricHandler : IRequestHandler<GetExperimentMetricLis
 
     public async Task<PagedResult<ExperimentMetricVm>> Handle(GetExperimentMetricList request, CancellationToken cancellationToken)
     {
-        var flags = await _service.GetListAsync(request.EnvId, request.Filter);
-        return _mapper.Map<PagedResult<ExperimentMetricVm>>(flags);
+        var metrics = await _service.GetListAsync(request.EnvId, request.Filter);
+        return _mapper.Map<PagedResult<ExperimentMetricVm>>(metrics);
     }
 }

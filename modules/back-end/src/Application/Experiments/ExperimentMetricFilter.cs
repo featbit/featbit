@@ -4,5 +4,5 @@ namespace Application.Experiments;
 
 public class ExperimentMetricFilter : PagedRequest
 {
-    public string SearchText { get; set; }
+    public string Name { get; set; }
 }

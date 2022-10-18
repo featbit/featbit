@@ -22,12 +22,11 @@ namespace Infrastructure.Experiments
                 filterBuilder.Eq(metric => metric.EnvId, envId)
             };
 
-            // name/key filter
-            var nameOrKey = metricFilter.SearchText;
-            if (!string.IsNullOrWhiteSpace(nameOrKey))
+            // name filter
+            if (!string.IsNullOrWhiteSpace(metricFilter.Name))
             {
                 var nameFilter = filterBuilder.Where(metric =>
-                    metric.Name.Contains(nameOrKey, StringComparison.CurrentCultureIgnoreCase));
+                    metric.Name.Contains(metricFilter.Name, StringComparison.CurrentCultureIgnoreCase));
                 filters.Add(nameFilter);
             }
 
