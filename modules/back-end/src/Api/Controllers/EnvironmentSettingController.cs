@@ -6,6 +6,7 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/settings")]
 public class EnvironmentSettingController : ApiControllerBase
 {
+    [HttpGet]
     public async Task<ApiResponse<IEnumerable<Setting>>> GetByTypeAsync(Guid envId, string type)
     {
         var request = new GetSettings
