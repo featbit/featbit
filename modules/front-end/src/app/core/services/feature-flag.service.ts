@@ -30,13 +30,9 @@ export class FeatureFlagService {
     this.currentFeatureFlag = data;
   }
 
-  public changeFeatureFlagStatus(id: string, status: 'Enabled' | 'Disabled'): Observable<any> {
-    const url =this.baseUrl + '/FeatureFlags/SwitchFeatureFlag';
-    return this.http.post(url, {
-      "id": id,
-      "environmentId": this.envId,
-      "status": status
-    })
+  public toggleStatus(id: string): Observable<any> {
+    const url = `${this.baseUrl}/${id}/toggle`;
+    return this.http.put(url, {})
   }
 
   getByKey(key: string): Observable<IFeatureFlag> {

@@ -81,16 +81,16 @@
             <nz-switch *ngIf="featureFlag.isEnabled"
                        i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-disable-ff"
                        nz-popconfirm="Are you sure to turn it off? The variation returned would be changed when it is off"
-                       (nzOnConfirm)="onChangeFeatureFlagStatus(featureFlag)"
+                       (nzOnConfirm)="onToggleFeatureFlagStatus(featureFlag)"
                        nzControl="true"
-                       [ngModel]="featureFlag.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
+                       [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
             </nz-switch>
             <nz-switch *ngIf="!featureFlag.isEnabled"
                        i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-enable-ff"
                        nz-popconfirm="Are you sure to turn it on? The matching targeting users' or rules' serving variation would be returned"
-                       (nzOnConfirm)="onChangeFeatureFlagStatus(featureFlag)"
+                       (nzOnConfirm)="onToggleFeatureFlagStatus(featureFlag)"
                        nzControl="true"
-                       [ngModel]="featureFlag.status === 'Enabled'" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
+                       [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
             </nz-switch>
           </td>
           <td style="max-width: 168px;">

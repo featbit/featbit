@@ -284,29 +284,23 @@ export class IndexComponent implements OnInit {
   }
 
   //#endregion
-
-  onChangeFeatureFlagStatus(data: IFeatureFlagListItem): void {
+  onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
+    let msg: string;
     if (data.isEnabled) {
-      this.featureFlagService.changeFeatureFlagStatus(data.id, 'Disabled')
-        .subscribe(_ => {
-          const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-            data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
-          this.msg.success(msg);
-          data.isEnabled = false;
-        }, _ => {
-          this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
-        });
-    } else if (!data.isEnabled) {
-      this.featureFlagService.changeFeatureFlagStatus(data.id, 'Enabled')
-        .subscribe(_ => {
-          const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-            data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
-          this.msg.success(msg);
-          data.isEnabled = true;
-        }, _ => {
-          this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
-        });
+      msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
+        data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
+    } else {
+      msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
+        data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
     }
+
+    this.featureFlagService.toggleStatus(data.id)
+      .subscribe(_ => {
+        this.msg.success(msg);
+        data.isEnabled = !data.isEnabled;
+      }, _ => {
+        this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
+      });
   }
 
   public onIntoFeatureFlagDetail(data: IFeatureFlag) {
