@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Domain.Identity;
 using Domain.Users;
 using Infrastructure.Identity;
@@ -58,7 +59,7 @@ public class IdentityServiceTests
             .Returns(PasswordVerificationResult.Success);
 
         _userStoreMock
-            .Setup(x => x.FindByEmailAsync(user.Email))
+            .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<User,bool>>>()))
             .Returns(Task.FromResult(user)!);
 
         var loginResult = await _identityService.LoginByEmailAsync(user.Email, realPwd);

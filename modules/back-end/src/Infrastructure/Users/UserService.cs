@@ -1,5 +1,4 @@
 using Application.Bases.Exceptions;
-using Application.Services;
 using Domain.Users;
 
 namespace Infrastructure.Users;
@@ -12,10 +11,10 @@ public class UserService : IUserService
     {
         _users = users;
     }
-    
+
     public async Task<User> GetAsync(Guid id)
     {
-        var user = await _users.FindByIdAsync(id);
+        var user = await _users.FindOneAsync(x => x.Id == id);
         if (user == null)
         {
             throw new EntityNotFoundException(nameof(User), id.ToString());
@@ -24,9 +23,14 @@ public class UserService : IUserService
         return user;
     }
 
+    public async Task<IEnumerable<User>> GetListAsync(IEnumerable<Guid> ids)
+    {
+        return await _users.FindManyAsync(x => ids.Contains(x.Id));
+    }
+
     public async Task<User?> FindByEmailAsync(string email)
     {
-        return await _users.FindByEmailAsync(email);
+        return await _users.FindOneAsync(x => x.Email == email);
     }
 
     public async Task UpdateAsync(User user)

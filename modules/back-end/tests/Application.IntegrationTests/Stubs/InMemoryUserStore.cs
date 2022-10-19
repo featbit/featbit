@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Domain.Users;
 using Infrastructure.Users;
 
@@ -10,9 +11,14 @@ public class InMemoryUserStore : IUserStore
         TestUser.Instance()
     };
 
-    public Task<User?> FindByIdAsync(Guid id)
+    public Task<User?> FindOneAsync(Expression<Func<User, bool>> predicate)
     {
-        return Task.FromResult(_users.FirstOrDefault(x => x.Id == id));
+        return Task.FromResult(_users.AsQueryable().FirstOrDefault(predicate));
+    }
+
+    public Task<ICollection<User>> FindManyAsync(Expression<Func<User, bool>> predicate)
+    {
+        return Task.FromResult<ICollection<User>>(_users.AsQueryable().Where(predicate).ToList());
     }
 
     public Task AddAsync(User user)
@@ -27,10 +33,5 @@ public class InMemoryUserStore : IUserStore
         _users.Add(user);
 
         return Task.FromResult(true);
-    }
-
-    public Task<User?> FindByEmailAsync(string email)
-    {
-        return Task.FromResult(_users.FirstOrDefault(x => x.Email == email));
     }
 }

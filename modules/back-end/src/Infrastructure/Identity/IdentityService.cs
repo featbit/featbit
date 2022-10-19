@@ -1,6 +1,5 @@
 using System.Text;
 using Application.Identity;
-using Application.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -69,7 +68,7 @@ public class IdentityService : IIdentityService
 
     public async Task<LoginResult> LoginByEmailAsync(string email, string password)
     {
-        var user = await _store.FindByEmailAsync(email);
+        var user = await _store.FindOneAsync(x => x.Email == email);
         if (user == null)
         {
             return LoginResult.Failed(ErrorCodes.EmailNotExist);
