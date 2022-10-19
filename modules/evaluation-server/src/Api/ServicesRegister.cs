@@ -20,8 +20,8 @@ public static class ServicesRegister
         // add app services
         builder.Services.TryAddSingleton<ISystemClock, SystemClock>();
         builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
-        builder.Services.AddSingleton<IMessageReader, MessageReader>();
         builder.Services.AddScoped<IConnectionHandler, ConnectionHandler>();
+        builder.Services.AddTransient<IMessageHandler, MessageHandler>();
 
         return builder;
     }

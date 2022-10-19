@@ -6,19 +6,22 @@ namespace Domain.WebSockets;
 public partial class ConnectionHandler : IConnectionHandler
 {
     private readonly IConnectionManager _connectionManager;
-    private readonly IMessageReader _messageReader;
+    private readonly MessageReader _messageReader;
+    private readonly IMessageHandler _messageHandler;
     private readonly ILogger<ConnectionHandler> _logger;
 
     public ConnectionHandler(
         IConnectionManager connectionManager,
-        IMessageReader messageReader,
+        IMessageHandler messageHandler,
         ILogger<ConnectionHandler> logger)
     {
         _connectionManager = connectionManager;
 
-        _messageReader = messageReader;
+        _messageReader = new MessageReader();
         _messageReader.OnMessageAsync += OnMessageAsync;
-        _messageReader.OnError += OnError;
+        _messageReader.OnError += OnMessageError;
+
+        _messageHandler = messageHandler;
 
         _logger = logger;
     }
@@ -78,12 +81,11 @@ public partial class ConnectionHandler : IConnectionHandler
         // currently we only process text messages
         if (message.Type == WebSocketMessageType.Text)
         {
-            // do echo
-            await connection.SendAsync(message, cancellationToken);
+            await _messageHandler.HandleAsync(connection, message, cancellationToken);
         }
     }
 
-    public void OnError(Connection connection, string error)
+    public void OnMessageError(Connection connection, string error)
     {
         Log.ErrorReadMessage(_logger, connection.Id, error);
     }
