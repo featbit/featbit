@@ -36,7 +36,7 @@ export interface ICopyToEnvResult {
 export class IFeatureFlagListFilter {
   name?: string;
   userKeyId?: string;
-  status?: string;
+  isEnabled?: boolean;
   tagIds?: number[];
   pageIndex: number;
   pageSize: number;
@@ -44,13 +44,13 @@ export class IFeatureFlagListFilter {
   constructor(
     name?: string,
     userKeyId?: string,
-    status?: string,
+    isEnabled?: boolean,
     tagIds?: number[],
     pageIndex: number = 1,
     pageSize: number = 10) {
     this.name = name ?? '';
     this.userKeyId = userKeyId ?? '';
-    this.status = status ?? '';
+    this.isEnabled = isEnabled;
     this.tagIds = tagIds ?? [];
     this.pageIndex = pageIndex;
     this.pageSize = pageSize;

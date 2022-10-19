@@ -35,25 +35,10 @@ export class SwitchV2Service {
     return this.http.get<IFeatureFlagDropdown[]>(url);
   }
 
-  getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
-    const queryParam = {
-      name: filter.name ?? '',
-      status: filter.status ?? '',
-      tagIds: filter.tagIds ?? [],
-      pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
-    };
-
-    return this.http.get<IFeatureFlagListModel>(
-      this.baseUrl,
-      {params: new HttpParams({fromObject: queryParam})}
-    );
-  }
-
   getListForUser(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
     const queryParam = {
       name: filter.name ?? '',
-      status: filter.status ?? '',
+      isEnabled: filter.isEnabled,
       tagIds: filter.tagIds ?? [],
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,

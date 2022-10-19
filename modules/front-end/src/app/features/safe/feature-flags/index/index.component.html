@@ -9,9 +9,9 @@
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
         <switch-tag-tree-select (onSelect)="onSelectTag($event)" [tagTree]="tagTree"></switch-tag-tree-select>
-        <nz-select nzAllowClear [(ngModel)]="featureFlagFilter.status" (ngModelChange)="onSearch(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
-          <nz-option nzValue="Enabled" nzLabel="ON"></nz-option>
-          <nz-option nzValue="Disabled" nzLabel="OFF"></nz-option>
+        <nz-select nzAllowClear [(ngModel)]="featureFlagFilter.isEnabled" (ngModelChange)="onSearch(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
+          <nz-option nzValue="true" nzLabel="ON"></nz-option>
+          <nz-option nzValue="false" nzLabel="OFF"></nz-option>
         </nz-select>
       </div>
       <div class="middle-btn">
