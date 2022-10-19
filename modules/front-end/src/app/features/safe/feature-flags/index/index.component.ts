@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { IFfParams } from '../types/switch-new';
 import { encodeURIComponentFfc } from '@shared/utils';
 import { SwitchTagTreeService } from "@services/switch-tag-tree.service";
 import {
@@ -206,13 +205,6 @@ export class IndexComponent implements OnInit {
     this.featureFlagService
       .getList(this.featureFlagFilter)
       .subscribe((featureFlags: IFeatureFlagListModel) => {
-        // if (featureFlags && featureFlags.items && featureFlags.items.length > 0) {
-        //   for (let i = 0; i < featureFlags.items.length; i++) {
-        //     let item = featureFlags.items[i];
-        //     item.variationOverview.variationsWhenOn = item.variationOverview.variationsWhenOn.sort(function(a, b){return a.localId - b.localId;});
-        //     item.variationOverview.variationsWhenOnStr =  item.variationOverview.variationsWhenOn.map(p=>p.variationValue);
-        //   }
-        // }
         this.featureFlagListModel = featureFlags;
         this.Loading = false;
       });
@@ -293,24 +285,24 @@ export class IndexComponent implements OnInit {
 
   //#endregion
 
-  onChangeFeatureFlagStatus(data: IFfParams): void {
-    if (data.status === 'Enabled') {
+  onChangeFeatureFlagStatus(data: IFeatureFlagListItem): void {
+    if (data.isEnabled) {
       this.featureFlagService.changeFeatureFlagStatus(data.id, 'Disabled')
         .subscribe(_ => {
           const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
             data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
           this.msg.success(msg);
-          data.status = 'Disabled';
+          data.isEnabled = false;
         }, _ => {
           this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
         });
-    } else if (data.status === 'Disabled') {
+    } else if (!data.isEnabled) {
       this.featureFlagService.changeFeatureFlagStatus(data.id, 'Enabled')
         .subscribe(_ => {
           const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
             data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
           this.msg.success(msg);
-          data.status = 'Enabled';
+          data.isEnabled = true;
         }, _ => {
           this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
         });

@@ -1,5 +1,5 @@
 ﻿import { NzTreeNodeOptions } from "ng-zorro-antd/core/tree/nz-tree-base-node";
-import { FeatureFlagParams, IVariationOption } from "@features/safe/feature-flags/types/switch-new";
+import {FeatureFlagParams} from "@features/safe/feature-flags/types/switch-new";
 
 export interface IFeatureFlagListModel {
   items: IFeatureFlagListItem[];
@@ -14,13 +14,12 @@ export interface IFeatureFlagListItem {
   isEnabled: boolean;
   updatedAt: Date;
   variationType: string;
-  variationOverview: IVariationOverview,
+  serves: IVariationOverview,
 }
 
 export interface IVariationOverview {
-  variationWhenOff: IVariationOption,
-  variationsWhenOn: IVariationOption[],
-  variationsWhenOnStr: string[]
+  disabledVariation: string,
+  enabledVariations: string[],
 }
 
 export interface IFeatureFlagListCheckItem {
@@ -74,14 +73,6 @@ export interface IFeatureFlagDropdown {
 export interface IFeatureFlagDetail {
   featureFlag: FeatureFlagParams;
   tags: string[];
-}
-
-export interface IUpdateSettingPayload {
-  name: string;
-  status: string;
-  variationOptionWhenDisabled: IVariationOption;
-  variationOptions: IVariationOption[];
-  variationDataType: string;
 }
 
 export class FeatureFlagTagTree {
