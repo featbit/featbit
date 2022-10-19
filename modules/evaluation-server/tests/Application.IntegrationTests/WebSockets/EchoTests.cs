@@ -17,7 +17,7 @@ public class EchoTests : IClassFixture<TestApp>
     [InlineData(false)]
     public async Task DoEchoAsync(bool multiFragment)
     {
-        using var ws = await _app.ConnectWithTokenAsync();
+        var ws = await _app.ConnectWithTokenAsync();
 
         var echo = Encoding.UTF8.GetBytes(
             "{'messageType':'echo','data':{}}".Replace("'", "\"")

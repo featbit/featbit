@@ -16,7 +16,7 @@ public class PingTests : IClassFixture<TestApp>
     [Fact]
     public async Task PingAsync()
     {
-        using var ws = await _app.ConnectWithTokenAsync();
+        var ws = await _app.ConnectWithTokenAsync();
 
         var ping = Encoding.UTF8.GetBytes(
             "{'messageType':'ping','data':{}}".Replace("'", "\"")
