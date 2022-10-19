@@ -9,7 +9,7 @@ public class CreateExperimentMetric : IRequest<ExperimentMetric>
     public Guid EnvId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
-    public string MaintainerUserId { get; set; }
+    public Guid MaintainerUserId { get; set; }
     public string EventName { get; set; }
     public EventType EventType { get; set; }
     public CustomEventTrackOption CustomEventTrackOption { get; set; }
