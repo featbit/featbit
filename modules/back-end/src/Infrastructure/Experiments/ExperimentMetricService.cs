@@ -47,7 +47,7 @@ namespace Infrastructure.Experiments
 
         public async Task DeleteAsync(Guid id)
         {
-            await MongoDb.CollectionOf<ExperimentMetric>().DeleteOneAsync(x => x.Id == id);
+            await Collection.DeleteOneAsync(x => x.Id == id);
         }
     }
 }
