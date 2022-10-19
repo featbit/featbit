@@ -6,19 +6,18 @@ namespace Domain.WebSockets;
 public partial class ConnectionHandler : IConnectionHandler
 {
     private readonly IConnectionManager _connectionManager;
-    private readonly IMessageReader _messageReader;
+    private readonly MessageReader _messageReader;
     private readonly IMessageHandler _messageHandler;
     private readonly ILogger<ConnectionHandler> _logger;
 
     public ConnectionHandler(
         IConnectionManager connectionManager,
-        IMessageReader messageReader,
         IMessageHandler messageHandler,
         ILogger<ConnectionHandler> logger)
     {
         _connectionManager = connectionManager;
 
-        _messageReader = messageReader;
+        _messageReader = new MessageReader();
         _messageReader.OnMessageAsync += OnMessageAsync;
         _messageReader.OnError += OnMessageError;
 
