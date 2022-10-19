@@ -7,5 +7,4 @@ namespace Application.Services;
 public interface IExperimentMetricService : IService<ExperimentMetric>
 {
     Task<PagedResult<ExperimentMetric>> GetListAsync(Guid envId, ExperimentMetricFilter filter);
-    Task DeleteAsync(Guid id);
 }

@@ -18,7 +18,6 @@ namespace Infrastructure.Experiments
 
             var filters = new List<FilterDefinition<ExperimentMetric>>
             {
-                // envId filter
                 filterBuilder.Eq(metric => metric.EnvId, envId),
                 filterBuilder.Eq(metric => metric.IsArvhived, false)
             };
@@ -44,11 +43,6 @@ namespace Infrastructure.Experiments
             var items = await itemsQuery.ToListAsync();
 
             return new PagedResult<ExperimentMetric>(totalCount, items);
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            await Collection.DeleteOneAsync(x => x.Id == id);
         }
     }
 }
