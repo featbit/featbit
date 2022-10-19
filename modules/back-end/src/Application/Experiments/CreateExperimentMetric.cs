@@ -52,7 +52,7 @@ public class CreateExperimentMetricHandler : IRequestHandler<CreateExperimentMet
 
     public async Task<ExperimentMetricVm> Handle(CreateExperimentMetric request, CancellationToken cancellationToken)
     {
-        var em = new ExperimentMetric()
+        var metric = new ExperimentMetric()
         {
             CreatedAt = DateTime.UtcNow,
             CustomEventSuccessCriteria = request.CustomEventSuccessCriteria,
@@ -69,14 +69,14 @@ public class CreateExperimentMetricHandler : IRequestHandler<CreateExperimentMet
             TargetUrls = request.TargetUrls,
             UpdatedAt = DateTime.UtcNow
         };
-        await _service.AddOneAsync(em);
+        await _service.AddOneAsync(metric);
 
 
-        var user = await _userService.GetAsync(em.MaintainerUserId);
-        var emVm = _mapper.Map<ExperimentMetricVm>(em);
-        emVm.MaintainerEmail = user.Email;
-        emVm.MaintainerName = user.Name;
+        var user = await _userService.GetAsync(metric.MaintainerUserId);
+        var metricVm = _mapper.Map<ExperimentMetricVm>(metric);
+        metricVm.MaintainerEmail = user.Email;
+        metricVm.MaintainerName = user.Name;
 
-        return emVm;
+        return metricVm;
     }
 }

@@ -31,8 +31,8 @@ public class GetExperimentMetricListHandler : IRequestHandler<GetExperimentMetri
         var metrics = await _metricService.GetListAsync(request.EnvId, request.Filter);
         var users = await _userService.GetListAsync(metrics.Items.Select(x => x.MaintainerUserId));
 
-        var vms = _mapper.Map<PagedResult<ExperimentMetricVm>>(metrics);
-        foreach (var item in vms.Items)
+        var metricVms = _mapper.Map<PagedResult<ExperimentMetricVm>>(metrics);
+        foreach (var item in metricVms.Items)
         {
             var maintainer = users.FirstOrDefault(x => x.Id.ToString() == item.MaintainerUserId);
             if (maintainer == null)
@@ -44,6 +44,6 @@ public class GetExperimentMetricListHandler : IRequestHandler<GetExperimentMetri
             item.MaintainerName = maintainer.Name;
         }
 
-        return vms;
+        return metricVms;
     }
 }

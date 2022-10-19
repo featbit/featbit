@@ -27,8 +27,8 @@ public class ExperimentMetricController : ApiControllerBase
     public async Task<ApiResponse<ExperimentMetricVm>> CreateAsync(Guid envId, CreateExperimentMetric request)
     {
         request.EnvId = envId;
-        var emVm = await Mediator.Send(request);
-        return Ok(emVm);
+        var metricVm = await Mediator.Send(request);
+        return Ok(metricVm);
     }
 
     [HttpPut("{id:guid}")]
@@ -36,9 +36,9 @@ public class ExperimentMetricController : ApiControllerBase
     {
         request.Id = id;
 
-        var emVm = await Mediator.Send(request);
+        var metricVm = await Mediator.Send(request);
 
-        return Ok(emVm);
+        return Ok(metricVm);
     }
 
     [HttpPut("{id:guid}/archive")]

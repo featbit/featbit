@@ -67,10 +67,10 @@ public class UpdateExperimentMetricHandler : IRequestHandler<UpdateExperimentMet
         await _service.UpdateAsync(em);
 
         var user = await _userService.GetAsync(em.MaintainerUserId);
-        var emVm = _mapper.Map<ExperimentMetricVm>(em);
-        emVm.MaintainerEmail = user.Email;
-        emVm.MaintainerName = user.Name;
+        var metricVm = _mapper.Map<ExperimentMetricVm>(em);
+        metricVm.MaintainerEmail = user.Email;
+        metricVm.MaintainerName = user.Name;
 
-        return emVm;
+        return metricVm;
     }
 }
