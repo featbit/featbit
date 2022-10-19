@@ -16,8 +16,11 @@ public class ArchiveExperimentMetricHandler : IRequestHandler<ArchiveExperimentM
     
     public async Task<bool> Handle(ArchiveExperimentMetric request, CancellationToken cancellationToken)
     {
-        await _service.DeleteAsync(request.Id);
-        
+        var em = await _service.GetAsync(request.Id);
+        em.UpdatedAt = DateTime.UtcNow;
+        em.IsArvhived = true;
+        await _service.UpdateAsync(em);
+
         return true;
     }
 }

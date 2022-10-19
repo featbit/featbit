@@ -19,7 +19,8 @@ namespace Infrastructure.Experiments
             var filters = new List<FilterDefinition<ExperimentMetric>>
             {
                 // envId filter
-                filterBuilder.Eq(metric => metric.EnvId, envId)
+                filterBuilder.Eq(metric => metric.EnvId, envId),
+                filterBuilder.Eq(metric => metric.IsArvhived, false)
             };
 
             // name filter
