@@ -44,6 +44,8 @@ public class ConnectionTests
     [Fact]
     public async Task CloseConnection()
     {
+        _webSocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
+
         await _connection.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, 1662904887947);
 
         _webSocketMock.Verify(
