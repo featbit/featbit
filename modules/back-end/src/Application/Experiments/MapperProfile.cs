@@ -1,5 +1,4 @@
 using Application.Bases.Models;
-using Application.Experiments;
 using Domain.Experiments;
 
 namespace Application.Experiments;

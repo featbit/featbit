@@ -9,7 +9,8 @@ public class ExperimentMetricVm
     public Guid EnvId { get; set; }
     public string Description { get; set; }
     public string MaintainerUserId { get; set; }
-    public string MaintainerUserName { get; set; }
+    public string MaintainerName { get; set; }
+    public string MaintainerEmail { get; set; }
     public string EventName { get; set; }
     public EventType EventType { get; set; }
     public CustomEventTrackOption CustomEventTrackOption { get; set; }

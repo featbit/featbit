@@ -9,20 +9,41 @@ public class GetExperimentMetricList : IRequest<PagedResult<ExperimentMetricVm>>
     public ExperimentMetricFilter Filter { get; set; }
 }
 
-public class GetExperimentMetricListHandler : IRequestHandler<GetExperimentMetricList, PagedResult<ExperimentMetricVm>>
+public class GetExperimentMetricHandler : IRequestHandler<GetExperimentMetricList, PagedResult<ExperimentMetricVm>>
 {
-    private readonly IExperimentMetricService _service;
+    private readonly IExperimentMetricService _metricService;
+    private readonly IUserService _userService;
     private readonly IMapper _mapper;
 
-    public GetExperimentMetricListHandler(IExperimentMetricService service, IMapper mapper)
+    public GetExperimentMetricHandler(
+        IExperimentMetricService metricService,
+        IUserService userService,
+        IMapper mapper)
     {
-        _service = service;
+        _metricService = metricService;
+        _userService = userService;
         _mapper = mapper;
     }
 
-    public async Task<PagedResult<ExperimentMetricVm>> Handle(GetExperimentMetricList request, CancellationToken cancellationToken)
+    public async Task<PagedResult<ExperimentMetricVm>> Handle(GetExperimentMetricList request,
+        CancellationToken cancellationToken)
     {
-        var metrics = await _service.GetListAsync(request.EnvId, request.Filter);
-        return _mapper.Map<PagedResult<ExperimentMetricVm>>(metrics);
+        var metrics = await _metricService.GetListAsync(request.EnvId, request.Filter);
+        var users = await _userService.GetListAsync(metrics.Items.Select(x => x.MaintainerUserId));
+
+        var vms = _mapper.Map<PagedResult<ExperimentMetricVm>>(metrics);
+        foreach (var item in vms.Items)
+        {
+            var maintainer = users.FirstOrDefault(x => x.Id.ToString() == item.MaintainerUserId);
+            if (maintainer == null)
+            {
+                continue;
+            }
+
+            item.MaintainerEmail = maintainer.Email;
+            item.MaintainerName = maintainer.Name;
+        }
+
+        return vms;
     }
 }

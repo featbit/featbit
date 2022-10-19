@@ -23,7 +23,7 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<IEnumerable<User>> GetListAsync(IEnumerable<Guid> ids)
+    public async Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids)
     {
         return await _users.FindManyAsync(x => ids.Contains(x.Id));
     }
