@@ -28,8 +28,6 @@ public class UpdateExperimentMetricValidator : AbstractValidator<UpdateExperimen
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
-        RuleFor(x => x.EventName)
-            .NotEmpty().WithErrorCode(ErrorCodes.EventNameIsRequired);
         RuleFor(x => x.EventType)
             .NotEmpty().WithErrorCode(ErrorCodes.EventTypeIsRequired);
         RuleFor(x => x.MaintainerUserId)

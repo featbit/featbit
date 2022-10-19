@@ -44,5 +44,10 @@ namespace Infrastructure.Experiments
 
             return new PagedResult<ExperimentMetric>(totalCount, items);
         }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            await MongoDb.CollectionOf<ExperimentMetric>().DeleteOneAsync(x => x.Id == id);
+        }
     }
 }

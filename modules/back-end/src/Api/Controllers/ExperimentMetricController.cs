@@ -41,15 +41,15 @@ public class ExperimentMetricController : ApiControllerBase
         return Ok(emVm);
     }
 
-    //[HttpDelete("{id:guid}")]
-    //public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
-    //{
-    //    var request = new DeleteEnvironment
-    //    {
-    //        Id = id
-    //    };
+    [HttpDelete("{id:guid}")]
+    public async Task<ApiResponse<bool>> ArchiveAsync(Guid id)
+    {
+        var request = new ArchiveExperimentMetric
+        {
+            Id = id
+        };
 
-    //    var success = await Mediator.Send(request);
-    //    return Ok(success);
-    //}
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }

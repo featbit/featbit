@@ -43,7 +43,7 @@ export class MetricService {
   }
 
   deleteMetric(envId: string, id: string): Observable<any> {
-    const url = this.baseUrl + `/${envId}/${id}`;
+    const url = this.baseUrl + `/${id}`;
     return this.http.delete(url);
   }
 }
