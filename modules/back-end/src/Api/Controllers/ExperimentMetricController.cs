@@ -41,7 +41,7 @@ public class ExperimentMetricController : ApiControllerBase
         return Ok(emVm);
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpPut("{id:guid}/archive")]
     public async Task<ApiResponse<bool>> ArchiveAsync(Guid id)
     {
         var request = new ArchiveExperimentMetric

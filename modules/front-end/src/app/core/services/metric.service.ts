@@ -42,8 +42,8 @@ export class MetricService {
     return this.http.get(url);
   }
 
-  deleteMetric(envId: string, id: string): Observable<any> {
-    const url = this.baseUrl + `/${id}`;
-    return this.http.delete(url);
+  archiveMetric(envId: string, id: string): Observable<any> {
+    const url = this.baseUrl + `/${id}/archive`;
+    return this.http.put(url, {});
   }
 }

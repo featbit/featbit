@@ -97,7 +97,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
   errorMsgs: string[] = [];
   onDeleteClick(metric: IMetric, tpl: TemplateRef<void>) {
     this.isLoading = true;
-    this.metricService.deleteMetric(this.currentProjectEnv.envId, metric.id).subscribe(res => {
+    this.metricService.archiveMetric(this.currentProjectEnv.envId, metric.id).subscribe(res => {
       this.metricList = this.metricList.filter(m => metric.id !== m.id);
       this.isLoading = false;
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);
