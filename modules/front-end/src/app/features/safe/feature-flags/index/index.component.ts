@@ -19,6 +19,7 @@ import { ProjectService } from "@services/project.service";
 import { IEnvironment } from "@shared/types";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import {FeatureFlagService} from "@services/feature-flag.service";
+import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 
 @Component({
   selector: 'index',
@@ -253,7 +254,7 @@ export class IndexComponent implements OnInit {
 
   featureFlagNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
-    switchMap(value => this.featureFlagService.isNameUsed(value as string)),
+    switchMap(value => this.featureFlagService.isKeyUsed(value as string)),
     map(isNameUsed => {
       switch (isNameUsed) {
         case true:
@@ -275,7 +276,7 @@ export class IndexComponent implements OnInit {
     const name = this.featureFlagForm.get('name').value;
 
     this.featureFlagService.create(name)
-      .subscribe((result: IFfParams) => {
+      .subscribe((result: IFeatureFlag) => {
         this.featureFlagService.setCurrentFeatureFlag(result);
         this.toFeatureFlagDetail(result.id);
         this.creating = false;
@@ -316,17 +317,17 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  public onIntoFeatureFlagDetail(data: IFfParams) {
+  public onIntoFeatureFlagDetail(data: IFeatureFlag) {
     this.featureFlagService.setCurrentFeatureFlag(data);
-    this.toFeatureFlagDetail(data.id);
+    this.toFeatureFlagDetail(data.key);
   }
 
   public onIntoCompareAndCopy() {
     this.router.navigateByUrl('/compare-and-copy');
   }
 
-  private toFeatureFlagDetail(id: string) {
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(id)}/targeting`);
+  private toFeatureFlagDetail(key: string) {
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`);
   }
 
   // 转换本地时间

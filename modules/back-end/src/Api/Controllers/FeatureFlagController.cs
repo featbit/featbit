@@ -69,10 +69,10 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}/un-archive")]
-    public async Task<ApiResponse<bool>> UnArchiveAsync(Guid id)
+    [HttpPut("{id:guid}/restore")]
+    public async Task<ApiResponse<bool>> RestoreAsync(Guid id)
     {
-        var request = new UnArchiveFeatureFlag
+        var request = new RestoreFeatureFlag
         {
             Id = id
         };
