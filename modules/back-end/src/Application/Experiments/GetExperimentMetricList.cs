@@ -9,12 +9,12 @@ public class GetExperimentMetricList : IRequest<PagedResult<ExperimentMetricVm>>
     public ExperimentMetricFilter Filter { get; set; }
 }
 
-public class GetExperimentMetricHandler : IRequestHandler<GetExperimentMetricList, PagedResult<ExperimentMetricVm>>
+public class GetExperimentMetricListHandler : IRequestHandler<GetExperimentMetricList, PagedResult<ExperimentMetricVm>>
 {
     private readonly IExperimentMetricService _service;
     private readonly IMapper _mapper;
 
-    public GetExperimentMetricHandler(IExperimentMetricService service, IMapper mapper)
+    public GetExperimentMetricListHandler(IExperimentMetricService service, IMapper mapper)
     {
         _service = service;
         _mapper = mapper;

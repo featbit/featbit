@@ -92,9 +92,9 @@ export class MetricsComponent implements OnInit, OnDestroy {
   private setMaintainerNames() {
     const unMatchedUserIds: string[] = [];
     this.metricList = this.metricList.map(m => {
-      const match = this.accountMemberList.find(r => r.userId === m.maintainerUserId);
+      const match = this.accountMemberList.find(r => r.id === m.maintainerUserId);
       if (match) {
-        return Object.assign({}, m, { maintainerName: match.userName });
+        return Object.assign({}, m, { maintainerName: match.name });
       } else {
         unMatchedUserIds.push(m.maintainerUserId);
         return Object.assign({}, m);
@@ -103,9 +103,9 @@ export class MetricsComponent implements OnInit, OnDestroy {
 
     if (unMatchedUserIds.length > 0) {
       this.teamService.getMembers(this.currentAccount.id).subscribe((result) => {
-        this.accountMemberList = result;
+        this.accountMemberList = result.items;
         this.metricList = this.metricList.map(m => {
-          return Object.assign({}, m, { maintainerName: result.find(r => r.userId === m.maintainerUserId)?.userName });
+          return Object.assign({}, m, { maintainerName: result.items.find(r => r.id === m.maintainerUserId)?.userName });
         });
         this.isLoading = false;
       }, _ => {

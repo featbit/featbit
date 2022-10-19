@@ -34,8 +34,8 @@
             <ng-container *ngFor="let o of maintainerList">
               <nz-option
                 *ngIf="!isMaintainersLoading"
-                [nzValue]="o.userId"
-                [nzLabel]="o.userName || o.email">
+                [nzValue]="o.id"
+                [nzLabel]="o.name || o.email">
               </nz-option>
             </ng-container>
             <nz-option *ngIf="isMaintainersLoading" nzDisabled nzCustomContent>
