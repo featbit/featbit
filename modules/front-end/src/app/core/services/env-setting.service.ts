@@ -9,7 +9,7 @@ import { Observable } from "rxjs";
   providedIn: 'root'
 })
 export class EnvSettingService {
-  get baseUrl() {
+  get baseUrl() { 
     const envId = getCurrentProjectEnv().envId;
 
     return `${environment.url}/api/v1/envs/${envId}/settings`
@@ -18,14 +18,14 @@ export class EnvSettingService {
   constructor(private http: HttpClient) { }
 
   get(type: string): Observable<EnvironmentSetting[]> {
-    return this.http.get<EnvironmentSetting[]>(this.baseUrl, {params: {type}});
+    return this.http.get<EnvironmentSetting[]>(this.baseUrl, { params: { type }});
   }
 
   upsert(settings: EnvironmentSetting[]): Observable<EnvironmentSetting[]> {
-    return this.http.put<EnvironmentSetting[]>(this.baseUrl, settings);
+    return this.http.put<EnvironmentSetting[]>(this.baseUrl, { settings });
   }
 
   delete(settingId: string): Observable<EnvironmentSetting[]> {
-    return this.http.delete<EnvironmentSetting[]>(this.baseUrl, {params: {settingId}});
+    return this.http.delete<EnvironmentSetting[]>(this.baseUrl + '/' + settingId);
   }
 }

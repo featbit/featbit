@@ -11,7 +11,7 @@ export class DataSyncService {
 
   get baseUrl() {
     const envId = getCurrentProjectEnv().envId;
-    return `${environment.url}/api/datasync/envs/${envId}`;
+    return `${environment.url}/api/v1/envs/${envId}/data-sync`;
   }
 
   constructor(private http: HttpClient) { }
@@ -25,6 +25,6 @@ export class DataSyncService {
   }
 
   syncToRemote(settingId: string): Observable<string> {
-    return this.http.put(`${this.baseUrl}/sync-to-remote?settingId=${settingId}`, { }, { responseType: 'text' });
+    return this.http.put(`${this.baseUrl}/to-remote?settingId=${settingId}`, { }, { responseType: 'text' });
   }
 }
