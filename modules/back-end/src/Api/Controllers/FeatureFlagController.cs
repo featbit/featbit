@@ -93,6 +93,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    [HttpPut("{id:guid}/toggle")]
+    public async Task<ApiResponse<bool>> ToggleAsync(Guid id)
+    {
+        var request = new ToggleFeatureFlag
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
     [HttpPut("{id:guid}/settings")]
     public async Task<ApiResponse<bool>> UpdateSettingAsync(Guid id, UpdateSetting request)
     {
