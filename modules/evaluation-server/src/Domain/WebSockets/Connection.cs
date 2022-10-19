@@ -44,9 +44,12 @@ public class Connection
 
     public async Task CloseAsync(WebSocketCloseStatus status, string description, long closeAt)
     {
-        CloseAt = closeAt;
+        if (WebSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
+        {
+            await WebSocket.CloseOutputAsync(status, description, CancellationToken.None);
+        }
 
-        await WebSocket.CloseOutputAsync(status, description, CancellationToken.None);
+        CloseAt = closeAt;
     }
 
     [ExcludeFromCodeCoverage]
