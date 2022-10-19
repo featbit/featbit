@@ -29,7 +29,7 @@ export class MetricService {
 
   updateMetric(params: IMetric): Observable<any> {
     const url = this.baseUrl;
-    return this.http.put(url, params);
+    return this.http.put(url + `/${params.id}`, params);
   }
 
   getMetrics(params: any): Observable<any> {

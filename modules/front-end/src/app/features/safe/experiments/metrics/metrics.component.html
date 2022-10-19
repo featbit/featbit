@@ -67,7 +67,7 @@
               click
             </ng-container>
           </td>
-          <td>{{ data.maintainerName }}</td>
+          <td>{{ data.maintainerName || data.maintainerEmail }}</td>
           <td>
             <a style="color: #23AD7F" (click)="onCreateOrEditClick(data)" i18n="@@common.edit">Edit</a>
             <nz-divider nzType="vertical"></nz-divider>

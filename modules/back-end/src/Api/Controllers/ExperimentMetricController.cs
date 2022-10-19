@@ -24,10 +24,32 @@ public class ExperimentMetricController : ApiControllerBase
 
 
     [HttpPost]
-    public async Task<ApiResponse<ExperimentMetric>> CreateAsync(Guid envId, CreateExperimentMetric request)
+    public async Task<ApiResponse<ExperimentMetricVm>> CreateAsync(Guid envId, CreateExperimentMetric request)
     {
         request.EnvId = envId;
-        var em = await Mediator.Send(request);
-        return Ok(em);
+        var emVm = await Mediator.Send(request);
+        return Ok(emVm);
     }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ApiResponse<ExperimentMetricVm>> UpdateAsync(Guid id, UpdateExperimentMetric request)
+    {
+        request.Id = id;
+
+        var emVm = await Mediator.Send(request);
+
+        return Ok(emVm);
+    }
+
+    //[HttpDelete("{id:guid}")]
+    //public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
+    //{
+    //    var request = new DeleteEnvironment
+    //    {
+    //        Id = id
+    //    };
+
+    //    var success = await Mediator.Send(request);
+    //    return Ok(success);
+    //}
 }

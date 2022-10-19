@@ -232,8 +232,7 @@ export class MetricDrawerComponent implements OnInit {
         .subscribe(
           res => {
             this.isLoading = false;
-            const maintainer = this.maintainerList.find(m => m.id === res.maintainerUserId);
-            this.close.emit({isEditing: true, data: {...res, maintainerName: maintainer.userName }});
+            this.close.emit({isEditing: true, data: {...res }});
             this.message.success($localize `:@@common.operation-success:Operation succeeded`);
           },
           _ => {
@@ -250,8 +249,7 @@ export class MetricDrawerComponent implements OnInit {
         .subscribe(
           res => {
             this.isLoading = false;
-            const maintainer = this.maintainerList.find(m => m.id === res.maintainerUserId);
-            this.close.emit({isEditing: false, data: {...res, maintainerName: maintainer.userName }});
+            this.close.emit({isEditing: false, data: {...res }});
             this.message.success($localize `:@@common.operation-success:Operation succeeded`);
           },
           _ => {

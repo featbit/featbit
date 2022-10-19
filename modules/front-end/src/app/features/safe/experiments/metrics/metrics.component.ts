@@ -77,43 +77,14 @@ export class MetricsComponent implements OnInit, OnDestroy {
       }).subscribe((result: any) => {
         if (result) {
           this.metricList = result.items;
-          this.setMaintainerNames();
-        } else {
-          this.isLoading = false;
         }
+        this.isLoading = false;
       }, _ => {
         this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`);
         this.isLoading = false;
       })
     });
     this.search$.next('');
-  }
-
-  private setMaintainerNames() {
-    const unMatchedUserIds: string[] = [];
-    this.metricList = this.metricList.map(m => {
-      const match = this.accountMemberList.find(r => r.id === m.maintainerUserId);
-      if (match) {
-        return Object.assign({}, m, { maintainerName: match.name });
-      } else {
-        unMatchedUserIds.push(m.maintainerUserId);
-        return Object.assign({}, m);
-      }
-    });
-
-    if (unMatchedUserIds.length > 0) {
-      this.teamService.getMembers(this.currentAccount.id).subscribe((result) => {
-        this.accountMemberList = result.items;
-        this.metricList = this.metricList.map(m => {
-          return Object.assign({}, m, { maintainerName: result.items.find(r => r.id === m.maintainerUserId)?.userName });
-        });
-        this.isLoading = false;
-      }, _ => {
-        this.isLoading = false;
-      });
-    } else {
-      this.isLoading = false;
-    }
   }
 
   onCreateOrEditClick(metric?: IMetric) {

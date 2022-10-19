@@ -1,11 +1,11 @@
 using Application.Bases;
-using Application.Users;
 using Domain.Experiments;
 
 namespace Application.Experiments;
 
-public class CreateExperimentMetric : IRequest<ExperimentMetricVm>
+public class UpdateExperimentMetric : IRequest<ExperimentMetricVm>
 {
+    public Guid Id { get; set; }
     public Guid EnvId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
@@ -22,9 +22,9 @@ public class CreateExperimentMetric : IRequest<ExperimentMetricVm>
     public bool IsArvhived { get; set; }
 }
 
-public class CreateExperimentMetricValidator : AbstractValidator<CreateExperimentMetric>
+public class UpdateExperimentMetricValidator : AbstractValidator<UpdateExperimentMetric>
 {
-    public CreateExperimentMetricValidator()
+    public UpdateExperimentMetricValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
@@ -37,14 +37,14 @@ public class CreateExperimentMetricValidator : AbstractValidator<CreateExperimen
     }
 }
 
-public class CreateExperimentMetricHandler : IRequestHandler<CreateExperimentMetric, ExperimentMetricVm>
+public class UpdateExperimentMetricHandler : IRequestHandler<UpdateExperimentMetric, ExperimentMetricVm>
 {
     private readonly IExperimentMetricService _service;
     private readonly IUserService _userService;
     private readonly IMapper _mapper;
 
-    public CreateExperimentMetricHandler(IExperimentMetricService service,
-        IUserService userService,
+    public UpdateExperimentMetricHandler(IExperimentMetricService service,
+        IUserService userService, 
         IMapper mapper)
     {
         _service = service;
@@ -52,27 +52,21 @@ public class CreateExperimentMetricHandler : IRequestHandler<CreateExperimentMet
         _mapper = mapper;
     }
 
-    public async Task<ExperimentMetricVm> Handle(CreateExperimentMetric request, CancellationToken cancellationToken)
+    public async Task<ExperimentMetricVm> Handle(UpdateExperimentMetric request, CancellationToken cancellationToken)
     {
-        var em = new ExperimentMetric()
-        {
-            CreatedAt = DateTime.UtcNow,
-            CustomEventSuccessCriteria = request.CustomEventSuccessCriteria,
-            CustomEventTrackOption = request.CustomEventTrackOption,
-            CustomEventUnit = request.CustomEventUnit,
-            Description = request.Description,
-            ElementTargets = request.ElementTargets,
-            EnvId = request.EnvId,
-            EventName = request.EventName,
-            EventType = request.EventType,
-            IsArvhived = request.IsArvhived,
-            MaintainerUserId = request.MaintainerUserId,
-            Name = request.Name,
-            TargetUrls = request.TargetUrls,
-            UpdatedAt = DateTime.UtcNow
-        };
-        await _service.AddOneAsync(em);
-
+        var em = await _service.GetAsync(request.Id);
+        em.UpdatedAt = DateTime.UtcNow;
+        em.Description = request.Description;
+        em.EventName = request.EventName;
+        em.EventType = request.EventType;
+        em.MaintainerUserId = request.MaintainerUserId;
+        em.CustomEventSuccessCriteria = request.CustomEventSuccessCriteria;
+        em.CustomEventUnit = request.CustomEventUnit;
+        em.CustomEventTrackOption = request.CustomEventTrackOption;
+        em.ElementTargets = request.ElementTargets;
+        em.TargetUrls = request.TargetUrls;
+        em.Name = request.Name;
+        await _service.UpdateAsync(em);
 
         var user = await _userService.GetAsync(em.MaintainerUserId);
         var emVm = _mapper.Map<ExperimentMetricVm>(em);
