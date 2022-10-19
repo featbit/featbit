@@ -270,7 +270,7 @@ export class IndexComponent implements OnInit {
     this.featureFlagService.create(name)
       .subscribe((result: IFeatureFlag) => {
         this.featureFlagService.setCurrentFeatureFlag(result);
-        this.toFeatureFlagDetail(result.id);
+        this.toFeatureFlagDetail(result.key);
         this.creating = false;
       }, err => {
         this.msg.error(err.error);
