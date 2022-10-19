@@ -1,3 +1,4 @@
+using Domain.MessageHandlers;
 using Domain.WebSockets;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Internal;
@@ -21,7 +22,11 @@ public static class ServicesRegister
         builder.Services.TryAddSingleton<ISystemClock, SystemClock>();
         builder.Services.AddSingleton<IConnectionManager, ConnectionManager>();
         builder.Services.AddScoped<IConnectionHandler, ConnectionHandler>();
-        builder.Services.AddTransient<IMessageHandler, MessageHandler>();
+
+        // message handlers
+        builder.Services.AddTransient<IMessageHandler, PingMessageHandler>();
+        builder.Services.AddTransient<IMessageHandler, EchoMessageHandler>();
+        builder.Services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
         return builder;
     }
