@@ -1083,13 +1083,6 @@
           <context context-type="linenumber">33</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="guide.guides-subtitle" datatype="html">
-        <source>Guides use the same demo sample (dino game)</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">34</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="guide.testing-in-production" datatype="html">
         <source>Testing in production</source>
         <context-group purpose="location">
@@ -1112,7 +1105,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="guide.empower-teams" datatype="html">
-        <source>Empower all teams deliver, control and experiment with</source>
+        <source>Entitlement management</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">38</context>
