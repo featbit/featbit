@@ -2,7 +2,7 @@
 
 ## Build & Run
 1. `cd ./featbit/modules/evaluation-server`
-2. `docker build --progress plain -f ./depoly/Dockerfile -t featbit/evaluation-server .`
+2. `docker build --progress plain -f ./deploy/Dockerfile -t featbit/evaluation-server .`
 3. `docker run -d -p 6000:6000 --name featbit-evaluation-server featbit/evaluation-server`
 
 ## Health Check
