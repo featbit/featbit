@@ -9,7 +9,7 @@
     <div class="selected-target-users" nz-row *ngIf="selectedUserDetailList.length">
       <div nz-col class="target-user" *ngFor="let user of selectedUserDetailList">
         <div i18n-nz-tooltip="@@common.click-to-edit" nz-tooltip="Click to edit" class="inner-box" (click)="openEditModal(user)">
-          {{user.name}}
+          {{user?.name}}
         </div>
         <button nz-button nzType="default" [nzSize]="'large'" (click)="removeUser(user)"><i nz-icon nzType="close"></i></button>
       </div>

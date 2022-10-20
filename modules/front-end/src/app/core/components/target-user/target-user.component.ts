@@ -148,6 +148,7 @@ export class TargetUserComponent implements OnInit {
       this.selectedUserDetailList = this.selectedUserDetailList.map(s => s.keyId === user.keyId ? {...user} : s);
       this.onSelectedUserListChange.next(this.selectedUserDetailList);
       this.saving = false;
+      this.msg.success($localize `:@@common.save-success:Saved Successfully`);
       this.closeEditModal();
     }, _ => {
       this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);

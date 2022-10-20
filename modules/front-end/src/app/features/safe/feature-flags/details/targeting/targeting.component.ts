@@ -90,7 +90,10 @@ export class TargetingComponent implements OnInit {
         if (userKeyIds.length > 0) {
           this.envUserService.getUsersByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
             this.targetingUsersByVariation = this.featureFlag.variations.reduce((acc, cur) => {
-              acc[cur.id] =  this.featureFlag.targetUsers.find(tu => tu.variationId === cur.id)?.keyIds?.map(keyId => users.find(u => u.keyId === keyId)) || [];
+              acc[cur.id] =  this.featureFlag.targetUsers
+                .find(tu => tu.variationId === cur.id)
+                ?.keyIds
+                ?.map(keyId => users.find(u => u.keyId === keyId) || { id: keyId, keyId, name: keyId, customizedProperties: []}) || [];
               return acc;
             }, {});
 
