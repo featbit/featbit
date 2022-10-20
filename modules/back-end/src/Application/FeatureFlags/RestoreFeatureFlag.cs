@@ -2,12 +2,12 @@ using Application.Users;
 
 namespace Application.FeatureFlags;
 
-public class UnArchiveFeatureFlag : IRequest<bool>
+public class RestoreFeatureFlag : IRequest<bool>
 {
     public Guid Id { get; set; }
 }
 
-public class UnArchiveFeatureFlagHandler : IRequestHandler<UnArchiveFeatureFlag, bool>
+public class UnArchiveFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, bool>
 {
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
@@ -18,7 +18,7 @@ public class UnArchiveFeatureFlagHandler : IRequestHandler<UnArchiveFeatureFlag,
         _currentUser = currentUser;
     }
 
-    public async Task<bool> Handle(UnArchiveFeatureFlag request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(RestoreFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.Id);
         flag.UnArchive(_currentUser.Id);

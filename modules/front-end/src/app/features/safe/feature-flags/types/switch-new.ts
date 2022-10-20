@@ -18,7 +18,7 @@ export interface IFfParams {
     id: string;
     name: string;
     type: FeatureFlagType;
-    keyName: string;
+    key: string;
     environmentId: number;
     creatorUserId: string;
     status: 'Enabled' | 'Disabled';

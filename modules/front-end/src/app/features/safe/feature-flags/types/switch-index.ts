@@ -1,5 +1,5 @@
 ﻿import { NzTreeNodeOptions } from "ng-zorro-antd/core/tree/nz-tree-base-node";
-import { FeatureFlagParams, IVariationOption } from "@features/safe/feature-flags/types/switch-new";
+import {FeatureFlagParams} from "@features/safe/feature-flags/types/switch-new";
 
 export interface IFeatureFlagListModel {
   items: IFeatureFlagListItem[];
@@ -14,13 +14,12 @@ export interface IFeatureFlagListItem {
   isEnabled: boolean;
   updatedAt: Date;
   variationType: string;
-  variationOverview: IVariationOverview,
+  serves: IVariationOverview,
 }
 
 export interface IVariationOverview {
-  variationWhenOff: IVariationOption,
-  variationsWhenOn: IVariationOption[],
-  variationsWhenOnStr: string[]
+  disabledVariation: string,
+  enabledVariations: string[],
 }
 
 export interface IFeatureFlagListCheckItem {
@@ -37,7 +36,7 @@ export interface ICopyToEnvResult {
 export class IFeatureFlagListFilter {
   name?: string;
   userKeyId?: string;
-  status?: string;
+  isEnabled?: boolean;
   tagIds?: number[];
   pageIndex: number;
   pageSize: number;
@@ -45,13 +44,13 @@ export class IFeatureFlagListFilter {
   constructor(
     name?: string,
     userKeyId?: string,
-    status?: string,
+    isEnabled?: boolean,
     tagIds?: number[],
     pageIndex: number = 1,
     pageSize: number = 10) {
     this.name = name ?? '';
     this.userKeyId = userKeyId ?? '';
-    this.status = status ?? '';
+    this.isEnabled = isEnabled;
     this.tagIds = tagIds ?? [];
     this.pageIndex = pageIndex;
     this.pageSize = pageSize;
@@ -74,14 +73,6 @@ export interface IFeatureFlagDropdown {
 export interface IFeatureFlagDetail {
   featureFlag: FeatureFlagParams;
   tags: string[];
-}
-
-export interface IUpdateSettingPayload {
-  name: string;
-  status: string;
-  variationOptionWhenDisabled: IVariationOption;
-  variationOptions: IVariationOption[];
-  variationDataType: string;
 }
 
 export class FeatureFlagTagTree {

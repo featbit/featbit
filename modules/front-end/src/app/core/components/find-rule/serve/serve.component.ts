@@ -25,7 +25,7 @@ export class ServeComponent implements OnInit {
 
   @Output() onPercentageChange = new EventEmitter<IRuleVariation[]>();
 
-  selectedVariationId: string = '';
+  selectedVariationId: string = '-1';
   ruleVariationValues: IRuleVariationValue[] = [];
   result: IRuleVariation[] = [];
 
@@ -40,7 +40,7 @@ export class ServeComponent implements OnInit {
         percentageValue: idx === 0 ? 100 : 0
       }));
     } else {
-      this.selectedVariationId = '';
+      this.selectedVariationId = '-1';
       this.ruleVariationValues = this.availableVariations.map(v => {
         const rule = this.ruleVariations.find(x => x.id === v.id);
         const result = {
@@ -58,7 +58,7 @@ export class ServeComponent implements OnInit {
   }
 
   public modelChange() {
-    if(this.selectedVariationId === '') {
+    if(this.selectedVariationId === '-1') {
       let currentRollout = [0, 0];
       this.result = this.ruleVariationValues.map(r => {
         currentRollout = [currentRollout[1], parseFloat((currentRollout[1] + r.percentageValue / 100.0).toFixed(2))]

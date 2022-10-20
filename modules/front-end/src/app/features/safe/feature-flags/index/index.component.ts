@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { IFfParams } from '../types/switch-new';
 import { encodeURIComponentFfc } from '@shared/utils';
 import { SwitchTagTreeService } from "@services/switch-tag-tree.service";
 import {
@@ -19,6 +18,7 @@ import { ProjectService } from "@services/project.service";
 import { IEnvironment } from "@shared/types";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import {FeatureFlagService} from "@services/feature-flag.service";
+import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 
 @Component({
   selector: 'index',
@@ -205,13 +205,6 @@ export class IndexComponent implements OnInit {
     this.featureFlagService
       .getList(this.featureFlagFilter)
       .subscribe((featureFlags: IFeatureFlagListModel) => {
-        // if (featureFlags && featureFlags.items && featureFlags.items.length > 0) {
-        //   for (let i = 0; i < featureFlags.items.length; i++) {
-        //     let item = featureFlags.items[i];
-        //     item.variationOverview.variationsWhenOn = item.variationOverview.variationsWhenOn.sort(function(a, b){return a.localId - b.localId;});
-        //     item.variationOverview.variationsWhenOnStr =  item.variationOverview.variationsWhenOn.map(p=>p.variationValue);
-        //   }
-        // }
         this.featureFlagListModel = featureFlags;
         this.Loading = false;
       });
@@ -253,7 +246,7 @@ export class IndexComponent implements OnInit {
 
   featureFlagNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
-    switchMap(value => this.featureFlagService.isNameUsed(value as string)),
+    switchMap(value => this.featureFlagService.isKeyUsed(value as string)),
     map(isNameUsed => {
       switch (isNameUsed) {
         case true:
@@ -275,9 +268,9 @@ export class IndexComponent implements OnInit {
     const name = this.featureFlagForm.get('name').value;
 
     this.featureFlagService.create(name)
-      .subscribe((result: IFfParams) => {
+      .subscribe((result: IFeatureFlag) => {
         this.featureFlagService.setCurrentFeatureFlag(result);
-        this.toFeatureFlagDetail(result.id);
+        this.toFeatureFlagDetail(result.key);
         this.creating = false;
       }, err => {
         this.msg.error(err.error);
@@ -291,42 +284,36 @@ export class IndexComponent implements OnInit {
   }
 
   //#endregion
-
-  onChangeFeatureFlagStatus(data: IFfParams): void {
-    if (data.status === 'Enabled') {
-      this.featureFlagService.changeFeatureFlagStatus(data.id, 'Disabled')
-        .subscribe(_ => {
-          const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-            data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
-          this.msg.success(msg);
-          data.status = 'Disabled';
-        }, _ => {
-          this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
-        });
-    } else if (data.status === 'Disabled') {
-      this.featureFlagService.changeFeatureFlagStatus(data.id, 'Enabled')
-        .subscribe(_ => {
-          const msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-            data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
-          this.msg.success(msg);
-          data.status = 'Enabled';
-        }, _ => {
-          this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
-        });
+  onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
+    let msg: string;
+    if (data.isEnabled) {
+      msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
+        data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
+    } else {
+      msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
+        data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
     }
+
+    this.featureFlagService.toggleStatus(data.id)
+      .subscribe(_ => {
+        this.msg.success(msg);
+        data.isEnabled = !data.isEnabled;
+      }, _ => {
+        this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
+      });
   }
 
-  public onIntoFeatureFlagDetail(data: IFfParams) {
+  public onIntoFeatureFlagDetail(data: IFeatureFlag) {
     this.featureFlagService.setCurrentFeatureFlag(data);
-    this.toFeatureFlagDetail(data.id);
+    this.toFeatureFlagDetail(data.key);
   }
 
   public onIntoCompareAndCopy() {
     this.router.navigateByUrl('/compare-and-copy');
   }
 
-  private toFeatureFlagDetail(id: string) {
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(id)}/targeting`);
+  private toFeatureFlagDetail(key: string) {
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`);
   }
 
   // 转换本地时间

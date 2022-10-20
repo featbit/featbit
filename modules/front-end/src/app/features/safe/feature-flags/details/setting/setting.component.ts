@@ -1,19 +1,20 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {NzModalService} from 'ng-zorro-antd/modal';
-import {SwitchV1Service} from '@services/switch-v1.service';
-import {FeatureFlagParams, IFfParams, IVariationOption, VariationDataTypeEnum} from '../../types/switch-new';
-import {IZeroCode} from '../../types/zero-code';
 import {MessageQueueService} from '@services/message-queue.service';
-import {SwitchV2Service} from '@services/switch-v2.service';
-import {IFeatureFlagDetail, IUpdateSettingPayload} from '@features/safe/feature-flags/types/switch-index';
 import {IProjectEnv} from '@shared/types';
 import {CURRENT_PROJECT} from '@utils/localstorage-keys';
-import {isNumeric, tryParseJSONObject} from "@utils/index";
+import {isNumeric, tryParseJSONObject, uuidv4} from "@utils/index";
 import {editor} from "monaco-editor";
-import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
-import {DataSyncService} from "@services/data-sync.service";
+import {FeatureFlagService} from "@services/feature-flag.service";
+import {
+  FeatureFlag,
+  IFeatureFlag,
+  ISettingPayload, IVariationsPayload,
+  VariationTypeEnum
+} from "@features/safe/feature-flags/types/details";
+import {IVariation} from "@shared/rules";
 
 @Component({
   selector: 'flag-setting',
@@ -22,16 +23,16 @@ import {DataSyncService} from "@services/data-sync.service";
 })
 export class SettingComponent implements OnInit {
 
-  trackById(_, v: IVariationOption) {
-    return v.localId;
+  trackById(_, v: IVariation) {
+    return v.id;
   }
 
-  compareWith(o1: IVariationOption, o2: IVariationOption): boolean {
+  compareWith(o1: string, o2: string): boolean {
     if (!o1 || !o2) {
       return false;
     }
 
-    return o1?.localId === o2?.localId;
+    return o1 === o2;
   }
 
   copyText(text: string) {
@@ -40,39 +41,27 @@ export class SettingComponent implements OnInit {
     );
   }
 
-  public currentSwitch: IFfParams = null;
-  public originalVariationOptions: IVariationOption[];
-  public variationOptions: IVariationOption[];
-  public variationDataType: VariationDataTypeEnum = VariationDataTypeEnum.string;
-  private temporaryStateId: number = -1;
-  public featureDetail: FeatureFlagParams;
+  public originalVariations: IVariation[];
+  public featureFlag: FeatureFlag = {} as FeatureFlag;
   public isLoading = true;
   public isEditingTitle = false;
-  public switchStatus: boolean = true;
-  public isEditingVariationOptions = false;
-  public id: string = null;
-  public quickStartDeliverFlag: boolean = false;
-  tags: string[] = [];
-  tutorial = '';
+  public isEditingVariations = false;
+  public key: string = null;
   currentProjectEnv: IProjectEnv = null;
-  isArchived: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchV1Service,
-    private switchServeV2: SwitchV2Service,
+    private featureFlagService: FeatureFlagService,
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
     private modal: NzModalService,
-    private router: Router,
-    private dataSyncService: DataSyncService,
-    private sanitizer: DomSanitizer
+    private router: Router
   ) {
     this.isLoading = true;
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     this.route.paramMap.subscribe( paramMap => {
-      this.id = decodeURIComponent(paramMap.get('id'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.id), () => this.loadData());
+      this.key = decodeURIComponent(paramMap.get('key'));
+      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), () => this.loadData());
       this.loadData();
     })
   }
@@ -94,164 +83,125 @@ export class SettingComponent implements OnInit {
   }
 
   private loadData() {
-    this.switchServeV2.getDetail(this.id).subscribe((result: IFeatureFlagDetail) => {
-      this.featureDetail = new FeatureFlagParams(result.featureFlag);
-      this.tags = result.tags || [];
-
-      this.initSwitchStatus();
-      this.variationOptions = this.featureDetail.getVariationOptions();
-      this.originalVariationOptions = [...this.variationOptions];
-      this.variationDataType = this.featureDetail.getVariationDataType();
-      this.isArchived = this.featureDetail.getIsArchived();
-
-      this.currentSwitch = this.featureDetail.getSwicthDetail();
-      this.switchServe.setCurrentSwitch(this.currentSwitch);
+    this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
+      this.featureFlag = new FeatureFlag(result);
+      this.originalVariations = [...this.featureFlag.variations];
+      this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
       this.isLoading = false;
     }, () => this.isLoading = false)
   }
 
-  // 初始化开关状态
-  private initSwitchStatus() {
-    this.switchStatus = this.featureDetail.getFeatureStatus() === 'Enabled';
+  public onChangeStatus() {
+    this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
+    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
   }
 
-  openTutorial(lan: string): void {
-    let config = {
-      "react": "http://featureflag.moyincloud.com/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/React_Web_APP.html",
-      "javascript": "http://featureflag.moyincloud.com/SDK/Javascript_Web_APP.html",
-      "wechat-mini-program": "http://featureflag.moyincloud.com/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html",
-      "python": "http://featureflag.moyincloud.com/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/Python_%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html",
-      "java-server": "http://featureflag.moyincloud.com/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/Java_%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html",
-      "spring-boot": "http://featureflag.moyincloud.com/%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/Spring_Boot_%E5%BA%94%E7%94%A8%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8.html"
-    };
-    let href = config[lan];
-    window.open(
-      href,
-      '_blank' // <- This is what makes it open in a new window.
-    );
-  }
-
-  // 切换开关状态
-  public onChangeSwitchStatus() {
-    if (this.switchStatus){
-      this.featureDetail.setFeatureStatus('Disabled');
-    } else {
-      this.featureDetail.setFeatureStatus('Enabled');
-    }
-
-    this.switchStatus = !this.switchStatus;
-    this.onSaveSwitch(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.id)));
-  }
-
-  onChangeDisabledStatusVariationOption() {
-    this.onSaveSwitch(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.id)));
+  onChangeDisabledVariation() {
+    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
   }
 
   toggleTitleEditState(): void {
     this.isEditingTitle = !this.isEditingTitle;
   }
 
-  toggleVariationOptionEditState(): void {
-    this.isEditingVariationOptions = !this.isEditingVariationOptions;
+  toggleVariationEditState(): void {
+    this.isEditingVariations = !this.isEditingVariations;
   }
 
-  saveVariationOptions() {
-    if (!this.validateVariationDataTypes()) {
+  saveVariations() {
+    if (!this.validateVariationTypes()) {
       this.message.error($localize `:@@ff.variation.type-value-not-match:The type and value of the variation don't match`);
       return;
     }
-    this.toggleVariationOptionEditState();
-    this.onSaveSwitch(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.id)));
+    this.toggleVariationEditState();
+
+    const { id, variationType, variations } = this.featureFlag;
+    const payload: IVariationsPayload = { id, variationType: variationType || VariationTypeEnum.string, variations: variations.filter(v => !v.isInvalid) };
+
+    this.featureFlagService.updateVariations(payload)
+      .subscribe(() => {
+        this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.isEditingTitle = false;
+        this.originalVariations = [...this.featureFlag.variations];
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
+      }, errResponse => this.message.error(errResponse.error));
   }
 
-  zeroCode: IZeroCode = null;
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe(queryMap => {
-      if (queryMap.has('tutorial')) {
-        this.tutorial = queryMap.get('tutorial');
-      }
-    })
   }
 
   addVariationOption(): void {
-    this.variationOptions = [
-      ...this.variationOptions,
+    this.featureFlag.variations = [
+      ...this.featureFlag.variations,
       {
-        localId: this.temporaryStateId,
-        displayOrder: null,
-        variationValue: null
+        id: uuidv4(),
+        value: null
       }
     ];
-
-    this.temporaryStateId -= 1;
   }
 
-  currentEditingVariationOption: IVariationOption = null;
-  optionValueExpandVisible = false;
+  currentEditingVariation: IVariation = null;
+  variationValueExpandVisible = false;
   expandReadonly = true;
-  expandVariationOption(v: IVariationOption, readonly: boolean = false) {
-    this.currentEditingVariationOption = {...v};
-    this.optionValueExpandVisible = true;
+  expandVariationOption(v: IVariation, readonly: boolean = false) {
+    this.currentEditingVariation = {...v};
+    this.variationValueExpandVisible = true;
     this.expandReadonly = readonly;
   }
 
   saveOptionValue() {
-    this.variationOptions = this.variationOptions.map(v => {
-      return v.localId === this.currentEditingVariationOption.localId ? {...this.currentEditingVariationOption} : v
+    this.featureFlag.variations = this.featureFlag.variations.map(v => {
+      return v.id === this.currentEditingVariation.id ? {...this.currentEditingVariation} : v
     });
 
-    this.optionValueExpandVisible = false;
+    this.variationValueExpandVisible = false;
   }
 
-  deleteVariationOptionRow(id: number): void {
-    if(this.featureDetail.getTargetIndividuals()?.find(x => x.valueOption.localId === id)?.individuals?.length > 0) {
+  deleteVariationRow(id: string): void {
+    if(this.featureFlag.targetUsers?.find(x => x.variationId === id)?.keyIds?.length > 0) {
       this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by targeting users, remove the reference before it can be safely removed`);
       return;
     }
 
-    if(this.featureDetail.getFftuwmtr().length > 0 && this.featureDetail.getFftuwmtr().find(x => x.valueOptionsVariationRuleValues.find(y => y.valueOption.localId === id))) {
+    if(this.featureFlag.rules.length > 0 && this.featureFlag.rules.find(x => x.variations.find(y => y.id === id))) {
       this.message.warning($localize `:@@ff.variation-used-by-rules:This variation is used by rules, remove the reference before it can be safely removed`);
       return;
     }
 
-    if(this.featureDetail.getFFDefaultRulePercentageRollouts().length > 0 && this.featureDetail.getFFDefaultRulePercentageRollouts().find(x => x.valueOption.localId === id)) {
+    if(this.featureFlag.fallthrough.variations.length > 0 && this.featureFlag.fallthrough.variations.find(x => x.id === id)) {
       this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by default rule, remove the reference before it can be safely removed`);
       return;
     }
 
-    if(this.featureDetail.getFFVariationOptionWhenDisabled() !== null && this.featureDetail.getFFVariationOptionWhenDisabled().localId === id) {
+    if(this.featureFlag.disabledVariationId === id) {
       this.message.warning($localize `:@@ff.variation-used-by-off:This variation is used by the value returned when the feature flag is OFF, remove the reference before it can be safely removed`);
       return;
     }
 
-    // if (this.zeroCode !== null && this.zeroCode?.items?.find(it => it.variationOption.localId === id)) {
-    //   this.message.warning("该状态已经在零代码设置中被使用，移除后方可删除！");
-    //   return;
-    // }
-
-    this.variationOptions = this.variationOptions.filter(d => d.localId !== id);
+    this.featureFlag.variations = this.featureFlag.variations.filter(d => d.id !== id);
   }
 
-  isValidVariationOption(v: IVariationOption): boolean {
-    return !!v && v.variationValue !== null && v.variationValue.trim() !== '' && this.validateVariationDataType(v.variationValue);
+  isValidVariationOption(v: IVariation): boolean {
+    return !!v && v.value !== null && v.value.trim() !== '' && this.validateVariationDataType(v.value);
   }
 
-  validateVariationDataTypes(): boolean {
-      this.variationOptions = this.variationOptions.map(v => ({...v, isInvalid: !this.isValidVariationOption(v)}));
-      return !this.variationOptions.some(v => v.isInvalid);
+  validateVariationTypes(): boolean {
+      this.featureFlag.variations = this.featureFlag.variations.map(v => ({...v, isInvalid: !this.isValidVariationOption(v)}));
+      return !this.featureFlag.variations.some(v => v.isInvalid);
   }
 
   //!isNaN(parseFloat(num)) && isFinite(num);
   validateVariationDataType(value: string): boolean {
-    switch (this.variationDataType) {
-      case VariationDataTypeEnum.string:
+    switch (this.featureFlag.variationType) {
+      case VariationTypeEnum.string:
         // the real value is alway string
         return value.trim().length > 0;
-      case VariationDataTypeEnum.boolean:
+      case VariationTypeEnum.boolean:
         return value === 'true' || value === 'false';
-      case VariationDataTypeEnum.number:
+      case VariationTypeEnum.number:
         return isNumeric(value);
-      case VariationDataTypeEnum.json:
+      case VariationTypeEnum.json:
         const result = tryParseJSONObject(value);
         return result !== false;
       default:
@@ -259,45 +209,27 @@ export class SettingComponent implements OnInit {
     }
   }
 
-  // 更新开关名字
-  onSaveSwitch(cb?: Function) {
-    const { id, name, variationOptionWhenDisabled } = this.currentSwitch;
-    const payload: IUpdateSettingPayload = {name, status: this.featureDetail.getFeatureStatus(), variationOptionWhenDisabled } as IUpdateSettingPayload;
+  onSaveSettings(cb?: Function) {
+    const { id, name, isEnabled, variationType, disabledVariationId, variations } = this.featureFlag;
+    const payload: ISettingPayload = { id, name, isEnabled, variationType: variationType || VariationTypeEnum.string, disabledVariationId, variations: variations.filter(v => !v.isInvalid) };
 
-    payload.variationDataType = this.variationDataType || VariationDataTypeEnum.string;
-    this.variationOptions = this.variationOptions.filter(v => !v.isInvalid);
-    // reset multistate id and order
-    let maxId = Math.max(...this.variationOptions.map(x => x.localId));
-    this.variationOptions.forEach((e, i) => {
-      if (e.localId < 0) {
-        maxId += 1;
-        e.localId = maxId;
-      }
-
-      e.displayOrder = i + 1;
-    });
-
-
-    payload.variationOptions = this.variationOptions;
-
-    this.switchServeV2.updateSetting(id, payload)
-      .subscribe((result: IFfParams) => {
-        this.currentSwitch = result;
-        this.switchServe.setCurrentSwitch(result);
+    this.featureFlagService.updateSetting(payload)
+      .subscribe(() => {
+        this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
-        this.originalVariationOptions = [...this.variationOptions];
+        this.originalVariations = [...this.featureFlag.variations];
         cb && cb();
       }, errResponse => this.message.error(errResponse.error));
   }
 
-  // 存档
+
   onArchiveClick() {
-    const disabledValue = this.currentSwitch.variationOptionWhenDisabled.variationValue;
+    const disabledVariation = this.featureFlag.diabledVariation;
     const msg = $localize `:@@ff.when-archived-status-change-to-off:When archived, the status would be changed to`
       + ' <strong>OFF</strong> '
       + $localize `:@@ff.and-return-varation-change-to:and the returning variation would be changed to`
-      + ` <strong>${disabledValue}</strong>`;
+      + ` <strong>${disabledVariation?.value}</strong>`;
 
     this.modal.confirm({
       nzContent: msg,
@@ -305,13 +237,11 @@ export class SettingComponent implements OnInit {
       nzCentered: true,
       nzClassName: 'information-modal-dialog',
       nzOnOk: () => {
-        this.switchServe.archiveEnvFeatureFlag(this.currentSwitch.id, this.currentSwitch.name)
+        this.featureFlagService.archive(this.featureFlag.id)
           .subscribe(
             _ => {
               this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-              this.isArchived = true;
-              this.switchStatus = false;
-              this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.id));
+              this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
             },
             _ => {
               this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -321,18 +251,15 @@ export class SettingComponent implements OnInit {
     });
   }
 
-  // 复位开关
   restoreFlag() {
-    this.switchServe.unarchiveEnvFeatureFlag(this.id, this.currentSwitch.name).subscribe(_ => {
+    this.featureFlagService.restore(this.featureFlag.id).subscribe(_ => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.isArchived = false;
-      this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.id));
+      this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
     });
   }
 
-  // 删除开关
   deleteFlag() {
-    this.switchServeV2.delete(this.id).subscribe(success => {
+    this.featureFlagService.delete(this.featureFlag.id).subscribe(success => {
       if (success) {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.router.navigateByUrl('/feature-flags');
@@ -340,34 +267,5 @@ export class SettingComponent implements OnInit {
         this.message.error($localize `:@@common.operation-failed:Operation failed`);
       }
     });
-  }
-
-  isExportingVariationUsers: boolean = false;
-  downloadFileName: string = null;
-  downloadUri: SafeUrl = null;
-  @ViewChild('downloadRef', { static: false })
-  downloadRef: ElementRef;
-
-
-  onExportVariationUsers(variation: IVariationOption) {
-    this.isExportingVariationUsers = true;
-    const downloadFilename = `featbit.${this.currentSwitch.name}_${variation.variationValue}.csv`;
-    this.switchServeV2.getUsersForVariation(this.currentSwitch.id, variation.localId).subscribe(data => {
-      this.downloadFile(downloadFilename, data);
-    }, _ => {
-      this.isExportingVariationUsers = false;
-      this.message.error($localize `:@@common.download-failed:Download failed`);
-    });
-  }
-
-  downloadFile(name: string, data) {
-    this.downloadFileName = name;
-    this.downloadUri = this.sanitizer.bypassSecurityTrustUrl("data:application/csv;charset=UTF-8," + encodeURIComponent(data));
-
-    window.setTimeout(() => {
-      this.isExportingVariationUsers = false;
-      this.downloadRef.nativeElement.click();
-      this.downloadUri = null;
-    }, 0);
   }
 }

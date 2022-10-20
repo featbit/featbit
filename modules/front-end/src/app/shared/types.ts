@@ -7,8 +7,6 @@ export interface IResponse {
 export interface IUserType {
   id: string;
   name: string;
-  email: string;
-  country: string;
   keyId: string;
   customizedProperties: [{name: string, value: string}];
 

@@ -351,6 +351,13 @@ db.FeatureFlags.insertOne(
                         op: "",
                         value: `[\"${prodSegmentIdStr}\"]`
                     }
+                ],
+                variations: [
+                    {
+                        _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+                        rollout: [0, 1],
+                        exptRollout: 1
+                    }
                 ]
             }
         ],

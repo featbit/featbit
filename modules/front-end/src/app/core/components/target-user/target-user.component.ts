@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import {USER_BUILT_IN_PROPERTIES} from "@shared/constants";
+import {CURRENT_PROJECT} from "@utils/localstorage-keys";
 
 @Component({
   selector: 'target-user',
@@ -15,6 +15,7 @@ import {USER_BUILT_IN_PROPERTIES} from "@shared/constants";
 })
 export class TargetUserComponent implements OnInit {
 
+  private envId;
   private inputs = new Subject<any>();
   public compareWith: (obj1: IUserType, obj2: IUserType) => boolean = (obj1: IUserType, obj2: IUserType) => {
     if(obj1 && obj2) {
@@ -82,6 +83,7 @@ export class TargetUserComponent implements OnInit {
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService) {
+    this.envId = JSON.parse(localStorage.getItem(CURRENT_PROJECT()))?.envId;
     this.inputs.pipe(
       debounceTime(500),
       distinctUntilChanged()
@@ -94,7 +96,6 @@ export class TargetUserComponent implements OnInit {
     this.getProps();
   }
 
-  // 搜索用户
   public onSearch(value: string = '') {
     this.isLoadingUsers = true;
     this.inputs.next(value);
@@ -111,11 +112,10 @@ export class TargetUserComponent implements OnInit {
 
   @ViewChild(NzSelectComponent, { static: true }) selectNode: NzSelectComponent;
 
-  // 选择发生改变
   public onSelectChange() {
     if (this.selectModel.isNew) {
-      const { name } = this.selectModel;
-      this.envUserService.upsert({userKeyId: name, userName: name}).subscribe((user) => {
+      const { name, keyId } = this.selectModel;
+      this.envUserService.upsert({keyId, name}).subscribe((user) => {
         this.selectedUserDetailList = [...this.selectedUserDetailList, {...user}];
         this.onSelectedUserListChange.next(this.selectedUserDetailList);
         this.selectNode.writeValue(undefined);
@@ -142,10 +142,11 @@ export class TargetUserComponent implements OnInit {
 
   save() {
     this.saving = true;
-    const { keyId, name, country, email, customizedProperties } = this.currentEditingUser;
+    const { keyId, name, customizedProperties } = this.currentEditingUser;
 
-    this.envUserService.upsert({userKeyId: keyId, userName: name, email, country, customizedProperties }).subscribe((user) => {
+    this.envUserService.upsert({envId: this.envId, keyId, name, customizedProperties }).subscribe((user) => {
       this.selectedUserDetailList = this.selectedUserDetailList.map(s => s.keyId === user.keyId ? {...user} : s);
+      this.onSelectedUserListChange.next(this.selectedUserDetailList);
       this.saving = false;
       this.closeEditModal();
     }, _ => {
