@@ -61,6 +61,7 @@ export class SettingComponent implements OnInit {
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     this.route.paramMap.subscribe( paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
+      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), () => this.loadData());
       this.loadData();
     })
   }
@@ -87,17 +88,16 @@ export class SettingComponent implements OnInit {
       this.originalVariations = [...this.featureFlag.variations];
       this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
       this.isLoading = false;
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.featureFlag.id), () => this.loadData());
     }, () => this.isLoading = false)
   }
 
   public onChangeStatus() {
     this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
-    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.featureFlag.id)));
+    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
   }
 
   onChangeDisabledVariation() {
-    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.featureFlag.id)));
+    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
   }
 
   toggleTitleEditState(): void {
@@ -124,7 +124,7 @@ export class SettingComponent implements OnInit {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
         this.originalVariations = [...this.featureFlag.variations];
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.featureFlag.id))
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
       }, errResponse => this.message.error(errResponse.error));
   }
 
@@ -241,7 +241,7 @@ export class SettingComponent implements OnInit {
           .subscribe(
             _ => {
               this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-              this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.featureFlag.id));
+              this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
             },
             _ => {
               this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -254,7 +254,7 @@ export class SettingComponent implements OnInit {
   restoreFlag() {
     this.featureFlagService.restore(this.featureFlag.id).subscribe(_ => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.featureFlag.id));
+      this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
     });
   }
 

@@ -134,7 +134,6 @@ export class FindRuleComponent {
     this.targetedUsersModalVisible = true;
   }
 
-  /**************Multi states */
-  @Output() onPercentageChangeMultistates = new EventEmitter<IRuleVariation[]>();
+  @Output() onPercentageChange = new EventEmitter<IRuleVariation[]>();
   @Input() variationOptions: IVariation[] = [];
 }

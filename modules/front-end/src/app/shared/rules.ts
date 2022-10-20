@@ -25,7 +25,7 @@ export interface IVariation {
 }
 
 export interface IRuleVariation {
-  id: string;
+  id: string; // variation id
 
   rollout: number[]; // only two elements, sta
   exptRollout?: number; // 0.45 means 45% TODO this is not optional

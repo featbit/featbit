@@ -1,12 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { forkJoin } from 'rxjs';
-import { SwitchV1Service } from '@services/switch-v1.service';
-import { FeatureFlagParams, IFfParams, IFfpParams, IJsonContent, IVariationOption, IRulePercentageRollout, IPrequisiteFeatureFlag, IFftuwmtrParams } from '../../types/switch-new';
-import { PendingChange } from '../../types/pending-changes';
-import { TeamService } from '@services/team.service';
 import { IOrganization, IProjectEnv } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
@@ -14,9 +8,12 @@ import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { MessageQueueService } from '@services/message-queue.service';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import featureFlagDiffer from '../../types/feature-flag-differ';
 import {USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP} from "@shared/constants";
 import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
+import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
+import {ICondition, IRule, IRuleVariation} from "@shared/rules";
+import {FeatureFlagService} from "@services/feature-flag.service";
+import {uuidv4} from "@utils/index";
 
 @Component({
   selector: 'switch-targeting',
@@ -24,50 +21,32 @@ import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
   styleUrls: ['./targeting.component.less']
 })
 export class TargetingComponent implements OnInit {
-  trackRuleById(_, rule: IFftuwmtrParams) {
-    return rule.ruleId;
+  trackRuleById(_, rule: IRule) {
+    return rule.id;
   }
 
-  public switchStatus: 'Enabled' | 'Disabled' = 'Enabled';  // 开关状态
-  public featureList: IPrequisiteFeatureFlag[] = [];                     // 开关列表
-  public featureDetail: FeatureFlagParams;                      // 开关详情
-  public upperFeatures: IFfpParams[] = [];                  // 上游开关列表
-  public userList: IUserType[] = [];                        // 用户列表
+  public featureFlag: FeatureFlag = {} as FeatureFlag;
+  public userList: IUserType[] = [];
 
-  // 用户属性列表
   userProps: IUserProp[];
-
-  public switchId: string;
+  public key: string;
   public isLoading: boolean = true;
-  public variationOptions: IVariationOption[] = [];                         // multi state
-  public targetIndividuals: { [key: string]: IUserType[] } = {}; // multi state
-  public targetIndividualsActive: boolean = false;
+  public isTargetUsersActive: boolean = false;
 
-  public isArchived = false;
   currentAccount: IOrganization = null;
   currentProjectEnv: IProjectEnv = null;
 
-  approvalRequestEnabled: boolean = false;
-
-  flagSchedulerSubscriptionFlag: string = "基础版";
-  flagApprovalRequestSubscriptionFlag: string = "基础版";
-
   exptRulesVisible = false;
-
 
   onSetExptRulesClick() {
     this.exptRulesVisible = true;
   }
 
-  onSetExptRulesClosed(data: any) {
+  async onSetExptRulesClosed(data: any) {
     if (data.isSaved) {
       this.isLoading = true;
-      this.switchServe.getSwitchDetail(this.featureDetail.getSwicthDetail().id).subscribe((result: FeatureFlagParams) => {
-        this.loadFeatureFlag(result);
-        this.isLoading = false;
-      }, () => {
-        this.isLoading = false;
-      });
+      await this.loadFeatureFlag();
+      this.isLoading = false;
     }
 
     this.exptRulesVisible = false;
@@ -75,148 +54,88 @@ export class TargetingComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchV1Service,
+    private featureFlagService: FeatureFlagService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService,
     private messageQueueService: MessageQueueService,
-    private teamService: TeamService,
-    private modal: NzModalService
   ) {
-    this.approvalRequestEnabled = false;
   }
 
   ngOnInit(): void {
     this.isLoading = true;
     this.route.paramMap.subscribe(paramMap => {
-      this.switchId = decodeURIComponent(paramMap.get('id'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.switchId), () => this.fetchFlag());
-      this.fetchFlag(() => this.isLoading = false);
+      this.key = decodeURIComponent(paramMap.get('key'));
+      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.loadData());
+      this.loadData();
     })
   }
 
-  fetchFlag(complete?: Function) {
-    this.switchServe.getSwitchDetail(this.switchId).subscribe((result: FeatureFlagParams) => {
-      this.loadFeatureFlag(result);
-      this.initData(complete);
-    }, () => {
-      this.isLoading = false;
-    })
-  }
-
-  private initData(complete?: Function) {
-    forkJoin([
-      this.envUserPropService.get(),
-      this.switchServe.getSwitchList(this.switchServe.envId)
-    ]).subscribe((result) => {
-      if (result) {
-        this.userProps = [USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP, ...result[0]];
-
-        this.featureList = result[1];
-        this.pendingChanges.setFeatureFlagList(this.featureList);
-
-        this.initSwitchStatus();
-        this.initUpperSwitch();
-
-        this.onSearchUser();
-        this.onSearchPrequisiteFeatureFlags();
-
-        this.switchServe.setCurrentSwitch(this.featureDetail.getSwicthDetail());
-        complete && complete();
-      }
-    }, _ => {
-      this.msg.error("数据加载失败，请重试!");
-      complete && complete();
-    })
-  }
-
-  private originalData: FeatureFlagParams;
-  private loadFeatureFlag(ff: FeatureFlagParams) {
-    this.originalData = new FeatureFlagParams(JSON.parse(JSON.stringify(ff)));
-    this.featureDetail = new FeatureFlagParams(ff);
-    this.isArchived = this.featureDetail.getIsArchived();
-    // set prerequiste
-    const upperFeatures = this.featureDetail.getUpperFeatures().map(u => {
-      u.selectedFeatureFlag = this.featureList.find(d => d.id === u.prerequisiteFeatureFlagId);
-      return u;
-    });
-    this.featureDetail.setUpperFeatures(upperFeatures);
-
-    this.variationOptions = this.featureDetail.getVariationOptions();
-    this.targetIndividuals = this.variationOptions.reduce((acc, cur) => {
-      acc[cur.localId] = this.featureDetail.getTargetIndividuals().filter(t => t.valueOption !== null).find(ti => ti.valueOption.localId === cur.localId)?.individuals || [];
-      return acc;
-    }, {});
-    for (const i in this.targetIndividuals) {
-      if (this.targetIndividuals[i].length !== 0) {
-        this.targetIndividualsActive = true;
-        break;
-      }
-    }
-    if (this.featureDetail.getFFDefaultRulePercentageRollouts().length === 0) {
-      this.featureDetail.setFFDefaultRulePercentageRollouts([
-        {
-          rolloutPercentage: [0, 1],
-          valueOption: this.variationOptions[0]
-        }
-      ]);
-    }
-
-    const detail: IFfParams = this.featureDetail.getSwicthDetail();
-    this.switchServe.setCurrentSwitch(detail);
-    this.switchId = detail.id;
-
+  async loadData() {
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
-    const currentUrl = this.route.snapshot['_routerState'].url;
-    this.pendingChanges = new PendingChange(
-      this.teamService,
-      this.currentAccount.id,
-      this.currentProjectEnv,
-      detail,
-      this.variationOptions,
-      currentUrl.substr(0, currentUrl.lastIndexOf('/') + 1)
-    );
 
-    this.pendingChanges.initialize(
-      this.targetIndividuals,
-      this.featureDetail.getFFVariationOptionWhenDisabled(),
-      this.featureDetail.getFFDefaultRulePercentageRollouts(),
-      this.featureDetail.getFftuwmtr(),
-      this.featureDetail.getUpperFeatures(),
-      this.featureDetail.getFeatureStatus()
-    );
+    await Promise.all([this.loadUserPropsData(), this.loadFeatureFlag()]);
+    this.isLoading = false;
   }
 
-  // -------------------------------------------------------------------------------------------------
+  public targetingUsersByVariation: { [key: string]: IUserType[] } = {}; // {variationId: users}
+  loadFeatureFlag() {
+    return new Promise((resolve, reject) => {
+      this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
+        this.featureFlag = new FeatureFlag(result);
+        this.isTargetUsersActive = this.featureFlag.targetUsers.some(tu => tu.keyIds.length > 0);
 
-  // 初始化开关状态
-  private initSwitchStatus() {
-    this.switchStatus = this.featureDetail.getFeatureStatus();
+        const userKeyIds = this.featureFlag.targetUsers.flatMap(tu => tu.keyIds);
+        if (userKeyIds.length > 0) {
+          this.envUserService.getUsersByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
+            this.targetingUsersByVariation = this.featureFlag.variations.reduce((acc, cur) => {
+              acc[cur.id] =  this.featureFlag.targetUsers.find(tu => tu.variationId === cur.id)?.keyIds?.map(keyId => users.find(u => u.keyId === keyId)) || [];
+              return acc;
+            }, {});
+
+            resolve(null);
+          }, () => resolve(null));
+        } else {
+          this.targetingUsersByVariation = this.featureFlag.variations.reduce((acc, cur) => {
+            acc[cur.id] = [];
+            return acc;
+          }, {});
+
+          resolve(null);
+        }
+
+        if (this.featureFlag.fallthrough.variations.length === 0) {
+          this.featureFlag.fallthrough.variations = [{
+            rollout: [0, 1],
+            id: this.featureFlag.variations[0].id
+          }];
+        }
+
+        this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
+      }, () => {
+        resolve(null);
+      })
+    });
   }
 
-  // 切换开关状态
-  public onChangeSwitchStatus(type: 'Enabled' | 'Disabled') {
-    this.switchStatus = type;
-    if (type === 'Enabled') {
-      this.featureDetail.setFeatureStatus('Disabled');
-    } else if (type === 'Disabled') {
-      this.featureDetail.setFeatureStatus('Enabled');
-    }
+  private loadUserPropsData() {
+    return new Promise((resolve, reject) => {
+      this.envUserPropService.get().subscribe((result) => {
+        if (result) {
+          this.userProps = [USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP, ...result];
+
+          this.onSearchUser();
+
+          resolve(null);
+        }
+      }, _ => {
+        this.msg.error("数据加载失败，请重试!");
+        resolve(null);
+      })
+    });
   }
 
-  // 初始化上游开关
-  private initUpperSwitch() {
-    this.upperFeatures = [...this.featureDetail.getUpperFeatures()];
-  }
-
-  // 上游开关发生改变
-  public onUpperSwicthChange(data: IFfpParams[]) {
-    this.upperFeatures = [...data];
-    this.featureDetail.setUpperFeatures(this.upperFeatures);
-  }
-
-  // 搜索用户
   public onSearchUser(searchText: string = '') {
     const filter = new EnvUserFilter(searchText, ['Name', 'KeyId'], 1, 5);
     this.envUserService.search(filter).subscribe(pagedResult => {
@@ -224,184 +143,109 @@ export class TargetingComponent implements OnInit {
     })
   }
 
-  // 搜索用户
-  public onSearchPrequisiteFeatureFlags(value: string = '') {
-    this.switchServe.queryPrequisiteFeatureFlags(value)
-      .subscribe((result: IPrequisiteFeatureFlag[]) => {
-        this.featureList = [...result.filter(r => r.id !== this.featureDetail.getSwicthDetail().id)];
-      })
+  public onDeleteRule(ruleId: string) {
+    this.featureFlag.rules = this.featureFlag.rules.filter(rule => rule.id !== ruleId);
   }
 
-
-  public onVariationOptionWhenDisabledChange(option: IVariationOption) {
-    this.featureDetail.setFFVariationOptionWhenDisabled(option);
-  }
-
-  // 删除规则
-  public onDeleteRule(index: number) {
-    this.featureDetail.deleteFftuwmtr(index);
-  }
-
-  // 添加规则
   public onAddRule() {
-    this.featureDetail.addFftuwmtr();
+    this.featureFlag.rules.push({
+      id: uuidv4(),
+      name: ($localize `:@@common.rule:Rule`) + ' ' + (this.featureFlag.rules.length + 1),
+      conditions: [],
+      variations: [],
+    });
   }
 
-  // 规则字段发生改变
-  public onRuleConfigChange(value: IJsonContent[], index: number) {
-    this.featureDetail.setConditionConfig(value, index);
+  public onRuleConditionChange(value: ICondition[], ruleId: string) {
+    this.featureFlag.rules = this.featureFlag.rules.map(rule => {
+      if (rule.id === ruleId) {
+        rule.conditions = [...value];
+      }
+
+      return rule;
+    })
   }
 
-  /****multi state* */
-
-  public onMultistatesSelectedUserListChange(data: IUserType[], variationOptionId: number) {
-    this.targetIndividuals[variationOptionId] = [...data];
+  public onSelectedUserListChange(data: IUserType[], variationId: string) {
+    this.targetingUsersByVariation[variationId] = [...data];
   }
 
-
-  // 默认返回值配置
-  public onDefaultRulePercentageRolloutsChange(value: IRulePercentageRollout[]) {
-    this.featureDetail.setFFDefaultRulePercentageRollouts(value);
+  public onFallthroughChange(value: IRuleVariation[]) {
+    this.featureFlag.fallthrough.variations = [...value];
   }
 
-  public onPreSaveConditions() {
-    const validationErrs = this.featureDetail.checkMultistatesPercentage();
+  public onSave() {
+    const validationErrs = this.validateFeatureFlag();
 
     if (validationErrs.length > 0) {
       this.msg.error(validationErrs[0]); // TODO display all messages by multiple lines
       return false;
     }
 
-    if (!this.sortoutSubmitData()) {
-      return;
-    }
-
-    this.pendingChanges.generateInstructions(
-      this.targetIndividuals,
-      this.featureDetail.getFFVariationOptionWhenDisabled(),
-      this.featureDetail.getFFDefaultRulePercentageRollouts(),
-      this.featureDetail.getFftuwmtr(),
-      this.featureDetail.getUpperFeatures(),
-      this.featureDetail.getFeatureStatus()
-    );
-
-    this.isApprovalRequestModal = false;
-    this.requestApprovalModalVisible = true;
-  }
-
-  public onSaveConditionsOld() {
-    const validationErrs = this.featureDetail.checkMultistatesPercentage();
-
-    if (validationErrs.length > 0) {
-      this.msg.error(validationErrs[0]); // TODO display all messages by multiple lines
-      return false;
-    }
-
-    if (!this.sortoutSubmitData()) {
-      return;
-    }
-
-    this.onSaveConditions();
-  }
-
-  public onSaveConditions() {
     this.isLoading = true;
-    this.featureDetail.setTargetIndividuals(this.targetIndividuals);
+    this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
 
-    this.switchServe.updateSwitch(this.featureDetail)
+    const payload = JSON.parse(JSON.stringify(this.featureFlag));
+    delete payload.originalData;
+
+    this.featureFlagService.update(payload)
       .subscribe((result) => {
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
-        this.loadFeatureFlag(result.data);
-        this.requestApprovalModalVisible = false;
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.switchId));
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key));
         this.isLoading = false;
       }, _ => {
         this.msg.error($localize `:@@common.save-fial:Failed to Save`);
-        this.requestApprovalModalVisible = true;
         this.isLoading = false;
       })
   }
 
-  private sortoutSubmitData(): boolean {
-    try {
-      this.featureDetail.onSortoutSubmitData();
-      return true;
-    } catch (e) {
-      this.msg.warning("请确保所填数据完整!");
-      return false;
+  private validateFeatureFlag(): string[]  {
+    const validatonErrs = [];
+
+    // default value
+    if (this.featureFlag.fallthrough === null || this.featureFlag.fallthrough.variations.length === 0) {
+      validatonErrs.push('默认返回值不能为空!');
     }
+
+    if (this.featureFlag.diabledVariation === null) {
+      validatonErrs.push('开关关闭后的返回值不能为空!');
+    }
+
+    const fallthroughPercentage = this.featureFlag.fallthrough?.variations?.reduce((acc, curr: IRuleVariation) => {
+      return acc + (curr.rollout[1] - curr.rollout[0]);
+    }, 0);
+
+    if (fallthroughPercentage !== undefined && fallthroughPercentage !== 1) {
+      validatonErrs.push('请确认默认返回值的总百分比必须为100%！');
+    }
+
+    // rules
+    this.featureFlag.rules.filter(f => f.conditions.length > 0).forEach((rule: IRule) => {
+      const percentage = rule.variations.reduce((acc, curr: IRuleVariation) => {
+        return acc + (curr.rollout[1] - curr.rollout[0]);
+      }, 0);
+
+      if (percentage !== 1) {
+        validatonErrs.push('请确认匹配条件中每条规则的总百分比必须为100%！');
+        return false;
+      }
+    })
+
+    return validatonErrs;
   }
 
-  public onPercentageChangeMultistates(value: IRulePercentageRollout[], index: number) {
-    this.featureDetail.setRuleValueOptionsVariationRuleValues(value, index);
-  }
 
-  /***************************Request approval********************************/
-  requestApprovalModalVisible: boolean = false;
-  pendingChanges: PendingChange;
-  isApprovalRequestModal = false;
-  pChanges: string = '';
-  numChanges: number = 0;
-  public onRequestApproval() {
-    let nzContent = "请求审阅允许将规则配置的修改被同事审核后再被执行，如同 DevOps 或 Git 管理的 Pull Request 功能。";
-    if (this.flagApprovalRequestSubscriptionFlag == "开发用") {
-      if (!this.sortoutSubmitData()) {
-        return;
+  public onRuleVariationsChange(value: IRuleVariation[], ruleId: string) {
+    this.featureFlag.rules = this.featureFlag.rules.map(rule => {
+      if (rule.id === ruleId) {
+        rule.variations = [...value];
       }
 
-      // TODO example code to generate PR diff
-      // this.featureDetail.setTargetIndividuals(this.targetIndividuals);
-      // const [ numChanges, changes]  = featureFlagDiffer.generateDiff(this.originalData, this.featureDetail);
-      // this.numChanges = numChanges;
-      // this.pChanges = changes;
-
-      this.pendingChanges.generateInstructions(
-        this.targetIndividuals,
-        this.featureDetail.getFFVariationOptionWhenDisabled(),
-        this.featureDetail.getFFDefaultRulePercentageRollouts(),
-        this.featureDetail.getFftuwmtr(),
-        this.featureDetail.getUpperFeatures(),
-        this.featureDetail.getFeatureStatus()
-      );
-      this.requestApprovalModalVisible = true;
-      this.isApprovalRequestModal = true;
-    }
-    else if (this.flagApprovalRequestSubscriptionFlag != "企业版") {
-      this.modal.warning({
-        nzTitle: '此功能只针对企业版用户开放',
-        nzContent: nzContent + '此模块目前只针对企业版用户开放，可以联系我们的客户经理、客服或通过官网 https://featureflag.co 的《预约咨询》升级您的订阅计划。',
-        nzClassName: 'information-modal-dialog'
-      });
-    }
-    else if (this.flagApprovalRequestSubscriptionFlag == "企业版") {
-      this.modal.info({
-        nzTitle: '此功能还在开发中',
-        nzContent: nzContent + '我们正在致力于这个模块的实现，若您希望我们加快速度，可以及时与我们的客户成功专员联系。',
-        nzClassName: 'information-modal-dialog'
-      });
-    }
+      return rule;
+    })
   }
 
-  public onFlagScheduler() {
-    let nzContent = "定时发布允许将一个配置在一个指定时间被执行，如深夜中发布某个功能给某个用户组。";
-    if (this.flagSchedulerSubscriptionFlag != "企业版") {
-      this.modal.warning({
-        nzTitle: '此功能只针对企业版用户开放',
-        nzContent: nzContent + '此模块目前只针对企业版用户开放，可以联系我们的客户经理、客服或通过官网 https://featureflag.co 的《预约咨询》升级您的订阅计划。',
-        nzClassName: 'information-modal-dialog'
-      });
-    }
-    else if (this.flagSchedulerSubscriptionFlag == "企业版") {
-      this.modal.info({
-        nzTitle: '此功能还在开发中',
-        nzContent: nzContent + '我们正在致力于这个模块的实现，若您希望我们加快速度，可以及时与我们的客户成功专员联系。',
-        nzClassName: 'information-modal-dialog',
-      });
-    }
-  }
-
-  // 拖放完成
   public onDragEnd(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.featureDetail.getFftuwmtr(), event.previousIndex, event.currentIndex);
+    moveItemInArray(this.featureFlag.rules, event.previousIndex, event.currentIndex);
   }
 }
