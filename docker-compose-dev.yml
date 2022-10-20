@@ -2,7 +2,7 @@ version: "3.9"
 services:
   ui:
     image: featbit/ui
-    container_name: featbit-ui-dev
+    container_name: ui-dev
     build:
       context: ./modules/front-end
       dockerfile: ./Dockerfile
@@ -13,10 +13,11 @@ services:
     ports:
       - "8081:80"
     networks:
-      - featbit-network  
+      - featbit-network
+
   api:
     image: featbit/api
-    container_name: featbit-api-dev
+    container_name: api-dev
     build:
       context: ./modules/back-end
       dockerfile: ./deploy/Dockerfile
@@ -31,7 +32,7 @@ services:
 
   mongodb:
     image: mongo
-    container_name: featbit-mongodb-dev
+    container_name: mongodb-dev
     restart: on-failure
     ports:
       - "27017:27017"
@@ -47,7 +48,7 @@ services:
 
   redis:
     image: 'bitnami/redis:latest'
-    container_name: redis
+    container_name: redis-dev
     restart: on-failure
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
@@ -60,7 +61,7 @@ services:
 
   zookeeper:
     image: bitnami/zookeeper:latest
-    container_name: zookeeper
+    container_name: zookeeper-dev
     restart: on-failure
     ports:
       - '2181:2181'
@@ -73,7 +74,7 @@ services:
 
   kafka:
     image: bitnami/kafka:latest
-    container_name: kafka
+    container_name: kafka-dev
     restart: on-failure
     depends_on:
       - zookeeper
@@ -96,7 +97,7 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui
-    container_name: kafka-ui
+    container_name: kafka-ui-dev
     ports:
       - "8080:8080"
     restart: on-failure
@@ -112,12 +113,11 @@ services:
 
   clickhouse-server:
     image: yandex/clickhouse-server
-    container_name: clickhouse-server
+    container_name: clickhouse-server-dev
     restart: on-failure
     depends_on:
       - zookeeper
       - kafka
-
     ports:
       - "8123:8123"
       - "8443:8443"
@@ -138,7 +138,7 @@ services:
 
   clickhouse-client:
     image: yandex/clickhouse-client
-    container_name: clickhouse-client
+    container_name: clickhouse-client-dev
     restart: on-failure
     entrypoint:
       - /bin/sleep
