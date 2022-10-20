@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ISegment } from '@features/safe/segments/types/segments-index';
 import { ruleOps, IRuleOp } from "@core/components/find-rule/ruleConfig";
-import { IRulePercentageRollout } from '@features/safe/feature-flags/types/switch-new';
 import { SegmentService } from '@services/segment.service';
 import { isSegmentRule, isSingleOperator } from '@utils/index';
 import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
@@ -104,16 +103,13 @@ export class ExptRulesDrawerComponent {
     });
   }
 
-  // 使用默认的实验分流比例
   useDefaultExperimentRollout() {
-    // 条件规则
     this.featureFlag.rules.forEach(rule =>
       rule.variations.forEach(variation => {
         this.setDefaultExperimentRollout(variation);
       })
     );
 
-    // 默认值
     this.featureFlag.fallthrough.variations.forEach(rule => {
       this.setDefaultExperimentRollout(rule);
     });
@@ -121,33 +117,27 @@ export class ExptRulesDrawerComponent {
     this.experimentRolloutType = 'default';
   }
 
-  // 选择要使用的实验分流比例类型
   toggleExperimentRolloutType() {
     this.experimentRolloutType === 'default' ?
       this.useRecommendedExperimentRollout() :
       this.useDefaultExperimentRollout();
   }
 
-  // 使用推荐的实验分流比例
   useRecommendedExperimentRollout() {
-    // 条件规则
     this.featureFlag.rules.forEach(rule =>
       this.setRecommendedExperimentRollout(rule.variations, rule.isNotPercentageRollout)
     );
 
-    // 默认值
     this.setRecommendedExperimentRollout(this.featureFlag.fallthrough.variations, this.featureFlag.fallthrough.isNotPercentageRollout);
 
     this.experimentRolloutType = 'recommended';
   }
 
-  // 使用默认的实验分流比例 (保持和请求分流比例一致)
   private setDefaultExperimentRollout(variation: IRuleVariation) {
     variation.exptPercentage = variation.percentage;
     variation.exptRollout = variation.percentage / 100;
   }
 
-  // 根据请求分流比例计算最合适的实验分流比例
   private setRecommendedExperimentRollout(rules: IRuleVariation[], isNotPercentageRollout: boolean) {
     if (isNotPercentageRollout) {
       rules.forEach(rule => {
@@ -195,10 +185,10 @@ export class ExptRulesDrawerComponent {
 
     this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets })
       .subscribe((result) => {
-        this.message.success("保存成功!");
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.close.emit({ isSaved: true, data: this.featureFlag });
       }, _ => {
-        this.message.error("保存失败!");
+        this.message.error($localize `:@@common.operation-failed:Operation failed`);
         this.close.emit({ isSaved: false, data: this.featureFlag });
       })
   }
