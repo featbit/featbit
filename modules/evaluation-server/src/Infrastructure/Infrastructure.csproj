@@ -10,4 +10,9 @@
       <ProjectReference Include="..\Application\Application.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Confluent.Kafka" Version="1.9.3" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+    </ItemGroup>
+
 </Project>

@@ -1,5 +1,7 @@
+using Domain.Core;
 using Domain.MessageHandlers;
 using Domain.WebSockets;
+using Infrastructure.Core;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Internal;
 
@@ -27,6 +29,9 @@ public static class ServicesRegister
         builder.Services.AddTransient<IMessageHandler, PingMessageHandler>();
         builder.Services.AddTransient<IMessageHandler, EchoMessageHandler>();
         builder.Services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
+
+        // message producer
+        builder.Services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
 
         return builder;
     }

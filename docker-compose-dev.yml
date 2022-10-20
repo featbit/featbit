@@ -29,6 +29,21 @@ services:
       - "5000:5000"
     networks:
       - featbit-network
+  
+  evaluation-server:
+    image: featbit/evaluation-server
+    container_name: evaluation-server-dev
+    build:
+      context: ./modules/evaluation-server
+      dockerfile: ./deploy/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - kafka
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
 
   mongodb:
     image: mongo
