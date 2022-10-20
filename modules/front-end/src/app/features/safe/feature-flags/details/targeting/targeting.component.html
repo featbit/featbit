@@ -3,13 +3,13 @@
     <div class="banner">
       <div class="placeholder"></div>
       <div class="action-btns">
-        <button nz-button nzType="primary" (click)="onSetExptRulesClick()" i18n="@@ff.components.details.targeting.setabtestrule">
+        <button nz-button nzType="primary" (click)="onSetExptRulesClick()">
           <i nz-icon nzType="filter" nzTheme="outline"></i>
-          Set A/B test rule
+          <ng-container i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</ng-container>
         </button>
-        <button nz-button nzType="primary" class="save-btn" (click)="onSave()" i18n="@@ff.components.details.targeting.save">
+        <button nz-button nzType="primary" class="save-btn" (click)="onSave()">
           <i nz-icon nzType="icons:icon-save"></i>
-          Save & Update
+          <ng-container i18n="@@common.save">Save</ng-container>
         </button>
       </div>
     </div>

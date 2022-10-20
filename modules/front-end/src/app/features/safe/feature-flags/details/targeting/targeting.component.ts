@@ -130,7 +130,7 @@ export class TargetingComponent implements OnInit {
           resolve(null);
         }
       }, _ => {
-        this.msg.error("数据加载失败，请重试!");
+        this.msg.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
         resolve(null);
       })
     });
@@ -214,11 +214,7 @@ export class TargetingComponent implements OnInit {
 
     // default value
     if (this.featureFlag.fallthrough === null || this.featureFlag.fallthrough.variations.length === 0) {
-      validatonErrs.push('默认返回值不能为空!');
-    }
-
-    if (this.featureFlag.diabledVariation === null) {
-      validatonErrs.push('开关关闭后的返回值不能为空!');
+      validatonErrs.push($localize `:@@ff.components.details.targeting.fallthrough-mandatory:Fallthrough rule can not be empty`);
     }
 
     const fallthroughPercentage = this.featureFlag.fallthrough?.variations?.reduce((acc, curr: IRuleVariation) => {
@@ -226,7 +222,7 @@ export class TargetingComponent implements OnInit {
     }, 0);
 
     if (fallthroughPercentage !== undefined && fallthroughPercentage !== 1) {
-      validatonErrs.push('请确认默认返回值的总百分比必须为100%！');
+      validatonErrs.push($localize `:@@ff.components.details.targeting.fallthrough-rollout-sum-must-be-100%:The sum of fallthrough rollout must be 100%`);
     }
 
     // rules
@@ -236,7 +232,7 @@ export class TargetingComponent implements OnInit {
       }, 0);
 
       if (percentage !== 1) {
-        validatonErrs.push('请确认匹配条件中每条规则的总百分比必须为100%！');
+        validatonErrs.push($localize `:@@ff.components.details.targeting.rule-rollout-must-be-100%:The sum of each rule's rollout must be 100%`);
         return false;
       }
     })
