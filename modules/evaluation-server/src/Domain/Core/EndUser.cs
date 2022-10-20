@@ -8,7 +8,7 @@ public class EndUser
 
     public string Name { get; set; }
 
-    public List<CustomizedProperty> CustomizedProperties { get; set; } = new();
+    public CustomizedProperty[] CustomizedProperties { get; set; } = Array.Empty<CustomizedProperty>();
 
     public bool IsValid()
     {

@@ -1,6 +1,7 @@
 using System.Text;
 using Domain.Identity;
 using Domain.Users;
+using Infrastructure.BackgroundServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
@@ -58,6 +59,9 @@ public static class ConfigureServices
                 };
             });
 
+        // hosted services
+        services.AddHostedService<KafkaConsumerService>();
+
         // custom services
         services.AddScoped<IUserService, UserService>();
         services.AddTransient<IOrganizationService, OrganizationService>();
@@ -72,7 +76,7 @@ public static class ConfigureServices
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
         services.AddTransient<IDataSyncService, DataSyncService>();
-        
+
         return services;
     }
 }
