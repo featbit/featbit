@@ -9,7 +9,12 @@ import {
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/switch-index";
 import {catchError} from "rxjs/operators";
-import {IFeatureFlag, ISettingPayload, IVariationsPayload} from "@features/safe/feature-flags/types/details";
+import {
+  IFeatureFlag,
+  IFeatureFlagTargeting,
+  ISettingPayload,
+  IVariationsPayload
+} from "@features/safe/feature-flags/types/details";
 
 @Injectable({
   providedIn: 'root'
@@ -106,7 +111,7 @@ export class FeatureFlagService {
     return this.http.put(url, {});
   }
 
-  public update(payload: IFeatureFlag): Observable<boolean> {
+  public update(payload: IFeatureFlagTargeting): Observable<boolean> {
     const url = `${this.baseUrl}/${payload.id}/targeting`;
     return this.http.put<boolean>(url, payload);
   }

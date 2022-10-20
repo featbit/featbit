@@ -16,13 +16,13 @@ export class FindRuleComponent {
 
   @Input() userProps: IUserProp[] = [];
 
-  @Output() deleteRule = new EventEmitter();
+  @Output() deleteRule = new EventEmitter<string>();
   @Output() updateRuleName = new EventEmitter<string>();
-  @Output() percentageChange = new EventEmitter<{ serve:boolean, T: number, F: number }>();
-  @Output() ruleConfigChange = new EventEmitter<ICondition[]>();
+  @Output() onConditionChange = new EventEmitter<ICondition[]>();
 
   public conditions: ICondition[] = [];
   public name: string = "";
+  public id: string = "";
   variations: IRuleVariation[] = [];
   trackByFunction = trackByFunction;
 
@@ -34,6 +34,7 @@ export class FindRuleComponent {
 
   @Input()
   set data(value: IRule) {
+    this.id = value.id;
     this.name = value.name;
     this.variations = value.variations || [];
     this.conditions = [];
@@ -88,7 +89,7 @@ export class FindRuleComponent {
   }
 
   onDeleteRule() {
-    this.deleteRule.emit();
+    this.deleteRule.emit(this.id);
   }
 
   public onDeleteRuleItem(index: number) {
@@ -102,7 +103,7 @@ export class FindRuleComponent {
     } else {
       this.conditions.splice(index, 1);
     }
-    this.ruleConfigChange.next(this.conditions);
+    this.onConditionChange.next(this.conditions);
   }
 
   public onRuleChange(value: ICondition, index: number) {
@@ -112,11 +113,7 @@ export class FindRuleComponent {
     }
 
     this.conditions = this.conditions.map((item, idx) => idx === index ? rule : item);
-    this.ruleConfigChange.next(this.conditions);
-  }
-
-  public confirm() {
-    this.onDeleteRule();
+    this.onConditionChange.next(this.conditions);
   }
 
   public onRuleNameChange() {
@@ -134,6 +131,6 @@ export class FindRuleComponent {
     this.targetedUsersModalVisible = true;
   }
 
-  @Output() onPercentageChange = new EventEmitter<IRuleVariation[]>();
+  @Output() onServeChange = new EventEmitter<IRuleVariation[]>();
   @Input() variationOptions: IVariation[] = [];
 }

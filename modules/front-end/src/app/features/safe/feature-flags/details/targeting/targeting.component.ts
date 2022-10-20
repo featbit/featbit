@@ -156,10 +156,11 @@ export class TargetingComponent implements OnInit {
     });
   }
 
-  public onRuleConditionChange(value: ICondition[], ruleId: string) {
+  public onRuleConditionChange(conditions: ICondition[], ruleId: string) {
     this.featureFlag.rules = this.featureFlag.rules.map(rule => {
       if (rule.id === ruleId) {
-        rule.conditions = [...value];
+        // value must be string
+        rule.conditions = conditions.map(condition => ({...condition, value: `${condition.value}`}));
       }
 
       return rule;
@@ -185,10 +186,9 @@ export class TargetingComponent implements OnInit {
     this.isLoading = true;
     this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
 
-    const payload = JSON.parse(JSON.stringify(this.featureFlag));
-    delete payload.originalData;
+    const { id, targetUsers, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
 
-    this.featureFlagService.update(payload)
+    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets })
       .subscribe((result) => {
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key));

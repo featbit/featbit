@@ -57,6 +57,14 @@ export interface IFeatureFlag {
   updatedAt: Date,
 }
 
+export interface IFeatureFlagTargeting {
+  id: string,
+  targetUsers: IVariationUser[],
+  rules: IRule[],
+  fallthrough: IFallthrough,
+  exptIncludeAllTargets: boolean
+}
+
 export interface IFallthrough {
   includedInExpt: boolean,
   variations: IRuleVariation[],

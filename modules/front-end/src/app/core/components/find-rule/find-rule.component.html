@@ -16,7 +16,7 @@
       <app-serve
         [variationOptions]="variationOptions"
         [ruleVariations]="variations"
-        (onPercentageChange)="onPercentageChange.next($event)">
+        (onPercentageChange)="onServeChange.next($event)">
       </app-serve>
     </ng-container>
   </nz-card>
@@ -34,7 +34,7 @@
           nzType="icons:icon-delete"
           nzPopconfirmPlacement="bottomRight"
           [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-          (nzOnConfirm)="confirm()"></i>
+          (nzOnConfirm)="onDeleteRule()"></i>
       </div>
     </div>
   </ng-template>

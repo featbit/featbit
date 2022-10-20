@@ -40,7 +40,7 @@ export class ServeComponent implements OnInit {
         percentageValue: idx === 0 ? 100 : 0
       }));
     } else {
-      this.selectedVariationId = '';
+      this.selectedVariationId = '-1';
       this.ruleVariationValues = this.availableVariations.map(v => {
         const rule = this.ruleVariations.find(x => x.id === v.id);
         const result = {
