@@ -141,13 +141,11 @@ export class RuleComponent  {
     this.onModelChange();
   }
 
-  // 数据改变，触发数据刷新
   public onModelChange() {
     this.ruleChange.next(this.condition);
     this.onDebounceTimeModelChange();
   }
 
-  // 需要节流的数据
   public onDebounceTimeModelChange() {
     this.inputs.next(this.condition);
   }

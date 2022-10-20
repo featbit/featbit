@@ -146,6 +146,7 @@ export class TargetUserComponent implements OnInit {
 
     this.envUserService.upsert({envId: this.envId, keyId, name, customizedProperties }).subscribe((user) => {
       this.selectedUserDetailList = this.selectedUserDetailList.map(s => s.keyId === user.keyId ? {...user} : s);
+      this.onSelectedUserListChange.next(this.selectedUserDetailList);
       this.saving = false;
       this.closeEditModal();
     }, _ => {

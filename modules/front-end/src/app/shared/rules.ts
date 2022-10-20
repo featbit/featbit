@@ -12,6 +12,7 @@ export interface ICondition {
   op: string,
   value: string,
 
+  // UI only
   multipleValue?: string[];
   type?: string;
 }

@@ -159,8 +159,18 @@ export class TargetingComponent implements OnInit {
   public onRuleConditionChange(conditions: ICondition[], ruleId: string) {
     this.featureFlag.rules = this.featureFlag.rules.map(rule => {
       if (rule.id === ruleId) {
-        // value must be string
-        rule.conditions = conditions.map(condition => ({...condition, value: `${condition.value}`}));
+        rule.conditions = conditions.map(condition => {
+          const result = {...condition };
+
+          if(result.type === 'multi') {
+            result.value = JSON.stringify(result.multipleValue);
+          }
+          if(result.type === 'number') {
+            result.value = result.value.toString();
+          }
+
+          return result;
+        })
       }
 
       return rule;
