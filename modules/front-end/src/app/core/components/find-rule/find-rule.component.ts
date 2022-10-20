@@ -45,7 +45,7 @@ export class FindRuleComponent {
         op: '',
         value: '',
         multipleValue: []
-      });
+      } as ICondition);
     } else {
       const segmentIds = value.conditions.flatMap((item: ICondition) => {
         const isSegment = isSegmentRule(item);
@@ -67,7 +67,7 @@ export class FindRuleComponent {
           value: defaultValue,
           multipleValue: [...multipleValue],
           type: opType
-        });
+        } as ICondition);
         return isSegment? [...multipleValue] : [];
       })
 
@@ -85,7 +85,7 @@ export class FindRuleComponent {
       op: '',
       value: '',
       multipleValue: []
-    })
+    } as ICondition)
   }
 
   onDeleteRule() {
@@ -99,7 +99,7 @@ export class FindRuleComponent {
         op: '',
         value: '',
         multipleValue: []
-      }
+      } as ICondition
     } else {
       this.conditions.splice(index, 1);
     }

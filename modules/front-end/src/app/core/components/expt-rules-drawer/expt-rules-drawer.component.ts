@@ -38,7 +38,7 @@ export class ExptRulesDrawerComponent {
 
   @Input()
   set featureFlag(ff: IFeatureFlag) {
-    if (ff) {
+    if (ff && Object.keys(ff).length > 0) {
       let segmentIds = [];
       const data = Object.assign({}, ff, {
         rules: ff.rules.map(rule => {
@@ -72,7 +72,7 @@ export class ExptRulesDrawerComponent {
           ...(ff.fallthrough || {}),
           includedInExpt: !!ff.fallthrough?.includedInExpt,
           isNotPercentageRollout: isNotPercentageRollout(ff.fallthrough.variations),
-          exptRollout: ff.fallthrough.variations.map(item => Object.assign({}, item, {
+          variations: ff.fallthrough.variations.map(item => Object.assign({}, item, {
             percentage: (parseFloat((item.rollout[1] - item.rollout[0]).toFixed(2))) * 100
           }))
         }
@@ -173,7 +173,7 @@ export class ExptRulesDrawerComponent {
     });
   }
 
-  exptPercentageChange(ruleValue: IRulePercentageRollout) {
+  exptPercentageChange(ruleValue: IRuleVariation) {
     if (ruleValue) {
       ruleValue.exptRollout = ruleValue.exptPercentage / 100;
     }
@@ -203,7 +203,7 @@ export class ExptRulesDrawerComponent {
       })
   }
 
-  getVariationValue(id: string){
-    this.featureFlag.variations.find(v => v.id === id).value;
+  getVariationValue(id: string): string{
+    return this.featureFlag.variations.find(v => v.id === id).value;
   }
 }
