@@ -200,9 +200,9 @@ export class TargetingComponent implements OnInit {
 
     this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets })
       .subscribe((result) => {
+        this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key));
-        this.isLoading = false;
       }, _ => {
         this.msg.error($localize `:@@common.save-fial:Failed to Save`);
         this.isLoading = false;
