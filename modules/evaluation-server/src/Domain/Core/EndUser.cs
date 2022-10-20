@@ -2,7 +2,7 @@
 
 namespace Domain.Core;
 
-public class User
+public class EndUser
 {
     public string KeyId { get; set; }
 
