@@ -30,7 +30,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=publish /app ./
 # ensure we listen on any IP Address
-ENV ASPNETCORE_URLS=http://*:5000
+ENV ASPNETCORE_URLS=http://*:6000
 EXPOSE 5000
 
 # health check
