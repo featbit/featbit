@@ -1,230 +1,230 @@
 <nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzTitle]="'设置分流进入实验的用户规则'" [nzFooter]="create" [nzWidth]="900" (nzOnClose)="onClose()">
-    <ng-container *nzDrawerContent>
-        <div class="drawer-layout" *ngIf="featureFlag">
-          <div class="warning-message">
-            <div class="warning">
-              <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-              <div class="warning-content">以下改动保存后立即生效，将会影响到该开关下所有正在运行中的实验，为了确保实验结果的准确性，建议保存后暂停所有的实验并重新开始！</div>
-            </div>
-          </div>
+  <ng-container *nzDrawerContent>
+    <div class="drawer-layout" *ngIf="featureFlag">
+      <div class="warning-message">
+        <div class="warning">
+          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+          <div class="warning-content">以下改动保存后立即生效，将会影响到该开关下所有正在运行中的实验，为了确保实验结果的准确性，建议保存后暂停所有的实验并重新开始！</div>
+        </div>
+      </div>
 
-          <div class="select-option-row">
-            <nz-radio-group [(ngModel)]="featureFlag.exptIncludeAllRules">
-              <label nz-radio [nzValue]="includeAllRules">所有规则</label>
-              <label nz-radio [nzValue]="customRules">自定义规则（不包含目标用户规则）</label>
-            </nz-radio-group>
+      <div class="select-option-row">
+        <nz-radio-group [(ngModel)]="featureFlag.exptIncludeAllTargets">
+          <label nz-radio [nzValue]="includeAllRules">所有规则</label>
+          <label nz-radio [nzValue]="customRules">自定义规则（不包含目标用户规则）</label>
+        </nz-radio-group>
 
-            <label nz-checkbox
-                   [nzChecked]="experimentRolloutType === 'recommended'"
-                   (nzCheckedChange)="toggleExperimentRolloutType()">
-              使用推荐值
-            </label>
-          </div>
+        <label nz-checkbox
+               [nzChecked]="experimentRolloutType === 'recommended'"
+               (nzCheckedChange)="toggleExperimentRolloutType()">
+          使用推荐值
+        </label>
+      </div>
 
-          <nz-table style="margin-top:15px" nzSize="small" #basicTable [nzData]="['']"
-              [nzFrontPagination]="false"
-              [nzOuterBordered]="true"
-          >
-            <tbody>
-              <ng-container *ngIf="featureFlag.exptIncludeAllRules">
-                <tr>
-                  <td>
-                    <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllRules" [nzDisabled]="true">
-                      目标用户
-                    </label>
-                  </td>
-                  <td class="rule-content">
-                    <div *ngFor="let target of featureFlag.targetIndividuals">
-                      <span>{{target.valueOption.variationValue}}</span> ({{target.individuals.length}} 个用户)
-                    </div>
-                  </td>
-                </tr>
-                <tr *ngFor="let rule of featureFlag.fftuwmtr">
-                  <td>
-                    <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllRules" [nzDisabled]="true">
-                      匹配条件
-                    </label>
-                  </td>
-                  <td class="rule-content">
-                    <div *ngFor="let clause of rule.ruleJsonContent">
-                      if {{clause.property}} {{clause.operation}}
-                      <ng-container *ngIf="!clause.isSingleOperator">
-                        <ng-container *ngIf="clause.type === 'multi'">
-                        <ng-container *ngIf="clause.isSegment">
+      <nz-table style="margin-top:15px" nzSize="small" #basicTable [nzData]="['']"
+                [nzFrontPagination]="false"
+                [nzOuterBordered]="true"
+      >
+        <tbody>
+        <ng-container *ngIf="featureFlag.exptIncludeAllTargets">
+          <tr>
+            <td>
+              <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllTargets" [nzDisabled]="true">
+                目标用户
+              </label>
+            </td>
+            <td class="rule-content">
+              <div *ngFor="let target of featureFlag.targetUsers">
+                <span>{{getVariationValue(target.variationId)}}</span> ({{target.keyIds.length}} 个用户)
+              </div>
+            </td>
+          </tr>
+          <tr *ngFor="let rule of featureFlag.rules">
+            <td>
+              <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllTargets" [nzDisabled]="true">
+                匹配条件
+              </label>
+            </td>
+            <td class="rule-content">
+              <div *ngFor="let clause of rule.conditions">
+                if {{clause.property}} {{clause.op}}
+                <ng-container *ngIf="!clause.isSingleOperator">
+                  <ng-container *ngIf="clause.type === 'multi'">
+                    <ng-container *ngIf="clause.isSegment">
                           <span class="ant-tag" *ngFor="let value of clause.multipleValue">
                             {{selectedSegmentDetailsDict[value]?.name}}
                           </span>
-                        </ng-container>
-                        <ng-container *ngIf="!clause.isSegment">
-                          <span class="ant-tag" *ngFor="let value of clause.multipleValue">{{value}}</span>
-                        </ng-container> 
-                        </ng-container>
-                        <ng-container *ngIf="clause.type !== 'multi'">
-                          <span class="ant-tag">{{clause.value}}</span>
-                        </ng-container>
-                      </ng-container>
-                    </div>
-                    serve
-                    <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
-                      <thead>
-                        <tr>
-                          <th></th>
-                          <th [nzAlign]="'right'">分流入实验的用户所占百分比（相对于匹配到该规则的总用户数）</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let valueOption of rule.valueOptionsVariationRuleValues">
-                          <td>
-                            {{valueOption.valueOption.variationValue}}
-                            <ng-container *ngIf="!rule.isNotPercentageRollout">
-                              ({{valueOption.percentage}}%)
-                            </ng-container>
-                          </td>
-                          <td class="expt-pencentage">
-                            <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
-                              <input type="number" nz-input [(ngModel)]="valueOption.exptPercentage" (ngModelChange)="exptPercentageChange(valueOption)"/>
-                            </nz-input-group>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </nz-table>
-                  </td>
-                </tr>
+                    </ng-container>
+                    <ng-container *ngIf="!clause.isSegment">
+                      <span class="ant-tag" *ngFor="let value of clause.multipleValue">{{value}}</span>
+                    </ng-container>
+                  </ng-container>
+                  <ng-container *ngIf="clause.type !== 'multi'">
+                    <span class="ant-tag">{{clause.value}}</span>
+                  </ng-container>
+                </ng-container>
+              </div>
+              serve
+              <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
+                <thead>
                 <tr>
+                  <th></th>
+                  <th [nzAlign]="'right'">分流入实验的用户所占百分比（相对于匹配到该规则的总用户数）</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let valueOption of rule.variations">
                   <td>
-                    <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllRules" [nzDisabled]="true">
-                      默认返回值
-                    </label>
+                    {{valueOption.valueOption.variationValue}}
+                    <ng-container *ngIf="!rule.isNotPercentageRollout">
+                      ({{valueOption.percentage}}%)
+                    </ng-container>
                   </td>
-                  <td class="rule-content">
-                    <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
-                      <thead>
-                        <tr>
-                          <th></th>
-                          <th [nzAlign]="'right'">分流入实验的用户所占百分比（相对于匹配到该规则的总用户数）</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let valueOption of featureFlag.ff.defaultRulePercentageRollouts">
-                          <td>
-                            {{valueOption.valueOption.variationValue}}
-                            <ng-container *ngIf="!featureFlag.ff.defaultRuleIsNotPercentageRollout">
-                              ({{valueOption.percentage}}%)
-                            </ng-container>
-                          </td>
-                          <td class="expt-pencentage">
-                            <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
-                              <input type="number" nz-input [(ngModel)]="valueOption.exptPercentage" (ngModelChange)="exptPercentageChange(valueOption)"/>
-                            </nz-input-group>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </nz-table>
+                  <td class="expt-pencentage">
+                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
+                      <input type="number" nz-input [(ngModel)]="valueOption.exptPercentage" (ngModelChange)="exptPercentageChange(valueOption)"/>
+                    </nz-input-group>
                   </td>
                 </tr>
-              </ng-container>
-              <ng-container *ngIf="!featureFlag.exptIncludeAllRules">
+                </tbody>
+              </nz-table>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllRules" [nzDisabled]="true">
+                默认返回值
+              </label>
+            </td>
+            <td class="rule-content">
+              <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
+                <thead>
                 <tr>
+                  <th></th>
+                  <th [nzAlign]="'right'">分流入实验的用户所占百分比（相对于匹配到该规则的总用户数）</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let valueOption of featureFlag.ff.defaultRulePercentageRollouts">
                   <td>
-                    <!-- It's always false here -->
-                    <label nz-checkbox [(ngModel)]="customRules" [nzDisabled]="true">
-                      目标用户
-                    </label>
+                    {{valueOption.valueOption.variationValue}}
+                    <ng-container *ngIf="!featureFlag.ff.defaultRuleIsNotPercentageRollout">
+                      ({{valueOption.percentage}}%)
+                    </ng-container>
                   </td>
-                  <td class="rule-content">
-                    <div *ngFor="let target of featureFlag.targetIndividuals">
-                      <span>{{target.valueOption.variationValue}}</span> ({{target.individuals.length}} 个用户)
-                    </div>
+                  <td class="expt-pencentage">
+                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
+                      <input type="number" nz-input [(ngModel)]="valueOption.exptPercentage" (ngModelChange)="exptPercentageChange(valueOption)"/>
+                    </nz-input-group>
                   </td>
                 </tr>
-                <tr *ngFor="let rule of featureFlag.fftuwmtr">
-                  <td>
-                    <label nz-checkbox [(ngModel)]="rule.isIncludedInExpt">
-                      匹配条件
-                    </label>
-                  </td>
-                  <td class="rule-content">
-                    <div *ngFor="let clause of rule.ruleJsonContent">
-                      if {{clause.property}} {{clause.operation}}
-                      <ng-container *ngIf="!clause.isSingleOperator">
-                        <ng-container *ngIf="clause.type === 'multi'">
-                          <ng-container *ngIf="clause.isSegment">
+                </tbody>
+              </nz-table>
+            </td>
+          </tr>
+       </ng-container>
+       <ng-container *ngIf="!featureFlag.exptIncludeAllTargets">
+          <tr>
+        <td>
+          <!-- It's always false here -->
+          <label nz-checkbox [(ngModel)]="customRules" [nzDisabled]="true">
+            目标用户
+          </label>
+        </td>
+        <td class="rule-content">
+          <div *ngFor="let target of featureFlag.targetIndividuals">
+            <span>{{target.valueOption.variationValue}}</span> ({{target.individuals.length}} 个用户)
+          </div>
+        </td>
+      </tr>
+          <tr *ngFor="let rule of featureFlag.fftuwmtr">
+        <td>
+          <label nz-checkbox [(ngModel)]="rule.isIncludedInExpt">
+            匹配条件
+          </label>
+        </td>
+        <td class="rule-content">
+          <div *ngFor="let clause of rule.ruleJsonContent">
+            if {{clause.property}} {{clause.operation}}
+            <ng-container *ngIf="!clause.isSingleOperator">
+              <ng-container *ngIf="clause.type === 'multi'">
+                <ng-container *ngIf="clause.isSegment">
                             <span class="ant-tag" *ngFor="let value of clause.multipleValue">
                               {{selectedSegmentDetailsDict[value]?.name}}
                             </span>
-                          </ng-container>
-                          <ng-container *ngIf="!clause.isSegment">
-                            <span class="ant-tag" *ngFor="let value of clause.multipleValue">{{value}}</span>
-                          </ng-container> 
-                        </ng-container>
-                        <ng-container *ngIf="clause.type !== 'multi'">
-                          <span class="ant-tag">{{clause.value}}</span>
-                        </ng-container>
-                      </ng-container>
-                    </div>
-                    serve
-                    <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
-                      <thead>
-                        <tr>
-                          <th></th>
-                          <th [nzAlign]="'right'">分流入实验的用户所占百分比（相对于匹配到该规则的总用户数）</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let valueOption of rule.valueOptionsVariationRuleValues">
-                          <td>
-                            {{valueOption.valueOption.variationValue}}
-                            <ng-container *ngIf="!rule.isNotPercentageRollout">
-                              ({{valueOption.percentage}}%)
-                            </ng-container>
-                          </td>
-                          <td class="expt-pencentage">
-                            <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
-                              <input type="number" nz-input [(ngModel)]="valueOption.exptPercentage" (ngModelChange)="exptPercentageChange(valueOption)"/>
-                            </nz-input-group>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </nz-table>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <label nz-checkbox [(ngModel)]="featureFlag.ff.isDefaultRulePercentageRolloutsIncludedInExpt">
-                      默认返回值
-                    </label>
-                  </td>
-                  <td class="rule-content">
-                    <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
-                      <thead>
-                        <tr>
-                          <th></th>
-                          <th [nzAlign]="'right'">分流入实验的用户所占百分比（相对于匹配到该规则的总用户数）</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let valueOption of featureFlag.ff.defaultRulePercentageRollouts">
-                          <td>
-                            {{valueOption.valueOption.variationValue}}
-                            <ng-container *ngIf="!featureFlag.ff.defaultRuleIsNotPercentageRollout">
-                              ({{valueOption.percentage}}%)
-                            </ng-container>
-                          </td>
-                          <td class="expt-pencentage">
-                            <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
-                              <input type="number" nz-input [(ngModel)]="valueOption.exptPercentage" (ngModelChange)="exptPercentageChange(valueOption)"/>
-                            </nz-input-group>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </nz-table>
-                  </td>
-                </tr>
+                </ng-container>
+                <ng-container *ngIf="!clause.isSegment">
+                  <span class="ant-tag" *ngFor="let value of clause.multipleValue">{{value}}</span>
+                </ng-container>
               </ng-container>
+              <ng-container *ngIf="clause.type !== 'multi'">
+                <span class="ant-tag">{{clause.value}}</span>
+              </ng-container>
+            </ng-container>
+          </div>
+          serve
+          <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
+            <thead>
+            <tr>
+              <th></th>
+              <th [nzAlign]="'right'">分流入实验的用户所占百分比（相对于匹配到该规则的总用户数）</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let valueOption of rule.valueOptionsVariationRuleValues">
+              <td>
+                {{valueOption.valueOption.variationValue}}
+                <ng-container *ngIf="!rule.isNotPercentageRollout">
+                  ({{valueOption.percentage}}%)
+                </ng-container>
+              </td>
+              <td class="expt-pencentage">
+                <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
+                  <input type="number" nz-input [(ngModel)]="valueOption.exptPercentage" (ngModelChange)="exptPercentageChange(valueOption)"/>
+                </nz-input-group>
+              </td>
+            </tr>
             </tbody>
           </nz-table>
-        </div>
-    </ng-container>
+        </td>
+      </tr>
+          <tr>
+        <td>
+          <label nz-checkbox [(ngModel)]="featureFlag.ff.isDefaultRulePercentageRolloutsIncludedInExpt">
+            默认返回值
+          </label>
+        </td>
+        <td class="rule-content">
+          <nz-table nzSize="small" [nzFrontPagination]="false" #basicTable [nzData]="['']">
+            <thead>
+            <tr>
+              <th></th>
+              <th [nzAlign]="'right'">分流入实验的用户所占百分比（相对于匹配到该规则的总用户数）</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let valueOption of featureFlag.ff.defaultRulePercentageRollouts">
+              <td>
+                {{valueOption.valueOption.variationValue}}
+                <ng-container *ngIf="!featureFlag.ff.defaultRuleIsNotPercentageRollout">
+                  ({{valueOption.percentage}}%)
+                </ng-container>
+              </td>
+              <td class="expt-pencentage">
+                <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
+                  <input type="number" nz-input [(ngModel)]="valueOption.exptPercentage" (ngModelChange)="exptPercentageChange(valueOption)"/>
+                </nz-input-group>
+              </td>
+            </tr>
+            </tbody>
+          </nz-table>
+        </td>
+      </tr>
+        </ng-container>
+      </tbody>
+  </nz-table>
+  </div>
+  </ng-container>
   <ng-template #create>
     <button (click)="doSubmit()" nz-button style="float: right"  class="form-button form-margin" [nzType]="'primary'" [nzLoading]="isLoading">保存</button>
   </ng-template>
@@ -232,4 +232,3 @@
     <button style="background-color: #DDDCEB" nz-button nzType="default" nzSearch>%</button>
   </ng-template>
 </nz-drawer>
-

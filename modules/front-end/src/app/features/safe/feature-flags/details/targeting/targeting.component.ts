@@ -153,7 +153,7 @@ export class TargetingComponent implements OnInit {
       name: ($localize `:@@common.rule:Rule`) + ' ' + (this.featureFlag.rules.length + 1),
       conditions: [],
       variations: [],
-    });
+    } as IRule);
   }
 
   public onRuleConditionChange(conditions: ICondition[], ruleId: string) {

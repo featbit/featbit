@@ -2,10 +2,13 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ISegment } from '@features/safe/segments/types/segments-index';
 import { ruleOps, IRuleOp } from "@core/components/find-rule/ruleConfig";
-import { FeatureFlagParams, IRulePercentageRollout } from '@features/safe/feature-flags/types/switch-new';
+import { IRulePercentageRollout } from '@features/safe/feature-flags/types/switch-new';
 import { SegmentService } from '@services/segment.service';
-import { SwitchV1Service } from '@services/switch-v1.service';
-import { isNotPercentageRollout, isSegmentRule, isSingleOperator } from '@utils/index';
+import { isSegmentRule, isSingleOperator } from '@utils/index';
+import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
+import {IRuleVariation, isNotPercentageRollout} from "@shared/rules";
+import {FeatureFlagService} from "@services/feature-flag.service";
+import {IUserType} from "@shared/types";
 
 @Component({
   selector: 'app-expt-rules-drawer',
@@ -16,16 +19,17 @@ export class ExptRulesDrawerComponent {
 
   @Input() currentAccountId: number;
   @Input() visible: boolean = false;
+  @Input() targetingUsersByVariation: { [key: string]: IUserType[] } = {};
   @Output() close: EventEmitter<any> = new EventEmitter();
 
   selectedSegmentDetailsDict: {[key: string]: ISegment[]} = {};
 
-  private _ff: any = null; // CSwitchParams
+  private _ff: IFeatureFlag = null;
 
-  // 实验分流类型
   experimentRolloutType: 'default' | 'recommended' = 'default';
 
   includeAllRules = true;
+
   customRules = false;
 
   get featureFlag() {
@@ -33,44 +37,45 @@ export class ExptRulesDrawerComponent {
   }
 
   @Input()
-  set featureFlag(ff: any) {
+  set featureFlag(ff: IFeatureFlag) {
     if (ff) {
       let segmentIds = [];
       const data = Object.assign({}, ff, {
-        fftuwmtr: ff.fftuwmtr.map(f => {
+        rules: ff.rules.map(rule => {
           const result = {
-            ruleJsonContent: f.ruleJsonContent.map(item => {
-              const isSegment = isSegmentRule(item);
-              let ruleType: string = isSegment ? 'multi': ruleOps.filter((rule: IRuleOp) => rule.value === item.operation)[0].type;
+            conditions: rule.conditions.map(condition => {
+              const isSegment = isSegmentRule(condition);
+              let ruleType: string = isSegment ? 'multi': ruleOps.filter((rule: IRuleOp) => rule.value === condition.op)[0].type;
 
               let multipleValue: string[] = [];
 
-              if(ruleType === 'multi' && item.multipleValue === undefined) {
-                multipleValue = JSON.parse(item.value || '[]');
+              if(ruleType === 'multi' && condition.multipleValue === undefined) {
+                multipleValue = JSON.parse(condition.value || '[]');
                 if (isSegment) {
                   segmentIds = [...segmentIds, ...multipleValue];
                 }
               }
 
-              return Object.assign({ multipleValue: multipleValue, type: ruleType, isSingleOperator: isSingleOperator(ruleType), isSegment}, item);
+              return Object.assign({ multipleValue: multipleValue, type: ruleType, isSingleOperator: isSingleOperator(ruleType), isSegment}, condition);
             }),
-            isIncludedInExpt: !!f.isIncludedInExpt,
-            isNotPercentageRollout: isNotPercentageRollout(f.valueOptionsVariationRuleValues),
-            valueOptionsVariationRuleValues: f.valueOptionsVariationRuleValues.map(item => Object.assign({}, item, {
-              percentage: (parseFloat((item.rolloutPercentage[1] - item.rolloutPercentage[0]).toFixed(2))) * 100
+            includedInExpt: !!rule.includedInExpt,
+            isNotPercentageRollout: isNotPercentageRollout(rule.variations),
+            variations: rule.variations.map(variation => Object.assign({}, variation, {
+              percentage: (parseFloat((variation.rollout[1] - variation.rollout[0]).toFixed(2))) * 100
             }))
           };
 
-          this.initExperimentRollout(result.valueOptionsVariationRuleValues);
-          return Object.assign({}, f, result);
+          this.initExperimentRollout(result.variations);
+          return Object.assign({}, rule, result);
         }),
-        ff: Object.assign({}, ff.ff, {
-          isDefaultRulePercentageRolloutsIncludedInExpt: !!ff.ff.isDefaultRulePercentageRolloutsIncludedInExpt,
-          defaultRuleIsNotPercentageRollout: isNotPercentageRollout(ff.ff.defaultRulePercentageRollouts),
-          defaultRulePercentageRollouts: ff.ff.defaultRulePercentageRollouts.map(item => Object.assign({}, item, {
-            percentage: (parseFloat((item.rolloutPercentage[1] - item.rolloutPercentage[0]).toFixed(2))) * 100
+        fallthrough: {
+          ...(ff.fallthrough || {}),
+          includedInExpt: !!ff.fallthrough?.includedInExpt,
+          isNotPercentageRollout: isNotPercentageRollout(ff.fallthrough.variations),
+          exptRollout: ff.fallthrough.variations.map(item => Object.assign({}, item, {
+            percentage: (parseFloat((item.rollout[1] - item.rollout[0]).toFixed(2))) * 100
           }))
-        })
+        }
       });
 
       if (segmentIds.length > 0) {
@@ -82,22 +87,19 @@ export class ExptRulesDrawerComponent {
         });
       }
 
-      this.initExperimentRollout(data.ff.defaultRulePercentageRollouts);
-      this._ff = new FeatureFlagParams(data);
+      this.initExperimentRollout(data.fallthrough.variations);
+      this._ff = new FeatureFlag(data);
     }
   }
 
-  // 初始化实验分类比例
-  private initExperimentRollout(rules: IRulePercentageRollout[]) {
+  private initExperimentRollout(variations: IRuleVariation[]) {
     const self = this;
-    rules.forEach(rule => {
-      // 该开关未设置过实验分流比例 则默认其实验分流比例与请求分流比例相同
-      if (!rule.exptRollout) {
-        self.setDefaultExperimentRollout(rule);
+    variations.forEach(variation => {
+      if (!variation.exptRollout) {
+        self.setDefaultExperimentRollout(variation);
       }
-      // 该开关已经设置过实验分流比例
       else {
-        rule.exptPercentage = rule.exptRollout * 100;
+        variation.exptPercentage = variation.exptRollout * 100;
       }
     });
   }
@@ -105,16 +107,14 @@ export class ExptRulesDrawerComponent {
   // 使用默认的实验分流比例
   useDefaultExperimentRollout() {
     // 条件规则
-    const conditions = this.featureFlag.fftuwmtr;
-    conditions.forEach(condition =>
-      condition.valueOptionsVariationRuleValues.forEach(rule => {
-        this.setDefaultExperimentRollout(rule);
+    this.featureFlag.rules.forEach(rule =>
+      rule.variations.forEach(variation => {
+        this.setDefaultExperimentRollout(variation);
       })
     );
 
     // 默认值
-    const ffBasic = this.featureFlag.ff;
-    ffBasic.defaultRulePercentageRollouts.forEach(rule => {
+    this.featureFlag.fallthrough.variations.forEach(rule => {
       this.setDefaultExperimentRollout(rule);
     });
 
@@ -131,26 +131,24 @@ export class ExptRulesDrawerComponent {
   // 使用推荐的实验分流比例
   useRecommendedExperimentRollout() {
     // 条件规则
-    const conditions = this.featureFlag.fftuwmtr;
-    conditions.forEach(condition =>
-      this.setRecommendedExperimentRollout(condition.valueOptionsVariationRuleValues, condition.isNotPercentageRollout)
+    this.featureFlag.rules.forEach(rule =>
+      this.setRecommendedExperimentRollout(rule.variations, rule.isNotPercentageRollout)
     );
 
     // 默认值
-    const ffBasic = this.featureFlag.ff;
-    this.setRecommendedExperimentRollout(ffBasic.defaultRulePercentageRollouts, ffBasic.defaultRuleIsNotPercentageRollout);
+    this.setRecommendedExperimentRollout(this.featureFlag.fallthrough.variations, this.featureFlag.fallthrough.isNotPercentageRollout);
 
     this.experimentRolloutType = 'recommended';
   }
 
   // 使用默认的实验分流比例 (保持和请求分流比例一致)
-  private setDefaultExperimentRollout(rule: IRulePercentageRollout) {
-    rule.exptPercentage = rule.percentage;
-    rule.exptRollout = rule.percentage / 100;
+  private setDefaultExperimentRollout(variation: IRuleVariation) {
+    variation.exptPercentage = variation.percentage;
+    variation.exptRollout = variation.percentage / 100;
   }
 
   // 根据请求分流比例计算最合适的实验分流比例
-  private setRecommendedExperimentRollout(rules: IRulePercentageRollout[], isNotPercentageRollout: boolean) {
+  private setRecommendedExperimentRollout(rules: IRuleVariation[], isNotPercentageRollout: boolean) {
     if (isNotPercentageRollout) {
       rules.forEach(rule => {
         rule.exptPercentage = rule.percentage;
@@ -182,7 +180,7 @@ export class ExptRulesDrawerComponent {
   }
 
   constructor(
-    private switchServe: SwitchV1Service,
+    private featureFlagService: FeatureFlagService,
     private segmentService: SegmentService,
     private message: NzMessageService
   ) {
@@ -193,13 +191,19 @@ export class ExptRulesDrawerComponent {
   }
 
   doSubmit() {
-    this.switchServe.updateSwitch(this.featureFlag)
-    .subscribe(_ => {
-      this.message.success("保存成功!");
-      this.close.emit({ isSaved: true, data: this.featureFlag });
-    }, _ => {
-      this.message.error("保存失败!");
-      this.close.emit({ isSaved: false, data: this.featureFlag });
-    })
+    const { id, targetUsers, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
+
+    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets })
+      .subscribe((result) => {
+        this.message.success("保存成功!");
+        this.close.emit({ isSaved: true, data: this.featureFlag });
+      }, _ => {
+        this.message.error("保存失败!");
+        this.close.emit({ isSaved: false, data: this.featureFlag });
+      })
+  }
+
+  getVariationValue(id: string){
+    this.featureFlag.variations.find(v => v.id === id).value;
   }
 }

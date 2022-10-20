@@ -1,10 +1,12 @@
 export interface IRule {
   id: string,
   name: string,
-  conditions: ICondition[]
+  conditions: ICondition[],
 
   // for feature flag
-  variations?: IRuleVariation[]
+  variations?: IRuleVariation[],
+  includedInExpt: boolean,
+  isNotPercentageRollout: boolean,
 }
 
 export interface ICondition {
@@ -15,6 +17,8 @@ export interface ICondition {
   // UI only
   multipleValue?: string[];
   type?: string;
+  isSingleOperator: boolean,
+  isSegment: boolean
 }
 
 export interface IVariation {
