@@ -36,9 +36,15 @@ public static class ConfigureServices
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
 
-        // redis
-        var multiplexer = ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"]);
-        services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+        // populate redis
+        if (configuration.GetValue<bool>("PopulateRedis"))
+        {
+            var multiplexer = ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"]);
+            services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+
+            services.AddHostedService<RedisPopulatingHostedService>();
+            services.AddTransient<IPopulatingService, RedisPopulatingService>();
+        }
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -67,7 +73,6 @@ public static class ConfigureServices
 
         // hosted services
         services.AddHostedService<KafkaConsumerService>();
-        services.AddHostedService<RedisPopulatingHostedService>();
 
         // custom services
         services.AddScoped<IUserService, UserService>();
@@ -83,7 +88,6 @@ public static class ConfigureServices
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
         services.AddTransient<IDataSyncService, DataSyncService>();
-        services.AddTransient<IPopulatingService, RedisPopulatingService>();
 
         return services;
     }

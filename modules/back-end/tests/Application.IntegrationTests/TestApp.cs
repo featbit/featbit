@@ -12,6 +12,12 @@ namespace Application.IntegrationTests;
 
 public class TestApp : WebApplicationFactory<Program>
 {
+    public TestApp()
+    {
+        // don't populate redis
+        Environment.SetEnvironmentVariable("PopulateRedis", "false");
+    }
+
     public async Task<HttpResponseMessage> GetAsync(string uri, bool authenticated = true)
     {
         var client = CreateClient();
@@ -39,7 +45,7 @@ public class TestApp : WebApplicationFactory<Program>
 
         return await client.PostAsync(uri, content);
     }
-    
+
     public string GetToken(User user)
     {
         var scopeFactory = Services.GetRequiredService<IServiceScopeFactory>();
