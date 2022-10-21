@@ -351,6 +351,13 @@ db.FeatureFlags.insertOne(
                         op: "",
                         value: `[\"${prodSegmentIdStr}\"]`
                     }
+                ],
+                variations: [
+                    {
+                        _id: "6a8d9740-2962-4ed1-a092-643d1bff7278",
+                        rollout: [0, 1],
+                        exptRollout: 1
+                    }
                 ]
             }
         ],
@@ -430,6 +437,13 @@ db.FeatureFlags.insertOne(
                         property: "User is in segment",
                         op: "",
                         value: `[\"${devSegmentIdStr}\"]`
+                    }
+                ],
+                variations: [
+                    {
+                        _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+                        rollout: [0, 1],
+                        exptRollout: 1
                     }
                 ]
             }
