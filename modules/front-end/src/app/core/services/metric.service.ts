@@ -14,7 +14,6 @@ export class MetricService {
   get baseUrl() {
     return environment.url + `/api/v1/envs/${this.envId}/experiment-metrics`;
   }
-  // baseUrl: string = environment.url + `/api/v1/envs/${this.envId}/experiment-metrics`;
 
   constructor(
     private http: HttpClient
