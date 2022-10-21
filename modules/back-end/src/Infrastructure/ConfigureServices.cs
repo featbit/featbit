@@ -1,6 +1,7 @@
 using System.Text;
 using Domain.Identity;
 using Domain.Users;
+using Infrastructure.Caches;
 using Infrastructure.HostedServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
@@ -19,6 +20,7 @@ using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -33,6 +35,10 @@ public static class ConfigureServices
         // mongodb
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
+
+        // redis
+        var multiplexer = ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"]);
+        services.AddSingleton<IConnectionMultiplexer>(multiplexer);
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -61,6 +67,7 @@ public static class ConfigureServices
 
         // hosted services
         services.AddHostedService<KafkaConsumerService>();
+        services.AddHostedService<RedisPopulatingHostedService>();
 
         // custom services
         services.AddScoped<IUserService, UserService>();
@@ -76,6 +83,7 @@ public static class ConfigureServices
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
         services.AddTransient<IDataSyncService, DataSyncService>();
+        services.AddTransient<IPopulatingService, RedisPopulatingService>();
 
         return services;
     }

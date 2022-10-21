@@ -72,7 +72,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis:/data
+      - ./infra/redis/data:/bitnami/redis/data
 
   zookeeper:
     image: bitnami/zookeeper:latest
