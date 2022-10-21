@@ -1,7 +1,7 @@
 using System.Text;
 using Domain.Identity;
 using Domain.Users;
-using Infrastructure.BackgroundServices;
+using Infrastructure.HostedServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;

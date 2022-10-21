@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.BackgroundServices;
+namespace Infrastructure.HostedServices;
 
 partial class KafkaConsumerService
 {

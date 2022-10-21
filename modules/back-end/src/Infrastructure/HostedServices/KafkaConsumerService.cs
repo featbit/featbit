@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.BackgroundServices;
+namespace Infrastructure.HostedServices;
 
 public partial class KafkaConsumerService : BackgroundService
 {
