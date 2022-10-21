@@ -1,10 +1,11 @@
 <!-- react tutorial drawer -->
-<nz-drawer [nzClosable]="false" 
-           [nzVisible]="isVisible" 
-           [nzWidth]="450" 
-           nzPlacement="right" 
-           (nzOnClose)="onClose()"
-           [nzFooter]="footer">
+<nz-drawer 
+    [nzClosable]="false" 
+    [nzVisible]="isVisible" 
+    [nzWidth]="450" 
+    nzPlacement="right" 
+    (nzOnClose)="onClose()"
+    [nzFooter]="footer">
   <ng-container *nzDrawerContent>
     <div class="guide-body">
       <a i18n="@@guide.go-to-doc">Go to documentation</a>
