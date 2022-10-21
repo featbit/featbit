@@ -7,21 +7,39 @@
       </li>
     </ul> -->
   </div>
+
+  <div class="header-btns">
+    <div class="guide-btn" nz-tooltip="Quick Start Guide" i18n-nz-tooltip (click)="onQuickStartGuideClick()">
+      <span nz-icon nzType="read" nzTheme="outline"></span>
+    </div>
+  </div>
   <div style="display:flex;justify-content: flex-end;align-items: center">
     <div class="header-info">
       <div class="org-proj-env">
-      <span [routerLink]="['/account-settings']">
-        <i nz-icon nzType="icons:icon-org"></i>
-        {{currentOrganization?.name}}
-      </span>
+        <span [routerLink]="['/account-settings']">
+          <i nz-icon nzType="icons:icon-org"></i>
+          {{currentOrganization?.name}}
+        </span>
         <span (click)="envModalVisible=true">
-        <i nz-icon nzType="icons:icon-proj"></i>
+          <i nz-icon nzType="icons:icon-proj"></i>
           {{currentProjectEnv?.projectName}}
-      </span>
-        <span (click)="envModalVisible=true">
-        <i nz-icon nzType="icons:icon-env"></i>
+        </span>
+        <span (click)="envModalVisible=true" nz-popover i18n-nz-popover nzPopoverTitle="Environment Secret"
+          [nzPopoverContent]="environmentSecretContent"
+          style="background-color: transparent;"
+          nzPopoverOverlayClassName="env-secret-popover">
+
+          <i nz-icon nzType="icons:icon-env"></i>
           {{currentProjectEnv?.envName}}
-      </span>
+
+          <ng-template #environmentSecretContent>
+            <div class="env-secret-popover-content" (click)="copyText($event, currentProjectEnv?.envSecret)">
+              <i class="copy-icon" nz-icon
+                nzType="icons:icon-copy"></i>
+              {{currentProjectEnv?.envSecret}}
+            </div>
+          </ng-template>
+        </span>
       </div>
 
       <div class="switch" (click)="envModalVisible=true">
@@ -34,23 +52,15 @@
 
 </section>
 
-<nz-modal
-  nzCentered
-  nzWidth="792"
-  [nzVisible]="envModalVisible"
-  [nzFooter]="modalFooter"
-  (nzOnCancel)="envModelCancel()"
-  i18n-nzTitle
-  nzTitle="Change environment">
+<nz-modal nzCentered nzWidth="792" [nzVisible]="envModalVisible" [nzFooter]="modalFooter"
+  (nzOnCancel)="envModelCancel()" i18n-nzTitle nzTitle="Change environment">
   <ng-container *nzModalContent>
     <message *ngIf="!canListProjects" [type]="'warning'" [content]="cannotReadProjectsMsg"></message>
     <message *ngIf="!canListEnvs" [type]="'warning'" [content]="cannotReadEnvsMsg"></message>
     <div class="project-envs">
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
-        <nz-list-item
-          [ngClass]="{'item-selected': selectedProject?.id === project.id}"
-          *ngFor="let project of availableProjects"
-          (click)="onSelectProject(project)">
+        <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"
+          *ngFor="let project of availableProjects" (click)="onSelectProject(project)">
           {{ project.name }}
         </nz-list-item>
         <ng-template #projectHeader>
@@ -58,9 +68,7 @@
         </ng-template>
       </nz-list>
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
-        <nz-list-item
-          [ngClass]="{'item-selected': selectedEnv?.id === env.id}"
-          *ngFor="let env of availableEnvs"
+        <nz-list-item [ngClass]="{'item-selected': selectedEnv?.id === env.id}" *ngFor="let env of availableEnvs"
           (click)="onSelectEnv(env)">
           {{ env.name }}
         </nz-list-item>

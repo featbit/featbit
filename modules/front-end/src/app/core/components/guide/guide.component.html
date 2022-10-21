@@ -1,43 +1,52 @@
 <!-- react tutorial drawer -->
-<nz-drawer
-  [nzClosable]="false"
-  [nzVisible]="isVisible"
-  [nzWidth]="450"
-  nzPlacement="right"
+<nz-drawer 
+  [nzClosable]="false" 
+  [nzVisible]="isVisible" 
+  [nzWidth]="450" 
+  nzPlacement="right" 
   (nzOnClose)="onClose()"
-  [nzFooter]="footer"
->
+  [nzFooter]="footer">
   <ng-container *nzDrawerContent>
     <div class="guide-body">
       <a i18n="@@guide.go-to-doc">Go to documentation</a>
       <div class="block">
         <h4 nz-typography i18n="@@guide.get-started">Get started</h4>
-        <a class="btn-link" target="_blank">
-          <i nz-icon nzType="icons:icon-add-outline"></i>
+        <a class="btn-link" target="_blank" href="https://featbit.gitbook.io/docs/get-started/featbit-in-3-minutes">
+          <span nz-icon nzType="play-square" nzTheme="outline"></span>
           <span i18n="@@guide.featbit-in-3-min">FeatBit in 3 minutes</span>
         </a>
-        <a class="btn-link" target="_blank">
-          <i nz-icon nzType="icons:icon-add-outline"></i>
+        <a class="btn-link" target="_blank"
+          href="https://featbit.gitbook.io/docs/get-started/create-2-flags-for-the-demo">
+          <span nz-icon nzType="flag" nzTheme="outline"></span>
           <span i18n="@@guide.create-ff">Create feature flags for the demo</span>
         </a>
-        <a class="btn-link" target="_blank">
-          <i nz-icon nzType="icons:icon-add-outline"></i>
+        <a class="btn-link" target="_blank"
+          href="https://featbit.gitbook.io/docs/get-started/try-interacting-with-the-demo">
+          <span nz-icon nzType="block" nzTheme="outline"></span>
           <span i18n="@@guide.try-interactive-demo">Try interactive with the demo</span>
         </a>
-        <a class="btn-link" target="_blank">
-          <i nz-icon nzType="icons:icon-add-outline"></i>
+        <a class="btn-link" target="_blank" href="https://featbit.gitbook.io/docs/get-started/connect-an-sdk">
+          <span nz-icon nzType="code" nzTheme="outline"></span>
           <span i18n="@@guide.connect-to-sdk">Connect to SDK</span>
         </a>
       </div>
       <div class="block">
         <h4 nz-typography i18n="@@guide.guides-title">How-to guides with demo & SDK</h4>
-        <div class="subtitle" i18n="@@guide.guides-subtitle">Guides use the same demo sample (dino game)</div>
-        <a class="btn-link" target="_blank" i18n="@@guide.testing-in-production">Testing in production</a>
-        <a class="btn-link" target="_blank" i18n="@@guide.targeted-progressive-delivery">Targeted progressive delivery</a>
-        <a class="btn-link" target="_blank" i18n="@@guide.ab-testing">A/B testing</a>
-        <a class="btn-link" target="_blank" i18n="@@guide.empower-teams">Empower all teams deliver, control and experiment with</a>
+        <a class="btn-link" target="_blank" i18n="@@guide.testing-in-production"
+          href="https://featbit.gitbook.io/docs/how-to-guides/testing-in-production">
+          <span nz-icon nzType="book" nzTheme="outline"></span>Testing in production</a>
+        <a class="btn-link" target="_blank" i18n="@@guide.targeted-progressive-delivery"
+          href="https://featbit.gitbook.io/docs/how-to-guides/targeted-progressive-delivery">
+          <span nz-icon nzType="book" nzTheme="outline"></span>Targeted progressive delivery</a>
+        <a class="btn-link" target="_blank" i18n="@@guide.ab-testing"
+          href="https://featbit.gitbook.io/docs/how-to-guides/ab-testing">
+          <span nz-icon nzType="book" nzTheme="outline"></span>A/B testing</a>
+        <a class="btn-link" target="_blank" i18n="@@guide.empower-teams"
+          href="https://featbit.gitbook.io/docs/how-to-guides/entitlement">
+          <span nz-icon nzType="book" nzTheme="outline"></span>Entitlement management</a>
       </div>
-      <a i18n="@@guide.how-to-doc">More how-to guides documentation</a>
+      <a target="_blank" i18n="@@guide.how-to-doc" style="font-size: 15px;" href="https://featbit.gitbook.io/docs/how-to-guides">
+        More how-to guides documentation...</a>
     </div>
   </ng-container>
 

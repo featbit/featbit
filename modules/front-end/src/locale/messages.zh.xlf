@@ -1401,7 +1401,7 @@
         <source>Go to documentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="linenumber">11</context>
         </context-group>
         <target></target>
       </trans-unit>
@@ -1409,7 +1409,7 @@
         <source>Get started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">14</context>
+          <context context-type="linenumber">13</context>
         </context-group>
         <target></target>
       </trans-unit>
@@ -1417,7 +1417,7 @@
         <source>FeatBit in 3 minutes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">17</context>
+          <context context-type="linenumber">16</context>
         </context-group>
         <target></target>
       </trans-unit>
@@ -1433,7 +1433,7 @@
         <source>Try interactive with the demo</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">25</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <target></target>
       </trans-unit>
@@ -1441,7 +1441,7 @@
         <source>Connect to SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">30</context>
         </context-group>
         <target></target>
       </trans-unit>
@@ -1449,55 +1449,59 @@
         <source>How-to guides with demo &amp; SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">33</context>
-        </context-group>
-        <target></target>
-      </trans-unit>
-      <trans-unit id="guide.guides-subtitle" datatype="html">
-        <source>Guides use the same demo sample (dino game)</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">34</context>
         </context-group>
         <target></target>
       </trans-unit>
       <trans-unit id="guide.testing-in-production" datatype="html">
-        <source>Testing in production</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">35</context>
-        </context-group>
-        <target></target>
-      </trans-unit>
-      <trans-unit id="guide.targeted-progressive-delivery" datatype="html">
-        <source>Targeted progressive delivery</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">36</context>
-        </context-group>
-        <target></target>
-      </trans-unit>
-      <trans-unit id="guide.ab-testing" datatype="html">
-        <source>A/B testing</source>
+        <source>
+          <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span nz-icon nzType=&quot;book&quot; nzTheme=&quot;outline&quot;&gt;"></x>
+          <x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"></x>
+Testing in production        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">37</context>
         </context-group>
         <target></target>
       </trans-unit>
-      <trans-unit id="guide.empower-teams" datatype="html">
-        <source>Empower all teams deliver, control and experiment with</source>
+      <trans-unit id="guide.targeted-progressive-delivery" datatype="html">
+        <source>
+          <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span nz-icon nzType=&quot;book&quot; nzTheme=&quot;outline&quot;&gt;"></x>
+          <x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"></x>
+Targeted progressive delivery        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="guide.ab-testing" datatype="html">
+        <source>
+          <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span nz-icon nzType=&quot;book&quot; nzTheme=&quot;outline&quot;&gt;"></x>
+          <x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"></x>
+A/B testing        </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="guide.empower-teams" datatype="html">
+        <source>
+          <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span nz-icon nzType=&quot;book&quot; nzTheme=&quot;outline&quot;&gt;"></x>
+          <x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"></x>
+Entitlement management        </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">46</context>
         </context-group>
         <target></target>
       </trans-unit>
       <trans-unit id="guide.how-to-doc" datatype="html">
-        <source>More how-to guides documentation</source>
+        <source>More how-to guides documentation...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">48,49</context>
         </context-group>
         <target></target>
       </trans-unit>
@@ -1505,7 +1509,7 @@
         <source>Close</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">46</context>
+          <context context-type="linenumber">55</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
@@ -1517,11 +1521,19 @@
         </context-group>
         <target>关闭</target>
       </trans-unit>
+      <trans-unit id="2079356056498052799" datatype="html">
+        <source>Quick Start Guide</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target></target>
+      </trans-unit>
       <trans-unit id="4081990841785642590" datatype="html">
         <source>Change environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">51</context>
         </context-group>
         <target>切换项目环境</target>
       </trans-unit>
@@ -1529,7 +1541,7 @@
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">57</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -1537,7 +1549,7 @@
         <source>Environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <target>环境</target>
       </trans-unit>
@@ -1545,7 +1557,7 @@
         <source>Cancel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">81</context>
         </context-group>
         <target>取消</target>
       </trans-unit>
@@ -1553,7 +1565,7 @@
         <source>OK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">75</context>
+          <context context-type="linenumber">82</context>
         </context-group>
         <target>OK</target>
       </trans-unit>
@@ -4851,7 +4863,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>We&apos;ve created a project for</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">7</context>
+          <context context-type="linenumber">8</context>
         </context-group>
         <target>您成功为机构</target>
       </trans-unit>
@@ -4859,7 +4871,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">7</context>
+          <context context-type="linenumber">10</context>
         </context-group>
         <target>创建了一个项目。</target>
       </trans-unit>
@@ -4867,7 +4879,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Projects start with two default environments:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">10</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <target>我们为您的项目创建了两个默认环境，分别为：</target>
       </trans-unit>
@@ -4875,15 +4887,17 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Each environment has its own SDK secret, you can develop and test in Dev before rolling out to Prod.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">16,18</context>
+          <context context-type="linenumber">20,23</context>
         </context-group>
         <target>每个环境拥有自己的 SDk secret, 您可以在 Dev 环境中进行开发和测试，完成后再发布到 Prod 环境。</target>
       </trans-unit>
       <trans-unit id="onboarding.complete.third-paragrah" datatype="html">
-        <source>Next, let&apos;s how to get started.</source>
+        <source>
+          <x id="TAG_IMG" ctype="image" equiv-text="&lt;img style=&quot;width:100%;&quot; src=&quot;assets/get-started/docpointer.png&quot; /&gt;"></x>
+Next, click on the &apos;Quick Start Doc&apos; button on the top-right corner to get started!!!        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">20,21</context>
+          <context context-type="linenumber">25,27</context>
         </context-group>
         <target>接下来，然我们开始学些如何创建并使用开关。</target>
       </trans-unit>
@@ -4891,7 +4905,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Get started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <target>开始使用</target>
       </trans-unit>
@@ -5160,7 +5174,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Feature flags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">48,47</context>
+          <context context-type="linenumber">54,53</context>
         </context-group>
         <target>开关管理</target>
       </trans-unit>
@@ -5168,7 +5182,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Archived feature flags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">53,52</context>
+          <context context-type="linenumber">59,58</context>
         </context-group>
         <target>开关存档</target>
       </trans-unit>
@@ -5176,7 +5190,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>End users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">58,57</context>
+          <context context-type="linenumber">64,63</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -5184,7 +5198,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">63,62</context>
+          <context context-type="linenumber">69,68</context>
         </context-group>
         <target>用户组</target>
       </trans-unit>
@@ -5192,7 +5206,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Experiments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">68,67</context>
+          <context context-type="linenumber">74,73</context>
         </context-group>
         <target>数据实验</target>
       </trans-unit>
@@ -5200,7 +5214,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Data sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">73,72</context>
+          <context context-type="linenumber">79,78</context>
         </context-group>
         <target>数据同步</target>
       </trans-unit>
@@ -5208,7 +5222,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">81,80</context>
+          <context context-type="linenumber">87,86</context>
         </context-group>
         <target>机构管理</target>
       </trans-unit>
@@ -5216,7 +5230,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">86,85</context>
+          <context context-type="linenumber">92,91</context>
         </context-group>
         <target>权限管理</target>
       </trans-unit>
@@ -5224,7 +5238,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Team</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">91,90</context>
+          <context context-type="linenumber">97,96</context>
         </context-group>
         <target>团队</target>
       </trans-unit>
@@ -5232,7 +5246,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Groups</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">96,95</context>
+          <context context-type="linenumber">102,101</context>
         </context-group>
         <target>组</target>
       </trans-unit>
@@ -5240,7 +5254,7 @@ Legal resource name (RN) cannot includeand :        </source>
         <source>Policies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">101,100</context>
+          <context context-type="linenumber">107,106</context>
         </context-group>
         <target>策略</target>
       </trans-unit>

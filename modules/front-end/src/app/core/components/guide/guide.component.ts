@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'guide-drawer',
@@ -9,8 +9,9 @@ export class GuideComponent {
 
   @Input()
   isVisible = true;
+  @Output() guideDrawerClosed: EventEmitter<any> = new EventEmitter();
 
   onClose() {
-    this.isVisible = false;
+    this.guideDrawerClosed.emit();
   }
 }
