@@ -51,8 +51,6 @@
         <nz-form-control i18n-nzErrorTip="@@expt.overview.event-type-cannot-be-empty" nzErrorTip="Event type cannot be empty">
           <nz-select formControlName="eventType" (ngModelChange)="onEventTypeChange($event)">
             <nz-option [nzValue]="customEventType"  nzLabel="Custom"></nz-option>
-            <!-- <nz-option [nzValue]="pageViewEventType" nzLabel="PageView"></nz-option>
-            <nz-option [nzValue]="clickEventType" nzLabel="Click"></nz-option> -->
           </nz-select>
         </nz-form-control>
       </nz-form-item>
