@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { IAuthProps } from '@shared/types';
 import { IMenuItem } from '@core/components/menu/menu';
@@ -11,6 +11,8 @@ import {IdentityService} from "@services/identity.service";
   styleUrls: ['./safe.component.less']
 })
 export class SafeComponent implements OnInit, OnDestroy {
+
+  @Input() showQuickStart: boolean = false;
 
   public menus: IMenuItem[] = [];
   public auth: IAuthProps;

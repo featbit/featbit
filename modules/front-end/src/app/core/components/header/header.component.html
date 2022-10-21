@@ -7,6 +7,13 @@
       </li>
     </ul> -->
   </div>
+  
+  <div class="header-btns">
+    <div class="guide-btn" nz-tooltip="Quick Start Guide" i18n-nz-tooltip
+         (click)="onQuickStartGuideClick()">
+      <span nz-icon nzType="read" nzTheme="outline"></span>
+    </div>
+  </div>
   <div style="display:flex;justify-content: flex-end;align-items: center">
     <div class="header-info">
       <div class="org-proj-env">
@@ -26,7 +33,7 @@
 
       <div class="switch" (click)="envModalVisible=true">
         <button class="switch-link-btn" nz-button nzType="link">
-          <i nz-icon nzType="icons:icon-swap"></i>
+          <i nz-icon nzType="icons:icon-swap" ></i>
         </button>
       </div>
     </div>

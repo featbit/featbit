@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, Output, OnInit, EventEmitter } from '@angular/core';
 import { IAuthProps, IOrganization, IProject, IEnvironment, IProjectEnv } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { ProjectService } from '@services/project.service';
@@ -17,6 +17,8 @@ import {MessageQueueService} from "@services/message-queue.service";
 export class HeaderComponent implements OnInit {
 
   @Input() auth: IAuthProps;
+
+  @Output() showQuickStart: EventEmitter<any> = new EventEmitter();
 
   cannotReadProjectsMsg: string;
   cannotReadEnvsMsg: string;
@@ -139,5 +141,9 @@ export class HeaderComponent implements OnInit {
   private setAllProjects() {
     this.projectService.getProjects(this.currentOrganization.id)
       .subscribe(projects => this.allProjects = projects);
+  }
+
+  onQuickStartGuideClick(){
+   this.showQuickStart.emit(true);
   }
 }
