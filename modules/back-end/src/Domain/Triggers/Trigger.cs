@@ -90,10 +90,9 @@ public class Trigger : AuditedEntity
         LastTriggeredAt = DateTime.UtcNow;
     }
 
-    public void Update(bool isEnabled, string description)
+    public void Update(bool isEnabled)
     {
         IsEnabled = isEnabled;
-        Description = description ?? string.Empty;
 
         UpdatedAt = DateTime.UtcNow;
     }

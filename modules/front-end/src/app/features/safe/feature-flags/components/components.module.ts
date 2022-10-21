@@ -24,6 +24,7 @@ import { NzTabsModule } from "ng-zorro-antd/tabs";
 import { NzSwitchModule } from "ng-zorro-antd/switch";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
+import {CoreModule} from "@core/core.module";
 
 
 @NgModule({
@@ -31,31 +32,32 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
     UpperSwitchComponent,
     FlagTriggersComponent,
   ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    NzButtonModule,
-    NzIconModule,
-    NzInputModule,
-    NzSelectModule,
-    NzSliderModule,
-    NzPaginationModule,
-    NzPopconfirmModule,
-    NzCardModule,
-    NzDropDownModule,
-    NzAvatarModule,
-    NzTagModule,
-    NzModalModule,
-    NzTypographyModule,
-    NzDividerModule,
-    NzSpinModule,
-    NzToolTipModule,
-    NzTabsModule,
-    NzSwitchModule,
-    NzTableModule,
-    NzCollapseModule,
-    NzSkeletonModule
-  ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        NzButtonModule,
+        NzIconModule,
+        NzInputModule,
+        NzSelectModule,
+        NzSliderModule,
+        NzPaginationModule,
+        NzPopconfirmModule,
+        NzCardModule,
+        NzDropDownModule,
+        NzAvatarModule,
+        NzTagModule,
+        NzModalModule,
+        NzTypographyModule,
+        NzDividerModule,
+        NzSpinModule,
+        NzToolTipModule,
+        NzTabsModule,
+        NzSwitchModule,
+        NzTableModule,
+        NzCollapseModule,
+        NzSkeletonModule,
+        CoreModule
+    ],
   exports: [
     CommonModule,
     UpperSwitchComponent,

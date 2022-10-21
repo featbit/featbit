@@ -1,4 +1,4 @@
-<div class="detail-body" *ngIf="featureFlagId">
+<div class="detail-body" *ngIf="featureFlagKey">
   <ng-template #loadingTem>
     <div class="block">
       <nz-skeleton [nzActive]="true"></nz-skeleton>
@@ -7,29 +7,29 @@
   <div class="banner">
     <div class="title">
       <div class="label">
-        <div>事件触发器</div>
-        <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;">通过事件触发器可以远程打开或关闭开关</div>
+        <div i18n="@@ff.triggers.triggers">Event triggers</div>
+        <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;" i18n="@@ff.triggers.programmatically-turn-on-off">Programmatically turn ON or Off the feature flag</div>
       </div>
     </div>
     <div class="action-btns">
       <button nz-button nzType="primary" (click)="onCreateTrigger()">
         <i nz-icon nzType="icons:icon-add"></i>
-        添加触发器
+        <ng-container i18n="@@common.add">Add</ng-container>
       </button>
     </div>
   </div>
 
   <div class="content-container" *ngIf="!isLoading; else loadingTem;">
       <div *ngFor="let trigger of triggers" class="standard-div">
-        <nz-card nzBorderless [nzTitle]="trigger.typeName" [nzExtra]="triggerInfo" [nzActions]="[actionStatus, actionReset, actionRemove]">
+        <nz-card nzBorderless [nzTitle]="trigger.type | T: flagTriggerTypeLabel[trigger.type] : 'trigger-type'" [nzExtra]="triggerInfo" [nzActions]="[actionStatus, actionReset, actionRemove]">
           <div class="trigger-body">
             <div class="trigger-body-main">
               <div class="trigger-main">
-                <div class="trigger-action">更新开关状态到 <nz-tag [class]="'action_' + trigger.action" class="action">{{trigger.actionName}}</nz-tag></div>
+                <div class="trigger-action"><ng-container i18n="@@ff.triggers.turn-the-feature-flag">Turn the feature flag</ng-container> <nz-tag [class]="'action_' + trigger.action" class="action">{{flagTriggerActionLabel[trigger.action]}}</nz-tag></div>
                 <div class="trigger-description">{{trigger.description}}</div>
                 <div class="trigger-url">
-                  <span *ngIf="!trigger.canCopyToken">{{trigger.triggerUrl}}</span>
-                  <span *ngIf="trigger.canCopyToken" nz-typography nzCopyable nzCopyText="{{ trigger.triggerUrl }}">{{trigger.triggerUrl}}</span>
+                  <span *ngIf="!trigger.canCopyToken">{{getTriggerUrl(trigger.token)}}</span>
+                  <span *ngIf="trigger.canCopyToken" nz-typography nzCopyable nzCopyText="{{ getTriggerUrl(trigger.token) }}">{{getTriggerUrl(trigger.token)}}</span>
                 </div>
               </div>
             </div>
@@ -37,26 +37,26 @@
         </nz-card>
         <ng-template #triggerInfo>
           <div style="color: #9A95CC">
-            <div>被调用 <strong>{{trigger.times}}</strong> 次</div>
-            <div *ngIf="!!trigger.lastTriggeredAt">最后一次被调用于 {{trigger.lastTriggeredAt}}</div>
-            <div>更新于 {{trigger.updatedAt}}</div>
+            <div><ng-container i18n="@@ff.triggers.triggered">Triggered</ng-container> <strong>{{trigger.triggeredTimes}}</strong> 次</div>
+            <div *ngIf="!!trigger.lastTriggeredAt"><ng-container i18n="@@ff.triggers.last_triggered_at">Last triggered at</ng-container> {{trigger.lastTriggeredAt | date: 'YYYY-MM-dd HH:mm'}}</div>
+            <div><ng-container i18n="@@ff.triggers.updated_at">Last updated at</ng-container> {{trigger.updatedAt | date: 'YYYY-MM-dd HH:mm'}}</div>
           </div>
         </ng-template>
         <ng-template #actionStatus>
-          <nz-switch [ngModel]="trigger.statusName === 'Enabled'" (click)="onChangeTriggerStatus(trigger)" nzCheckedChildren="激活" nzUnCheckedChildren="关闭"></nz-switch>
+          <nz-switch [ngModel]="trigger.isEnabled" (click)="onToggleTriggerStatus(trigger)" i18n-nzCheckedChildren="@@common.enable" nzCheckedChildren="Enable" i18n-nzUnCheckedChildren="@@common.disable" nzUnCheckedChildren="Disable"></nz-switch>
         </ng-template>
         <ng-template #actionReset>
-          <a style="color: #9A95CC;" nz-popconfirm="当前URL将失效，重置后请立即复制并保存URL"
+          <a style="color: #9A95CC;" i18n-nz-popconfirm="@@ff.triggers.current-url-will-expire" nz-popconfirm="Current URL will expire, please copy and save it when regenerated."
              nzPopconfirmPlacement="bottom" [nzPopconfirmOverlayStyle]="{minWidth: '370px'}"
              (nzOnConfirm)="resetToken(trigger)" [nzIcon]="iconTpl">
             <i nz-icon nzType="edit" nzTheme="outline"></i>
-            重置 URL
+            <ng-container i18n="@@ff.triggers.regenerate-url">Regenerate URL</ng-container>L
           </a>
         </ng-template>
         <ng-template #actionRemove>
-          <a nz-popconfirm="确定删除吗?" nzPopconfirmPlacement="bottom"
+          <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom"
              [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
-             (nzOnConfirm)="archiveTrigger(trigger)" [nzIcon]="iconTpl">
+             (nzOnConfirm)="removeTrigger(trigger)" [nzIcon]="iconTpl">
             <i style="color: #9A95CC;" nz-icon nzType="delete" nzTheme="fill"></i>
           </a>
         </ng-template>
@@ -67,33 +67,32 @@
   </div>
 </div>
 
-<nz-modal [(nzVisible)]="isCreationModalVisible" nzTitle="新建触发器" [nzOkLoading]="isCreationLoading" (nzOnCancel)="cancelCreation()" (nzOnOk)="createTrigger()">
+<nz-modal [(nzVisible)]="isCreationModalVisible" i18n-nzTitle="@@ff.triggers.create-trigger" nzTitle="Create trigger" [nzOkLoading]="isCreationLoading" (nzOnCancel)="cancelCreation()" (nzOnOk)="createTrigger()">
   <ng-container *nzModalContent>
     <div class="create-trigger">
       <div class="info-item">
-        <div>类型</div>
-        <nz-select [(ngModel)]="newFlagTrigger.type" nzPlaceHolder="选择触发器类型" [nzCustomTemplate]="typeTemplate">
-          <nz-option *ngFor="let type of flagTriggerTypes;" [nzLabel]="type.label" [nzValue]="type.id"></nz-option>
+        <div i18n="@@ff.triggers.trigger-type">Type</div>
+        <nz-select [(ngModel)]="newFlagTrigger.type" i18n-nzPlaceHolder="@@ff.triggers.trigger-type" nzPlaceHolder="Type" [nzCustomTemplate]="typeTemplate">
+          <nz-option *ngFor="let type of flagTriggerTypes;" [nzLabel]="type | T: flagTriggerTypeLabel[type] : 'trigger-type'" [nzValue]="type"></nz-option>
         </nz-select>
         <ng-template #typeTemplate let-selected>
-          <!-- <i nz-icon [nzType]="selected.nzValue"></i> -->
           <i nz-icon nzType="aim"></i>
           <div style="margin-top: 2px">{{ selected.nzLabel }}</div>
         </ng-template>
       </div>
       <div class="info-item" style="margin-top: 10px">
-        <div>操作</div>
-        <nz-select [(ngModel)]="newFlagTrigger.action" nzPlaceHolder="选择触发器操作" [nzCustomTemplate]="actionTemplate">
-          <nz-option *ngFor="let action of flagTriggerActions" [nzLabel]="action.label" [nzValue]="action.id"></nz-option>
+        <div i18n="@@ff.triggers.trigger-action">Action</div>
+        <nz-select [(ngModel)]="newFlagTrigger.action" i18n-nzPlaceHolder="@@ff.triggers.trigger-action" nzPlaceHolder="Action" [nzCustomTemplate]="actionTemplate">
+          <nz-option *ngFor="let action of flagTriggerActions" [nzLabel]="flagTriggerActionLabel[action]" [nzValue]="action"></nz-option>
         </nz-select>
         <ng-template #actionTemplate let-selected>
-          <div style="margin-top: 2px">更新开关状态到</div>
+          <div style="margin-top: 2px" i18n="@@ff.triggers.turn-the-feature-flag">Turn the feature flag</div>
           <nz-tag [class]="'action_' + newFlagTrigger.action" class="action">{{selected.nzLabel}}</nz-tag>
         </ng-template>
       </div>
       <div class="info-item">
-        <div>描述</div>
-        <textarea style="height:100px" [(ngModel)]="newFlagTrigger.description" nz-input placeholder="简要描述什么情况下会触发该触发器"></textarea>
+        <div i18n="@@common.description">Description</div>
+        <textarea style="height:100px" [(ngModel)]="newFlagTrigger.description" nz-input i18n-placeholder="@@common.description" placeholder="Description"></textarea>
       </div>
     </div>
   </ng-container>
