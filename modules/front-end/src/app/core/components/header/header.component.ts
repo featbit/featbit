@@ -18,8 +18,6 @@ export class HeaderComponent implements OnInit {
 
   @Input() auth: IAuthProps;
 
-  @Output() showQuickStart: EventEmitter<any> = new EventEmitter();
-
   cannotReadProjectsMsg: string;
   cannotReadEnvsMsg: string;
   currentProjectEnv: IProjectEnv;
@@ -144,6 +142,6 @@ export class HeaderComponent implements OnInit {
   }
 
   onQuickStartGuideClick(){
-   this.showQuickStart.emit(true);
+    this.messageQueueService.emit(this.messageQueueService.topics.QUICK_START_GUIDE_ONCLICK);
   }
 }

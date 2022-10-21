@@ -3,7 +3,8 @@ import { Subject } from 'rxjs';
 import { IAuthProps } from '@shared/types';
 import { IMenuItem } from '@core/components/menu/menu';
 import { getAuth } from '@shared/utils';
-import {IdentityService} from "@services/identity.service";
+import { IdentityService } from "@services/identity.service";
+import { MessageQueueService } from "@services/message-queue.service";
 
 @Component({
   selector: 'app-safe',
@@ -11,8 +12,6 @@ import {IdentityService} from "@services/identity.service";
   styleUrls: ['./safe.component.less']
 })
 export class SafeComponent implements OnInit, OnDestroy {
-
-  @Input() showQuickStart: boolean = false;
 
   public menus: IMenuItem[] = [];
   public auth: IAuthProps;
@@ -23,12 +22,17 @@ export class SafeComponent implements OnInit, OnDestroy {
 
   constructor(
     private identityService: IdentityService,
+    private messageQueueService: MessageQueueService
   ) {
     this.setMenus();
   }
 
   ngOnInit(): void {
     this.auth = getAuth();
+
+    this.messageQueueService.subscribe(this.messageQueueService.topics.QUICK_START_GUIDE_ONCLICK, () => {
+      this.isGuideVisible = true;
+    });
   }
 
   ngOnDestroy(): void {
@@ -112,5 +116,9 @@ export class SafeComponent implements OnInit, OnDestroy {
 
   public async logout() {
     await this.identityService.doLogoutUser();
+  }
+
+  onGuideDrawerClosed(){
+    this.isGuideVisible = false;
   }
 }
