@@ -82,10 +82,11 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
     {
         var request = new DeleteFeatureFlag
         {
+            EnvId = envId,
             Id = id
         };
 

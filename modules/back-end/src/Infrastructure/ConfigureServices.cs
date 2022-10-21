@@ -1,5 +1,6 @@
 using System.Text;
 using Domain.Identity;
+using Domain.Messages;
 using Domain.Users;
 using Infrastructure.Caches;
 using Infrastructure.HostedServices;
@@ -10,6 +11,7 @@ using Infrastructure.FeatureFlags;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
+using Infrastructure.Messages;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
@@ -45,6 +47,9 @@ public static class ConfigureServices
             services.AddHostedService<RedisPopulatingHostedService>();
             services.AddTransient<IPopulatingService, RedisPopulatingService>();
         }
+
+        // message producer
+        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -88,6 +93,7 @@ public static class ConfigureServices
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
         services.AddTransient<IDataSyncService, DataSyncService>();
+        services.AddSingleton<IRedisService, RedisService>();
 
         return services;
     }
