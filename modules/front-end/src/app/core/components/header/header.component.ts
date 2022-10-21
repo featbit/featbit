@@ -4,10 +4,10 @@ import { OrganizationService } from '@services/organization.service';
 import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
-import {PermissionsService} from "@services/permissions.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
-import {NzMessageService} from "ng-zorro-antd/message";
-import {MessageQueueService} from "@services/message-queue.service";
+import { PermissionsService } from "@services/permissions.service";
+import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { MessageQueueService } from "@services/message-queue.service";
 
 @Component({
   selector: 'app-header',
@@ -49,8 +49,8 @@ export class HeaderComponent implements OnInit {
     this.canListProjects = this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.ListProjects);
     this.canListEnvs = this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.ListEnvs);
 
-    this.cannotReadProjectsMsg = $localize `You don't have permissions to read project list, please contact the admin to grant you the necessary permissions`;
-    this.cannotReadEnvsMsg = this.canListProjects ? $localize `You don't have permissions to read environment list, please contact the admin to grant you the necessary permissions` : $localize `You don't have permissions to read project and environment list, please contact the admin to grant you the necessary permissions`;
+    this.cannotReadProjectsMsg = $localize`You don't have permissions to read project list, please contact the admin to grant you the necessary permissions`;
+    this.cannotReadEnvsMsg = this.canListProjects ? $localize`You don't have permissions to read environment list, please contact the admin to grant you the necessary permissions` : $localize`You don't have permissions to read project and environment list, please contact the admin to grant you the necessary permissions`;
     this.selectCurrentProjectEnv();
     this.setAllProjects();
 
@@ -87,8 +87,8 @@ export class HeaderComponent implements OnInit {
       (canAccessProjectEnvs === undefined && canAccessEnv === undefined) ||
       canAccessProjectEnvs === false ||
       canAccessEnv === false) {
-        this.message.warning(this.permissionsService.genericDenyMessage);
-        return;
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
     }
 
     const projectEnv = {
@@ -96,7 +96,7 @@ export class HeaderComponent implements OnInit {
       projectName: this.selectedProject.name,
       envId: this.selectedEnv.id,
       envName: this.selectedEnv.name,
-      envSecret: this.selectedEnv.secret
+      envSecret: this.selectedEnv.secrets[0].value
     };
 
     this.projectService.upsertCurrentProjectEnvLocally(projectEnv);
@@ -141,7 +141,14 @@ export class HeaderComponent implements OnInit {
       .subscribe(projects => this.allProjects = projects);
   }
 
-  onQuickStartGuideClick(){
+  onQuickStartGuideClick() {
     this.messageQueueService.emit(this.messageQueueService.topics.QUICK_START_GUIDE_ONCLICK);
+  }
+
+  // copy environment key
+  copyText(event, text: string) {
+    navigator.clipboard.writeText(text).then(
+      () => this.message.success($localize`:@@common.copy-success:Copied`)
+    );
   }
 }

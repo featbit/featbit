@@ -86,7 +86,7 @@ export class ProjectService {
             projectName: firstProject.name,
             envId: firstProjectEnv.id,
             envName: firstProjectEnv.name,
-            envSecret: firstProjectEnv.secret
+            envSecret: firstProjectEnv.secrets[0].value
           };
 
           this.upsertCurrentProjectEnvLocally(projectEnv);
