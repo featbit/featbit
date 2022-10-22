@@ -285,11 +285,6 @@ export class IndexComponent implements OnInit {
 
   //#endregion
   onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
-    // Toggle of status is disabled for archived feature flags
-    if (this.featureFlagFilter.isArchived) {
-      return;
-    }
-
     let msg: string;
     if (data.isEnabled) {
       msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +

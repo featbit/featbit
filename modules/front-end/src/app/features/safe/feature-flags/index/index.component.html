@@ -79,18 +79,16 @@
             {{featureFlag.key}}
           </td>
           <td>
-            <nz-switch [nzDisabled]="featureFlagFilter.isArchived" *ngIf="featureFlag.isEnabled"
+            <nz-switch *ngIf="featureFlag.isEnabled"
                        i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-disable-ff"
                        nz-popconfirm="Are you sure to turn it off? The variation returned would be changed when it is off"
                        (nzOnConfirm)="onToggleFeatureFlagStatus(featureFlag)"
-                       [nzCondition]="featureFlagFilter.isArchived"
                        nzControl="true"
                        [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
             </nz-switch>
-            <nz-switch [nzDisabled]="featureFlagFilter.isArchived" *ngIf="!featureFlag.isEnabled"
+            <nz-switch *ngIf="!featureFlag.isEnabled"
                        i18n-nz-popconfirm="@@ff.idx.are-you-sure-to-enable-ff"
                        nz-popconfirm="Are you sure to turn it on? The matching targeting users' or rules' serving variation would be returned"
-                       (nzOnConfirm)="onToggleFeatureFlagStatus(featureFlag)"
                        [nzCondition]="featureFlagFilter.isArchived"
                        nzControl="true"
                        [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
