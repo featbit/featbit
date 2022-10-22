@@ -27,13 +27,6 @@ const routes: Routes = [
         },
       },
       {
-        path: 'switch-archive',
-        loadChildren: () => import("./switch-archive/switch-archive.module").then(m => m.SwitchArchiveModule),
-        data: {
-          breadcrumb: $localize `:@@ff-archive:Archived feature flags`
-        },
-      },
-      {
         path: 'experiments',
         loadChildren: () => import("./experiments/experiments.module").then(m => m.ExperimentsModule),
         data: {

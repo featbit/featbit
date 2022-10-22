@@ -8,5 +8,5 @@ public class FeatureFlagFilter : PagedRequest
 
     public bool? IsEnabled { get; set; }
 
-    public bool IncludeArchived { get; set; }
+    public bool IsArchived { get; set; }
 }

@@ -38,6 +38,7 @@ export class IFeatureFlagListFilter {
   userKeyId?: string;
   isEnabled?: boolean;
   tagIds?: number[];
+  isArchived?: boolean;
   pageIndex: number;
   pageSize: number;
 
@@ -46,12 +47,14 @@ export class IFeatureFlagListFilter {
     userKeyId?: string,
     isEnabled?: boolean,
     tagIds?: number[],
+    archivedOnly?: boolean,
     pageIndex: number = 1,
     pageSize: number = 10) {
     this.name = name ?? '';
     this.userKeyId = userKeyId ?? '';
     this.isEnabled = isEnabled;
     this.tagIds = tagIds ?? [];
+    this.isArchived = !!archivedOnly;
     this.pageIndex = pageIndex;
     this.pageSize = pageSize;
   }
