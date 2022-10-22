@@ -31,13 +31,10 @@ public static class ServicesRegister
         services.AddSingleton<IConnectionManager, ConnectionManager>();
         services.AddScoped<IConnectionHandler, ConnectionHandler>();
 
-        // message handlers
+        // websocket message handlers
         services.AddTransient<IMessageHandler, PingMessageHandler>();
         services.AddTransient<IMessageHandler, EchoMessageHandler>();
         services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
-
-        // message producer
-        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
 
         // for integration tests, ignore below configs 
         if (builder.Environment.IsEnvironment("IntegrationTests"))
@@ -45,16 +42,25 @@ public static class ServicesRegister
             return builder;
         }
 
-        // population redis
+        // redis
         services.AddSingleton<IConnectionMultiplexer>(
             _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
         );
         services.AddTransient<IPopulatingService, RedisPopulatingService>();
         services.AddHostedService<RedisPopulatingHostedService>();
+        services.AddSingleton<RedisService>();
 
         // mongodb
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
+
+        // kafka message producer & consumer
+        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+        services.AddHostedService<KafkaMessageConsumer>();
+
+        // kafka message handlers
+        services.AddSingleton<IKafkaMessageHandler, FeatureFlagChangeMessageHandler>();
+        services.AddSingleton<IKafkaMessageHandler, SegmentChangeMessageHandler>();
 
         return builder;
     }

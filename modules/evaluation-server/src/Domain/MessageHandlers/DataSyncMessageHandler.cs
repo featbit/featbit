@@ -37,7 +37,7 @@ public class DataSyncMessageHandler : IMessageHandler
 
             // publish end-user message
             var endUserMessage = new EndUserMessage(connection.EnvId, message.User);
-            await _producer.PublishAsync(MessageTopics.EndUser, endUserMessage);
+            await _producer.PublishAsync(Topics.EndUser, endUserMessage);
         }
     }
 }
