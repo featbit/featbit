@@ -40,7 +40,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
+      - mongodb
       - kafka
+      - redis
     ports:
       - "5100:5100"
     networks:
