@@ -26,7 +26,6 @@ services:
     depends_on:
       - mongodb
       - kafka
-      - redis
     ports:
       - "5000:5000"
     networks:

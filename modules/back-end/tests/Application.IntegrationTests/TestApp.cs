@@ -12,12 +12,6 @@ namespace Application.IntegrationTests;
 
 public class TestApp : WebApplicationFactory<Program>
 {
-    public TestApp()
-    {
-        // don't populate redis
-        Environment.SetEnvironmentVariable("PopulateRedis", "false");
-    }
-
     public async Task<HttpResponseMessage> GetAsync(string uri, bool authenticated = true)
     {
         var client = CreateClient();
