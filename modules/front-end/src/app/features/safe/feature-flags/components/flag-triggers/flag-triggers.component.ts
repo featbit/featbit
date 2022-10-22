@@ -1,8 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { FlagTriggerService } from '@services/flag-trigger.service';
-import { FlagTriggerAction, FlagTriggerStatus, FlagTriggerType, IFlagTrigger } from '../../types/flag-triggers';
-import * as moment from 'moment';
+import { FlagTriggerActionEnum, FlagTriggerTypeEnum, IFlagTrigger } from '../../types/flag-triggers';
+import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
+import {FeatureFlagService} from "@services/feature-flag.service";
 
 @Component({
   selector: 'flag-triggers',
@@ -16,70 +17,51 @@ export class FlagTriggersComponent implements OnInit {
   isLoading = true;
   constructor(
     private flagTriggerService: FlagTriggerService,
+    private featureFlagService: FeatureFlagService,
     private message: NzMessageService) {
   }
 
-  @Input() featureFlagId: string;
+  @Input() featureFlagKey: string;
+  featureFlagId: string;
   triggers: IFlagTrigger[] = [];
   ngOnInit(): void {
-    this.flagTriggerService.getTriggers(this.featureFlagId).subscribe(res => {
-      this.triggers = res.map(r => {
-        const trigger = Object.assign({}, r);
-        trigger.typeName = this.getEnumName('type', r.type);
-        trigger.actionName = this.getEnumName('action', r.action),
-        trigger.statusName = this.getEnumName('status', r.status);
-        trigger.updatedAt = moment(new Date(r.updatedAt)).format('YYYY-MM-DD HH:mm');
-        trigger.lastTriggeredAt = r.lastTriggeredAt ? moment(new Date(r.lastTriggeredAt)).format('YYYY-MM-DD HH:mm') : null;
-        trigger.triggerUrl = this.flagTriggerService.getTriggerUrl(trigger.token);
-        return trigger;
-      });
+    this.featureFlagService.getByKey(this.featureFlagKey).subscribe((result: IFeatureFlag) => {
+      this.featureFlagId = result.id;
+      this.flagTriggerService.getList(this.featureFlagId).subscribe(res => {
+        this.triggers = [...res];
+        this.isLoading = false;
+      }, () => this.isLoading = false);
+    }, () => {
       this.isLoading = false;
-    }, () => this.isLoading = false);
+      this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
+    });
   }
 
   newFlagTrigger: IFlagTrigger = null;
 
   onCreateTrigger() {
     this.newFlagTrigger = {
-      featureFlagId: this.featureFlagId,
-      action: FlagTriggerAction.On,
-      type: FlagTriggerType.GenericTrigger,
-      status: FlagTriggerStatus.Enabled,
+      targetId: this.featureFlagId,
+      action: FlagTriggerActionEnum.TurnOn,
+      type: FlagTriggerTypeEnum.FeatureFlagGeneral,
+      isEnabled: true,
       description: ''
     };
 
     this.isCreationModalVisible = true;
   }
 
-  private getEnumName(enumType: string, enu: FlagTriggerAction | FlagTriggerStatus | FlagTriggerType): string {
-    switch(enumType){
-      case 'action':
-        return this.flagTriggerActions.find(f => f.id === enu).label;
-      case 'type':
-        return this.flagTriggerTypes.find(f => f.id === enu).label;
-      case 'status':
-        return this.flagTriggerStatus.find(f => f.id === enu).label;
-    }
-  }
-
   createTrigger() {
     this.isCreationLoading = true;
-    this.flagTriggerService.createTrigger(this.newFlagTrigger).subscribe(res => {
-      const trigger = Object.assign({}, res, {
-        actionName: this.getEnumName('action', res.action),
-        statusName: this.getEnumName('status', res.status),
-        typeName: this.getEnumName('type', res.type),
-        updatedAt: moment(res.updatedAt).format('YYYY-MM-DD HH:MM'),
-        triggerUrl: this.flagTriggerService.getTriggerUrl(res.token),
-        canCopyToken: true
-      });
+    this.flagTriggerService.create(this.newFlagTrigger).subscribe(res => {
+      const trigger = {...res, canCopyToken: true};
 
-      this.message.success('成功创建新的触发器！');
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.triggers = [trigger, ...this.triggers];
       this.isCreationLoading = false;
       this.isCreationModalVisible = false;
     }, (err) => {
-      this.message.error('发生错误，请稍后再试！');
+      this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
       this.isCreationLoading = false;
       this.isCreationModalVisible = false;
     });
@@ -88,88 +70,55 @@ export class FlagTriggersComponent implements OnInit {
   cancelCreation() {
     this.isCreationModalVisible = false;
   }
-  onChangeTriggerStatus(trigger: IFlagTrigger): void{
-    if (trigger.statusName === 'Enabled'){
-      this.toggleTriggerStatus(trigger, FlagTriggerStatus.Disabled, () => {
-        this.message.success('成功关闭触发器！');
-      });
-    }else if (trigger.statusName === 'Disabled' ){
-      this.toggleTriggerStatus(trigger, FlagTriggerStatus.Enabled, () => {
-        this.message.success('成功激活触发器！');
-      });
-    }
+
+  onToggleTriggerStatus(trigger: IFlagTrigger): void{
+    this.flagTriggerService.updateStatus(trigger.id, !trigger.isEnabled).subscribe(res => {
+      trigger.isEnabled = !trigger.isEnabled;
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    }, err => {
+      this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
+    })
   }
 
-  disableTrigger(trigger: IFlagTrigger){
-    this.toggleTriggerStatus(trigger, FlagTriggerStatus.Disabled, () => {
-      this.message.success('成功关闭触发器！');
-    });
-  }
-
-  enableTrigger(trigger: IFlagTrigger){
-    this.toggleTriggerStatus(trigger, FlagTriggerStatus.Enabled, () => {
-      this.message.success('成功激活触发器！');
-    });
-  }
-
-  archiveTrigger(trigger: IFlagTrigger){
-    this.toggleTriggerStatus(trigger, FlagTriggerStatus.Archived, () => {
-      const idx = this.triggers.findIndex(f => f.id === trigger.id);
-      this.triggers.splice(idx, 1);
+  removeTrigger(trigger: IFlagTrigger){
+    this.flagTriggerService.delete(trigger.id).subscribe(() => {
+      this.triggers = this.triggers.filter(t => t.id !== trigger.id);
       this.message.success('成功删除触发器！');
+    }, () => {
+      this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
     });
   }
 
   resetToken(trigger: IFlagTrigger){
-    this.flagTriggerService.resetTriggerToken(trigger.id, this.featureFlagId).subscribe(res => {
-      trigger.token = res.token;
-      trigger.triggerUrl = this.flagTriggerService.getTriggerUrl(res.token);
+    this.flagTriggerService.resetToken(trigger.id).subscribe(token => {
+      trigger.token = token;
+      trigger.triggerUrl = this.flagTriggerService.getTriggerUrl(token);
       trigger.canCopyToken = true;
-      this.message.success('成功重置 URL！');
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    }, () => {
+      this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
     });
   }
 
-  private toggleTriggerStatus(trigger: IFlagTrigger, status: FlagTriggerStatus, callback?: () => void){
-    this.flagTriggerService.updateTriggerStatus(trigger.id, this.featureFlagId, status).subscribe(res => {
-      trigger.status = status;
-      trigger.statusName = this.getEnumName('status', status);
-      if (callback) {
-        callback();
-      }
-    }, err => {
-      this.message.error('发生错误，请稍后再试！');
-    })
+  getTriggerUrl(token: string): string {
+    return this.flagTriggerService.getTriggerUrl(token);
   }
 
-  flagTriggerStatus = [
-    {
-      id: FlagTriggerStatus.Enabled,
-      label: 'Enabled'
-    },
-    {
-      id: FlagTriggerStatus.Disabled,
-      label: 'Disabled'
-    },
-    {
-      id: FlagTriggerStatus.Archived,
-      label: 'Archived'
-    }
-  ];
+  flagTriggerTypeLabel = {
+    [FlagTriggerTypeEnum.FeatureFlagGeneral]: 'General'
+  }
 
   flagTriggerTypes = [
-    {
-       id: FlagTriggerType.GenericTrigger,
-       label: '通用触发器'
-    }
+    FlagTriggerTypeEnum.FeatureFlagGeneral
   ];
 
+  flagTriggerActionLabel = {
+    [FlagTriggerActionEnum.TurnOn]: 'ON',
+    [FlagTriggerActionEnum.TurnOff]: 'OFF'
+  }
+
   flagTriggerActions = [
-    {
-      id: FlagTriggerAction.On,
-      label: 'ON'
-    }, {
-      id: FlagTriggerAction.Off,
-      label: 'OFF'
-    }
+    FlagTriggerActionEnum.TurnOn,
+    FlagTriggerActionEnum.TurnOff
   ]
 }

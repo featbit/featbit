@@ -6,7 +6,7 @@ import {
   IFeatureFlagListFilter,
   IFeatureFlagDropdown,
   IFeatureFlagListModel,
-  IFeatureFlagDetail, IUpdateSettingPayload, ICopyToEnvResult
+  IFeatureFlagDetail, ICopyToEnvResult
 } from "@features/safe/feature-flags/types/switch-index";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
@@ -35,25 +35,10 @@ export class SwitchV2Service {
     return this.http.get<IFeatureFlagDropdown[]>(url);
   }
 
-  getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
-    const queryParam = {
-      name: filter.name ?? '',
-      status: filter.status ?? '',
-      tagIds: filter.tagIds ?? [],
-      pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
-    };
-
-    return this.http.get<IFeatureFlagListModel>(
-      this.baseUrl,
-      {params: new HttpParams({fromObject: queryParam})}
-    );
-  }
-
   getListForUser(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
     const queryParam = {
       name: filter.name ?? '',
-      status: filter.status ?? '',
+      isEnabled: filter.isEnabled,
       tagIds: filter.tagIds ?? [],
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
@@ -63,39 +48,6 @@ export class SwitchV2Service {
       `${this.baseUrl}/${filter.userKeyId}`,
       {params: new HttpParams({fromObject: queryParam})}
     );
-  }
-
-  getListV20220621(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
-    const queryParam = {
-      name: filter.name ?? '',
-      status: filter.status ?? '',
-      tagIds: filter.tagIds ?? [],
-      pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
-    };
-
-    return this.http.get<IFeatureFlagListModel>(
-      this.baseUrl + '/v20220621',
-      {params: new HttpParams({fromObject: queryParam})}
-    );
-  }
-
-  isNameUsed(name: string): Observable<boolean> {
-    const url = `${this.baseUrl}/is-name-used?name=${name}`;
-
-    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
-  }
-
-  updateSetting(id: string, payload: IUpdateSettingPayload): Observable<IFfParams> {
-    const url = `${this.baseUrl}/${id}/setting`;
-
-    return this.http.put<IFfParams>(url, payload);
-  }
-
-  copyToEnv(targetEnvId: string, flagIds: string[]): Observable<ICopyToEnvResult> {
-    const url = `${this.baseUrl}/copy-to-env/${targetEnvId}`;
-
-    return this.http.post<ICopyToEnvResult>(url, flagIds);
   }
 
   delete(id: string): Observable<boolean> {

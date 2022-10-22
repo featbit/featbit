@@ -83,7 +83,7 @@ export class ReportingComponent implements OnInit {
           this.chartConfig = {
             source: data as any[],
             xAxis: {
-              name: $localize `:@@common.times:Time`,
+              name: $localize `:@@common.time:Time`,
               field: 'time',
               position: 'end',
               scale: {type: "timeCat", nice: true, range: [0.05, 0.95], mask: 'YYYY-MM-DD HH:mm'}

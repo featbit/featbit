@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 export class TriggersComponent implements OnInit, OnDestroy {
 
   private destory$: Subject<void> = new Subject();
-  featureFlagId: string;
+  featureFlagKey: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -18,7 +18,7 @@ export class TriggersComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.featureFlagId = this.route.snapshot.paramMap.get('id');
+    this.featureFlagKey = this.route.snapshot.paramMap.get('key');
   }
 
   ngOnDestroy(): void {

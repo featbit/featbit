@@ -144,8 +144,10 @@
     margin-top: 20px;
 
     .switcher {
+      display: flex;
+      align-items: center;
       nz-switch {
-        margin-right: 12px;
+        margin-right: 3px;
       }
     }
 
@@ -162,6 +164,22 @@
 
       nz-select {
         width: 160px;
+      }
+    }
+
+    nz-tag {
+      border-radius: 10px;
+
+      &.on {
+        color: #389e0d;
+        background: #f6ffed;
+        border-color: #b7eb8f;
+      }
+
+      &.off {
+        color: #cf1322;
+        background: #fff1f0;
+        border-color: #ffa39e
       }
     }
   }

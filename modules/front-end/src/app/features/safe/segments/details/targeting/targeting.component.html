@@ -68,7 +68,7 @@
                 [data]="rule"
                 [userProps]="userProps"
                 (deleteRule)="deleteRule(index)"
-                (ruleConfigChange)="onRuleConditionsChange($event, index)"
+                (onConditionChange)="onRuleConditionsChange($event, index)"
                 (updateRuleName)="rule.name = $event">
               </find-rule>
             </div>

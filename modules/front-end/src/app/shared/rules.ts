@@ -1,10 +1,12 @@
 export interface IRule {
   id: string,
   name: string,
-  conditions: ICondition[]
+  conditions: ICondition[],
 
   // for feature flag
-  variations?: IRuleVariation[]
+  variations?: IRuleVariation[],
+  includedInExpt: boolean,
+  isNotPercentageRollout: boolean,
 }
 
 export interface ICondition {
@@ -12,17 +14,23 @@ export interface ICondition {
   op: string,
   value: string,
 
+  // UI only
   multipleValue?: string[];
   type?: string;
+  isSingleOperator: boolean,
+  isSegment: boolean
 }
 
 export interface IVariation {
   id: string,
-  value: string
+  value: string,
+
+  // ui only
+  isInvalid?: boolean
 }
 
 export interface IRuleVariation {
-  id: string;
+  id: string; // variation id
 
   rollout: number[]; // only two elements, sta
   exptRollout?: number; // 0.45 means 45% TODO this is not optional

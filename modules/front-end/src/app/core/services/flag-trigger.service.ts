@@ -1,14 +1,14 @@
-import { HttpClient } from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { environment } from 'src/environments/environment';
-import { FlagTriggerStatus, IFlagTrigger } from "@features/safe/feature-flags/types/flag-triggers";
+import { IFlagTrigger } from "@features/safe/feature-flags/types/flag-triggers";
 
 @Injectable({
   providedIn: 'root'
 })
 export class FlagTriggerService {
-  baseUrl: string = environment.url + '/api/FeatureFlagTriggers';
+  baseUrl: string = environment.url + '/api/v1/triggers';
 
   constructor(
     private http: HttpClient
@@ -16,25 +16,32 @@ export class FlagTriggerService {
   }
 
   getTriggerUrl(token: string): string {
-    return this.baseUrl + `/trigger/${token}`;
+    return this.baseUrl + `/trigger/run/${token}`;
   }
 
-  getTriggers(featureFlagId: string): Observable<IFlagTrigger[]> {
-    const url = this.baseUrl + '/' + featureFlagId;
-    return this.http.get<IFlagTrigger[]>(url);
+  getList(featureFlagId: string): Observable<IFlagTrigger[]> {
+    return this.http.get<IFlagTrigger[]>(
+      this.baseUrl,
+      {params: new HttpParams({fromObject: {targetId: featureFlagId}})}
+    );
   }
 
-  updateTriggerStatus(id: string, featureFlagId: string, status: FlagTriggerStatus): Observable<IFlagTrigger> {
-    const url = this.baseUrl + `/${id}/${featureFlagId}/${status}`;
-    return this.http.put<IFlagTrigger>(url, {});
+  updateStatus(id: string, isEnabled: boolean): Observable<boolean> {
+    const url = this.baseUrl + `/${id}`;
+    return this.http.put<boolean>(url, { isEnabled });
   }
 
-  resetTriggerToken(id: string, featureFlagId: string): Observable<IFlagTrigger> {
-    const url = this.baseUrl + `/token/${id}/${featureFlagId}`;
-    return this.http.put<IFlagTrigger>(url, {});
+  delete(id: string): Observable<boolean> {
+    const url = this.baseUrl + `/${id}`;
+    return this.http.delete<boolean>(url);
   }
 
-  createTrigger(trigger: IFlagTrigger): Observable<IFlagTrigger> {
+  resetToken(id: string): Observable<string> {
+    const url = this.baseUrl + `/${id}/reset-token`;
+    return this.http.put<string>(url, {});
+  }
+
+  create(trigger: IFlagTrigger): Observable<IFlagTrigger> {
     return this.http.post<IFlagTrigger>(this.baseUrl, trigger);
   }
 }

@@ -4,14 +4,15 @@ import ResourceTypeTranslation from "@core/translations/resource-type.translatio
 import IamOperationTranslation from "@core/translations/iam-operation.translation";
 import IamActionTranslation from "@core/translations/iam-action.translation";
 import ExptStatusTranslation from "@core/translations/expt-status.translation";
-
+import TriggerTypeTranslation from "@core/translations/trigger-type.translation";
 
 const translationType = {
   resource: 'resource',
   resourceType: 'resource-type',
   op: 'operation',
   action: 'action',
-  exptStatus: 'expt-status'
+  exptStatus: 'expt-status',
+  triggerType: 'trigger-type'
 }
 
 @Pipe({ name: "T" })
@@ -19,7 +20,7 @@ export class TranslationPipe implements PipeTransform {
   constructor(@Inject(LOCALE_ID) private locale: string) {
   }
 
-  transform(value, defaultValue, type: 'resource' | 'resource-type' | 'operation' | 'action' | 'expt-status') {
+  transform(value, defaultValue, type: 'resource' | 'resource-type' | 'operation' | 'action' | 'expt-status' | 'trigger-type') {
     let result;
     switch (type){
       case translationType.resource:
@@ -36,6 +37,9 @@ export class TranslationPipe implements PipeTransform {
         break;
       case translationType.exptStatus:
         result = ExptStatusTranslation[value] ? ExptStatusTranslation[value][this.locale] : null
+        break;
+      case translationType.triggerType:
+        result = TriggerTypeTranslation[value] ? TriggerTypeTranslation[value][this.locale] : null
         break;
       default:
         result = null;

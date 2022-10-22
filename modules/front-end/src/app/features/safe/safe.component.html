@@ -13,7 +13,8 @@
 </div>
 
 <onboarding-complete (close)="onCompleteModalClose()"></onboarding-complete>
-<guide-drawer [isVisible]="isGuideVisible"></guide-drawer>
+<guide-drawer [isVisible]="isGuideVisible"
+              (guideDrawerClosed)="onGuideDrawerClosed()"></guide-drawer>
 
 
 

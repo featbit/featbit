@@ -129,7 +129,7 @@ export class EnvDrawerComponent implements OnInit {
 
   onRegenerate(keyName: EnvKeyNameEnum) {
     this.envService.putUpdateEnvKey(this.env.projectId, this.env.id,
-      {keyName: keyName, keyValue: this.env.secret}
+      {keyName: keyName, keyValue: this.env.secrets[0].value}
     ).subscribe(
       (envKey: IEnvKey) => {
         const curProjectEnv = this.projectSrv.getLocalCurrentProjectEnv();

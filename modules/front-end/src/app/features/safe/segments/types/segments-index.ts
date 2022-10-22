@@ -89,7 +89,7 @@ export class Segment {
       id: uuidv4(),
       name: ($localize `:@@common.rule:Rule`) + ' ' + (this.rules.length + 1),
       conditions: []
-    });
+    } as IRule);
   }
 
   removeRule(index: number) {

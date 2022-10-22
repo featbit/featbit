@@ -33,12 +33,8 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
             filters.Add(nameFilter);
         }
 
-        // includeArchived filter
-        if (!userFilter.IncludeArchived)
-        {
-            var unArchiveFilter = filterBuilder.Eq(flag => flag.IsArchived, false);
-            filters.Add(unArchiveFilter);
-        }
+        var isArchivedFilter = filterBuilder.Eq(flag => flag.IsArchived, userFilter.IsArchived);
+        filters.Add(isArchivedFilter);
 
         // isEnabled filter
         if (userFilter.IsEnabled.HasValue)
