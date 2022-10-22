@@ -9,7 +9,7 @@
   </div>
 
   <div class="header-btns">
-    <div class="guide-btn" nz-tooltip="Quick Start Guide" i18n-nz-tooltip (click)="onQuickStartGuideClick()">
+    <div class="guide-btn" nz-tooltip="Quick Start Guide" i18n-nz-tooltip="@@common.quick-start-guide" (click)="onQuickStartGuideClick()">
       <span nz-icon nzType="read" nzTheme="outline"></span>
     </div>
   </div>
@@ -24,7 +24,7 @@
           <i nz-icon nzType="icons:icon-proj"></i>
           {{currentProjectEnv?.projectName}}
         </span>
-        <span (click)="envModalVisible=true" nz-popover i18n-nz-popover nzPopoverTitle="Environment Secret"
+        <span (click)="envModalVisible=true" nz-popover i18n-nz-popover="@@common.env-secret" nzPopoverTitle="Environment Secret"
           [nzPopoverContent]="environmentSecretContent"
           style="background-color: transparent;"
           nzPopoverOverlayClassName="env-secret-popover">

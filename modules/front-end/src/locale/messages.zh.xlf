@@ -1521,7 +1521,7 @@ Entitlement management        </source>
         </context-group>
         <target>关闭</target>
       </trans-unit>
-      <trans-unit id="2079356056498052799" datatype="html">
+      <trans-unit id="common.quick-start-guide" datatype="html">
         <source>Quick Start Guide</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
