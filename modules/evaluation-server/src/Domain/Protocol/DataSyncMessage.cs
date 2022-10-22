@@ -1,4 +1,4 @@
-using Domain.Core;
+using Domain.EndUsers;
 
 namespace Domain.Protocol;
 

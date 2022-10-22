@@ -13,6 +13,21 @@ public class RedisService
         _redis = multiplexer.GetDatabase();
     }
 
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
+    {
+        // get flag keys
+        var index = RedisKeys.FlagIndex(envId);
+        var ids = await _redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
+        var keys = ids.Select(id => RedisKeys.FeatureFlag(id!));
+
+        // get flags
+        var tasks = keys.Select(key => _redis.StringGetAsync(key));
+        var values = await Task.WhenAll(tasks);
+        var jsonBytes = values.Select(x => (byte[])x!);
+
+        return jsonBytes;
+    }
+
     public async Task UpsertFlagAsync(JsonElement flag)
     {
         // upsert flag
@@ -35,6 +50,21 @@ public class RedisService
         await _redis.SortedSetRemoveAsync(index, flagId.ToString());
     }
 
+    public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
+    {
+        // get segment keys
+        var index = RedisKeys.SegmentIndex(envId);
+        var ids = await _redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
+        var keys = ids.Select(id => RedisKeys.Segment(id!));
+
+        // get segments
+        var tasks = keys.Select(key => _redis.StringGetAsync(key));
+        var values = await Task.WhenAll(tasks);
+        var jsonBytes = values.Select(x => (byte[])x!);
+
+        return jsonBytes;
+    }
+
     public async Task UpsertSegmentAsync(BsonDocument segment)
     {
         // upsert cache
@@ -45,7 +75,7 @@ public class RedisService
         var index = RedisCaches.SegmentIndex(segment);
         await _redis.SortedSetAddAsync(index.Key, index.Value, index.Score);
     }
-    
+
     public async Task UpsertSegmentAsync(JsonElement segment)
     {
         // upsert cache

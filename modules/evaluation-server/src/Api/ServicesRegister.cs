@@ -1,9 +1,11 @@
 using Domain.Core;
-using Domain.MessageHandlers;
+using Domain.Services;
 using Domain.WebSockets;
 using Infrastructure.Caches;
 using Infrastructure.Kafka;
 using Infrastructure.MongoDb;
+using Infrastructure.Services;
+using Infrastructure.WsMessageHandlers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Internal;
 using StackExchange.Redis;
@@ -30,6 +32,7 @@ public static class ServicesRegister
         services.TryAddSingleton<ISystemClock, SystemClock>();
         services.AddSingleton<IConnectionManager, ConnectionManager>();
         services.AddScoped<IConnectionHandler, ConnectionHandler>();
+        services.AddTransient<IDataSyncService, DataSyncService>();
 
         // websocket message handlers
         services.AddTransient<IMessageHandler, PingMessageHandler>();

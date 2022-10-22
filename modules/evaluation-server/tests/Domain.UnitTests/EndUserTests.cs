@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Domain.Core;
+using Domain.EndUsers;
 
 namespace Domain.UnitTests;
 

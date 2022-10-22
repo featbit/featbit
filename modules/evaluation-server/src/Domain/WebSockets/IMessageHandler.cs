@@ -1,4 +1,4 @@
-namespace Domain.MessageHandlers;
+namespace Domain.WebSockets;
 
 public interface IMessageHandler
 {

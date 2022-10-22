@@ -1,19 +1,23 @@
 using System.Text.Json;
 using Domain.Core;
+using Domain.EndUsers;
 using Domain.Protocol;
+using Domain.Services;
 using Domain.WebSockets;
 
-namespace Domain.MessageHandlers;
+namespace Infrastructure.WsMessageHandlers;
 
 public class DataSyncMessageHandler : IMessageHandler
 {
     public string Type => MessageTypes.DataSync;
 
     private readonly IMessageProducer _producer;
+    private readonly IDataSyncService _service;
 
-    public DataSyncMessageHandler(IMessageProducer producer)
+    public DataSyncMessageHandler(IMessageProducer producer, IDataSyncService service)
     {
         _producer = producer;
+        _service = service;
     }
 
     public async Task HandleAsync(MessageContext ctx)
@@ -32,12 +36,15 @@ public class DataSyncMessageHandler : IMessageHandler
             // client sdk must attach user info when sync data
             if (message.User == null || !message.User.IsValid())
             {
-                throw new ArgumentException($"client sdk must attach valid user info when sync data.");
+                throw new ArgumentException("client sdk must attach valid user info when sync data.");
             }
 
             // publish end-user message
             var endUserMessage = new EndUserMessage(connection.EnvId, message.User);
             await _producer.PublishAsync(Topics.EndUser, endUserMessage);
         }
+
+        var serverMessage = await _service.GetResponseAsync(connection, message);
+        await connection.SendAsync(serverMessage, ctx.CancellationToken);
     }
 }

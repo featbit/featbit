@@ -1,4 +1,4 @@
-namespace Domain.Core;
+namespace Domain.EndUsers;
 
 public class EndUserMessage : EndUser
 {

@@ -19,7 +19,11 @@ public class RedisKeys
 
     public static RedisKey FeatureFlag(Guid id) => new($"{RedisKeyPrefixes.Flag}{id}");
 
+    public static RedisKey FeatureFlag(string id) => new($"{RedisKeyPrefixes.Flag}{id}");
+
     public static RedisKey SegmentIndex(Guid envId) => new($"{RedisKeyPrefixes.SegmentIndex}{envId}");
 
     public static RedisKey Segment(Guid id) => new($"{RedisKeyPrefixes.Segment}{id}");
+
+    public static RedisKey Segment(string id) => new($"{RedisKeyPrefixes.Segment}{id}");
 }

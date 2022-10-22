@@ -1,7 +1,6 @@
 using System.Text.Json;
-using Domain.WebSockets;
 
-namespace Domain.MessageHandlers;
+namespace Domain.WebSockets;
 
 public class MessageContext
 {

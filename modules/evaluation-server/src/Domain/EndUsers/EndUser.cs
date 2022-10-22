@@ -1,6 +1,6 @@
 ﻿#nullable disable
 
-namespace Domain.Core;
+namespace Domain.EndUsers;
 
 public class EndUser
 {

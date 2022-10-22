@@ -1,6 +1,5 @@
 using System.Net.WebSockets;
 using System.Text.Json;
-using Domain.MessageHandlers;
 using Microsoft.Extensions.Logging;
 
 namespace Domain.WebSockets;

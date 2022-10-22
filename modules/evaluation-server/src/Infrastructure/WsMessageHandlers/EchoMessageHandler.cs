@@ -1,6 +1,7 @@
 using Domain.Protocol;
+using Domain.WebSockets;
 
-namespace Domain.MessageHandlers;
+namespace Infrastructure.WsMessageHandlers;
 
 public class EchoMessageHandler : IMessageHandler
 {
