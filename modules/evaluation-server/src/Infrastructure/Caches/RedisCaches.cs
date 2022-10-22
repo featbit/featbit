@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Infrastructure.MongoDb;
 using MongoDB.Bson;
 using StackExchange.Redis;
 
@@ -10,9 +11,7 @@ public static class RedisCaches
     public static KeyValuePair<RedisKey, RedisValue> Flag(BsonDocument flag)
     {
         var id = flag["_id"].AsGuid;
-        var bytes = Encoding.UTF8.GetBytes(
-            JsonSerializer.Serialize(flag.ToDictionary())
-        );
+        var bytes = Encoding.UTF8.GetBytes(flag.AsJson());
 
         var value = new KeyValuePair<RedisKey, RedisValue>(
             RedisKeys.FeatureFlag(id), bytes
@@ -80,9 +79,7 @@ public static class RedisCaches
     public static KeyValuePair<RedisKey, RedisValue> Segment(BsonDocument segment)
     {
         var id = segment["_id"].AsGuid;
-        var bytes = Encoding.UTF8.GetBytes(
-            JsonSerializer.Serialize(segment.ToDictionary())
-        );
+        var bytes = Encoding.UTF8.GetBytes(segment.AsJson());
 
         var value = new KeyValuePair<RedisKey, RedisValue>(
             RedisKeys.Segment(id), bytes
