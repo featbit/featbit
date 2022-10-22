@@ -2,7 +2,7 @@ using Domain.Core;
 using Domain.MessageHandlers;
 using Domain.WebSockets;
 using Infrastructure.Caches;
-using Infrastructure.Core;
+using Infrastructure.Kafka;
 using Infrastructure.MongoDb;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Internal;
