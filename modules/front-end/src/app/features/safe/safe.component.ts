@@ -56,11 +56,6 @@ export class SafeComponent implements OnInit, OnDestroy {
         path: '/feature-flags'
       },
       {
-        title: $localize `:@@menu.archivedFF:Archived feature flags`,
-        icon: 'icons:icon-switch-archive',
-        path: '/switch-archive'
-      },
-      {
         title: $localize `:@@menu.end-users:End users`,
         icon: 'icons:icon-switch-user',
         path: '/users'

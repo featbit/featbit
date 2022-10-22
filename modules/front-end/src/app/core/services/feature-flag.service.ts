@@ -48,6 +48,7 @@ export class FeatureFlagService {
     const queryParam: any = {
       name: filter.name ?? '',
       tagIds: filter.tagIds ?? [],
+      isArchived: filter.isArchived,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize
     };
