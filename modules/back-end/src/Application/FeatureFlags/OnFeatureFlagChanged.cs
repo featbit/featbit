@@ -15,23 +15,16 @@ public class OnFeatureFlagChanged : INotification
 
 public class OnFeatureFlagChangedHandler : INotificationHandler<OnFeatureFlagChanged>
 {
-    private readonly IRedisService _redisService;
     private readonly IMessageProducer _messageProducer;
 
-    public OnFeatureFlagChangedHandler(IRedisService redisService, IMessageProducer messageProducer)
+    public OnFeatureFlagChangedHandler(IMessageProducer messageProducer)
     {
-        _redisService = redisService;
         _messageProducer = messageProducer;
     }
 
     public async Task Handle(OnFeatureFlagChanged notification, CancellationToken cancellationToken)
     {
-        var flag = notification.Flag;
-
-        // upsert feature flag cache
-        await _redisService.UpsertFlagAsync(flag);
-
         // publish feature flag change message
-        await _messageProducer.PublishAsync(Topics.FeatureFlagChange, flag);
+        await _messageProducer.PublishAsync(Topics.FeatureFlagChange, notification.Flag);
     }
 }

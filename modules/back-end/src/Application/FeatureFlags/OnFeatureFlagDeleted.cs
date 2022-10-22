@@ -15,15 +15,8 @@ public class OnFeatureFlagDeleted : INotification
 
 public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDeleted>
 {
-    private readonly IRedisService _service;
-
-    public OnFeatureFlagDeletedHandler(IRedisService service)
+    public Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
     {
-        _service = service;
-    }
-
-    public async Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
-    {
-        await _service.DeleteFlagAsync(notification.EnvId, notification.FlagId);
+        return Task.CompletedTask;
     }
 }
