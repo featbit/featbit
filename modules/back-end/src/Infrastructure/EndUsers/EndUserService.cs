@@ -64,10 +64,8 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
             filter &= filterBuilder.Or(filters);
         }
 
-        var endUsers = MongoDb.CollectionOf<EndUser>();
-
-        var totalCount = await endUsers.CountDocumentsAsync(filter);
-        var itemsQuery = endUsers
+        var totalCount = await Collection.CountDocumentsAsync(filter);
+        var itemsQuery = Collection
             .Find(filter)
             .Sort("{_id: -1}")
             .Skip(userFilter.PageIndex * userFilter.PageSize)
@@ -79,23 +77,45 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
 
     public async Task<EndUser> UpsertAsync(EndUser user)
     {
-        var users = MongoDb.CollectionOf<EndUser>();
-
-        var existed = await users.AsQueryable()
-            .FirstOrDefaultAsync(x => x.EnvId == user.EnvId && x.KeyId == user.KeyId);
-
-        // update existed
-        if (existed != null)
+        var existed = await Queryable.FirstOrDefaultAsync(x => x.EnvId == user.EnvId && x.KeyId == user.KeyId);
+        if (existed == null)
+        {
+            await Collection.InsertOneAsync(user);
+        }
+        else if (!existed.ValueEquals(user))
         {
             existed.Update(user.Name, user.CustomizedProperties);
             await UpdateAsync(existed);
-
-            return existed;
         }
 
-        // insert new
-        await users.InsertOneAsync(user);
         return user;
+    }
+
+    public async Task<IEnumerable<EndUserProperty>> AddNewPropertiesAsync(EndUser user)
+    {
+        var customizedProperties = user.CustomizedProperties;
+        if (customizedProperties == null || !customizedProperties.Any())
+        {
+            return Array.Empty<EndUserProperty>();
+        }
+
+        var messageProperties = customizedProperties.Select(x => x.Name);
+        var currentProperties = await MongoDb.QueryableOf<EndUserProperty>()
+            .Where(x => x.EnvId == user.EnvId)
+            .Select(x => x.Name)
+            .ToListAsync();
+
+        var newProperties = messageProperties
+            .Where(x => currentProperties.All(y => y != x))
+            .Select(x => new EndUserProperty(user.EnvId, x, Array.Empty<EndUserPresetValue>()))
+            .ToList();
+
+        if (newProperties.Any())
+        {
+            await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(newProperties);
+        }
+
+        return newProperties;
     }
 
     public async Task<IEnumerable<EndUserProperty>> GetPropertiesAsync(Guid envId)

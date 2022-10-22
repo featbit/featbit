@@ -438,6 +438,13 @@ db.FeatureFlags.insertOne(
                         op: "",
                         value: `[\"${devSegmentIdStr}\"]`
                     }
+                ],
+                variations: [
+                    {
+                        _id: "5ff9bda1-5445-4121-871a-e9b178cd03ff",
+                        rollout: [0, 1],
+                        exptRollout: 1
+                    }
                 ]
             }
         ],

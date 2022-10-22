@@ -38,19 +38,23 @@ public class UpdateSegmentValidator : AbstractValidator<UpdateSegment>
 public class UpdateSegmentHandler : IRequestHandler<UpdateSegment, Segment>
 {
     private readonly ISegmentService _service;
+    private readonly IPublisher _publisher;
 
-    public UpdateSegmentHandler(ISegmentService service)
+    public UpdateSegmentHandler(ISegmentService service, IPublisher publisher)
     {
         _service = service;
+        _publisher = publisher;
     }
 
     public async Task<Segment> Handle(UpdateSegment request, CancellationToken cancellationToken)
     {
         var segment = await _service.GetAsync(request.Id);
-
         segment.Update(request.Name, request.Included, request.Excluded, request.Rules, request.Description);
-
         await _service.UpdateAsync(segment);
+
+        // publish segment updated notification
+        var flagReferences = await _service.GetFlagReferencesAsync(segment.EnvId, segment.Id);
+        await _publisher.Publish(new OnSegmentChange(segment, flagReferences.Select(x => x.Id)), cancellationToken);
 
         return segment;
     }

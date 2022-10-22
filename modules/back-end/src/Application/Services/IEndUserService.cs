@@ -10,6 +10,8 @@ public interface IEndUserService : IService<EndUser>
 
     Task<EndUser> UpsertAsync(EndUser user);
 
+    Task<IEnumerable<EndUserProperty>> AddNewPropertiesAsync(EndUser user);
+
     Task<IEnumerable<EndUserProperty>> GetPropertiesAsync(Guid envId);
 
     Task<EndUserProperty> UpsertPropertyAsync(EndUserProperty property);

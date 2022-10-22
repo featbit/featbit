@@ -1,6 +1,8 @@
 using System.Text;
 using Domain.Identity;
+using Domain.Messages;
 using Domain.Users;
+using Infrastructure.HostedServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
@@ -8,6 +10,7 @@ using Infrastructure.FeatureFlags;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
+using Infrastructure.Messages;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
@@ -32,6 +35,9 @@ public static class ConfigureServices
         // mongodb
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
+
+        // message producer
+        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -58,6 +64,9 @@ public static class ConfigureServices
                 };
             });
 
+        // hosted services
+        services.AddHostedService<KafkaConsumerService>();
+
         // custom services
         services.AddScoped<IUserService, UserService>();
         services.AddTransient<IOrganizationService, OrganizationService>();
@@ -72,7 +81,7 @@ public static class ConfigureServices
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
         services.AddTransient<IDataSyncService, DataSyncService>();
-        
+
         return services;
     }
 }

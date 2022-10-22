@@ -30,12 +30,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=publish /app ./
 # ensure we listen on any IP Address
-ENV ASPNETCORE_URLS=http://*:5000
-EXPOSE 5000
+ENV ASPNETCORE_URLS=http://*:5100
+EXPOSE 5100
 
 # health check
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
-  CMD curl --fail --silent http://localhost:5000/health/liveness || exit 1
+  CMD curl --fail --silent http://localhost:5100/health/liveness || exit 1
 
 ENTRYPOINT ["dotnet", "Api.dll"]
