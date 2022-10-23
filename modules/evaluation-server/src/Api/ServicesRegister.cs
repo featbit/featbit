@@ -33,6 +33,7 @@ public static class ServicesRegister
         services.AddSingleton<IConnectionManager, ConnectionManager>();
         services.AddScoped<IConnectionHandler, ConnectionHandler>();
         services.AddTransient<IDataSyncService, DataSyncService>();
+        services.AddSingleton<EvaluationService>();
 
         // websocket message handlers
         services.AddTransient<IMessageHandler, PingMessageHandler>();
