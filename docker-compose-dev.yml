@@ -26,6 +26,7 @@ services:
     depends_on:
       - mongodb
       - kafka
+      - demo-dino-game-vue
     ports:
       - "5000:5000"
     networks:
@@ -164,6 +165,14 @@ services:
       - infinity
     networks:
       - featbit-network
+
+  demo-dino-game-vue:
+    image: featbitdocker/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "8080:80"
 
 networks:
   featbit-network:
