@@ -69,10 +69,10 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}/un-archive")]
-    public async Task<ApiResponse<bool>> UnArchiveAsync(Guid id)
+    [HttpPut("{id:guid}/restore")]
+    public async Task<ApiResponse<bool>> RestoreAsync(Guid id)
     {
-        var request = new UnArchiveFeatureFlag
+        var request = new RestoreFeatureFlag
         {
             Id = id
         };
@@ -82,9 +82,22 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
     {
         var request = new DeleteFeatureFlag
+        {
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [HttpPut("{id:guid}/toggle")]
+    public async Task<ApiResponse<bool>> ToggleAsync(Guid id)
+    {
+        var request = new ToggleFeatureFlag
         {
             Id = id
         };

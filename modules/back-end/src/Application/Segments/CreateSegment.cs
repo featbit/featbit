@@ -43,16 +43,21 @@ public class CreateSegmentValidator : AbstractValidator<CreateSegment>
 public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
 {
     private readonly ISegmentService _service;
+    private readonly IPublisher _publisher;
 
-    public CreateSegmentHandler(ISegmentService service)
+    public CreateSegmentHandler(ISegmentService service, IPublisher publisher)
     {
         _service = service;
+        _publisher = publisher;
     }
 
     public async Task<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
     {
         var segment = request.AsSegment();
         await _service.AddOneAsync(segment);
+
+        // publish on segment created message
+        await _publisher.Publish(new OnSegmentChange(segment), cancellationToken);
 
         return segment;
     }

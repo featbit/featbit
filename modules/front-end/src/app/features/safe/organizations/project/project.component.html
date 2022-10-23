@@ -32,13 +32,13 @@
                   </div>
                   <div class="env-secret">
                     <div>
-                      <div class="desc-name" i18n="@@org.project.secret">Secret</div>
+                      <div class="desc-name" i18n="@@org.project.secrets[0].value">Secret</div>
                       <div class="desc-content">
                         <nz-input-group [nzSuffix]="copySuffix">
-                          <input readonly nz-input value="{{ env.secret }}">
+                          <input readonly nz-input value="{{ env.secrets[0].value }}">
                         </nz-input-group>
                         <ng-template #copySuffix>
-                          <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(env.secret)"></i>
+                          <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(env.secrets[0].value)"></i>
                         </ng-template>
                       </div>
                     </div>

@@ -39,7 +39,7 @@ public class TestApp : WebApplicationFactory<Program>
 
         return await client.PostAsync(uri, content);
     }
-    
+
     public string GetToken(User user)
     {
         var scopeFactory = Services.GetRequiredService<IServiceScopeFactory>();

@@ -24,17 +24,22 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
 {
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
+    private readonly IPublisher _publisher;
 
-    public CreateFeatureFlagHandler(IFeatureFlagService service, ICurrentUser currentUser)
+    public CreateFeatureFlagHandler(IFeatureFlagService service, ICurrentUser currentUser, IPublisher publisher)
     {
         _service = service;
         _currentUser = currentUser;
+        _publisher = publisher;
     }
 
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = new FeatureFlag(request.EnvId, request.Name, _currentUser.Id);
         await _service.AddOneAsync(flag);
+
+        // publish on feature flag change notification
+        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
 
         return flag;
     }

@@ -4,3 +4,4 @@
 
 # Ignore Database Volumns
 infra/mongodb/data/*
+infra/redis/data/*

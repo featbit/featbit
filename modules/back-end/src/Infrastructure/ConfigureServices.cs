@@ -1,6 +1,8 @@
 using System.Text;
 using Domain.Identity;
+using Domain.Messages;
 using Domain.Users;
+using Infrastructure.HostedServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
@@ -9,6 +11,7 @@ using Infrastructure.FeatureFlags;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
+using Infrastructure.Messages;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
@@ -34,6 +37,9 @@ public static class ConfigureServices
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
 
+        // message producer
+        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserStore, MongoDbUserStore>();
@@ -58,6 +64,9 @@ public static class ConfigureServices
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]))
                 };
             });
+
+        // hosted services
+        services.AddHostedService<KafkaConsumerService>();
 
         // custom services
         services.AddScoped<IUserService, UserService>();

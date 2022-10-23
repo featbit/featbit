@@ -17,5 +17,14 @@ public partial class ConnectionHandler
         
         [LoggerMessage(4, LogLevel.Warning, "{ConnectionId}: error occured while read message. {Error}", EventName = "ErrorReadMessage")]
         public static partial void ErrorReadMessage(ILogger logger, string connectionId, string error);
+        
+        [LoggerMessage(5, LogLevel.Warning, "{ConnectionId}: receive invalid message.", EventName = "ReceiveInvalidMessage")]
+        public static partial void ReceiveInvalidMessage(ILogger logger, string connectionId, Exception exception);
+
+        [LoggerMessage(6, LogLevel.Error, "{ConnectionId}: failed handle message.", EventName = "ErrorHandleMessage")]
+        public static partial void ErrorHandleMessage(ILogger logger, string connectionId, Exception exception);
+
+        [LoggerMessage(7, LogLevel.Warning, "{ConnectionId}: cannot find message handler for type {MessageType}", EventName = "CannotFindMessageHandler")]
+        public static partial void CannotFindMessageHandler(ILogger logger, string connectionId, string messageType);
     }
 }

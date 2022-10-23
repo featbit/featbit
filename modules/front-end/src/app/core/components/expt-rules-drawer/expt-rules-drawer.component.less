@@ -23,6 +23,23 @@
       font-size: 15px;
       font-weight: 500;
 
+      .rollout-table {
+        > div {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          height: 50px;
+
+          &:first-child {
+            background-color: #fafafa;
+            height: 40px;
+          }
+
+          button.ant-input-search-button {
+            height: 40px;
+          }
+        }
+      }
       .expt-pencentage {
         text-align: right;
       }

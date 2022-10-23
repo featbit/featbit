@@ -5,8 +5,6 @@ public class UpdateTrigger : IRequest<bool>
     public Guid Id { get; set; }
 
     public bool IsEnabled { get; set; }
-
-    public string Description { get; set; }
 }
 
 public class UpdateTriggerHandler : IRequestHandler<UpdateTrigger, bool>
@@ -21,7 +19,7 @@ public class UpdateTriggerHandler : IRequestHandler<UpdateTrigger, bool>
     public async Task<bool> Handle(UpdateTrigger request, CancellationToken cancellationToken)
     {
         var trigger = await _service.GetAsync(request.Id);
-        trigger.Update(request.IsEnabled, request.Description);
+        trigger.Update(request.IsEnabled);
 
         await _service.UpdateAsync(trigger);
 

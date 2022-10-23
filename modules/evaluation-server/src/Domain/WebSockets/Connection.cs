@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.WebSockets;
+using Domain.EndUsers;
+using Domain.Protocol;
 
 namespace Domain.WebSockets;
 
@@ -10,6 +12,11 @@ public class Connection
     public WebSocket WebSocket { get; }
 
     public Guid EnvId { get; }
+
+    /// <summary>
+    /// client-side sdk EndUser
+    /// </summary>
+    public EndUser? User { get; set; }
 
     public string Type { get; }
 
@@ -42,11 +49,27 @@ public class Connection
         await WebSocket.SendAsync(message.Bytes, message.Type, true, cancellationToken);
     }
 
+    public async Task SendAsync(ServerMessage message, CancellationToken cancellationToken)
+    {
+        await WebSocket.SendAsync(message.GetBytes(), WebSocketMessageType.Text, true, cancellationToken);
+    }
+
     public async Task CloseAsync(WebSocketCloseStatus status, string description, long closeAt)
     {
-        CloseAt = closeAt;
+        if (WebSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
+        {
+            await WebSocket.CloseOutputAsync(status, description, CancellationToken.None);
+        }
 
-        await WebSocket.CloseOutputAsync(status, description, CancellationToken.None);
+        CloseAt = closeAt;
+    }
+
+    /// <summary>
+    /// attach client-side sdk EndUser
+    /// </summary>
+    public void AttachUser(EndUser user)
+    {
+        User = user;
     }
 
     [ExcludeFromCodeCoverage]

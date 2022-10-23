@@ -52,7 +52,7 @@ public class StreamingMiddleware
             return;
         }
 
-        // use ApplicationStopping token (note that this won't work if handler's cancellation token has been set before)
+        // use ApplicationStopping token
         await handler.OnConnectedAsync(connection, _applicationLifetime.ApplicationStopping);
     }
 }

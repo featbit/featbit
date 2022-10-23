@@ -3,7 +3,7 @@ using System.Net.WebSockets;
 
 namespace Domain.WebSockets;
 
-public class MessageReader : IMessageReader
+public class MessageReader
 {
     private const int DefaultBufferSize = 4 * 1024;
     private const int MaxMessageFragment = 8;

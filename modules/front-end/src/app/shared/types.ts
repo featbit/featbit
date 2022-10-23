@@ -7,8 +7,6 @@ export interface IResponse {
 export interface IUserType {
   id: string;
   name: string;
-  email: string;
-  country: string;
   keyId: string;
   customizedProperties: [{name: string, value: string}];
 
@@ -73,7 +71,12 @@ export interface IEnvironment {
   projectId: string,
   name: string,
   description: string,
-  secret: string
+  secrets: ISecret[]
+}
+
+export interface ISecret {
+  type: string,
+  value: string
 }
 
 export interface IAccountUser {

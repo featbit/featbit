@@ -21,11 +21,13 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 {
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
+    private readonly IPublisher _publisher;
 
-    public UpdateTargetingHandler(IFeatureFlagService service, ICurrentUser currentUser)
+    public UpdateTargetingHandler(IFeatureFlagService service, ICurrentUser currentUser, IPublisher publisher)
     {
         _service = service;
         _currentUser = currentUser;
+        _publisher = publisher;
     }
 
     public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
@@ -40,6 +42,9 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         );
 
         await _service.UpdateAsync(flag);
+
+        // publish on feature flag change notification
+        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
 
         return true;
     }

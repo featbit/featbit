@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,13 @@ namespace Application.IntegrationTests;
 
 public class TestApp : WebApplicationFactory<Program>
 {
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("IntegrationTests");
+
+        base.ConfigureWebHost(builder);
+    }
+
     public async Task<WebSocket> ConnectAsync(long timestamp = 0, string queryString = "")
     {
         var streamingApp = WithWebHostBuilder(builder =>

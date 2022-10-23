@@ -168,4 +168,12 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = CreatedAt;
         UpdatorId = currentUserId;
     }
+
+    public void Toggle(Guid currentUserId)
+    {
+        IsEnabled = !IsEnabled;
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
+    }
 }

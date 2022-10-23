@@ -18,26 +18,29 @@ public class EchoTests : IClassFixture<TestApp>
     public async Task DoEchoAsync(bool multiFragment)
     {
         var ws = await _app.ConnectWithTokenAsync();
-        
-        const string message = "hello, world!";
-        var payload = Encoding.UTF8.GetBytes(message);
+
+        var echo = Encoding.UTF8.GetBytes(
+            "{'messageType':'echo','data':{}}".Replace("'", "\"")
+        );
 
         if (multiFragment)
         {
-            await ws.SendAsync(payload[..2], WebSocketMessageType.Text, false, CancellationToken.None);
-            await ws.SendAsync(payload[2..4], WebSocketMessageType.Text, false, CancellationToken.None);
-            await ws.SendAsync(payload[4..], WebSocketMessageType.Text, true, CancellationToken.None);
+            await ws.SendAsync(echo[..10], WebSocketMessageType.Text, false, CancellationToken.None);
+            await ws.SendAsync(echo[10..14], WebSocketMessageType.Text, false, CancellationToken.None);
+            await ws.SendAsync(echo[14..], WebSocketMessageType.Text, true, CancellationToken.None);
         }
         else
         {
-            await ws.SendAsync(payload, WebSocketMessageType.Text, true, CancellationToken.None);
+            await ws.SendAsync(echo, WebSocketMessageType.Text, true, CancellationToken.None);
         }
-        
+
         var buffer = new byte[100];
         var result = await ws.ReceiveAsync(buffer, CancellationToken.None);
-        
+        var bytesReceived = result.Count;
+
         Assert.True(result.EndOfMessage);
         Assert.Equal(WebSocketMessageType.Text, result.MessageType);
-        Assert.Equal(message, Encoding.UTF8.GetString(buffer, 0, result.Count));
+        Assert.Equal(echo.Length, bytesReceived);
+        Assert.True(buffer[..bytesReceived].SequenceEqual(echo));
     }
 }
