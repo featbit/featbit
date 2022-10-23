@@ -44,15 +44,6 @@ export class MetricsComponent implements OnInit, OnDestroy {
   ) {
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
-
-    //   const metricId = this.route.snapshot.queryParams['id'];
-    //   if (metricId) {
-    //     this.metricService.getMetric(this.currentProjectEnv.envId, metricId).subscribe(res => {
-    //       if (res) {
-    //         this.onCreateOrEditClick(res);
-    //       }
-    //     });
-    //   }
   }
 
   ngOnInit(): void {
