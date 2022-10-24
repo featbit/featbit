@@ -13,15 +13,13 @@ export class GuideComponent {
   isVisible = true;
   @Output() guideDrawerClosed: EventEmitter<any> = new EventEmitter();
 
-  currentProjectEnv: IProjectEnv;
   demoUrl: string;
 
   constructor(
     private organizationService: OrganizationService
   ) {
     const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
-    this.currentProjectEnv = currentOrganizationProjectEnv.projectEnv;
-    this.demoUrl = `http://localhost:5173?envKey=${this.currentProjectEnv.envSecret}`;
+    this.demoUrl = `http://localhost:5173?envKey=${currentOrganizationProjectEnv.projectEnv.envSecret}`;
   }
 
   onClose() {
