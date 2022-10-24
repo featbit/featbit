@@ -240,6 +240,7 @@ export class SettingComponent implements OnInit {
         this.featureFlagService.archive(this.featureFlag.id)
           .subscribe(
             _ => {
+              this.featureFlag.isArchived = true;
               this.message.success($localize `:@@common.operation-success:Operation succeeded`);
               this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
             },
@@ -253,6 +254,7 @@ export class SettingComponent implements OnInit {
 
   restoreFlag() {
     this.featureFlagService.restore(this.featureFlag.id).subscribe(_ => {
+      this.featureFlag.isArchived = false;
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
     });
