@@ -19,7 +19,7 @@ export class GuideComponent {
     private organizationService: OrganizationService
   ) {
     const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
-    this.demoUrl = `http://localhost:5173?envKey=${currentOrganizationProjectEnv.projectEnv.envSecret}`;
+    this.demoUrl = `http://localhost:5173?envKey=${currentOrganizationProjectEnv?.projectEnv?.envSecret}`;
   }
 
   onClose() {
