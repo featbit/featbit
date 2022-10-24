@@ -10,6 +10,7 @@ services:
         API_URL: http://localhost:5000
     depends_on:
       - api
+      - demo-dino-game-vue
     ports:
       - "8081:80"
     networks:
@@ -26,7 +27,6 @@ services:
     depends_on:
       - mongodb
       - kafka
-      - demo-dino-game-vue
     ports:
       - "5000:5000"
     networks:
@@ -172,7 +172,7 @@ services:
     networks:
       - featbit-network
     ports:
-      - "8080:80"
+      - "5173:80"
 
 networks:
   featbit-network:
