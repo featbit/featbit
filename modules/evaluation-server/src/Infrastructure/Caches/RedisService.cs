@@ -28,6 +28,15 @@ public class RedisService
         return jsonBytes;
     }
 
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
+    {
+        var keys = ids.Select(RedisKeys.FeatureFlag);
+
+        var tasks = keys.Select(key => _redis.StringGetAsync(key));
+        var values = await Task.WhenAll(tasks);
+        return values.Select(x => (byte[])x!);
+    }
+
     public async Task UpsertFlagAsync(JsonElement flag)
     {
         // upsert flag

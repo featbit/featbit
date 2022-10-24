@@ -60,6 +60,28 @@ public class DataSyncService : IDataSyncService
         return payload;
     }
 
+    public async Task<object> GetSegmentChangePayloadAsync(
+        Connection connection,
+        JsonElement segment,
+        string[] affectedFlagIds)
+    {
+        if (connection.Type == ConnectionType.Client && connection.User == null)
+        {
+            throw new ArgumentException($"client sdk must have user info when sync data. Connection: {connection}");
+        }
+
+        object payload = connection.Type switch
+        {
+            ConnectionType.Client => await GetClientSegmentChangePayloadAsync(affectedFlagIds, connection.User!),
+            ConnectionType.Server => GetServerSdkSegmentChangePayload(segment),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(connection), $"unsupported sdk type {connection.Type}"
+            )
+        };
+
+        return payload;
+    }
+
     #region get client sdk payload
 
     private async Task<ClientSdkPayload> GetClientSdkFlagChangePayloadAsync(JsonElement flag, EndUser user)
@@ -69,6 +91,20 @@ public class DataSyncService : IDataSyncService
             user.KeyId,
             new[] { await GetClientSdkFlagAsync(flag, user) }
         );
+    }
+
+    private async Task<ClientSdkPayload> GetClientSegmentChangePayloadAsync(string[] affectedFlagIds, EndUser user)
+    {
+        var clientSdkFlags = new List<ClientSdkFlag>();
+
+        var flags = await _redisService.GetFlagsAsync(affectedFlagIds);
+        foreach (var flag in flags)
+        {
+            using var document = JsonDocument.Parse(flag);
+            clientSdkFlags.Add(await GetClientSdkFlagAsync(document.RootElement, user));
+        }
+
+        return new ClientSdkPayload(DataSyncEventTypes.Patch, user.KeyId, clientSdkFlags);
     }
 
     private async Task<ClientSdkFlag> GetClientSdkFlagAsync(JsonElement flag, EndUser user)
@@ -107,8 +143,17 @@ public class DataSyncService : IDataSyncService
     {
         return new ServerSdkPayload(
             DataSyncEventTypes.Patch,
-            new List<JsonObject> { JsonObject.Create(flag)! },
+            new[] { JsonObject.Create(flag)! },
             Array.Empty<JsonObject>()
+        );
+    }
+
+    private ServerSdkPayload GetServerSdkSegmentChangePayload(JsonElement segment)
+    {
+        return new ServerSdkPayload(
+            DataSyncEventTypes.Patch,
+            Array.Empty<JsonObject>(),
+            new[] { JsonObject.Create(segment)! }
         );
     }
 
