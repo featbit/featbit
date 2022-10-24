@@ -38,13 +38,13 @@ public class ClientSdkFeatureFlag
 
     public long Timestamp { get; set; }
 
-    public ClientSdkFeatureFlag(JsonElement flag, UserVariation userVariation)
+    public ClientSdkFeatureFlag(JsonElement flag, UserVariation userVariation, Variation[] allVariations)
     {
         Id = flag.GetProperty("key").GetString()!;
         Variation = userVariation.Variation.Value;
         VariationType = flag.GetProperty("variationType").GetString() ?? "string";
         MatchReason = userVariation.MatchReason;
-        VariationOptions = flag.GetProperty("variations").Deserialize<Variation[]>(ReusableJsonSerializerOptions.Web)!;
+        VariationOptions = allVariations;
         SendToExperiment = userVariation.SendToExperiment;
         Timestamp = flag.GetProperty("updatedAt").GetDateTimeOffset().ToUnixTimeMilliseconds();
     }

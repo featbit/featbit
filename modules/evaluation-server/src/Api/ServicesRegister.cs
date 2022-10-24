@@ -53,6 +53,8 @@ public static class ServicesRegister
         services.AddTransient<IPopulatingService, RedisPopulatingService>();
         services.AddHostedService<RedisPopulatingHostedService>();
         services.AddSingleton<RedisService>();
+        services.AddSingleton<EvaluationService>();
+        services.AddSingleton<TargetRuleMatcher>();
 
         // mongodb
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));

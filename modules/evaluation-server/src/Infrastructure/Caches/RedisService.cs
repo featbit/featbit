@@ -50,6 +50,14 @@ public class RedisService
         await _redis.SortedSetRemoveAsync(index, flagId.ToString());
     }
 
+    public async Task<byte[]> GetSegmentAsync(string id)
+    {
+        var key = RedisKeys.Segment(id);
+        var segment = await _redis.StringGetAsync(key);
+
+        return (byte[])segment!;
+    }
+
     public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
     {
         // get segment keys

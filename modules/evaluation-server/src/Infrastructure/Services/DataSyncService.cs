@@ -52,11 +52,15 @@ public class DataSyncService : IDataSyncService
         foreach (var flagBytes in flagsBytes)
         {
             using var document = JsonDocument.Parse(flagBytes);
-            var flag = document.RootElement;
-            var ctx = new EvaluationContext(flag, user);
-            var variation = await _evaluationService.EvaluateAsync(ctx);
 
-            clientSdkFlags.Add(new ClientSdkFeatureFlag(flag, variation));
+            var flag = document.RootElement;
+            var variations =
+                flag.GetProperty("variations").Deserialize<Variation[]>(ReusableJsonSerializerOptions.Web)!;
+
+            var scope = new EvaluationScope(flag, user, variations);
+            var userVariation = await _evaluationService.EvaluateAsync(scope);
+
+            clientSdkFlags.Add(new ClientSdkFeatureFlag(flag, userVariation, variations));
         }
 
         return new ClientSdkPayload(eventType, user.KeyId, clientSdkFlags);
