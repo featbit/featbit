@@ -147,3 +147,18 @@ db.Policies.insertOne(
     }
 )
 print('collection seeded: Policies')
+
+// seed member policy
+print('clean and seed collection: MemberPolicies')
+db.MemberPolicies.deleteMany({})
+db.MemberPolicies.insertOne(
+    {
+        _id: UUID(),
+        organizationId: organizationId,
+        policyId: ownerPolicyId,
+        memberId: userId,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: MemberPolicies')
