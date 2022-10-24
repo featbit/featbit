@@ -44,7 +44,8 @@ public class DataSyncMessageHandler : IMessageHandler
             await _producer.PublishAsync(Topics.EndUser, endUserMessage);
         }
 
-        var serverMessage = await _service.GetResponseAsync(connection, message);
+        var payload = await _service.GetPayloadAsync(connection, message);
+        var serverMessage = new ServerMessage(MessageTypes.DataSync, payload);
         await connection.SendAsync(serverMessage, ctx.CancellationToken);
     }
 }

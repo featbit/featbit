@@ -6,11 +6,11 @@ public class ServerSdkPayload
 {
     public string EventType { get; set; }
 
-    public List<JsonObject> FeatureFlags { get; set; }
+    public IEnumerable<JsonObject> FeatureFlags { get; set; }
 
-    public List<JsonObject> Segments { get; set; }
+    public IEnumerable<JsonObject> Segments { get; set; }
 
-    public ServerSdkPayload(string eventType, List<JsonObject> featureFlags, List<JsonObject> segments)
+    public ServerSdkPayload(string eventType, IEnumerable<JsonObject> featureFlags, IEnumerable<JsonObject> segments)
     {
         EventType = eventType;
         FeatureFlags = featureFlags;

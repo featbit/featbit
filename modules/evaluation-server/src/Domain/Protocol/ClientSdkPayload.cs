@@ -9,12 +9,12 @@ public class ClientSdkPayload
 
     public string UserKeyId { get; set; }
 
-    public IEnumerable<ClientSdkFeatureFlag> FeatureFlags { get; set; }
+    public IEnumerable<ClientSdkFlag> FeatureFlags { get; set; }
 
     public ClientSdkPayload(
         string eventType,
         string userKeyId,
-        IEnumerable<ClientSdkFeatureFlag> featureFlags)
+        IEnumerable<ClientSdkFlag> featureFlags)
     {
         EventType = eventType;
         UserKeyId = userKeyId;
@@ -22,7 +22,7 @@ public class ClientSdkPayload
     }
 }
 
-public class ClientSdkFeatureFlag
+public class ClientSdkFlag
 {
     public string Id { get; set; }
 
@@ -38,7 +38,7 @@ public class ClientSdkFeatureFlag
 
     public long Timestamp { get; set; }
 
-    public ClientSdkFeatureFlag(JsonElement flag, UserVariation userVariation, Variation[] allVariations)
+    public ClientSdkFlag(JsonElement flag, UserVariation userVariation, Variation[] allVariations)
     {
         Id = flag.GetProperty("key").GetString()!;
         Variation = userVariation.Variation.Value;

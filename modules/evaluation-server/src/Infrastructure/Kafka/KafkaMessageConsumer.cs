@@ -70,7 +70,7 @@ public partial class KafkaMessageConsumer : BackgroundService
                     continue;
                 }
 
-                await handler.HandleAsync(consumeResult);
+                await handler.HandleAsync(consumeResult, cancellationToken);
             }
             catch (ConsumeException ex)
             {

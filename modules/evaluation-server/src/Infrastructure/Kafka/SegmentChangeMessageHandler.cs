@@ -16,7 +16,7 @@ public class SegmentChangeMessageHandler : IKafkaMessageHandler
         _redisService = redisService;
     }
 
-    public async Task HandleAsync(ConsumeResult<Null, string> consumeResult)
+    public async Task HandleAsync(ConsumeResult<Null, string> consumeResult, CancellationToken cancellationToken)
     {
         var body = consumeResult.Message.Value;
 

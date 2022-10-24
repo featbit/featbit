@@ -15,4 +15,10 @@ public interface IConnectionManager
     /// <param name="connection">The connection.</param>
     /// <returns>A <see cref="Task"/> that represents the asynchronous disconnect.</returns>
     void Remove(Connection connection);
+
+    /// <summary>
+    /// Get environment connections
+    /// </summary>
+    /// <returns></returns>
+    IEnumerable<Connection> GetEnvConnections(Guid envId);
 }

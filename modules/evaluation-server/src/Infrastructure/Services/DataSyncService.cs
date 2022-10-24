@@ -20,7 +20,7 @@ public class DataSyncService : IDataSyncService
         _evaluationService = evaluationService;
     }
 
-    public async Task<ServerMessage> GetResponseAsync(Connection connection, DataSyncMessage message)
+    public async Task<object> GetPayloadAsync(Connection connection, DataSyncMessage message)
     {
         // attach client-side sdk EndUser
         if (connection.Type == ConnectionType.Client)
@@ -38,29 +38,62 @@ public class DataSyncService : IDataSyncService
             _ => throw new ArgumentOutOfRangeException(nameof(connection), $"unsupported sdk type {connection.Type}")
         };
 
-        return new ServerMessage(MessageTypes.DataSync, payload);
+        return payload;
+    }
+
+    public async Task<object> GetFlagChangePayloadAsync(Connection connection, JsonElement flag)
+    {
+        if (connection.Type == ConnectionType.Client && connection.User == null)
+        {
+            throw new ArgumentException($"client sdk must have user info when sync data. Connection: {connection}");
+        }
+
+        object payload = connection.Type switch
+        {
+            ConnectionType.Client => await GetClientSdkFlagChangePayloadAsync(flag, connection.User!),
+            ConnectionType.Server => GetServerSdkFlagChangePayload(flag),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(connection), $"unsupported sdk type {connection.Type}"
+            )
+        };
+
+        return payload;
     }
 
     #region get client sdk payload
+
+    private async Task<ClientSdkPayload> GetClientSdkFlagChangePayloadAsync(JsonElement flag, EndUser user)
+    {
+        return new ClientSdkPayload(
+            DataSyncEventTypes.Patch,
+            user.KeyId,
+            new[] { await GetClientSdkFlagAsync(flag, user) }
+        );
+    }
+
+    private async Task<ClientSdkFlag> GetClientSdkFlagAsync(JsonElement flag, EndUser user)
+    {
+        var variations =
+            flag.GetProperty("variations").Deserialize<Variation[]>(ReusableJsonSerializerOptions.Web)!;
+
+        var scope = new EvaluationScope(flag, user, variations);
+        var userVariation = await _evaluationService.EvaluateAsync(scope);
+
+        return new ClientSdkFlag(flag, userVariation, variations);
+    }
 
     private async Task<ClientSdkPayload> GetClientSdkPayloadAsync(Guid envId, EndUser user, long timestamp)
     {
         var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
         var flagsBytes = await _redisService.GetFlagsAsync(envId, timestamp);
 
-        var clientSdkFlags = new List<ClientSdkFeatureFlag>();
+        var clientSdkFlags = new List<ClientSdkFlag>();
         foreach (var flagBytes in flagsBytes)
         {
             using var document = JsonDocument.Parse(flagBytes);
-
             var flag = document.RootElement;
-            var variations =
-                flag.GetProperty("variations").Deserialize<Variation[]>(ReusableJsonSerializerOptions.Web)!;
 
-            var scope = new EvaluationScope(flag, user, variations);
-            var userVariation = await _evaluationService.EvaluateAsync(scope);
-
-            clientSdkFlags.Add(new ClientSdkFeatureFlag(flag, userVariation, variations));
+            clientSdkFlags.Add(await GetClientSdkFlagAsync(flag, user));
         }
 
         return new ClientSdkPayload(eventType, user.KeyId, clientSdkFlags);
@@ -69,6 +102,15 @@ public class DataSyncService : IDataSyncService
     #endregion
 
     #region get server sdk payload
+
+    private ServerSdkPayload GetServerSdkFlagChangePayload(JsonElement flag)
+    {
+        return new ServerSdkPayload(
+            DataSyncEventTypes.Patch,
+            new List<JsonObject> { JsonObject.Create(flag)! },
+            Array.Empty<JsonObject>()
+        );
+    }
 
     private async Task<ServerSdkPayload> GetServerSdkPayloadAsync(Guid envId, long timestamp)
     {

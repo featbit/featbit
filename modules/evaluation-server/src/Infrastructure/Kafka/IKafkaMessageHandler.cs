@@ -6,5 +6,5 @@ public interface IKafkaMessageHandler
 {
     public string Topic { get; }
 
-    Task HandleAsync(ConsumeResult<Null, string> consumeResult);
+    Task HandleAsync(ConsumeResult<Null, string> consumeResult, CancellationToken cancellationToken);
 }
