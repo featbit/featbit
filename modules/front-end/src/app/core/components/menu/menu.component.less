@@ -26,7 +26,7 @@ section.menu-body {
       display: none;
     }
 
-    ::ng-deep .ant-menu-submenu-title span:nth-child(2){
+    ::ng-deep .ant-menu-submenu-title span:nth-child(2) {
       display: none;
     }
   }
@@ -38,7 +38,7 @@ section.menu-body {
       }
     }
 
-    ::ng-deep .ant-menu-submenu-title span:nth-child(2){
+    ::ng-deep .ant-menu-submenu-title span:nth-child(2) {
       color: #4f5867;
     }
   }
@@ -59,8 +59,7 @@ section.menu-body {
 
   .brand {
     width: 251px;
-    // padding: 44px 10px 44px 20px;
-    padding: 33px 10px 33px 20px;
+    padding: 18px 10px 10px 7px;
 
     .brand-content {
       display: flex;
@@ -70,9 +69,21 @@ section.menu-body {
       background: #FFFFFF;
 
       .brand-logo {
-        img {
-          width: 149.07px;
-          height: 28px;
+
+        display: flex;
+
+        .logo {
+          width: 55px;
+          height: 56px;
+          margin-left: 8px;
+          margin-top: -2px;
+        }
+
+        .brand {
+          width: 100px;
+          height: 88px;
+          padding: 0px 10px 0px 10px;
+          margin-top: -19px;
         }
       }
 
@@ -80,6 +91,7 @@ section.menu-body {
         transition: left 500ms;
         line-height: 25px;
         background-color: #ffffff;
+        margin-top: -15px;
 
         i {
           font-size: 20px;
@@ -97,7 +109,10 @@ section.menu-body {
 
     /** override default menu item selected behavior **/
 
-    .ant-menu-vertical .ant-menu-item::after, .ant-menu-vertical-left .ant-menu-item::after, .ant-menu-vertical-right .ant-menu-item::after, .ant-menu-inline .ant-menu-item::after {
+    .ant-menu-vertical .ant-menu-item::after,
+    .ant-menu-vertical-left .ant-menu-item::after,
+    .ant-menu-vertical-right .ant-menu-item::after,
+    .ant-menu-inline .ant-menu-item::after {
       position: absolute;
       top: 0;
       left: 0;
@@ -107,7 +122,8 @@ section.menu-body {
       z-index: -1;
     }
 
-    .ant-menu-inline .ant-menu-selected::before, .ant-menu-inline .ant-menu-item-selected::before {
+    .ant-menu-inline .ant-menu-selected::before,
+    .ant-menu-inline .ant-menu-item-selected::before {
       transform: scaleY(1);
       opacity: 1;
       border-left: 4px solid @primary-color;
@@ -116,7 +132,10 @@ section.menu-body {
       transition: transform 0.15s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
     }
 
-    .ant-menu-vertical .ant-menu-item::before, .ant-menu-vertical-left .ant-menu-item::before, .ant-menu-vertical-right .ant-menu-item::before, .ant-menu-inline .ant-menu-item::before {
+    .ant-menu-vertical .ant-menu-item::before,
+    .ant-menu-vertical-left .ant-menu-item::before,
+    .ant-menu-vertical-right .ant-menu-item::before,
+    .ant-menu-inline .ant-menu-item::before {
       position: absolute;
       // top: 10px;
       top: 9px;
@@ -149,7 +168,9 @@ section.menu-body {
       &.ant-menu-item-selected {
         font-weight: 500;
         background-color: white;
-        a, span {
+
+        a,
+        span {
           color: @primary-color;
         }
       }
@@ -284,10 +305,10 @@ ul.user-item {
     }
   }
 
-  .ant-table-thead > tr.ant-table-row-hover:not(.ant-table-expanded-row) > td,
-  .ant-table-tbody > tr.ant-table-row-hover:not(.ant-table-expanded-row) > td,
-  .ant-table-thead > tr:hover:not(.ant-table-expanded-row) > td,
-  .ant-table-tbody > tr:hover:not(.ant-table-expanded-row) > td {
+  .ant-table-thead>tr.ant-table-row-hover:not(.ant-table-expanded-row)>td,
+  .ant-table-tbody>tr.ant-table-row-hover:not(.ant-table-expanded-row)>td,
+  .ant-table-thead>tr:hover:not(.ant-table-expanded-row)>td,
+  .ant-table-tbody>tr:hover:not(.ant-table-expanded-row)>td {
     background-color: #ffffff;
     color: #000000;
   }
@@ -297,11 +318,11 @@ ul.user-item {
     color: #000000;
   }
 
-  .ant-table-tbody > tr .ant-table-expanded-row-fixed {
+  .ant-table-tbody>tr .ant-table-expanded-row-fixed {
     width: 100% !important;
   }
 
-  .ant-table-tbody > tr.ant-table-placeholder {
+  .ant-table-tbody>tr.ant-table-placeholder {
     display: none;
   }
 }

@@ -1,4 +1,5 @@
 using Domain.EndUsers;
+using Domain.Experiments;
 using Domain.FeatureFlags;
 using Domain.Groups;
 using Domain.Members;
@@ -52,6 +53,8 @@ public class MongoDbClient
         { typeof(GroupMember), "GroupMembers" },
         { typeof(GroupPolicy), "GroupPolicies" },
         { typeof(MemberPolicy), "MemberPolicies" },
+
+        { typeof(ExperimentMetric), "ExperimentMetrics" },
     };
 
     public IMongoCollection<TEntity> CollectionOf<TEntity>()

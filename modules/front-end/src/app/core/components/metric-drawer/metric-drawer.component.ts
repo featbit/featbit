@@ -69,7 +69,7 @@ export class MetricDrawerComponent implements OnInit {
       distinctUntilChanged()
     ).subscribe(searchText => {
       this.teamService.searchMembers(currentAccount.id, searchText).subscribe((result) => {
-        this.maintainerList = result;
+        this.maintainerList = result.items;
         this.isMaintainersLoading = false;
       }, _ => {
         this.isMaintainersLoading = false;
@@ -232,8 +232,7 @@ export class MetricDrawerComponent implements OnInit {
         .subscribe(
           res => {
             this.isLoading = false;
-            const maintainer = this.maintainerList.find(m => m.userId === res.maintainerUserId);
-            this.close.emit({isEditing: true, data: {...res, maintainerName: maintainer.userName }});
+            this.close.emit({isEditing: true, data: {...res }});
             this.message.success($localize `:@@common.operation-success:Operation succeeded`);
           },
           _ => {
@@ -250,8 +249,7 @@ export class MetricDrawerComponent implements OnInit {
         .subscribe(
           res => {
             this.isLoading = false;
-            const maintainer = this.maintainerList.find(m => m.userId === res.maintainerUserId);
-            this.close.emit({isEditing: false, data: {...res, maintainerName: maintainer.userName }});
+            this.close.emit({isEditing: false, data: {...res }});
             this.message.success($localize `:@@common.operation-success:Operation succeeded`);
           },
           _ => {

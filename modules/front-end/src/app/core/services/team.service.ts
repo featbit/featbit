@@ -12,12 +12,12 @@ export class TeamService {
   constructor(private http: HttpClient) { }
 
   public getMembers(organizationId: string): Observable<any> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + '/old-api/get-all';
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
     return this.http.get(url);
   }
 
   public searchMembers(organizationId: string, searchText: string): Observable<any> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/old-api/search?searchText=${searchText}`;
+    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `?searchText=${searchText}`;
     return this.http.get(url);
   }
 }

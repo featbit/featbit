@@ -25,7 +25,7 @@ export class ExperimentDrawerComponent implements OnInit {
   isLoading: boolean = false;
 
   public compareWith: (obj1: any, obj2: any) => boolean = (obj1: any, obj2: any) => {
-    if(obj1 && obj2) {
+    if (obj1 && obj2) {
       return obj1.id === obj2.id;
     } else {
       return false;
@@ -71,14 +71,19 @@ export class ExperimentDrawerComponent implements OnInit {
       debounceTime(500),
       distinctUntilChanged()
     ).subscribe(searchText => {
-      this.metricService.getMetrics({envId: currentProjectEnv.envId, searchText}).subscribe((result) => {
+      this.metricService.getMetrics({
+        envId: currentProjectEnv.envId, 
+        pageIndex: 0,
+        pageSize: 2000,
+        name: searchText
+      }).subscribe((result) => {
         this.metricList = result;
         this.isMetricsLoading = false;
       }, error => {
         this.isMetricsLoading = false;
       });
     });
-   }
+  }
 
   ngOnInit(): void {
     this.initForm();
@@ -159,10 +164,10 @@ export class ExperimentDrawerComponent implements OnInit {
           this.isLoading = false;
           res.metric = this.metricList.find(m => m.id === res.metricId);
           res.featureFlagName = featureFlag.ff.name;
-          this.close.emit({isEditing: false, data: res});
+          this.close.emit({ isEditing: false, data: res });
         },
         err => {
-          this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
+          this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
           this.isLoading = false;
         }
       );

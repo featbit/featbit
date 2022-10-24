@@ -6,6 +6,7 @@ using Infrastructure.HostedServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
+using Infrastructure.Experiments;
 using Infrastructure.FeatureFlags;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
@@ -81,6 +82,7 @@ public static class ConfigureServices
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
         services.AddTransient<IDataSyncService, DataSyncService>();
+        services.AddTransient<IExperimentMetricService, ExperimentMetricService>();
 
         return services;
     }

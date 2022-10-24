@@ -49,4 +49,9 @@ public static class ErrorCodes
     public const string InvalidTriggerAction = nameof(InvalidTriggerAction);
     public const string InvalidTriggerToken = nameof(InvalidTriggerToken);
     public const string TriggerTokenNotMatchOrHasExpired = nameof(TriggerTokenNotMatchOrHasExpired);
+
+    // experiment metrics
+    public const string MaintainerIsRequired = nameof(MaintainerIsRequired);
+    public const string EventTypeIsRequired = nameof(EventTypeIsRequired);
+    public const string EventNameIsRequired = nameof(EventNameIsRequired);
 }
