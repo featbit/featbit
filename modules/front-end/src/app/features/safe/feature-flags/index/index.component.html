@@ -24,7 +24,7 @@
           <i nz-icon nzType="icons:icon-setting"></i>
           <ng-container i18n="@@common.tags">Tags</ng-container>
         </button>
-        <button *ngIf="compareAndCopyFlag" class="more-action" nz-dropdown [nzDropdownMenu]="menu" >
+        <button class="more-action" nz-dropdown [nzDropdownMenu]="menu" >
           <i nz-icon nzType="icons:icon-menu"></i>
         </button>
         <nz-dropdown-menu #menu="nzDropdownMenu">
@@ -207,7 +207,7 @@
     <nz-alert
       nzType="warning"
       i18n-nzDescription="@@ff.idx.only-following-fields-are-copied"
-      nzDescription="Only following fields are copied: name, keyName, status, variation and default variation."
+      nzDescription="Only following fields are copied: name, key, status, variation and default rule."
       nzShowIcon
       nzIconType="icons:icon-warning"
     ></nz-alert>

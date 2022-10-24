@@ -40,8 +40,6 @@ export class IndexComponent implements OnInit {
       name: ['', [this.featureFlagNameValidator], [this.featureFlagNameAsyncValidator], 'change'],
       keyName: [{ value: '', disabled: true }, [Validators.required]]
     });
-
-    this.compareAndCopyFlag = false;
   }
 
   ngOnInit(): void {
@@ -198,7 +196,6 @@ export class IndexComponent implements OnInit {
   };
 
   Loading: boolean = true;
-  compareAndCopyFlag: boolean = true;
 
   loadFeatureFlagList() {
     this.Loading = true;
