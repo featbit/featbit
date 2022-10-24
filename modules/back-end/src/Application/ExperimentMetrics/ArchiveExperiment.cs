@@ -1,4 +1,4 @@
-namespace Application.Experiments;
+namespace Application.ExperimentMetrics;
 
 public class ArchiveExperimentMetric : IRequest<bool>
 {

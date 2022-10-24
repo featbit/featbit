@@ -1,6 +1,6 @@
 using Application.Bases.Models;
 
-namespace Application.Experiments;
+namespace Application.ExperimentMetrics;
 
 public class ExperimentMetricFilter : PagedRequest
 {

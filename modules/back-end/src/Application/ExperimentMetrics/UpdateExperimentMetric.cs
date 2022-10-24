@@ -1,7 +1,7 @@
 using Application.Bases;
-using Domain.Experiments;
+using Domain.ExperimentMetrics;
 
-namespace Application.Experiments;
+namespace Application.ExperimentMetrics;
 
 public class UpdateExperimentMetric : IRequest<ExperimentMetricVm>
 {

@@ -6,7 +6,7 @@ using Infrastructure.HostedServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
-using Infrastructure.Experiments;
+using Infrastructure.ExperimentMetrics;
 using Infrastructure.FeatureFlags;
 using Infrastructure.Groups;
 using Infrastructure.Identity;

@@ -1,5 +1,5 @@
 using Domain.EndUsers;
-using Domain.Experiments;
+using Domain.ExperimentMetrics;
 using Domain.FeatureFlags;
 using Domain.Groups;
 using Domain.Members;

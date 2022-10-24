@@ -1,6 +1,6 @@
 using Application.Bases.Models;
-using Application.Experiments;
-using Domain.Experiments;
+using Application.ExperimentMetrics;
+using Domain.ExperimentMetrics;
 
 namespace Application.Services;
 

@@ -1,8 +1,7 @@
 using Application.Bases;
-using Application.Users;
-using Domain.Experiments;
+using Domain.ExperimentMetrics;
 
-namespace Application.Experiments;
+namespace Application.ExperimentMetrics;
 
 public class CreateExperimentMetric : IRequest<ExperimentMetricVm>
 {

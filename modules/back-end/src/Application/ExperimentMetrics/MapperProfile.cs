@@ -1,7 +1,7 @@
 using Application.Bases.Models;
-using Domain.Experiments;
+using Domain.ExperimentMetrics;
 
-namespace Application.Experiments;
+namespace Application.ExperimentMetrics;
 
 public class MapperProfile : Profile
 {

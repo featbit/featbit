@@ -1,4 +1,4 @@
-namespace Domain.Experiments;
+namespace Domain.ExperimentMetrics;
 
 public enum CustomEventTrackOption
 {

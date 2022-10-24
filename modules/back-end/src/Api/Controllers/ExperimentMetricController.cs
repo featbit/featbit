@@ -1,6 +1,5 @@
 using Application.Bases.Models;
-using Application.Experiments;
-using Domain.Experiments;
+using Application.ExperimentMetrics;
 
 namespace Api.Controllers;
 
