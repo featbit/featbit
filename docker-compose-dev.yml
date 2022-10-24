@@ -10,6 +10,7 @@ services:
         API_URL: http://localhost:5000
     depends_on:
       - api
+      - demo-dino-game-vue
     ports:
       - "8081:80"
     networks:
@@ -164,6 +165,14 @@ services:
       - infinity
     networks:
       - featbit-network
+
+  demo-dino-game-vue:
+    image: featbitdocker/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "5173:80"
 
 networks:
   featbit-network:
