@@ -125,42 +125,42 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   experimentList: IExperiment[] = [];
   private initData() {
-    this.experimentService.getExperiments({envId: this.switchServe.envId, featureFlagId: this.featureFlagId}).subscribe(experiments => {
-      if (experiments) {
-        this.experimentList = experiments.map(experiment => {
-          const expt = Object.assign({}, experiment);
-
-          if (expt.iterations.length > 0) {
-            expt.iterations = expt.iterations.map(iteration => this.processIteration(iteration, expt.baselineVariation)).reverse();
-            expt.selectedIteration = expt.iterations[0];
-
-            if (expt.selectedIteration.updatedAt) {
-              expt.selectedIteration.updatedAtStr = moment(expt.selectedIteration.updatedAt).format('YYYY-MM-DD HH:mm');
-            }
-
-            if (experiment.metric.customEventTrackOption === this.customEventTrackNumeric) {
-              // [min, max, max - min]
-              expt.selectedIteration.numericConfidenceIntervalBoundary = [
-                Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
-                Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
-              ];
-
-              expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
-            }
-          }
-
-          expt.isLoading = false;
-          return expt;
-        });
-
-        this.onGoingExperiments = [...this.experimentList.filter(expt => this.onGoingStatus.includes(expt.status))];
-        this.experimentList.forEach(experiment => this.initChartConfig(experiment));
-      }
-      this.isInitLoading = false;
-    }, _ => {
-      this.message.error("数据加载失败，请重试!");
-      this.isInitLoading = false;
-    });
+    // this.experimentService.getList({envId: this.switchServe.envId, featureFlagId: this.featureFlagId}).subscribe(experiments => {
+    //   if (experiments) {
+    //     this.experimentList = experiments.map(experiment => {
+    //       const expt = Object.assign({}, experiment);
+    //
+    //       if (expt.iterations.length > 0) {
+    //         expt.iterations = expt.iterations.map(iteration => this.processIteration(iteration, expt.baselineVariation)).reverse();
+    //         expt.selectedIteration = expt.iterations[0];
+    //
+    //         if (expt.selectedIteration.updatedAt) {
+    //           expt.selectedIteration.updatedAtStr = moment(expt.selectedIteration.updatedAt).format('YYYY-MM-DD HH:mm');
+    //         }
+    //
+    //         if (experiment.metric.customEventTrackOption === this.customEventTrackNumeric) {
+    //           // [min, max, max - min]
+    //           expt.selectedIteration.numericConfidenceIntervalBoundary = [
+    //             Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
+    //             Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
+    //           ];
+    //
+    //           expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
+    //         }
+    //       }
+    //
+    //       expt.isLoading = false;
+    //       return expt;
+    //     });
+    //
+    //     this.onGoingExperiments = [...this.experimentList.filter(expt => this.onGoingStatus.includes(expt.status))];
+    //     this.experimentList.forEach(experiment => this.initChartConfig(experiment));
+    //   }
+    //   this.isInitLoading = false;
+    // }, _ => {
+    //   this.message.error("数据加载失败，请重试!");
+    //   this.isInitLoading = false;
+    // });
   }
 
   onStartIterationClick(expt: IExperiment) {
