@@ -1403,7 +1403,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">11</context>
         </context-group>
-        <target></target>
+        <target>访问文档</target>
       </trans-unit>
       <trans-unit id="guide.get-started" datatype="html">
         <source>Get started</source>
@@ -1411,7 +1411,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">13</context>
         </context-group>
-        <target></target>
+        <target>快速开始</target>
       </trans-unit>
       <trans-unit id="guide.featbit-in-3-min" datatype="html">
         <source>FeatBit in 3 minutes</source>
@@ -1419,7 +1419,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">16</context>
         </context-group>
-        <target></target>
+        <target>3分钟了解 FeatBit</target>
       </trans-unit>
       <trans-unit id="guide.create-ff" datatype="html">
         <source>Create feature flags for the demo</source>
@@ -1427,7 +1427,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">21</context>
         </context-group>
-        <target></target>
+        <target>建立两个功能开关</target>
       </trans-unit>
       <trans-unit id="guide.try-interactive-demo" datatype="html">
         <source>Try interactive with the demo</source>
@@ -1435,7 +1435,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">26</context>
         </context-group>
-        <target></target>
+        <target>通过Demo进行交互学习</target>
       </trans-unit>
       <trans-unit id="guide.connect-to-sdk" datatype="html">
         <source>Connect to SDK</source>
@@ -1443,7 +1443,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">30</context>
         </context-group>
-        <target></target>
+        <target>学习使用SDK</target>
       </trans-unit>
       <trans-unit id="guide.guides-title" datatype="html">
         <source>How-to guides with demo &amp; SDK</source>
@@ -1451,7 +1451,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">34</context>
         </context-group>
-        <target></target>
+        <target>实战案例</target>
       </trans-unit>
       <trans-unit id="guide.testing-in-production" datatype="html">
         <source>
@@ -1462,7 +1462,7 @@ Testing in production        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target></target>
+        <target>在生产环境上测试</target>
       </trans-unit>
       <trans-unit id="guide.targeted-progressive-delivery" datatype="html">
         <source>
@@ -1473,7 +1473,7 @@ Targeted progressive delivery        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">40</context>
         </context-group>
-        <target></target>
+        <target>可租户定制化的渐进式交付</target>
       </trans-unit>
       <trans-unit id="guide.ab-testing" datatype="html">
         <source>
@@ -1484,7 +1484,7 @@ A/B testing        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">43</context>
         </context-group>
-        <target></target>
+        <target>AB测试</target>
       </trans-unit>
       <trans-unit id="guide.empower-teams" datatype="html">
         <source>
@@ -1495,7 +1495,7 @@ Entitlement management        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">46</context>
         </context-group>
-        <target></target>
+        <target>功能订阅管理</target>
       </trans-unit>
       <trans-unit id="guide.how-to-doc" datatype="html">
         <source>More how-to guides documentation...</source>
@@ -1503,7 +1503,7 @@ Entitlement management        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">48,49</context>
         </context-group>
-        <target></target>
+        <target>关于实战案例更多文档</target>
       </trans-unit>
       <trans-unit id="common.close" datatype="html">
         <source>Close</source>
@@ -5104,7 +5104,7 @@ Next, click on the &apos;Quick Start Doc&apos; button on the top-right corner to
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
           <context context-type="linenumber">35</context>
         </context-group>
-        <target></target>
+        <target>秘钥</target>
       </trans-unit>
       <trans-unit id="org.project.edit" datatype="html">
         <source>Edit</source>
