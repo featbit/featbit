@@ -1,3 +1,4 @@
+using Domain.EndUsers;
 using Domain.Projects;
 using MongoDB.Driver;
 using Environment = Domain.Environments.Environment;
@@ -58,6 +59,10 @@ public class ProjectService : MongoDbService<Project>, IProjectService
 
         var envs = envNames.Select(envName => new Environment(project.Id, envName)).ToList();
         await MongoDb.CollectionOf<Environment>().InsertManyAsync(envs);
+
+        // add env built-in end-user properties
+        var builtInProperties = envs.SelectMany(x => EndUserConsts.BuiltInUserProperties(x.Id));
+        await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(builtInProperties);
 
         return new ProjectWithEnvs
         {

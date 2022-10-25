@@ -91,6 +91,13 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         return user;
     }
 
+    public async Task AddBuiltInPropertiesAsync(Guid envId)
+    {
+        var builtInProperties = EndUserConsts.BuiltInUserProperties(envId);
+
+        await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(builtInProperties);
+    }
+
     public async Task<IEnumerable<EndUserProperty>> AddNewPropertiesAsync(EndUser user)
     {
         var customizedProperties = user.CustomizedProperties;

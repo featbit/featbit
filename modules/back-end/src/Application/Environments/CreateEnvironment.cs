@@ -24,19 +24,23 @@ public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
 public class CreateEnvironmentHandler : IRequestHandler<CreateEnvironment, EnvironmentVm>
 {
     private readonly IEnvironmentService _service;
+    private readonly IEndUserService _endUserService;
     private readonly IMapper _mapper;
 
-    public CreateEnvironmentHandler(IEnvironmentService service, IMapper mapper)
+    public CreateEnvironmentHandler(IEnvironmentService service, IMapper mapper, IEndUserService endUserService)
     {
         _service = service;
         _mapper = mapper;
+        _endUserService = endUserService;
     }
 
     public async Task<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
     {
         var env = new Environment(request.ProjectId, request.Name, request.Description);
-
         await _service.AddOneAsync(env);
+
+        // add env built-in end-user properties
+        await _endUserService.AddBuiltInPropertiesAsync(env.Id);
 
         return _mapper.Map<EnvironmentVm>(env);
     }
