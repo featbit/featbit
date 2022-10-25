@@ -9,6 +9,6 @@ public static class BsonDocumentExtensions
     {
         var json = JsonSerializer.Serialize(bsonDocument.ToDictionary());
 
-        return json.Replace("_id", "id");
+        return json.Replace("\"_id\":", "\"id\":");
     }
 }
