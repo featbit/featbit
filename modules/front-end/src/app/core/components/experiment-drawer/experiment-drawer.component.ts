@@ -4,12 +4,14 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IProjectEnv } from '@shared/types';
-import { IExperiment } from '@features/safe/feature-flags/types/experimentations';
-import { IVariationOption } from '@features/safe/feature-flags/types/switch-new';
+import {IExperiment, IPagedMetric} from '@features/safe/feature-flags/types/experimentations';
 import { ExperimentService } from '@services/experiment.service';
 import { MetricService } from '@services/metric.service';
-import { SwitchV1Service } from '@services/switch-v1.service';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
+import {FeatureFlagService} from "@services/feature-flag.service";
+import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
+import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
+import {IVariation} from "@shared/rules";
 
 
 @Component({
@@ -49,7 +51,7 @@ export class ExperimentDrawerComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private metricService: MetricService,
-    private switchService: SwitchV1Service,
+    private featureFlagService: FeatureFlagService,
     private experimentService: ExperimentService,
     private message: NzMessageService
   ) {
@@ -59,7 +61,7 @@ export class ExperimentDrawerComponent implements OnInit {
       debounceTime(500),
       distinctUntilChanged()
     ).subscribe(searchText => {
-      this.switchService.queryFeatureFlags(currentProjectEnv.envId, searchText).subscribe((result) => {
+      this.featureFlagService.getList(new IFeatureFlagListFilter(searchText)).subscribe((result) => {
         this.featureFlagList = result;
         this.isFeatureFlagsLoading = false;
       }, error => {
@@ -72,9 +74,9 @@ export class ExperimentDrawerComponent implements OnInit {
       distinctUntilChanged()
     ).subscribe(searchText => {
       this.metricService.getMetrics({
-        envId: currentProjectEnv.envId, 
+        envId: currentProjectEnv.envId,
         pageIndex: 0,
-        pageSize: 2000,
+        pageSize: 50,
         name: searchText
       }).subscribe((result) => {
         this.metricList = result;
@@ -111,7 +113,7 @@ export class ExperimentDrawerComponent implements OnInit {
 
   featureFlagSearchChange$ = new BehaviorSubject('');
   isFeatureFlagsLoading = false;
-  featureFlagList: any[];
+  featureFlagList: IFeatureFlagListModel;
   onSearchFeatureFlag(value: string) {
     if (value.length > 0) {
       this.isFeatureFlagsLoading = true;
@@ -119,14 +121,17 @@ export class ExperimentDrawerComponent implements OnInit {
     }
   }
 
-  currentVariations: IVariationOption[] = [];
-  onFeatureFlagChange(data: any) {
-    this.currentVariations = [...data.variationOptions];
+  currentVariations: IVariation[] = [];
+  onFeatureFlagChange(data: IFeatureFlag) {
+    this.experimentForm.patchValue({
+      baselineVariation: null,
+    });
+    this.currentVariations = [...data.variations];
   }
 
   metricSearchChange$ = new BehaviorSubject('');
   isMetricsLoading = false;
-  metricList: any[];
+  metricList: IPagedMetric;
   onSearchMetrics(value: string) {
     if (value.length > 0) {
       this.isMetricsLoading = true;
@@ -155,14 +160,14 @@ export class ExperimentDrawerComponent implements OnInit {
       envId: this.experiment.envId,
       featureFlagId: featureFlag.id,
       baselineVariation: `${baselineVariation}`,
-      variations: this.currentVariations.map(v => `${v.localId}`),
+      variations: this.currentVariations.map(v => `${v.id}`),
       metricId
     })
       .pipe()
       .subscribe(
         res => {
           this.isLoading = false;
-          res.metric = this.metricList.find(m => m.id === res.metricId);
+          res.metric = this.metricList?.items.find(m => m.id === res.metricId);
           res.featureFlagName = featureFlag.ff.name;
           this.close.emit({ isEditing: false, data: res });
         },

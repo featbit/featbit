@@ -14,6 +14,8 @@ public class FeatureFlagVm
 
     public string VariationType { get; set; }
 
+    public ICollection<Variation> Variations { get; set; }
+    
     public DateTime UpdatedAt { get; set; }
 
     public Serves Serves { get; set; }

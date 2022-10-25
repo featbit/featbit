@@ -1,5 +1,6 @@
 using Domain.EndUsers;
 using Domain.ExperimentMetrics;
+using Domain.Experiments;
 using Domain.FeatureFlags;
 using Domain.Groups;
 using Domain.Members;
@@ -54,6 +55,7 @@ public class MongoDbClient
         { typeof(GroupPolicy), "GroupPolicies" },
         { typeof(MemberPolicy), "MemberPolicies" },
 
+        { typeof(Experiment), "Experiments" },
         { typeof(ExperimentMetric), "ExperimentMetrics" },
     };
 

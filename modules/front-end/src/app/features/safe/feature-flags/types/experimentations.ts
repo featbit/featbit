@@ -33,6 +33,11 @@ export interface ITargetUrl {
   url: string
 }
 
+export interface IPagedMetric {
+  totalCount: number;
+  items: IMetric[];
+}
+
 export interface IMetric {
   id?: string,
   name: string,

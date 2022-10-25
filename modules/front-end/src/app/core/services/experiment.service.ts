@@ -1,19 +1,27 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IExperiment, IExperimentIteration } from '@features/safe/feature-flags/types/experimentations';
+import {getCurrentProjectEnv} from "@utils/project-env";
+import {ExperimentListFilter, IPagedExpt} from "@features/safe/experiments/overview/types";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExperimentService {
 
-  baseUrl: string = environment.url + '/api/experiments';
+  public envId: string = null;
+
+  get baseUrl() {
+    return environment.url + `/api/v1/envs/${this.envId}/experiments`;
+  }
 
   constructor(
     private http: HttpClient
-  ) {}
+  ) {
+    this.envId = getCurrentProjectEnv().envId;
+  }
 
   // 获取 custom events 列表
   public getCustomEvents(envId: string, lastItem?: string, searchText?: string): Observable<string[]> {
@@ -53,9 +61,18 @@ export class ExperimentService {
     return this.http.post(url, params);
   }
 
-  getExperiments(params: any): Observable<any> {
-    const url = this.baseUrl;
-    return this.http.get(url, { params });
+  getList(filter: ExperimentListFilter = new ExperimentListFilter()): Observable<IPagedExpt> {
+    const queryParam = {
+      featureFlagName: filter.featureFlagName ?? '',
+      featureFlagId: filter.featureFlagId ?? '',
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    return this.http.get<IPagedExpt>(
+      this.baseUrl,
+      {params: new HttpParams({fromObject: queryParam})}
+    );
   }
 
   startIteration(envId: string, experimentId: string): Observable<any> {
