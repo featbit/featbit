@@ -657,19 +657,19 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">243</context>
+          <context context-type="linenumber">244</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">256</context>
+          <context context-type="linenumber">258</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">264</context>
+          <context context-type="linenumber">266</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">341</context>
+          <context context-type="linenumber">338</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -785,7 +785,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">267</context>
+          <context context-type="linenumber">269</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -1403,7 +1403,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">11</context>
         </context-group>
-        <target></target>
+        <target>访问文档</target>
       </trans-unit>
       <trans-unit id="guide.get-started" datatype="html">
         <source>Get started</source>
@@ -1411,7 +1411,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">13</context>
         </context-group>
-        <target></target>
+        <target>快速开始</target>
       </trans-unit>
       <trans-unit id="guide.featbit-in-3-min" datatype="html">
         <source>FeatBit in 3 minutes</source>
@@ -1419,7 +1419,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">16</context>
         </context-group>
-        <target></target>
+        <target>3分钟了解 FeatBit</target>
       </trans-unit>
       <trans-unit id="guide.create-ff" datatype="html">
         <source>Create feature flags for the demo</source>
@@ -1427,7 +1427,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">21</context>
         </context-group>
-        <target></target>
+        <target>建立两个功能开关</target>
       </trans-unit>
       <trans-unit id="guide.try-interactive-demo" datatype="html">
         <source>Try interactive with the demo</source>
@@ -1435,7 +1435,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">26</context>
         </context-group>
-        <target></target>
+        <target>通过Demo进行交互学习</target>
       </trans-unit>
       <trans-unit id="guide.connect-to-sdk" datatype="html">
         <source>Connect to SDK</source>
@@ -1443,7 +1443,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">30</context>
         </context-group>
-        <target></target>
+        <target>学习使用SDK</target>
       </trans-unit>
       <trans-unit id="guide.guides-title" datatype="html">
         <source>How-to guides with demo &amp; SDK</source>
@@ -1451,7 +1451,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">34</context>
         </context-group>
-        <target></target>
+        <target>实战案例</target>
       </trans-unit>
       <trans-unit id="guide.testing-in-production" datatype="html">
         <source>
@@ -1462,7 +1462,7 @@ Testing in production        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target></target>
+        <target>在生产环境上测试</target>
       </trans-unit>
       <trans-unit id="guide.targeted-progressive-delivery" datatype="html">
         <source>
@@ -1473,7 +1473,7 @@ Targeted progressive delivery        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">40</context>
         </context-group>
-        <target></target>
+        <target>可租户定制化的渐进式交付</target>
       </trans-unit>
       <trans-unit id="guide.ab-testing" datatype="html">
         <source>
@@ -1484,7 +1484,7 @@ A/B testing        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">43</context>
         </context-group>
-        <target></target>
+        <target>AB测试</target>
       </trans-unit>
       <trans-unit id="guide.empower-teams" datatype="html">
         <source>
@@ -1495,7 +1495,7 @@ Entitlement management        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">46</context>
         </context-group>
-        <target></target>
+        <target>功能订阅管理</target>
       </trans-unit>
       <trans-unit id="guide.how-to-doc" datatype="html">
         <source>More how-to guides documentation...</source>
@@ -1503,7 +1503,7 @@ Entitlement management        </source>
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">48,49</context>
         </context-group>
-        <target></target>
+        <target>关于实战案例更多文档</target>
       </trans-unit>
       <trans-unit id="common.close" datatype="html">
         <source>Close</source>
@@ -1609,11 +1609,11 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">186</context>
+          <context context-type="linenumber">184</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">326</context>
+          <context context-type="linenumber">323</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -1701,7 +1701,7 @@ Entitlement management        </source>
         <source>Account</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>账户管理</target>
       </trans-unit>
@@ -1709,7 +1709,7 @@ Entitlement management        </source>
         <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">100</context>
         </context-group>
         <target>个人信息</target>
       </trans-unit>
@@ -1717,7 +1717,7 @@ Entitlement management        </source>
         <source>Logout</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>退出</target>
       </trans-unit>
@@ -1969,7 +1969,7 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">247</context>
+          <context context-type="linenumber">248</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
@@ -4111,7 +4111,7 @@ Entitlement management        </source>
         <target>批量复制</target>
       </trans-unit>
       <trans-unit id="ff.idx.only-following-fields-are-copied" datatype="html">
-        <source>Only following fields are copied: name, keyName, status, variation and default variation.</source>
+        <source>Only following fields are copied: name, key, status, variation and default rule.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">210</context>
@@ -4146,7 +4146,7 @@ Entitlement management        </source>
         <source>Please select at least one feature flag to copy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">151</context>
+          <context context-type="linenumber">149</context>
         </context-group>
         <target>请先选择需要复制的开关</target>
       </trans-unit>
@@ -4154,7 +4154,7 @@ Entitlement management        </source>
         <source>Successfully copied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">176</context>
+          <context context-type="linenumber">174</context>
         </context-group>
         <target>成功复制</target>
       </trans-unit>
@@ -4162,7 +4162,7 @@ Entitlement management        </source>
         <source>feature flags to environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">178</context>
+          <context context-type="linenumber">176</context>
         </context-group>
         <target>个开关到环境</target>
       </trans-unit>
@@ -4170,14 +4170,14 @@ Entitlement management        </source>
         <source>Following feature flags have been ignored as they are already in the targeting environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">182</context>
+          <context context-type="linenumber">180</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.copy-result" datatype="html">
         <source>Copy result</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">184</context>
+          <context context-type="linenumber">182</context>
         </context-group>
         <target>复制结果</target>
       </trans-unit>
@@ -4185,11 +4185,11 @@ Entitlement management        </source>
         <source>The status of feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">290</context>
+          <context context-type="linenumber">287</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">293</context>
+          <context context-type="linenumber">290</context>
         </context-group>
         <target>开关状态</target>
       </trans-unit>
@@ -4197,7 +4197,7 @@ Entitlement management        </source>
         <source>is changed to OFF</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">291</context>
+          <context context-type="linenumber">288</context>
         </context-group>
         <target>已切换至 OFF</target>
       </trans-unit>
@@ -4205,7 +4205,7 @@ Entitlement management        </source>
         <source>is changed to ON</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">294</context>
+          <context context-type="linenumber">291</context>
         </context-group>
         <target>已切换至 ON</target>
       </trans-unit>
@@ -4213,7 +4213,7 @@ Entitlement management        </source>
         <source>Failed to change feature flag status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">302</context>
+          <context context-type="linenumber">299</context>
         </context-group>
         <target>开关状态切换失败</target>
       </trans-unit>
@@ -5104,7 +5104,7 @@ Next, click on the &apos;Quick Start Doc&apos; button on the top-right corner to
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
           <context context-type="linenumber">35</context>
         </context-group>
-        <target></target>
+        <target>秘钥</target>
       </trans-unit>
       <trans-unit id="org.project.edit" datatype="html">
         <source>Edit</source>
