@@ -14,6 +14,27 @@ public class EndUser
     {
         return !string.IsNullOrWhiteSpace(KeyId);
     }
+
+    public string ValueOf(string property)
+    {
+        if (string.IsNullOrWhiteSpace(property))
+        {
+            return string.Empty;
+        }
+
+        if (property == "keyId")
+        {
+            return KeyId;
+        }
+
+        if (property == "name")
+        {
+            return Name;
+        }
+
+        var value = CustomizedProperties?.FirstOrDefault(x => x.Name == property);
+        return value?.Value ?? string.Empty;
+    }
 }
 
 public class CustomizedProperty

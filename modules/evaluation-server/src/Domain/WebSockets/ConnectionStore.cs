@@ -37,4 +37,14 @@ public class ConnectionStore
     {
         _connections.TryRemove(connection.Id, out _);
     }
+
+    /// <summary>
+    /// Find connections by predication
+    /// </summary>
+    /// <param name="predicate"></param>
+    /// <returns></returns>
+    public IEnumerable<Connection> Find(Func<Connection, bool> predicate)
+    {
+        return _connections.Where(x => predicate(x.Value)).Select(x => x.Value);
+    }
 }

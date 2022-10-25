@@ -33,17 +33,20 @@ public static class ServicesRegister
         services.AddSingleton<IConnectionManager, ConnectionManager>();
         services.AddScoped<IConnectionHandler, ConnectionHandler>();
         services.AddTransient<IDataSyncService, DataSyncService>();
+        services.AddSingleton<EvaluationService>();
 
         // websocket message handlers
         services.AddTransient<IMessageHandler, PingMessageHandler>();
         services.AddTransient<IMessageHandler, EchoMessageHandler>();
-        services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
-        // for integration tests, ignore below configs 
+        // for integration tests, ignore below services 
         if (builder.Environment.IsEnvironment("IntegrationTests"))
         {
             return builder;
         }
+
+        // data-sync message handler
+        services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
         // redis
         services.AddSingleton<IConnectionMultiplexer>(
@@ -52,6 +55,8 @@ public static class ServicesRegister
         services.AddTransient<IPopulatingService, RedisPopulatingService>();
         services.AddHostedService<RedisPopulatingHostedService>();
         services.AddSingleton<RedisService>();
+        services.AddSingleton<EvaluationService>();
+        services.AddSingleton<TargetRuleMatcher>();
 
         // mongodb
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));

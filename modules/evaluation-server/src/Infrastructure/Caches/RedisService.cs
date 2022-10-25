@@ -28,6 +28,15 @@ public class RedisService
         return jsonBytes;
     }
 
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
+    {
+        var keys = ids.Select(RedisKeys.FeatureFlag);
+
+        var tasks = keys.Select(key => _redis.StringGetAsync(key));
+        var values = await Task.WhenAll(tasks);
+        return values.Select(x => (byte[])x!);
+    }
+
     public async Task UpsertFlagAsync(JsonElement flag)
     {
         // upsert flag
@@ -48,6 +57,14 @@ public class RedisService
         // delete index
         var index = RedisKeys.FlagIndex(envId);
         await _redis.SortedSetRemoveAsync(index, flagId.ToString());
+    }
+
+    public async Task<byte[]> GetSegmentAsync(string id)
+    {
+        var key = RedisKeys.Segment(id);
+        var segment = await _redis.StringGetAsync(key);
+
+        return (byte[])segment!;
     }
 
     public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
