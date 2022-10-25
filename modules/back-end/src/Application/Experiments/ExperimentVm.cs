@@ -1,0 +1,21 @@
+using Domain.ExperimentMetrics;
+using Domain.FeatureFlags;
+
+namespace Application.Experiments;
+
+public class ExperimentVm
+{
+    public Guid Id { get; set; }
+
+    public Variation BaseLineVariation { get; set; }
+    
+    public string FeatureFlagKey { get; set; }
+    public string FeatureFlagName { get; set; }
+    
+    public Guid MetricId { get; set; }
+    public string MetricName { get; set; }
+    public string MetricEventName { get; set; }
+    public EventType MetricEventType { get; set; }
+    
+    public string Status { get; set; }
+}
