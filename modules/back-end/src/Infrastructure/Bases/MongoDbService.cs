@@ -32,7 +32,7 @@ public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
         return entity;
     }
 
-    public async Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> predicate)
+    public async Task<TEntity> FindOneAsync(Expression<Func<TEntity, bool>> predicate)
     {
         return await Queryable.FirstOrDefaultAsync(predicate);
     }

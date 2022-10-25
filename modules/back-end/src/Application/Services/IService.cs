@@ -11,7 +11,7 @@ public interface IService<TEntity> where TEntity : Entity
 
     Task AddManyAsync(IEnumerable<TEntity> entities);
 
-    Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> predicate);
+    Task<TEntity> FindOneAsync(Expression<Func<TEntity, bool>> predicate);
 
     Task<ICollection<TEntity>> FindManyAsync(Expression<Func<TEntity, bool>> predicate);
 
