@@ -38,13 +38,15 @@ public static class ServicesRegister
         // websocket message handlers
         services.AddTransient<IMessageHandler, PingMessageHandler>();
         services.AddTransient<IMessageHandler, EchoMessageHandler>();
-        services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
-        // for integration tests, ignore below configs 
+        // for integration tests, ignore below services 
         if (builder.Environment.IsEnvironment("IntegrationTests"))
         {
             return builder;
         }
+
+        // data-sync message handler
+        services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
         // redis
         services.AddSingleton<IConnectionMultiplexer>(
