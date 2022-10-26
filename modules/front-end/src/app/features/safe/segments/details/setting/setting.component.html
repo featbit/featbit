@@ -63,7 +63,7 @@
       </div>
     </div>
     <div *ngFor="let flag of flagReferences" style="margin-top:5px">
-      <div (click)="openFlagPage(flag.id)" style="cursor:pointer">{{flag.name}}</div>
+      <a (click)="openFlagPage(flag.key)">{{flag.name}}</a>
     </div>
   </ng-template>
 

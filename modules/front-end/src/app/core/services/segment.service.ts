@@ -100,7 +100,7 @@ export class SegmentService {
   }
 
   public getFeatureFlagReferences(id: string): Observable<ISegmentFlagReference[]> {
-    const url = `${this.baseUrl}/${id}/flag-segment-references`;
+    const url = `${this.baseUrl}/${id}/flag-references`;
 
     return this.http.get<ISegmentFlagReference[]>(url).pipe(catchError(() => of(undefined)));
   }

@@ -12,7 +12,7 @@
       </div>
       <nz-dropdown-menu #menu="nzDropdownMenu">
         <ul nz-menu>
-          <li nz-menu-item *ngFor="let flag of flagReferences" (click)="openFlagPage(flag.id)">
+          <li nz-menu-item *ngFor="let flag of flagReferences" (click)="openFlagPage(flag.key)">
             {{flag.name}}
           </li>
         </ul>

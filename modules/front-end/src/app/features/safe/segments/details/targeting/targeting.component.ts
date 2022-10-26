@@ -39,9 +39,9 @@ export class TargetingComponent {
         if (result) {
           this.id = result.id;
           this.loadSegment(result);
-          // this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
-          //   this.flagReferences = [...flags];
-          // });
+          this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
+            this.flagReferences = [...flags];
+          });
         }
       })
     })
@@ -53,9 +53,9 @@ export class TargetingComponent {
     }, () => this.isUserPropsLoading = false);
   }
 
-  public openFlagPage(flagKeyName: string) {
+  public openFlagPage(flagKey: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/feature-flags/${flagKeyName}/targeting`])
+      this.router.createUrlTree([`/feature-flags/${flagKey}/targeting`])
     );
 
     window.open(url, '_blank');

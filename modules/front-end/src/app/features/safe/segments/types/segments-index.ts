@@ -21,7 +21,7 @@ export interface ISegment {
 export interface ISegmentFlagReference {
   id: string,
   name: string,
-  keyName: string
+  key: string
 }
 
 export class SegmentListFilter {
