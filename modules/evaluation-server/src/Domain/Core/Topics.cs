@@ -7,4 +7,6 @@ public class Topics
     public const string FeatureFlagChange = "api-feature-flag-change";
 
     public const string SegmentChange = "api-segment-change";
+
+    public const string Insights = "ch_events_json";
 }
