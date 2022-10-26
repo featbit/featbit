@@ -1,5 +1,6 @@
 using Application.Bases.Models;
 using Application.Experiments;
+using Domain.Experiments;
 
 namespace Api.Controllers;
 
@@ -19,5 +20,14 @@ public class ExperimentController : ApiControllerBase
 
         var expts = await Mediator.Send(request);
         return Ok(expts);
+    }
+    
+    [HttpPost]
+    public async Task<ApiResponse<Experiment>> CreateAsync(Guid envId, CreateExperiment request)
+    {
+        request.EnvId = envId;
+
+        var experiment = await Mediator.Send(request);
+        return Ok(experiment);
     }
 }

@@ -8,5 +8,5 @@ public class Experiment : AuditedEntity
     
     public string Status { get; set; } // possible values: NotStarted, NotRecording, Recording
 
-    public string BaseLineVariationId { get; set; }
+    public string BaselineVariationId { get; set; }
 }

@@ -1,4 +1,5 @@
 import {IGroup} from "@features/safe/iam/types/group";
+import {CustomEventTrackOption, EventType} from "@features/safe/feature-flags/types/experimentations";
 
 export class ExperimentListFilter {
   featureFlagName?: string;
@@ -24,9 +25,15 @@ export interface IPagedExpt {
 }
 
 export interface IExpt {
-  id: string;
-  featureFlagName: string;
-  featureFlagKey: string;
-  description: string;
-  updatedAt: Date;
+  id?: string;
+  envId: string,
+  featureFlagId: string,
+  featureFlagName?: string;
+  featureFlagKey?: string;
+  metricId: string,
+  metricName?: string,
+  metricEventName?: string,
+  metricEventType?: EventType,
+  metricCustomEventTrackOption?: CustomEventTrackOption,
+  baselineVariationId: string
 }

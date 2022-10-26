@@ -86,7 +86,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
               this.onGoingExperiments.forEach(expt => {
                 const iteration = res.find(r => r.id === expt.selectedIteration.id);
                 if (iteration) {
-                  expt.selectedIteration = this.processIteration(iteration, expt.baselineVariation);
+                  expt.selectedIteration = this.processIteration(iteration, expt.baselineVariationId);
                   if (iteration.updatedAt) {
                     expt.selectedIteration.updatedAt = iteration.updatedAt;
                     expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
@@ -167,7 +167,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     expt.isLoading  = true;
     this.experimentService.startIteration(this.switchServe.envId, expt.id).subscribe(res => {
       if (res) {
-        expt.iterations = [this.processIteration(res, expt.baselineVariation), ...expt.iterations];
+        expt.iterations = [this.processIteration(res, expt.baselineVariationId), ...expt.iterations];
         expt.selectedIteration = expt.iterations[0];
         expt.status = ExperimentStatus.Recording;
 
@@ -186,7 +186,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       if (res) {
         expt.selectedIteration.endTime = res.endTime;
         expt.selectedIteration.dateTimeInterval = `${moment(expt.selectedIteration.startTime).format('YYYY-MM-DD HH:mm')} - ${moment(expt.selectedIteration.endTime).format('YYYY-MM-DD HH:mm')}`
-        expt.status = ExperimentStatus.NotRecording;
+        expt.status = ExperimentStatus.Paused;
       }
 
       expt.isLoading  = false;
@@ -197,7 +197,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   private setExptStatus(expt: IExperiment, iteration: IExperimentIteration) {
-    expt.status = iteration.isFinish ? ExperimentStatus.NotRecording : ExperimentStatus.Recording;
+    expt.status = iteration.isFinish ? ExperimentStatus.Paused : ExperimentStatus.Recording;
 
     return;
   }
@@ -206,7 +206,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     expt.isLoading  = true;
     this.experimentService.getIterationResults(this.switchServe.envId, [{ experimentId: expt.id, iterationId: expt.selectedIteration.id}]).subscribe(res => {
       if (res) {
-        expt.selectedIteration = this.processIteration(res[0], expt.baselineVariation);
+        expt.selectedIteration = this.processIteration(res[0], expt.baselineVariationId);
         if (res[0].updatedAt) {
           expt.selectedIteration.updatedAt = res[0].updatedAt;
           expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
