@@ -176,7 +176,7 @@ services:
       - kafka
       - clickhouse-server
     ports:
-      - 80:80
+      - "8200:80"
     networks:
       - featbit-network
     environment:
