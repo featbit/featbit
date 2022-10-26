@@ -102,9 +102,9 @@ export class EnvDrawerComponent implements OnInit {
         id: this.env.id
       }).pipe()
         .subscribe(
-          ({id, secret}) => {
+          ({id, name, description, secrets}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: true, env: { name, description, id, projectId, secret }});
+            this.close.emit({isEditing: true, env: { name, description, id, projectId, secrets }});
             this.message.success($localize `:@@org.project.envUpdateSuccess:Environment successfully updated`);
           },
           () => {
@@ -115,9 +115,9 @@ export class EnvDrawerComponent implements OnInit {
       this.envService.postCreateEnv(this.env.projectId, { name, description, projectId })
         .pipe()
         .subscribe(
-          ({id, secret}) => {
+          ({id, name, description, secrets}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: false, env: { name, description, id, projectId, secret }});
+            this.close.emit({isEditing: false, env: { name, description, id, projectId, secrets }});
             this.message.success($localize `:@@org.project.envCreateSuccess:Environment successfully created`);
           },
           () => {
