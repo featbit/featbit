@@ -6,7 +6,7 @@ namespace Domain.Insights;
 
 public class VariationInsight
 {
-    public string FeatureFlagKeyName { get; set; }
+    public string FeatureFlagKey { get; set; }
 
     public Variation Variation { get; set; }
 

@@ -28,7 +28,7 @@ public class Insight
         // flag messages
         foreach (var variation in Variations)
         {
-            var flagId = $"{envId}-{variation.FeatureFlagKeyName}";
+            var flagId = $"{envId}-{variation.FeatureFlagKey}";
             var properties = new
             {
                 RequestPath = "/Variation/GetMultiOptionVariation",
@@ -36,7 +36,7 @@ public class Insight
                 EnvId = envId.ToString(),
                 AccountId = string.Empty,
                 ProjectId = string.Empty,
-                FeatureFlagKeyName = variation.FeatureFlagKeyName,
+                FeatureFlagKeyName = variation.FeatureFlagKey,
                 SendToExperiment = variation.SendToExperiment,
                 UserKeyId = User!.KeyId,
                 FFUserName = User!.Name,
