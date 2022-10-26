@@ -37,6 +37,7 @@ public class Insight
                 AccountId = string.Empty,
                 ProjectId = string.Empty,
                 FeatureFlagKeyName = variation.FeatureFlagKeyName,
+                SendToExperiment = variation.SendToExperiment,
                 UserKeyId = User!.KeyId,
                 FFUserName = User!.Name,
                 VariationLocalId = variation.Variation.Id,
