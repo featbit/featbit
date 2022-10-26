@@ -42,7 +42,8 @@ public class Insight
                 FFUserName = User!.Name,
                 VariationLocalId = variation.Variation.Id,
                 tag_0 = User!.KeyId,
-                tag_1 = variation.Variation.Id
+                tag_1 = variation.Variation.Id,
+                tag_2 = variation.SendToExperiment
             };
 
             var message = new InsightMessage
