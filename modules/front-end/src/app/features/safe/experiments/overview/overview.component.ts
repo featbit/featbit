@@ -1,13 +1,18 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { IProjectEnv } from '@shared//types';
-import { ExperimentService } from '@services/experiment.service';
-import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment } from '../../feature-flags/types/experimentations';
-import { CURRENT_PROJECT } from "@utils/localstorage-keys";
-import {ExperimentListFilter, IPagedExpt} from "@features/safe/experiments/overview/types";
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Subject} from 'rxjs';
+import {debounceTime} from 'rxjs/operators';
+import {IProjectEnv} from '@shared//types';
+import {ExperimentService} from '@services/experiment.service';
+import {
+  CustomEventTrackOption,
+  EventType,
+  ExperimentStatus,
+  IExperiment
+} from '../../feature-flags/types/experimentations';
+import {CURRENT_PROJECT} from "@utils/localstorage-keys";
+import {ExperimentListFilter, IExpt, IPagedExpt} from "@features/safe/experiments/overview/types";
 
 @Component({
   selector: 'experiments-overview',
@@ -32,6 +37,10 @@ export class OverviewComponent implements OnInit, OnDestroy {
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
   customEventTrackNumeric: CustomEventTrackOption = CustomEventTrackOption.Numeric;
 
+  exptStatusNotStarted: ExperimentStatus = ExperimentStatus.NotStarted;
+  exptStatusPaused: ExperimentStatus = ExperimentStatus.Paused;
+  exptStatusRecording: ExperimentStatus = ExperimentStatus.Recording;
+
   filter: ExperimentListFilter = new ExperimentListFilter();
   constructor(
     private router: Router,
@@ -45,17 +54,21 @@ export class OverviewComponent implements OnInit, OnDestroy {
     this.search$.pipe(
       debounceTime(300)
     ).subscribe(e => {
-      this.isLoading = true;
-      this.experimentService.getList(this.filter).subscribe((result) => {
-        this.pagedExpt = result;
-        this.isLoading = false;
-      }, _ => {
-        this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
-        this.isLoading = false;
-      })
+      this.loadExperiments();
     });
 
     this.search$.next(null);
+  }
+
+  loadExperiments() {
+    this.isLoading = true;
+    this.experimentService.getList(this.filter).subscribe((result) => {
+      this.pagedExpt = result;
+      this.isLoading = false;
+    }, _ => {
+      this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
+      this.isLoading = false;
+    })
   }
 
   onSearch(resetPage?: boolean) {
@@ -81,19 +94,21 @@ export class OverviewComponent implements OnInit, OnDestroy {
   onDetailViewClosed(data: any) {
     this.detailViewVisible = false;
 
-    // if (data.data && data.data.id) {
-    //   if (!this.experimentList.find(expt => expt.id === data.data.id)) {
-    //     const experiment = {...data.data};
-    //     this.experimentList = [experiment, ...this.experimentList];
-    //     this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-    //   } else {
-    //     this.message.warning($localize `:@@expt.overview.expt-exists:Experiment with the same feature flag and metric exists`);
-    //   }
-    // }
+    const predicate = (it: IExpt) => it.featureFlagId === data.data.featureFlagId && it.metricId === data.data.metricId;
+
+    if (!this.pagedExpt.items.find(predicate)) {
+      this.pagedExpt.items = [data.data, ...this.pagedExpt.items];
+    } else {
+      this.message.warning($localize `:@@expt.overview.expt-exists:Experiment with the same feature flag and metric exists`);
+    }
   }
 
-  goToFeatureFlag(featureFlagId: string) {
-    this.router.navigateByUrl(`/feature-flags/${featureFlagId}/experimentations`);
+  goToFeatureFlag(featureFlagKey: string) {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree([`/feature-flags/${featureFlagKey}/experimentations`])
+    );
+
+    window.open(url, '_blank');
   }
 
   goToMetric(metricId: string) {

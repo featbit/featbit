@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IExperiment, IExperimentIteration } from '@features/safe/feature-flags/types/experimentations';
 import {getCurrentProjectEnv} from "@utils/project-env";
-import {ExperimentListFilter, IPagedExpt} from "@features/safe/experiments/overview/types";
+import {ExperimentListFilter, IExpt, IPagedExpt} from "@features/safe/experiments/overview/types";
 
 @Injectable({
   providedIn: 'root'
@@ -55,10 +55,9 @@ export class ExperimentService {
   }
 
 
-  // 获取 experiment 结果
-  createExperiment(params: IExperiment): Observable<any> {
+  createExperiment(params: IExpt): Observable<IExpt[]> {
     const url = this.baseUrl;
-    return this.http.post(url, params);
+    return this.http.post<IExpt[]>(url, params);
   }
 
   getList(filter: ExperimentListFilter = new ExperimentListFilter()): Observable<IPagedExpt> {

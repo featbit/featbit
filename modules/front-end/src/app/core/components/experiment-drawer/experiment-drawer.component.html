@@ -37,9 +37,11 @@
               </nz-option>
             </nz-select>
             <ng-template #ffTemplate let-selected>
-              {{selected.nzValue.name}}
-              <nz-tag *ngIf="selected.nzValue.isEnabled" class="status on">ON</nz-tag>
-              <nz-tag *ngIf="!selected.nzValue.isEnabled" class="status off">OFF</nz-tag>
+              <div class="selected-items-wrapper" style="">
+                <span>{{selected.nzValue.name}}</span>
+                <nz-tag *ngIf="selected.nzValue.isEnabled" class="status on">ON</nz-tag>
+                <nz-tag *ngIf="!selected.nzValue.isEnabled" class="status off">OFF</nz-tag>
+              </div>
             </ng-template>
           </nz-input-group>
         </nz-form-control>
@@ -69,11 +71,15 @@
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label i18n="@@common.baseline-variation">Baseline variation</nz-form-label>
+        <nz-form-label i18n="@@common.baseline-variation">Baseline</nz-form-label>
         <nz-form-control i18n-nzErrorTip="@@common.baseline-variation" nzErrorTip="Base variation">
           <nz-input-group>
             <div class="">
-              <nz-select i18n-nzPlaceHolder="@@expt.overview.select-baseline-variation" nzPlaceHolder="Select baseline variation" formControlName="baselineVariation">
+              <nz-select
+                i18n-nzPlaceHolder="@@expt.overview.select-baseline-variation"
+                [compareWith]="compareWith"
+                nzPlaceHolder="Select baseline variation"
+                formControlName="baselineVariationId">
                 <nz-option
                   *ngFor="let o of currentVariations"
                   [nzValue]="o.id"

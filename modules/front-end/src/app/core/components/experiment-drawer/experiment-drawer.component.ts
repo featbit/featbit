@@ -95,15 +95,7 @@ export class ExperimentDrawerComponent implements OnInit {
     this.experimentForm = this.fb.group({
       featureFlag: [null, [Validators.required]],
       metricId: [null, [Validators.required]],
-      baselineVariation: [null, [Validators.required]],
-    });
-  }
-
-  patchForm(experiment: Partial<IExperiment>) {
-    this.experimentForm.patchValue({
-      //featureFlag: experiment.featureFlagId,
-      metricId: experiment.metricId,
-      baselineVariation: experiment.baselineVariation,
+      baselineVariationId: [null, [Validators.required]],
     });
   }
 
@@ -124,7 +116,7 @@ export class ExperimentDrawerComponent implements OnInit {
   currentVariations: IVariation[] = [];
   onFeatureFlagChange(data: IFeatureFlag) {
     this.experimentForm.patchValue({
-      baselineVariation: null,
+      baselineVariationId: null,
     });
     this.currentVariations = [...data.variations];
   }
@@ -154,22 +146,30 @@ export class ExperimentDrawerComponent implements OnInit {
 
     this.isLoading = true;
 
-    const { featureFlag, metricId, baselineVariation } = this.experimentForm.value;
+    const { featureFlag, metricId, baselineVariationId } = this.experimentForm.value;
 
+    const metric = this.metricList.items.find(m => m.id === metricId);
     this.experimentService.createExperiment({
       envId: this.experiment.envId,
       featureFlagId: featureFlag.id,
-      baselineVariation: `${baselineVariation}`,
-      variations: this.currentVariations.map(v => `${v.id}`),
-      metricId
+      metricId: metric.id,
+      baselineVariationId,
     })
       .pipe()
       .subscribe(
         res => {
           this.isLoading = false;
-          res.metric = this.metricList?.items.find(m => m.id === res.metricId);
-          res.featureFlagName = featureFlag.ff.name;
-          this.close.emit({ isEditing: false, data: res });
+          this.close.emit({ isEditing: false, data: {
+              ...res,
+              featureFlagKey: featureFlag.key,
+              featureFlagName: featureFlag.name,
+              metricName: metric.name,
+              metricEventName: metric.eventName,
+              metricEventType: metric.eventType,
+              metricCustomEventTrackOption: metric.customEventTrackOption,
+              baselineVariation: featureFlag.variations.find(v => v.id === baselineVariationId)
+            }
+          });
         },
         err => {
           this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);

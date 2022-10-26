@@ -11,6 +11,7 @@ namespace Infrastructure.Experiments;
 public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 {
     private IMongoQueryable<FeatureFlag> featureFlagQueryable;
+
     public ExperimentService(MongoDbClient mongoDb) : base(mongoDb)
     {
         featureFlagQueryable = MongoDb.QueryableOf<FeatureFlag>();
@@ -26,26 +27,30 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     on expt.MetricId equals metric.Id
                 join ff in featureFlagQueryable
                     on expt.FeatureFlagId equals ff.Id
-                where expt.EnvId == envId && !ff.IsArchived && (string.IsNullOrWhiteSpace(filter.FeatureFlagName) || ff.Name.Contains(filter.FeatureFlagName, StringComparison.CurrentCultureIgnoreCase))
+                where expt.EnvId == envId && !ff.IsArchived && (string.IsNullOrWhiteSpace(filter.FeatureFlagName) ||
+                                                                ff.Name.Contains(filter.FeatureFlagName,
+                                                                    StringComparison.CurrentCultureIgnoreCase))
                 select new ExperimentVm
                 {
                     Id = expt.Id,
-                    BaseLineVariation = ff.Variations.First(v => v.Id == expt.BaseLineVariationId),
+                    BaselineVariation = ff.Variations.First(v => v.Id == expt.BaselineVariationId),
+                    FeatureFlagId = ff.Id,
                     FeatureFlagKey = ff.Key,
                     FeatureFlagName = ff.Name,
                     MetricId = expt.MetricId,
                     MetricName = metric.Name,
                     MetricEventName = metric.EventName,
                     MetricEventType = metric.EventType,
-                    Status = expt.Status
+                    Status = expt.Status,
+                    MetricCustomEventTrackOption = metric.CustomEventTrackOption
                 };
-            
+
             var totalCount = await query.CountAsync();
-            var items =  await query
+            var items = await query
                 .Skip(filter.PageIndex * filter.PageSize)
                 .Take(filter.PageSize)
                 .ToListAsync();
-            
+
             return new PagedResult<ExperimentVm>(totalCount, items);
         }
         else
@@ -60,39 +65,25 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 select new ExperimentVm
                 {
                     Id = expt.Id,
-                    BaseLineVariation = ff.Variations.First(v => v.Id == expt.BaseLineVariationId),
+                    BaselineVariation = ff.Variations.First(v => v.Id == expt.BaselineVariationId),
+                    FeatureFlagId = ff.Id,
                     FeatureFlagKey = ff.Key,
                     FeatureFlagName = ff.Name,
                     MetricId = expt.MetricId,
                     MetricName = metric.Name,
                     MetricEventName = metric.EventName,
                     MetricEventType = metric.EventType,
-                    Status = expt.Status
+                    Status = expt.Status,
+                    MetricCustomEventTrackOption = metric.CustomEventTrackOption
                 };
-            
+
             var totalCount = await query.CountAsync();
-            var items =  await query
+            var items = await query
                 .Skip(filter.PageIndex * filter.PageSize)
                 .Take(filter.PageSize)
                 .ToListAsync();
-            
-            return new PagedResult<ExperimentVm>(totalCount, items);
-        }  
-    }
 
-    // public async Task<FeatureFlag> GetAsync(Guid envId, string key)
-    // {
-    //     var flag = await FindOneAsync(x => x.EnvId == envId && x.Key == key);
-    //     if (flag == null)
-    //     {
-    //         throw new EntityNotFoundException(nameof(FeatureFlag), $"{envId}-{key}");
-    //     }
-    //
-    //     return flag;
-    // }
-    //
-    // public async Task DeleteAsync(Guid id)
-    // {
-    //     await Collection.DeleteOneAsync(x => x.Id == id);
-    // }
+            return new PagedResult<ExperimentVm>(totalCount, items);
+        }
+    }
 }
