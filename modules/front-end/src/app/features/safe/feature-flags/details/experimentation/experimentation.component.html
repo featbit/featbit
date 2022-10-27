@@ -5,7 +5,7 @@
     </div>
   </ng-template>
   <ng-container *ngIf="!isInitLoading; else loadingTem;">
-    <div class="detail-body" name="detail" *ngIf="featureFlagId">
+    <div class="detail-body" name="detail" *ngIf="featureFlag?.id">
       <nz-empty style="margin-top: 50px" *ngIf="!isInitLoading && experimentList.length === 0"
       [nzNotFoundContent]="contentTpl"
       >
@@ -34,22 +34,22 @@
               <div class="head">
                 <div class="first-line">
                   <div class="title-area">
-                    <div class="title">{{experiment.metric.name}}</div>
+                    <div class="title">{{experiment.metricName}}</div>
                     <nz-tag nzNoAnimation style="border-radius: 8px">
-                      <ng-container *ngIf="experiment.metric.eventType === customEventType">
-                        自定义事件: {{ experiment.metric.customEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
+                      <ng-container *ngIf="experiment.metricEventType === customEventType">
+                        自定义事件: {{ experiment.metricCustomEventTrackOption === customEventTrackConversion ? '转化率' : '数值' }}
                       </ng-container>
-                      <ng-container *ngIf="experiment.metric.eventType === pageViewEventType">
+                      <ng-container *ngIf="experiment.metricEventType === pageViewEventType">
                         Page View: 转化率
                       </ng-container>
-                      <ng-container *ngIf="experiment.metric.eventType === clickEventType">
+                      <ng-container *ngIf="experiment.metricEventType === clickEventType">
                         Click: 转化率
                       </ng-container>
                     </nz-tag>
                   </div>
                   <div style="display: flex;flex-direction: row">
                     <div>
-                      <span *ngIf="experiment?.selectedIteration?.updatedAtStr?.length > 0">结果最后更新于： {{experiment?.selectedIteration?.updatedAtStr}}</span>
+                      <span *ngIf="experiment?.selectedIteration?.updatedAt">结果最后更新于： {{experiment?.selectedIteration?.updatedAt | date: 'YYYY-MM-dd HH:mm'}}</span>
                       <button *ngIf="experiment.status !== 1" style="margin-left: 15px;border-radius:8px" nz-button nzType="default" nz-tooltip nzTooltipTitle="每1分钟会自动刷新" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
                         <i *ngIf="!experiment.isLoading" nz-icon nzType="reload" nzTheme="outline"></i>
                         <i *ngIf="experiment.isLoading" nz-icon [nzType]="'sync'" [nzSpin]="true"></i>
@@ -91,12 +91,6 @@
                       <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
                       实验进行中，点击暂停实验
                     </button>
-                    <div class="warning-message" *ngIf="[4, 5].includes(experiment.status)">
-                      <div class="warning">
-                        <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-                        <div class="warning-content">{{experiment.status === 4 ? '实验启动中，请耐心等待实验启动后方可暂停实验' : '实验结束中，请耐心等待实验结束后方可再次开启实验'}}</div>
-                      </div>
-                    </div>
                   </div>
                   <div class="right">
                     <div *ngIf="experiment.iterations.length > 0">
@@ -143,11 +137,11 @@
                       <thead>
                         <tr>
                           <th>特性</th>
-                          <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metric.customEventTrackOption)">
+                          <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metricCustomEventTrackOption)">
                             <th>转化数 / 用户数</th>
                             <th>转化率</th>
                           </ng-container>
-                          <ng-container *ngIf="experiment.metric.customEventTrackOption === customEventTrackNumeric">
+                          <ng-container *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
                             <th>总事件数</th>
                             <th>平均值</th>
                           </ng-container>
@@ -190,20 +184,20 @@
                               <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
                               &nbsp;{{ data.variationValue }}
                             </td>
-                            <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metric.customEventTrackOption)">
+                            <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metricCustomEventTrackOption)">
                               <td>{{ data.conversion }}/{{data.uniqueUsers}}</td>
                               <td>{{ data.conversionRate | percentage }}</td>
                             </ng-container>
-                            <ng-container *ngIf="experiment.metric.customEventTrackOption === customEventTrackNumeric">
+                            <ng-container *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
                               <td>{{ data.totalEvents }}</td>
-                              <td>{{ data.average }} <span *ngIf="data.average !== '--'">{{experiment.metric.customEventUnit}}</span></td>
+                              <td>{{ data.average }} <span *ngIf="data.average !== '--'">{{experiment.metricCustomEventUnit}}</span></td>
                             </ng-container>
 
                             <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
                               <div>基准特性</div>
                             </td>
 
-                            <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metric.customEventTrackOption)">
+                            <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metricCustomEventTrackOption)">
                               <td *ngIf="!data.isBaseline">
                                 <div  style="width: 200px;box-sizing: border-box;">
                                   <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
@@ -221,7 +215,7 @@
                                 <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
                               </td>
                             </ng-container>
-                            <ng-container *ngIf="experiment.metric.customEventTrackOption === customEventTrackNumeric">
+                            <ng-container *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
                               <td *ngIf="!data.isBaseline">
                                 <div  style="width: 200px;box-sizing: border-box;">
                                   <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
@@ -235,7 +229,7 @@
                                     <div class="BoxChart-whisker"></div>
                                   </div>
                                 </div>
-                                <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0]}} {{experiment.metric.customEventUnit}} - {{data.confidenceInterval[1]}} {{experiment.metric.customEventUnit}}</div>
+                                <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0]}} {{experiment.metricCustomEventUnit}} - {{data.confidenceInterval[1]}} {{experiment.metricCustomEventUnit}}</div>
                                 <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
                               </td>
                             </ng-container>
@@ -269,4 +263,4 @@
   </ng-container>
 </section>
 
-<app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed()" [featureFlag]="currentFeatureFlag"></app-expt-rules-drawer>
+<app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed()" [featureFlag]="featureFlag"></app-expt-rules-drawer>

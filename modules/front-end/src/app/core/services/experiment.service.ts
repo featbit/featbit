@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IExperiment, IExperimentIteration } from '@features/safe/feature-flags/types/experimentations';
 import {getCurrentProjectEnv} from "@utils/project-env";
-import {ExperimentListFilter, IExpt, IPagedExpt} from "@features/safe/experiments/overview/types";
+import {ExperimentListFilter, IExpt, IExptIteration, IPagedExpt} from "@features/safe/experiments/overview/types";
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +21,30 @@ export class ExperimentService {
     private http: HttpClient
   ) {
     this.envId = getCurrentProjectEnv().envId;
+  }
+
+  createExperiment(params: IExpt): Observable<IExpt[]> {
+    const url = this.baseUrl;
+    return this.http.post<IExpt[]>(url, params);
+  }
+
+  getList(filter: ExperimentListFilter = new ExperimentListFilter()): Observable<IPagedExpt> {
+    const queryParam = {
+      featureFlagName: filter.featureFlagName ?? '',
+      featureFlagId: filter.featureFlagId ?? '',
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    return this.http.get<IPagedExpt>(
+      this.baseUrl,
+      {params: new HttpParams({fromObject: queryParam})}
+    );
+  }
+
+  getIterationResults(params): Observable<IExptIteration[]> {
+    const url = this.baseUrl + `/iteration-results`;
+    return this.http.post<IExptIteration[]>(url, params);
   }
 
   // 获取 custom events 列表
@@ -54,26 +78,6 @@ export class ExperimentService {
     return this.http.post(url, params);
   }
 
-
-  createExperiment(params: IExpt): Observable<IExpt[]> {
-    const url = this.baseUrl;
-    return this.http.post<IExpt[]>(url, params);
-  }
-
-  getList(filter: ExperimentListFilter = new ExperimentListFilter()): Observable<IPagedExpt> {
-    const queryParam = {
-      featureFlagName: filter.featureFlagName ?? '',
-      featureFlagId: filter.featureFlagId ?? '',
-      pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
-    };
-
-    return this.http.get<IPagedExpt>(
-      this.baseUrl,
-      {params: new HttpParams({fromObject: queryParam})}
-    );
-  }
-
   startIteration(envId: string, experimentId: string): Observable<any> {
     const url = this.baseUrl + `/${envId}/${experimentId}`;
     return this.http.put(url, {});
@@ -82,11 +86,6 @@ export class ExperimentService {
   stopIteration(envId: string, experimentId: string, iterationId: string): Observable<any> {
     const url = this.baseUrl + `/${envId}/${experimentId}/${iterationId}`;
     return this.http.put(url, {});
-  }
-
-  getIterationResults(envId: string, params): Observable<IExperimentIteration[]> {
-    const url = this.baseUrl + `/${envId}`;
-    return this.http.post<IExperimentIteration[]>(url, params);
   }
 
   archiveExperiment(envId: string, experimentId: string): Observable<any> {

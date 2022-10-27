@@ -17,7 +17,7 @@ import {
 import {IVariation} from "@shared/rules";
 
 @Component({
-  selector: 'flag-setting',
+  selector: 'ff-setting',
   templateUrl: './setting.component.html',
   styleUrls: ['./setting.component.less']
 })

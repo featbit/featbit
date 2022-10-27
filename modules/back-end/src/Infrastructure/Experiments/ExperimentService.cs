@@ -41,8 +41,10 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     MetricName = metric.Name,
                     MetricEventName = metric.EventName,
                     MetricEventType = metric.EventType,
+                    MetricCustomEventUnit = metric.CustomEventUnit,
                     Status = expt.Status,
-                    MetricCustomEventTrackOption = metric.CustomEventTrackOption
+                    MetricCustomEventTrackOption = metric.CustomEventTrackOption,
+                    Iterations = expt.Iterations
                 };
 
             var totalCount = await query.CountAsync();
@@ -73,8 +75,10 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     MetricName = metric.Name,
                     MetricEventName = metric.EventName,
                     MetricEventType = metric.EventType,
+                    MetricCustomEventUnit = metric.CustomEventUnit,
                     Status = expt.Status,
-                    MetricCustomEventTrackOption = metric.CustomEventTrackOption
+                    MetricCustomEventTrackOption = metric.CustomEventTrackOption,
+                    Iterations = expt.Iterations
                 };
 
             var totalCount = await query.CountAsync();

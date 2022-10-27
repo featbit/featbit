@@ -6,7 +6,7 @@ import { ChartConfig } from "@core/components/g2-chart/g2-line-chart/g2-line-cha
 
 
 @Component({
-  selector: 'switch-reporting',
+  selector: 'ff-reporting',
   templateUrl: './reporting.component.html',
   styleUrls: ['./reporting.component.less']
 })

@@ -1,30 +1,30 @@
 <div class="body-container">
   <div class="flag-container">
-    <flag-setting></flag-setting>
+    <ff-setting></ff-setting>
   </div>
   <nz-tabset nzLinkRouter class="tabs-container segment-flag">
     <nz-tab>
       <a *nzTabLink nz-tab-link [routerLink]="['./targeting']" queryParamsHandling="preserve" i18n="@@ff.routing.details.targeting">Targeting</a>
       <ng-template nz-tab>
-        <switch-targeting></switch-targeting>
+        <ff-targeting></ff-targeting>
       </ng-template>
     </nz-tab>
     <nz-tab>
       <a *nzTabLink nz-tab-link [routerLink]="['./triggers']" i18n="@@ff.routing.details.triggers">Triggers</a>
       <ng-template nz-tab>
-        <switch-triggers></switch-triggers>
+        <ff-triggers></ff-triggers>
       </ng-template>
     </nz-tab>
     <nz-tab>
       <a *nzTabLink nz-tab-link [routerLink]="['./experimentations']" i18n="@@ff.routing.details.experimentation">Experimentation</a>
       <ng-template nz-tab>
-        <switch-experimentations></switch-experimentations>
+        <ff-experimentations></ff-experimentations>
       </ng-template>
     </nz-tab>
     <nz-tab>
       <a *nzTabLink nz-tab-link [routerLink]="['./reporting']" i18n="@@ff.routing.details.reporting">Reporting</a>
       <ng-template nz-tab>
-        <switch-reporting></switch-reporting>
+        <ff-reporting></ff-reporting>
       </ng-template>
     </nz-tab>
   </nz-tabset>

@@ -16,7 +16,7 @@ import {FeatureFlagService} from "@services/feature-flag.service";
 import {uuidv4} from "@utils/index";
 
 @Component({
-  selector: 'switch-targeting',
+  selector: 'ff-targeting',
   templateUrl: './targeting.component.html',
   styleUrls: ['./targeting.component.less']
 })
