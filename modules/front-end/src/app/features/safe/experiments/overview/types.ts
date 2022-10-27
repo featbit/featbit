@@ -1,4 +1,5 @@
 import {
+  CustomEventSuccessCriteria,
   CustomEventTrackOption,
   EventType, ExperimentStatus,
   IExperimentIterationResult
@@ -38,6 +39,7 @@ export interface IExpt {
   metricEventName?: string,
   metricEventType?: EventType,
   metricCustomEventTrackOption?: CustomEventTrackOption,
+  metricCustomEventSuccessCriteria?: CustomEventSuccessCriteria,
   metricCustomEventUnit?: string,
   baselineVariationId: string,
   iterations?: IExptIteration[],

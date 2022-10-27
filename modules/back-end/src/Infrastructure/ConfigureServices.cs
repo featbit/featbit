@@ -85,7 +85,7 @@ public static class ConfigureServices
         services.AddTransient<IDataSyncService, DataSyncService>();
         services.AddTransient<IExperimentService, ExperimentService>();
         services.AddTransient<IExperimentMetricService, ExperimentMetricService>();
-
+        services.AddTransient<IOlapService, OlapService>();
         return services;
     }
 }

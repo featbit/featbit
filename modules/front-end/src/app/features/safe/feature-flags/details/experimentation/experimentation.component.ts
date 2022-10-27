@@ -203,33 +203,49 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onReloadIterationResultsClick(expt: IExpt) {
-    // expt.isLoading  = true;
-    // this.experimentService.getIterationResults(this.switchServe.envId, [{ experimentId: expt.id, iterationId: expt.selectedIteration.id}]).subscribe(res => {
-    //   if (res) {
-    //     expt.selectedIteration = this.processIteration(res[0], expt.baselineVariationId);
-    //     if (res[0].updatedAt) {
-    //       expt.selectedIteration.updatedAt = res[0].updatedAt;
-    //       expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
-    //     }
-    //
-    //     if (expt.metric.customEventTrackOption === this.customEventTrackNumeric) {
-    //       // [min, max, max - min]
-    //       expt.selectedIteration.numericConfidenceIntervalBoundary = [
-    //         Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
-    //         Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
-    //       ];
-    //
-    //       expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
-    //     }
-    //
-    //     this.setExptStatus(expt, res[0]);
-    //   }
-    //
-    //   expt.isLoading  = false;
-    // }, _ => {
-    //   //this.message.error("数据加载失败，请重试!");
-    //   expt.isLoading  = false;
-    // });
+    expt.isLoading  = true;
+    const param = {
+      exptId: expt.id,
+      iterationId: expt.selectedIteration.id,
+      flagExptId: `${expt.envId}-${expt.featureFlagKey}`,
+      baselineVariationId: expt.baselineVariationId,
+      variationIds: this.featureFlag.variations.map(v => v.id),
+      eventName: expt.metricEventName,
+      eventType: expt.metricEventType,
+      customEventTrackOption: expt.metricCustomEventTrackOption,
+      customEventSuccessCriteria: expt.metricCustomEventSuccessCriteria,
+      customEventUnit: expt.metricCustomEventUnit,
+      startTime: expt.selectedIteration.startTime,
+      endTime: expt.selectedIteration.endTime,
+      isFinish: expt.selectedIteration.isFinish
+    };
+
+    this.experimentService.getIterationResults([param]).subscribe(res => {
+      if (res) {
+        expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariationId);
+        if (res[0].updatedAt) {
+          expt.selectedIteration.updatedAt = res[0].updatedAt;
+          expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
+        }
+
+        if (expt.metricCustomEventTrackOption === this.customEventTrackNumeric) {
+          // [min, max, max - min]
+          expt.selectedIteration.numericConfidenceIntervalBoundary = [
+            Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
+            Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
+          ];
+
+          expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
+        }
+
+        this.setExptStatus(expt, res[0]);
+      }
+
+      expt.isLoading  = false;
+    }, _ => {
+      //this.message.error("数据加载失败，请重试!");
+      expt.isLoading  = false;
+    });
   }
 
   onDeleteExptClick(expt: IExpt) {

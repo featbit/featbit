@@ -1,4 +1,5 @@
 using Application.Bases.Models;
+using Application.ExperimentMetrics;
 using Application.Experiments;
 using Domain.Experiments;
 
@@ -37,6 +38,19 @@ public class ExperimentController : ApiControllerBase
         var request = new GetExperimentStatusCount
         {
             EnvId = envId
+        };
+
+        var status = await Mediator.Send(request);
+        return Ok(status);
+    }
+    
+    [HttpGet("iteration-results")]
+    public async Task<ApiResponse<IEnumerable<ExperimentIterationResultsVm>>> GetExperimentIterationResultsAsync(Guid envId, IEnumerable<ExperimentIterationParam> experimentIterationParam)
+    {
+        var request = new GetExperimentIterationResults
+        {
+            EnvId = envId,
+            ExperimentIterationParam = experimentIterationParam
         };
 
         var status = await Mediator.Send(request);

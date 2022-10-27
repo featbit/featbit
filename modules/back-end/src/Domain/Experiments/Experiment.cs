@@ -7,7 +7,7 @@ public class Experiment : AuditedEntity
     public Guid EnvId { get; set; }
     public Guid MetricId { get; set; }
     public Guid FeatureFlagId { get; set; }
-    
+    public bool IsArchived { get; set; }
     public string Status { get; set; } // possible values: NotStarted, NotRecording, Recording
 
     public string BaselineVariationId { get; set; }
@@ -21,7 +21,7 @@ public class ExperimentIteration
     public DateTime StartTime { get; set; }
     public DateTime? EndTime { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    public bool IsArvhived { get; set; }
+    public bool IsArchived { get; set; }
     public int EventType { get; set; }
     public string EventName { get; set; }
     public CustomEventTrackOption CustomEventTrackOption { get; set; }
@@ -43,6 +43,44 @@ public class IterationResult
     public bool IsWinner { get; set; }
     public float? PValue { get; set; }
     public long? UniqueUsers { get; set; }
-    public string Variation { get; set; }
+    public string VariationId { get; set; }
     public List<float> ConfidenceInterval { get; set; }
+}
+
+public class ExptIterationParam
+{
+    public Guid ExptId { get; set; }
+    public string IterationId { get; set; }
+    public Guid EnvId { get; set; }
+    public string FlagExptId { get; set; }
+    public string BaselineVariationId { get; set; }
+    public IEnumerable<string> VariationIds { get; set; }
+    public string EventName { get; set; }
+    public int EventType { get; set; }
+    public int CustomEventTrackOption { get; set; }
+    public int CustomEventSuccessCriteria { get; set; }
+    public string CustomEventUnit { get; set; }
+    public string StartExptTime { get; set; } // format "2021-09-20T21:00:00.123456"
+    public string EndExptTime { get; set; } // format "2021-09-20T21:00:00.123456"
+}
+
+public class OlapExptIterationResponse
+{
+    public int Code { get; set; }
+    public ExptIterationResult Data { get; set; }
+    public string Error { get; set; }
+}
+
+public class ExptIterationResult
+{
+    public string IterationId { get; set; }
+    public string ExperimentId { get; set; }
+    public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
+    public CustomEventTrackOption CustomEventTrackOption { get; set; }
+    public string CustomEventUnit { get; set; }
+    public DateTime? EndTime { get; set; }
+    public int EventType { get; set; }
+    public bool IsFinish { get; set; }
+    public List<IterationResult> Results { get; set; }
+    public DateTime StartTime { get; set; }
 }
