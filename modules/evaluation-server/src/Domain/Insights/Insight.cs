@@ -31,16 +31,16 @@ public class Insight
             var flagId = $"{envId}-{variation.FeatureFlagKey}";
             var properties = new
             {
-                RequestPath = "/Variation/GetMultiOptionVariation",
-                FeatureFlagId = flagId,
+                Route = "/Variation/GetMultiOptionVariation",
+                FlagId = flagId,
                 EnvId = envId.ToString(),
                 AccountId = string.Empty,
                 ProjectId = string.Empty,
-                FeatureFlagKeyName = variation.FeatureFlagKey,
+                FeatureFlagKey = variation.FeatureFlagKey,
                 SendToExperiment = variation.SendToExperiment,
-                UserKeyId = User!.KeyId,
-                FFUserName = User!.Name,
-                VariationLocalId = variation.Variation.Id,
+                userKeyId = User!.KeyId,
+                UserName = User!.Name,
+                VariationId = variation.Variation.Id,
                 tag_0 = User!.KeyId,
                 tag_1 = variation.Variation.Id,
                 tag_2 = variation.SendToExperiment
@@ -71,7 +71,7 @@ public class Insight
                 User = User!,
                 ApplicationType = metric.AppType,
                 ProjectId = string.Empty,
-                EnvironmentId = envId.ToString(),
+                EnvId = envId.ToString(),
                 AccountId = string.Empty,
                 tag_0 = User!.KeyId,
                 tag_1 = metric.NumericValue,
