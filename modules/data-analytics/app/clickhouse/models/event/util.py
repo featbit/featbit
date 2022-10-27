@@ -16,13 +16,12 @@ def _make_event(properties: Optional[Dict[str, Any]] = {}) -> str:
         properties = {}
 
     event_uuid = str(uuid.uuid4())
-    event = properties.get("Type", 'FlagValue')
-    timestamp = properties.get("Timestamp", datetime.utcnow())
+    event = properties.get("type", 'FlagValue')
+    timestamp = properties.get("timestamp", datetime.utcnow())
     if isinstance(timestamp, str):
         timestamp = isoparse(timestamp)
-    distinct_id = properties.get("FeatureFlagId", None) or properties.get("EventName", None)
-    env_id = properties.get("EnvId", None) or properties.get("EnvironmentId", None)
-
+    distinct_id = properties.get("flagId", None) or properties.get("eventName", None)
+    env_id = properties.get("envId", None)
     return {
         "uuid": event_uuid,
         "distinct_id": distinct_id,

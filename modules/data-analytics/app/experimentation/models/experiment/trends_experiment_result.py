@@ -33,16 +33,16 @@ class TrendsExperimentResult:
     def get_results(self) -> Dict[str, Any]:
         output = self.cal_normal_results()
         return {
-            'ExperimentId': self._expt.id,
-            'EventType': self._expt.event_numeric_type,
-            'CustomEventTrackOption': self._expt.extra_prop('CustomEventTrackOption', None),
-            'CustomEventUnit' : self._expt.extra_prop('CustomEventUnit', None),
-            'CustomEventSuccessCriteria': self._expt.extra_prop('CustomEventSuccessCriteria', None),
-            'IterationId': self._expt.extra_prop('IterationId', None),
-            'StartTime': self._expt.start.strftime(UTC_FMT),
-            'EndTime': self._expt.end.strftime(UTC_FMT) if self._expt.is_finished else None,
-            'IsFinish': self._expt.is_finished,
-            'Results': output
+            'exptId': self._expt.id,
+            'eventType': self._expt.event_numeric_type,
+            'customEventTrackOption': self._expt.extra_prop('customEventTrackOption', None),
+            'customEventUnit' : self._expt.extra_prop('customEventUnit', None),
+            'customEventSuccessCriteria': self._expt.extra_prop('customEventSuccessCriteria', None),
+            'iterationId': self._expt.extra_prop('iterationId', None),
+            'startTime': self._expt.start.strftime(UTC_FMT),
+            'endTime': self._expt.end.strftime(UTC_FMT) if self._expt.is_finished else None,
+            'isFinish': self._expt.is_finished,
+            'results': output
         }
 
     def cal_normal_results(self) -> Dict[str, Any]:
@@ -123,7 +123,7 @@ class TrendsExperimentResult:
                          alpha: float = default_alpha) -> bool:
         sample_size = min(baseline_var.count, test_var.count)
         ratio_power = test_var.count / baseline_var.count
-        if not (stat_power := self._expt.extra_prop('Power', None)):
+        if not (stat_power := self._expt.extra_prop('power', None)):
             stat_power = self.default_power
             effect = self._effect_size(baseline_var, test_var)
             power_func = TTestIndPower().power if self._expt.is_numeric_expt else NormalIndPower(ddof=0).power
@@ -131,7 +131,7 @@ class TrendsExperimentResult:
             return p_value is not None and p_value < alpha and current_power > stat_power
 
         else:
-            expected_experiment_effect = self._expt['ExpectedExperimentEffect']
+            expected_experiment_effect = self._expt.extra_prop('expectedExperimentEffect')
             solve_power_func = tt_ind_solve_power if self._expt.is_numeric_expt else zt_ind_solve_power
             required_n = math.ceil(solve_power_func(
                 expected_experiment_effect,
@@ -151,7 +151,7 @@ class TrendsExperimentResult:
 
         sorted_valid_results = sorted(valid_results, key=lambda r: r['changeToBaseline'])
         if sorted_valid_results:
-            if self._expt.extra_prop('CustomEventSuccessCriteria', 1) == 2 and sorted_valid_results[0]['changeToBaseline'] < 0:
+            if self._expt.extra_prop('customEventSuccessCriteria', 1) == 2 and sorted_valid_results[0]['changeToBaseline'] < 0:
                 sorted_valid_results[0]['isWinner'] = True
             elif sorted_valid_results[-1]['changeToBaseline'] > 0:
                 sorted_valid_results[-1]['isWinner'] = True
