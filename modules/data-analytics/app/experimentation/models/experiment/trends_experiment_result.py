@@ -56,12 +56,12 @@ class TrendsExperimentResult:
                             ):
 
             if self._expt.is_numeric_expt:
-                output = {'variation': variation.key,
+                output = {'variationId': variation.key,
                           'totalEvents': variation.count,
                           'average': format_float_positional(variation.mean) if variation.mean is not None else None
                           }
             else :
-                output = {'variation': variation.key,
+                output = {'variationId': variation.key,
                           'conversion': variation.exposure,
                           'uniqueUsers': variation.count,
                           'conversionRate': format_float_positional(variation.mean) if variation.mean is not None else None

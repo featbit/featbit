@@ -79,8 +79,8 @@ class Experiment:
                           flag_id=properties.pop("flagExptId"),
                           event_name=properties.pop("eventName"),
                           event_type=properties.pop("eventType"),
-                          baseline=properties.pop("baselineVariation"),
-                          variations=properties.pop("variations"),
+                          baseline=properties.pop("baselineVariationId"),
+                          variations=properties.pop("variationIds"),
                           start=properties.pop("startExptTime"),
                           end=properties.pop("endExptTime", None),
                           **properties)
