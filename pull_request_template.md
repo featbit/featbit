@@ -1,7 +1,7 @@
 <!--
 # Instructions
 
-1. Pick a meaningful title for your pull request. (Use sentence case. Keep it short < 70 characters)
+1. Pick a meaningful and result oriented title for your pull request. (Use sentence case, don't include any the words indicating the way you achived this result, we just want the result. Keep it short < 70 characters)
   - Prefix the title with an emoji to categorize what is being done. (Copy-paste the emoji from the list below.)
   - Assign the appropriate label(s) to the pull request. (Use one of the labels from the list below.)
   
