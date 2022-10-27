@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 
 namespace Domain.Core;
@@ -51,7 +52,9 @@ public sealed class RolloutUserVariation : UserVariation
         string matchReason)
         : base(Variation.Empty, matchReason)
     {
-        var sendToExptRollout = new[] { 0.0, 0.0 };
+        var splittingRollout = 0.0;
+        var exptRollout = 0.0;
+
         foreach (var rolloutVariation in rolloutVariations.EnumerateArray())
         {
             var rollouts = rolloutVariation.GetProperty("rollout").Deserialize<double[]>()!;
@@ -59,10 +62,8 @@ public sealed class RolloutUserVariation : UserVariation
             {
                 var variationId = rolloutVariation.GetProperty("id").GetString()!;
                 Variation = allVariations.FirstOrDefault(x => x.Id == variationId)!;
-
-                // send to experiment rollout
-                sendToExptRollout[0] = rollouts[0];
-                sendToExptRollout[1] = rollouts[1] * rolloutVariation.GetProperty("exptRollout").GetDouble();
+                splittingRollout = rollouts[1] - rollouts[0];
+                exptRollout = rolloutVariation.GetProperty("exptRollout").GetDouble();
                 break;
             }
         }
@@ -77,7 +78,20 @@ public sealed class RolloutUserVariation : UserVariation
         }
         else
         {
-            SendToExperiment = SplittingAlgorithm.IsInRollout(userKeyId, sendToExptRollout);
+            var sendToExptKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(userKeyId));
+            if (exptRollout == 0.0 || splittingRollout == 0.0)
+            {
+                SendToExperiment = false;
+                return;
+            }
+
+            var upperBound = exptRollout / splittingRollout;
+            if (upperBound > 1.0)
+            {
+                upperBound = 1.0;
+            }
+
+            SendToExperiment = SplittingAlgorithm.IsInRollout(sendToExptKey, new[] { 0.0, upperBound });
         }
     }
 }
