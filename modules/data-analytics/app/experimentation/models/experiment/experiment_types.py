@@ -6,7 +6,7 @@ import scipy as sp
 from dateutil.parser import isoparse
 from utils import format_float_positional
 
-EXPT_NECESSARY_COLUMNS = ["ExptId", "EnvId", "FlagId", "EventName", "EventType", "StartExptTime", "BaselineVariation", "Variations"]
+EXPT_NECESSARY_COLUMNS = ["exptId", "envId", "flagExptId", "eventName", "eventType", "startExptTime", "baselineVariation", "variations"]
 EXPT_EVENT_TYPE_MAPPING = {1: "CustomEvent", 2: "PageView", 3: "Click"}
 EXPT_DEFAULT_EVENT_TYPE = "CustomEvent"
 
@@ -74,15 +74,15 @@ class Experiment:
     @staticmethod
     def from_properties(properties: Dict[str, Any] = {}) -> "Experiment":
         assert all(key in properties for key in EXPT_NECESSARY_COLUMNS), "Experiment properties missing necessary columns"
-        return Experiment(id=properties.pop("ExptId"),
-                          env_id=properties.pop("EnvId"),
-                          flag_id=properties.pop("FlagId"),
-                          event_name=properties.pop("EventName"),
-                          event_type=properties.pop("EventType"),
-                          baseline=properties.pop("BaselineVariation"),
-                          variations=properties.pop("Variations"),
-                          start=properties.pop("StartExptTime"),
-                          end=properties.pop("EndExptTime", None),
+        return Experiment(id=properties.pop("exptId"),
+                          env_id=properties.pop("envId"),
+                          flag_id=properties.pop("flagExptId"),
+                          event_name=properties.pop("eventName"),
+                          event_type=properties.pop("eventType"),
+                          baseline=properties.pop("baselineVariationId"),
+                          variations=properties.pop("variationIds"),
+                          start=properties.pop("startExptTime"),
+                          end=properties.pop("endExptTime", None),
                           **properties)
 
     def __init__(self,
@@ -149,7 +149,7 @@ class Experiment:
 
     @property
     def is_numeric_expt(self):
-        return self._event_type == EXPT_DEFAULT_EVENT_TYPE and self.extra_prop('CustomEventTrackOption', None) == 2
+        return self._event_type == EXPT_DEFAULT_EVENT_TYPE and self.extra_prop('customEventTrackOption', None) == 2
 
     @property
     def is_finished(self) -> bool:

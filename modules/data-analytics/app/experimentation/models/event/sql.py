@@ -9,6 +9,7 @@ AND event = 'FlagValue'
 AND env_id = %(env_id)s
 AND timestamp > %(start)s
 AND timestamp < %(end)s
+AND tag_2 = 'true'
 )"""
 
 CUSTOM_EVENTS_CTE = f"""custom_events as

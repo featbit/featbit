@@ -31,18 +31,19 @@ public class Insight
             var flagId = $"{envId}-{variation.FeatureFlagKey}";
             var properties = new
             {
-                RequestPath = "/Variation/GetMultiOptionVariation",
-                FeatureFlagId = flagId,
-                EnvId = envId.ToString(),
-                AccountId = string.Empty,
-                ProjectId = string.Empty,
-                FeatureFlagKeyName = variation.FeatureFlagKey,
-                SendToExperiment = variation.SendToExperiment,
-                UserKeyId = User!.KeyId,
-                FFUserName = User!.Name,
-                VariationLocalId = variation.Variation.Id,
+                route = "/Variation/GetMultiOptionVariation",
+                flagId = flagId,
+                envId = envId.ToString(),
+                accountId = string.Empty,
+                projectId = string.Empty,
+                featureFlagKey = variation.FeatureFlagKey,
+                sendToExperiment = variation.SendToExperiment,
+                userKeyId = User!.KeyId,
+                userName = User!.Name,
+                variationId = variation.Variation.Id,
                 tag_0 = User!.KeyId,
-                tag_1 = variation.Variation.Id
+                tag_1 = variation.Variation.Id,
+                tag_2 = variation.SendToExperiment
             };
 
             var message = new InsightMessage
@@ -63,15 +64,15 @@ public class Insight
         {
             var properties = new
             {
-                Route = metric.Route,
-                Type = metric.Type,
-                EventName = metric.EventName,
-                NumericValue = metric.NumericValue,
-                User = User!,
-                ApplicationType = metric.AppType,
-                ProjectId = string.Empty,
-                EnvironmentId = envId.ToString(),
-                AccountId = string.Empty,
+                route = metric.Route,
+                type = metric.Type,
+                eventName = metric.EventName,
+                numericValue = metric.NumericValue,
+                user = User!,
+                applicationType = metric.AppType,
+                projectId = string.Empty,
+                envId = envId.ToString(),
+                accountId = string.Empty,
                 tag_0 = User!.KeyId,
                 tag_1 = metric.NumericValue,
             };

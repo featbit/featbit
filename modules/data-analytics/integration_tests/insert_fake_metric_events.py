@@ -2,7 +2,7 @@ from random import randint
 
 import requests
 
-url = "http://127.0.0.1/api/events"
+url = "http://127.0.0.1:8200/api/events"
 
 for group in range(1, 5):
     events = []
@@ -11,32 +11,24 @@ for group in range(1, 5):
     for user in range(size):
         numeric_value = randint(1, 50)
         Q5 = {
-            "Route": "index",
-            "Type": "CustomEvent",
-            "EventName": "ButtonPayTrack",
-            "NumericValue": numeric_value,
-            "User": {
-                    "FFUserName": "u_group" + str(group) + "_" + str(user),
-                    "FFUserEmail": "u_group" + str(group) + "_" + str(user) + "@testliang.com",
-                    "FFUserCountry": "China",
-                    "FFUserKeyId": "u_group" + str(group) + "_" + str(user) + "@testliang.com",
-                    "FFUserCustomizedProperties": [
+            "route": "index",
+            "type": "CustomEvent",
+            "eventName": "ButtonPayTrack",
+            "numericValue": numeric_value,
+            "user": {
+                    "name": "u_group" + str(group) + "_" + str(user),
+                    "keyId": "u_group" + str(group) + "_" + str(user) + "@testliang.com",
+                    "customizedProperties": [
                         {
-                            "Name": "age",
-                            "Value": "16"
+                            "name": "age",
+                            "value": "16"
                         }
                     ]
             },
-            "ApplicationType": "Javascript",
-            "CustomizedProperties": [
-                {
-                    "Name": "age",
-                    "Value": "16"
-                }
-            ],
-            "ProjectId": "48",
-            "EnvironmentId": "103",
-            "AccountId": "38",
+            "applicationType": "Javascript",
+            "projectId": "48",
+            "envId": "103",
+            "accountId": "38",
             "tag_0": "u_group" + str(group) + "_" + str(user) + "@testliang.com",
             "tag_1": str(numeric_value)
         }
