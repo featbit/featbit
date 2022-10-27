@@ -1,4 +1,5 @@
 using Application.Bases.Models;
+using Application.ExperimentMetrics;
 using Application.Experiments;
 using Domain.ExperimentMetrics;
 using Domain.Experiments;
@@ -11,10 +12,62 @@ namespace Infrastructure.Experiments;
 public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 {
     private IMongoQueryable<FeatureFlag> featureFlagQueryable;
+    private IOlapService olapService;
 
-    public ExperimentService(MongoDbClient mongoDb) : base(mongoDb)
+    public ExperimentService(MongoDbClient mongoDb, IOlapService olapService) : base(mongoDb)
     {
         featureFlagQueryable = MongoDb.QueryableOf<FeatureFlag>();
+        olapService = olapService;
+    }
+
+    public async Task<IEnumerable<ExperimentIterationResultsVm>> GetIterationResults(Guid envId,
+        IEnumerable<ExperimentIterationParam> experimentIterationParam)
+    {
+        var results = new List<ExperimentIterationResultsVm>();
+
+        foreach (var iteration in experimentIterationParam)
+        {
+            var iterationResults = new ExperimentIterationResultsVm();
+            
+            if (iteration.IsFinish)
+            {
+                iterationResults.IsFinish = true;
+                iterationResults.IsUpdated = false;
+                results.Add(iterationResults);
+                
+                continue;
+            }
+
+            var param = new ExptIterationParam
+            {
+                ExptId = iteration.ExptId,
+                IterationId = iteration.IterationId,
+                EnvId = envId,
+                FlagExptId = iteration.FlagExptId,
+                BaselineVariationId = iteration.BaselineVariationId,
+                VariationIds = iteration.VariationIds,
+                EventName = iteration.EventName,
+                EventType = iteration.EventType,
+                CustomEventTrackOption = (int)iteration.CustomEventTrackOption,
+                CustomEventSuccessCriteria = (int)iteration.CustomEventSuccessCriteria,
+                CustomEventUnit = iteration.CustomEventUnit,
+                StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                EndExptTime = iteration.EndTime?.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+            };
+            
+            var olapExptResults = await olapService.GetExptIterationResultAsync(param);
+            if (olapExptResults != null)
+            {
+                iterationResults.IsFinish = olapExptResults.IsFinish;
+                iterationResults.Results = olapExptResults.Results;
+                iterationResults.UpdatedAt = olapExptResults.UpdatedAt;
+                iterationResults.IsUpdated = true;
+            }
+            
+            results.Add(iterationResults);
+        }
+            
+        return results;
     }
 
     public async Task<IEnumerable<ExperimentStatusCountVm>> GetStatusCountAsync(Guid envId)
