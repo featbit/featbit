@@ -84,3 +84,8 @@ export interface IExptIterationResult {
   confidenceInterval: number[], // float[]
   isEmpty: boolean
 }
+
+export interface IExptStatusCount {
+  status: ExperimentStatus,
+  count: number
+}

@@ -40,6 +40,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
   exptStatusNotStarted: ExperimentStatus = ExperimentStatus.NotStarted;
   exptStatusPaused: ExperimentStatus = ExperimentStatus.Paused;
   exptStatusRecording: ExperimentStatus = ExperimentStatus.Recording;
+  statusCount: {[key: string]: number} = {};
 
   filter: ExperimentListFilter = new ExperimentListFilter();
   constructor(
@@ -48,6 +49,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     private experimentService: ExperimentService
   ) {
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
+    this.loadStatusCounte();
   }
 
   ngOnInit(): void {
@@ -58,6 +60,19 @@ export class OverviewComponent implements OnInit, OnDestroy {
     });
 
     this.search$.next(null);
+  }
+
+  loadStatusCounte() {
+    this.experimentService.getExperimentStatusCount().subscribe(res => {
+      this.statusCount = res.reduce((acc, cur) => {
+        acc[cur.status] = cur.count;
+        return acc;
+      }, {
+        [ExperimentStatus.NotStarted]: 0,
+        [ExperimentStatus.Paused]: 0,
+        [ExperimentStatus.Recording]: 0,
+      });
+    })
   }
 
   loadExperiments() {
@@ -79,11 +94,6 @@ export class OverviewComponent implements OnInit, OnDestroy {
     this.search$.next(null);
   }
 
-  getExptCountByStatus(status: ExperimentStatus): number {
-    return 10; //this.experimentList.filter(expt => expt.status === status).length;
-  }
-
-
   detailViewVisible: boolean = false;
   currentExperiment: IExperiment;
   onCreateClick() {
@@ -101,6 +111,8 @@ export class OverviewComponent implements OnInit, OnDestroy {
     } else {
       this.message.warning($localize `:@@expt.overview.expt-exists:Experiment with the same feature flag and metric exists`);
     }
+
+    this.loadStatusCounte();
   }
 
   goToFeatureFlag(featureFlagKey: string) {

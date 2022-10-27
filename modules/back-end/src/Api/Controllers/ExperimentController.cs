@@ -30,4 +30,16 @@ public class ExperimentController : ApiControllerBase
         var experiment = await Mediator.Send(request);
         return Ok(experiment);
     }
+    
+    [HttpGet("status-count")]
+    public async Task<ApiResponse<IEnumerable<ExperimentStatusCountVm>>> GetExperimentStatusCounterAsync(Guid envId)
+    {
+        var request = new GetExperimentStatusCount
+        {
+            EnvId = envId
+        };
+
+        var status = await Mediator.Send(request);
+        return Ok(status);
+    }
 }
