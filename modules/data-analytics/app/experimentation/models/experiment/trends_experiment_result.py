@@ -155,4 +155,4 @@ class TrendsExperimentResult:
                 sorted_valid_results[0]['isWinner'] = True
             elif sorted_valid_results[-1]['changeToBaseline'] > 0:
                 sorted_valid_results[-1]['isWinner'] = True
-        return sorted(map(lambda r: {**r, 'changeToBaseline': format_float_positional(r['changeToBaseline'])}, sorted_valid_results + invalid_results), key=lambda r: r['variation'])
+        return sorted(map(lambda r: {**r, 'changeToBaseline': format_float_positional(r['changeToBaseline'])}, sorted_valid_results + invalid_results), key=lambda r: r['variationId'])
