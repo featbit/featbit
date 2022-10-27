@@ -31,16 +31,16 @@ public class Insight
             var flagId = $"{envId}-{variation.FeatureFlagKey}";
             var properties = new
             {
-                Route = "/Variation/GetMultiOptionVariation",
-                FlagId = flagId,
-                EnvId = envId.ToString(),
-                AccountId = string.Empty,
-                ProjectId = string.Empty,
-                FeatureFlagKey = variation.FeatureFlagKey,
-                SendToExperiment = variation.SendToExperiment,
+                route = "/Variation/GetMultiOptionVariation",
+                flagId = flagId,
+                envId = envId.ToString(),
+                accountId = string.Empty,
+                projectId = string.Empty,
+                featureFlagKey = variation.FeatureFlagKey,
+                sendToExperiment = variation.SendToExperiment,
                 userKeyId = User!.KeyId,
-                UserName = User!.Name,
-                VariationId = variation.Variation.Id,
+                userName = User!.Name,
+                variationId = variation.Variation.Id,
                 tag_0 = User!.KeyId,
                 tag_1 = variation.Variation.Id,
                 tag_2 = variation.SendToExperiment
@@ -64,15 +64,15 @@ public class Insight
         {
             var properties = new
             {
-                Route = metric.Route,
-                Type = metric.Type,
-                EventName = metric.EventName,
-                NumericValue = metric.NumericValue,
-                User = User!,
-                ApplicationType = metric.AppType,
-                ProjectId = string.Empty,
-                EnvId = envId.ToString(),
-                AccountId = string.Empty,
+                route = metric.Route,
+                type = metric.Type,
+                eventName = metric.EventName,
+                numericValue = metric.NumericValue,
+                user = User!,
+                applicationType = metric.AppType,
+                projectId = string.Empty,
+                envId = envId.ToString(),
+                accountId = string.Empty,
                 tag_0 = User!.KeyId,
                 tag_1 = metric.NumericValue,
             };
