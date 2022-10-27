@@ -12,6 +12,7 @@ import {FeatureFlagService} from "@services/feature-flag.service";
 import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {IVariation} from "@shared/rules";
+import {IExpt} from "@features/safe/experiments/overview/types";
 
 
 @Component({
@@ -154,7 +155,7 @@ export class ExperimentDrawerComponent implements OnInit {
       featureFlagId: featureFlag.id,
       metricId: metric.id,
       baselineVariationId,
-    })
+    } as IExpt)
       .pipe()
       .subscribe(
         res => {

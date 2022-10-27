@@ -1,4 +1,5 @@
 using Domain.ExperimentMetrics;
+using Domain.Experiments;
 using Domain.FeatureFlags;
 
 namespace Application.Experiments;
@@ -16,5 +17,8 @@ public class ExperimentVm
     public string MetricEventName { get; set; }
     public EventType MetricEventType { get; set; }
     public CustomEventTrackOption MetricCustomEventTrackOption { get; set; }
+    public string MetricCustomEventUnit { get; set; }
     public string Status { get; set; }
+    
+    public List<ExperimentIteration> Iterations { get; set; }
 }

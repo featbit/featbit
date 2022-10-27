@@ -1,5 +1,8 @@
-import {IGroup} from "@features/safe/iam/types/group";
-import {CustomEventTrackOption, EventType} from "@features/safe/feature-flags/types/experimentations";
+import {
+  CustomEventTrackOption,
+  EventType, ExperimentStatus,
+  IExperimentIterationResult
+} from "@features/safe/feature-flags/types/experimentations";
 
 export class ExperimentListFilter {
   featureFlagName?: string;
@@ -35,5 +38,49 @@ export interface IExpt {
   metricEventName?: string,
   metricEventType?: EventType,
   metricCustomEventTrackOption?: CustomEventTrackOption,
-  baselineVariationId: string
+  metricCustomEventUnit?: string,
+  baselineVariationId: string,
+  iterations?: IExptIteration[],
+  status: ExperimentStatus,
+
+  // UI only
+  selectedIteration?: IExptIteration
+  isLoading?: boolean,
+  isChartExpanded?: boolean,
+  chartConfig?: any // the config object for chart
+}
+
+export interface IExptIteration {
+  id: string,
+  startTime: Date,
+  endTime: Date,
+  updatedAt?: Date,
+  updatedAtStr?: string,
+  dateTimeInterval?: string,
+  numericConfidenceIntervalBoundary?: number[], // [min, max, max - min]
+  customEventTrackOption: CustomEventTrackOption,
+  customEventUnit: string,
+  isFinish: boolean,
+  results: IExptIterationResult[],
+
+  // UI only
+  invalidVariation?: boolean,
+  winnerVariation?: boolean,
+}
+
+export interface IExptIterationResult {
+  changeToBaseline: number, // float
+  conversion: number, // long
+  conversionRate: number, // float
+  isBaseline: boolean,
+  isInvalid: boolean,
+  isWinner: boolean,
+  totalEvents: number,
+  pValue: number, // float
+  uniqueUsers: number, // long
+  variation: string, // variationId
+  variationValue: string,
+  average: number,
+  confidenceInterval: number[], // float[]
+  isEmpty: boolean
 }

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'switch-triggers',
+  selector: 'ff-triggers',
   templateUrl: './triggers.component.html',
   styleUrls: ['./triggers.component.less']
 })

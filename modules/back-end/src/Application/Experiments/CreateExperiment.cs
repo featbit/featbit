@@ -17,7 +17,8 @@ public class CreateExperiment: IRequest<Experiment>
             MetricId = MetricId,
             FeatureFlagId = FeatureFlagId,
             BaselineVariationId = BaseLineVariationId,
-            Status = ExperimentStatus.NotStarted
+            Status = ExperimentStatus.NotStarted,
+            Iterations = new List<ExperimentIteration>()
         };
     }
 }
