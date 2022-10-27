@@ -4,7 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IExperiment, IExperimentIteration } from '@features/safe/feature-flags/types/experimentations';
 import {getCurrentProjectEnv} from "@utils/project-env";
-import {ExperimentListFilter, IExpt, IExptIteration, IPagedExpt} from "@features/safe/experiments/overview/types";
+import {
+  ExperimentListFilter,
+  IExpt,
+  IExptIteration,
+  IExptStatusCount,
+  IPagedExpt
+} from "@features/safe/experiments/overview/types";
 
 @Injectable({
   providedIn: 'root'
@@ -40,6 +46,11 @@ export class ExperimentService {
       this.baseUrl,
       {params: new HttpParams({fromObject: queryParam})}
     );
+  }
+
+  getExperimentStatusCount(): Observable<IExptStatusCount[]>{
+    const url = this.baseUrl + `/status-count`;
+    return this.http.get<IExptStatusCount[]>(url);
   }
 
   getIterationResults(params): Observable<IExptIteration[]> {

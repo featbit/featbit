@@ -3,7 +3,7 @@
     <div class="annotation">
       <div class="legend">
         <div i18n="@@expt.overview.in-progress">In Progress</div>
-        <div>{{ getExptCountByStatus(exptStatusRecording) }}</div>
+        <div>{{ statusCount[exptStatusRecording] }}</div>
       </div>
       <div class="icon">
         <i class="status" nz-icon nzType="icons:icon-expt-ongoing"></i>
@@ -12,7 +12,7 @@
     <div class="annotation">
       <div class="legend">
         <div i18n="@@expt.overview.paused">Paused</div>
-        <div>{{ getExptCountByStatus(exptStatusPaused) }}</div>
+        <div>{{ statusCount[exptStatusPaused] }}</div>
       </div>
       <div class="icon">
         <i class="status" nz-icon nzType="icons:icon-expt-paused"></i>
@@ -21,7 +21,7 @@
     <div class="annotation">
       <div class="legend">
         <div i18n="@@expt.overview.not-started">Not Started</div>
-        <div>{{ getExptCountByStatus(exptStatusNotStarted) }}</div>
+        <div>{{ statusCount[exptStatusNotStarted] }}</div>
       </div>
       <div class="icon">
         <i class="status" nz-icon nzType="icons:icon-expt-not-started"></i>

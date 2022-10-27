@@ -17,6 +17,14 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         featureFlagQueryable = MongoDb.QueryableOf<FeatureFlag>();
     }
 
+    public async Task<IEnumerable<ExperimentStatusCountVm>> GetStatusCountAsync(Guid envId)
+    {
+        var query = Queryable.GroupBy(expt => expt.Status)
+            .Select(group => new ExperimentStatusCountVm { Status = group.Key, Count = group.Count() });
+        
+        return await query.ToListAsync();
+    }
+
     public async Task<PagedResult<ExperimentVm>> GetListAsync(Guid envId, ExperimentFilter filter)
     {
         if (string.IsNullOrWhiteSpace(filter.FeatureFlagId.ToString()))

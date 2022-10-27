@@ -6,6 +6,8 @@ namespace Application.Services;
 
 public interface IExperimentService : IService<Experiment>
 {
+    Task<IEnumerable<ExperimentStatusCountVm>> GetStatusCountAsync(Guid envId);
+    
     Task<PagedResult<ExperimentVm>> GetListAsync(Guid envId, ExperimentFilter filter);
 
     // Task<Experiment> GetAsync(Guid envId, string key);
