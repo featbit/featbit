@@ -19,7 +19,7 @@ public class OlapService : IOlapService
         HttpContent content = new StringContent(JsonSerializer.Serialize(param));
         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
 
-        var res = await client.PostAsync($"{Endpoint}/api/expt/result", content);
+        var res = await client.PostAsync($"{Endpoint}/api/expt/results", content);
 
         if (res.StatusCode != System.Net.HttpStatusCode.OK)
         {

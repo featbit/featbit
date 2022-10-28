@@ -10,7 +10,7 @@ expt = get_expt_blueprint()
 expt.register_error_handler(500, internal_error_handler)
 
 
-@expt.route('/result', methods=['POST'])
+@expt.route('/results', methods=['POST'])
 def get_result():
     json_str = request.get_data()
     try:
