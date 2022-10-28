@@ -1,4 +1,4 @@
-<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" [nzTitle]="'设置分流进入实验的用户规则'" [nzFooter]="create"
+<nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" i18n-nzTitle="@@expt-drawer.configure-data-sent-to-expt" nzTitle="Configure data sent to experiments" [nzFooter]="create"
            [nzWidth]="900" (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <div class="drawer-layout" *ngIf="featureFlag">

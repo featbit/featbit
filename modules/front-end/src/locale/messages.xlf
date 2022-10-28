@@ -448,6 +448,13 @@
           <context context-type="linenumber">99</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="expt-drawer.configure-data-sent-to-expt" datatype="html">
+        <source>Configure data sent to experiments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="expt.rule-drawer.warning" datatype="html">
         <source> When saved, the following changes would be effective immediately, all experiments related to this feature flag would be affected. We strongly recommend that you pause all those experiments and start over. </source>
         <context-group purpose="location">
@@ -733,11 +740,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">54</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">102</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.operation-failed" datatype="html">
@@ -852,7 +859,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">102</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.view-matched-users" datatype="html">
@@ -3133,7 +3140,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
@@ -3230,7 +3237,7 @@
         <source>Experiment with the same feature flag and metric exists</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">116</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.triggers.triggers" datatype="html">

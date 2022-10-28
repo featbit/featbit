@@ -465,6 +465,14 @@
         </context-group>
         <target>发生错误，请重试</target>
       </trans-unit>
+      <trans-unit id="expt-drawer.configure-data-sent-to-expt" datatype="html">
+        <source>Configure data sent to experiments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <target>设置分流进入实验的用户规则</target>
+      </trans-unit>
       <trans-unit id="expt.rule-drawer.warning" datatype="html">
         <source>When saved, the following changes would be effective immediately, all experiments related to this feature flag would be affected. We strongly recommend that you pause all those experiments and start over.</source>
         <context-group purpose="location">
@@ -761,11 +769,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">54</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <target>操作成功</target>
       </trans-unit>
@@ -881,7 +889,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <target>操作失败</target>
       </trans-unit>
@@ -3376,7 +3384,7 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
@@ -3485,7 +3493,7 @@ Entitlement management        </source>
         <source>Experiment with the same feature flag and metric exists</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <target>相同开关和 Metric 的实验已经存在</target>
       </trans-unit>
