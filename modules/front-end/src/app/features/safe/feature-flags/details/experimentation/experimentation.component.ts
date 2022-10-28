@@ -41,6 +41,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   pageViewEventType: EventType = EventType.PageView;
   clickEventType: EventType = EventType.Click;
 
+  exptStatusNotStarted: ExperimentStatus = ExperimentStatus.NotStarted;
+  exptStatusPaused: ExperimentStatus = ExperimentStatus.Paused;
+  exptStatusRecording: ExperimentStatus = ExperimentStatus.Recording;
+
   exptRulesVisible = false;
 
   constructor(
@@ -164,36 +168,38 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onStartIterationClick(expt: IExpt) {
-    // expt.isLoading  = true;
-    // this.experimentService.startIteration(this.switchServe.envId, expt.id).subscribe(res => {
-    //   if (res) {
-    //     expt.iterations = [this.processIteration(res, expt.baselineVariationId), ...expt.iterations];
-    //     expt.selectedIteration = expt.iterations[0];
-    //     expt.status = ExperimentStatus.Recording;
-    //
-    //     this.onGoingExperiments = [...this.onGoingExperiments, expt];
-    //   }
-    //   expt.isLoading  = false;
-    // }, _ => {
-    //   this.message.error("操作失败，请重试!");
-    //   expt.isLoading  = false;
-    // });
+    expt.isLoading  = true;
+    this.experimentService.startIteration(expt.id).subscribe(res => {
+      if (res) {
+        expt.iterations = [this.processIteration(res, expt.baselineVariationId), ...expt.iterations];
+        expt.selectedIteration = expt.iterations[0];
+        expt.status = ExperimentStatus.Recording;
+
+        this.loadIterationResults(expt);
+
+        this.onGoingExperiments = [...this.onGoingExperiments, expt];
+      }
+      expt.isLoading  = false;
+    }, _ => {
+      this.message.error("操作失败，请重试!");
+      expt.isLoading  = false;
+    });
   }
 
   onStopIterationClick(expt: IExpt) {
-    // expt.isLoading  = true;
-    // this.experimentService.stopIteration(this.switchServe.envId, expt.id, expt.selectedIteration.id).subscribe(res => {
-    //   if (res) {
-    //     expt.selectedIteration.endTime = res.endTime;
-    //     expt.selectedIteration.dateTimeInterval = `${moment(expt.selectedIteration.startTime).format('YYYY-MM-DD HH:mm')} - ${moment(expt.selectedIteration.endTime).format('YYYY-MM-DD HH:mm')}`
-    //     expt.status = ExperimentStatus.Paused;
-    //   }
-    //
-    //   expt.isLoading  = false;
-    // }, _ => {
-    //   this.message.error("操作失败，请重试!");
-    //   expt.isLoading  = false;
-    // });
+    expt.isLoading  = true;
+    this.experimentService.stopIteration(expt.id, expt.selectedIteration.id).subscribe(res => {
+      if (res) {
+        expt.selectedIteration.endTime = res.endTime;
+        expt.selectedIteration.dateTimeInterval = `${moment(expt.selectedIteration.startTime).format('YYYY-MM-DD HH:mm')} - ${moment(expt.selectedIteration.endTime).format('YYYY-MM-DD HH:mm')}`
+        expt.status = ExperimentStatus.Paused;
+      }
+
+      expt.isLoading  = false;
+    }, _ => {
+      this.message.error("操作失败，请重试!");
+      expt.isLoading  = false;
+    });
   }
 
   private setExptStatus(expt: IExpt, iteration: IExptIteration) {
@@ -202,7 +208,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     return;
   }
 
-  onReloadIterationResultsClick(expt: IExpt) {
+  loadIterationResults(expt: IExpt) {
     expt.isLoading  = true;
     const param = {
       exptId: expt.id,
@@ -248,28 +254,32 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     });
   }
 
+  onReloadIterationResultsClick(expt: IExpt) {
+    this.loadIterationResults(expt);
+  }
+
   onDeleteExptClick(expt: IExpt) {
-    // expt.isLoading  = true;
-    // this.experimentService.archiveExperiment(this.switchServe.envId, expt.id).subscribe(_ => {
-    //   this.experimentList = this.experimentList.filter(ex => ex.id !== expt.id);
-    //   expt.isLoading  = false;
-    // }, _ => {
-    //   this.message.error("操作失败，请重试!");
-    //   expt.isLoading  = false;
-    // });
+    expt.isLoading  = true;
+    this.experimentService.archiveExperiment(expt.id).subscribe(_ => {
+      this.experimentList = this.experimentList.filter(ex => ex.id !== expt.id);
+      expt.isLoading  = false;
+    }, _ => {
+      this.message.error("操作失败，请重试!");
+      expt.isLoading  = false;
+    });
   }
 
   onDeleteExptDataClick(expt: IExpt) {
-    // expt.isLoading  = true;
-    // this.experimentService.archiveExperimentData(this.switchServe.envId, expt.id).subscribe(_ => {
-    //   expt.selectedIteration = null;
-    //   expt.iterations = [];
-    //   expt.status = ExperimentStatus.NotStarted;
-    //   expt.isLoading  = false;
-    // }, _ => {
-    //   this.message.error("操作失败，请重试!");
-    //   expt.isLoading  = false;
-    // });
+    expt.isLoading  = true;
+    this.experimentService.archiveExperimentData(expt.id).subscribe(_ => {
+      expt.selectedIteration = null;
+      expt.iterations = [];
+      expt.status = ExperimentStatus.NotStarted;
+      expt.isLoading  = false;
+    }, _ => {
+      this.message.error("操作失败，请重试!");
+      expt.isLoading  = false;
+    });
   }
 
   private processIteration(iteration: IExptIteration, baselineVariationId: string): IExptIteration {

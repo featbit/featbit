@@ -32,7 +32,7 @@ public class GetExperimentIterationResultsHandler : IRequestHandler<GetExperimen
 {
     private readonly IExperimentService _service;
 
-    public GetExperimentIterationResultsHandler(IExperimentService service, IMapper mapper)
+    public GetExperimentIterationResultsHandler(IExperimentService service)
     {
         _service = service;
     }

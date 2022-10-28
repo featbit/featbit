@@ -44,7 +44,7 @@ public class ExperimentController : ApiControllerBase
         return Ok(status);
     }
     
-    [HttpGet("iteration-results")]
+    [HttpPut("iteration-results")]
     public async Task<ApiResponse<IEnumerable<ExperimentIterationResultsVm>>> GetExperimentIterationResultsAsync(Guid envId, IEnumerable<ExperimentIterationParam> experimentIterationParam)
     {
         var request = new GetExperimentIterationResults
@@ -55,5 +55,58 @@ public class ExperimentController : ApiControllerBase
 
         var status = await Mediator.Send(request);
         return Ok(status);
+    }
+    
+    [HttpPost("{experimentId}/iterations")]
+    public async Task<ApiResponse<ExperimentIteration>> GetExperimentIterationResultsAsync(Guid envId, Guid experimentId)
+    {
+        var request = new StartIteration
+        {
+            EnvId = envId,
+            ExperimentId = experimentId
+        };
+
+        var iteration = await Mediator.Send(request);
+        return Ok(iteration);
+    }
+    
+    [HttpDelete("{experimentId}/iterations")]
+    public async Task<ApiResponse<bool>> ArchiveExperimentIterations(Guid envId, Guid experimentId)
+    {
+        var request = new ArchiveExperimentIterations
+        {
+            EnvId = envId,
+            ExperimentId = experimentId
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+    
+    [HttpPut("{experimentId}/iterations/{iterationId}")]
+    public async Task<ApiResponse<ExperimentIteration>> StopIterationAsync(Guid envId, Guid experimentId, string iterationId)
+    {
+        var request = new StopIteration
+        {
+            EnvId = envId,
+            ExperimentId = experimentId,
+            IterationId = iterationId
+        };
+
+        var iteration = await Mediator.Send(request);
+        return Ok(iteration);
+    }
+    
+    [HttpDelete("{experimentId}")]
+    public async Task<ApiResponse<bool>> ArchiveExperimentAsync(Guid envId, Guid experimentId)
+    {
+        var request = new ArchiveExperiment
+        {
+            EnvId = envId,
+            ExperimentId = experimentId
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
     }
 }

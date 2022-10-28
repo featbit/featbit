@@ -50,7 +50,7 @@
                   <div style="display: flex;flex-direction: row">
                     <div>
                       <span *ngIf="experiment?.selectedIteration?.updatedAt">结果最后更新于： {{experiment?.selectedIteration?.updatedAt | date: 'YYYY-MM-dd HH:mm'}}</span>
-                      <button *ngIf="experiment.status !== 1" style="margin-left: 15px;border-radius:8px" nz-button nzType="default" nz-tooltip nzTooltipTitle="每1分钟会自动刷新" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
+                      <button *ngIf="experiment.status !== exptStatusNotStarted" style="margin-left: 15px;border-radius:8px" nz-button nzType="default" nz-tooltip nzTooltipTitle="每1分钟会自动刷新" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
                         <i *ngIf="!experiment.isLoading" nz-icon nzType="reload" nzTheme="outline"></i>
                         <i *ngIf="experiment.isLoading" nz-icon [nzType]="'sync'" [nzSpin]="true"></i>
                         点击刷新结果
@@ -60,7 +60,7 @@
 
                     <nz-dropdown-menu #options="nzDropdownMenu">
                       <ul nz-menu nzSelectable style="min-width: 150px;">
-                        <li *ngIf="experiment.status !== 1" nz-menu-item nz-popconfirm nzPopconfirmTitle="确定删除吗? 将会删除所有实验数据，删除后不可恢复。"
+                        <li *ngIf="experiment.status !== exptStatusNotStarted" nz-menu-item nz-popconfirm nzPopconfirmTitle="确定删除吗? 将会删除所有实验数据，删除后不可恢复。"
                             nzPopconfirmPlacement="bottomRight"
                             [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                             style="width: 100%;display: flex;justify-content: center;"
@@ -81,13 +81,13 @@
                     </nz-dropdown-menu>
                   </div>
                 </div>
-                <div class="second-line" *ngIf="experiment.status !== 1">
+                <div class="second-line" *ngIf="experiment.status !== exptStatusNotStarted">
                   <div class="action-wrapper">
-                    <button class="status paused" *ngIf="experiment.status === 2" nz-button nzType="default" (click)="onStartIterationClick(experiment)">
+                    <button class="status paused" *ngIf="experiment.status === exptStatusPaused" nz-button nzType="default" (click)="onStartIterationClick(experiment)">
                       <i class="status paused" nz-icon nzType="pause-circle" nzTheme="outline"></i>
                       实验已暂停，点击继续实验
                     </button>
-                    <button class="status on-going" *ngIf="experiment.status === 3" nz-button nzType="default" (click)="onStopIterationClick(experiment)">
+                    <button class="status on-going" *ngIf="experiment.status === exptStatusRecording" nz-button nzType="default" (click)="onStopIterationClick(experiment)">
                       <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
                       实验进行中，点击暂停实验
                     </button>
@@ -104,7 +104,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="third-line" *ngIf="experiment.status !== 1">
+                <div class="third-line" *ngIf="experiment.status !== exptStatusNotStarted">
                   <ul *ngIf="experiment.selectedIteration?.results?.length > 0">
                     <li *ngIf="!experiment.selectedIteration.winnerVariation">
                       <i nz-icon nzType="info-circle" nzTheme="outline"></i> 需要更多的实验数据才能在统计学上确认表格中的结论
@@ -118,13 +118,13 @@
                   </ul>
                 </div>
               </div>
-              <div *ngIf="experiment.status === 1" class="empty-experiment">
+              <div *ngIf="experiment.status === exptStatusNotStarted" class="empty-experiment">
                 <button nz-button nzType="primary" (click)="onStartIterationClick(experiment)" [nzLoading]="experiment.isLoading">
                   <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
                   开始实验
                 </button>
               </div>
-              <nz-spin [nzSpinning]="experiment.isLoading" nzTip="数据加载中..." *ngIf="experiment.status !== 1">
+              <nz-spin [nzSpinning]="experiment.isLoading" nzTip="数据加载中..." *ngIf="experiment.status !== exptStatusNotStarted">
                 <div class="table-content-area" style="padding-bottom: 10px;">
                   <div class="table-wrapper">
                     <nz-table

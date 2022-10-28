@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Experiments;
 
-public class OlapService: IOlapService
+public class OlapService : IOlapService
 {
     private string Endpoint { get; }
 
@@ -12,21 +12,27 @@ public class OlapService: IOlapService
     {
         Endpoint = configuration["OLAP:ServiceHost"];
     }
-    
+
     public async Task<ExperimentIteration> GetExptIterationResultAsync(ExptIterationParam param)
     {
         using var client = new HttpClient();
         HttpContent content = new StringContent(JsonSerializer.Serialize(param));
         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
-            
+
         var res = await client.PostAsync($"{Endpoint}/api/expt/result", content);
 
         if (res.StatusCode != System.Net.HttpStatusCode.OK)
         {
             return null;
         }
-            
-        var response = JsonSerializer.Deserialize<OlapExptIterationResponse>(await res.Content.ReadAsStringAsync());
+
+        var tt = await res.Content.ReadAsStringAsync();
+        var response = JsonSerializer.Deserialize<OlapExptIterationResponse>(
+            await res.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
 
         if (!(response is { Code: (int)System.Net.HttpStatusCode.OK }))
         {

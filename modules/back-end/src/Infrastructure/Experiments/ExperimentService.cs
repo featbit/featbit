@@ -11,13 +11,233 @@ namespace Infrastructure.Experiments;
 
 public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 {
-    private IMongoQueryable<FeatureFlag> featureFlagQueryable;
-    private IOlapService olapService;
+    private readonly IFeatureFlagService _featureFlagService;
+    private readonly IOlapService _olapService;
+    private readonly IExperimentMetricService _experimentMetricService;
 
-    public ExperimentService(MongoDbClient mongoDb, IOlapService olapService) : base(mongoDb)
+    public ExperimentService(MongoDbClient mongoDb, IFeatureFlagService featureFlagService, IOlapService olapService,
+        IExperimentMetricService experimentMetricService) : base(mongoDb)
     {
-        featureFlagQueryable = MongoDb.QueryableOf<FeatureFlag>();
-        olapService = olapService;
+        _featureFlagService = featureFlagService;
+        _olapService = olapService;
+        _experimentMetricService = experimentMetricService;
+    }
+
+    public async Task ArchiveExperiment(Guid envId, Guid experimentId)
+    {
+        var experiment = await this.GetAsync(experimentId);
+
+        var operationTime = DateTime.UtcNow;
+        // stop active iterations
+        var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
+        var metric = await _experimentMetricService.GetAsync(experiment.MetricId);
+        foreach (var iteration in experiment.Iterations.Where(x => !x.EndTime.HasValue))
+        {
+            iteration.EndTime = operationTime;
+            iteration.IsFinish = true;
+
+            var param = new ExptIterationParam
+            {
+                ExptId = experiment.Id,
+                IterationId = iteration.Id,
+                EnvId = envId,
+                FlagExptId = $"{envId}-{featureFlag.Key}",
+                BaselineVariationId = experiment.BaselineVariationId,
+                VariationIds = featureFlag.Variations.Select(x => x.Id),
+                EventName = metric.EventName,
+                EventType = (int)metric.EventType,
+                CustomEventTrackOption = (int)iteration.CustomEventTrackOption,
+                CustomEventSuccessCriteria = (int)iteration.CustomEventSuccessCriteria,
+                CustomEventUnit = iteration.CustomEventUnit,
+                StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                EndExptTime = iteration.EndTime?.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+            };
+
+            var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
+            if (olapExptResult != null)
+            {
+                iteration.Results = olapExptResult.Results;
+                iteration.UpdatedAt = olapExptResult.UpdatedAt;
+            }
+        }
+
+        experiment.UpdatedAt = operationTime;
+        experiment.Status = ExperimentStatus.Paused;
+        experiment.IsArchived = true;
+        await this.UpdateAsync(experiment);
+    }
+
+    public async Task ArchiveIterations(Guid envId, Guid experimentId)
+    {
+        var experiment = await this.GetAsync(experimentId);
+
+        if (experiment.Iterations.Any())
+        {
+            var operationTime = DateTime.UtcNow;
+            // stop active iterations
+            var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
+            var metric = await _experimentMetricService.GetAsync(experiment.MetricId);
+            foreach (var iteration in experiment.Iterations.Where(x => !x.EndTime.HasValue))
+            {
+                iteration.EndTime = operationTime;
+                iteration.IsFinish = true;
+
+                var param = new ExptIterationParam
+                {
+                    ExptId = experiment.Id,
+                    IterationId = iteration.Id,
+                    EnvId = envId,
+                    FlagExptId = $"{envId}-{featureFlag.Key}",
+                    BaselineVariationId = experiment.BaselineVariationId,
+                    VariationIds = featureFlag.Variations.Select(x => x.Id),
+                    EventName = metric.EventName,
+                    EventType = (int)metric.EventType,
+                    CustomEventTrackOption = (int)iteration.CustomEventTrackOption,
+                    CustomEventSuccessCriteria = (int)iteration.CustomEventSuccessCriteria,
+                    CustomEventUnit = iteration.CustomEventUnit,
+                    StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                    EndExptTime = iteration.EndTime?.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+                };
+
+                var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
+                if (olapExptResult != null)
+                {
+                    iteration.Results = olapExptResult.Results;
+                    iteration.UpdatedAt = olapExptResult.UpdatedAt;
+                }
+            }
+
+            experiment.UpdatedAt = operationTime;
+            experiment.Status = ExperimentStatus.NotStarted;
+            experiment.Iterations.ForEach(it => it.IsArchived = true);
+            await this.UpdateAsync(experiment);
+        }
+    }
+
+    public async Task<ExperimentIteration> StopIteration(Guid envId, Guid experimentId, string iterationId)
+    {
+        var experiment = await this.GetAsync(experimentId);
+
+        var operationTime = DateTime.UtcNow;
+
+        var iteration = experiment.Iterations.FirstOrDefault(i => i.Id == iterationId);
+
+        if (iteration == null)
+        {
+            return null;
+        }
+
+        if (experiment.Iterations.Any(it => !it.IsFinish))
+        {
+            experiment.Status = ExperimentStatus.Paused;
+        }
+
+        iteration.EndTime = operationTime;
+        iteration.IsFinish = true;
+
+        // stop active iterations
+        var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
+        var metric = await _experimentMetricService.GetAsync(experiment.MetricId);
+        foreach (var it in experiment.Iterations.Where(x => !x.EndTime.HasValue))
+        {
+            it.EndTime = operationTime;
+            it.IsFinish = true;
+            it.UpdatedAt = operationTime;
+
+            var param = new ExptIterationParam
+            {
+                ExptId = experiment.Id,
+                IterationId = it.Id,
+                EnvId = envId,
+                FlagExptId = $"{envId}-{featureFlag.Key}",
+                BaselineVariationId = experiment.BaselineVariationId,
+                VariationIds = featureFlag.Variations.Select(x => x.Id),
+                EventName = metric.EventName,
+                EventType = (int)metric.EventType,
+                CustomEventTrackOption = (int)it.CustomEventTrackOption,
+                CustomEventSuccessCriteria = (int)it.CustomEventSuccessCriteria,
+                CustomEventUnit = it.CustomEventUnit,
+                StartExptTime = it.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                EndExptTime = it.EndTime?.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+            };
+
+            var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
+            if (olapExptResult != null)
+            {
+                it.Results = olapExptResult.Results;
+                it.UpdatedAt = olapExptResult.UpdatedAt;
+            }
+        }
+
+        await this.UpdateAsync(experiment);
+
+        return iteration;
+    }
+
+    public async Task<ExperimentIteration> StartIteration(Guid envId, Guid experimentId)
+    {
+        var experiment = await this.GetAsync(experimentId);
+
+        var operationTime = DateTime.UtcNow;
+
+        if (experiment.Iterations == null)
+        {
+            experiment.Iterations = new List<ExperimentIteration>();
+        }
+
+        // stop active iterations
+        var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
+        var metric = await _experimentMetricService.GetAsync(experiment.MetricId);
+        foreach (var iteration in experiment.Iterations.Where(x => !x.EndTime.HasValue))
+        {
+            iteration.EndTime = operationTime;
+            iteration.IsFinish = true;
+
+            var param = new ExptIterationParam
+            {
+                ExptId = experiment.Id,
+                IterationId = iteration.Id,
+                EnvId = envId,
+                FlagExptId = $"{envId}-{featureFlag.Key}",
+                BaselineVariationId = experiment.BaselineVariationId,
+                VariationIds = featureFlag.Variations.Select(x => x.Id),
+                EventName = metric.EventName,
+                EventType = (int)metric.EventType,
+                CustomEventTrackOption = (int)iteration.CustomEventTrackOption,
+                CustomEventSuccessCriteria = (int)iteration.CustomEventSuccessCriteria,
+                CustomEventUnit = iteration.CustomEventUnit,
+                StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
+                EndExptTime = iteration.EndTime?.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
+            };
+
+            var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
+            if (olapExptResult != null)
+            {
+                iteration.Results = olapExptResult.Results;
+                iteration.UpdatedAt = olapExptResult.UpdatedAt;
+            }
+        }
+
+        // start new iteration
+        var newIteration = new ExperimentIteration
+        {
+            Id = Guid.NewGuid().ToString(),
+            StartTime = operationTime,
+            // EndTime, Don't need to set end time as this is a start experiment signal
+            Results = new List<IterationResult>(),
+            CustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
+            CustomEventTrackOption = metric.CustomEventTrackOption,
+            CustomEventUnit = metric.CustomEventUnit,
+            EventType = (int)metric.EventType,
+            EventName = metric.EventName,
+        };
+
+        experiment.Iterations.Add(newIteration);
+        experiment.Status = ExperimentStatus.Recording;
+
+        await this.UpdateAsync(experiment);
+
+        return newIteration;
     }
 
     public async Task<IEnumerable<ExperimentIterationResultsVm>> GetIterationResults(Guid envId,
@@ -28,13 +248,13 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         foreach (var iteration in experimentIterationParam)
         {
             var iterationResults = new ExperimentIterationResultsVm();
-            
+
             if (iteration.IsFinish)
             {
                 iterationResults.IsFinish = true;
                 iterationResults.IsUpdated = false;
                 results.Add(iterationResults);
-                
+
                 continue;
             }
 
@@ -54,8 +274,8 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 StartExptTime = iteration.StartTime.ToString("yyyy-MM-ddTHH:mm:ss.ffffff"),
                 EndExptTime = iteration.EndTime?.ToString("yyyy-MM-ddTHH:mm:ss.ffffff")
             };
-            
-            var olapExptResults = await olapService.GetExptIterationResultAsync(param);
+
+            var olapExptResults = await _olapService.GetExptIterationResultAsync(param);
             if (olapExptResults != null)
             {
                 iterationResults.IsFinish = olapExptResults.IsFinish;
@@ -63,10 +283,10 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 iterationResults.UpdatedAt = olapExptResults.UpdatedAt;
                 iterationResults.IsUpdated = true;
             }
-            
+
             results.Add(iterationResults);
         }
-            
+
         return results;
     }
 
@@ -74,7 +294,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
     {
         var query = Queryable.GroupBy(expt => expt.Status)
             .Select(group => new ExperimentStatusCountVm { Status = group.Key, Count = group.Count() });
-        
+
         return await query.ToListAsync();
     }
 
@@ -86,11 +306,12 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 from expt in Queryable
                 join metric in MongoDb.QueryableOf<ExperimentMetric>()
                     on expt.MetricId equals metric.Id
-                join ff in featureFlagQueryable
+                join ff in MongoDb.QueryableOf<FeatureFlag>()
                     on expt.FeatureFlagId equals ff.Id
-                where expt.EnvId == envId && !ff.IsArchived && (string.IsNullOrWhiteSpace(filter.FeatureFlagName) ||
-                                                                ff.Name.Contains(filter.FeatureFlagName,
-                                                                    StringComparison.CurrentCultureIgnoreCase))
+                where expt.EnvId == envId && !expt.IsArchived && !ff.IsArchived &&
+                      (string.IsNullOrWhiteSpace(filter.FeatureFlagName) ||
+                       ff.Name.Contains(filter.FeatureFlagName,
+                           StringComparison.CurrentCultureIgnoreCase))
                 select new ExperimentVm
                 {
                     Id = expt.Id,
@@ -122,9 +343,10 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 from expt in Queryable
                 join metric in MongoDb.QueryableOf<ExperimentMetric>()
                     on expt.MetricId equals metric.Id
-                join ff in featureFlagQueryable
+                join ff in MongoDb.QueryableOf<FeatureFlag>()
                     on expt.FeatureFlagId equals ff.Id
-                where expt.EnvId == envId && !ff.IsArchived && expt.FeatureFlagId == filter.FeatureFlagId
+                where expt.EnvId == envId && !expt.IsArchived && !ff.IsArchived &&
+                      expt.FeatureFlagId == filter.FeatureFlagId
                 select new ExperimentVm
                 {
                     Id = expt.Id,

@@ -2,7 +2,6 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IExperiment, IExperimentIteration } from '@features/safe/feature-flags/types/experimentations';
 import {getCurrentProjectEnv} from "@utils/project-env";
 import {
   ExperimentListFilter,
@@ -49,63 +48,32 @@ export class ExperimentService {
   }
 
   getExperimentStatusCount(): Observable<IExptStatusCount[]>{
-    const url = this.baseUrl + `/status-count`;
+    const url = `${this.baseUrl}/status-count`;
     return this.http.get<IExptStatusCount[]>(url);
   }
 
   getIterationResults(params): Observable<IExptIteration[]> {
-    const url = this.baseUrl + `/iteration-results`;
-    return this.http.post<IExptIteration[]>(url, params);
+    const url = `${this.baseUrl}/iteration-results`;
+    return this.http.put<IExptIteration[]>(url, params);
   }
 
-  // 获取 custom events 列表
-  public getCustomEvents(envId: string, lastItem?: string, searchText?: string): Observable<string[]> {
-    let url = this.baseUrl + '/Events/#envId'.replace(/#envId/ig, `${envId}`);
-    let queryStr = '';
-    if (lastItem !== undefined && lastItem !== null && lastItem.trim().length > 0) {
-      queryStr = `?lastItem=${lastItem}`;
-    }
-
-    if (searchText !== undefined && searchText !== null && searchText.trim().length > 0) {
-      if (queryStr !== '') {
-        queryStr += '&';
-      } else {
-        queryStr = '?';
-      }
-
-      queryStr += `searchText=${searchText}`;
-    }
-
-    if (queryStr !== '') {
-      url += queryStr;
-    }
-
-    return this.http.get<string[]>(url);
+  startIteration(experimentId: string): Observable<any> {
+    const url = `${this.baseUrl}/${experimentId}/iterations`;
+    return this.http.post(url, {});
   }
 
-  // 获取 experiment 结果
-  getExperimentResult(envId: string, params): Observable<any> {
-    const url = this.baseUrl + `/launchQuery/${envId}`;
-    return this.http.post(url, params);
-  }
-
-  startIteration(envId: string, experimentId: string): Observable<any> {
-    const url = this.baseUrl + `/${envId}/${experimentId}`;
+  stopIteration(experimentId: string, iterationId: string): Observable<any> {
+    const url = `${this.baseUrl}/${experimentId}/iterations/${iterationId}`;
     return this.http.put(url, {});
   }
 
-  stopIteration(envId: string, experimentId: string, iterationId: string): Observable<any> {
-    const url = this.baseUrl + `/${envId}/${experimentId}/${iterationId}`;
-    return this.http.put(url, {});
-  }
-
-  archiveExperiment(envId: string, experimentId: string): Observable<any> {
-    const url = this.baseUrl + `/${envId}/${experimentId}`;
+  archiveExperiment(experimentId: string): Observable<any> {
+    const url = `${this.baseUrl}/${experimentId}`;
     return this.http.delete(url);
   }
 
-  archiveExperimentData(envId: string, experimentId: string): Observable<any> {
-    const url = this.baseUrl + `/${envId}/${experimentId}/data`;
+  archiveExperimentData(experimentId: string): Observable<any> {
+    const url = `${this.baseUrl}/${experimentId}/iterations`;
     return this.http.delete(url);
   }
 }
