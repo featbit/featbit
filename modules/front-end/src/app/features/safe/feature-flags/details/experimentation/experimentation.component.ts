@@ -162,7 +162,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       }
       this.isInitLoading = false;
     }, _ => {
-      this.message.error("数据加载失败，请重试!");
+      this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
       this.isInitLoading = false;
     });
   }
@@ -181,7 +181,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       }
       expt.isLoading  = false;
     }, _ => {
-      this.message.error("操作失败，请重试!");
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       expt.isLoading  = false;
     });
   }
@@ -197,7 +197,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
       expt.isLoading  = false;
     }, _ => {
-      this.message.error("操作失败，请重试!");
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       expt.isLoading  = false;
     });
   }
@@ -249,7 +249,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
       expt.isLoading  = false;
     }, _ => {
-      //this.message.error("数据加载失败，请重试!");
+      this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
       expt.isLoading  = false;
     });
   }
@@ -264,7 +264,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       this.experimentList = this.experimentList.filter(ex => ex.id !== expt.id);
       expt.isLoading  = false;
     }, _ => {
-      this.message.error("操作失败，请重试!");
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       expt.isLoading  = false;
     });
   }
@@ -277,7 +277,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       expt.status = ExperimentStatus.NotStarted;
       expt.isLoading  = false;
     }, _ => {
-      this.message.error("操作失败，请重试!");
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       expt.isLoading  = false;
     });
   }
@@ -324,13 +324,13 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const xAxisName = '时间';
+    const xAxisName = $localize `:@@common.time:time`;
     const trackOption = iterations[0].customEventTrackOption;
     const valueUnit = trackOption === CustomEventTrackOption.Conversion
       ? '%' : (iterations[0].customEventUnit ? iterations[0].customEventUnit : '');
     const yAxisName = trackOption === CustomEventTrackOption.Conversion
-      ? `转换率（${valueUnit}）`
-      : iterations[0].customEventUnit ? `平均值（${valueUnit}）` : '平均值';
+      ? `${$localize `:@@common.conversion-rate:Conversion rate`}（${valueUnit}）`
+      : iterations[0].customEventUnit ? `${$localize `:@@common.average:Average`}（${valueUnit}）` : $localize `:@@common.average:Average`;
 
     let source = [];
     let yAxisFormatter;
@@ -344,7 +344,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         }
 
         // see function **processIteration**
-        // conversionRate average 这两个值为 -1 时 会被修改为 '--' 代表 '没有值' 显示为 0
         let yAxisValue;
         if (trackOption === CustomEventTrackOption.Conversion) {
           const conversionRate = Number(result.conversionRate);

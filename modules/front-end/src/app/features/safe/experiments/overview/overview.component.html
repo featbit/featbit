@@ -89,14 +89,14 @@
             <span class="tag">
               <ng-container *ngIf="data.metricEventType === customEventType">
                 <ng-container i18n="@@common.custom-event">Custom: </ng-container>
-                <ng-container *ngIf="data.metricCustomEventTrackOption === customEventTrackConversion" i18n="@@common.conversion">Conversion</ng-container>
+                <ng-container *ngIf="data.metricCustomEventTrackOption === customEventTrackConversion" i18n="@@common.conversion-rate">Conversion rate</ng-container>
                 <ng-container *ngIf="data.metricCustomEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
               </ng-container>
               <ng-container *ngIf="data.metricEventType === pageViewEventType">
-                PageView: <ng-container i18n="@@common.conversion">Conversion</ng-container>
+                PageView: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
               </ng-container>
               <ng-container *ngIf="data.metricEventType === clickEventType">
-                Click: <ng-container i18n="@@common.conversion">Conversion</ng-container>
+                Click: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
               </ng-container>
             </span>
           </td>
