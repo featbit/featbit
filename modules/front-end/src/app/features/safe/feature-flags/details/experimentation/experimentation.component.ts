@@ -94,7 +94,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
             this.onGoingExperiments.forEach(expt => {
               const iteration = res.find(r => r.id === expt.selectedIteration.id);
               if (iteration) {
-                expt.selectedIteration = this.processIteration(iteration, expt.baselineVariationId);
+                expt.selectedIteration = this.processIteration(iteration, expt.baselineVariation.id);
                 if (iteration.updatedAt) {
                   expt.selectedIteration.updatedAt = iteration.updatedAt;
                   expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
@@ -139,7 +139,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       if (experiments) {
         this.experimentList = experiments.items.map(expt => {
           if (expt.iterations.length > 0) {
-            expt.iterations = expt.iterations.map(iteration => this.processIteration(iteration, expt.baselineVariationId)).reverse();
+            expt.iterations = expt.iterations.map(iteration => this.processIteration(iteration, expt.baselineVariation.id)).reverse();
             expt.selectedIteration = expt.iterations[0];
 
             if (expt.metricCustomEventTrackOption === this.customEventTrackNumeric) {
@@ -171,7 +171,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     expt.isLoading  = true;
     this.experimentService.startIteration(expt.id).subscribe(res => {
       if (res) {
-        expt.iterations = [this.processIteration(res, expt.baselineVariationId), ...expt.iterations];
+        expt.iterations = [this.processIteration(res, expt.baselineVariation.id), ...expt.iterations];
         expt.selectedIteration = expt.iterations[0];
         expt.status = ExperimentStatus.Recording;
 
@@ -213,8 +213,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     const param = {
       exptId: expt.id,
       iterationId: expt.selectedIteration.id,
-      flagExptId: `${expt.envId}-${expt.featureFlagKey}`,
-      baselineVariationId: expt.baselineVariationId,
+      flagExptId: `${this.experimentService.envId}-${expt.featureFlagKey}`,
+      baselineVariationId: expt.baselineVariation.id,
       variationIds: this.featureFlag.variations.map(v => v.id),
       eventName: expt.metricEventName,
       eventType: expt.metricEventType,
@@ -228,7 +228,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
     this.experimentService.getIterationResults([param]).subscribe(res => {
       if (res) {
-        expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariationId);
+        expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariation.id);
         if (res[0].updatedAt) {
           expt.selectedIteration.updatedAt = res[0].updatedAt;
           expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
@@ -284,7 +284,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   private processIteration(iteration: IExptIteration, baselineVariationId: string): IExptIteration {
     const iterationResults = this.variations.map((option) => {
-        const found = iteration.results.find(r => r.variation === option.id);
+        const found = iteration.results.find(r => r.variationId === option.id);
         return !found ? this.createEmptyIterationResult(option, baselineVariationId) : { ...found,
           variationValue: option.value,
           confidenceInterval: !found.confidenceInterval ? [-1, -1] : found.confidenceInterval.map(x => Math.max(0, x)),
@@ -311,7 +311,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   private createEmptyIterationResult(option: IVariation, baselineVariationId: string): IExptIterationResult {
     return {
       isEmpty: true,
-      variation: option.id,
+      variationId: option.id,
       variationValue: option.value,
       confidenceInterval: [-1, -1],
       isBaseline: baselineVariationId === option.id
@@ -337,8 +337,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     iterations.forEach(iteration => {
       const xAxisValue = iteration.endTime ? iteration.endTime : iteration.updatedAt;
       iteration.results.forEach(result => {
-        if (!result.variation ||
-          !this.variations.find(option => option.id == result.variation)
+        if (!result.variationId ||
+          !this.variations.find(option => option.id == result.variationId)
         ) {
           return;
         }

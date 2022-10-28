@@ -53,12 +53,12 @@ public class ExperimentController : ApiControllerBase
             ExperimentIterationParam = experimentIterationParam
         };
 
-        var status = await Mediator.Send(request);
-        return Ok(status);
+        var results = await Mediator.Send(request);
+        return Ok(results);
     }
     
     [HttpPost("{experimentId}/iterations")]
-    public async Task<ApiResponse<ExperimentIteration>> GetExperimentIterationResultsAsync(Guid envId, Guid experimentId)
+    public async Task<ApiResponse<ExperimentIteration>> StartIterationAsync(Guid envId, Guid experimentId)
     {
         var request = new StartIteration
         {

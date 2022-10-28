@@ -4,6 +4,7 @@ import {
   EventType, ExperimentStatus,
   IExperimentIterationResult
 } from "@features/safe/feature-flags/types/experimentations";
+import {IVariation} from "@shared/rules";
 
 export class ExperimentListFilter {
   featureFlagName?: string;
@@ -41,7 +42,7 @@ export interface IExpt {
   metricCustomEventTrackOption?: CustomEventTrackOption,
   metricCustomEventSuccessCriteria?: CustomEventSuccessCriteria,
   metricCustomEventUnit?: string,
-  baselineVariationId: string,
+  baselineVariation: IVariation,
   iterations?: IExptIteration[],
   status: ExperimentStatus,
 
@@ -80,7 +81,7 @@ export interface IExptIterationResult {
   totalEvents: number,
   pValue: number, // float
   uniqueUsers: number, // long
-  variation: string, // variationId
+  variationId: string,
   variationValue: string,
   average: number,
   confidenceInterval: number[], // float[]
