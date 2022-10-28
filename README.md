@@ -70,7 +70,7 @@ The default admin username is `test@featbit.com`, password is `123456`.
 
 Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. 
 
-We'd love to have your help too, please feel free to open issues, provide pull requests, and become a contributor.
+We'd love to have your help too. Feel free to open issues, provide pull requests, and become a contributor.
 
 ## License
 
