@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, Inject, LOCALE_ID} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { EnvUserService } from '@services/env-user.service';
@@ -10,6 +10,7 @@ import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 import {ICondition, IRule} from "@shared/rules";
+import {hasLocalePath} from "@utils/index";
 
 @Component({
   selector: 'segment-targeting',
@@ -26,6 +27,7 @@ export class TargetingComponent {
 
   public flagReferences: ISegmentFlagReference[] = [];
   constructor(
+    @Inject(LOCALE_ID) public activeLocale: string,
     private router: Router,
     private route:ActivatedRoute,
     private segmentService: SegmentService,
@@ -54,8 +56,9 @@ export class TargetingComponent {
   }
 
   public openFlagPage(flagKey: string) {
+    const path = hasLocalePath()? `/${this.activeLocale}/feature-flags/${flagKey}/targeting` : `/feature-flags/${flagKey}/targeting`;
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/feature-flags/${flagKey}/targeting`])
+      this.router.createUrlTree([path])
     );
 
     window.open(url, '_blank');

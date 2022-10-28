@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import {Component, Inject, LOCALE_ID} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ISegment, ISegmentFlagReference } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import {hasLocalePath} from "@utils/index";
 
 @Component({
   selector: 'segment-setting',
@@ -21,6 +22,7 @@ export class SettingComponent {
   deleteModalVisible: boolean = false;
 
   constructor(
+    @Inject(LOCALE_ID) public activeLocale: string,
     private route:ActivatedRoute,
     private msg: NzMessageService,
     private segmentService: SegmentService,
@@ -73,8 +75,9 @@ export class SettingComponent {
   }
 
   openFlagPage(flagKey: string) {
+    const path = hasLocalePath()? `/${this.activeLocale}/feature-flags/${flagKey}/targeting` : `/feature-flags/${flagKey}/targeting`;
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/feature-flags/${flagKey}/targeting`])
+      this.router.createUrlTree([path])
     );
 
     window.open(url, '_blank');

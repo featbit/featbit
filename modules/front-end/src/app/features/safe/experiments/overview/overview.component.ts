@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Inject, LOCALE_ID, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Subject} from 'rxjs';
@@ -11,8 +11,9 @@ import {
   ExperimentStatus,
   IExperiment
 } from '../../feature-flags/types/experimentations';
-import {CURRENT_PROJECT} from "@utils/localstorage-keys";
+import {CURRENT_LANGUAGE, CURRENT_PROJECT} from "@utils/localstorage-keys";
 import {ExperimentListFilter, IExpt, IPagedExpt} from "@features/safe/experiments/overview/types";
+import {hasLocalePath} from "@utils/index";
 
 @Component({
   selector: 'experiments-overview',
@@ -43,11 +44,14 @@ export class OverviewComponent implements OnInit, OnDestroy {
   statusCount: {[key: string]: number} = {};
 
   filter: ExperimentListFilter = new ExperimentListFilter();
+
   constructor(
+    @Inject(LOCALE_ID) public activeLocale: string,
     private router: Router,
     private message: NzMessageService,
     private experimentService: ExperimentService
   ) {
+    this.activeLocale = localStorage.getItem(CURRENT_LANGUAGE());
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     this.loadStatusCounte();
   }
@@ -116,15 +120,12 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   goToFeatureFlag(featureFlagKey: string) {
+    const path = hasLocalePath()? `/${this.activeLocale}/feature-flags/${featureFlagKey}/experimentations` : `/feature-flags/${featureFlagKey}/experimentations`;
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/feature-flags/${featureFlagKey}/experimentations`])
+      this.router.createUrlTree([path])
     );
 
     window.open(url, '_blank');
-  }
-
-  goToMetric(metricId: string) {
-    this.router.navigateByUrl(`/experimentations/metrics?id=${metricId}`);
   }
 
   ngOnDestroy(): void {
