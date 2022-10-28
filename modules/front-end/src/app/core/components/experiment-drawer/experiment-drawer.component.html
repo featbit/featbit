@@ -5,8 +5,7 @@
   nzPlacement="right"
   i18n-nzTitle="@@expt.overview.expt"
   nzTitle="Experiment"
-  [nzWidth]="500"
-  (nzOnClose)="onClose()">
+  [nzWidth]="500">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="experimentForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>

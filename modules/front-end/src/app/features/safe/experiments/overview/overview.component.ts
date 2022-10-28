@@ -108,15 +108,17 @@ export class OverviewComponent implements OnInit, OnDestroy {
   onDetailViewClosed(data: any) {
     this.detailViewVisible = false;
 
-    const predicate = (it: IExpt) => it.featureFlagId === data.data.featureFlagId && it.metricId === data.data.metricId;
+    if (data) {
+      const predicate = (it: IExpt) => it.featureFlagId === data.data.featureFlagId && it.metricId === data.data.metricId;
 
-    if (!this.pagedExpt.items.find(predicate)) {
-      this.pagedExpt.items = [data.data, ...this.pagedExpt.items];
-    } else {
-      this.message.warning($localize `:@@expt.overview.expt-exists:Experiment with the same feature flag and metric exists`);
+      if (!this.pagedExpt.items.find(predicate)) {
+        this.pagedExpt.items = [data.data, ...this.pagedExpt.items];
+      } else {
+        this.message.warning($localize `:@@expt.overview.expt-exists:Experiment with the same feature flag and metric exists`);
+      }
+
+      this.loadStatusCounte();
     }
-
-    this.loadStatusCounte();
   }
 
   goToFeatureFlag(featureFlagKey: string) {

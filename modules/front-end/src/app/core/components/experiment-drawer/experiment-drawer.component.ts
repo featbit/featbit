@@ -133,8 +133,9 @@ export class ExperimentDrawerComponent implements OnInit {
   }
 
   onClose() {
-    this.close.emit({ isEditing: false, data: this._experiment });
+    this.close.emit(null);
   }
+
 
   doSubmit() {
     if (this.experimentForm.invalid) {
