@@ -28,6 +28,15 @@ public static class ServicesRegister
         // health check dependencies
         services.AddHealthChecks();
 
+        // cors
+        builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
+        {
+            policyBuilder
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }));
+
         // add app services
         services.TryAddSingleton<ISystemClock, SystemClock>();
         services.AddSingleton<IConnectionManager, ConnectionManager>();
