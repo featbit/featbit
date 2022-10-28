@@ -1,4 +1,4 @@
-## Introduction & Our Philosophy
+## Introduction
 
 [![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
@@ -8,35 +8,52 @@
 
 
 
-**FeatBit** is a scalable, high-performance **Feature Management** and **Progressive Experimentation** platform.
+**FeatBit** is a scalable and high-performance **Feature Management** platform. Our mission statement is to **Empower all teams to deliver, control, experiment with, and monetize their software**.
 
-Feature Management use cases: `Testing in production`, `Progressive & Targeted release`, `Trunk-based development`, `Entitlement Management`, `Data & Cloud Migration`,  `Faster incident resolution`, etc.
-    
-Progressive Experimentation, which provides the ability to get online and offline feedback as quickly as possible. Use cases: `Beta testing and qualitative feedback`, `Experimentation and A/B testing`.
+Our first task is to provide an open source tool to better achieve the following works：
 
-### Our Philosophy
-◆  **Empower All teams to Deliver, Control, Experiment with and Monetize their software**. 
+- Testing in production
+- Targeted & Progressive release
+- Entitlement Management & Software monetization
+- Progressive Experimentation
+- Beta testing and qualitative feedback
+- Data Rollback & Cloud Migration
+- Faster incident resolution
+- etc.
 
-◆  Progressively delegating the control of a feature to the owner that is most closely responsible for the outcome.
-
-◆  Less self-developed, more reusable open source software. 
-
+FeatBit started with a consensus that We use open source to make software innovation faster.
 
 ## Getting Started
 
-The project is under code refactoring. An update will be coming soon.
+FeatBit's first version is still under development, but you can run and test the project with `docker-compose-dev.yml`.
+
+```
+docker-compose -f docker-compose-dev.yml up -d
+```
+
+After FeatBit's docker container is etablished, you can open FeatBit's portal UI to start your journey. The default URL is [http://localhost:8081](http://localhost:8081) .
+
+The default admin username is `test@featbit.com`, password is `123456`.
+
 
 ## Documentation & Communities
 
-◆  View the [**FeatBit Docs**](https://featbit.gitbook.io/) for info on how to use and develop with FeatBit.
+◆ To learn how to use FeatBit, you can visit [**FeatBit's documentation page**](https://featbit.gitbook.io/docs/)
 
-◆  Join [**FeatBit Slack Community**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) if you get stuck, want to chat, or are thinking of a new feature. 
+◆ If you met an issues, you can report it to our [**Issues page**](https://github.com/featbit/featbit/issues)
 
-◆  Join [**FeatBit Github Discussions**](https://github.com/featbit/featbit/discussions), this is a place to ask questions to the community and make suggestions to the team. You can react to comments just like issues and you can even create threads! It's also an alternative to Slack.
+◆ If you want to request a new feature, you can post it in our [**Discussion's feature suggestions page**](https://github.com/featbit/featbit/discussions/categories/feature-suggestions)
 
-## Useful links
+◆ All important announcement will be posted in our [**Discusssion's announcement page**](https://github.com/featbit/featbit/discussions/categories/announcements)
 
-◆  [FeatBit Roadmap](https://featbit.gitbook.io/docs/roadmap/roadmap-voter) - Looking for a feature? It might already be planned for release. You can also vote for the feature you care mostly.
+◆ Any other requirements (such as Q&A, pool, show-n-tell, general topics), you can join our [**Discussions's page**](https://github.com/featbit/featbit/discussions) .
+
+◆ If you have further questions and would like to contact us, you can join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
+
+◆ All approved stories, tasks will be displayed and managed in [**GitHub's project page**](https://github.com/orgs/featbit/projects).
+
+
+## Other useful links
 
 ◆  [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
 
@@ -51,7 +68,9 @@ The project is under code refactoring. An update will be coming soon.
 
 ## Contribute to FeatBit
 
-Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. We'd love to have your help too: Please feel free to open issues or provide pull requests.
+Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. 
+
+We'd love to have your help too. Feel free to open issues, provide pull requests, and become a contributor.
 
 ## License
 
