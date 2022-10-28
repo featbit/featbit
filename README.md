@@ -48,7 +48,7 @@ The default admin username is `test@featbit.com`, password is `123456`.
 
 ◆ Any other requirements (such as Q&A, pool, show-n-tell, general topics), you can join our [**Discussions's page**](https://github.com/featbit/featbit/discussions) .
 
-◆ Whether you feel comfortable or uncomfortable with GitHub's Discussion, you can join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
+◆ If you have further questions and would like to contact us, you can join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
 
 ◆ All approved stories, tasks will be displayed and managed in [**GitHub's project page**](https://github.com/orgs/featbit/projects).
 
