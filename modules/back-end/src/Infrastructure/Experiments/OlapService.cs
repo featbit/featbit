@@ -25,8 +25,7 @@ public class OlapService : IOlapService
         {
             return null;
         }
-
-        var tt = await res.Content.ReadAsStringAsync();
+        
         var response = JsonSerializer.Deserialize<OlapExptIterationResponse>(
             await res.Content.ReadAsStringAsync(),
             new JsonSerializerOptions

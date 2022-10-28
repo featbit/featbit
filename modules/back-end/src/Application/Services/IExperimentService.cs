@@ -20,7 +20,4 @@ public interface IExperimentService : IService<Experiment>
     Task<PagedResult<ExperimentVm>> GetListAsync(Guid envId, ExperimentFilter filter);
 
     Task<IEnumerable<ExperimentIterationResultsVm>> GetIterationResults(Guid envId, IEnumerable<ExperimentIterationParam> experimentIterationTuples);
-    // Task<Experiment> GetAsync(Guid envId, string key);
-    //
-    // Task DeleteAsync(Guid id);
 }
