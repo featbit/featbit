@@ -44,9 +44,9 @@ After FeatBit's docker container is etablished, you can open FeatBit's portal UI
 
 ◆ All important announcement will be posted in our [**Discusssion's announcement page**](https://github.com/featbit/featbit/discussions/categories/announcements)
 
-◆ For any other requirement, you can post it in our other [**Discussions's page**](https://github.com/featbit/featbit/discussions) such as Q&A, Poll, Show&Tell, or other general topics. This is a good place to ask questions to the community and make suggestions to the team.
+◆ Any other requirements (such as Q&A, pool, show-n-tell, general topics), you can join our [**Discussions's page**](https://github.com/featbit/featbit/discussions) .
 
-◆ If when you get stuck, want to chat, or are thinking of a new feature, and you don't feel comfortable with methods above, you can Join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).  
+◆ Whether you feel comfortable or uncomfortable with GitHub's Discussion, you can also join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
 
 ◆ All approved stories, tasks will be displayed and managed in [**GitHub's project page**](https://github.com/orgs/featbit/projects).
 
