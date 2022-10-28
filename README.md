@@ -25,13 +25,15 @@ FeatBit started with a consensus that We use open source to make software innova
 
 ## Getting Started
 
-FeatBit's first version is still under development, we didn't release it yet. You can now run and test the project with `docker-compose-dev.yml`.
+FeatBit's first version is still under development, but you can run and test the project with `docker-compose-dev.yml`.
 
 ```
 docker-compose -f docker-compose-dev.yml up -d
 ```
 
-After FeatBit's docker container is etablished, you can open FeatBit's portal UI to start your journey. The default URL is `http://localhost:8081`
+After FeatBit's docker container is etablished, you can open FeatBit's portal UI to start your journey. The default URL is:
+
+[http://localhost:8081](http://localhost:8081)
 
 
 ## Documentation & Communities
@@ -66,7 +68,9 @@ After FeatBit's docker container is etablished, you can open FeatBit's portal UI
 
 ## Contribute to FeatBit
 
-Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. We'd love to have your help too: Please feel free to open issues, provide pull requests, and request to be a contributor (even a administrator).
+Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. 
+
+We'd love to have your help too: Please feel free to open issues, provide pull requests, and become a contributor.
 
 ## License
 
