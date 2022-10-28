@@ -10,7 +10,7 @@
 
 **FeatBit** is a scalable and high-performance **Feature Management** platform. Our mission statement is to **Empower all teams to deliver, control, experiment with, and monetize their software**.
 
-Our first task is to reduce the cost of self-research for everyone, an open source tool to better achieve the following works：
+Our first task is to provide an open source tool to better achieve the following works：
 
 - Testing in production
 - Targeted & Progressive release
@@ -48,7 +48,7 @@ The default admin username is `test@featbit.com`, password is `123456`.
 
 ◆ Any other requirements (such as Q&A, pool, show-n-tell, general topics), you can join our [**Discussions's page**](https://github.com/featbit/featbit/discussions) .
 
-◆ Whether you feel comfortable or uncomfortable with GitHub's Discussion, you can also join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
+◆ Whether you feel comfortable or uncomfortable with GitHub's Discussion, you can join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
 
 ◆ All approved stories, tasks will be displayed and managed in [**GitHub's project page**](https://github.com/orgs/featbit/projects).
 
@@ -70,7 +70,7 @@ The default admin username is `test@featbit.com`, password is `123456`.
 
 Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. 
 
-We'd love to have your help too: Please feel free to open issues, provide pull requests, and become a contributor.
+We'd love to have your help too, please feel free to open issues, provide pull requests, and become a contributor.
 
 ## License
 
