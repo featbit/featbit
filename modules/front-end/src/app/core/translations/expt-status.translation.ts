@@ -1,14 +1,14 @@
 export default {
-  '1': {
+  'NotStarted': {
     zh: '未开始',
     en: 'Not Started'
   },
-  '2':{
+  'Paused':{
     zh: '暂停',
     en: 'Paused'
   },
-  '3':{
+  'Recording':{
     zh: '进行中',
-    en: 'In Progress'
+    en: 'Recording'
   }
 }

@@ -19,9 +19,9 @@ export enum CustomEventSuccessCriteria {
 }
 
 export enum ExperimentStatus {
-  NotStarted = 1,
-  NotRecording = 2,
-  Recording = 3
+  NotStarted = 'NotStarted',
+  Paused = 'Paused',
+  Recording = 'Recording'
 }
 
 export enum UrlMatchType {
@@ -31,6 +31,11 @@ export enum UrlMatchType {
 export interface ITargetUrl {
   matchType: UrlMatchType,
   url: string
+}
+
+export interface IPagedMetric {
+  totalCount: number;
+  items: IMetric[];
 }
 
 export interface IMetric {
@@ -55,7 +60,7 @@ export interface IExperiment {
   featureFlagName?: string,
   metricId: string,
   metric?: IMetric,
-  baselineVariation: string,
+  baselineVariationId: string,
   status?: ExperimentStatus,
   variations: string[],
   iterations?: IExperimentIteration[],

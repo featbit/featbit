@@ -7,6 +7,7 @@ using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
 using Infrastructure.ExperimentMetrics;
+using Infrastructure.Experiments;
 using Infrastructure.FeatureFlags;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
@@ -82,8 +83,9 @@ public static class ConfigureServices
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
         services.AddTransient<IDataSyncService, DataSyncService>();
+        services.AddTransient<IExperimentService, ExperimentService>();
         services.AddTransient<IExperimentMetricService, ExperimentMetricService>();
-
+        services.AddTransient<IOlapService, OlapService>();
         return services;
     }
 }

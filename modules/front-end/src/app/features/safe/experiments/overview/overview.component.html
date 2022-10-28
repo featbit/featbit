@@ -3,7 +3,7 @@
     <div class="annotation">
       <div class="legend">
         <div i18n="@@expt.overview.in-progress">In Progress</div>
-        <div>{{ getExptCountByStatus(3) }}</div>
+        <div>{{ statusCount[exptStatusRecording] }}</div>
       </div>
       <div class="icon">
         <i class="status" nz-icon nzType="icons:icon-expt-ongoing"></i>
@@ -12,7 +12,7 @@
     <div class="annotation">
       <div class="legend">
         <div i18n="@@expt.overview.paused">Paused</div>
-        <div>{{ getExptCountByStatus(2) }}</div>
+        <div>{{ statusCount[exptStatusPaused] }}</div>
       </div>
       <div class="icon">
         <i class="status" nz-icon nzType="icons:icon-expt-paused"></i>
@@ -21,7 +21,7 @@
     <div class="annotation">
       <div class="legend">
         <div i18n="@@expt.overview.not-started">Not Started</div>
-        <div>{{ getExptCountByStatus(1) }}</div>
+        <div>{{ statusCount[exptStatusNotStarted] }}</div>
       </div>
       <div class="icon">
         <i class="status" nz-icon nzType="icons:icon-expt-not-started"></i>
@@ -33,7 +33,7 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by feature flag name" i18n-placeholder="@@expt.overview.filter-by-ff-name" [(ngModel)]="searchText" (ngModelChange)="onSearch()">
+          <input nz-input type="text" placeholder="Filter by feature flag name" i18n-placeholder="@@expt.overview.filter-by-ff-name" [(ngModel)]="filter.featureFlagName" (ngModelChange)="onSearch(true)">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
@@ -42,18 +42,22 @@
 
       <button nz-button nzType="primary" (click)="onCreateClick()">
         <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@expt.overview.add-expt">Add Experiment</ng-container>
+        <ng-container i18n="@@expt.overview.add-expt">Add</ng-container>
       </button>
     </div>
     <div class="table-wrapper">
       <nz-table #borderedTable
                 nzSize="small"
-                [nzLoading]="isLoading"
-                nzFrontPagination
-                nzShowPagination
                 nzShowSizeChanger
-                [nzPageSizeOptions]="[10, 20, 30]"
-                [nzData]="experimentList"
+                [nzData]="pagedExpt.items"
+                [nzFrontPagination]="false"
+                [nzLoading]="isLoading"
+                [nzTotal]="pagedExpt.totalCount"
+                [(nzPageSize)]="filter.pageSize"
+                (nzPageSizeChange)="onSearch()"
+                [nzPageSizeOptions]="[10,20,30]"
+                [(nzPageIndex)]="filter.pageIndex"
+                (nzPageIndexChange)="onSearch()"
                 style="margin-top: 20px;">
         <thead>
         <tr>
@@ -61,6 +65,7 @@
           <th i18n="@@expt.overview.metric-name">Metric name</th>
           <th i18n="@@expt.overview.event-name">Event name</th>
           <th i18n="@@expt.overview.event-type">Event type</th>
+          <th i18n="@@common.baseline-variation">Baseline</th>
           <th i18n="@@expt.overview.status">Status</th>
           <th nzAlign="center" i18n="@@common.actions">Actions</th>
         </tr>
@@ -68,43 +73,46 @@
         <tbody>
         <tr *ngFor="let data of borderedTable.data">
           <td>{{data.featureFlagName}}</td>
-          <td>{{data.metric.name}}</td>
+          <td>{{data.metricName}}</td>
           <td>
-            <ng-container *ngIf="data.metric.eventType === customEventType">
-              {{data.metric.eventName}}
+            <ng-container *ngIf="data.metricEventType === customEventType">
+              {{data.metricEventName}}
             </ng-container>
-            <ng-container *ngIf="data.metric.eventType === pageViewEventType">
+            <ng-container *ngIf="data.metricEventType === pageViewEventType">
               pageview
             </ng-container>
-            <ng-container *ngIf="data.metric.eventType === clickEventType">
+            <ng-container *ngIf="data.metricEventType === clickEventType">
               click
             </ng-container>
           </td>
           <td>
             <span class="tag">
-              <ng-container *ngIf="data.metric.eventType === customEventType">
+              <ng-container *ngIf="data.metricEventType === customEventType">
                 <ng-container i18n="@@common.custom-event">Custom: </ng-container>
-                <ng-container *ngIf="data.metric.customEventTrackOption === customEventTrackConversion" i18n="@@common.conversion">Conversion</ng-container>
-                <ng-container *ngIf="data.metric.customEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
+                <ng-container *ngIf="data.metricCustomEventTrackOption === customEventTrackConversion" i18n="@@common.conversion-rate">Conversion rate</ng-container>
+                <ng-container *ngIf="data.metricCustomEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
               </ng-container>
-              <ng-container *ngIf="data.metric.eventType === pageViewEventType">
-                PageView: <ng-container i18n="@@common.conversion">Conversion</ng-container>
+              <ng-container *ngIf="data.metricEventType === pageViewEventType">
+                PageView: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
               </ng-container>
-              <ng-container *ngIf="data.metric.eventType === clickEventType">
-                Click: <ng-container i18n="@@common.conversion">Conversion</ng-container>
+              <ng-container *ngIf="data.metricEventType === clickEventType">
+                Click: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
               </ng-container>
             </span>
           </td>
+          <td>
+            {{data.baselineVariation.value}}
+          </td>
           <td class="expt-status-col">
-            <div *ngIf="data.status === 3" class="expt-status ongoing"></div>
-            <div *ngIf="data.status === 2" class="expt-status paused"></div>
-            <div *ngIf="data.status === 1" class="expt-status not-started"></div>
+            <div *ngIf="data.status === exptStatusRecording" class="expt-status ongoing"></div>
+            <div *ngIf="data.status === exptStatusPaused" class="expt-status paused"></div>
+            <div *ngIf="data.status === exptStatusNotStarted" class="expt-status not-started"></div>
             <div>
               {{data.status | T: data.status: 'expt-status'}}
             </div>
           </td>
           <td style="text-align: center">
-            <a (click)="goToFeatureFlag(data.featureFlagId)" i18n="expt.overview.check-result">Check result</a>
+            <a (click)="goToFeatureFlag(data.featureFlagKey)" i18n="expt.overview.check-result">Check result</a>
           </td>
         </tr>
         </tbody>

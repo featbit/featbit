@@ -6,7 +6,7 @@ import scipy as sp
 from dateutil.parser import isoparse
 from utils import format_float_positional
 
-EXPT_NECESSARY_COLUMNS = ["exptId", "envId", "flagExptId", "eventName", "eventType", "startExptTime", "baselineVariation", "variations"]
+EXPT_NECESSARY_COLUMNS = ["exptId", "envId", "flagExptId", "eventName", "eventType", "startExptTime", "baselineVariationId", "variationIds"]
 EXPT_EVENT_TYPE_MAPPING = {1: "CustomEvent", 2: "PageView", 3: "Click"}
 EXPT_DEFAULT_EVENT_TYPE = "CustomEvent"
 

@@ -2,27 +2,32 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from '@services/experiment.service';
-import { SwitchV1Service } from '@services/switch-v1.service';
-import { FeatureFlagParams, IVariationOption } from '../../types/switch-new';
-import { CustomEventTrackOption, EventType, ExperimentStatus, IExperiment, IExperimentIteration, IExperimentIterationResult } from '../../types/experimentations';
+import { CustomEventTrackOption, EventType, ExperimentStatus } from '../../types/experimentations';
 import * as moment from 'moment';
-import { isNumber } from '@utils/index';
+import {FeatureFlagService} from "@services/feature-flag.service";
+import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
+import {IVariation} from "@shared/rules";
+import {
+  ExperimentListFilter,
+  IExpt,
+  IExptIteration,
+  IExptIterationResult
+} from "@features/safe/experiments/overview/types";
 
 @Component({
-  selector: 'switch-experimentations',
+  selector: 'ff-experimentations',
   templateUrl: './experimentation.component.html',
   styleUrls: ['./experimentation.component.less']
 })
 export class ExperimentationComponent implements OnInit, OnDestroy {
 
-  compareWith = (o1: IExperimentIteration, o2: IExperimentIteration) => o1 && o2 && o1.id === o2.id;
+  compareWith = (o1: IExptIteration, o2: IExptIteration) => o1 && o2 && o1.id === o2.id;
 
-  featureFlagId: string;
-  currentVariationOptions: IVariationOption[] = [];
-  currentFeatureFlag: FeatureFlagParams = null;
+  variations: IVariation[] = [];
+  featureFlag: FeatureFlag = {} as FeatureFlag;
   isInitLoading = true;
   experimentation: string;
-  onGoingExperiments: IExperiment[] = [];
+  onGoingExperiments: IExpt[] = [];
   refreshIntervalId;
   refreshInterval: number = 1000 * 60; // 1 minute
 
@@ -36,18 +41,23 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   pageViewEventType: EventType = EventType.PageView;
   clickEventType: EventType = EventType.Click;
 
+  exptStatusNotStarted: ExperimentStatus = ExperimentStatus.NotStarted;
+  exptStatusPaused: ExperimentStatus = ExperimentStatus.Paused;
+  exptStatusRecording: ExperimentStatus = ExperimentStatus.Recording;
+
   exptRulesVisible = false;
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchV1Service,
+    private featureFlagService: FeatureFlagService,
     private message: NzMessageService,
     private experimentService: ExperimentService
   ) {
-    const ffId: string = decodeURIComponent(this.route.snapshot.params['id']);
-    this.switchServe.getSwitchDetail(ffId).subscribe(res => {
-      this.currentFeatureFlag = new FeatureFlagParams(res);
-      this.currentVariationOptions = this.currentFeatureFlag.getVariationOptions();
+    const featureFlagKey: string = decodeURIComponent(this.route.snapshot.params['key']);
+
+    this.featureFlagService.getByKey(featureFlagKey).subscribe((result: IFeatureFlag) => {
+      this.featureFlag = new FeatureFlag(result);
+      this.variations = [...this.featureFlag.variations];
     });
   }
 
@@ -64,81 +74,75 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.featureFlagId = this.route.snapshot.paramMap.get('id');
-    if(this.switchServe.envId) {
-      this.initData();
+    this.loadExperiments();
 
-      this.refreshIntervalId = setInterval(() => {
-        const activeExperimentIteration = this.onGoingExperiments.flatMap(expt => {
-          expt.isLoading = true;
+    this.refreshIntervalId = setInterval(() => {
+      const activeExperimentIteration = this.onGoingExperiments.flatMap(expt => {
+        expt.isLoading = true;
 
-          return expt.iterations.filter(it => it.endTime === null || !it.isFinish).map( i =>
-            ({
-              experimentId: expt.id,
-              iterationId: i.id
-            })
-          )
-        });
+        return expt.iterations.filter(it => it.endTime === null || !it.isFinish).map( i =>
+          ({
+            experimentId: expt.id,
+            iterationId: i.id
+          })
+        )
+      });
 
-        if (activeExperimentIteration.length > 0) {
-          this.experimentService.getIterationResults(this.switchServe.envId, activeExperimentIteration).subscribe(res => {
-            if (res && res.length > 0) {
-              this.onGoingExperiments.forEach(expt => {
-                const iteration = res.find(r => r.id === expt.selectedIteration.id);
-                if (iteration) {
-                  expt.selectedIteration = this.processIteration(iteration, expt.baselineVariation);
-                  if (iteration.updatedAt) {
-                    expt.selectedIteration.updatedAt = iteration.updatedAt;
-                    expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
-                  }
-
-                  if (expt.metric.customEventTrackOption === this.customEventTrackNumeric) {
-                    // [min, max, max - min]
-                    expt.selectedIteration.numericConfidenceIntervalBoundary = [
-                      Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
-                      Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
-                    ];
-
-                    expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
-                  }
-
-                  // update experiment original iterations
-                  const selectedIterationIndex = expt.iterations.findIndex(iteration => iteration.id === expt.selectedIteration.id);
-                  expt.iterations[selectedIterationIndex] = expt.selectedIteration;
-
-                  this.setExptStatus(expt, iteration);
-                }
-              });
-            }
-
+      if (activeExperimentIteration.length > 0) {
+        this.experimentService.getIterationResults(activeExperimentIteration).subscribe(res => {
+          if (res && res.length > 0) {
             this.onGoingExperiments.forEach(expt => {
-              expt.isLoading = false;
-              this.initChartConfig(expt);
+              const iteration = res.find(r => r.id === expt.selectedIteration.id);
+              if (iteration) {
+                expt.selectedIteration = this.processIteration(iteration, expt.baselineVariationId);
+                if (iteration.updatedAt) {
+                  expt.selectedIteration.updatedAt = iteration.updatedAt;
+                  expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
+                }
+
+                if (expt.metricCustomEventTrackOption === this.customEventTrackNumeric) {
+                  // [min, max, max - min]
+                  expt.selectedIteration.numericConfidenceIntervalBoundary = [
+                    Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
+                    Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
+                  ];
+
+                  expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
+                }
+
+                // update experiment original iterations
+                const selectedIterationIndex = expt.iterations.findIndex(iteration => iteration.id === expt.selectedIteration.id);
+                expt.iterations[selectedIterationIndex] = expt.selectedIteration;
+
+                this.setExptStatus(expt, iteration);
+              }
             });
-          }, _ => {
-            this.onGoingExperiments.forEach(expt => expt.isLoading = false);
+          }
+
+          this.onGoingExperiments.forEach(expt => {
+            expt.isLoading = false;
+            this.initChartConfig(expt);
           });
-        }
-      }, this.refreshInterval);
-    }
+        }, _ => {
+          this.onGoingExperiments.forEach(expt => expt.isLoading = false);
+        });
+      }
+    }, this.refreshInterval);
   }
 
-  experimentList: IExperiment[] = [];
-  private initData() {
-    this.experimentService.getExperiments({envId: this.switchServe.envId, featureFlagId: this.featureFlagId}).subscribe(experiments => {
+  experimentList: IExpt[] = [];
+  private loadExperiments() {
+    // temporary use 1000 as page size to assure to have all experiments in the first page
+    // we should find a way to manage pagination
+    const filter = new ExperimentListFilter(null, this.featureFlag.id, 1, 1000);
+    this.experimentService.getList(filter).subscribe(experiments => {
       if (experiments) {
-        this.experimentList = experiments.map(experiment => {
-          const expt = Object.assign({}, experiment);
-
+        this.experimentList = experiments.items.map(expt => {
           if (expt.iterations.length > 0) {
-            expt.iterations = expt.iterations.map(iteration => this.processIteration(iteration, expt.baselineVariation)).reverse();
+            expt.iterations = expt.iterations.map(iteration => this.processIteration(iteration, expt.baselineVariationId)).reverse();
             expt.selectedIteration = expt.iterations[0];
 
-            if (expt.selectedIteration.updatedAt) {
-              expt.selectedIteration.updatedAtStr = moment(expt.selectedIteration.updatedAt).format('YYYY-MM-DD HH:mm');
-            }
-
-            if (experiment.metric.customEventTrackOption === this.customEventTrackNumeric) {
+            if (expt.metricCustomEventTrackOption === this.customEventTrackNumeric) {
               // [min, max, max - min]
               expt.selectedIteration.numericConfidenceIntervalBoundary = [
                 Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
@@ -158,61 +162,79 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       }
       this.isInitLoading = false;
     }, _ => {
-      this.message.error("数据加载失败，请重试!");
+      this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
       this.isInitLoading = false;
     });
   }
 
-  onStartIterationClick(expt: IExperiment) {
+  onStartIterationClick(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.startIteration(this.switchServe.envId, expt.id).subscribe(res => {
+    this.experimentService.startIteration(expt.id).subscribe(res => {
       if (res) {
-        expt.iterations = [this.processIteration(res, expt.baselineVariation), ...expt.iterations];
+        expt.iterations = [this.processIteration(res, expt.baselineVariationId), ...expt.iterations];
         expt.selectedIteration = expt.iterations[0];
         expt.status = ExperimentStatus.Recording;
+
+        this.loadIterationResults(expt);
 
         this.onGoingExperiments = [...this.onGoingExperiments, expt];
       }
       expt.isLoading  = false;
     }, _ => {
-      this.message.error("操作失败，请重试!");
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       expt.isLoading  = false;
     });
   }
 
-  onStopIterationClick(expt: IExperiment) {
+  onStopIterationClick(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.stopIteration(this.switchServe.envId, expt.id, expt.selectedIteration.id).subscribe(res => {
+    this.experimentService.stopIteration(expt.id, expt.selectedIteration.id).subscribe(res => {
       if (res) {
         expt.selectedIteration.endTime = res.endTime;
         expt.selectedIteration.dateTimeInterval = `${moment(expt.selectedIteration.startTime).format('YYYY-MM-DD HH:mm')} - ${moment(expt.selectedIteration.endTime).format('YYYY-MM-DD HH:mm')}`
-        expt.status = ExperimentStatus.NotRecording;
+        expt.status = ExperimentStatus.Paused;
       }
 
       expt.isLoading  = false;
     }, _ => {
-      this.message.error("操作失败，请重试!");
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       expt.isLoading  = false;
     });
   }
 
-  private setExptStatus(expt: IExperiment, iteration: IExperimentIteration) {
-    expt.status = iteration.isFinish ? ExperimentStatus.NotRecording : ExperimentStatus.Recording;
+  private setExptStatus(expt: IExpt, iteration: IExptIteration) {
+    expt.status = iteration.isFinish ? ExperimentStatus.Paused : ExperimentStatus.Recording;
 
     return;
   }
 
-  onReloadIterationResultsClick(expt: IExperiment) {
+  loadIterationResults(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.getIterationResults(this.switchServe.envId, [{ experimentId: expt.id, iterationId: expt.selectedIteration.id}]).subscribe(res => {
+    const param = {
+      exptId: expt.id,
+      iterationId: expt.selectedIteration.id,
+      flagExptId: `${expt.envId}-${expt.featureFlagKey}`,
+      baselineVariationId: expt.baselineVariationId,
+      variationIds: this.featureFlag.variations.map(v => v.id),
+      eventName: expt.metricEventName,
+      eventType: expt.metricEventType,
+      customEventTrackOption: expt.metricCustomEventTrackOption,
+      customEventSuccessCriteria: expt.metricCustomEventSuccessCriteria,
+      customEventUnit: expt.metricCustomEventUnit,
+      startTime: expt.selectedIteration.startTime,
+      endTime: expt.selectedIteration.endTime,
+      isFinish: expt.selectedIteration.isFinish
+    };
+
+    this.experimentService.getIterationResults([param]).subscribe(res => {
       if (res) {
-        expt.selectedIteration = this.processIteration(res[0], expt.baselineVariation);
+        expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariationId);
         if (res[0].updatedAt) {
           expt.selectedIteration.updatedAt = res[0].updatedAt;
           expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
         }
 
-        if (expt.metric.customEventTrackOption === this.customEventTrackNumeric) {
+        if (expt.metricCustomEventTrackOption === this.customEventTrackNumeric) {
           // [min, max, max - min]
           expt.selectedIteration.numericConfidenceIntervalBoundary = [
             Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
@@ -227,88 +249,88 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
       expt.isLoading  = false;
     }, _ => {
-      //this.message.error("数据加载失败，请重试!");
+      this.message.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
       expt.isLoading  = false;
     });
   }
 
-  onDeleteExptClick(expt: IExperiment) {
+  onReloadIterationResultsClick(expt: IExpt) {
+    this.loadIterationResults(expt);
+  }
+
+  onDeleteExptClick(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.archiveExperiment(this.switchServe.envId, expt.id).subscribe(_ => {
+    this.experimentService.archiveExperiment(expt.id).subscribe(_ => {
       this.experimentList = this.experimentList.filter(ex => ex.id !== expt.id);
       expt.isLoading  = false;
     }, _ => {
-      this.message.error("操作失败，请重试!");
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       expt.isLoading  = false;
     });
   }
 
-  onDeleteExptDataClick(expt: IExperiment) {
+  onDeleteExptDataClick(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.archiveExperimentData(this.switchServe.envId, expt.id).subscribe(_ => {
+    this.experimentService.archiveExperimentData(expt.id).subscribe(_ => {
       expt.selectedIteration = null;
       expt.iterations = [];
       expt.status = ExperimentStatus.NotStarted;
       expt.isLoading  = false;
     }, _ => {
-      this.message.error("操作失败，请重试!");
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
       expt.isLoading  = false;
     });
   }
 
-  private processIteration(iteration: IExperimentIteration, baselineVariation: string) {
-    const iterationResults = this.currentVariationOptions.map((option) => {
-        const found = iteration.results.find(r => r.variation == option.localId);
-        return !found ? this.createEmptyIterationResult(option, baselineVariation) : Object.assign({}, found, {
-          conversion: !isNumber(found.conversion) ? '--' : found.conversion,
-          conversionRate: !isNumber(found.conversionRate) ? '--' : found.conversionRate,
-          uniqueUsers: !isNumber(found.uniqueUsers) ? '--' : found.uniqueUsers,
-          totalEvents: !isNumber(found.totalEvents) ? '--' : found.totalEvents,
-          average: !isNumber(found.average) ? '--' : found.average,
-          variationValue: option.variationValue,
-          pValue: !isNumber(found.pValue) ? '--' : found.pValue,
+  private processIteration(iteration: IExptIteration, baselineVariationId: string): IExptIteration {
+    const iterationResults = this.variations.map((option) => {
+        const found = iteration.results.find(r => r.variation === option.id);
+        return !found ? this.createEmptyIterationResult(option, baselineVariationId) : { ...found,
+          variationValue: option.value,
           confidenceInterval: !found.confidenceInterval ? [-1, -1] : found.confidenceInterval.map(x => Math.max(0, x)),
           isEmpty: false,
-        })
+        }
       });
 
     if (iterationResults.length === 0) {
       console.log('------------- Hello, Did you find what you want?--------------------')
     }
 
-    const invalidVariation = iterationResults.find(e => e.isInvalid && !e.isBaseline);
-    const winnerVariation = iterationResults.find(e => e.isWinner);
+    const invalidVariation = !!iterationResults.find(e => e.isInvalid && !e.isBaseline);
+    const winnerVariation = !!iterationResults.find(e => e.isWinner);
 
-    return Object.assign({}, iteration, {
+    return {
+      ...iteration,
       invalidVariation,
       winnerVariation,
       results: iterationResults,
       dateTimeInterval: `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')} - ${iteration.endTime? moment(iteration.endTime).format('YYYY-MM-DD HH:mm') : moment(new Date()).format('YYYY-MM-DD HH:mm') + ' (现在)'}`
-    });
-  }
-
-  private createEmptyIterationResult(option: IVariationOption, baselineVariation: string): Partial<IExperimentIterationResult> {
-    return {
-      isEmpty: true,
-      variationValue: option.variationValue,
-      confidenceInterval: [-1, -1],
-      isBaseline: baselineVariation === `${option.localId}`
     };
   }
 
-  private initChartConfig(experiment: IExperiment) {
+  private createEmptyIterationResult(option: IVariation, baselineVariationId: string): IExptIterationResult {
+    return {
+      isEmpty: true,
+      variation: option.id,
+      variationValue: option.value,
+      confidenceInterval: [-1, -1],
+      isBaseline: baselineVariationId === option.id
+    } as IExptIterationResult;
+  }
+
+  private initChartConfig(experiment: IExpt) {
     const iterations = experiment.iterations;
     if (!iterations || !iterations.length) {
       return;
     }
 
-    const xAxisName = '时间';
+    const xAxisName = $localize `:@@common.time:time`;
     const trackOption = iterations[0].customEventTrackOption;
     const valueUnit = trackOption === CustomEventTrackOption.Conversion
       ? '%' : (iterations[0].customEventUnit ? iterations[0].customEventUnit : '');
     const yAxisName = trackOption === CustomEventTrackOption.Conversion
-      ? `转换率（${valueUnit}）`
-      : iterations[0].customEventUnit ? `平均值（${valueUnit}）` : '平均值';
+      ? `${$localize `:@@common.conversion-rate:Conversion rate`}（${valueUnit}）`
+      : iterations[0].customEventUnit ? `${$localize `:@@common.average:Average`}（${valueUnit}）` : $localize `:@@common.average:Average`;
 
     let source = [];
     let yAxisFormatter;
@@ -316,13 +338,12 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       const xAxisValue = iteration.endTime ? iteration.endTime : iteration.updatedAt;
       iteration.results.forEach(result => {
         if (!result.variation ||
-          !this.currentVariationOptions.find(option => option.localId == result.variation)
+          !this.variations.find(option => option.id == result.variation)
         ) {
           return;
         }
 
         // see function **processIteration**
-        // conversionRate average 这两个值为 -1 时 会被修改为 '--' 代表 '没有值' 显示为 0
         let yAxisValue;
         if (trackOption === CustomEventTrackOption.Conversion) {
           const conversionRate = Number(result.conversionRate);
@@ -337,7 +358,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       });
     });
 
-    experiment.chartConfig = ({
+    experiment.chartConfig = {
       xAxis: {
         name: xAxisName,
         position: 'end',
@@ -355,6 +376,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       dataGroupBy: 'variation',
       padding: [50, 50, 50, 70],
       toolTip: { tplFormatter: tpl => tpl.replace("{value}", `{value} ${valueUnit}`) },
-    });
-  }
+    };
+   }
 }
