@@ -31,9 +31,7 @@ FeatBit's first version is still under development, but you can run and test the
 docker-compose -f docker-compose-dev.yml up -d
 ```
 
-After FeatBit's docker container is etablished, you can open FeatBit's portal UI to start your journey. The default URL is:
-
-[http://localhost:8081](http://localhost:8081)
+After FeatBit's docker container is etablished, you can open FeatBit's portal UI to start your journey. The default URL is [http://localhost:8081](http://localhost:8081) .
 
 
 ## Documentation & Communities
