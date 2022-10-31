@@ -1,56 +1,47 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using Domain.Utils;
+using System.Net.Mime;
+using System.Text.Json;
 using Domain.Experiments;
-using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Experiments;
 
 public class OlapService : IOlapService
 {
-    private string Endpoint { get; }
+    private readonly HttpClient _httpClient;
 
-    public OlapService(IConfiguration configuration)
+    public OlapService(HttpClient httpClient)
     {
-        Endpoint = configuration["OLAP:ServiceHost"];
+        _httpClient = httpClient;
     }
 
     public async Task<ExperimentIteration> GetExptIterationResultAsync(ExptIterationParam param)
     {
-        using var client = new HttpClient();
-        HttpContent content = new StringContent(JsonSerializer.Serialize(param));
-        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
+        var content = new StringContent(
+            JsonSerializer.Serialize(param, ReusableJsonSerializerOptions.Web),
+            Encoding.UTF8, MediaTypeNames.Application.Json
+        );
 
-        var res = await client.PostAsync($"{Endpoint}/api/expt/results", content);
+        var response = await _httpClient.PostAsync("/api/expt/results", content);
 
-        if (res.StatusCode != System.Net.HttpStatusCode.OK)
-        {
-            return null;
-        }
-        
-        var response = JsonSerializer.Deserialize<OlapExptIterationResponse>(
-            await res.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-        if (!(response is { Code: (int)System.Net.HttpStatusCode.OK }))
-        {
-            return null;
-        }
+        var result = JsonSerializer.Deserialize<OlapExptIterationResponse>(
+            await response.Content.ReadAsStringAsync(),
+            ReusableJsonSerializerOptions.Web
+        );
 
         return new ExperimentIteration
         {
-            Id = response.Data.IterationId,
-            StartTime = response.Data.StartTime,
-            EndTime = response.Data.EndTime,
+            Id = result.Data.IterationId,
+            StartTime = result.Data.StartTime,
+            EndTime = result.Data.EndTime,
             UpdatedAt = DateTime.UtcNow,
-            EventType = response.Data.EventType,
+            EventType = result.Data.EventType,
             EventName = param.EventName,
-            CustomEventTrackOption = response.Data.CustomEventTrackOption,
-            CustomEventUnit = response.Data.CustomEventUnit,
-            CustomEventSuccessCriteria = response.Data.CustomEventSuccessCriteria,
-            Results = response.Data.Results,
-            IsFinish = response.Data.IsFinish,
+            CustomEventTrackOption = result.Data.CustomEventTrackOption,
+            CustomEventUnit = result.Data.CustomEventUnit,
+            CustomEventSuccessCriteria = result.Data.CustomEventSuccessCriteria,
+            Results = result.Data.Results,
+            IsFinish = result.Data.IsFinish,
         };
     }
 }

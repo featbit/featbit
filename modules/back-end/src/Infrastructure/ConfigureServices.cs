@@ -69,6 +69,12 @@ public static class ConfigureServices
         // hosted services
         services.AddHostedService<KafkaConsumerService>();
 
+        // typed http clients
+        services.AddHttpClient<IOlapService, OlapService>(httpClient =>
+        {
+            httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]);
+        });
+
         // custom services
         services.AddScoped<IUserService, UserService>();
         services.AddTransient<IOrganizationService, OrganizationService>();
@@ -85,7 +91,6 @@ public static class ConfigureServices
         services.AddTransient<IDataSyncService, DataSyncService>();
         services.AddTransient<IExperimentService, ExperimentService>();
         services.AddTransient<IExperimentMetricService, ExperimentMetricService>();
-        services.AddTransient<IOlapService, OlapService>();
         return services;
     }
 }

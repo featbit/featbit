@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using Domain.ExperimentMetrics;
 
 namespace Domain.Experiments;
@@ -50,43 +49,30 @@ public class IterationResult
 
 public class ExptIterationParam
 {
-    [JsonPropertyName("exptId")]
     public Guid ExptId { get; set; }
-    
-    [JsonPropertyName("iterationId")]
+
     public string IterationId { get; set; }
-    
-    [JsonPropertyName("envId")]
+
     public Guid EnvId { get; set; }
-    
-    [JsonPropertyName("flagExptId")]
+
     public string FlagExptId { get; set; }
-    
-    [JsonPropertyName("baselineVariationId")]
+
     public string BaselineVariationId { get; set; }
-    
-    [JsonPropertyName("variationIds")]
+
     public IEnumerable<string> VariationIds { get; set; }
-    
-    [JsonPropertyName("eventName")]
+
     public string EventName { get; set; }
-    
-    [JsonPropertyName("eventType")]
+
     public int EventType { get; set; }
-    
-    [JsonPropertyName("customEventTrackOption")]
+
     public int CustomEventTrackOption { get; set; }
-    
-    [JsonPropertyName("customEventSuccessCriteria")]
+
     public int CustomEventSuccessCriteria { get; set; }
-    
-    [JsonPropertyName("customEventUnit")]
+
     public string CustomEventUnit { get; set; }
-    
-    [JsonPropertyName("startExptTime")]
+
     public string StartExptTime { get; set; } // format "2021-09-20T21:00:00.123456"
-    
-    [JsonPropertyName("endExptTime")]
+
     public string EndExptTime { get; set; } // format "2021-09-20T21:00:00.123456"
 }
 
