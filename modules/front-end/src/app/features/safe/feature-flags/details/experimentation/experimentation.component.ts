@@ -105,7 +105,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
             this.onGoingExperiments.forEach(expt => {
               const iteration = res.find(r => r.id === expt.selectedIteration.id);
               if (iteration) {
-                expt.selectedIteration = this.processIteration(iteration, expt.baselineVariation.id);
+                expt.selectedIteration = this.processIteration({ ...expt.selectedIteration }, expt.baselineVariation.id);
                 if (iteration.updatedAt) {
                   expt.selectedIteration.updatedAt = iteration.updatedAt;
                   expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
@@ -162,9 +162,12 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
               expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
             }
+
+            this.loadIterationResults(expt);
+          } else {
+            expt.isLoading = false;
           }
 
-          expt.isLoading = false;
           return expt;
         });
 
