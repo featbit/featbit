@@ -6,6 +6,13 @@ import {
 } from "@features/safe/feature-flags/types/experimentations";
 import {IVariation} from "@shared/rules";
 
+export interface IExptCreation {
+  envId: string,
+  featureFlagId: string,
+  metricId: string,
+  baselineVariationId: string,
+}
+
 export class ExperimentListFilter {
   featureFlagName?: string;
   featureFlagId?: string;

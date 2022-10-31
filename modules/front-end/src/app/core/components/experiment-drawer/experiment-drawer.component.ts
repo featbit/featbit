@@ -155,8 +155,8 @@ export class ExperimentDrawerComponent implements OnInit {
       envId: this.experiment.envId,
       featureFlagId: featureFlag.id,
       metricId: metric.id,
-      baselineVariation: baselineVariationId,
-    } as IExpt)
+      baselineVariationId: baselineVariationId,
+    })
       .pipe()
       .subscribe(
         res => {

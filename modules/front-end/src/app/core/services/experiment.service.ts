@@ -5,7 +5,7 @@ import { environment } from 'src/environments/environment';
 import {getCurrentProjectEnv} from "@utils/project-env";
 import {
   ExperimentListFilter,
-  IExpt,
+  IExpt, IExptCreation,
   IExptIteration,
   IExptStatusCount,
   IPagedExpt
@@ -28,7 +28,7 @@ export class ExperimentService {
     this.envId = getCurrentProjectEnv().envId;
   }
 
-  createExperiment(params: IExpt): Observable<IExpt[]> {
+  createExperiment(params: IExptCreation): Observable<IExpt[]> {
     const url = this.baseUrl;
     return this.http.post<IExpt[]>(url, params);
   }
