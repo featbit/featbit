@@ -17,7 +17,7 @@ public class ExperimentVm
     public string MetricEventName { get; set; }
     public EventType MetricEventType { get; set; }
     public CustomEventTrackOption MetricCustomEventTrackOption { get; set; }
-    public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
+    public CustomEventSuccessCriteria MetricCustomEventSuccessCriteria { get; set; }
     public string MetricCustomEventUnit { get; set; }
     public string Status { get; set; }
     

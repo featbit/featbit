@@ -29,7 +29,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   experimentation: string;
   onGoingExperiments: IExpt[] = [];
   refreshIntervalId;
-  refreshInterval: number = 1000 * 60; // 1 minute
+  refreshInterval: number = 1000 * 10; // 1 minute
 
   onGoingStatus = [
     ExperimentStatus.Recording
@@ -82,8 +82,19 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
         return expt.iterations.filter(it => it.endTime === null || !it.isFinish).map( i =>
           ({
-            experimentId: expt.id,
-            iterationId: i.id
+            exptId: expt.id,
+            iterationId: i.id,
+            flagExptId: `${this.experimentService.envId}-${expt.featureFlagKey}`,
+            baselineVariationId: expt.baselineVariation.id,
+            variationIds: this.featureFlag.variations.map(v => v.id),
+            eventName: expt.metricEventName,
+            eventType: expt.metricEventType,
+            customEventTrackOption: expt.metricCustomEventTrackOption,
+            customEventSuccessCriteria: expt.metricCustomEventSuccessCriteria,
+            customEventUnit: expt.metricCustomEventUnit,
+            startTime: expt.selectedIteration.startTime,
+            endTime: expt.selectedIteration.endTime,
+            isFinish: expt.selectedIteration.isFinish
           })
         )
       });

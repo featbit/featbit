@@ -247,7 +247,10 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 
         foreach (var iteration in experimentIterationParam)
         {
-            var iterationResults = new ExperimentIterationResultsVm();
+            var iterationResults = new ExperimentIterationResultsVm
+            {
+                Id = iteration.IterationId
+            };
 
             if (iteration.IsFinish)
             {
@@ -326,6 +329,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     MetricCustomEventUnit = metric.CustomEventUnit,
                     Status = expt.Status,
                     MetricCustomEventTrackOption = metric.CustomEventTrackOption,
+                    MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
                     Iterations = expt.Iterations
                 };
 
