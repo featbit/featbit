@@ -33,16 +33,16 @@ public class ExperimentIteration
 
 public class IterationResult
 {
-    public float? ChangeToBaseline { get; set; }
-    public List<float> ConfidenceInterval { get; set; }
+    public string ChangeToBaseline { get; set; }
+    public List<string> ConfidenceInterval { get; set; }
     public long? Conversion { get; set; }
-    public float? ConversionRate { get; set; }
+    public string ConversionRate { get; set; }
     public long? TotalEvents { get; set; }
-    public float? Average { get; set; }
+    public string Average { get; set; }
     public bool IsBaseline { get; set; }
     public bool IsInvalid { get; set; }
     public bool IsWinner { get; set; }
-    public float? PValue { get; set; }
+    public string PValue { get; set; }
     public long? UniqueUsers { get; set; }
     public string VariationId { get; set; }
 }
