@@ -235,7 +235,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         experiment.Iterations.Add(newIteration);
         experiment.Status = ExperimentStatus.Recording;
 
-        await this.UpdateAsync(experiment);
+        await UpdateAsync(experiment);
 
         return newIteration;
     }
@@ -247,6 +247,14 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 
         foreach (var iteration in experimentIterationParam)
         {
+            var experiment = await GetAsync(iteration.ExptId);
+            var targetIteration = experiment?.Iterations?.FirstOrDefault(it => it.Id == iteration.IterationId);
+
+            if (experiment == null || targetIteration == null)
+            {
+                continue;
+            }
+
             var iterationResults = new ExperimentIterationResultsVm
             {
                 Id = iteration.IterationId
@@ -256,8 +264,9 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
             {
                 iterationResults.IsFinish = true;
                 iterationResults.IsUpdated = false;
+                iterationResults.Results = targetIteration.Results;
                 results.Add(iterationResults);
-
+                
                 continue;
             }
 
@@ -285,6 +294,11 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 iterationResults.Results = olapExptResults.Results;
                 iterationResults.UpdatedAt = olapExptResults.UpdatedAt;
                 iterationResults.IsUpdated = true;
+
+                targetIteration.IsFinish = olapExptResults.IsFinish;
+                targetIteration.Results = olapExptResults.Results;
+                targetIteration.UpdatedAt = olapExptResults.UpdatedAt;
+                await UpdateAsync(experiment);
             }
 
             results.Add(iterationResults);
