@@ -76,8 +76,8 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         var organizationUser = new OrganizationUser(request.OrganizationId, userId, _currentUser.Id, initialPwd);
         await _organizationService.AddUserAsync(
             organizationUser,
-            request.GroupIds,
-            request.PolicyIds
+            request.PolicyIds,
+            request.GroupIds
         );
 
         return true;
