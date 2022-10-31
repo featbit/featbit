@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import {IUserType} from "@shared/types";
-import {encodeURIComponentFfc} from "@utils/index";
+import {encodeURIComponentFfc, getPathPrefix} from "@utils/index";
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import {ISegment, ISegmentListModel, SegmentListFilter} from "@features/safe/segments/types/segments-index";
 import {SegmentService} from "@services/segment.service";
@@ -171,19 +171,17 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
     return new Date(date);
   }
 
-  // 点击进入对应开关详情
   public onIntoSegmentDetail(data: ISegment) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/segments/details/${encodeURIComponentFfc(data.id)}/targeting`])
+      this.router.createUrlTree([`${getPathPrefix()}segments/details/${encodeURIComponentFfc(data.id)}/targeting`])
     );
 
     window.open(url, '_blank');
   }
 
-  // 点击进入对应开关详情
   public onIntoFlagDetail(data: IFfParams) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/feature-flags/${encodeURIComponentFfc(data.id)}/targeting`])
+      this.router.createUrlTree([`${getPathPrefix()}feature-flags/${encodeURIComponentFfc(data.id)}/targeting`])
     );
 
     window.open(url, '_blank');

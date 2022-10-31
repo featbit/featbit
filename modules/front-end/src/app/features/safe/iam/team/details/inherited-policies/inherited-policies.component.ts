@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { encodeURIComponentFfc } from "@utils/index";
+import {encodeURIComponentFfc, getPathPrefix} from "@utils/index";
 import { MemberService } from "@services/member.service";
 import { InheritedMemberPolicyFilter, IPagedInheritedMemberPolicy } from "@features/safe/iam/types/member";
 
@@ -62,7 +62,7 @@ export class InheritedPoliciesComponent implements OnInit {
 
   navigateToPolicy(policyId: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/iam/policies/${encodeURIComponentFfc(policyId)}/permission`])
+      this.router.createUrlTree([`/${getPathPrefix()}iam/policies/${encodeURIComponentFfc(policyId)}/permission`])
     );
 
     window.open(url, '_blank');

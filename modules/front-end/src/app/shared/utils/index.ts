@@ -4,9 +4,8 @@ import {IRulePercentageRollout} from "@features/safe/feature-flags/types/switch-
 import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
 import {ICondition} from "@shared/rules";
 
-export function hasLocalePath() {
-  const regex = /^\/en\/|zh\//i;
-  return regex.test(location.pathname);
+export function getPathPrefix() {
+  return location.pathname.match(/^(?<locale>\/en\/|\/zh\/)/i)?.groups['locale'] || '/';
 }
 
 export function getAuth() : IAuthProps | null {

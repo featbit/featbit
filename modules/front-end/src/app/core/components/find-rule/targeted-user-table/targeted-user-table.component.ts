@@ -5,6 +5,7 @@ import { IUserType } from "@shared/types";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
+import {getPathPrefix} from "@utils/index";
 
 @Component({
   selector: 'targeted-user-table',
@@ -74,7 +75,7 @@ export class TargetedUserTableComponent implements OnInit {
 
   navigateToUserDetail(user: IUserType) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/switch-user/${encodeURIComponent(user.id)}`])
+      this.router.createUrlTree([`/${getPathPrefix()}users/${encodeURIComponent(user.id)}`])
     );
 
     window.open(url, '_blank');

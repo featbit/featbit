@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { encodeURIComponentFfc } from "@utils/index";
+import {encodeURIComponentFfc, getPathPrefix} from "@utils/index";
 import { IPagedPolicyGroup, PolicyGroupFilter } from "@features/safe/iam/types/policy";
 import { GroupService } from "@services/group.service";
 import { PolicyService } from "@services/policy.service";
@@ -93,7 +93,7 @@ export class GroupsComponent implements OnInit {
 
   navigateToGroup(groupId: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/iam/groups/${encodeURIComponentFfc(groupId)}/users`])
+      this.router.createUrlTree([`/${getPathPrefix()}iam/groups/${encodeURIComponentFfc(groupId)}/team`])
     );
 
     window.open(url, '_blank');

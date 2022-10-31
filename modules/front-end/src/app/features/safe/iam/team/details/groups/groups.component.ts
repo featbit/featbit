@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { encodeURIComponentFfc } from "@utils/index";
+import {encodeURIComponentFfc, getPathPrefix} from "@utils/index";
 import { MemberService } from "@services/member.service";
 import { IPagedMemberGroup, MemberGroupFilter } from "@features/safe/iam/types/member";
 import { GroupService } from "@services/group.service";
@@ -39,7 +39,7 @@ export class GroupsComponent implements OnInit {
 
   goToGroup(groupId: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/iam/groups/${encodeURIComponentFfc(groupId)}/users`])
+      this.router.createUrlTree([`${getPathPrefix()}iam/groups/${encodeURIComponentFfc(groupId)}/team`])
     );
 
     window.open(url, '_blank');

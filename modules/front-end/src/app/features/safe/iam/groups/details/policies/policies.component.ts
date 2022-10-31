@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { encodeURIComponentFfc } from "@utils/index";
+import {encodeURIComponentFfc, getPathPrefix} from "@utils/index";
 import { GroupService } from "@services/group.service";
 import { GroupPolicyFilter, IPagedGroupPolicy } from "@features/safe/iam/types/group";
 
@@ -91,7 +91,7 @@ export class PoliciesComponent implements OnInit {
 
   navigateToPolicyDetail(policyId: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/iam/policies/${encodeURIComponentFfc(policyId)}/permission`])
+      this.router.createUrlTree([`/${getPathPrefix()}iam/policies/${encodeURIComponentFfc(policyId)}/permission`])
     );
 
     window.open(url, '_blank');

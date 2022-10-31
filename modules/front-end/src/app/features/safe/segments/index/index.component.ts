@@ -1,8 +1,8 @@
-import {Component, Inject, LOCALE_ID, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import {encodeURIComponentFfc, hasLocalePath} from '@shared/utils';
+import {encodeURIComponentFfc, getPathPrefix} from '@shared/utils';
 import { SegmentListFilter, ISegment, ISegmentListModel, ISegmentFlagReference } from "../types/segments-index";
 import { SegmentService } from "@services/segment.service";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
@@ -149,7 +149,6 @@ export class IndexComponent implements OnInit, OnDestroy {
 
   //#endregion
   constructor(
-    @Inject(LOCALE_ID) public activeLocale: string,
     private router: Router,
     private segmentService: SegmentService,
     private msg: NzMessageService,
@@ -188,9 +187,8 @@ export class IndexComponent implements OnInit, OnDestroy {
   }
 
   public openFlagPage(flagKey: string) {
-    const path = hasLocalePath()? `/${this.activeLocale}/feature-flags/${flagKey}/targeting` : `/feature-flags/${flagKey}/targeting`;
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([path])
+      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flagKey}/targeting`])
     );
 
     window.open(url, '_blank');

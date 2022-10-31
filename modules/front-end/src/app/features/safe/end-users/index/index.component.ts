@@ -8,6 +8,7 @@ import { IUserProp, IUserType } from "@shared/types";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 import { CURRENT_USER_FILTER_ATTRIBUTE } from "@utils/localstorage-keys";
 import { EnvUserService } from "@services/env-user.service";
+import {getPathPrefix} from "@utils/index";
 
 
 @Component({
@@ -134,7 +135,7 @@ export class IndexComponent implements OnInit {
 
   navigateToUserDetail(user: IUserType) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`${window.location.pathname}/${encodeURIComponent(user.id)}`])
+      this.router.createUrlTree([`${getPathPrefix()}users/${encodeURIComponent(user.id)}`])
     );
 
     window.open(url, '_blank');

@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { encodeURIComponentFfc } from "@utils/index";
+import {encodeURIComponentFfc, getPathPrefix} from "@utils/index";
 import { MemberService } from "@services/member.service";
 import { PolicyService } from "@services/policy.service";
 import { IPagedPolicyMember, PolicyMemberFilter } from "@features/safe/iam/types/policy";
@@ -93,7 +93,7 @@ export class TeamComponent implements OnInit {
 
   navigateToMember(userId: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/iam/users/${encodeURIComponentFfc(userId)}/groups`])
+      this.router.createUrlTree([`/${getPathPrefix()}iam/users/${encodeURIComponentFfc(userId)}/groups`])
     );
 
     window.open(url, '_blank');
