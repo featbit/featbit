@@ -17,7 +17,7 @@ export class DetailsComponent implements OnInit {
   searchValue: string = '';
   userId: string;
 
-  defaultKeys = ['keyId', 'name', 'email', 'country'];
+  builtInKeys = ['keyId', 'name'];
 
   propertyList = [];
   searchResult = [];
@@ -60,12 +60,12 @@ export class DetailsComponent implements OnInit {
         const user = res;
         if (res) {
           if (!res.customizedProperties) {
-            this.propertyList = this.defaultKeys.map(key => ({
+            this.propertyList = this.builtInKeys.map(key => ({
               name: key,
               value: user[key]
             }));
           } else {
-            this.propertyList = [...this.defaultKeys.map(key => ({
+            this.propertyList = [...this.builtInKeys.map(key => ({
                 name: key,
                 value: user[key]
               })),
