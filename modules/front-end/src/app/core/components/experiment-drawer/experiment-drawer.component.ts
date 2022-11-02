@@ -2,17 +2,14 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
-import { IProjectEnv } from '@shared/types';
-import {IExperiment, IPagedMetric} from '@features/safe/feature-flags/types/experimentations';
+import { debounceTime } from 'rxjs/operators';
 import { ExperimentService } from '@services/experiment.service';
 import { MetricService } from '@services/metric.service';
-import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import {FeatureFlagService} from "@services/feature-flag.service";
 import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {IVariation} from "@shared/rules";
-import {IExpt} from "@features/safe/experiments/overview/types";
+import {IExpt, IPagedMetric, MetricListFilter} from "@features/safe/experiments/types";
 
 
 @Component({
@@ -22,7 +19,7 @@ import {IExpt} from "@features/safe/experiments/overview/types";
 })
 export class ExperimentDrawerComponent implements OnInit {
 
-  private _experiment: IExperiment;
+  private _experiment: IExpt;
 
   experimentForm: FormGroup;
   isLoading: boolean = false;
@@ -36,7 +33,7 @@ export class ExperimentDrawerComponent implements OnInit {
   };
 
   @Input()
-  set experiment(experiment: IExperiment) {
+  set experiment(experiment: IExpt) {
     this.resetForm();
 
     this._experiment = experiment;
@@ -56,13 +53,10 @@ export class ExperimentDrawerComponent implements OnInit {
     private experimentService: ExperimentService,
     private message: NzMessageService
   ) {
-    const currentProjectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
-
     this.featureFlagSearchChange$.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(searchText => {
-      this.featureFlagService.getList(new IFeatureFlagListFilter(searchText)).subscribe((result) => {
+      debounceTime(500)
+    ).subscribe(query => {
+      this.featureFlagService.getList(new IFeatureFlagListFilter(query)).subscribe((result) => {
         this.featureFlagList = result;
         this.isFeatureFlagsLoading = false;
       }, error => {
@@ -71,16 +65,10 @@ export class ExperimentDrawerComponent implements OnInit {
     });
 
     this.metricSearchChange$.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(searchText => {
-      this.metricService.getMetrics({
-        envId: currentProjectEnv.envId,
-        pageIndex: 0,
-        pageSize: 50,
-        name: searchText
-      }).subscribe((result) => {
-        this.metricList = result;
+      debounceTime(500)
+    ).subscribe(query => {
+      this.metricService.getMetrics(new MetricListFilter(query)).subscribe((result) => {
+        this.pagedMetric = result;
         this.isMetricsLoading = false;
       }, error => {
         this.isMetricsLoading = false;
@@ -124,7 +112,7 @@ export class ExperimentDrawerComponent implements OnInit {
 
   metricSearchChange$ = new BehaviorSubject('');
   isMetricsLoading = false;
-  metricList: IPagedMetric;
+  pagedMetric: IPagedMetric;
   onSearchMetrics(value: string) {
     if (value.length > 0) {
       this.isMetricsLoading = true;
@@ -150,7 +138,7 @@ export class ExperimentDrawerComponent implements OnInit {
 
     const { featureFlag, metricId, baselineVariationId } = this.experimentForm.value;
 
-    const metric = this.metricList.items.find(m => m.id === metricId);
+    const metric = this.pagedMetric.items.find(m => m.id === metricId);
     this.experimentService.createExperiment({
       envId: this.experiment.envId,
       featureFlagId: featureFlag.id,

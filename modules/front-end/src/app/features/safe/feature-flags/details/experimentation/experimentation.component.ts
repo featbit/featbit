@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from '@services/experiment.service';
-import { CustomEventTrackOption, EventType, ExperimentStatus } from '../../types/experimentations';
 import * as moment from 'moment';
 import {FeatureFlagService} from "@services/feature-flag.service";
 import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
@@ -11,8 +10,11 @@ import {
   ExperimentListFilter,
   IExpt,
   IExptIteration,
-  IExptIterationResult
-} from "@features/safe/experiments/overview/types";
+  IExptIterationResult,
+  CustomEventTrackOption,
+  EventType,
+  ExperimentStatus
+} from "@features/safe/experiments/types";
 
 @Component({
   selector: 'ff-experimentations',

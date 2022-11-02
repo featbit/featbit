@@ -22,11 +22,18 @@ public class ExperimentMetricService : MongoDbService<ExperimentMetric>, IExperi
         };
 
         // name filter
-        if (!string.IsNullOrWhiteSpace(metricFilter.Name))
+        if (!string.IsNullOrWhiteSpace(metricFilter.metricName))
         {
             var nameFilter = filterBuilder.Where(metric =>
-                metric.Name.Contains(metricFilter.Name, StringComparison.CurrentCultureIgnoreCase));
+                metric.Name.Contains(metricFilter.metricName, StringComparison.CurrentCultureIgnoreCase));
             filters.Add(nameFilter);
+        }
+        
+        // event type filter
+        if (metricFilter.EventType.HasValue)
+        {
+            var eventTypeFilter = filterBuilder.Where(metric => metric.EventType == metricFilter.EventType.Value);
+            filters.Add(eventTypeFilter);
         }
 
         var filter = filterBuilder.And(filters);

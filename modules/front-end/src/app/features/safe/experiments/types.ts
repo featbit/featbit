@@ -1,10 +1,27 @@
-import {
-  CustomEventSuccessCriteria,
-  CustomEventTrackOption,
-  EventType, ExperimentStatus,
-  IExperimentIterationResult
-} from "@features/safe/feature-flags/types/experimentations";
 import {IVariation} from "@shared/rules";
+
+export class MetricListFilter {
+  metricName?: string;
+  eventType?: EventType;
+  pageIndex: number;
+  pageSize: number;
+
+  constructor(
+    metricName?: string,
+    eventType?: EventType,
+    pageIndex: number = 1,
+    pageSize: number = 10) {
+    this.metricName = metricName ?? '';
+    this.eventType = eventType;
+    this.pageIndex = pageIndex;
+    this.pageSize = pageSize;
+  }
+}
+
+export interface IPagedMetric {
+  totalCount: number;
+  items: IMetric[];
+}
 
 export interface IExptCreation {
   envId: string,
@@ -98,4 +115,52 @@ export interface IExptIterationResult {
 export interface IExptStatusCount {
   status: ExperimentStatus,
   count: number
+}
+
+export enum EventType {
+  Custom = 1,
+  PageView = 2,
+  Click = 3
+}
+
+export enum CustomEventTrackOption {
+  Undefined = 0,
+  Conversion = 1,
+  Numeric = 2
+}
+
+export enum CustomEventSuccessCriteria {
+  Undefined = 0,
+  Lower = 2, // lower than baseline
+  Higher = 1 // higher than baseline
+}
+
+export enum ExperimentStatus {
+  NotStarted = 'NotStarted',
+  Paused = 'Paused',
+  Recording = 'Recording'
+}
+
+export enum UrlMatchType {
+  Substring = 1
+}
+
+export interface ITargetUrl {
+  matchType: UrlMatchType,
+  url: string
+}
+
+export interface IMetric {
+  id?: string,
+  name: string,
+  envId: string,
+  description: string,
+  maintainerUserId: string,
+  eventName: string,
+  eventType: EventType,
+  customEventTrackOption?: CustomEventTrackOption,
+  customEventUnit?: string,
+  customEventSuccessCriteria?: CustomEventSuccessCriteria,
+  elementTargets?: string,
+  targetUrls?: ITargetUrl[]
 }

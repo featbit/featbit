@@ -3,14 +3,14 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="searchText" (ngModelChange)="onSearch()">
+          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="filter.metricName" (ngModelChange)="onSearch()">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
-        <nz-select [(ngModel)]="showType">
+        <nz-select [(ngModel)]="filter.eventType" (ngModelChange)="onSearch()">
           <nz-option nzValue="" i18n-nzLabel="@@common.all" nzLabel="All"></nz-option>
-          <nz-option [nzValue]="customEventType" i18n-nzLabel="@@expt.metric.custom-event-metric" nzLabel="With custom event"></nz-option>
+          <nz-option [nzValue]="customEventType" i18n-nzLabel="@@expt.metric.custom-event-metric" nzLabel="Custom event"></nz-option>
         </nz-select>
       </div>
 
@@ -28,7 +28,7 @@
                 [nzPageSizeOptions]="[10, 20, 30]"
                 nzSize="small"
                 [nzLoading]="isLoading"
-                [nzData]="metricList">
+                [nzData]="pagedMetric.items">
         <thead>
         <tr>
           <th nzWidth="20%">Metric</th>
