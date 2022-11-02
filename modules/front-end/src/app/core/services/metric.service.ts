@@ -42,11 +42,6 @@ export class MetricService {
     return this.http.get(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
   }
 
-  getMetric(envId: string, id: string): Observable<any> {
-    const url = this.baseUrl + `/${envId}/${id}`;
-    return this.http.get(url);
-  }
-
   archiveMetric(id: string): Observable<any> {
     const url = this.baseUrl + `/${id}/archive`;
     return this.http.put(url, {});
