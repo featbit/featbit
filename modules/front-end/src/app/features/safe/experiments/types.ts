@@ -2,9 +2,32 @@ import {
   CustomEventSuccessCriteria,
   CustomEventTrackOption,
   EventType, ExperimentStatus,
-  IExperimentIterationResult
+  IMetric
 } from "@features/safe/feature-flags/types/experimentations";
 import {IVariation} from "@shared/rules";
+
+export class MetricListFilter {
+  metricName?: string;
+  eventType?: EventType;
+  pageIndex: number;
+  pageSize: number;
+
+  constructor(
+    metricName?: string,
+    eventType?: EventType,
+    pageIndex: number = 1,
+    pageSize: number = 10) {
+    this.metricName = metricName ?? '';
+    this.eventType = eventType;
+    this.pageIndex = pageIndex;
+    this.pageSize = pageSize;
+  }
+}
+
+export interface IPagedMetric {
+  totalCount: number;
+  items: IMetric[];
+}
 
 export interface IExptCreation {
   envId: string,

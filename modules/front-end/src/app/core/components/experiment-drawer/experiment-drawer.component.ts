@@ -12,7 +12,7 @@ import {FeatureFlagService} from "@services/feature-flag.service";
 import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {IVariation} from "@shared/rules";
-import {IExpt} from "@features/safe/experiments/overview/types";
+import {IExpt} from "@features/safe/experiments/types";
 
 
 @Component({
@@ -75,10 +75,9 @@ export class ExperimentDrawerComponent implements OnInit {
       distinctUntilChanged()
     ).subscribe(searchText => {
       this.metricService.getMetrics({
-        envId: currentProjectEnv.envId,
-        pageIndex: 0,
+        pageIndex: 1,
         pageSize: 50,
-        name: searchText
+        metricName: searchText
       }).subscribe((result) => {
         this.metricList = result;
         this.isMetricsLoading = false;

@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { IOrganization } from '@shared/types';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from '@features/safe/feature-flags/types/experimentations';
 import { MetricService } from '@services/metric.service';
@@ -65,8 +65,7 @@ export class MetricDrawerComponent implements OnInit {
     const currentAccount: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
 
     this.maintainerSearchChange$.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
+      debounceTime(500)
     ).subscribe(searchText => {
       this.teamService.searchMembers(currentAccount.id, searchText).subscribe((result) => {
         this.maintainerList = result.items;

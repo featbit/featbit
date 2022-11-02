@@ -12,7 +12,7 @@ import {
   IExpt,
   IExptIteration,
   IExptIterationResult
-} from "@features/safe/experiments/overview/types";
+} from "@features/safe/experiments/types";
 
 @Component({
   selector: 'ff-experimentations',

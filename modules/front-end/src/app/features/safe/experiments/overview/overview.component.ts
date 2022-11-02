@@ -12,7 +12,7 @@ import {
   IExperiment
 } from '../../feature-flags/types/experimentations';
 import {CURRENT_LANGUAGE, CURRENT_PROJECT} from "@utils/localstorage-keys";
-import {ExperimentListFilter, IExpt, IPagedExpt} from "@features/safe/experiments/overview/types";
+import {ExperimentListFilter, IExpt, IPagedExpt} from "@features/safe/experiments/types";
 import {getPathPrefix} from "@utils/index";
 
 @Component({

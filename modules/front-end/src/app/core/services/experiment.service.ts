@@ -9,7 +9,7 @@ import {
   IExptIteration,
   IExptStatusCount,
   IPagedExpt
-} from "@features/safe/experiments/overview/types";
+} from "@features/safe/experiments/types";
 
 @Injectable({
   providedIn: 'root'

@@ -2,12 +2,12 @@ import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { IOrganization, IAccountUser, IProjectEnv } from '@shared/types';
 import { MetricService } from '@services/metric.service';
-import { TeamService } from '@services/team.service';
 import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from '../../feature-flags/types/experimentations';
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
+import {IPagedMetric, MetricListFilter} from "@features/safe/experiments/types";
 
 @Component({
   selector: 'experiments-metrics',
@@ -19,8 +19,12 @@ export class MetricsComponent implements OnInit, OnDestroy {
   private search$ = new Subject<any>();
   isLoading: boolean = true;
   detailViewVisible: boolean = false;
-  searchText: string = '';
-  metricList: IMetric[] = [];
+
+  pagedMetric: IPagedMetric = {
+    totalCount: 0,
+    items: []
+  };
+
   accountMemberList: IAccountUser[] = [];
 
   currentProjectEnv: IProjectEnv = null;
@@ -34,12 +38,11 @@ export class MetricsComponent implements OnInit, OnDestroy {
   customEventTrackConversion: CustomEventTrackOption = CustomEventTrackOption.Conversion;
   customEventTrackNumeric: CustomEventTrackOption = CustomEventTrackOption.Numeric;
 
-  showType: '' | EventType = '';
+  filter: MetricListFilter = new MetricListFilter();
 
   constructor(
     private route: ActivatedRoute,
     private message: NzMessageService,
-    private teamService: TeamService,
     private metricService: MetricService
   ) {
     this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
@@ -47,35 +50,23 @@ export class MetricsComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.init();
-  }
-
-  onSearch() {
-    this.search$.next(this.searchText);
-  }
-
-  private init() {
     this.search$.pipe(
-      debounceTime(300),
-      distinctUntilChanged()
-    ).subscribe(e => {
+      debounceTime(300)
+    ).subscribe(() => {
       this.isLoading = true;
-      this.metricService.getMetrics({
-        envId: this.currentProjectEnv.envId,
-        pageIndex: 0,
-        pageSize: 2000,
-        name: e
-      }).subscribe((result: any) => {
-        if (result) {
-          this.metricList = result.items;
-        }
+      this.metricService.getMetrics(this.filter).subscribe((result: any) => {
+        this.pagedMetric = result;
         this.isLoading = false;
       }, _ => {
         this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`);
         this.isLoading = false;
       })
     });
-    this.search$.next('');
+    this.search$.next(null);
+  }
+
+  onSearch() {
+    this.search$.next(null);
   }
 
   onCreateOrEditClick(metric?: IMetric) {
@@ -83,13 +74,12 @@ export class MetricsComponent implements OnInit, OnDestroy {
     this.detailViewVisible = true;
   }
 
-
   errorMsgTitle: string;
   errorMsgs: string[] = [];
   onDeleteClick(metric: IMetric, tpl: TemplateRef<void>) {
     this.isLoading = true;
-    this.metricService.archiveMetric(this.currentProjectEnv.envId, metric.id).subscribe(res => {
-      this.metricList = this.metricList.filter(m => metric.id !== m.id);
+    this.metricService.archiveMetric(metric.id).subscribe(res => {
+      this.pagedMetric.items = this.pagedMetric.items.filter(m => metric.id !== m.id);
       this.isLoading = false;
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);
     }, err => {
@@ -108,11 +98,11 @@ export class MetricsComponent implements OnInit, OnDestroy {
     this.detailViewVisible = false;
 
     if (!data.isEditing && data.data && data.data.id) {
-      this.metricList = [data.data, ...this.metricList];
+      this.pagedMetric.items = [data.data, ...this.pagedMetric.items];
     }
 
     if (data.isEditing && data.data) {
-      this.metricList = this.metricList.map(m => {
+      this.pagedMetric.items = this.pagedMetric.items.map(m => {
         return m.id === data.data.id ? data.data : m;
       })
     }

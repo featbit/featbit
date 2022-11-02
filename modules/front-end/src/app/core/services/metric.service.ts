@@ -1,9 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IMetric } from '@features/safe/feature-flags/types/experimentations';
 import { getCurrentProjectEnv } from '@utils/project-env';
+import {MetricListFilter} from "@features/safe/experiments/types";
 
 @Injectable({
   providedIn: 'root'
@@ -31,9 +32,15 @@ export class MetricService {
     return this.http.put(url + `/${params.id}`, params);
   }
 
-  getMetrics(params: any): Observable<any> {
-    const url = this.baseUrl;
-    return this.http.get(url, { params });
+  getMetrics(filter: MetricListFilter = new MetricListFilter()): Observable<any> {
+    const queryParam = {
+      metricName: filter.metricName ?? '',
+      eventType: filter.eventType ?? '',
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    return this.http.get(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
   }
 
   getMetric(envId: string, id: string): Observable<any> {
@@ -41,7 +48,7 @@ export class MetricService {
     return this.http.get(url);
   }
 
-  archiveMetric(envId: string, id: string): Observable<any> {
+  archiveMetric(id: string): Observable<any> {
     const url = this.baseUrl + `/${id}/archive`;
     return this.http.put(url, {});
   }
