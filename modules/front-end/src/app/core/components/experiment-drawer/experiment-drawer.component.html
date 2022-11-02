@@ -56,7 +56,7 @@
               formControlName="metricId"
               (nzOnSearch)="onSearchMetrics($event)"
             >
-              <ng-container *ngFor="let o of metricList?.items">
+              <ng-container *ngFor="let o of pagedMetric?.items">
                 <nz-option *ngIf="!isMetricsLoading" [nzValue]="o.id" [nzLabel]="o.name">
                 </nz-option>
               </ng-container>
