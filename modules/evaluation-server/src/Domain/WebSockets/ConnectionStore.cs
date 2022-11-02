@@ -43,8 +43,21 @@ public class ConnectionStore
     /// </summary>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    public IEnumerable<Connection> Find(Func<Connection, bool> predicate)
+    public ICollection<Connection> Find(Func<Connection, bool> predicate)
     {
-        return _connections.Where(x => predicate(x.Value)).Select(x => x.Value);
+        var connections = new List<Connection>();
+
+        // the enumerator returned from the concurrent dictionary is safe to use concurrently with reads and writes to the dictionary
+        // see https://learn.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2.getenumerator?view=net-6.0
+        foreach (var entry in _connections)
+        {
+            var connection = entry.Value;
+            if (predicate(connection))
+            {
+                connections.Add(connection);
+            }
+        }
+
+        return connections;
     }
 }

@@ -20,5 +20,5 @@ public interface IConnectionManager
     /// Get environment connections
     /// </summary>
     /// <returns></returns>
-    IEnumerable<Connection> GetEnvConnections(Guid envId);
+    ICollection<Connection> GetEnvConnections(Guid envId);
 }

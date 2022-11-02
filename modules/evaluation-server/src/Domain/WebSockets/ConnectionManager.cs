@@ -26,7 +26,7 @@ public partial class ConnectionManager : IConnectionManager
         Log.ConnectionRemoved(_logger, connection.Id);
     }
 
-    public IEnumerable<Connection> GetEnvConnections(Guid envId)
+    public ICollection<Connection> GetEnvConnections(Guid envId)
     {
         return _connectionStore.Find(x => x.EnvId == envId);
     }
