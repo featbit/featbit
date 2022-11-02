@@ -5,9 +5,8 @@ import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { IOrganization, IAccountUser, IProjectEnv } from '@shared/types';
 import { MetricService } from '@services/metric.service';
-import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric } from '../../feature-flags/types/experimentations';
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
-import {IPagedMetric, MetricListFilter} from "@features/safe/experiments/types";
+import {IPagedMetric, MetricListFilter, CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric} from "@features/safe/experiments/types";
 
 @Component({
   selector: 'experiments-metrics',

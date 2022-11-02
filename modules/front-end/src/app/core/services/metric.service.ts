@@ -2,9 +2,8 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IMetric } from '@features/safe/feature-flags/types/experimentations';
 import { getCurrentProjectEnv } from '@utils/project-env';
-import {MetricListFilter} from "@features/safe/experiments/types";
+import {MetricListFilter, IMetric} from "@features/safe/experiments/types";
 
 @Injectable({
   providedIn: 'root'

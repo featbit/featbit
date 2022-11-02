@@ -4,11 +4,17 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { IOrganization } from '@shared/types';
-import { CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric, UrlMatchType } from '@features/safe/feature-flags/types/experimentations';
 import { MetricService } from '@services/metric.service';
 import { TeamService } from '@services/team.service';
 import { uuidv4 } from '@utils/index';
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
+import {
+  CustomEventSuccessCriteria,
+  CustomEventTrackOption,
+  EventType,
+  IMetric,
+  UrlMatchType
+} from "@features/safe/experiments/types";
 
 @Component({
   selector: 'app-metric-drawer',

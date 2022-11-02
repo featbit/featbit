@@ -4,7 +4,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { IProjectEnv } from '@shared/types';
-import {IExperiment, IPagedMetric} from '@features/safe/feature-flags/types/experimentations';
 import { ExperimentService } from '@services/experiment.service';
 import { MetricService } from '@services/metric.service';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
@@ -12,7 +11,7 @@ import {FeatureFlagService} from "@services/feature-flag.service";
 import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {IVariation} from "@shared/rules";
-import {IExpt} from "@features/safe/experiments/types";
+import {IExpt, IPagedMetric} from "@features/safe/experiments/types";
 
 
 @Component({
@@ -22,7 +21,7 @@ import {IExpt} from "@features/safe/experiments/types";
 })
 export class ExperimentDrawerComponent implements OnInit {
 
-  private _experiment: IExperiment;
+  private _experiment: IExpt;
 
   experimentForm: FormGroup;
   isLoading: boolean = false;
@@ -36,7 +35,7 @@ export class ExperimentDrawerComponent implements OnInit {
   };
 
   @Input()
-  set experiment(experiment: IExperiment) {
+  set experiment(experiment: IExpt) {
     this.resetForm();
 
     this._experiment = experiment;

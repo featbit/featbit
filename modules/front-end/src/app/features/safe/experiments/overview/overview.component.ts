@@ -5,14 +5,14 @@ import {Subject} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
 import {IProjectEnv} from '@shared//types';
 import {ExperimentService} from '@services/experiment.service';
+import {CURRENT_PROJECT} from "@utils/localstorage-keys";
 import {
   CustomEventTrackOption,
   EventType,
-  ExperimentStatus,
-  IExperiment
-} from '../../feature-flags/types/experimentations';
-import {CURRENT_LANGUAGE, CURRENT_PROJECT} from "@utils/localstorage-keys";
-import {ExperimentListFilter, IExpt, IPagedExpt} from "@features/safe/experiments/types";
+  ExperimentListFilter, ExperimentStatus,
+  IExpt,
+  IPagedExpt
+} from "@features/safe/experiments/types";
 import {getPathPrefix} from "@utils/index";
 
 @Component({
@@ -97,9 +97,9 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   detailViewVisible: boolean = false;
-  currentExperiment: IExperiment;
+  currentExperiment: IExpt;
   onCreateClick() {
-    this.currentExperiment = { envId: this.currentProjectEnv.envId } as IExperiment;
+    this.currentExperiment = { envId: this.currentProjectEnv.envId } as IExpt;
     this.detailViewVisible = true;
   }
 
