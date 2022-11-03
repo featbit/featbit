@@ -2,6 +2,8 @@ namespace Application.EndUsers;
 
 public class GetEndUserSegments : IRequest<IEnumerable<EndUserSegment>>
 {
+    public Guid EnvId { get; set; }
+
     public Guid Id { get; set; }
 }
 
@@ -19,7 +21,7 @@ public class GetEndUserSegmentsHandler : IRequestHandler<GetEndUserSegments, IEn
     public async Task<IEnumerable<EndUserSegment>> Handle(GetEndUserSegments request, CancellationToken cancellationToken)
     {
         var endUser = await _endUserService.GetAsync(request.Id);
-        var segments = await _segmentService.FindManyAsync(x => !x.IsArchived);
+        var segments = await _segmentService.FindManyAsync(x => x.EnvId == request.EnvId && !x.IsArchived);
 
         var result = segments
             .Where(x => x.IsMatch(endUser))
