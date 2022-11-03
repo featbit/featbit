@@ -71,6 +71,9 @@ public partial class KafkaMessageConsumer : BackgroundService
                 }
 
                 await handler.HandleAsync(consumeResult, cancellationToken);
+
+                // store offset manually
+                _consumer.StoreOffset(consumeResult);
             }
             catch (ConsumeException ex)
             {
