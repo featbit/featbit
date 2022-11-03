@@ -20,9 +20,8 @@ export class GuideComponent {
     private organizationService: OrganizationService
   ) {
     const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
-    const envSecret = currentOrganizationProjectEnv?.projectEnv?.envSecret
-    const evaluationUrl = environment.evaluationUrl
-    this.demoUrl = `${environment.demoUrl}?envKey=${envSecret}&evaluationUrl=${evaluationUrl}`;
+    const envSecret = currentOrganizationProjectEnv?.projectEnv?.envSecret;
+    this.demoUrl = `${environment.demoUrl}?envKey=${envSecret}&evaluationUrl=${environment.evaluationUrl}`;
   }
 
   onClose() {
