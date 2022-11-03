@@ -1,3 +1,5 @@
+using Domain.Targeting;
+
 namespace Domain.FeatureFlags;
 
 public class RolloutVariation
@@ -12,4 +14,6 @@ public class RolloutVariation
     {
         return Rollout[1] - Rollout[0] == 0;
     }
+
+    public bool IsInRollout(string key) => SplittingAlgorithm.IsInRollout(key, Rollout);
 }

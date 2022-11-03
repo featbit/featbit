@@ -176,4 +176,11 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
     }
+
+    public Variation DisabledVariation => GetVariation(DisabledVariationId);
+
+    public Variation GetVariation(string variationId)
+    {
+        return Variations.FirstOrDefault(x => x.Id == variationId);
+    }
 }

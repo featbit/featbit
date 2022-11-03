@@ -18,6 +18,7 @@ using Infrastructure.Policies;
 using Infrastructure.Projects;
 using Infrastructure.Resources;
 using Infrastructure.Segments;
+using Infrastructure.Targeting;
 using Infrastructure.Triggers;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
@@ -91,6 +92,7 @@ public static class ConfigureServices
         services.AddTransient<IDataSyncService, DataSyncService>();
         services.AddTransient<IExperimentService, ExperimentService>();
         services.AddTransient<IExperimentMetricService, ExperimentMetricService>();
+        services.AddSingleton<IEvaluator, Evaluator>();
         return services;
     }
 }

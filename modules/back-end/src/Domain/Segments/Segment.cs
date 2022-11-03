@@ -1,3 +1,4 @@
+using Domain.EndUsers;
 using Domain.Targeting;
 
 namespace Domain.Segments;
@@ -57,5 +58,23 @@ public class Segment : AuditedEntity
     {
         IsArchived = true;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public bool IsMatch(EndUser user)
+    {
+        if (Excluded.Contains(user.KeyId))
+        {
+            return false;
+        }
+
+        if (Included.Contains(user.KeyId))
+        {
+            return true;
+        }
+
+        // if any rule match this user
+        return Rules.Any(
+            rule => rule.Conditions.All(condition => condition.IsMatch(user))
+        );
     }
 }
