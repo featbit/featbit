@@ -21,10 +21,18 @@ public class TargetRuleMatcher
         {
             var property = condition.GetProperty("property").GetString();
 
-            // segment condition
-            if (property is "User is in segment" or "User is not in segment")
+            // in segment condition
+            if (property is "User is in segment")
             {
                 if (!await IsMatchAnySegmentAsync(condition, user))
+                {
+                    return false;
+                }
+            }
+            // not in segment condition
+            else if (property is "User is not in segment")
+            {
+                if (await IsMatchAnySegmentAsync(condition, user))
                 {
                     return false;
                 }
