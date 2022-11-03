@@ -1,51 +1,55 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {NzMessageService} from 'ng-zorro-antd/message';
 import {IUserType} from "@shared/types";
 import {encodeURIComponentFfc, getPathPrefix} from "@utils/index";
-import { EnvUserPropService } from "@services/env-user-prop.service";
-import {ISegment, ISegmentListModel, SegmentListFilter} from "@features/safe/segments/types/segments-index";
-import {SegmentService} from "@services/segment.service";
-import {Subject} from "rxjs";
-import {debounceTime} from "rxjs/operators";
 import {Router} from "@angular/router";
-import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
-import {SwitchV2Service} from "@services/switch-v2.service";
-import {IFfParams, IVariationOption} from "@features/safe/feature-flags/types/switch-new";
 import {editor} from "monaco-editor";
+import {IEndUserFlag, IEndUserSegment} from "@features/safe/end-users/types/user-segments-flags";
+import {EnvUserService} from "@services/env-user.service";
 
 @Component({
   selector: 'user-segments-flags-drawer',
   templateUrl: './user-segments-flags-drawer.component.html',
   styleUrls: ['./user-segments-flags-drawer.component.less']
 })
-export class UserSegmentsFlagsDrawerComponent implements OnInit {
+export class UserSegmentsFlagsDrawerComponent {
 
-  @Input() envId: number;
-  @Input() user: IUserType;
+  private _user: IUserType;
+  @Input()
+  set user(value: IUserType) {
+    if (!value) {
+      return;
+    }
+
+    this._user = value;
+    this.loadFlags();
+    this.loadSegments();
+  }
+
+  get user() {
+    return this._user;
+  }
+
+  @Input() visible: boolean = false;
   @Output() close: EventEmitter<boolean> = new EventEmitter();
 
   constructor(
     private router: Router,
-    private switchV2Service: SwitchV2Service,
-    private segmentService: SegmentService,
-    private envUserPropService: EnvUserPropService,
+    private envUserService: EnvUserService,
     private message: NzMessageService
   ) { }
-
-  ngOnInit(): void {
-    this.subscribeSegmentsSearch();
-    this.subscribeFlagsSearch();
-  }
 
   // copy keyName
   copyText(event, text: string) {
     navigator.clipboard.writeText(text).then(
-      () => this.message.success($localize `:@@common.copy-success:Copied`)
+      () => this.message.success($localize`:@@common.copy-success:Copied`)
     );
   }
 
-  /******************** flags start *******************************/
+  /******************** editor start *******************************/
+
   editor?: editor.ICodeEditor | editor.IEditor;
+
   formatCode(e?: editor.ICodeEditor | editor.IEditor) {
     if (e) {
       this.editor = e;
@@ -59,129 +63,72 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
     }, 100);
   }
 
-  currentVariationOption: IVariationOption = null;
-  currentVariationDataType: string = null;
+  variation: string = '';
+  variationType: string = 'string';
   optionValueExpandVisible = false;
-  expandVariationOption(v: IVariationOption, variationDataType: string) {
-    this.currentVariationOption = {...v};
-    this.currentVariationDataType = variationDataType;
+
+  expandVariationOption(variation: string, variationType: string) {
+    this.variation = variation;
+    this.variationType = variationType;
     this.optionValueExpandVisible = true;
   }
 
+  /******************** editor end *******************************/
+
+  /******************** flags start *******************************/
+
   isFlagsLoading: boolean = false;
-  flagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
-  $searchFlags: Subject<void> = new Subject();
+  flagFilter: string = '';
+  flags: IEndUserFlag[] = [];
+  filteredFlags: IEndUserFlag[] = [];
 
-  onSearchFlags() {
-    this.flagFilter.pageIndex = 1;
-
-    this.$searchFlags.next();
-  }
-
-  subscribeFlagsSearch() {
-    this.$searchFlags.pipe(
-      debounceTime(400)
-    ).subscribe(() => {
-      this.loadFlagList();
+  loadFlags() {
+    this.isFlagsLoading = true;
+    this.envUserService.getFlags(this.user.id).subscribe((flags: IEndUserFlag[]) => {
+      this.flags = flags;
+      this.filteredFlags = flags;
+      this.isFlagsLoading = false;
     });
   }
 
-  flagListModel: IFeatureFlagListModel = {
-    items: [],
-    totalCount: 0
-  };
-
-  loadFlagList() {
-    this.flagFilter.userKeyId = this.user?.keyId;
-    this.isFlagsLoading = true;
-
-    this.switchV2Service
-      .getListForUser(this.flagFilter)
-      .subscribe((flags: IFeatureFlagListModel) => {
-        this.flagListModel = flags;
-        this.isFlagsLoading = false;
-      });
+  filterFlags() {
+    this.filteredFlags = this.flags.filter(x => x.key.includes(this.flagFilter) || x.name.includes(this.flagFilter));
   }
 
   /******************** flags end ********************************/
 
   /******************* segments start *****************************/
   isSegmentsLoading: boolean = false;
-  segmentFilter: SegmentListFilter = new SegmentListFilter();
-  $searchSegments: Subject<void> = new Subject();
+  segmentFilter: string = '';
+  segments: IEndUserSegment[] = [];
+  filteredSegments: IEndUserSegment[] = [];
 
-  onSearchSegments() {
-    this.segmentFilter.pageIndex = 1;
-
-    this.$searchSegments.next();
-  }
-
-  subscribeSegmentsSearch() {
-    this.$searchSegments.pipe(
-      debounceTime(400)
-    ).subscribe(() => {
-      this.loadSegmentList();
+  loadSegments() {
+    this.isSegmentsLoading = true;
+    this.envUserService.getSegments(this.user.id).subscribe((segments: IEndUserSegment[]) => {
+      this.segments = segments;
+      this.filteredSegments = segments;
+      this.isSegmentsLoading = false;
     });
   }
 
-  segmentListModel: ISegmentListModel = {
-    items: [],
-    totalCount: 0
-  };
-
-  loadSegmentList() {
-    this.segmentFilter.pageSize = 5000; // set a big enough value to get all segments
-    this.segmentFilter.userKeyId = this.user?.keyId;
-    this.isSegmentsLoading = true;
-    this.segmentService
-      .getSegmentListForUser(this.segmentFilter)
-      .subscribe((segments: ISegmentListModel) => {
-        this.segmentListModel = segments;
-        this.isSegmentsLoading = false;
-      });
+  filterSegments() {
+    this.filteredSegments = this.segments.filter(x => x.name.includes(this.segmentFilter));
   }
+
   /******************* segments end *****************************/
-  private _visible: boolean = false;
-  @Input()
-  set visible(visible: boolean) {
-    if (visible) {
-      this.segmentListModel = {
-        items: [],
-        totalCount: 0
-      };
-      this.segmentFilter = new SegmentListFilter();
-      this.$searchSegments.next();
 
-      this.flagListModel = {
-        items: [],
-        totalCount: 0
-      };
-      this.flagFilter = new IFeatureFlagListFilter();
-      this.$searchFlags.next();
-    }
-    this._visible = visible;
-  }
-  get visible() {
-    return this._visible;
-  }
-
-  // 转换本地时间
-  getLocalDate(date: string) {
-    if (!date) return '';
-    return new Date(date);
-  }
-
-  public onIntoSegmentDetail(data: ISegment) {
+  public navigateToSegment(id: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`${getPathPrefix()}segments/details/${encodeURIComponentFfc(data.id)}/targeting`])
+      this.router.createUrlTree([`${getPathPrefix()}segments/details/${encodeURIComponentFfc(id)}/targeting`])
     );
 
     window.open(url, '_blank');
   }
 
-  public onIntoFlagDetail(data: IFfParams) {
+  public navigateToFlag(key: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`${getPathPrefix()}feature-flags/${encodeURIComponentFfc(data.id)}/targeting`])
+      this.router.createUrlTree([`${getPathPrefix()}feature-flags/${encodeURIComponentFfc(key)}/targeting`])
     );
 
     window.open(url, '_blank');

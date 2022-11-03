@@ -15,7 +15,7 @@
           <div class="table-search-area">
             <div class="search-inputs">
               <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="Filter by name or keyName" i18n-placeholder="@@users.idx.filter-by-name-or-keyname" [(ngModel)]="flagFilter.name" (ngModelChange)="onSearchFlags()">
+                <input nz-input type="text" placeholder="Filter by name or keyName" i18n-placeholder="@@users.idx.filter-by-name-or-keyname" [(ngModel)]="flagFilter" (ngModelChange)="filterFlags()">
               </nz-input-group>
               <ng-template #prefixIconSearch>
                 <i nz-icon nzType="icons:icon-search"></i>
@@ -23,15 +23,7 @@
             </div>
           </div>
           <div class="table-wrapper">
-            <nz-table #flagstable nzSize="small"
-                      [nzData]="flagListModel.items"
-                      [nzFrontPagination]="false"
-                      [nzLoading]="isFlagsLoading"
-                      [nzTotal]="flagListModel.totalCount"
-                      [(nzPageSize)]="flagFilter.pageSize"
-                      (nzPageSizeChange)="onSearchFlags()"
-                      [(nzPageIndex)]="flagFilter.pageIndex"
-                      (nzPageIndexChange)="onSearchFlags()">
+            <nz-table #flagstable nzSize="small" [nzData]="filteredFlags" [nzFrontPagination]="true" [nzLoading]="isFlagsLoading">
               <thead>
               <tr>
                 <th nzWidth="30%" i18n="@@common.name">Name</th>
@@ -43,21 +35,21 @@
               <tbody>
               <tr *ngFor="let item of flagstable.data">
                 <td>
-                  <span>{{item.name}}</span>
+                  {{item.name}}
                 </td>
                 <td>
-                  <i (click)="copyText($event, item.keyName)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
-                  {{item.keyName}}
+                  <i (click)="copyText($event, item.key)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                  {{item.key}}
                 </td>
                 <td class="option">
                   <div class="left">
-                    <div class="variation-tip {{'tip-' + (item.variation.displayOrder - 1) % 9}}"></div>
-                    <div class="variation-value">{{item.variation.variationValue}}</div>
+                    <div class="variation-tip {{'tip-' + (item.variationDisplayOrder - 1) % 9}}"></div>
+                    <div class="variation-value">{{item.variation}}</div>
                   </div>
-                  <i class="expand-icon" *ngIf="['json', 'string'].includes(item.variationDataType)" nz-icon nzType="expand" (click)="expandVariationOption(item.variation, item.variationDataType)"></i>
+                  <i class="expand-icon" *ngIf="['json', 'string'].includes(item.variationType)" nz-icon nzType="expand" (click)="expandVariationOption(item.variation, item.variationType)"></i>
                 </td>
                 <td>
-                  <a style="color:#23AD7F;" (click)="onIntoFlagDetail(item)" i18n="@@common.details">Details</a>
+                  <a style="color:#23AD7F;" (click)="navigateToFlag(item)" i18n="@@common.details">Details</a>
                 </td>
               </tr>
               </tbody>
@@ -71,7 +63,7 @@
           <div class="table-search-area">
             <div class="search-inputs">
               <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearchSegments()">
+                <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="segmentFilter" (ngModelChange)="filterSegments()">
               </nz-input-group>
               <ng-template #prefixIconSearch>
                 <i nz-icon nzType="icons:icon-search"></i>
@@ -79,15 +71,7 @@
             </div>
           </div>
           <div class="table-wrapper">
-            <nz-table #segstable nzSize="small"
-                      [nzData]="segmentListModel.items"
-                      [nzFrontPagination]="false"
-                      [nzLoading]="isSegmentsLoading"
-                      [nzTotal]="segmentListModel.totalCount"
-                      [(nzPageSize)]="segmentFilter.pageSize"
-                      (nzPageSizeChange)="onSearchSegments()"
-                      [(nzPageIndex)]="segmentFilter.pageIndex"
-                      (nzPageIndexChange)="onSearchSegments()">
+            <nz-table #segstable nzSize="small" [nzFrontPagination]="true" [nzData]="filteredSegments" [nzLoading]="isSegmentsLoading">
               <thead>
               <tr>
                 <th nzWidth="40%" i18n="@@common.name">Name</th>
@@ -101,10 +85,10 @@
                   <span>{{item.name}}</span>
                 </td>
                 <td>
-                  {{getLocalDate(item.updatedAt) | date: 'YYYY-MM-dd HH:mm:ss'}}
+                  {{item.updatedAt | date: 'YYYY-MM-dd HH:mm:ss'}}
                 </td>
                 <td>
-                  <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>
+                  <a style="color:#23AD7F;" (click)="navigateToSegment(item.id)" i18n="@@common.details">Details</a>
                 </td>
               </tr>
               </tbody>
@@ -130,7 +114,7 @@
   (nzOnCancel)="optionValueExpandVisible=false">
   <ng-template #modalTitle><ng-container i18n="@@common.variation"></ng-container></ng-template>
   <ng-template #modalContent>
-    <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentVariationOption.variationValue" [nzEditorOption]="{ language: currentVariationDataType, theme: 'vs-dark' }"></nz-code-editor>
+    <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="variation" [nzEditorOption]="{ language: variationType, theme: 'vs-dark' }"></nz-code-editor>
   </ng-template>
   <ng-template #modalFooter>
     <div style="display: flex;justify-content: space-between">
