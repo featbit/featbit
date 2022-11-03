@@ -49,7 +49,7 @@
                   <i class="expand-icon" *ngIf="['json', 'string'].includes(item.variationType)" nz-icon nzType="expand" (click)="expandVariationOption(item.variation, item.variationType)"></i>
                 </td>
                 <td>
-                  <a style="color:#23AD7F;" (click)="navigateToFlag(item)" i18n="@@common.details">Details</a>
+                  <a style="color:#23AD7F;" (click)="navigateToFlag(item.key)" i18n="@@common.details">Details</a>
                 </td>
               </tr>
               </tbody>
