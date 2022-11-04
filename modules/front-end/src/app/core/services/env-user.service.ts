@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/end-users/types/featureflag-user";
 import { IUserType } from "@shared/types";
-import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
+import {ICondition} from "@shared/rules";
 
 @Injectable({
   providedIn: 'root'
@@ -51,11 +51,11 @@ export class EnvUserService {
     return this.http.get<EnvUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
   }
 
-  targetedUsers(rules: IJsonContent[], pageIndex: number = 0, pageSize: number = 10): Observable<EnvUserPagedResult> {
+  targetedUsers(rules: ICondition[], pageIndex: number = 0, pageSize: number = 10): Observable<EnvUserPagedResult> {
     let filters: string[] = [];
     rules.forEach(rule => {
       let prop = rule.property;
-      let op = rule.operation;
+      let op = rule.op;
 
       // prop and op cannot be null or empty
       if (!prop || !op) {

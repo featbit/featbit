@@ -73,11 +73,6 @@ export interface IFeatureFlagDropdown {
   value: string;
 }
 
-export interface IFeatureFlagDetail {
-  featureFlag: FeatureFlagParams;
-  tags: string[];
-}
-
 export class FeatureFlagTagTree {
   trees: IFeatureFlagTagTreeNode[];
   private _maxNodeId: number;

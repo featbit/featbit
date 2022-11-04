@@ -1,11 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import { EnvUserService } from "@services/env-user.service";
 import { IUserType } from "@shared/types";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import {getPathPrefix} from "@utils/index";
+import {ICondition} from "@shared/rules";
 
 @Component({
   selector: 'targeted-user-table',
@@ -15,8 +15,7 @@ import {getPathPrefix} from "@utils/index";
 export class TargetedUserTableComponent implements OnInit {
 
   @Input()
-  rules: IJsonContent[] = [];
-
+  rules: ICondition[] = [];
   isLoading = true;
   total: number = 0;
   pageIndex: number = 1;
@@ -49,11 +48,11 @@ export class TargetedUserTableComponent implements OnInit {
     if (this.searchName) {
       searchRules.push({
         multipleValue: [],
-        operation: "Contains",
+        op: "Contains",
         property: "Name",
         type: "string",
         value: this.searchName,
-      })
+      } as ICondition)
     }
 
     this.envUserService.targetedUsers(searchRules, this.pageIndex - 1, this.pageSize)
