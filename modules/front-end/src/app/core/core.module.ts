@@ -38,7 +38,6 @@ import { NzImageModule } from "ng-zorro-antd/image";
 import {NzPopoverModule} from "ng-zorro-antd/popover";
 import {NzCodeEditorModule} from "ng-zorro-antd/code-editor";
 import {PercentagePipe} from "@core/pipes/percentage.pipe";
-import {FfcDatePipe} from "@core/pipes/ffcdate.pipe";
 import {PolicyTypePipe} from "@core/pipes/policy-type.pipe";
 import {PermissionCheckDirective} from "@core/directives/permission-check.directive";
 import {LocaleSwitcherComponent} from "@core/components/locale-switcher/locale-switcher.component";
@@ -76,7 +75,6 @@ import {RuleVariationValuePipe} from "@core/components/find-rule/serve/rule-vari
   declarations: [
     SwitchKeyNamePipe,
     PercentagePipe,
-    FfcDatePipe,
     PolicyTypePipe,
     TranslationPipe,
     RuleVariationValuePipe,
@@ -154,7 +152,6 @@ import {RuleVariationValuePipe} from "@core/components/find-rule/serve/rule-vari
     FormsModule,
     SwitchKeyNamePipe,
     PercentagePipe,
-    FfcDatePipe,
     PolicyTypePipe,
     TranslationPipe,
     RuleVariationValuePipe,
