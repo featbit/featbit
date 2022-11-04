@@ -6,9 +6,15 @@ COPY package*.json /app/
 RUN npm install
 COPY ./ /app/
 
-ARG API_URL
+ARG API_URL \ 
+    DEMO_URL \ 
+    EVALUATION_URL
 RUN sed -i "s|__API_URL__|${API_URL}|g" src/environments/environment.ts  \
     && sed -i "s|__API_URL__|${API_URL}|g" src/environments/environment.prod.ts \
+    && sed -i "s|__DEMO_URL__|${DEMO_URL}|g" src/environments/environment.ts  \
+    && sed -i "s|__DEMO_URL__|${DEMO_URL}|g" src/environments/environment.prod.ts \
+    && sed -i "s|__EVALUATION_URL__|${EVALUATION_URL}|g" src/environments/environment.ts  \
+    && sed -i "s|__EVALUATION_URL__|${EVALUATION_URL}|g" src/environments/environment.prod.ts \
     && npm run build:prod
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx

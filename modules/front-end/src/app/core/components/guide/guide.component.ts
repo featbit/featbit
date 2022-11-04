@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { OrganizationService } from '@services/organization.service';
+import { environment } from 'src/environments/environment';
 import { IProjectEnv } from '@shared/types';
 
 @Component({
@@ -19,7 +20,8 @@ export class GuideComponent {
     private organizationService: OrganizationService
   ) {
     const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
-    this.demoUrl = `http://localhost:5173?envKey=${currentOrganizationProjectEnv?.projectEnv?.envSecret}`;
+    const envSecret = currentOrganizationProjectEnv?.projectEnv?.envSecret;
+    this.demoUrl = `${environment.demoUrl}?envKey=${envSecret}&evaluationUrl=${environment.evaluationUrl}`;
   }
 
   onClose() {
