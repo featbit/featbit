@@ -60,6 +60,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.featureFlagService.getByKey(featureFlagKey).subscribe((result: IFeatureFlag) => {
       this.featureFlag = new FeatureFlag(result);
       this.variations = [...this.featureFlag.variations];
+      this.loadExperiments();
     });
   }
 
@@ -76,8 +77,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadExperiments();
-
     this.refreshIntervalId = setInterval(() => {
       const activeExperimentIteration = this.onGoingExperiments.flatMap(expt => {
         expt.isLoading = true;
