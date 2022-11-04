@@ -43,6 +43,8 @@ public static class ErrorCodes
     // feature flag
     public const string CannotDeleteUnArchivedFeatureFlag = nameof(CannotDeleteUnArchivedFeatureFlag);
     public const string InvalidVariationType = nameof(InvalidVariationType);
+    public const string FeatureFlagIdIsRequired = nameof(FeatureFlagIdIsRequired);
+    public const string FeatureFlagVariationIdIsRequired = nameof(FeatureFlagVariationIdIsRequired);
 
     // triggers
     public const string InvalidTriggerType = nameof(InvalidTriggerType);

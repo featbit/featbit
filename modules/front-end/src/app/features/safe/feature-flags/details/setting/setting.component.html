@@ -65,7 +65,6 @@
   <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
     <div class="title">
       <span class="text" i18n="@@common.variations">Variations</span>
-      <!--       <i class="edit-save" nz-tooltip="" nz-icon nzType="icons:icon-info-outline"></i> -->
       <i *ngIf="!isEditingVariations" class="edit-save" (click)="toggleVariationEditState()" nz-icon nzType="icons:icon-edit"></i>
       <i *ngIf="isEditingVariations" class="edit-save" (click)="addVariationOption()" nz-icon nzType="icons:icon-add-outline"></i>
       <i *ngIf="isEditingVariations" style="font-size: 14px" class="edit-save" (click)="saveVariations()" nz-icon nzType="icons:icon-save"></i>
@@ -103,7 +102,7 @@
         <i class="expand-icon" *ngIf="!isEditingVariations && ['json', 'string'].includes(featureFlag.variationType)" nz-icon nzType="expand" (click)="expandVariationOption(variation, true)"></i>
         <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variation.value)"></i>
         <div *ngIf="isEditingVariations">
-          <span class="delete-icon-wrapper" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariationRow(variation.id)">
+          <span class="delete-icon-wrapper" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariation(variation.id)">
             <i nz-icon nzType="icons:icon-delete"></i>
           </span>
         </div>
@@ -145,5 +144,73 @@
         <button *ngIf="!expandReadonly" nz-button nzType="primary" (click)="saveOptionValue()" i18n="@@common.save">Save</button>
       </div>
     </div>
+  </ng-template>
+</nz-modal>
+
+<nz-modal
+  nzWidth="792"
+  [(nzVisible)]="exptReferenceModalVisible"
+  [nzTitle]="exptReferenceModalTitle"
+  [nzCentered]="true"
+  [nzContent]="exptReferenceModalContent"
+  [nzFooter]="exptReferenceModalFooter"
+  (nzOnCancel)="closeExptReferenceModal()">
+  <ng-template #exptReferenceModalTitle><span style="font-size:18px"><ng-container i18n="@@ff.removing-variation">Removing variation</ng-container></span></ng-template>
+
+  <ng-template #exptReferenceModalContent>
+    <div class="expt-references">
+      <div class="warning-message">
+        <div class="warning">
+          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+          <div class="warning-content">
+            <ng-container i18n="@@segment.segment-used-by">This variation is used by following</ng-container>
+            <span style="font-weight:800;display:inline-block;margin:0 3px;"> {{variationExptReferences.length}} </span>
+            <ng-container i18n="@@segment.num-segment-remove-to-use">experiment(s), remove all references before the variation can be safely removed!</ng-container>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <nz-table #borderedTable
+                  nzSize="small"
+                  [nzData]="variationExptReferences"
+                  [nzFrontPagination]="true"
+                  [nzLoading]="isLoading"
+                  [nzTotal]="variationExptReferences.length"
+                  nzPageSize="10"
+                  style="margin-top: 20px;">
+          <thead>
+          <tr>
+            <th i18n="@@expt.overview.metric-name">Metric name</th>
+            <th i18n="@@common.baseline-variation">Baseline</th>
+            <th i18n="@@expt.overview.status">Status</th>
+            <th nzAlign="center" i18n="@@common.actions">Actions</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let data of borderedTable.data">
+            <td>{{data.metricName}}</td>
+            <td>
+              {{data.baselineVariation.value}}
+            </td>
+            <td class="expt-status-col">
+              <div *ngIf="data.status === exptStatusRecording" class="expt-status ongoing"></div>
+              <div *ngIf="data.status === exptStatusPaused" class="expt-status paused"></div>
+              <div *ngIf="data.status === exptStatusNotStarted" class="expt-status not-started"></div>
+              <div>
+                {{data.status | T: data.status: 'expt-status'}}
+              </div>
+            </td>
+            <td style="text-align: center">
+              <a (click)="goToExperimentPage(data.featureFlagKey, data.id)" i18n="expt.overview.check-experiment">Check experiment</a>
+            </td>
+          </tr>
+          </tbody>
+        </nz-table>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #exptReferenceModalFooter>
+    <button nz-button nzType="default" (click)="closeExptReferenceModal()" i18n="@@common.close">Close</button>
   </ng-template>
 </nz-modal>

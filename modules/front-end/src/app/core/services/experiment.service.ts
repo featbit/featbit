@@ -47,6 +47,18 @@ export class ExperimentService {
     );
   }
 
+  getFeatureFlagVariationReferences(featureFlagId: string, variationId: string): Observable<IExpt[]> {
+    const queryParam = {
+      featureFlagId,
+      variationId
+    };
+
+    return this.http.get<IExpt[]>(
+      `${this.baseUrl}/variation-experiment-references`,
+      {params: new HttpParams({fromObject: queryParam})}
+    );
+  }
+
   getExperimentStatusCount(): Observable<IExptStatusCount[]>{
     const url = `${this.baseUrl}/status-count`;
     return this.http.get<IExptStatusCount[]>(url);

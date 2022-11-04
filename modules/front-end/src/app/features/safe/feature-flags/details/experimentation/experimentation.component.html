@@ -27,8 +27,8 @@
             </button>
           </div>
         </div>
-        <div class="content-container">
-          <div *ngFor="let experiment of experimentList" class="standard-div">
+        <div class="content-container" id="expt-wrapper">
+          <div *ngFor="let experiment of experimentList" class="standard-div" [id]="experiment.id" [class]="{active: experiment.id === exptId}">
             <nz-card class="experiment">
               <div class="head">
                 <div class="first-line">
@@ -232,7 +232,7 @@
                                   </div>
                                 </div>
                                 <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
-                                <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
+                                <div *ngIf="data.confidenceInterval[0] === -1" class="confidence_interval"> -- </div>
                               </td>
                             </ng-container>
                             <ng-container *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">

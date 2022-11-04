@@ -76,7 +76,12 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.exptRulesVisible = false;
   }
 
+  exptId: string;
   ngOnInit(): void {
+    this.route.fragment.subscribe((exptId: string) => {
+      this.exptId = exptId;
+    })
+
     this.refreshIntervalId = setInterval(() => {
       const activeExperimentIteration = this.onGoingExperiments.flatMap(expt => {
         expt.isLoading = true;
@@ -174,6 +179,15 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
         this.onGoingExperiments = [...this.experimentList.filter(expt => this.onGoingStatus.includes(expt.status))];
         this.experimentList.forEach(experiment => this.initChartConfig(experiment));
+
+        if (this.exptId) {
+          // scroll to the active experiment
+          setTimeout(() => {
+            const container = document.getElementById('expt-wrapper');
+            const rowToScrollTo = document.getElementById(this.exptId);
+            container.scrollTop = rowToScrollTo.offsetTop - 100;
+          }, 0);
+        }
       }
       this.isInitLoading = false;
     }, _ => {

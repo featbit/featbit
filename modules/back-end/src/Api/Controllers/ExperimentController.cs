@@ -1,6 +1,7 @@
 using Application.Bases.Models;
 using Application.ExperimentMetrics;
 using Application.Experiments;
+using Application.FeatureFlags;
 using Domain.Experiments;
 
 namespace Api.Controllers;
@@ -32,6 +33,20 @@ public class ExperimentController : ApiControllerBase
         return Ok(experiment);
     }
     
+    [HttpGet("variation-experiment-references")]
+    public async Task<ApiResponse<ICollection<ExperimentVm>>> IsVariationUsedAsync(Guid envId, Guid featureFlagId, string variationId)
+    {
+        var request = new GetFeatureFlagVariationExptReferences
+        {
+            EnvId = envId,
+            FeatureFlagId = featureFlagId,
+            VariationId = variationId
+        };
+
+        var expts = await Mediator.Send(request);
+        return Ok(expts);
+    }
+
     [HttpGet("status-count")]
     public async Task<ApiResponse<IEnumerable<ExperimentStatusCountVm>>> GetExperimentStatusCounterAsync(Guid envId)
     {
