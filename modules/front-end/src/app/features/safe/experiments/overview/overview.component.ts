@@ -119,9 +119,9 @@ export class OverviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  goToFeatureFlag(featureFlagKey: string) {
+  goToExperimentPage(featureFlagKey: string, exptId: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${featureFlagKey}/experimentations`])
+      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${featureFlagKey}/experimentations`], { fragment: exptId })
     );
 
     window.open(url, '_blank');

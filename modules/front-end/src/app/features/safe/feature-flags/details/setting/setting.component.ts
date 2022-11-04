@@ -5,7 +5,7 @@ import {NzModalService} from 'ng-zorro-antd/modal';
 import {MessageQueueService} from '@services/message-queue.service';
 import {IProjectEnv} from '@shared/types';
 import {CURRENT_PROJECT} from '@utils/localstorage-keys';
-import {isNumeric, tryParseJSONObject, uuidv4} from "@utils/index";
+import {getPathPrefix, isNumeric, tryParseJSONObject, uuidv4} from "@utils/index";
 import {editor} from "monaco-editor";
 import {FeatureFlagService} from "@services/feature-flag.service";
 import {
@@ -15,6 +15,8 @@ import {
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
 import {IVariation} from "@shared/rules";
+import {ExperimentService} from "@services/experiment.service";
+import {ExperimentStatus, IExpt} from "@features/safe/experiments/types";
 
 @Component({
   selector: 'ff-setting',
@@ -52,6 +54,7 @@ export class SettingComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
+    private experimentService: ExperimentService,
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
     private modal: NzModalService,
@@ -158,7 +161,26 @@ export class SettingComponent implements OnInit {
     this.variationValueExpandVisible = false;
   }
 
-  deleteVariationRow(id: string): void {
+  exptStatusNotStarted: ExperimentStatus = ExperimentStatus.NotStarted;
+  exptStatusPaused: ExperimentStatus = ExperimentStatus.Paused;
+  exptStatusRecording: ExperimentStatus = ExperimentStatus.Recording;
+
+  goToExperimentPage(featureFlagKey: string, exptId: string) {
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree([`${getPathPrefix()}feature-flags/${featureFlagKey}/experimentations`], { fragment: exptId })
+    );
+
+    window.open(url, '_blank');
+  }
+
+  exptReferenceModalVisible = false;
+
+  variationExptReferences: IExpt[] = [];
+  closeExptReferenceModal() {
+    this.exptReferenceModalVisible = false;
+  }
+
+  deleteVariation(id: string): void {
     if(this.featureFlag.targetUsers?.find(x => x.variationId === id)?.keyIds?.length > 0) {
       this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by targeting users, remove the reference before it can be safely removed`);
       return;
@@ -179,7 +201,16 @@ export class SettingComponent implements OnInit {
       return;
     }
 
-    this.featureFlag.variations = this.featureFlag.variations.filter(d => d.id !== id);
+    this.experimentService.getFeatureFlagVariationReferences(this.featureFlag.id, id).subscribe(res => {
+      if (res.length === 0) {
+        this.featureFlag.variations = this.featureFlag.variations.filter(d => d.id !== id);
+      } else {
+        this.variationExptReferences = [...res];
+        this.exptReferenceModalVisible = true;
+      }
+    }, () => {
+      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+    })
   }
 
   isValidVariationOption(v: IVariation): boolean {

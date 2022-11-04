@@ -348,10 +348,20 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 };
 
             var totalCount = await query.CountAsync();
-            var items = await query
-                .Skip(filter.PageIndex * filter.PageSize)
-                .Take(filter.PageSize)
-                .ToListAsync();
+            
+            List<ExperimentVm> items;
+
+            if (filter.PageSize == -1) // no pagination
+            {
+                items = await query.ToListAsync();
+            }
+            else
+            {
+                items = await query
+                    .Skip(filter.PageIndex * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToListAsync();
+            }
 
             return new PagedResult<ExperimentVm>(totalCount, items);
         }
@@ -383,10 +393,19 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 };
 
             var totalCount = await query.CountAsync();
-            var items = await query
-                .Skip(filter.PageIndex * filter.PageSize)
-                .Take(filter.PageSize)
-                .ToListAsync();
+            List<ExperimentVm> items;
+
+            if (filter.PageSize == -1) // no pagination
+            {
+                items = await query.ToListAsync();
+            }
+            else
+            {
+                items = await query
+                    .Skip(filter.PageIndex * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToListAsync();
+            }
 
             return new PagedResult<ExperimentVm>(totalCount, items);
         }

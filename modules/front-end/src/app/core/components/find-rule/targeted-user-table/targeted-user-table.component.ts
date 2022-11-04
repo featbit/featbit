@@ -75,7 +75,7 @@ export class TargetedUserTableComponent implements OnInit {
 
   navigateToUserDetail(user: IUserType) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}users/${encodeURIComponent(user.id)}`])
+      this.router.createUrlTree([`${getPathPrefix()}users/${encodeURIComponent(user.id)}`])
     );
 
     window.open(url, '_blank');
