@@ -57,12 +57,13 @@ public class EndUserController : ApiControllerBase
     }
 
     [HttpGet("{id:guid}/flags")]
-    public async Task<ApiResponse<IEnumerable<EndUserFlagVm>>> GetFlagsAsync(Guid envId, Guid id)
+    public async Task<ApiResponse<PagedResult<EndUserFlagVm>>> GetFlagsAsync(Guid envId, Guid id, string? searchText)
     {
         var request = new GetEndUserFlags
         {
             EnvId = envId,
-            Id = id
+            Id = id,
+            SearchText = searchText
         };
 
         var flags = await Mediator.Send(request);

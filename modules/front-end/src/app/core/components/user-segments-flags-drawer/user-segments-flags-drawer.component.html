@@ -15,7 +15,7 @@
           <div class="table-search-area">
             <div class="search-inputs">
               <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="Filter by name or keyName" i18n-placeholder="@@users.idx.filter-by-name-or-keyname" [(ngModel)]="flagFilter" (ngModelChange)="filterFlags()">
+                <input nz-input type="text" placeholder="Filter by name or keyName" i18n-placeholder="@@users.idx.filter-by-name-or-keyname" [(ngModel)]="flagFilter.searchText" (ngModelChange)="doSearchFlags(true)">
               </nz-input-group>
               <ng-template #prefixIconSearch>
                 <i nz-icon nzType="icons:icon-search"></i>
@@ -23,7 +23,15 @@
             </div>
           </div>
           <div class="table-wrapper">
-            <nz-table #flagstable nzSize="small" [nzData]="filteredFlags" [nzFrontPagination]="true" [nzLoading]="isFlagsLoading">
+            <nz-table #flagstable nzSize="small"
+                      [nzData]="flags.items"
+                      [nzFrontPagination]="false"
+                      [nzLoading]="isFlagsLoading"
+                      [nzTotal]="flags.totalCount"
+                      [(nzPageSize)]="flagFilter.pageSize"
+                      (nzPageSizeChange)="doSearchFlags()"
+                      [(nzPageIndex)]="flagFilter.pageIndex"
+                      (nzPageIndexChange)="doSearchFlags()">
               <thead>
               <tr>
                 <th nzWidth="30%" i18n="@@common.name">Name</th>

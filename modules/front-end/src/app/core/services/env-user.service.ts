@@ -6,7 +6,11 @@ import { environment } from 'src/environments/environment';
 import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/end-users/types/featureflag-user";
 import { IUserType } from "@shared/types";
 import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
-import { IEndUserFlag, IEndUserSegment } from "@features/safe/end-users/types/user-segments-flags";
+import {
+  EndUserFlagFilter,
+  IEndUserSegment,
+  IPagedEndUserFlag
+} from "@features/safe/end-users/types/user-segments-flags";
 
 @Injectable({
   providedIn: 'root'
@@ -80,10 +84,16 @@ export class EnvUserService {
     return this.http.get<EnvUserPagedResult>(url, { params: params });
   }
 
-  getFlags(id: string): Observable<IEndUserFlag[]> {
+  getFlags(id: string, filter: EndUserFlagFilter = new EndUserFlagFilter()): Observable<IPagedEndUserFlag> {
+    const queryParam = {
+      searchText: filter.searchText ?? '',
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
     const url = `${this.baseUrl}/api/v1/envs/${this.envId}/end-users/${id}/flags`;
 
-    return this.http.get<IEndUserFlag[]>(url);
+    return this.http.get<IPagedEndUserFlag>(url, {params: new HttpParams({fromObject: queryParam})});
   }
 
   getSegments(id: string): Observable<IEndUserSegment[]> {

@@ -1,13 +1,31 @@
+using Application.Bases.Models;
+using Application.FeatureFlags;
+
 namespace Application.EndUsers;
 
-public class GetEndUserFlags : IRequest<IEnumerable<EndUserFlagVm>>
+public class GetEndUserFlags : PagedRequest, IRequest<PagedResult<EndUserFlagVm>>
 {
     public Guid EnvId { get; set; }
 
     public Guid Id { get; set; }
+
+    public string SearchText { get; set; }
+
+    public FeatureFlagFilter Filter()
+    {
+        var filter = new FeatureFlagFilter
+        {
+            Name = SearchText,
+            IsArchived = false,
+            PageIndex = PageIndex,
+            PageSize = PageSize
+        };
+
+        return filter;
+    }
 }
 
-public class GetEndUserFlagsHandler : IRequestHandler<GetEndUserFlags, IEnumerable<EndUserFlagVm>>
+public class GetEndUserFlagsHandler : IRequestHandler<GetEndUserFlags, PagedResult<EndUserFlagVm>>
 {
     private readonly IFeatureFlagService _flagService;
     private readonly IEndUserService _endUserService;
@@ -23,18 +41,19 @@ public class GetEndUserFlagsHandler : IRequestHandler<GetEndUserFlags, IEnumerab
         _evaluator = evaluator;
     }
 
-    public async Task<IEnumerable<EndUserFlagVm>> Handle(GetEndUserFlags request, CancellationToken cancellationToken)
+    public async Task<PagedResult<EndUserFlagVm>> Handle(GetEndUserFlags request, CancellationToken cancellationToken)
     {
         var endUser = await _endUserService.GetAsync(request.Id);
-        var flags = await _flagService.FindManyAsync(x => x.EnvId == request.EnvId && !x.IsArchived);
+        var flags = await _flagService.GetListAsync(request.EnvId, request.Filter());
 
-        var result = new List<EndUserFlagVm>();
-        foreach (var flag in flags)
+        var vms = new List<EndUserFlagVm>();
+        foreach (var flag in flags.Items)
         {
             var variation = await _evaluator.EvaluateAsync(flag, endUser);
-            result.Add(new EndUserFlagVm(flag, variation));
+            vms.Add(new EndUserFlagVm(flag, variation));
         }
 
+        var result = new PagedResult<EndUserFlagVm>(flags.TotalCount, vms);
         return result;
     }
 }

@@ -1,18 +1,25 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IUserType } from "@shared/types";
 import { encodeURIComponentFfc, getPathPrefix } from "@utils/index";
 import { Router } from "@angular/router";
 import { editor } from "monaco-editor";
-import { IEndUserFlag, IEndUserSegment } from "@features/safe/end-users/types/user-segments-flags";
+import {
+  EndUserFlagFilter,
+  IEndUserFlag,
+  IEndUserSegment,
+  IPagedEndUserFlag
+} from "@features/safe/end-users/types/user-segments-flags";
 import { EnvUserService } from "@services/env-user.service";
+import { Subject } from "rxjs";
+import { debounceTime } from "rxjs/operators";
 
 @Component({
   selector: 'user-segments-flags-drawer',
   templateUrl: './user-segments-flags-drawer.component.html',
   styleUrls: ['./user-segments-flags-drawer.component.less']
 })
-export class UserSegmentsFlagsDrawerComponent {
+export class UserSegmentsFlagsDrawerComponent implements OnInit {
 
   private _user: IUserType;
   @Input()
@@ -38,6 +45,14 @@ export class UserSegmentsFlagsDrawerComponent {
     private envUserService: EnvUserService,
     private message: NzMessageService
   ) { }
+
+  ngOnInit(): void {
+    this.$searchFlags.pipe(
+      debounceTime(400)
+    ).subscribe(() => {
+      this.loadFlags();
+    });
+  }
 
   // copy keyName
   copyText(event, text: string) {
@@ -78,21 +93,27 @@ export class UserSegmentsFlagsDrawerComponent {
   /******************** flags start *******************************/
 
   isFlagsLoading: boolean = false;
-  flagFilter: string = '';
-  flags: IEndUserFlag[] = [];
-  filteredFlags: IEndUserFlag[] = [];
+  flagFilter: EndUserFlagFilter = new EndUserFlagFilter();
+  flags: IPagedEndUserFlag = {
+    totalCount: 0,
+    items: []
+  };
+
+  $searchFlags: Subject<void> = new Subject();
+  doSearchFlags(resetPage?: boolean) {
+    if (resetPage) {
+      this.flagFilter.pageIndex = 1;
+    }
+
+    this.$searchFlags.next();
+  }
 
   loadFlags() {
     this.isFlagsLoading = true;
-    this.envUserService.getFlags(this.user.id).subscribe((flags: IEndUserFlag[]) => {
+    this.envUserService.getFlags(this.user.id, this.flagFilter).subscribe(flags => {
       this.flags = flags;
-      this.filteredFlags = flags;
       this.isFlagsLoading = false;
     });
-  }
-
-  filterFlags() {
-    this.filteredFlags = this.flags.filter(x => x.key.includes(this.flagFilter) || x.name.includes(this.flagFilter));
   }
 
   getMatchVariationDisplayOrder(flag: IEndUserFlag) {
