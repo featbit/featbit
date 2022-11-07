@@ -1,13 +1,13 @@
 namespace Application.EndUsers;
 
-public class GetEndUserFlags : IRequest<IEnumerable<EndUserFlag>>
+public class GetEndUserFlags : IRequest<IEnumerable<EndUserFlagVm>>
 {
     public Guid EnvId { get; set; }
 
     public Guid Id { get; set; }
 }
 
-public class GetEndUserFlagsHandler : IRequestHandler<GetEndUserFlags, IEnumerable<EndUserFlag>>
+public class GetEndUserFlagsHandler : IRequestHandler<GetEndUserFlags, IEnumerable<EndUserFlagVm>>
 {
     private readonly IFeatureFlagService _flagService;
     private readonly IEndUserService _endUserService;
@@ -23,16 +23,16 @@ public class GetEndUserFlagsHandler : IRequestHandler<GetEndUserFlags, IEnumerab
         _evaluator = evaluator;
     }
 
-    public async Task<IEnumerable<EndUserFlag>> Handle(GetEndUserFlags request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<EndUserFlagVm>> Handle(GetEndUserFlags request, CancellationToken cancellationToken)
     {
         var endUser = await _endUserService.GetAsync(request.Id);
         var flags = await _flagService.FindManyAsync(x => x.EnvId == request.EnvId && !x.IsArchived);
 
-        var result = new List<EndUserFlag>();
+        var result = new List<EndUserFlagVm>();
         foreach (var flag in flags)
         {
             var variation = await _evaluator.EvaluateAsync(flag, endUser);
-            result.Add(new EndUserFlag(flag, variation));
+            result.Add(new EndUserFlagVm(flag, variation));
         }
 
         return result;

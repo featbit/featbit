@@ -2,7 +2,7 @@ using Domain.FeatureFlags;
 
 namespace Application.EndUsers;
 
-public class EndUserFlag
+public class EndUserFlagVm
 {
     public string Name { get; set; }
 
@@ -16,7 +16,7 @@ public class EndUserFlag
 
     public string MatchReason { get; set; }
 
-    public EndUserFlag(FeatureFlag flag, UserVariation userVariation)
+    public EndUserFlagVm(FeatureFlag flag, UserVariation userVariation)
     {
         Name = flag.Name;
         Key = flag.Key;

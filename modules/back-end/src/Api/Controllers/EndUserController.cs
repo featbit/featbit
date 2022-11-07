@@ -57,7 +57,7 @@ public class EndUserController : ApiControllerBase
     }
 
     [HttpGet("{id:guid}/flags")]
-    public async Task<ApiResponse<IEnumerable<EndUserFlag>>> GetFlagsAsync(Guid envId, Guid id)
+    public async Task<ApiResponse<IEnumerable<EndUserFlagVm>>> GetFlagsAsync(Guid envId, Guid id)
     {
         var request = new GetEndUserFlags
         {
@@ -70,7 +70,7 @@ public class EndUserController : ApiControllerBase
     }
 
     [HttpGet("{id:guid}/segments")]
-    public async Task<ApiResponse<IEnumerable<EndUserSegment>>> GetSegmentsAsync(Guid envId, Guid id)
+    public async Task<ApiResponse<IEnumerable<EndUserSegmentVm>>> GetSegmentsAsync(Guid envId, Guid id)
     {
         var request = new GetEndUserSegments
         {

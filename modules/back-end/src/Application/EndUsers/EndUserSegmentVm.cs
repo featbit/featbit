@@ -2,7 +2,7 @@ using Domain.Segments;
 
 namespace Application.EndUsers;
 
-public class EndUserSegment
+public class EndUserSegmentVm
 {
     public string Id { get; set; }
 
@@ -10,7 +10,7 @@ public class EndUserSegment
 
     public DateTime UpdatedAt { get; set; }
 
-    public EndUserSegment(Segment segment)
+    public EndUserSegmentVm(Segment segment)
     {
         Id = segment.Id.ToString();
         Name = segment.Name;
