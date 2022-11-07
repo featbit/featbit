@@ -14,6 +14,8 @@ expt.register_error_handler(500, internal_error_handler)
 def get_result():
     json_str = request.get_data()
     try:
+        if not json_str:
+            raise ValueError('post body is empty')
         expt = Experiment.from_properties(json.loads(json_str))
         return jsonify(code=200, error='', data=TrendsExperimentResult(expt).get_results())
     except Exception as e:

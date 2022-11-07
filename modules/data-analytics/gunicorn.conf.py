@@ -1,7 +1,7 @@
 import os
 
 
-bind = '0.0.0.0:5000'
+bind = '0.0.0.0:10000'
 
 workers = 2
 worker_class = 'gthread'

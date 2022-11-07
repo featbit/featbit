@@ -4,8 +4,8 @@ from logging.config import dictConfig
 from flask import Flask
 
 from app.config import DevelopmentConfig, ProductionConfig
-from app.extensions import get_scheduler
-from app.setting import DEFAULT_LOGGING_CONFIG, WSGI
+from app.extensions import get_scheduler, get_cache
+from app.setting import CACHE_KEY_PREFIX, CACHE_TYPE, DEFAULT_LOGGING_CONFIG, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, WSGI
 
 CONFIGS = {
     'production': ProductionConfig,
@@ -29,6 +29,14 @@ def _create_app(config_name='default') -> Flask:
 
     from app.experimentation import get_expt_blueprint
     __app.register_blueprint(get_expt_blueprint(), url_prefix='/api/expt')
+
+    # https://flask-caching.readthedocs.io/en/latest/
+    cache = get_cache(config={"CACHE_TYPE": CACHE_TYPE,
+                              "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
+                              "CACHE_REDIS_HOST": REDIS_HOST,
+                              "CACHE_REDIS_PORT": REDIS_PORT,
+                              "CACHE_REDIS_PASSWORD": REDIS_PASSWORD})
+    cache.init_app(__app)
 
     if WSGI:
         _init_aps_scheduler(__app)

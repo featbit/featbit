@@ -1,4 +1,6 @@
+import hashlib
 import os
+from datetime import datetime
 from typing import Any, Callable, Optional
 from uuid import UUID
 
@@ -47,3 +49,11 @@ class SingletonDecorator:
 
 def format_float_positional(value: float) -> Optional[str]:
     return None if value is None else np.format_float_positional(value, precision=10, trim='-')
+
+
+def to_epoch_millis(value: datetime) -> int:
+    return round(value.timestamp() * 1000)
+
+
+def to_md5_hexdigest(value: bytes) -> str:
+    return hashlib.md5(value).hexdigest()
