@@ -1,3 +1,4 @@
+using Domain.EndUsers;
 using Domain.Segments;
 
 namespace Domain.Targeting;
@@ -15,5 +16,13 @@ public class Condition
         var isSegmentProperty = SegmentConsts.ConditionProperties.Contains(Property);
 
         return isSegmentProperty;
+    }
+
+    public bool IsMatch(EndUser user)
+    {
+        var userValue = user.ValueOf(Property);
+
+        var theOperator = Operator.Get(Op);
+        return theOperator.IsMatch(userValue, Value);
     }
 }

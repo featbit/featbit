@@ -55,4 +55,31 @@ public class EndUserController : ApiControllerBase
         var users = await Mediator.Send(request);
         return Ok(users);
     }
+
+    [HttpGet("{id:guid}/flags")]
+    public async Task<ApiResponse<PagedResult<EndUserFlagVm>>> GetFlagsAsync(Guid envId, Guid id, string? searchText)
+    {
+        var request = new GetEndUserFlags
+        {
+            EnvId = envId,
+            Id = id,
+            SearchText = searchText
+        };
+
+        var flags = await Mediator.Send(request);
+        return Ok(flags);
+    }
+
+    [HttpGet("{id:guid}/segments")]
+    public async Task<ApiResponse<IEnumerable<EndUserSegmentVm>>> GetSegmentsAsync(Guid envId, Guid id)
+    {
+        var request = new GetEndUserSegments
+        {
+            EnvId = envId,
+            Id = id
+        };
+
+        var segments = await Mediator.Send(request);
+        return Ok(segments);
+    }
 }

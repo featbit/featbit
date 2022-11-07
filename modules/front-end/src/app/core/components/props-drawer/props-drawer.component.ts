@@ -11,7 +11,7 @@ import { EnvUserPropService } from "@services/env-user-prop.service";
 })
 export class PropsDrawerComponent {
 
-  @Input() envId: number;
+  @Input() envId: string;
   @Output() close: EventEmitter<boolean> = new EventEmitter();
 
   constructor(

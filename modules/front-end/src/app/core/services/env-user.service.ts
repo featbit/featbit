@@ -6,6 +6,11 @@ import { environment } from 'src/environments/environment';
 import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/end-users/types/featureflag-user";
 import { IUserType } from "@shared/types";
 import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
+import {
+  EndUserFlagFilter,
+  IEndUserSegment,
+  IPagedEndUserFlag
+} from "@features/safe/end-users/types/user-segments-flags";
 
 @Injectable({
   providedIn: 'root'
@@ -77,5 +82,23 @@ export class EnvUserService {
 
     const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/rest-search`;
     return this.http.get<EnvUserPagedResult>(url, { params: params });
+  }
+
+  getFlags(id: string, filter: EndUserFlagFilter = new EndUserFlagFilter()): Observable<IPagedEndUserFlag> {
+    const queryParam = {
+      searchText: filter.searchText ?? '',
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    const url = `${this.baseUrl}/api/v1/envs/${this.envId}/end-users/${id}/flags`;
+
+    return this.http.get<IPagedEndUserFlag>(url, {params: new HttpParams({fromObject: queryParam})});
+  }
+
+  getSegments(id: string): Observable<IEndUserSegment[]> {
+    const url = `${this.baseUrl}/api/v1/envs/${this.envId}/end-users/${id}/segments`;
+
+    return this.http.get<IEndUserSegment[]>(url);
   }
 }

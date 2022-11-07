@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserSegmentsFlagsDrawerComponent } from './props-drawer.component';
+import { UserSegmentsFlagsDrawerComponent } from './user-segments-flags-drawer.component';
 
 describe('PropsDrawerComponent', () => {
   let component: UserSegmentsFlagsDrawerComponent;
