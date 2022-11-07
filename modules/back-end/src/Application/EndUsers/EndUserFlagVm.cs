@@ -8,11 +8,11 @@ public class EndUserFlagVm
 
     public string Key { get; set; }
 
+    public ICollection<Variation> Variations { get; set; }
+
     public string VariationType { get; set; }
 
-    public string Variation { get; set; }
-
-    public int VariationDisplayOrder { get; set; }
+    public string MatchVariation { get; set; }
 
     public string MatchReason { get; set; }
 
@@ -20,9 +20,9 @@ public class EndUserFlagVm
     {
         Name = flag.Name;
         Key = flag.Key;
+        Variations = flag.Variations;
         VariationType = flag.VariationType;
-        Variation = userVariation.Variation.Value;
-        VariationDisplayOrder = flag.Variations.ToList().FindIndex(x => x.Id == userVariation.Variation.Id) + 1;
+        MatchVariation = userVariation.Variation.Value;
         MatchReason = userVariation.MatchReason;
     }
 }

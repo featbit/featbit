@@ -1,11 +1,11 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {NzMessageService} from 'ng-zorro-antd/message';
-import {IUserType} from "@shared/types";
-import {encodeURIComponentFfc, getPathPrefix} from "@utils/index";
-import {Router} from "@angular/router";
-import {editor} from "monaco-editor";
-import {IEndUserFlag, IEndUserSegment} from "@features/safe/end-users/types/user-segments-flags";
-import {EnvUserService} from "@services/env-user.service";
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { IUserType } from "@shared/types";
+import { encodeURIComponentFfc, getPathPrefix } from "@utils/index";
+import { Router } from "@angular/router";
+import { editor } from "monaco-editor";
+import { IEndUserFlag, IEndUserSegment } from "@features/safe/end-users/types/user-segments-flags";
+import { EnvUserService } from "@services/env-user.service";
 
 @Component({
   selector: 'user-segments-flags-drawer',
@@ -93,6 +93,10 @@ export class UserSegmentsFlagsDrawerComponent {
 
   filterFlags() {
     this.filteredFlags = this.flags.filter(x => x.key.includes(this.flagFilter) || x.name.includes(this.flagFilter));
+  }
+
+  getMatchVariationDisplayOrder(flag: IEndUserFlag) {
+    return flag.variations.findIndex(x => x.value === flag.matchVariation);
   }
 
   /******************** flags end ********************************/

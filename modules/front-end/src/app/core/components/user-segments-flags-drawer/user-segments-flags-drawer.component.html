@@ -43,10 +43,10 @@
                 </td>
                 <td class="option">
                   <div class="left">
-                    <div class="variation-tip {{'tip-' + (item.variationDisplayOrder - 1) % 9}}"></div>
-                    <div class="variation-value">{{item.variation}}</div>
+                    <div class="variation-tip {{'tip-' + getMatchVariationDisplayOrder(item)}}"></div>
+                    <div class="variation-value">{{item.matchVariation}}</div>
                   </div>
-                  <i class="expand-icon" *ngIf="['json', 'string'].includes(item.variationType)" nz-icon nzType="expand" (click)="expandVariationOption(item.variation, item.variationType)"></i>
+                  <i class="expand-icon" *ngIf="['json', 'string'].includes(item.variationType)" nz-icon nzType="expand" (click)="expandVariationOption(item.matchVariation, item.variationType)"></i>
                 </td>
                 <td>
                   <a style="color:#23AD7F;" (click)="navigateToFlag(item.key)" i18n="@@common.details">Details</a>
