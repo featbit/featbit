@@ -3,6 +3,7 @@ using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Infrastructure.FeatureFlags;
 
@@ -73,5 +74,12 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
     public async Task DeleteAsync(Guid id)
     {
         await Collection.DeleteOneAsync(x => x.Id == id);
+    }
+
+    public async Task<ICollection<string>> GetAllTagsAsync(Guid envId)
+    {
+        var filter = new ExpressionFilterDefinition<FeatureFlag>(x => x.EnvId == envId && !x.IsArchived);
+        var cursor = await Collection.DistinctAsync<string>("tags", filter);
+        return await cursor.ToListAsync();
     }
 }

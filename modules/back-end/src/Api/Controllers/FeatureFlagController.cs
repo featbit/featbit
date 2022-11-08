@@ -148,6 +148,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(copyToEnvResult);
     }
 
+    [HttpGet("all-tags")]
+    public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
+    {
+        var request = new GetAllTag
+        {
+            EnvId = envId
+        };
+
+        var tags = await Mediator.Send(request);
+        return Ok(tags);
+    }
+
     [HttpPut("{id:guid}/tags")]
     public async Task<ApiResponse<bool>> SetTagsAsync(Guid id, ICollection<string> tags)
     {
