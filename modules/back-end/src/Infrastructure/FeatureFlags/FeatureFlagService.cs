@@ -3,7 +3,6 @@ using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Infrastructure.FeatureFlags;
 
@@ -43,6 +42,13 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
             var isEnabled = userFilter.IsEnabled.Value;
             var statusFilter = filterBuilder.Where(flag => flag.IsEnabled == isEnabled);
             filters.Add(statusFilter);
+        }
+
+        // tags filter
+        if (userFilter.Tags.Any())
+        {
+            var tagsFilter = filterBuilder.All(x => x.Tags, userFilter.Tags);
+            filters.Add(tagsFilter);
         }
 
         var filter = filterBuilder.And(filters);
