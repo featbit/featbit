@@ -3,6 +3,7 @@ using Domain.Utils;
 using System.Net.Mime;
 using System.Text.Json;
 using Domain.Experiments;
+using Domain.FeatureFlags;
 
 namespace Infrastructure.Experiments;
 
@@ -14,21 +15,33 @@ public class OlapService : IOlapService
     {
         _httpClient = httpClient;
     }
-
-    public async Task<ExperimentIteration> GetExptIterationResultAsync(ExptIterationParam param)
+    
+    private async Task<T?> GetFeatureFlagStatusByVariation<T>(string endPoint, Object param)
     {
         var content = new StringContent(
             JsonSerializer.Serialize(param, ReusableJsonSerializerOptions.Web),
             Encoding.UTF8, MediaTypeNames.Application.Json
         );
+        
+        var response = await _httpClient.PostAsync(endPoint, content);
 
-        var response = await _httpClient.PostAsync("/api/expt/results", content);
-
-        var result = JsonSerializer.Deserialize<OlapExptIterationResponse>(
+        return JsonSerializer.Deserialize<T>(
             await response.Content.ReadAsStringAsync(),
             ReusableJsonSerializerOptions.Web
         );
+    }
 
+    public async Task<ICollection<FeatureFlagStats>> GetFeatureFlagStatusByVariation(StatsByVariationParam param)
+    {
+        var result = await GetFeatureFlagStatusByVariation<StatsByVariationResponse>("/api/events/stat/featureflag", param);
+
+        return result.Data;
+    }
+
+    public async Task<ExperimentIteration> GetExptIterationResultAsync(ExptIterationParam param)
+    {
+        var result = await GetFeatureFlagStatusByVariation<OlapExptIterationResponse>("/api/expt/results", param);
+        
         return new ExperimentIteration
         {
             Id = result.Data.IterationId,

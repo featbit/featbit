@@ -25,7 +25,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 
     public async Task ArchiveExperiment(Guid envId, Guid experimentId)
     {
-        var experiment = await this.GetAsync(experimentId);
+        var experiment = await GetAsync(experimentId);
 
         var operationTime = DateTime.UtcNow;
         // stop active iterations

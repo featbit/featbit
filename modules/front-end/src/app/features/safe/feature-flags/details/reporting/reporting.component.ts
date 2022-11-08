@@ -1,8 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {SwitchV1Service} from '@services/switch-v1.service';
 import {map} from 'rxjs/operators';
 import { ChartConfig } from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
+import {IntervalOption, ReportFilter} from "@features/safe/feature-flags/details/reporting/types";
+import {FeatureFlagService} from "@services/feature-flag.service";
 
 
 @Component({
@@ -12,7 +13,7 @@ import { ChartConfig } from "@core/components/g2-chart/g2-line-chart/g2-line-cha
 })
 export class ReportingComponent implements OnInit {
 
-  public switchId: string = '';
+  public key: string = '';
   public usage: string = '';
 
   public isLoading: boolean = true;
@@ -29,36 +30,64 @@ export class ReportingComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private switchServe: SwitchV1Service
+    private featureFlagService: FeatureFlagService
   ) {
-    this.switchId = this.route.snapshot.params['id'];
   }
 
   ngOnInit(): void {
-    this.getFeatureFlagUsage();
+    this.route.paramMap.subscribe(paramMap => {
+      this.key = decodeURIComponent(paramMap.get('key'));
+      this.filter = new ReportFilter();
+      this.getFeatureFlagUsage();
+    });
+  }
+
+  filter: ReportFilter;
+
+  intervalOptions = [
+    {
+      value: IntervalOption.Last24H,
+      label: $localize `:@@common.last-7d:Last 24 hours`
+    },
+    {
+      value: IntervalOption.Last7D,
+      label: $localize `:@@common.last-7d:Last 7 days`
+    },
+    {
+      value: IntervalOption.Last14D,
+      label: '最近14天'
+    },
+    {
+      value: IntervalOption.Last1M,
+      label: '最近1个月'
+    },
+    {
+      value: IntervalOption.Last2M,
+      label: '最近2个月'
+    },
+    {
+      value: IntervalOption.Last6M,
+      label: '最近6个月'
+    },
+    {
+      value: IntervalOption.Last12M,
+      label: '最近12个月'
+    }
+  ];
+
+  filterChanged() {
+    console.log('filterChanged');
+    // this.uniqueUserDays = [this.activeUserFilter.getFromAndTo(), ...this.activeUserFilter.days];
+    // this.loadActiveUsers();
+    // this.loadUniqueUsers();
   }
 
   public getFeatureFlagUsage() {
     this.isLoading = true;
 
-    this.switchServe.getReport(this.switchId, this.selectedTimeSpanKey)
+    this.featureFlagService.getReport(this.filter.filter)
       .pipe(
         map(res => {
-          let userUsageStr = "";
-          let userByVariationValue = JSON.parse(res.userByVariationValue);
-
-          if (userByVariationValue && userByVariationValue.aggregations &&
-            userByVariationValue.aggregations.group_by_status &&
-            userByVariationValue.aggregations.group_by_status.buckets &&
-            userByVariationValue.aggregations.group_by_status.buckets.length > 0) {
-            let buckets = userByVariationValue.aggregations.group_by_status.buckets;
-            for (let i = 0; i < buckets.length; i++) {
-              userUsageStr += `| ${buckets[i].key}: ${buckets[i].doc_count} ` + $localize `:@@common.times-call:Times of call`
-            }
-            userUsageStr += "|";
-          }
-          this.usage = userUsageStr;
-
           let chartData = JSON.parse(res.chartData);
           return chartData || {};
         })

@@ -7,6 +7,7 @@ public class GetFeatureFlag : IRequest<FeatureFlag>
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
+    
 }
 
 public class GetFeatureFlagHandler : IRequestHandler<GetFeatureFlag, FeatureFlag>
