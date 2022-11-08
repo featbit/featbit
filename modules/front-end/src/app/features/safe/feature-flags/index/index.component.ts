@@ -59,6 +59,12 @@ export class IndexComponent implements OnInit {
     });
     this.$search.next();
 
+    // get flag tags
+    this.featureFlagService.getAllTags().subscribe(allTags => {
+      this.allTags = allTags;
+      this.isLoadingTags = false;
+    });
+
     // get current envs
     const curAccountId = getCurrentOrganization().id;
     const curProjectId = currentProjectEnv.projectId;
@@ -75,6 +81,10 @@ export class IndexComponent implements OnInit {
   // tag tree
   tagTreeModalVisible: boolean = false;
   tagTree: FeatureFlagTagTree = new FeatureFlagTagTree([]);
+
+  // tags
+  allTags: string[] = [];
+  isLoadingTags: boolean = true;
 
   // table selection
   allChecked: boolean = false;
@@ -208,13 +218,6 @@ export class IndexComponent implements OnInit {
   }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
-
-  onSelectTag(nodeIds: number[]) {
-    this.featureFlagFilter.tagIds = nodeIds;
-
-    this.onSearch();
-  }
-
   $search: Subject<void> = new Subject();
 
   onSearch(resetPage?: boolean) {
@@ -285,10 +288,10 @@ export class IndexComponent implements OnInit {
     let msg: string;
     if (data.isEnabled) {
       msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-        data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
+        `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-off: is changed to OFF`;
     } else {
       msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-        data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
+        `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-on: is changed to ON`;
     }
 
     this.featureFlagService.toggleStatus(data.id)

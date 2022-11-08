@@ -48,7 +48,7 @@ export class FeatureFlagService {
   public getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
     const queryParam: any = {
       name: filter.name ?? '',
-      tagIds: filter.tagIds ?? [],
+      tags: filter.tags ?? [],
       isArchived: filter.isArchived,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize

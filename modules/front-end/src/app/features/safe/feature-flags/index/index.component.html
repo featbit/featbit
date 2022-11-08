@@ -8,7 +8,24 @@
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
-        <switch-tag-tree-select (onSelect)="onSelectTag($event)" [tagTree]="tagTree"></switch-tag-tree-select>
+        <nz-select
+          class="tag-select"
+          nzMode="multiple"
+          [nzMaxTagCount]="1"
+          [nzMaxTagPlaceholder]="tagPlaceHolder"
+          [(ngModel)]="featureFlagFilter.tags"
+          (ngModelChange)="onSearch(true)"
+          i18n-nzPlaceHolder="@@ff.idx.filter-by-tags"
+          nzPlaceHolder="Filter by tags">
+          <ng-container *ngFor="let tag of allTags">
+            <nz-option *ngIf="!isLoadingTags" [nzValue]="tag" [nzLabel]="tag"></nz-option>
+          </ng-container>
+          <nz-option *ngIf="isLoadingTags" nzDisabled nzCustomContent>
+            <i nz-icon nzType="loading" class="loading-icon"></i>
+            <ng-container i18n="@@common.loading">Loading...</ng-container>
+          </nz-option>
+          <ng-template #tagPlaceHolder let-selectedList>and {{ selectedList.length }} more</ng-template>
+        </nz-select>
         <nz-select nzAllowClear [(ngModel)]="featureFlagFilter.isEnabled" (ngModelChange)="onSearch(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
           <nz-option nzValue="true" nzLabel="ON"></nz-option>
           <nz-option nzValue="false" nzLabel="OFF"></nz-option>
@@ -101,15 +118,14 @@
             <div style="min-width: 60px;" >
               <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length === 1">
                 <span class="variation-tip tip-0" style="margin-bottom:2px;"></span>
-                <span style="margin-left: 0px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves.enabledVariations[0]}}
                 </span>
               </div>
               <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length > 1"
                    style="cursor: pointer;"
-                   nz-tooltip
-                   nzTooltipTitle="{{featureFlag.serves?.enabledVariations?.join(' // ')}}"
+                   nz-tooltip="{{featureFlag.serves?.enabledVariations?.join(' // ')}}"
                    >
                 <span *ngFor="let variationValue of featureFlag.serves?.enabledVariations; let key=index; ">
                   <span  class="variation-tip {{'tip-' + key % 9}}" style="margin-right:-3px;margin-bottom:2px;"></span>
@@ -121,7 +137,7 @@
               </div>
               <div *ngIf="!featureFlag.isEnabled" style="opacity: .5;">
                 <span class="variation-tip tip-9" style="margin-bottom:2px;background-color:darkgray;"></span>
-                <span style="margin-left: 0px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves?.disabledVariation}}
                 </span>

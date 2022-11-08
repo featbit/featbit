@@ -346,8 +346,7 @@ app-root {
     // tag select
     .tag-select .ant-select-selector {
       .ant-select-selector;
-      width: 250px;
-      padding-left: 42px !important;
+      width: 230px;
       padding-right: 16px !important;
 
       .ant-select-selection-item {
@@ -356,23 +355,12 @@ app-root {
       }
 
       .ant-select-selection-search {
-        width: 45px !important;
+        width: 15px !important;
         margin: 0 !important;
       }
 
       .ant-select-selection-placeholder {
         margin: 0;
-        padding-left: 36px !important;
-      }
-
-      &::before {
-        position: absolute;
-        margin-left: 5px;
-        left: 15px;
-        top: 10px;
-        width: 17px;
-        height: 17px;
-        content: url("src/assets/icons/icon-tag.svg");
       }
     }
 
@@ -398,10 +386,6 @@ app-root {
   height: 20px;
   content: url("assets/icons/icon-dropdown.svg") !important;
   align-self: center;
-}
-
-.tag-select .ant-select-selector::after {
-  display: none;
 }
 
 .ant-pagination-options .ant-select-selector::after {
