@@ -15,6 +15,7 @@ import {
   ISettingPayload,
   IVariationsPayload
 } from "@features/safe/feature-flags/types/details";
+import {IReportingFilter} from "@features/safe/feature-flags/details/reporting/types";
 
 @Injectable({
   providedIn: 'root'
@@ -125,5 +126,11 @@ export class FeatureFlagService {
   setTags(flag: IFeatureFlag): Observable<boolean> {
     const url = `${this.baseUrl}/${flag.id}/tags`;
     return this.http.put<boolean>(url, flag.tags);
+  }
+
+  public getReport(filter: IReportingFilter): Observable<any> {
+    const queryParam = {...filter};
+    const url = `${this.baseUrl}/reporting`;
+    return this.http.get(url, {params: new HttpParams({fromObject: queryParam})});
   }
 }

@@ -172,4 +172,20 @@ public class FeatureFlagController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
+
+    [HttpGet]
+    [Route("stats")]
+    public async Task<ApiResponse<IEnumerable<StatsByVariationVm>>> GetStatsByVariationAsync(
+        Guid envId,
+        [FromQuery] StatsByVariationFilter filter)
+    {
+        var request = new GetStatsByVariation
+        {
+            EnvId = envId,
+            Filter = filter
+        };
+
+        var stats = await Mediator.Send(request);
+        return Ok(stats);
+    }
 }

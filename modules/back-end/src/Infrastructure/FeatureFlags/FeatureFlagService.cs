@@ -8,8 +8,30 @@ namespace Infrastructure.FeatureFlags;
 
 public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagService
 {
-    public FeatureFlagService(MongoDbClient mongoDb) : base(mongoDb)
+    private readonly IOlapService _olapService;
+    
+    public FeatureFlagService(MongoDbClient mongoDb, IOlapService olapService) : base(mongoDb)
     {
+        _olapService = olapService;
+    }
+
+    public async Task<ICollection<FeatureFlagStats>> GetStatsByVariationAsync(Guid envId, StatsByVariationFilter filter)
+    {
+        var featureFlag = await GetAsync(envId, filter.Key);
+
+        var param = new StatsByVariationParam
+        {
+            FlagExptId = $"{envId}-{filter.Key}",
+            IntervalType = filter.IntervalType,
+            StartTime = filter.From
+        };
+
+        if (!string.IsNullOrWhiteSpace(filter.To))
+        {
+            param.EndTime = filter.To;
+        }
+
+        return await _olapService.GetFeatureFlagStatusByVariation(param);
     }
 
     public async Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter userFilter)
