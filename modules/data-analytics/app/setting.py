@@ -32,7 +32,7 @@ CLICKHOUSE_REPLICATION = get_from_env("CLICKHOUSE_REPLICATION", True, type_cast=
 
 CACHE_TYPE = "RedisCache"
 CACHE_KEY_PREFIX = "da-server"
-REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = os.getenv("REDIS_PORT", "6379")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 
@@ -41,7 +41,8 @@ SHELL_PLUS_PRINT_SQL = True if TEST else False
 
 UTC_FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
-EVENTS_FMT = '%Y-%m-%d %H:%M:%S.%f'
+CH_SIM_FMT = '%Y-%m-%d %H:%M:%S'
+CH_UTC_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
 DEFAULT_LOGGING_CONFIG = {
     'version': 1,

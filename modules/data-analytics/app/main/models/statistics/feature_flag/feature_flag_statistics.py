@@ -1,22 +1,14 @@
 from datetime import datetime
-from enum import Enum
 from itertools import groupby
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, Optional
 
 from dateutil.parser import isoparse
 
 from app.clickhouse.client import sync_execute
-from app.main.models.statistics.feature_flag.sql import GET_FLAG_EVENTS_BY_INTERVAL_SQL
-from utils import to_epoch_millis
-
-
-class IntervalType(Enum):
-    MONTH = 'month'
-    WEEK = 'week'
-    DAY = 'day'
-    HOUR = 'hour'
-    MINUTE = 'minute'
-
+from app.clickhouse.models.time_series import FrequencyType, time_series
+from app.main.models.statistics.feature_flag.sql import \
+    GET_FLAG_EVENTS_BY_INTERVAL_SQL
+from app.setting import CH_UTC_FMT
 
 INTERVAL_PARAMS_NECESSARY_COLUMNS = ['flagExptId', 'envId', 'startTime', 'intervalType']
 
@@ -32,7 +24,7 @@ class IntervalParams:
         self.__env_id = env_id
         self.__start = isoparse(start_time)
         self.__end = isoparse(end_time) if end_time else datetime.utcnow()
-        self.__interval = IntervalType[interval_type].value
+        self.__interval = FrequencyType[interval_type]
 
     @property
     def flag_id(self) -> str:
@@ -51,7 +43,7 @@ class IntervalParams:
         return self.__end
 
     @property
-    def interval(self) -> str:
+    def interval(self) -> FrequencyType:
         return self.__interval
 
     @staticmethod
@@ -68,16 +60,21 @@ class FeatureFlagIntervalStatistics:
     def __init__(self, params: "IntervalParams"):
         self._params = params
         self._query_params = {
-            'interval_type': params.interval,
+            'interval_type': params.interval.value,
             'flag_id': params.flag_id,
             'env_id': params.env_id,
             'start': params.start,
             'end': params.end
         }
 
-    def get_results(self) -> Dict[int, Any]:
-        def iter():
-            for count, var_key, time in sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL, args=self._query_params):
-                yield {"time": to_epoch_millis(time), "id": var_key, "val": count}
+    def get_results(self) -> Iterable[Dict[str, Any]]:
 
-        return [{"time": time, "variations": list(group)}for time, group in groupby(iter(), key=lambda x: x.pop("time"))]
+        def iter(groups):
+            for ts in time_series(self._params.start, self._params.end, self._params.interval):
+                ts_str = ts[0].strftime(CH_UTC_FMT)
+                counts = groups.get(ts_str, [])
+                yield {"time": ts_str, "variations": counts}
+
+        counts_gen = ({"time": time.strftime(CH_UTC_FMT), "id": var_key, "val": count} for count, var_key, time in sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL, args=self._query_params))
+        counts_by_group = dict((time, list(group)) for time, group in groupby(counts_gen, key=lambda x: x.pop("time")))
+        return list(iter(counts_by_group))
