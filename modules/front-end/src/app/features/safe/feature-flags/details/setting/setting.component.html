@@ -16,7 +16,7 @@
          i18n-nz-popconfirm="@@ff.are-you-sure-to-recover-ff"
          nz-popconfirm="Are you sure to recover this feature flag?"
          (nzOnConfirm)="restoreFlag()">&nbsp;<ng-container i18n="@@ff.recover">Recover</ng-container>&nbsp;</a>
-      <ng-container i="@@common.or">or</ng-container>
+      <ng-container i18n="@@common.or">or</ng-container>
       <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;<ng-container i18n="@@common.permanetly-remove">Permanetly Remove</ng-container>&nbsp;</a>
       <ng-container i18n="@@ff.the-ff">the feature flag</ng-container>
     </div>
@@ -107,6 +107,32 @@
           </span>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
+    <div class="title">Tags</div>
+    <div class="tags">
+      <div class="selected" *ngIf="this.featureFlag.tags.length">
+        <nz-tag *ngFor="let tag of this.featureFlag.tags" nzMode="closeable" (nzOnClose)="onRemoveTag(tag)">
+          {{ tag }}
+        </nz-tag>
+      </div>
+      <nz-select
+        #tags
+        nzPlaceHolder="Add Tags"
+        nzShowSearch
+        [(ngModel)]="selectedTag"
+        (nzOnSearch)="onSearchTag($event)"
+        (ngModelChange)="onAddTag()">
+        <ng-container *ngFor="let tag of currentAllTags">
+          <nz-option *ngIf="!isLoadingTags" [nzValue]="tag" [nzLabel]="tag" [nzHide]="isTagSelected(tag)"></nz-option>
+        </ng-container>
+        <nz-option *ngIf="isLoadingTags" nzDisabled nzCustomContent>
+          <i nz-icon nzType="loading" class="loading-icon"></i>
+          <ng-container i18n="@@common.loading">Loading...</ng-container>
+        </nz-option>
+      </nz-select>
     </div>
   </div>
 

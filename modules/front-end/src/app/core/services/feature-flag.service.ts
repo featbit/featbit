@@ -10,6 +10,7 @@ import {
 } from "@features/safe/feature-flags/types/switch-index";
 import {catchError} from "rxjs/operators";
 import {
+  FeatureFlag,
   IFeatureFlag,
   IFeatureFlagTargeting,
   ISettingPayload,
@@ -115,5 +116,15 @@ export class FeatureFlagService {
   public update(payload: IFeatureFlagTargeting): Observable<boolean> {
     const url = `${this.baseUrl}/${payload.id}/targeting`;
     return this.http.put<boolean>(url, payload);
+  }
+
+  getAllTags(): Observable<string[]> {
+    const url = `${this.baseUrl}/all-tags`;
+    return this.http.get<string[]>(url);
+  }
+
+  setTags(flag: FeatureFlag) : Observable<boolean> {
+    const url = `${this.baseUrl}/${flag.id}/tags`;
+    return this.http.put<boolean>(url, flag.tags);
   }
 }
