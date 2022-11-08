@@ -30,5 +30,8 @@ public static class Initialization
             typeof(Guid),
             CombGuidGenerator.Instance
         );
+
+        // register custom class mapping
+        ClassMaps.Register();
     }
 }

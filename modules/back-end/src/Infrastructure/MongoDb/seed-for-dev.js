@@ -374,6 +374,7 @@ db.FeatureFlags.insertOne(
             ]
         },
         exptIncludeAllTargets: true,
+        tags: [], 
         isArchived: false,
         creatorId: userId,
         createdAt: new Date(),
@@ -461,6 +462,7 @@ db.FeatureFlags.insertOne(
             ]
         },
         exptIncludeAllTargets: true,
+        tags: [],
         isArchived: false,
         creatorId: userId,
         createdAt: new Date(),

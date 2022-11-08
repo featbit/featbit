@@ -147,4 +147,17 @@ public class FeatureFlagController : ApiControllerBase
         var copyToEnvResult = await Mediator.Send(request);
         return Ok(copyToEnvResult);
     }
+
+    [HttpPut("{id:guid}/tags")]
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid id, ICollection<string> tags)
+    {
+        var request = new SetTags
+        {
+            Id = id,
+            Tags = tags
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }
