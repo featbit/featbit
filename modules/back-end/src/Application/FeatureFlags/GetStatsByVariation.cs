@@ -48,11 +48,11 @@ public class GetStatsByVariationHandler : IRequestHandler<GetStatsByVariation, I
         return stats.Select(s => new StatsByVariationVm
         {
             Time = s.Time,
-            Variations = s.Variations.Select(v => new VariationStatsVm
+            Variations = featureFlag.Variations.Select(v => new VariationStatsVm
             {
                 Id = v.Id,
-                Value = featureFlag.Variations.FirstOrDefault(x => x.Id == v.Id)?.Value,
-                Count = v.Val
+                Value = v.Value,
+                Count = s.Variations.FirstOrDefault(x => x.Id == v.Id)?.Val ?? 0
             })
         });
     }
