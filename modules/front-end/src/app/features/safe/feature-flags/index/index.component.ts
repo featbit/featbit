@@ -3,13 +3,11 @@ import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { encodeURIComponentFfc } from '@shared/utils';
-import { SwitchTagTreeService } from "@services/switch-tag-tree.service";
 import {
   IFeatureFlagListCheckItem,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel,
-  FeatureFlagTagTree
 } from "../types/switch-index";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
@@ -31,7 +29,6 @@ export class IndexComponent implements OnInit {
     private router: Router,
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService,
-    private switchTagTreeService: SwitchTagTreeService,
     private fb: FormBuilder,
     private projectService: ProjectService,
     private notification: NzNotificationService
@@ -46,10 +43,6 @@ export class IndexComponent implements OnInit {
     let currentProjectEnv = getCurrentProjectEnv();
 
     this.featureFlagService.envId = currentProjectEnv.envId;
-
-    // // get switch tag tree
-    // this.switchTagTreeService.getTree()
-    //   .subscribe(res => this.tagTree = res);
 
     // get switch list
     this.$search.pipe(
@@ -77,10 +70,6 @@ export class IndexComponent implements OnInit {
         this.targetEnv = this.envs[0];
       });
   }
-
-  // tag tree
-  tagTreeModalVisible: boolean = false;
-  tagTree: FeatureFlagTagTree = new FeatureFlagTagTree([]);
 
   // tags
   allTags: string[] = [];
@@ -325,25 +314,5 @@ export class IndexComponent implements OnInit {
     navigator.clipboard.writeText(text).then(
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
-  }
-
-  saveTagTree() {
-    this.switchTagTreeService.saveTree(this.tagTree)
-      .subscribe(savedTagTree => {
-        // for trigger change detection
-        this.tagTree = savedTagTree;
-
-        // update switch tags when save tagTree
-        for (const item of this.featureFlagListModel.items) {
-          item.tags = this.tagTree.getFeatureFlagTags(item.id);
-        }
-
-        this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
-      }, err => {
-        this.msg.error(err.error);
-      });
-
-    // close modal
-    this.tagTreeModalVisible = false;
   }
 }

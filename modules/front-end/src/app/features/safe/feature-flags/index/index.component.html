@@ -37,10 +37,6 @@
           <i nz-icon nzType="icons:icon-add"></i>
           <ng-container i18n="@@common.add">Add</ng-container>
         </button>
-        <button class="tag-tree-management" nz-button nzType="primary" (click)="tagTreeModalVisible = true">
-          <i nz-icon nzType="icons:icon-setting"></i>
-          <ng-container i18n="@@common.tags">Tags</ng-container>
-        </button>
         <button class="more-action" nz-dropdown [nzDropdownMenu]="menu" >
           <i nz-icon nzType="icons:icon-menu"></i>
         </button>
@@ -189,22 +185,6 @@
     <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
     <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!featureFlagForm.valid" (click)="createFeatureFlag()" i18n="@@common.save">Save</button>
   </ng-template>
-</nz-modal>
-
-<nz-modal
-  nzAutofocus="cancel"
-  [(nzVisible)]="tagTreeModalVisible"
-  (nzOnOk)="saveTagTree()"
-  (nzOnCancel)="tagTreeModalVisible = false"
-  [nzCentered]="true"
-  [nzBodyStyle]="{minHeight: '400px'}"
-  nzWidth="1000px"
-  i18n-nzTitle="@@common.tags"
-  nzTitle="Tags"
-  nzMaskClosable="false">
-  <ng-container *nzModalContent>
-    <switch-tag-tree-view [tagTree]="tagTree"></switch-tag-tree-view>
-  </ng-container>
 </nz-modal>
 
 <nz-modal
