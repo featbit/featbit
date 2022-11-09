@@ -45,15 +45,13 @@ public class GetStatsByVariationHandler : IRequestHandler<GetStatsByVariation, I
         
         var stats = await _service.GetStatsByVariationAsync(request.EnvId, request.Filter);
 
-        Random rnd = new Random();
-        
         return stats.Select(s => new StatsByVariationVm
         {
             Time = s.Time,
             Variations = featureFlag.Variations.Select(v => new VariationStatsVm
             {
                 Variation = v.Value,
-                Count = rnd.Next(0, 1000)//s.Variations.FirstOrDefault(x => x.Id == v.Id)?.Val ?? 0
+                Count = s.Variations.FirstOrDefault(x => x.Id == v.Id)?.Val ?? 0
             })
         });
     }
