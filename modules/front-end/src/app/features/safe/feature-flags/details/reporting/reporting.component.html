@@ -1,26 +1,22 @@
 <section class="body-container">
-  <div class="standard-div" name="detail" *ngIf="key">
+  <div class="standard-div" name="detail" *ngIf="filter?.key">
     <div class="header">
-      <div class="title">开关被调用次数</div>
+      <div class="title" i18n="@@ff.reporting.times-of-call">Times of call</div>
       <div class="filters">
-        <nz-select class="interval-selector" [(ngModel)]="filter.interval" (ngModelChange)="filterChanged()" nzPlaceHolder="选择时间区间">
-          <nz-option *ngFor="let interval of intervalOptions" [nzValue]="interval.value" [nzLabel]="interval.label"></nz-option>
+        <nz-select class="period-selector" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()">
+          <nz-option *ngFor="let period of periodOptions" [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
         </nz-select>
 
-        <nz-select class="interval-selector" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()" nzPlaceHolder="选择时间区间">
-          <nz-option [nzValue]="'month'" [nzLabel]="'按月显示'"></nz-option>
-          <nz-option [nzValue]="'week'" [nzLabel]="'按周显示'"></nz-option>
-          <nz-option [nzValue]="'day'" [nzLabel]="'按天显示'"></nz-option>
-          <nz-option [nzValue]="'hour'" [nzLabel]="'按小时显示'"></nz-option>
-          <nz-option [nzValue]="'minute'" [nzLabel]="'按分钟显示'"></nz-option>
+        <nz-select class="interval-selector" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()">
+          <nz-option *ngFor="let intervalType of intervalTypes" [nzValue]="intervalType.value" [nzLabel]="intervalType.label"></nz-option>
         </nz-select>
       </div>
     </div>
-    <div style="margin: 20px 0;text-align: center;">{{usage}}</div>
+    <div style="text-align: center;">{{usage}}</div>
     <div class="chart-container" style="width:97%">
       <nz-spin [nzSpinning]="isLoading" i18n-nzTip="@@common.loading" nzTip="Loading...">
         <ng-container *ngIf="!isLoading">
-          <g2-line-chart [defaultChartHeight]="600" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
+          <g2-line-chart [defaultChartHeight]="450" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
         </ng-container>
       </nz-spin>
     </div>

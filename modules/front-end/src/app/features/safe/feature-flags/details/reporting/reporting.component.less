@@ -25,22 +25,20 @@
         display: flex;
         justify-content: flex-end;
         gap: 16px;
-        ::ng-deep .interval-selector,::ng-deep .project-selector {
+        ::ng-deep .interval-selector,::ng-deep .period-selector {
           width: 150px;
 
           .ant-select-selector {
             border-radius: 32px;
-          }
 
-          .project {
-            font-weight: 400;
-          }
-          .env {
-            padding-left: 16px;
+            .ant-select-selection-item {
+              display: flex;
+              align-items: center;
+            }
           }
         }
 
-        .project-selector {
+        .period-selector {
           width: 250px;
         }
       }

@@ -18,7 +18,7 @@ public class StatsByVariationResponse
 
 public class FeatureFlagStats
 {
-    public long Time { get; set; }
+    public string Time { get; set; }
     public ICollection<VariationStats> Variations { get; set; }
 }
 

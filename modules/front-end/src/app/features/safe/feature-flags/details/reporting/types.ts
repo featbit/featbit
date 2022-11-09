@@ -1,4 +1,6 @@
-export enum IntervalOption {
+export enum PeriodOption {
+  Last30m = '30m',
+  Last2H = '2H',
   Last24H = '24H',
   Last7D = '7D',
   Last14D = '14D',
@@ -10,7 +12,20 @@ export enum IntervalOption {
 
 export enum IntervalType {
   Month = 'MONTH',
-  Day = 'DAY'
+  Week = 'WEEK',
+  Day = 'DAY',
+  Hour = 'HOUR',
+  Minute = 'MINUTE'
+}
+
+export interface IStatsByVariation {
+  time: Date,
+  variations: IVariationStats[]
+}
+
+export interface IVariationStats {
+  variation: string,
+  count: number
 }
 
 export interface IReportingFilter {
@@ -22,12 +37,11 @@ export interface IReportingFilter {
 }
 
 export class ReportFilter {
-  key: string;
-  interval: IntervalOption = IntervalOption.Last7D;
+  period: PeriodOption = PeriodOption.Last7D;
   intervalType: IntervalType = IntervalType.Day;
   userQuery: string = '';
 
-  constructor() {
+  constructor(public key: string) {
   }
 
   get filter(): IReportingFilter {
@@ -38,7 +52,7 @@ export class ReportFilter {
       intervalType: this.intervalType,
       from,
       to,
-      tzOffset: this.getTimezoneOffsetInHours()
+      tzOffset: this.getTimezoneString()
     }
   }
 
@@ -62,10 +76,11 @@ export class ReportFilter {
     return days;
   }
 
-  private getTimezoneOffsetInHours() {
+  // The result is in Etc/GMT format
+  private getTimezoneString() {
     const offset = - new Date().getTimezoneOffset() / 60;
 
-    return encodeURIComponent(`${offset >= 0 ? '+': '-'}${Math.abs(offset)}`);
+    return encodeURIComponent(`Etc/GMT${offset >= 0 ? '-': '+'}${Math.abs(offset)}`);
   }
 
   getFromAndTo(): [string, string] {
@@ -74,62 +89,74 @@ export class ReportFilter {
     const today = new Date();
 
     endDate = new Date(today.getTime());
-    endDate.setHours(23,59,59,999);
-    to = endDate.toISOString();
 
-    switch (this.interval) {
-      case IntervalOption.Last7D:
+    switch (this.period) {
+      case PeriodOption.Last30m:
         // @ts-ignore
-        startDate = today.addDays(-6);
-
-        startDate.setHours(0, 0, 0, 0);
-        from = startDate.toISOString();
+        startDate = today.addMinutes(-30);
 
         break;
-      case IntervalOption.Last14D:
+      case PeriodOption.Last2H:
         // @ts-ignore
-        startDate = today.addDays(-13);
-
-        startDate.setHours(0, 0, 0, 0);
-        from = startDate.toISOString();
+        startDate = today.addHours(-2);
 
         break;
-      case IntervalOption.Last1M:
+      case PeriodOption.Last24H:
+        // @ts-ignore
+        startDate = today.addHours(-24);
+
+        break;
+      case PeriodOption.Last7D:
+        // @ts-ignore
+        startDate = today.addDays(-7);
+
+        break;
+      case PeriodOption.Last14D:
+        // @ts-ignore
+        startDate = today.addDays(-14);
+
+        break;
+      case PeriodOption.Last1M:
         // @ts-ignore
         startDate = new Date(today.setMonth(today.getMonth() - 1));
 
-        startDate.setHours(0, 0, 0, 0);
-        from = startDate.toISOString();
-
         break;
-      case IntervalOption.Last2M:
+      case PeriodOption.Last2M:
         // @ts-ignore
         startDate = new Date(today.setMonth(today.getMonth() - 2));
 
-        startDate.setHours(0, 0, 0, 0);
-        from = startDate.toISOString();
-
         break;
-      case IntervalOption.Last6M:
+      case PeriodOption.Last6M:
         // @ts-ignore
         startDate = new Date(today.setMonth(today.getMonth() - 6));
 
-        startDate.setHours(0, 0, 0, 0);
-        from = startDate.toISOString();
-
         break;
-      case IntervalOption.Last12M:
+      case PeriodOption.Last12M:
         // @ts-ignore
         startDate = new Date(today.setMonth(today.getMonth() - 12));
-
-        startDate.setHours(0, 0, 0, 0);
-        from = startDate.toISOString();
 
         break;
     }
 
+    startDate.setMilliseconds(0);
+    endDate.setMilliseconds(0);
+
+    from = startDate.toISOString();
+    to = endDate.toISOString();
     return [from, to];
   }
+}
+
+// @ts-ignore
+Date.prototype.addMinutes = function(munites) {
+  var date = new Date(this.valueOf());
+  return new Date(date.getTime() + (munites * 60 * 1000));
+}
+
+// @ts-ignore
+Date.prototype.addHours = function(hours) {
+  var date = new Date(this.valueOf());
+  return new Date(date.getTime() + (hours * 3600 * 1000));
 }
 
 // @ts-ignore
