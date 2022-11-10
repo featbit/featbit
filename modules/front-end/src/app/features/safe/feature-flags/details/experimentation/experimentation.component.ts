@@ -98,8 +98,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
             customEventTrackOption: expt.metricCustomEventTrackOption,
             customEventSuccessCriteria: expt.metricCustomEventSuccessCriteria,
             customEventUnit: expt.metricCustomEventUnit,
-            startTime: expt.selectedIteration.startTime,
-            endTime: expt.selectedIteration.endTime,
+            startTime: new Date(expt.selectedIteration.startTime).getTime(),
+            endTime: expt.selectedIteration.endTime ? new Date(expt.selectedIteration.endTime).getTime(): undefined,
             isFinish: expt.selectedIteration.isFinish
           })
         )
@@ -250,8 +250,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       customEventTrackOption: expt.metricCustomEventTrackOption,
       customEventSuccessCriteria: expt.metricCustomEventSuccessCriteria,
       customEventUnit: expt.metricCustomEventUnit,
-      startTime: expt.selectedIteration.startTime,
-      endTime: expt.selectedIteration.endTime,
+      startTime: new Date(expt.selectedIteration.startTime).getTime(),
+      endTime: expt.selectedIteration.endTime ? new Date(expt.selectedIteration.endTime).getTime() : undefined,
       isFinish: expt.selectedIteration.isFinish
     };
 
@@ -313,7 +313,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   private processIteration(iteration: IExptIteration, baselineVariationId: string): IExptIteration {
     const iterationResults = this.variations.map((option) => {
-        const found = iteration.results.find(r => r.variationId === option.id);
+        const found = iteration.results?.find(r => r.variationId === option.id);
         return !found ? this.createEmptyIterationResult(option, baselineVariationId) : { ...found,
           variationValue: option.value,
           confidenceInterval: !found.confidenceInterval ? [-1, -1] : found.confidenceInterval.map(x => Math.max(0, x)),

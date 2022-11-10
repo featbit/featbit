@@ -36,7 +36,7 @@ public class OlapService : IOlapService
         param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
         param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
         
-        var result = await GetFeatureFlagStatusByVariation<FeatureFlagEndUserStatsResponse>("/api/events/stat/featureflag", param);
+        var result = await GetFeatureFlagStatusByVariation<FeatureFlagEndUserStatsResponse>("/api/events/stat/featureflag1", param);
 
         return result.Data;
     }

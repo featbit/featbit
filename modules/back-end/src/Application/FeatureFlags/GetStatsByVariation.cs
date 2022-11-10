@@ -49,6 +49,7 @@ public class GetStatsByVariationHandler : IRequestHandler<GetStatsByVariation, I
         
         var param = new StatsByVariationParam
         {
+            EnvId = request.EnvId,
             FlagExptId = $"{request.EnvId}-{request.Filter.FeatureFlagKey}",
             IntervalType = request.Filter.IntervalType,
             StartTime = request.Filter.From,
@@ -57,15 +58,13 @@ public class GetStatsByVariationHandler : IRequestHandler<GetStatsByVariation, I
 
         var stats = await _olapService.GetFeatureFlagStatusByVariation(param);
 
-        Random rnd = new Random();
-        
         return stats.Select(s => new StatsByVariationVm
         {
             Time = s.Time,
             Variations = featureFlag.Variations.Select(v => new VariationStatsVm
             {
                 Variation = v.Value,
-                Count = rnd.Next(0, 1000)//s.Variations.FirstOrDefault(x => x.Id == v.Id)?.Val ?? 0
+                Count = s.Variations.FirstOrDefault(x => x.Id == v.Id)?.Val ?? 0
             })
         });
     }
