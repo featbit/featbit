@@ -33,6 +33,9 @@ public class OlapService : IOlapService
 
     public async Task<FeatureFlagEndUserStats> GetFeatureFlagEndUserStats(FeatureFlagEndUserParam param)
     {
+        param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
+        param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
+        
         var result = await GetFeatureFlagStatusByVariation<FeatureFlagEndUserStatsResponse>("/api/events/stat/featureflag", param);
 
         return result.Data;
@@ -40,6 +43,9 @@ public class OlapService : IOlapService
     
     public async Task<ICollection<FeatureFlagStats>> GetFeatureFlagStatusByVariation(StatsByVariationParam param)
     {
+        param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
+        param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
+        
         var result = await GetFeatureFlagStatusByVariation<StatsByVariationResponse>("/api/events/stat/featureflag", param);
 
         return result.Data;
@@ -47,6 +53,12 @@ public class OlapService : IOlapService
 
     public async Task<ExperimentIteration> GetExptIterationResultAsync(ExptIterationParam param)
     {
+        param.StartExptTime = param.StartExptTime * 1000; // milliseconds to microseconds
+        if (param.EndExptTime.HasValue)
+        {
+            param.EndExptTime = param.EndExptTime * 1000; // milliseconds to microseconds
+        }
+        
         var result = await GetFeatureFlagStatusByVariation<OlapExptIterationResponse>("/api/expt/results", param);
         
         return new ExperimentIteration

@@ -22,5 +22,5 @@ public class InsightMessage
     public string Properties { get; set; }
 
     [JsonPropertyName("timestamp")] 
-    public string Timestamp { get; set; }
+    public long Timestamp { get; set; }
 }

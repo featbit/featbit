@@ -54,7 +54,7 @@ public class Insight
                 EnvId = envId.ToString(),
                 Event = "FlagValue",
                 Properties = JsonSerializer.Serialize(properties),
-                Timestamp = DateTimeOffset.FromUnixTimeMilliseconds(variation.Timestamp).ToString("yyyy-MM-dd HH:mm:ss.ffffff")
+                Timestamp = variation.Timestamp * 1000 // milliseconds to microseconds
             };
 
             messages.Add(message);
@@ -86,7 +86,7 @@ public class Insight
                 EnvId = envId.ToString(),
                 Event = metric.Type,
                 Properties = JsonSerializer.Serialize(properties),
-                Timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.ffffff")
+                Timestamp = metric.Timestamp * 1000 // milliseconds to microseconds
             };
 
             messages.Add(message);
