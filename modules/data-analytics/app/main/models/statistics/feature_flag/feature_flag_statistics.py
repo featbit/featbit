@@ -78,13 +78,18 @@ class FeatureFlagIntervalStatistics:
 
     def get_results(self) -> Iterable[Dict[str, Any]]:
 
+        def handle_time(time):
+            if self._params.interval == FrequencyType.WEEK or self._params.interval == FrequencyType.MONTH:
+                return time_to_special_tz(time_to_special_tz(time, self._params.timezone), 'UTC')
+            return time_to_special_tz(time, 'UTC')
+
         def iter(groups):
             for ts in time_series(self._params.start, self._params.end, self._params.timezone, self._params.interval):
-                ts_str = time_to_special_tz(ts[0], 'UTC').strftime(CH_UTC_FMT)
+                ts_str = handle_time(ts[0]).strftime(CH_UTC_FMT)
                 counts = groups.get(ts_str, [])
                 yield {"time": ts_str, "variations": counts}
 
-        counts_gen = ({"time": time_to_special_tz(time, 'UTC').strftime(CH_UTC_FMT), "id": var_key, "val": count}
+        counts_gen = ({"time": handle_time(time).strftime(CH_UTC_FMT), "id": var_key, "val": count}
                       for count, var_key, time in sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL, args=self._query_params))
         counts_by_group = dict((time, list(group)) for time, group in groupby(counts_gen, key=lambda x: x.pop("time")))
         return list(iter(counts_by_group))
