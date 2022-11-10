@@ -57,6 +57,7 @@ export class SettingComponent implements OnInit {
   selectedTag: string = '';
   isLoadingTags: boolean = true;
   @ViewChild('tags') tagsSelect: NzSelectComponent;
+  createTagPrefix = $localize`:@@common.create-tag:Create Tag`;
 
   isTagSelected(tag: string): boolean {
     return this.featureFlag.tags.includes(tag);
@@ -70,7 +71,7 @@ export class SettingComponent implements OnInit {
     }
 
     if (this.currentAllTags.findIndex(x => x.startsWith(value)) === -1) {
-      this.currentAllTags = [`Create Tag '${value}'`];
+      this.currentAllTags = [`${this.createTagPrefix} '${value}'`];
     }
   }
 
@@ -82,9 +83,9 @@ export class SettingComponent implements OnInit {
   }
 
   onAddTag() {
-    let actualTag = this.selectedTag.startsWith('Create Tag ')
-      ? this.selectedTag.replace('Create Tag ', '').replace(/'/g, '')
-      : this.selectedTag;
+    let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
+      ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
+      : this.selectedTag.trim();
 
     this.featureFlag.addTag(actualTag);
     this.featureFlagService.setTags(this.featureFlag).subscribe(_ => {
