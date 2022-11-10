@@ -65,7 +65,6 @@ import {FindRuleComponent} from "@core/components/find-rule/find-rule.component"
 import {ServeComponent} from "@core/components/find-rule/serve/serve.component";
 import {RuleComponent} from "@core/components/find-rule/rule/rule.component";
 import {NzCardModule} from "ng-zorro-antd/card";
-import {TargetedUserTableComponent} from "@core/components/find-rule/targeted-user-table/targeted-user-table.component";
 import {TranslationPipe} from "@core/pipes/translation.pipe";
 import {GuideComponent} from "@core/components/guide/guide.component";
 import {NzTypographyModule} from "ng-zorro-antd/typography";
@@ -103,7 +102,6 @@ import {RuleVariationValuePipe} from "@core/components/find-rule/serve/rule-vari
     FindRuleComponent,
     ServeComponent,
     RuleComponent,
-    TargetedUserTableComponent,
     GuideComponent
   ],
   imports: [
@@ -180,7 +178,6 @@ import {RuleVariationValuePipe} from "@core/components/find-rule/serve/rule-vari
     FindRuleComponent,
     ServeComponent,
     RuleComponent,
-    TargetedUserTableComponent,
     GuideComponent
   ]
 })
