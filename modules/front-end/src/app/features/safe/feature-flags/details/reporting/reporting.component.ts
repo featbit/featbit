@@ -2,8 +2,16 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {ChartConfig} from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
 import {FeatureFlagService} from "@services/feature-flag.service";
-import {PeriodOption, IntervalType, ReportFilter} from "@features/safe/feature-flags/details/reporting/types";
-
+import {
+  PeriodOption,
+  IntervalType,
+  ReportFilter,
+  IFeatureFlagEndUserPagedResult
+} from "@features/safe/feature-flags/details/reporting/types";
+import {IVariation} from "@shared/rules";
+import {EnvUserService} from "@services/env-user.service";
+import {Subject} from "rxjs";
+import {debounceTime} from "rxjs/operators";
 
 @Component({
   selector: 'ff-reporting',
@@ -17,18 +25,38 @@ export class ReportingComponent implements OnInit {
   public isLoading: boolean = true;
 
   chartConfig: ChartConfig;
+  variations: IVariation[] = [];
+
+  $chartSearch: Subject<void> = new Subject();
+  $endUserSearch: Subject<void> = new Subject();
 
   constructor(
     private route: ActivatedRoute,
-    private featureFlagService: FeatureFlagService
+    private featureFlagService: FeatureFlagService,
+    private endUserService: EnvUserService
   ) {
   }
 
   ngOnInit(): void {
+    this.$chartSearch.pipe(
+      debounceTime(0)
+    ).subscribe(() => {
+      this.loadFeatureFlagUsage();
+    });
+
+    this.$endUserSearch.pipe(
+      debounceTime(200)
+    ).subscribe(() => {
+      this.loadEndUsers();
+    });
+
     this.route.paramMap.subscribe(paramMap => {
       this.filter = new ReportFilter(decodeURIComponent(paramMap.get('key')));
-      this.setIntervalTypes();
-      this.getFeatureFlagUsage();
+      this.featureFlagService.getByKey(this.filter.featureFlagKey).subscribe((res) => {
+        this.variations = [...res.variations];
+        this.setIntervalTypes();
+        this.filterChanged();
+      });
     });
   }
 
@@ -153,10 +181,11 @@ export class ReportingComponent implements OnInit {
   }
 
   filterChanged() {
-    this.getFeatureFlagUsage();
+    this.$chartSearch.next();
+    this.$endUserSearch.next();
   }
 
-  public getFeatureFlagUsage() {
+  public loadFeatureFlagUsage() {
     this.isLoading = true;
 
     this.featureFlagService.getReport(this.filter.filter)
@@ -201,7 +230,7 @@ export class ReportingComponent implements OnInit {
 
         // data loaded
         this.isLoading = false;
-      });
+      }, () => this.isLoading = false);
   }
 
   private getXAxisMask() {
@@ -216,5 +245,25 @@ export class ReportingComponent implements OnInit {
       default:
         return 'YYYY-MM-DD HH:mm';
     }
+  }
+
+  /**************************End user table **********************************/
+  isEndUserLoading: boolean = true;
+  pagedEndUser: IFeatureFlagEndUserPagedResult = {
+    items: [],
+    totalCount: 0
+  };
+
+  endUserFilterChanged() {
+    this.$endUserSearch.next();
+  }
+
+  loadEndUsers() {
+    this.isEndUserLoading = true;
+
+    this.endUserService.searchByFlag(this.filter.endUserFilter).subscribe((res) => {
+      this.pagedEndUser = { ...res };
+      this.isEndUserLoading = false;
+    }, () => this.isEndUserLoading = false);
   }
 }

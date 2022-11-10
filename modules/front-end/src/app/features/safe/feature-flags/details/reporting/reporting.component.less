@@ -5,7 +5,31 @@
   height: 100%;
   padding-left: 24px;
 
+  .filters {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-bottom: 10px;
+    ::ng-deep .interval-selector,::ng-deep .period-selector, ::ng-deep .variation-filter {
+      width: 150px;
+
+      .ant-select-selector {
+        border-radius: 32px;
+
+        .ant-select-selection-item {
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+
+    .period-selector {
+      width: 250px;
+    }
+  }
+
   .standard-div {
+    margin-bottom: 20px;
     .header {
       display:flex;
       justify-content: space-between;
@@ -19,28 +43,6 @@
         font-size: 16px;
         line-height: 150%;
         color: @grey70-color;
-      }
-
-      .filters {
-        display: flex;
-        justify-content: flex-end;
-        gap: 16px;
-        ::ng-deep .interval-selector,::ng-deep .period-selector {
-          width: 150px;
-
-          .ant-select-selector {
-            border-radius: 32px;
-
-            .ant-select-selection-item {
-              display: flex;
-              align-items: center;
-            }
-          }
-        }
-
-        .period-selector {
-          width: 250px;
-        }
       }
     }
 

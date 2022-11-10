@@ -1,24 +1,77 @@
 <section class="body-container">
-  <div class="standard-div" name="detail" *ngIf="filter?.key">
-    <div class="header">
-      <div class="title" i18n="@@ff.reporting.times-of-call">Times of call</div>
-      <div class="filters">
-        <nz-select class="period-selector" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()">
-          <nz-option *ngFor="let period of periodOptions" [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
-        </nz-select>
+  <ng-template #loadingTem>
+    <div class="block">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
+    </div>
+  </ng-template>
+  <ng-container *ngIf="!isLoading; else loadingTem;">
+    <div class="filters">
+      <nz-select class="period-selector" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()">
+        <nz-option *ngFor="let period of periodOptions" [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
+      </nz-select>
 
-        <nz-select class="interval-selector" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()">
-          <nz-option *ngFor="let intervalType of intervalTypes" [nzValue]="intervalType.value" [nzLabel]="intervalType.label"></nz-option>
-        </nz-select>
+      <nz-select class="interval-selector" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()">
+        <nz-option *ngFor="let intervalType of intervalTypes" [nzValue]="intervalType.value" [nzLabel]="intervalType.label"></nz-option>
+      </nz-select>
+    </div>
+
+      <div class="standard-div" name="detail">
+        <div class="header">
+          <div class="title" i18n="@@ff.reporting.times-of-call">Times of call</div>
+        </div>
+        <div style="text-align: center;">{{usage}}</div>
+        <div class="chart-container" style="width:97%">
+          <nz-spin [nzSpinning]="isLoading" i18n-nzTip="@@common.loading" nzTip="Loading...">
+            <ng-container *ngIf="!isLoading">
+              <g2-line-chart [defaultChartHeight]="450" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
+            </ng-container>
+          </nz-spin>
+        </div>
+      </div>
+    <div class="standard-div" *ngIf="filter">
+      <div class="table-content-area">
+        <div class="table-search-area">
+          <div class="filters">
+            <nz-input-group [nzPrefix]="prefixIconSearch" style="width:500px">
+              <input nz-input type="text" i18n-placeholder="@@ff.reporting.filter-by-keyid-or-name" placeholder="Filter by keyId or name" [(ngModel)]="filter.userQuery" (ngModelChange)="endUserFilterChanged()">
+            </nz-input-group>
+            <ng-template #prefixIconSearch>
+              <i nz-icon nzType="icons:icon-search"></i>
+            </ng-template>
+            <nz-select class="variation-filter" [(ngModel)]="filter.variationId" (ngModelChange)="endUserFilterChanged()">
+              <nz-option *ngFor="let variation of variations" [nzValue]="variation.id" [nzLabel]="variation.value"></nz-option>
+            </nz-select>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <nz-table #table nzSize="small"
+                    [nzData]="pagedEndUser.items"
+                    [nzFrontPagination]="true"
+                    [nzLoading]="isEndUserLoading"
+                    [nzTotal]="pagedEndUser.totalCount"
+                    nzPageSize="5">
+            <thead>
+            <tr>
+              <th i18n="@@common.variation">Variation</th>
+              <th>KeyId</th>
+              <th i18n="@@common.name">Name</th>
+              <th i18n="@@ff.reporting.last-evaluated-at">Last evaluated at</th>
+              <th i18n="@@common.actions">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let endUser of table.data">
+              <td>{{ endUser.variation }}</td>
+              <td>{{ endUser.keyId }}</td>
+              <td>{{ endUser.name ?? '--' }}</td>
+              <td>{{ endUser.lastEvaluatedAt | date: 'YYYY-MM-dd HH:mm' }}</td>
+              <td></td>
+            </tr>
+            </tbody>
+          </nz-table>
+        </div>
       </div>
     </div>
-    <div style="text-align: center;">{{usage}}</div>
-    <div class="chart-container" style="width:97%">
-      <nz-spin [nzSpinning]="isLoading" i18n-nzTip="@@common.loading" nzTip="Loading...">
-        <ng-container *ngIf="!isLoading">
-          <g2-line-chart [defaultChartHeight]="450" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
-        </ng-container>
-      </nz-spin>
-    </div>
-  </div>
+  </ng-container>
 </section>

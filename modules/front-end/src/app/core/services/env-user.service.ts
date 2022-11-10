@@ -11,6 +11,11 @@ import {
   IEndUserSegment,
   IPagedEndUserFlag
 } from "@features/safe/end-users/types/user-segments-flags";
+import {
+  IFeatureFlagEndUser,
+  IFeatureFlagEndUserFilter,
+  IFeatureFlagEndUserPagedResult
+} from "@features/safe/feature-flags/details/reporting/types";
 
 @Injectable({
   providedIn: 'root'
@@ -23,25 +28,24 @@ export class EnvUserService {
   }
 
   get baseUrl() {
-    return environment.url;
+    return `${environment.url}/api/v1/envs/${this.envId}/end-users`;
   }
 
   get(id: string): Observable<IUserType> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/${id}`;
+    const url = `${this.baseUrl}/${id}`;
 
     return this.http.get<IUserType>(url);
   }
 
   // get users by key ids
   public getUsersByKeyIds(keyIds: string[]): Observable<any> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/by-keyIds`;
+    const url = `${this.baseUrl}/by-keyIds`;
     return this.http.get(url, {params: new HttpParams({fromObject: { keyIds }})});
   }
 
   // upsert users
   public upsert(params): Observable<any> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users`;
-    return this.http.put(url, { ...params });
+    return this.http.put(this.baseUrl, { ...params });
   }
 
   search(filter: EnvUserFilter = new EnvUserFilter()): Observable<EnvUserPagedResult> {
@@ -52,8 +56,7 @@ export class EnvUserService {
       pageSize: filter.pageSize,
     };
 
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users`;
-    return this.http.get<EnvUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
+    return this.http.get<EnvUserPagedResult>(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
   }
 
   targetedUsers(rules: IJsonContent[], pageIndex: number = 0, pageSize: number = 10): Observable<EnvUserPagedResult> {
@@ -80,7 +83,7 @@ export class EnvUserService {
       .set('pageIndex', pageIndex)
       .set('pageSize', pageSize);
 
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/rest-search`;
+    const url = `${this.baseUrl}/rest-search`;
     return this.http.get<EnvUserPagedResult>(url, { params: params });
   }
 
@@ -91,14 +94,30 @@ export class EnvUserService {
       pageSize: filter.pageSize,
     };
 
-    const url = `${this.baseUrl}/api/v1/envs/${this.envId}/end-users/${id}/flags`;
+    const url = `${this.baseUrl}/${id}/flags`;
 
     return this.http.get<IPagedEndUserFlag>(url, {params: new HttpParams({fromObject: queryParam})});
   }
 
   getSegments(id: string): Observable<IEndUserSegment[]> {
-    const url = `${this.baseUrl}/api/v1/envs/${this.envId}/end-users/${id}/segments`;
+    const url = `${this.baseUrl}/${id}/segments`;
 
     return this.http.get<IEndUserSegment[]>(url);
+  }
+
+  searchByFlag(filter: IFeatureFlagEndUserFilter): Observable<IFeatureFlagEndUserPagedResult> {
+    const queryParam = {
+      query: filter.query ?? '',
+      featureFlagKey: filter.featureFlagKey,
+      variationId: filter.variationId ?? '',
+      from: filter.from,
+      to: filter.to,
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    const url = `${this.baseUrl}/get-by-featureflag`;
+
+    return this.http.get<IFeatureFlagEndUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
   }
 }
