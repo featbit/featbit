@@ -2,18 +2,18 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ChartConfig} from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
 import {FeatureFlagService} from "@services/feature-flag.service";
-import {
-  PeriodOption,
-  IntervalType,
-  ReportFilter,
-  IFeatureFlagEndUserPagedResult, IFeatureFlagEndUser
-} from "@features/safe/feature-flags/details/reporting/types";
 import {IVariation} from "@shared/rules";
 import {EnvUserService} from "@services/env-user.service";
 import {Subject} from "rxjs";
 import {debounceTime} from "rxjs/operators";
 import {getPathPrefix, uuidv4} from "@utils/index";
-import {IUserType} from "@shared/types";
+import {
+  IFeatureFlagEndUser,
+  IFeatureFlagEndUserPagedResult,
+  IntervalType,
+  PeriodOption,
+  ReportFilter
+} from "@features/safe/feature-flags/details/reporting/types";
 
 @Component({
   selector: 'ff-reporting',

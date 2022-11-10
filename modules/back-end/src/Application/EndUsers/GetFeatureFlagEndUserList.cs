@@ -49,6 +49,7 @@ public class
 
         var param = new FeatureFlagEndUserParam
         {
+            EnvId = request.EnvId,
             FlagExptId = $"{request.EnvId}-{request.Filter.FeatureFlagKey}",
             VariationId = request.Filter.VariationId,
             StartTime = request.Filter.From,
@@ -57,40 +58,20 @@ public class
             PageIndex = request.Filter.PageIndex
         };
 
-        // var stats = await _olapService.GetFeatureFlagEndUserStats(param);
-        //
-        // var endUsers = await _service.GetListByKeyIdsAsync(request.EnvId, stats.Items.Select(x => x.KeyId));
-        // var items = stats.Items
-        //     .Where(it => endUsers.FirstOrDefault(u => u.KeyId == it.KeyId) != null)
-        //     .Select(it => new FeatureFlagEndUserStatsVm
-        //     {
-        //         Id = endUsers.FirstOrDefault(u => u.KeyId == it.KeyId).Id,
-        //         Variation = featureFlag.Variations.FirstOrDefault(v => v.Id == it.VariationId)?.Value ?? it.VariationId,
-        //         KeyId = it.KeyId,
-        //         Name = it.Name,
-        //         LastEvaluatedAt = it.LastEvaluatedAt
-        //     }).ToList();
-        //
-        // return new PagedResult<FeatureFlagEndUserStatsVm>(stats.TotalCount, items);
-
-        Random rnd = new Random();
+        var stats = await _olapService.GetFeatureFlagEndUserStats(param);
         
-        var items = new List<FeatureFlagEndUserStatsVm>();
-        
-        for (int i = 0; i < 10; i++) 
-        {
-            items.Add(new FeatureFlagEndUserStatsVm
+        var endUsers = await _service.GetListByKeyIdsAsync(request.EnvId, stats.Items.Select(x => x.KeyId));
+        var items = stats.Items
+            .Where(it => endUsers.FirstOrDefault(u => u.KeyId == it.KeyId) != null)
+            .Select(it => new FeatureFlagEndUserStatsVm
             {
-                Id = Guid.NewGuid(),
-                Variation = string.IsNullOrWhiteSpace(request.Filter.VariationId)
-                    ? featureFlag.Variations.ElementAt(rnd.Next(0, featureFlag.Variations.Count - 1)).Value
-                    : featureFlag.Variations.FirstOrDefault(v => v.Id == request.Filter.VariationId)?.Value,
-                KeyId = $"keyId-{rnd.Next(1, 100)}",
-                Name = $"Name-{rnd.Next(1, 100)}",
-                LastEvaluatedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
-            });
-        }
+                Id = endUsers.FirstOrDefault(u => u.KeyId == it.KeyId).Id,
+                Variation = featureFlag.Variations.FirstOrDefault(v => v.Id == it.VariationId)?.Value ?? it.VariationId,
+                KeyId = it.KeyId,
+                Name = it.Name,
+                LastEvaluatedAt = it.LastEvaluatedAt
+            }).ToList();
         
-        return new PagedResult<FeatureFlagEndUserStatsVm>(50, items);
+        return new PagedResult<FeatureFlagEndUserStatsVm>(stats.TotalCount, items);
     }
 }
