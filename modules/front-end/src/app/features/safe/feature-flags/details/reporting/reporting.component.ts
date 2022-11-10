@@ -12,6 +12,7 @@ import {IVariation} from "@shared/rules";
 import {EnvUserService} from "@services/env-user.service";
 import {Subject} from "rxjs";
 import {debounceTime} from "rxjs/operators";
+import {uuidv4} from "@utils/index";
 
 @Component({
   selector: 'ff-reporting',
@@ -29,6 +30,8 @@ export class ReportingComponent implements OnInit {
 
   $chartSearch: Subject<void> = new Subject();
   $endUserSearch: Subject<void> = new Subject();
+
+  featureFlagVariationAllId: string = uuidv4();
 
   constructor(
     private route: ActivatedRoute,
@@ -53,7 +56,8 @@ export class ReportingComponent implements OnInit {
     this.route.paramMap.subscribe(paramMap => {
       this.filter = new ReportFilter(decodeURIComponent(paramMap.get('key')));
       this.featureFlagService.getByKey(this.filter.featureFlagKey).subscribe((res) => {
-        this.variations = [...res.variations];
+        this.variations = [{ id: this.featureFlagVariationAllId, value: $localize `:@@common.all:All`}, ...res.variations];
+        this.filter.variationId = this.featureFlagVariationAllId;
         this.setIntervalTypes();
         this.filterChanged();
       });
@@ -260,8 +264,9 @@ export class ReportingComponent implements OnInit {
 
   loadEndUsers() {
     this.isEndUserLoading = true;
+    const variationId = this.filter.endUserFilter.variationId === this.featureFlagVariationAllId ? null : this.filter.endUserFilter.variationId;
 
-    this.endUserService.searchByFlag(this.filter.endUserFilter).subscribe((res) => {
+    this.endUserService.searchByFlag({...this.filter.endUserFilter, ...{ variationId }}).subscribe((res) => {
       this.pagedEndUser = { ...res };
       this.isEndUserLoading = false;
     }, () => this.isEndUserLoading = false);
