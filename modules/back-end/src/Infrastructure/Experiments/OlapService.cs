@@ -31,6 +31,13 @@ public class OlapService : IOlapService
         );
     }
 
+    public async Task<FeatureFlagEndUserStats> GetFeatureFlagEndUserStats(FeatureFlagEndUserParam param)
+    {
+        var result = await GetFeatureFlagStatusByVariation<FeatureFlagEndUserStatsResponse>("/api/events/stat/featureflag", param);
+
+        return result.Data;
+    }
+    
     public async Task<ICollection<FeatureFlagStats>> GetFeatureFlagStatusByVariation(StatsByVariationParam param)
     {
         var result = await GetFeatureFlagStatusByVariation<StatsByVariationResponse>("/api/events/stat/featureflag", param);

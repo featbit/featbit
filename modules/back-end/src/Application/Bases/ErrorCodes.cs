@@ -48,6 +48,7 @@ public static class ErrorCodes
     public const string FeatureFlagKeyIsRequired = nameof(FeatureFlagKeyIsRequired);
     public const string IntervalTypeIsRequired = nameof(IntervalTypeIsRequired);
     public const string StatsFromIsRequired = nameof(StatsFromIsRequired);
+    public const string StatsToIsRequired = nameof(StatsToIsRequired);
 
     // triggers
     public const string InvalidTriggerType = nameof(InvalidTriggerType);

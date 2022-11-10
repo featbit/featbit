@@ -1,3 +1,5 @@
+import {IUserType} from "@shared/types";
+
 export enum PeriodOption {
   Last30m = '30m',
   Last2H = '2H',
@@ -29,31 +31,72 @@ export interface IVariationStats {
 }
 
 export interface IReportingFilter {
-  key: string,
+  featureFlagKey: string,
   intervalType: IntervalType,
   from: string, // included
   to: string, // included
-  tzOffset: string
+  timezone: string
 }
+
+export interface IFeatureFlagEndUserFilter {
+  query: string,
+  featureFlagKey: string,
+  variationId: string,
+  from: string, // included
+  to: string, // included
+  pageIndex: number;
+  pageSize: number;
+}
+
+export interface IFeatureFlagEndUser {
+  variation: string,
+  keyId: string,
+  name: string,
+  lastEvaluatedAt: Date
+}
+
+export interface IFeatureFlagEndUserPagedResult {
+  totalCount: number;
+  items: IFeatureFlagEndUser[];
+}
+
 
 export class ReportFilter {
   period: PeriodOption = PeriodOption.Last7D;
   intervalType: IntervalType = IntervalType.Day;
-  userQuery: string = '';
 
-  constructor(public key: string) {
+  variationId: string = '';
+  userQuery: string = '';
+  endUserPageSize: number = 20;
+  endUserPageIndex: number = 1;
+
+  constructor(public featureFlagKey: string) {
   }
 
   get filter(): IReportingFilter {
     const [from, to] = this.getFromAndTo();
 
     return {
-      key: this.key,
+      featureFlagKey: this.featureFlagKey,
       intervalType: this.intervalType,
       from,
       to,
-      tzOffset: this.getTimezoneString()
+      timezone: this.getTimezoneString()
     }
+  }
+
+  get endUserFilter(): IFeatureFlagEndUserFilter {
+    const [from, to] = this.getFromAndTo();
+
+    return {
+      from,
+      to,
+      pageIndex: this.endUserPageIndex,
+      pageSize: this.endUserPageSize,
+      query: this.userQuery,
+      featureFlagKey: this.featureFlagKey,
+      variationId: this.variationId
+    };
   }
 
   get days(): [string, string][] {
