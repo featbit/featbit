@@ -183,8 +183,8 @@ export class ReportFilter {
     startDate.setMilliseconds(0);
     endDate.setMilliseconds(0);
 
-    from = startDate.getTime() * 1000;
-    to = endDate.getTime() * 1000;
+    from = startDate.getTime();
+    to = endDate.getTime();
     return [from, to];
   }
 }

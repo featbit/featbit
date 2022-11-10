@@ -13,4 +13,6 @@ public class MetricInsight
     public float NumericValue { get; set; }
 
     public string AppType { get; set; }
+
+    public long Timestamp { get; set; }
 }
