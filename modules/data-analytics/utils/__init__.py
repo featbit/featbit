@@ -6,6 +6,7 @@ from uuid import UUID
 
 import numpy as np
 import pytz
+from dateutil.parser import isoparse
 from flask import jsonify
 
 
@@ -65,5 +66,30 @@ def to_md5_hexdigest(value: bytes) -> str:
     return hashlib.md5(value).hexdigest()
 
 
-def to_epoch_millis(value: datetime) -> int:
-    return round(value.timestamp() * 1000)
+def to_UTC_datetime(value: Union[int, float, str, datetime]) -> datetime:
+    def len_int(value):
+        return len(str(round(value)))
+
+    if isinstance(value, datetime):
+        dt = value
+    elif isinstance(value, str):
+        dt = isoparse(value)
+    else:
+        # https://stackoverflow.com/questions/23929145/how-to-test-if-a-given-time-stamp-is-in-seconds-or-milliseconds
+        n = len_int(value)
+        if n > 13:
+            dt = datetime.utcfromtimestamp(value / 1000000)
+        elif n > 10:
+            dt = datetime.utcfromtimestamp(value / 1000)
+        else:
+            dt = datetime.utcfromtimestamp(value)
+    return time_to_special_tz(dt, 'UTC')
+
+
+def dt_to_seconds_or_millis_or_micros(value: datetime, timespec="milliseconds") -> int:
+    if timespec == "milliseconds":
+        return round(value.timestamp() * 1000)
+    elif timespec == "microseconds":
+        return round(value.timestamp() * 1000000)
+    else:
+        return round(value.timestamp())

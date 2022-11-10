@@ -7,8 +7,8 @@ from app.clickhouse.client import sync_execute
 from app.clickhouse.kafka import KAFKA_EVENTS_TOPIC, ClickhouseProducer
 from app.clickhouse.models.event import BULK_INSERT_EVENT_SQL, INSERT_EVENT_SQL
 from app.clickhouse.models.event.sql import MERGE_EVENTS_SQL
-from app.setting import KAFKA_PRODUCER_ENABLED, UTC_FMT
-from dateutil.parser import isoparse
+from app.setting import KAFKA_PRODUCER_ENABLED
+from utils import to_UTC_datetime, dt_to_seconds_or_millis_or_micros
 
 
 def _make_event(properties: Optional[Dict[str, Any]] = {}) -> str:
@@ -17,9 +17,7 @@ def _make_event(properties: Optional[Dict[str, Any]] = {}) -> str:
 
     event_uuid = str(uuid.uuid4())
     event = properties.get("type", 'FlagValue')
-    timestamp = properties.get("timestamp", datetime.utcnow())
-    if isinstance(timestamp, str):
-        timestamp = isoparse(timestamp)
+    timestamp = to_UTC_datetime(properties.get("timestamp", datetime.utcnow()))
     distinct_id = properties.get("flagId", None) or properties.get("eventName", None)
     env_id = properties.get("envId", None)
     return {
@@ -28,7 +26,7 @@ def _make_event(properties: Optional[Dict[str, Any]] = {}) -> str:
         "env_id": env_id,
         "event": event,
         "properties": json.dumps(properties),
-        "timestamp": timestamp.strftime(UTC_FMT)
+        "timestamp": dt_to_seconds_or_millis_or_micros(timestamp, timespec="microseconds")
     }
 
 

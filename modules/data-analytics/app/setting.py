@@ -39,10 +39,10 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 
 SHELL_PLUS_PRINT_SQL = True if TEST else False
 
-UTC_FMT = '%Y-%m-%dT%H:%M:%S.%f'
+DATE_ISO_FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
-CH_SIM_FMT = '%Y-%m-%d %H:%M:%S'
-CH_UTC_FMT = '%Y-%m-%dT%H:%M:%SZ'
+DATE_SIM_FMT = '%Y-%m-%d %H:%M:%S'
+DATE_UTC_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
 DEFAULT_LOGGING_CONFIG = {
     'version': 1,

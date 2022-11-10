@@ -2,14 +2,12 @@ from datetime import datetime
 from itertools import groupby
 from typing import Any, Dict, Iterable, Optional
 
-from dateutil.parser import isoparse
-
 from app.clickhouse.client import sync_execute
 from app.clickhouse.models.time_series import FrequencyType, time_series
 from app.main.models.statistics.feature_flag.sql import \
     GET_FLAG_EVENTS_BY_INTERVAL_SQL
-from app.setting import CH_UTC_FMT
-from utils import time_to_special_tz
+from app.setting import DATE_ISO_FMT, DATE_UTC_FMT
+from utils import time_to_special_tz, to_UTC_datetime
 
 INTERVAL_PARAMS_NECESSARY_COLUMNS = ['flagExptId', 'envId', 'startTime', 'intervalType']
 
@@ -24,8 +22,8 @@ class IntervalParams:
                  timezone: Optional[str] = "UTC"):
         self.__flag_id = flag_id
         self.__env_id = env_id
-        self.__start = isoparse(start_time)
-        self.__end = isoparse(end_time) if end_time else datetime.utcnow()
+        self.__start = to_UTC_datetime(start_time)
+        self.__end = to_UTC_datetime(end_time) if end_time else datetime.utcnow()
         self.__interval = FrequencyType[interval_type]
         self.__tz = timezone
 
@@ -71,8 +69,8 @@ class FeatureFlagIntervalStatistics:
             'interval_type': params.interval.value,
             'flag_id': params.flag_id,
             'env_id': params.env_id,
-            'start': params.start,
-            'end': params.end,
+            'start': params.start.strftime(DATE_ISO_FMT),
+            'end': params.end.strftime(DATE_ISO_FMT),
             'tz': params.timezone
         }
 
@@ -85,11 +83,11 @@ class FeatureFlagIntervalStatistics:
 
         def iter(groups):
             for ts in time_series(self._params.start, self._params.end, self._params.timezone, self._params.interval):
-                ts_str = handle_time(ts[0]).strftime(CH_UTC_FMT)
+                ts_str = handle_time(ts[0]).strftime(DATE_UTC_FMT)
                 counts = groups.get(ts_str, [])
                 yield {"time": ts_str, "variations": counts}
 
-        counts_gen = ({"time": handle_time(time).strftime(CH_UTC_FMT), "id": var_key, "val": count}
+        counts_gen = ({"time": handle_time(time).strftime(DATE_UTC_FMT), "id": var_key, "val": count}
                       for count, var_key, time in sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL, args=self._query_params))
-        counts_by_group = dict((time, list(group)) for time, group in groupby(counts_gen, key=lambda x: x.pop("time")))
+        counts_by_group = dict((time, list(group)) for time, group in groupby(sorted(counts_gen, key=lambda x: x["time"]), key=lambda x: x.pop("time")))
         return list(iter(counts_by_group))

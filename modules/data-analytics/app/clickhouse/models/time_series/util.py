@@ -7,7 +7,7 @@ from app.clickhouse.client import sync_execute
 from app.clickhouse.models.time_series.sql import (DAY_SERIES, HOUR_SERIES,
                                                    MINUTE_SERIES, MONTH_SERIES,
                                                    WEEK_SERIES)
-from app.setting import CH_SIM_FMT
+from app.setting import DATE_SIM_FMT
 from utils import time_to_special_tz
 
 
@@ -30,7 +30,7 @@ def time_series(utc_start: datetime,
     if not utc_start or not utc_end or utc_start > utc_start or not localtz or not freq:
         return []
     delta = utc_end - utc_start
-    query_params = {"start": time_to_special_tz(utc_start, localtz).strftime(CH_SIM_FMT),
+    query_params = {"start": time_to_special_tz(utc_start, localtz).strftime(DATE_SIM_FMT),
                     "tz": localtz}
 
     if (freq == FrequencyType.MONTH):
