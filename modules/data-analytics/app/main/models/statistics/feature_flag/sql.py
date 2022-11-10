@@ -2,7 +2,7 @@ from app.clickhouse.models.event.sql import event_table_name
 
 
 FLAG_EVENTS_BY_INTERVAL_CTE = f"""flag_events_by_interval as
-(SELECT tag_0 AS target_user, tag_1 AS variation, date_trunc(%(interval_type)s, timestamp) AS time
+(SELECT tag_0 AS target_user, tag_1 AS variation, date_trunc(%(interval_type)s, timestamp, %(tz)s) AS time
 FROM {event_table_name()}
 WHERE distinct_id = %(flag_id)s
 AND event = 'FlagValue'

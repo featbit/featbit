@@ -1,10 +1,11 @@
 import hashlib
 import os
-from datetime import datetime
-from typing import Any, Callable, Optional
+from datetime import date, datetime
+from typing import Any, Callable, Optional, Union
 from uuid import UUID
 
 import numpy as np
+import pytz
 from flask import jsonify
 
 
@@ -51,9 +52,18 @@ def format_float_positional(value: float) -> Optional[str]:
     return None if value is None else np.format_float_positional(value, precision=10, trim='-')
 
 
-def to_epoch_millis(value: datetime) -> int:
-    return round(value.timestamp() * 1000)
+def time_to_special_tz(source: Union[datetime, date], tz: str) -> datetime:
+    if isinstance(source, datetime):
+        return source.astimezone(pytz.timezone(tz)) if source.tzinfo else source.replace(tzinfo=pytz.timezone(tz))
+    elif isinstance(source, date):
+        return datetime.combine(source, datetime.min.time()).replace(tzinfo=pytz.timezone(tz))
+    else:
+        raise ValueError("source is neithor datetime nor date")
 
 
 def to_md5_hexdigest(value: bytes) -> str:
     return hashlib.md5(value).hexdigest()
+
+
+def to_epoch_millis(value: datetime) -> int:
+    return round(value.timestamp() * 1000)

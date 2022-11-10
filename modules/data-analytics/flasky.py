@@ -10,4 +10,4 @@ if os.getenv('FLASK_APP', None):
 
 if __name__ == '__main__':
     if app is not None:
-        app.run()
+        app.run(port=10000)
