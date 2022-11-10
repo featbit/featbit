@@ -64,7 +64,24 @@ export class ExperimentService {
     return this.http.get<IExptStatusCount[]>(url);
   }
 
-  getIterationResults(params): Observable<IExptIteration[]> {
+  getIterationResults(params: any[]): Observable<IExptIteration[]> {
+    params = params.map((p) => {
+      let startTime, endTime;
+      if (p.startTime) {
+        startTime = new Date(p.startTime).getTime() * 1000;
+      }
+
+      if (p.endTime) {
+        endTime = new Date(p.endTime).getTime() * 1000;
+      }
+
+      return {
+        ...p,
+        startTime,
+        endTime
+      }
+    });
+
     const url = `${this.baseUrl}/iteration-results`;
     return this.http.put<IExptIteration[]>(url, params);
   }

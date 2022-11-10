@@ -5,9 +5,9 @@ public class FeatureFlagEndUserParam
     public Guid EnvId { get; set; }
     public string FlagExptId { get; set; }
     public string VariationId { get; set; }
-    public string StartTime { get; set; }
+    public long StartTime { get; set; }
     
-    public string EndTime { get; set; }
+    public long EndTime { get; set; }
     public int PageIndex { get; set; }
     public int PageSize { get; set; }
 }
