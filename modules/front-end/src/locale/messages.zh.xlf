@@ -88,6 +88,10 @@
           <context context-type="linenumber">17</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">31</context>
         </context-group>
@@ -393,7 +397,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
-          <context context-type="linenumber">17</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -2129,7 +2133,7 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -2138,6 +2142,10 @@ Entitlement management        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
           <context context-type="linenumber">70</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -2596,7 +2604,7 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">123</context>
         </context-group>
         <target>开关和用户组：</target>
       </trans-unit>
@@ -2626,6 +2634,10 @@ Entitlement management        </source>
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
           <context context-type="linenumber">150</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
         <target>返回值</target>
       </trans-unit>
       <trans-unit id="common.details" datatype="html">
@@ -2640,7 +2652,11 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">125</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
+          <context context-type="linenumber">67</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -3193,6 +3209,10 @@ Entitlement management        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
           <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
+          <context context-type="linenumber">61</context>
         </context-group>
         <target>全部</target>
       </trans-unit>
@@ -3817,7 +3837,7 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">185</context>
+          <context context-type="linenumber">220</context>
         </context-group>
         <target>时间</target>
       </trans-unit>
@@ -3825,51 +3845,75 @@ Entitlement management        </source>
         <source>Times of call</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
-          <context context-type="linenumber">4</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <target>开关调用次数</target>
+      </trans-unit>
+      <trans-unit id="ff.reporting.end-users" datatype="html">
+        <source>End users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <target>目标用户</target>
+      </trans-unit>
+      <trans-unit id="ff.reporting.filter-by-keyid-or-name" datatype="html">
+        <source>Filter by keyId or name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <target>按 keyId 或名称查找</target>
+      </trans-unit>
+      <trans-unit id="ff.reporting.last-evaluated-at" datatype="html">
+        <source>Last evaluated at</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.html</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <target>最后调用于</target>
       </trans-unit>
       <trans-unit id="common.month" datatype="html">
         <source>Minute</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">77</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">55</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">105</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">79</context>
+          <context context-type="linenumber">113</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">128</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">136</context>
         </context-group>
         <target>分钟</target>
       </trans-unit>
@@ -3877,7 +3921,7 @@ Entitlement management        </source>
         <source>Last 30 minutes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">147</context>
         </context-group>
         <target>过去30分钟</target>
       </trans-unit>
@@ -3885,7 +3929,7 @@ Entitlement management        </source>
         <source>Last 2 hours</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <target>过去2小时</target>
       </trans-unit>
@@ -3893,7 +3937,7 @@ Entitlement management        </source>
         <source>Last 24 hours</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">155</context>
         </context-group>
         <target>过去24小时</target>
       </trans-unit>
@@ -3901,7 +3945,7 @@ Entitlement management        </source>
         <source>Last 7 days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">159</context>
         </context-group>
         <target>过去7天</target>
       </trans-unit>
@@ -3909,7 +3953,7 @@ Entitlement management        </source>
         <source>Last 14 days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">163</context>
         </context-group>
         <target>过去14天</target>
       </trans-unit>
@@ -3917,7 +3961,7 @@ Entitlement management        </source>
         <source>Last 1 month</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">167</context>
         </context-group>
         <target>过去1个月</target>
       </trans-unit>
@@ -3925,7 +3969,7 @@ Entitlement management        </source>
         <source>Last 2 months</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">137</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <target>过去两个月</target>
       </trans-unit>
@@ -3933,7 +3977,7 @@ Entitlement management        </source>
         <source>Last 6 months</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">175</context>
         </context-group>
         <target>过去6个月</target>
       </trans-unit>
@@ -3941,7 +3985,7 @@ Entitlement management        </source>
         <source>Last 12 months</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">179</context>
         </context-group>
         <target>过去12个月</target>
       </trans-unit>
@@ -3949,7 +3993,7 @@ Entitlement management        </source>
         <source>Total</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">166</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <target>总共</target>
       </trans-unit>
@@ -3991,7 +4035,7 @@ Entitlement management        </source>
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">19,20</context>
         </context-group>
-        <target></target>
+        <target>或者</target>
       </trans-unit>
       <trans-unit id="common.permanetly-remove" datatype="html">
         <source>Permanetly Remove</source>
