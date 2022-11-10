@@ -1,6 +1,5 @@
 import { USER_PROFILE } from "./localstorage-keys";
 import {IAuthProps} from "../types";
-import {IRulePercentageRollout} from "@features/safe/feature-flags/types/switch-new";
 import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
 import {ICondition} from "@shared/rules";
 
@@ -63,10 +62,6 @@ export function tryParseJSONObject (jsonString: string): Object | false {
 
   return false;
 };
-
-export function isNotPercentageRollout(rulePercentageRollouts: IRulePercentageRollout[]) : boolean {
-  return rulePercentageRollouts.length === 0 || (rulePercentageRollouts.length === 1 && rulePercentageRollouts[0].rolloutPercentage.length === 2 && rulePercentageRollouts[0].rolloutPercentage[0] === 0 && rulePercentageRollouts[0].rolloutPercentage[1] === 1);
-}
 
 export function getPercentageFromRolloutPercentageArray(arr: number[]): number {
   const diff = arr[1] - arr[0];

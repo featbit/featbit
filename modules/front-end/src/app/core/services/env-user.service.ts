@@ -5,14 +5,12 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/end-users/types/featureflag-user";
 import { IUserType } from "@shared/types";
-import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import {
   EndUserFlagFilter,
   IEndUserSegment,
   IPagedEndUserFlag
 } from "@features/safe/end-users/types/user-segments-flags";
 import {
-  IFeatureFlagEndUser,
   IFeatureFlagEndUserFilter,
   IFeatureFlagEndUserPagedResult
 } from "@features/safe/feature-flags/details/reporting/types";
@@ -57,34 +55,6 @@ export class EnvUserService {
     };
 
     return this.http.get<EnvUserPagedResult>(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
-  }
-
-  targetedUsers(rules: IJsonContent[], pageIndex: number = 0, pageSize: number = 10): Observable<EnvUserPagedResult> {
-    let filters: string[] = [];
-    rules.forEach(rule => {
-      let prop = rule.property;
-      let op = rule.operation;
-
-      // prop and op cannot be null or empty
-      if (!prop || !op) {
-        return;
-      }
-
-      let value = rule.type === 'multi'
-        ? rule.multipleValue.join(',')
-        : rule.value?.toString() ?? '';
-
-      let filter = `${prop} ${op} '${value}'`;
-      filters.push(filter);
-    });
-
-    let params = new HttpParams()
-      .set('$filter', filters.join(' and '))
-      .set('pageIndex', pageIndex)
-      .set('pageSize', pageSize);
-
-    const url = `${this.baseUrl}/rest-search`;
-    return this.http.get<EnvUserPagedResult>(url, { params: params });
   }
 
   getFlags(id: string, filter: EndUserFlagFilter = new EndUserFlagFilter()): Observable<IPagedEndUserFlag> {
