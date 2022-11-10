@@ -43,7 +43,8 @@ public class Insight
                 variationId = variation.Variation.Id,
                 tag_0 = User!.KeyId,
                 tag_1 = variation.Variation.Id,
-                tag_2 = variation.SendToExperiment
+                tag_2 = variation.SendToExperiment,
+                tag_3 = User!.Name
             };
 
             var message = new InsightMessage
@@ -75,6 +76,7 @@ public class Insight
                 accountId = string.Empty,
                 tag_0 = User!.KeyId,
                 tag_1 = metric.NumericValue,
+                tag_2 = User!.Name
             };
 
             var message = new InsightMessage
