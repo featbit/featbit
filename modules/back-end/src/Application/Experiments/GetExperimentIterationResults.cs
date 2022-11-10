@@ -22,8 +22,8 @@ public class ExperimentIterationParam
     public CustomEventTrackOption CustomEventTrackOption { get; set; }
     public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
     public string CustomEventUnit { get; set; }
-    public DateTime StartTime { get; set; }
-    public DateTime? EndTime { get; set; }
+    public long StartTime { get; set; }
+    public long? EndTime { get; set; }
     public bool IsFinish { get; set; }
 
 }

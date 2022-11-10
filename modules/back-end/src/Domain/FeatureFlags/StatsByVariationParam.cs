@@ -4,9 +4,9 @@ public class StatsByVariationParam
 {
     public string FlagExptId { get; set; }
     public Guid EnvId { get; set; }
-    public string StartTime { get; set; }
+    public long StartTime { get; set; }
     public string IntervalType { get; set; }
-    public string EndTime { get; set; }
+    public long EndTime { get; set; }
 }
 
 public class StatsByVariationResponse

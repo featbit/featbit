@@ -71,9 +71,9 @@ public class ExptIterationParam
 
     public string CustomEventUnit { get; set; }
 
-    public string StartExptTime { get; set; } // format "2021-09-20T21:00:00.123456"
+    public long StartExptTime { get; set; } // format "1667489884000000"
 
-    public string EndExptTime { get; set; } // format "2021-09-20T21:00:00.123456"
+    public long? EndExptTime { get; set; } // format "1667489884000000"
 }
 
 public class OlapExptIterationResponse

@@ -1,5 +1,3 @@
-import {IUserType} from "@shared/types";
-
 export enum PeriodOption {
   Last30m = '30m',
   Last2H = '2H',
@@ -185,8 +183,8 @@ export class ReportFilter {
     startDate.setMilliseconds(0);
     endDate.setMilliseconds(0);
 
-    from = startDate.toISOString();
-    to = endDate.toISOString();
+    from = startDate.getTime() * 1000;
+    to = endDate.getTime() * 1000;
     return [from, to];
   }
 }

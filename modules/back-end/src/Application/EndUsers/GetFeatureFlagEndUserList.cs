@@ -19,10 +19,10 @@ public class GetFeatureFlagEndUserListValidator : AbstractValidator<GetFeatureFl
             .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired);
 
         RuleFor(x => x.Filter.From)
-            .NotEmpty().WithErrorCode(ErrorCodes.StatsFromIsRequired);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.StatsFromIsRequired);
 
         RuleFor(x => x.Filter.To)
-            .NotEmpty().WithErrorCode(ErrorCodes.StatsToIsRequired);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.StatsToIsRequired);
     }
 }
 
