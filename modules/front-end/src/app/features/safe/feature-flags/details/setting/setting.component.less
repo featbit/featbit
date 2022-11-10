@@ -119,24 +119,30 @@
   }
 
   .tags {
-    width: 100%;
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-wrap: wrap;
+    margin-top: 16px;
 
-    .tag {
-      text-align: center;
-      width: 117px;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      background-color: @grey10-color;
-      padding: 4px 6px;
-      border-radius: 4px;
-      margin-right: 10px;
-      margin-bottom: 8px;
+    .selected {
+      border: 1px solid @grey20-color;
+      background-color: #ffffff;
+      padding: 5px 0 1px 6px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      margin-bottom: 12px;
+
+      nz-tag {
+        background: @grey20-color;
+        border-radius: 4px;
+        padding: 2px 4px 2px 5px;
+        line-height: 15px;
+        margin-right: 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    nz-select {
+      width: 100%;
     }
   }
 

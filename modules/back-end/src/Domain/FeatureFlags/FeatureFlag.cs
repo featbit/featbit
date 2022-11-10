@@ -26,6 +26,8 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool ExptIncludeAllTargets { get; set; }
 
+    public ICollection<string> Tags { get; set; }
+
     public bool IsArchived { get; set; }
 
     public FeatureFlag(Guid envId, string name, Guid currentUserId) : base(currentUserId)
@@ -64,6 +66,7 @@ public class FeatureFlag : FullAuditedEntity
         };
         ExptIncludeAllTargets = true;
 
+        Tags = Array.Empty<string>();
         IsArchived = false;
     }
 
@@ -182,5 +185,13 @@ public class FeatureFlag : FullAuditedEntity
     public Variation GetVariation(string variationId)
     {
         return Variations.FirstOrDefault(x => x.Id == variationId);
+    }
+
+    public void SetTags(ICollection<string> tags, Guid currentUserId)
+    {
+        Tags = tags ?? Array.Empty<string>();
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = currentUserId;
     }
 }

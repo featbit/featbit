@@ -3,13 +3,11 @@ import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { encodeURIComponentFfc } from '@shared/utils';
-import { SwitchTagTreeService } from "@services/switch-tag-tree.service";
 import {
   IFeatureFlagListCheckItem,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel,
-  FeatureFlagTagTree
 } from "../types/switch-index";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
@@ -31,7 +29,6 @@ export class IndexComponent implements OnInit {
     private router: Router,
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService,
-    private switchTagTreeService: SwitchTagTreeService,
     private fb: FormBuilder,
     private projectService: ProjectService,
     private notification: NzNotificationService
@@ -47,10 +44,6 @@ export class IndexComponent implements OnInit {
 
     this.featureFlagService.envId = currentProjectEnv.envId;
 
-    // // get switch tag tree
-    // this.switchTagTreeService.getTree()
-    //   .subscribe(res => this.tagTree = res);
-
     // get switch list
     this.$search.pipe(
       debounceTime(200)
@@ -58,6 +51,12 @@ export class IndexComponent implements OnInit {
       this.loadFeatureFlagList();
     });
     this.$search.next();
+
+    // get flag tags
+    this.featureFlagService.getAllTags().subscribe(allTags => {
+      this.allTags = allTags;
+      this.isLoadingTags = false;
+    });
 
     // get current envs
     const curAccountId = getCurrentOrganization().id;
@@ -72,9 +71,9 @@ export class IndexComponent implements OnInit {
       });
   }
 
-  // tag tree
-  tagTreeModalVisible: boolean = false;
-  tagTree: FeatureFlagTagTree = new FeatureFlagTagTree([]);
+  // tags
+  allTags: string[] = [];
+  isLoadingTags: boolean = true;
 
   // table selection
   allChecked: boolean = false;
@@ -208,13 +207,6 @@ export class IndexComponent implements OnInit {
   }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
-
-  onSelectTag(nodeIds: number[]) {
-    this.featureFlagFilter.tagIds = nodeIds;
-
-    this.onSearch();
-  }
-
   $search: Subject<void> = new Subject();
 
   onSearch(resetPage?: boolean) {
@@ -285,10 +277,10 @@ export class IndexComponent implements OnInit {
     let msg: string;
     if (data.isEnabled) {
       msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-        data.name + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
+        `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-off: is changed to OFF`;
     } else {
       msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-        data.name + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
+        `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-on: is changed to ON`;
     }
 
     this.featureFlagService.toggleStatus(data.id)
@@ -322,25 +314,5 @@ export class IndexComponent implements OnInit {
     navigator.clipboard.writeText(text).then(
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
-  }
-
-  saveTagTree() {
-    this.switchTagTreeService.saveTree(this.tagTree)
-      .subscribe(savedTagTree => {
-        // for trigger change detection
-        this.tagTree = savedTagTree;
-
-        // update switch tags when save tagTree
-        for (const item of this.featureFlagListModel.items) {
-          item.tags = this.tagTree.getFeatureFlagTags(item.id);
-        }
-
-        this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
-      }, err => {
-        this.msg.error(err.error);
-      });
-
-    // close modal
-    this.tagTreeModalVisible = false;
   }
 }

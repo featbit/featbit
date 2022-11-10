@@ -8,7 +8,24 @@
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
-        <switch-tag-tree-select (onSelect)="onSelectTag($event)" [tagTree]="tagTree"></switch-tag-tree-select>
+        <nz-select
+          class="tag-select"
+          nzMode="multiple"
+          [nzMaxTagCount]="1"
+          [nzMaxTagPlaceholder]="tagPlaceHolder"
+          [(ngModel)]="featureFlagFilter.tags"
+          (ngModelChange)="onSearch(true)"
+          i18n-nzPlaceHolder="@@ff.idx.filter-by-tags"
+          nzPlaceHolder="Filter by tags">
+          <ng-container *ngFor="let tag of allTags">
+            <nz-option *ngIf="!isLoadingTags" [nzValue]="tag" [nzLabel]="tag"></nz-option>
+          </ng-container>
+          <nz-option *ngIf="isLoadingTags" nzDisabled nzCustomContent>
+            <i nz-icon nzType="loading" class="loading-icon"></i>
+            <ng-container i18n="@@common.loading">Loading...</ng-container>
+          </nz-option>
+          <ng-template #tagPlaceHolder let-selectedList>and {{ selectedList.length }} more</ng-template>
+        </nz-select>
         <nz-select nzAllowClear [(ngModel)]="featureFlagFilter.isEnabled" (ngModelChange)="onSearch(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
           <nz-option nzValue="true" nzLabel="ON"></nz-option>
           <nz-option nzValue="false" nzLabel="OFF"></nz-option>
@@ -19,10 +36,6 @@
         <button nz-button nzType="primary" (click)="this.createModalVisible = true">
           <i nz-icon nzType="icons:icon-add"></i>
           <ng-container i18n="@@common.add">Add</ng-container>
-        </button>
-        <button class="tag-tree-management" nz-button nzType="primary" (click)="tagTreeModalVisible = true">
-          <i nz-icon nzType="icons:icon-setting"></i>
-          <ng-container i18n="@@common.tags">Tags</ng-container>
         </button>
         <button class="more-action" nz-dropdown [nzDropdownMenu]="menu" >
           <i nz-icon nzType="icons:icon-menu"></i>
@@ -101,15 +114,14 @@
             <div style="min-width: 60px;" >
               <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length === 1">
                 <span class="variation-tip tip-0" style="margin-bottom:2px;"></span>
-                <span style="margin-left: 0px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves.enabledVariations[0]}}
                 </span>
               </div>
               <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length > 1"
                    style="cursor: pointer;"
-                   nz-tooltip
-                   nzTooltipTitle="{{featureFlag.serves?.enabledVariations?.join(' // ')}}"
+                   nz-tooltip="{{featureFlag.serves?.enabledVariations?.join(' // ')}}"
                    >
                 <span *ngFor="let variationValue of featureFlag.serves?.enabledVariations; let key=index; ">
                   <span  class="variation-tip {{'tip-' + key % 9}}" style="margin-right:-3px;margin-bottom:2px;"></span>
@@ -121,7 +133,7 @@
               </div>
               <div *ngIf="!featureFlag.isEnabled" style="opacity: .5;">
                 <span class="variation-tip tip-9" style="margin-bottom:2px;background-color:darkgray;"></span>
-                <span style="margin-left: 0px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves?.disabledVariation}}
                 </span>
@@ -173,22 +185,6 @@
     <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
     <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!featureFlagForm.valid" (click)="createFeatureFlag()" i18n="@@common.save">Save</button>
   </ng-template>
-</nz-modal>
-
-<nz-modal
-  nzAutofocus="cancel"
-  [(nzVisible)]="tagTreeModalVisible"
-  (nzOnOk)="saveTagTree()"
-  (nzOnCancel)="tagTreeModalVisible = false"
-  [nzCentered]="true"
-  [nzBodyStyle]="{minHeight: '400px'}"
-  nzWidth="1000px"
-  i18n-nzTitle="@@common.tags"
-  nzTitle="Tags"
-  nzMaskClosable="false">
-  <ng-container *nzModalContent>
-    <switch-tag-tree-view [tagTree]="tagTree"></switch-tag-tree-view>
-  </ng-container>
 </nz-modal>
 
 <nz-modal

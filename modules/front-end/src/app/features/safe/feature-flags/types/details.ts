@@ -1,9 +1,9 @@
-import {IRule, IRuleVariation, IVariation} from "@shared/rules";
+import { IRule, IRuleVariation, IVariation } from "@shared/rules";
 
 export class FeatureFlag implements IFeatureFlag {
   originalData: IFeatureFlag;
   constructor(data: IFeatureFlag) {
-    for(let p in data) {
+    for (let p in data) {
       if (data[p] !== null && (Array.isArray(data[p]) || typeof data[p] === 'object')) {
         this[p] = JSON.parse(JSON.stringify(data[p]));
       } else {
@@ -18,11 +18,20 @@ export class FeatureFlag implements IFeatureFlag {
     return this.variations.find(v => v.id === this.disabledVariationId);
   }
 
+  addTag(tag: string) {
+    this.tags = [...this.tags, tag];
+  }
+
+  removeTag(tag: string) {
+    this.tags = this.tags.filter(x => x !== tag);
+  }
+
   createdAt: Date;
   creatorId: string;
   disabledVariationId: string;
   envId: string;
   exptIncludeAllTargets: boolean;
+  tags: string[];
   fallthrough: IFallthrough;
   id: string;
   isArchived: boolean;
@@ -49,7 +58,8 @@ export interface IFeatureFlag {
   isEnabled: boolean,
   disabledVariationId: string,
   fallthrough: IFallthrough,
-  exptIncludeAllTargets: boolean
+  exptIncludeAllTargets: boolean,
+  tags: string[],
   isArchived: boolean,
   creatorId: string,
   updatorId: string,

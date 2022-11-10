@@ -1,14 +1,14 @@
-import {Injectable} from "@angular/core";
-import {environment} from "../../../environments/environment";
-import {HttpClient, HttpParams} from "@angular/common/http";
-import {getCurrentProjectEnv} from "@utils/project-env";
-import {Observable, of} from "rxjs";
+import { Injectable } from "@angular/core";
+import { environment } from "../../../environments/environment";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { getCurrentProjectEnv } from "@utils/project-env";
+import { Observable, of } from "rxjs";
 import {
   ICopyToEnvResult,
   IFeatureFlagListFilter,
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/switch-index";
-import {catchError} from "rxjs/operators";
+import { catchError } from "rxjs/operators";
 import {
   IFeatureFlag,
   IFeatureFlagTargeting,
@@ -47,7 +47,7 @@ export class FeatureFlagService {
   public getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
     const queryParam: any = {
       name: filter.name ?? '',
-      tagIds: filter.tagIds ?? [],
+      tags: filter.tags ?? [],
       isArchived: filter.isArchived,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize
@@ -115,5 +115,15 @@ export class FeatureFlagService {
   public update(payload: IFeatureFlagTargeting): Observable<boolean> {
     const url = `${this.baseUrl}/${payload.id}/targeting`;
     return this.http.put<boolean>(url, payload);
+  }
+
+  getAllTags(): Observable<string[]> {
+    const url = `${this.baseUrl}/all-tags`;
+    return this.http.get<string[]>(url);
+  }
+
+  setTags(flag: IFeatureFlag): Observable<boolean> {
+    const url = `${this.baseUrl}/${flag.id}/tags`;
+    return this.http.put<boolean>(url, flag.tags);
   }
 }

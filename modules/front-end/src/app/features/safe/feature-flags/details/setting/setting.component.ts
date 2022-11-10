@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {NzModalService} from 'ng-zorro-antd/modal';
@@ -17,6 +17,7 @@ import {
 import {IVariation} from "@shared/rules";
 import {ExperimentService} from "@services/experiment.service";
 import {ExperimentStatus, IExpt} from "@features/safe/experiments/types";
+import { NzSelectComponent } from "ng-zorro-antd/select";
 
 @Component({
   selector: 'ff-setting',
@@ -51,6 +52,52 @@ export class SettingComponent implements OnInit {
   public key: string = null;
   currentProjectEnv: IProjectEnv = null;
 
+  allTags: string[] = [];
+  currentAllTags: string[] = [];
+  selectedTag: string = '';
+  isLoadingTags: boolean = true;
+  @ViewChild('tags') tagsSelect: NzSelectComponent;
+  createTagPrefix = $localize`:@@common.create-tag:Create Tag`;
+
+  isTagSelected(tag: string): boolean {
+    return this.featureFlag.tags.includes(tag);
+  }
+
+  onSearchTag(value: string) {
+    this.currentAllTags = [...this.allTags];
+
+    if (!value) {
+      return;
+    }
+
+    if (this.currentAllTags.findIndex(x => x.startsWith(value)) === -1) {
+      this.currentAllTags = [`${this.createTagPrefix} '${value}'`];
+    }
+  }
+
+  onRemoveTag(tag: string) {
+    this.featureFlag.removeTag(tag);
+    this.featureFlagService.setTags(this.featureFlag).subscribe(_ => {
+      this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+    });
+  }
+
+  onAddTag() {
+    let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
+      ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
+      : this.selectedTag.trim();
+
+    this.featureFlag.addTag(actualTag);
+    this.featureFlagService.setTags(this.featureFlag).subscribe(_ => {
+      this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+    });
+
+    this.allTags = [...this.allTags, actualTag];
+    this.currentAllTags = this.allTags;
+    // clear current selected
+    this.tagsSelect.writeValue(null);
+  }
+
   constructor(
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
@@ -67,6 +114,12 @@ export class SettingComponent implements OnInit {
       this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), () => this.loadData());
       this.loadData();
     })
+
+    this.featureFlagService.getAllTags().subscribe(allTags => {
+      this.allTags = allTags;
+      this.currentAllTags = allTags;
+      this.isLoadingTags = false;
+    });
   }
   editor?: editor.ICodeEditor | editor.IEditor;
   formatCode(e?: editor.ICodeEditor | editor.IEditor) {

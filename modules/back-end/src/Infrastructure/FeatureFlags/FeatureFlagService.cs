@@ -44,6 +44,13 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
             filters.Add(statusFilter);
         }
 
+        // tags filter
+        if (userFilter.Tags.Any())
+        {
+            var tagsFilter = filterBuilder.All(x => x.Tags, userFilter.Tags);
+            filters.Add(tagsFilter);
+        }
+
         var filter = filterBuilder.And(filters);
 
         var totalCount = await Collection.CountDocumentsAsync(filter);
@@ -73,5 +80,12 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
     public async Task DeleteAsync(Guid id)
     {
         await Collection.DeleteOneAsync(x => x.Id == id);
+    }
+
+    public async Task<ICollection<string>> GetAllTagsAsync(Guid envId)
+    {
+        var filter = new ExpressionFilterDefinition<FeatureFlag>(x => x.EnvId == envId && !x.IsArchived);
+        var cursor = await Collection.DistinctAsync<string>("tags", filter);
+        return await cursor.ToListAsync();
     }
 }

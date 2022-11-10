@@ -19,4 +19,6 @@ public class FeatureFlagVm
     public DateTime UpdatedAt { get; set; }
 
     public Serves Serves { get; set; }
+
+    public ICollection<string> Tags { get; set; }
 }
