@@ -1,6 +1,5 @@
 using Application.Bases;
 using Application.Bases.Models;
-using Application.FeatureFlags;
 using Domain.FeatureFlags;
 
 namespace Application.EndUsers;
@@ -21,27 +20,33 @@ public class GetFeatureFlagEndUserListValidator : AbstractValidator<GetFeatureFl
 
         RuleFor(x => x.Filter.From)
             .NotEmpty().WithErrorCode(ErrorCodes.StatsFromIsRequired);
-        
+
         RuleFor(x => x.Filter.To)
             .NotEmpty().WithErrorCode(ErrorCodes.StatsToIsRequired);
     }
 }
 
-public class GetFeatureFlagEndUserListHandler : IRequestHandler<GetFeatureFlagEndUserList, PagedResult<FeatureFlagEndUserStatsVm>>
+public class
+    GetFeatureFlagEndUserListHandler : IRequestHandler<GetFeatureFlagEndUserList,
+        PagedResult<FeatureFlagEndUserStatsVm>>
 {
+    private readonly IEndUserService _service;
     private readonly IFeatureFlagService _featureFlagService;
     private readonly IOlapService _olapService;
 
-    public GetFeatureFlagEndUserListHandler(IFeatureFlagService featureFlagService, IOlapService olapService)
+    public GetFeatureFlagEndUserListHandler(IEndUserService service, IFeatureFlagService featureFlagService,
+        IOlapService olapService)
     {
+        _service = service;
         _featureFlagService = featureFlagService;
         _olapService = olapService;
     }
 
-    public async Task<PagedResult<FeatureFlagEndUserStatsVm>> Handle(GetFeatureFlagEndUserList request, CancellationToken cancellationToken)
+    public async Task<PagedResult<FeatureFlagEndUserStatsVm>> Handle(GetFeatureFlagEndUserList request,
+        CancellationToken cancellationToken)
     {
         var featureFlag = await _featureFlagService.GetAsync(request.EnvId, request.Filter.FeatureFlagKey);
-        
+
         var param = new FeatureFlagEndUserParam
         {
             FlagExptId = $"{request.EnvId}-{request.Filter.FeatureFlagKey}",
@@ -51,25 +56,32 @@ public class GetFeatureFlagEndUserListHandler : IRequestHandler<GetFeatureFlagEn
             PageSize = request.Filter.PageSize,
             PageIndex = request.Filter.PageIndex
         };
-        
+
         // var stats = await _olapService.GetFeatureFlagEndUserStats(param);
-        // var items = stats.Items.Select(it => new FeatureFlagEndUserStatsVm
-        // {
-        //     Variation = featureFlag.Variations.FirstOrDefault(v => v.Id == it.VariationId)?.Value ?? it.VariationId,
-        //     KeyId = it.KeyId,
-        //     Name = it.Name,
-        //     LastEvaluatedAt = it.LastEvaluatedAt
-        // }).ToList();
+        //
+        // var endUsers = await _service.GetListByKeyIdsAsync(request.EnvId, stats.Items.Select(x => x.KeyId));
+        // var items = stats.Items
+        //     .Where(it => endUsers.FirstOrDefault(u => u.KeyId == it.KeyId) != null)
+        //     .Select(it => new FeatureFlagEndUserStatsVm
+        //     {
+        //         Id = endUsers.FirstOrDefault(u => u.KeyId == it.KeyId).Id,
+        //         Variation = featureFlag.Variations.FirstOrDefault(v => v.Id == it.VariationId)?.Value ?? it.VariationId,
+        //         KeyId = it.KeyId,
+        //         Name = it.Name,
+        //         LastEvaluatedAt = it.LastEvaluatedAt
+        //     }).ToList();
+        //
         // return new PagedResult<FeatureFlagEndUserStatsVm>(stats.TotalCount, items);
-        
+
         Random rnd = new Random();
-
+        
         var items = new List<FeatureFlagEndUserStatsVm>();
-
+        
         for (int i = 0; i < 10; i++) 
         {
             items.Add(new FeatureFlagEndUserStatsVm
             {
+                Id = Guid.NewGuid(),
                 Variation = string.IsNullOrWhiteSpace(request.Filter.VariationId)
                     ? featureFlag.Variations.ElementAt(rnd.Next(0, featureFlag.Variations.Count - 1)).Value
                     : featureFlag.Variations.FirstOrDefault(v => v.Id == request.Filter.VariationId)?.Value,
@@ -78,7 +90,7 @@ public class GetFeatureFlagEndUserListHandler : IRequestHandler<GetFeatureFlagEn
                 LastEvaluatedAt = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")
             });
         }
-
+        
         return new PagedResult<FeatureFlagEndUserStatsVm>(50, items);
     }
 }

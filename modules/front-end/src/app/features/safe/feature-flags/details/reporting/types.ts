@@ -49,6 +49,7 @@ export interface IFeatureFlagEndUserFilter {
 }
 
 export interface IFeatureFlagEndUser {
+  id: string,
   variation: string,
   keyId: string,
   name: string,

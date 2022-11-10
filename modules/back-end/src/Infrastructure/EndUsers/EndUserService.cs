@@ -14,6 +14,25 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
     {
     }
 
+    public async Task<IEnumerable<EndUser>> GetListByKeyIdsAsync(Guid envId, IEnumerable<string> keyIds)
+    {
+        if (!keyIds.Any())
+        {
+            return new List<EndUser>();
+        }
+        
+        var filterBuilder = Builders<EndUser>.Filter;
+
+        var keyIdFilter =
+            filterBuilder.Where(x => keyIds.Contains(x.KeyId));
+
+        var filter = filterBuilder.Eq(x => x.EnvId, envId) & keyIdFilter;
+        
+        var itemsQuery = Collection.Find(filter);
+        
+        return await itemsQuery.ToListAsync();
+    }
+        
     public async Task<PagedResult<EndUser>> GetListAsync(Guid envId, EndUserFilter userFilter)
     {
         var filterBuilder = Builders<EndUser>.Filter;
