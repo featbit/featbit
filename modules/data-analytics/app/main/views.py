@@ -6,8 +6,9 @@ from flask import abort, current_app, jsonify, request
 from app.clickhouse.models.event import bulk_create_events
 from app.extensions import get_cache
 from app.main import get_main_blueprint
-from app.main.models.statistics.feature_flag.feature_flag_statistics import (
-    FeatureFlagIntervalStatistics, IntervalParams)
+from app.main.models.statistics import (EndUserParams, EndUserStatistics,
+                                        FeatureFlagIntervalStatistics,
+                                        IntervalParams)
 from utils import internal_error_handler, to_md5_hexdigest
 
 main = get_main_blueprint()
@@ -44,11 +45,12 @@ def get_event_stat(event: str):
         if not data:
             params = json.loads(json_str)
             if event == 'featureflag':
-                interval_params = IntervalParams.from_properties(params)
-                data = FeatureFlagIntervalStatistics(interval_params).get_results()
-                get_cache().set(cache_key, data, timeout=5)
+                data = FeatureFlagIntervalStatistics(IntervalParams.from_properties(params)).get_results()
+            elif event == 'enduser':
+                data = EndUserStatistics(EndUserParams.from_properties(params)).get_results()
             else:
                 raise NotImplementedError('event not supported')
+            get_cache().set(cache_key, data, timeout=10)
         return jsonify(code=200, error='', data=data)
     except Exception as e:
         current_app.logger.exception('unexpected error occurs: %s' % str(e))

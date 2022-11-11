@@ -1,4 +1,4 @@
-from app.clickhouse.models.event.sql import event_table_name
+from app.clickhouse.models.event import event_table_name
 
 
 FLAG_EVENTS_BY_INTERVAL_CTE = f"""flag_events_by_interval as
