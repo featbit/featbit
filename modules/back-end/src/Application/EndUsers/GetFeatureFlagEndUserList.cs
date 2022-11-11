@@ -60,12 +60,9 @@ public class
 
         var stats = await _olapService.GetFeatureFlagEndUserStats(param);
         
-        var endUsers = await _service.GetListByKeyIdsAsync(request.EnvId, stats.Items.Select(x => x.KeyId));
         var items = stats.Items
-            .Where(it => endUsers.FirstOrDefault(u => u.KeyId == it.KeyId) != null)
             .Select(it => new FeatureFlagEndUserStatsVm
             {
-                Id = endUsers.FirstOrDefault(u => u.KeyId == it.KeyId).Id,
                 Variation = featureFlag.Variations.FirstOrDefault(v => v.Id == it.VariationId)?.Value ?? it.VariationId,
                 KeyId = it.KeyId,
                 Name = it.Name,
