@@ -72,10 +72,11 @@ def to_UTC_datetime(value: Union[int, float, str, datetime]) -> datetime:
 
     if isinstance(value, datetime):
         dt = value
-    elif isinstance(value, str):
+    elif isinstance(value, str) and not value.isnumeric():
         dt = isoparse(value)
     else:
         # https://stackoverflow.com/questions/23929145/how-to-test-if-a-given-time-stamp-is-in-seconds-or-milliseconds
+        value = float(value)
         n = len_int(value)
         if n > 13:
             dt = datetime.utcfromtimestamp(value / 1000000)
