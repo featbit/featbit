@@ -97,7 +97,7 @@ class EndUserStatistics:
         for res in sync_execute(count_user_sql(has_variation, has_user), args=self._query_params):
             user_count = res[0]
 
-        items = [{"variationId": var_key, "keyId": user_key, "userName": user_name, "lastEvaluatedAt": time.strftime(DATE_UTC_FMT)}
+        items = [{"variationId": var_key, "keyId": user_key, "name": user_name, "lastEvaluatedAt": time.strftime(DATE_UTC_FMT)}
                  for var_key, user_key, user_name, time in sync_execute(get_users_sql(has_variation, has_user), args=self._query_params)]
 
         return {"totalCount": user_count,
