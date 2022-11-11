@@ -273,12 +273,4 @@ export class ReportingComponent implements OnInit {
       this.isEndUserLoading = false;
     }, () => this.isEndUserLoading = false);
   }
-
-  navigateToUserDetail(user: IFeatureFlagEndUser) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree([`${getPathPrefix()}users/${encodeURIComponent(user.id)}`])
-    );
-
-    window.open(url, '_blank');
-  }
 }
