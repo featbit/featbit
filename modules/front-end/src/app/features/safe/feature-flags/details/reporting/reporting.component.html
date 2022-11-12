@@ -1,5 +1,5 @@
 <section class="body-container">
-  <div class="filters">
+  <div class="filters-area">
     <nz-select class="period-selector" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()">
       <nz-option *ngFor="let period of periodOptions" [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
     </nz-select>
@@ -28,7 +28,7 @@
       </div>
       <div class="table-content-area">
         <div class="table-search-area">
-          <div class="filters">
+          <div class="filters-area">
             <nz-input-group [nzPrefix]="prefixIconSearch" style="width:500px">
               <input nz-input type="text" i18n-placeholder="@@ff.reporting.filter-by-keyid-or-name" placeholder="Filter by keyId or name" [(ngModel)]="filter.userQuery" (ngModelChange)="endUserFilterChanged()">
             </nz-input-group>
