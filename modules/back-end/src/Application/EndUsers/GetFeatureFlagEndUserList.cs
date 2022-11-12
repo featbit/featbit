@@ -49,6 +49,7 @@ public class
 
         var param = new FeatureFlagEndUserParam
         {
+            Query = request.Filter.Query,
             EnvId = request.EnvId,
             FlagExptId = $"{request.EnvId}-{request.Filter.FeatureFlagKey}",
             VariationId = request.Filter.VariationId,

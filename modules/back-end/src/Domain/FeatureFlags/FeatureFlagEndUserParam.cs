@@ -5,6 +5,7 @@ public class FeatureFlagEndUserParam
     public Guid EnvId { get; set; }
     public string FlagExptId { get; set; }
     public string VariationId { get; set; }
+    public string Query { get; set; }
     public long StartTime { get; set; }
     
     public long EndTime { get; set; }
