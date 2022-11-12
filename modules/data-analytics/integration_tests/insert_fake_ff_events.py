@@ -21,7 +21,8 @@ for group in range(1, 5):
                 "variationId": str(group),
                 "tag_0": "u_group" + str(group) + "_" + str(user) + "@testliang.com",
                 "tag_1": str(group),
-                "tag_2": True
+                "tag_2": True,
+                "tag_3": "u_group" + str(group) + "_" + str(user),
             }
             events.append(Q4)
         print("sending request")

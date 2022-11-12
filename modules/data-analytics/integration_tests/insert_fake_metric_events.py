@@ -30,7 +30,8 @@ for group in range(1, 5):
             "envId": "103",
             "accountId": "38",
             "tag_0": "u_group" + str(group) + "_" + str(user) + "@testliang.com",
-            "tag_1": str(numeric_value)
+            "tag_1": str(numeric_value),
+            "tag_2": "u_group" + str(group) + "_" + str(user),
         }
         events.append(Q5)
     response = requests.post(url, json=events)

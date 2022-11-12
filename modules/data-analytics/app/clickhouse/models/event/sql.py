@@ -38,7 +38,17 @@ EVENTS_TABLE_MATERIALIZED_COLUMNS = """,tag_0 VARCHAR MATERIALIZED JSONExtractSt
     ,tag_6 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_6')
     ,tag_7 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_7')
     ,tag_8 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_8')
-    ,tag_9 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_9')"""
+    ,tag_9 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_9')
+    ,tag_10 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_10')
+    ,tag_11 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_11')
+    ,tag_12 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_12')
+    ,tag_13 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_13')
+    ,tag_14 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_14')
+    ,tag_15 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_15')
+    ,tag_16 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_16')
+    ,tag_17 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_17')
+    ,tag_18 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_18')
+    ,tag_19 VARCHAR MATERIALIZED JSONExtractString(properties, 'tag_19')"""
 
 EVENTS_TABLE_BASIC_SQL = """
 CREATE TABLE IF NOT EXISTS {table_name} {cluster}

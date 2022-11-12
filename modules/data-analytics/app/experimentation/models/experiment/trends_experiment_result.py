@@ -5,7 +5,7 @@ from app.clickhouse.client import sync_execute
 from app.experimentation.models.event.sql import (GET_PROP_ZTEST_VARS_SQL,
                                                   GET_TTEST_VARS_SQL)
 from app.experimentation.models.experiment import Experiment, Variation
-from app.setting import UTC_FMT
+from app.setting import DATE_ISO_FMT, DATE_UTC_FMT
 from scipy.stats import ttest_ind_from_stats
 from statsmodels.stats.power import (NormalIndPower, TTestIndPower,
                                      tt_ind_solve_power, zt_ind_solve_power)
@@ -26,8 +26,8 @@ class TrendsExperimentResult:
             "event_name": experiment.event_name,
             "event": experiment.event_type,
             "env_id": experiment.env_id,
-            "start": experiment.start.strftime(UTC_FMT),
-            "end": experiment.end.strftime(UTC_FMT),
+            "start": experiment.start.strftime(DATE_ISO_FMT),
+            "end": experiment.end.strftime(DATE_ISO_FMT),
         }
 
     def get_results(self) -> Dict[str, Any]:
@@ -39,8 +39,8 @@ class TrendsExperimentResult:
             'customEventUnit' : self._expt.extra_prop('customEventUnit', None),
             'customEventSuccessCriteria': self._expt.extra_prop('customEventSuccessCriteria', None),
             'iterationId': self._expt.extra_prop('iterationId', None),
-            'startTime': self._expt.start.strftime(UTC_FMT),
-            'endTime': self._expt.end.strftime(UTC_FMT) if self._expt.is_finished else None,
+            'startTime': self._expt.start.strftime(DATE_UTC_FMT),
+            'endTime': self._expt.end.strftime(DATE_UTC_FMT) if self._expt.is_finished else None,
             'isFinish': self._expt.is_finished,
             'results': output
         }

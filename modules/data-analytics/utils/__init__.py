@@ -1,8 +1,12 @@
+import hashlib
 import os
-from typing import Any, Callable, Optional
+from datetime import date, datetime
+from typing import Any, Callable, Optional, Union
 from uuid import UUID
 
 import numpy as np
+import pytz
+from dateutil.parser import isoparse
 from flask import jsonify
 
 
@@ -47,3 +51,46 @@ class SingletonDecorator:
 
 def format_float_positional(value: float) -> Optional[str]:
     return None if value is None else np.format_float_positional(value, precision=10, trim='-')
+
+
+def time_to_special_tz(source: Union[datetime, date], tz: str) -> datetime:
+    if isinstance(source, datetime):
+        return source.astimezone(pytz.timezone(tz)) if source.tzinfo else source.replace(tzinfo=pytz.timezone(tz))
+    elif isinstance(source, date):
+        return datetime.combine(source, datetime.min.time()).replace(tzinfo=pytz.timezone(tz))
+    else:
+        raise ValueError("source is neithor datetime nor date")
+
+
+def to_md5_hexdigest(value: bytes) -> str:
+    return hashlib.md5(value).hexdigest()
+
+
+def to_UTC_datetime(value: Union[int, float, str, datetime]) -> datetime:
+    def len_int(value):
+        return len(str(round(value)))
+
+    if isinstance(value, datetime):
+        dt = value
+    elif isinstance(value, str) and not value.isnumeric():
+        dt = isoparse(value)
+    else:
+        # https://stackoverflow.com/questions/23929145/how-to-test-if-a-given-time-stamp-is-in-seconds-or-milliseconds
+        value = float(value)
+        n = len_int(value)
+        if n > 13:
+            dt = datetime.utcfromtimestamp(value / 1000000)
+        elif n > 10:
+            dt = datetime.utcfromtimestamp(value / 1000)
+        else:
+            dt = datetime.utcfromtimestamp(value)
+    return time_to_special_tz(dt, 'UTC')
+
+
+def dt_to_seconds_or_millis_or_micros(value: datetime, timespec="milliseconds") -> int:
+    if timespec == "milliseconds":
+        return round(value.timestamp() * 1000)
+    elif timespec == "microseconds":
+        return round(value.timestamp() * 1000000)
+    else:
+        return round(value.timestamp())

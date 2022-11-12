@@ -5,7 +5,7 @@ from utils import get_from_env, str_to_bool
 WSGI = get_from_env("WSGI", False, type_cast=str_to_bool)
 
 TEST = get_from_env("TEST", True, type_cast=str_to_bool)
-SUFFIX = "_test" if TEST else os.getenv("SUFFIX", "")
+SUFFIX = os.getenv("SUFFIX", "")
 
 KAFKA_HOSTS = os.getenv("KAFKA_HOSTS", "localhost:29092")
 KAFKA_SECURITY_PROTOCOL = os.getenv("KAFKA_SECURITY_PROTOCOL", None)
@@ -30,11 +30,19 @@ CLICKHOUSE_ENABLE_STORAGE_POLICY = get_from_env("CLICKHOUSE_ENABLE_STORAGE_POLIC
 CLICKHOUSE_KAFKA_HOSTS = os.getenv("CLICKHOUSE_KAFKA_HOSTS", "kafka:9092")
 CLICKHOUSE_REPLICATION = get_from_env("CLICKHOUSE_REPLICATION", True, type_cast=str_to_bool)
 
+CACHE_TYPE = "RedisCache"
+CACHE_KEY_PREFIX = "da-server"
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+
+
 SHELL_PLUS_PRINT_SQL = True if TEST else False
 
-UTC_FMT = '%Y-%m-%dT%H:%M:%S.%f'
+DATE_ISO_FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
-EVENTS_FMT = '%Y-%m-%d %H:%M:%S.%f'
+DATE_SIM_FMT = '%Y-%m-%d %H:%M:%S'
+DATE_UTC_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
 DEFAULT_LOGGING_CONFIG = {
     'version': 1,

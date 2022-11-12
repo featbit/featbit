@@ -3,8 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, Iterable, Optional, Tuple
 
 import scipy as sp
-from dateutil.parser import isoparse
-from utils import format_float_positional
+from utils import format_float_positional, to_UTC_datetime
 
 EXPT_NECESSARY_COLUMNS = ["exptId", "envId", "flagExptId", "eventName", "eventType", "startExptTime", "baselineVariationId", "variationIds"]
 EXPT_EVENT_TYPE_MAPPING = {1: "CustomEvent", 2: "PageView", 3: "Click"}
@@ -104,8 +103,8 @@ class Experiment:
         self._event_type = EXPT_EVENT_TYPE_MAPPING.get(event_type, EXPT_DEFAULT_EVENT_TYPE)
         self._baseline = baseline
         self._variations = variations
-        self._start = isoparse(start) if start else datetime.utcnow()
-        self._end = isoparse(end) if end else datetime(year=2100, month=1, day=1)
+        self._start = to_UTC_datetime(start) if start else datetime.utcnow()
+        self._end = to_UTC_datetime(end) if end else datetime(year=2100, month=1, day=1)
         self._extra_props = kwargs.copy()
 
     def extra_prop(self, key: str, default: Any = None) -> Dict[str, Any]:
