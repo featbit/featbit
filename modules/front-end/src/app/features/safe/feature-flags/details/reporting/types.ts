@@ -66,7 +66,7 @@ export class ReportFilter {
 
   variationId: string = '';
   userQuery: string = '';
-  endUserPageSize: number = 20;
+  endUserPageSize: number = 5;
   endUserPageIndex: number = 1;
 
   constructor(public featureFlagKey: string) {

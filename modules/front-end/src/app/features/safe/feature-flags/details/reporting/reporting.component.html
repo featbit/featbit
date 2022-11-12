@@ -44,10 +44,12 @@
         <div class="table-wrapper">
           <nz-table #table nzSize="small"
                     [nzData]="pagedEndUser.items"
-                    [nzFrontPagination]="true"
+                    [nzFrontPagination]="false"
                     [nzLoading]="isEndUserLoading"
                     [nzTotal]="pagedEndUser.totalCount"
-                    nzPageSize="5">
+                    [(nzPageSize)]="filter.endUserPageSize"
+                    [(nzPageIndex)]="filter.endUserPageIndex"
+                    (nzPageIndexChange)="endUserFilterChanged()">
             <thead>
             <tr>
               <th>KeyId</th>
