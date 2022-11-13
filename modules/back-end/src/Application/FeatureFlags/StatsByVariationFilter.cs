@@ -8,11 +8,11 @@ public class StatsByVariationFilter
     public long To { get; set; }
 }
 
-public static class IntervalTypeEnum
+public static class IntervalType
 {
-    public static string Month => "MONTH";
-    public static string Week => "WEEK";
-    public static string Day => "DAY";
-    public static string Hour => "HOUR";
-    public static string Minute => "MINUTE";
+    public const string Month = "MONTH";
+    public const string Week = "WEEK";
+    public const string Day = "DAY";
+    public const string Hour = "HOUR";
+    public const string Minute = "MINUTE";
 }
