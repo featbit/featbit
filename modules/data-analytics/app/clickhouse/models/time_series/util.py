@@ -46,7 +46,7 @@ def time_series(utc_start: datetime,
         upper_bound = delta_time(delta, 60)
         sql = MINUTE_SERIES
     else:
-        upper_bound = delta_time(delta, 86400)
+        upper_bound = delta_time(delta, 86400) + 1
         sql = DAY_SERIES
     query_params['upperbound'] = upper_bound
     return sync_execute(sql, args=query_params)

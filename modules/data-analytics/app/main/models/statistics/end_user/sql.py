@@ -13,14 +13,20 @@ AND timestamp < %(end)s
 ORDER BY timestamp DESC"""
 
 VARIATION_CLAUSE = """AND tag_1 = %(variation)s"""
-USER_CLAUSE = """AND (tag_0 like %(user_search_key)s OR tag_3 like %(user_search_key)s)"""
+USER_CLAUSE = """AND (tag_0 ILIKE %(user_search_key)s OR tag_3 ILIKE %(user_search_key)s)"""
 
 GET_USERS_STATISTICS_SQL = """WITH users_cte AS
 (
 {user_subquery}
-)
-SELECT count(user_key)
+),
+uniq_user_cte AS
+(
+SELECT uniq(user_key) AS uniq_user
 FROM users_cte
+GROUP BY variation, user_key
+)
+select sum(uniq_user)
+from uniq_user_cte
 """
 
 GET_USERS_PAGENATION = """WITH users_cte AS
