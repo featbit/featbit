@@ -77,7 +77,16 @@ public partial class KafkaMessageConsumer : BackgroundService
             }
             catch (ConsumeException ex)
             {
-                Log.FailedConsumeMessage(_logger, ex.Error.ToString());
+                var error = ex.Error.ToString();
+                if (error.StartsWith("Subscribed topic not available"))
+                {
+                    // ignore topic not exists exception
+                    // because we currently set `auto.create.topics.enable=true` on broker
+                    // ref: https://kafka.apache.org/documentation/#brokerconfigs_auto.create.topics.enable
+                    continue;
+                }
+
+                Log.FailedConsumeMessage(_logger, error);
 
                 if (ex.Error.IsFatal)
                 {
