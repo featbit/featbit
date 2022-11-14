@@ -1,8 +1,10 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
 using Domain.Utils;
 using System.Net.Mime;
 using System.Text.Json;
 using Domain.Experiments;
+using Domain.FeatureFlags;
 
 namespace Infrastructure.Experiments;
 
@@ -15,19 +17,41 @@ public class OlapService : IOlapService
         _httpClient = httpClient;
     }
 
+    public async Task<FeatureFlagEndUserStats> GetFeatureFlagEndUserStats(FeatureFlagEndUserParam param)
+    {
+        param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
+        param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
+        
+        var response = await _httpClient.PostAsJsonAsync("/api/events/stat/enduser", param);
+
+        var result = await response.Content.ReadFromJsonAsync<FeatureFlagEndUserStatsResponse>();
+
+        return result.Data;
+    }
+    
+    public async Task<ICollection<FeatureFlagStats>> GetFeatureFlagStatusByVariation(StatsByVariationParam param)
+    {
+        param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
+        param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
+        
+        var response = await _httpClient.PostAsJsonAsync("/api/events/stat/featureflag", param);
+
+        var result = await response.Content.ReadFromJsonAsync<StatsByVariationResponse>();
+
+        return result.Data;
+    }
+
     public async Task<ExperimentIteration> GetExptIterationResultAsync(ExptIterationParam param)
     {
-        var content = new StringContent(
-            JsonSerializer.Serialize(param, ReusableJsonSerializerOptions.Web),
-            Encoding.UTF8, MediaTypeNames.Application.Json
-        );
+        param.StartExptTime = param.StartExptTime * 1000; // milliseconds to microseconds
+        if (param.EndExptTime.HasValue)
+        {
+            param.EndExptTime = param.EndExptTime * 1000; // milliseconds to microseconds
+        }
+        
+        var response = await _httpClient.PostAsJsonAsync("/api/expt/results", param);
 
-        var response = await _httpClient.PostAsync("/api/expt/results", content);
-
-        var result = JsonSerializer.Deserialize<OlapExptIterationResponse>(
-            await response.Content.ReadAsStringAsync(),
-            ReusableJsonSerializerOptions.Web
-        );
+        var result = await response.Content.ReadFromJsonAsync<OlapExptIterationResponse>();
 
         return new ExperimentIteration
         {

@@ -5,12 +5,15 @@ import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/end-users/types/featureflag-user";
 import { IUserType } from "@shared/types";
-import { IJsonContent } from "@features/safe/feature-flags/types/switch-new";
 import {
   EndUserFlagFilter,
   IEndUserSegment,
   IPagedEndUserFlag
 } from "@features/safe/end-users/types/user-segments-flags";
+import {
+  IFeatureFlagEndUserFilter,
+  IFeatureFlagEndUserPagedResult
+} from "@features/safe/feature-flags/details/reporting/types";
 
 @Injectable({
   providedIn: 'root'
@@ -23,25 +26,24 @@ export class EnvUserService {
   }
 
   get baseUrl() {
-    return environment.url;
+    return `${environment.url}/api/v1/envs/${this.envId}/end-users`;
   }
 
   get(id: string): Observable<IUserType> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/${id}`;
+    const url = `${this.baseUrl}/${id}`;
 
     return this.http.get<IUserType>(url);
   }
 
   // get users by key ids
   public getUsersByKeyIds(keyIds: string[]): Observable<any> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/by-keyIds`;
+    const url = `${this.baseUrl}/by-keyIds`;
     return this.http.get(url, {params: new HttpParams({fromObject: { keyIds }})});
   }
 
   // upsert users
   public upsert(params): Observable<any> {
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users`;
-    return this.http.put(url, { ...params });
+    return this.http.put(this.baseUrl, { ...params });
   }
 
   search(filter: EnvUserFilter = new EnvUserFilter()): Observable<EnvUserPagedResult> {
@@ -52,36 +54,7 @@ export class EnvUserService {
       pageSize: filter.pageSize,
     };
 
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users`;
-    return this.http.get<EnvUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
-  }
-
-  targetedUsers(rules: IJsonContent[], pageIndex: number = 0, pageSize: number = 10): Observable<EnvUserPagedResult> {
-    let filters: string[] = [];
-    rules.forEach(rule => {
-      let prop = rule.property;
-      let op = rule.operation;
-
-      // prop and op cannot be null or empty
-      if (!prop || !op) {
-        return;
-      }
-
-      let value = rule.type === 'multi'
-        ? rule.multipleValue.join(',')
-        : rule.value?.toString() ?? '';
-
-      let filter = `${prop} ${op} '${value}'`;
-      filters.push(filter);
-    });
-
-    let params = new HttpParams()
-      .set('$filter', filters.join(' and '))
-      .set('pageIndex', pageIndex)
-      .set('pageSize', pageSize);
-
-    const url = this.baseUrl + `/api/v1/envs/${this.envId}/end-users/rest-search`;
-    return this.http.get<EnvUserPagedResult>(url, { params: params });
+    return this.http.get<EnvUserPagedResult>(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
   }
 
   getFlags(id: string, filter: EndUserFlagFilter = new EndUserFlagFilter()): Observable<IPagedEndUserFlag> {
@@ -91,14 +64,30 @@ export class EnvUserService {
       pageSize: filter.pageSize,
     };
 
-    const url = `${this.baseUrl}/api/v1/envs/${this.envId}/end-users/${id}/flags`;
+    const url = `${this.baseUrl}/${id}/flags`;
 
     return this.http.get<IPagedEndUserFlag>(url, {params: new HttpParams({fromObject: queryParam})});
   }
 
   getSegments(id: string): Observable<IEndUserSegment[]> {
-    const url = `${this.baseUrl}/api/v1/envs/${this.envId}/end-users/${id}/segments`;
+    const url = `${this.baseUrl}/${id}/segments`;
 
     return this.http.get<IEndUserSegment[]>(url);
+  }
+
+  searchByFlag(filter: IFeatureFlagEndUserFilter): Observable<IFeatureFlagEndUserPagedResult> {
+    const queryParam = {
+      query: filter.query ?? '',
+      featureFlagKey: filter.featureFlagKey,
+      variationId: filter.variationId ?? '',
+      from: filter.from,
+      to: filter.to,
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    const url = `${this.baseUrl}/get-by-featureflag`;
+
+    return this.http.get<IFeatureFlagEndUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
   }
 }

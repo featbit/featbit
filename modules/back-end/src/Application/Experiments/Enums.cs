@@ -1,8 +1,8 @@
 ﻿namespace Application.Experiments;
 
-public class ExperimentStatus
+public static class ExperimentStatus
 {
-    public static string NotStarted => "NotStarted";
-    public static string Paused => "Paused";
-    public static string Recording => "Recording";
+    public const string NotStarted = "NotStarted";
+    public const string Paused = "Paused";
+    public const string Recording = "Recording";
 }

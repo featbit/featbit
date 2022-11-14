@@ -82,4 +82,17 @@ public class EndUserController : ApiControllerBase
         var segments = await Mediator.Send(request);
         return Ok(segments);
     }
+    
+    [HttpGet("get-by-featureflag")]
+    public async Task<ApiResponse<PagedResult<FeatureFlagEndUserStatsVm>>> GetListByFeatureFlagAsync(Guid envId, [FromQuery] FeatureFlagEndUserFilter filter)
+    {
+        var request = new GetFeatureFlagEndUserList
+        {
+            EnvId = envId,
+            Filter = filter
+        };
+
+        var users = await Mediator.Send(request);
+        return Ok(users);
+    }
 }

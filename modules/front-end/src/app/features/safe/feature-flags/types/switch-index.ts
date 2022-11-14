@@ -1,6 +1,4 @@
-﻿import { FeatureFlagParams } from "@features/safe/feature-flags/types/switch-new";
-
-export interface IFeatureFlagListModel {
+﻿export interface IFeatureFlagListModel {
   items: IFeatureFlagListItem[];
   totalCount: number;
 }
@@ -57,14 +55,4 @@ export class IFeatureFlagListFilter {
     this.pageIndex = pageIndex;
     this.pageSize = pageSize;
   }
-}
-
-export interface IFeatureFlagDropdown {
-  key: string;
-  value: string;
-}
-
-export interface IFeatureFlagDetail {
-  featureFlag: FeatureFlagParams;
-  tags: string[];
 }

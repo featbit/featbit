@@ -1,27 +1,74 @@
 <section class="body-container">
-  <ng-container>
-    <div class="detail-body" name="detail" *ngIf="switchId">
-      <nz-button-group [nzSize]="'large'" style="width: fit-content;font-size: 13px;">
-        <div style="border-bottom: 1px solid rgba(0, 0, 0, 0.06);width: 100%">
-          <ng-container *ngFor="let timeSpan of timeSpans;">
-            <a nz-button style="font-size: 13px;padding: 0 0 2px 0;margin-right: 32px;height: auto;"
-                        [ngStyle]="{
-                          borderBottom: '1px solid ' + (selectedTimeSpanKey === timeSpans.key ? '#4CB287' : 'transparent'),
-                          color: selectedTimeSpanKey=== timeSpan.key ? '#4CB287' : '#000'
-                        }"
-                        nzType='link'
-              (click)="onTimeSpanClick(timeSpan.key)">{{timeSpan.value}}</a>
-          </ng-container>
-        </div>
-      </nz-button-group>
-      <div style="margin: 20px 0;text-align: center;">{{usage}}</div>
+  <div class="filters-area">
+    <nz-select class="period-selector" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()">
+      <nz-option *ngFor="let period of periodOptions" [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
+    </nz-select>
+
+    <nz-select class="interval-selector" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()">
+      <nz-option *ngFor="let intervalType of intervalTypes" [nzValue]="intervalType.value" [nzLabel]="intervalType.label"></nz-option>
+    </nz-select>
+  </div>
+  <div class="content-container">
+    <div class="standard-div" name="detail">
+      <div class="header">
+        <div class="title" i18n="@@ff.reporting.times-of-call">Times of call</div>
+      </div>
+      <div style="text-align: center;">{{usage}}</div>
       <div class="chart-container" style="width:97%">
         <nz-spin [nzSpinning]="isLoading" i18n-nzTip="@@common.loading" nzTip="Loading...">
           <ng-container *ngIf="!isLoading">
-            <g2-line-chart [defaultChartHeight]="600" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
+            <g2-line-chart [containerId]="filter.featureFlagKey" [defaultChartHeight]="450" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
           </ng-container>
         </nz-spin>
       </div>
     </div>
-  </ng-container>
+    <div class="standard-div" *ngIf="filter">
+      <div class="header">
+        <div class="title" i18n="@@ff.reporting.end-users">End users</div>
+      </div>
+      <div class="table-content-area">
+        <div class="table-search-area">
+          <div class="filters-area">
+            <nz-input-group [nzPrefix]="prefixIconSearch" style="width:500px">
+              <input nz-input type="text" i18n-placeholder="@@ff.reporting.filter-by-keyid-or-name" placeholder="Filter by keyId or name" [(ngModel)]="filter.userQuery" (ngModelChange)="endUserFilterChanged()">
+            </nz-input-group>
+            <ng-template #prefixIconSearch>
+              <i nz-icon nzType="icons:icon-search"></i>
+            </ng-template>
+            <nz-select class="variation-filter" [(ngModel)]="filter.variationId" (ngModelChange)="endUserFilterChanged()">
+              <nz-option *ngFor="let variation of variations" [nzValue]="variation.id" [nzLabel]="variation.value"></nz-option>
+            </nz-select>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <nz-table #table nzSize="small"
+                    [nzData]="pagedEndUser.items"
+                    [nzFrontPagination]="false"
+                    [nzLoading]="isEndUserLoading"
+                    [nzTotal]="pagedEndUser.totalCount"
+                    [(nzPageSize)]="filter.endUserPageSize"
+                    [(nzPageIndex)]="filter.endUserPageIndex"
+                    (nzPageIndexChange)="endUserFilterChanged()">
+            <thead>
+            <tr>
+              <th>KeyId</th>
+              <th i18n="@@common.name">Name</th>
+              <th i18n="@@common.variation">Variation</th>
+              <th i18n="@@ff.reporting.last-evaluated-at">Last evaluated at</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let endUser of table.data">
+              <td>{{ endUser.keyId }}</td>
+              <td>{{ endUser.name ?? '--' }}</td>
+              <td>{{ endUser.variation }}</td>
+              <td>{{ endUser.lastEvaluatedAt | date: 'YYYY-MM-dd HH:mm:ss' }}</td>
+            </tr>
+            </tbody>
+          </nz-table>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>

@@ -7,7 +7,6 @@ import { FormsModule } from '@angular/forms';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
-import { UpperSwitchComponent } from './upper-switch/upper-switch.component';
 import { FlagTriggersComponent } from './flag-triggers/flag-triggers.component';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -29,7 +28,6 @@ import {CoreModule} from "@core/core.module";
 
 @NgModule({
   declarations: [
-    UpperSwitchComponent,
     FlagTriggersComponent,
   ],
     imports: [
@@ -60,7 +58,6 @@ import {CoreModule} from "@core/core.module";
     ],
   exports: [
     CommonModule,
-    UpperSwitchComponent,
     FlagTriggersComponent,
   ]
 })
