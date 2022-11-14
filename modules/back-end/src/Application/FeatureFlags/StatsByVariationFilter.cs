@@ -15,4 +15,11 @@ public static class IntervalType
     public const string Day = "DAY";
     public const string Hour = "HOUR";
     public const string Minute = "MINUTE";
+
+    public static bool IsDefined(string intervalType)
+    {
+        return Month == intervalType || Week == intervalType ||
+               Day == intervalType || Hour == intervalType ||
+               Minute == intervalType;
+    }
 }

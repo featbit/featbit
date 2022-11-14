@@ -6,7 +6,6 @@ namespace Application.Services;
 
 public interface IEndUserService : IService<EndUser>
 {
-    Task<IEnumerable<EndUser>> GetListByKeyIdsAsync(Guid envId, IEnumerable<string> keyIds);
     Task<PagedResult<EndUser>> GetListAsync(Guid envId, EndUserFilter filter);
 
     Task<EndUser> UpsertAsync(EndUser user);

@@ -19,10 +19,10 @@ public class GetFeatureFlagEndUserListValidator : AbstractValidator<GetFeatureFl
             .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired);
 
         RuleFor(x => x.Filter.From)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.StatsFromIsRequired);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidFrom);
 
         RuleFor(x => x.Filter.To)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.StatsToIsRequired);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidTo);
     }
 }
 
@@ -30,14 +30,11 @@ public class
     GetFeatureFlagEndUserListHandler : IRequestHandler<GetFeatureFlagEndUserList,
         PagedResult<FeatureFlagEndUserStatsVm>>
 {
-    private readonly IEndUserService _service;
     private readonly IFeatureFlagService _featureFlagService;
     private readonly IOlapService _olapService;
 
-    public GetFeatureFlagEndUserListHandler(IEndUserService service, IFeatureFlagService featureFlagService,
-        IOlapService olapService)
+    public GetFeatureFlagEndUserListHandler(IFeatureFlagService featureFlagService, IOlapService olapService)
     {
-        _service = service;
         _featureFlagService = featureFlagService;
         _olapService = olapService;
     }

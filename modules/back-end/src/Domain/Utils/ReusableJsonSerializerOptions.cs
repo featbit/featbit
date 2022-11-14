@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace Domain.Utils;
 
-public class ReusableJsonSerializerOptions
+public static class ReusableJsonSerializerOptions
 {
-    public static JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
+    public static readonly JsonSerializerOptions Web = new(JsonSerializerDefaults.Web);
 }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
 using Domain.Utils;
 using System.Net.Mime;
 using System.Text.Json;
@@ -15,28 +16,15 @@ public class OlapService : IOlapService
     {
         _httpClient = httpClient;
     }
-    
-    private async Task<T?> GetFeatureFlagStatusByVariation<T>(string endPoint, Object param)
-    {
-        var content = new StringContent(
-            JsonSerializer.Serialize(param, ReusableJsonSerializerOptions.Web),
-            Encoding.UTF8, MediaTypeNames.Application.Json
-        );
-        
-        var response = await _httpClient.PostAsync(endPoint, content);
-
-        return JsonSerializer.Deserialize<T>(
-            await response.Content.ReadAsStringAsync(),
-            ReusableJsonSerializerOptions.Web
-        );
-    }
 
     public async Task<FeatureFlagEndUserStats> GetFeatureFlagEndUserStats(FeatureFlagEndUserParam param)
     {
         param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
         param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
         
-        var result = await GetFeatureFlagStatusByVariation<FeatureFlagEndUserStatsResponse>("/api/events/stat/enduser", param);
+        var response = await _httpClient.PostAsJsonAsync("/api/events/stat/enduser", param);
+
+        var result = await response.Content.ReadFromJsonAsync<FeatureFlagEndUserStatsResponse>();
 
         return result.Data;
     }
@@ -46,7 +34,9 @@ public class OlapService : IOlapService
         param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
         param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
         
-        var result = await GetFeatureFlagStatusByVariation<StatsByVariationResponse>("/api/events/stat/featureflag", param);
+        var response = await _httpClient.PostAsJsonAsync("/api/events/stat/featureflag", param);
+
+        var result = await response.Content.ReadFromJsonAsync<StatsByVariationResponse>();
 
         return result.Data;
     }
@@ -59,8 +49,10 @@ public class OlapService : IOlapService
             param.EndExptTime = param.EndExptTime * 1000; // milliseconds to microseconds
         }
         
-        var result = await GetFeatureFlagStatusByVariation<OlapExptIterationResponse>("/api/expt/results", param);
-        
+        var response = await _httpClient.PostAsJsonAsync("/api/expt/results", param);
+
+        var result = await response.Content.ReadFromJsonAsync<OlapExptIterationResponse>();
+
         return new ExperimentIteration
         {
             Id = result.Data.IterationId,

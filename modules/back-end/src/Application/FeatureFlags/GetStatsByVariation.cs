@@ -17,18 +17,13 @@ public class GetStatsByVariationValidator : AbstractValidator<GetStatsByVariatio
             .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired);
 
         RuleFor(x => x.Filter.IntervalType)
-            .Must(IntervalType =>
-            {
-                return IntervalTypeEnum.Month == IntervalType || IntervalTypeEnum.Week == IntervalType ||
-                       IntervalTypeEnum.Day == IntervalType || IntervalTypeEnum.Hour == IntervalType ||
-                       IntervalTypeEnum.Minute == IntervalType;
-            }).WithErrorCode(ErrorCodes.IntervalTypeIsRequired);
+            .Must(IntervalType.IsDefined).WithErrorCode(ErrorCodes.InvalidIntervalType);
         
         RuleFor(x => x.Filter.From)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.StatsFromIsRequired);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidFrom);
         
         RuleFor(x => x.Filter.To)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.StatsToIsRequired);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidTo);
     }
 }
 
@@ -57,7 +52,7 @@ public class GetStatsByVariationHandler : IRequestHandler<GetStatsByVariation, I
         };
 
         var stats = await _olapService.GetFeatureFlagStatusByVariation(param);
-
+        
         return stats.Select(s => new StatsByVariationVm
         {
             Time = s.Time,
