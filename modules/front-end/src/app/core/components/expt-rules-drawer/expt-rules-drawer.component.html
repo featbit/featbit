@@ -71,7 +71,7 @@
               <div class="rollout-table">
                 <div>
                   <div></div>
-                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span> <i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
+                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
                 </div>
                 <div *ngFor="let variation of rule.variations">
                   <div>
@@ -81,7 +81,7 @@
                     </ng-container>
                   </div>
                   <div>
-                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
+                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
                       <input type="number" nz-input [(ngModel)]="variation.exptPercentage"
                              (ngModelChange)="exptPercentageChange(variation)"/>
                     </nz-input-group>
@@ -100,7 +100,7 @@
               <div class="rollout-table">
                 <div>
                   <div></div>
-                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span> <i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
+                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
                 </div>
                 <div *ngFor="let variation of featureFlag.fallthrough.variations">
                   <div>
@@ -110,7 +110,7 @@
                     </ng-container>
                   </div>
                   <div>
-                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
+                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
                       <input type="number" nz-input [(ngModel)]="variation.exptPercentage"
                              (ngModelChange)="exptPercentageChange(variation)"/>
                     </nz-input-group>
@@ -163,7 +163,7 @@
               <div class="rollout-table">
                 <div>
                   <div></div>
-                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span> <i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
+                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
                 </div>
                 <div *ngFor="let variation of rule.variations">
                   <div>
@@ -173,7 +173,7 @@
                     </ng-container>
                   </div>
                   <div>
-                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
+                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
                       <input type="number" nz-input [(ngModel)]="variation.exptPercentage"
                              (ngModelChange)="exptPercentageChange(variation)"/>
                     </nz-input-group>
@@ -192,7 +192,7 @@
               <div class="rollout-table">
                 <div>
                   <div></div>
-                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span> <i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
+                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
                 </div>
                 <div *ngFor="let variation of featureFlag.fallthrough.variations">
                   <div>
@@ -202,7 +202,7 @@
                     </ng-container>
                   </div>
                   <div>
-                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo" style="width: 120px">
+                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
                       <input type="number" nz-input [(ngModel)]="variation.exptPercentage"
                              (ngModelChange)="exptPercentageChange(variation)"/>
                     </nz-input-group>
@@ -222,6 +222,6 @@
     </button>
   </ng-template>
   <ng-template #suffixTemplateInfo>
-    <button style="background-color: #DDDCEB" nz-button nzType="default" nzSearch>%</button>
+    <button nz-button nzType="default" nzSearch>%</button>
   </ng-template>
 </nz-drawer>

@@ -58,10 +58,11 @@ export class ServeComponent implements OnInit {
   }
 
   public modelChange() {
+    // -1 means percentage rollout
     if(this.selectedVariationId === '-1') {
       let currentRollout = [0, 0];
       this.result = this.ruleVariationValues.map(r => {
-        currentRollout = [currentRollout[1], parseFloat((currentRollout[1] + r.percentageValue / 100.0).toFixed(2))]
+        currentRollout = [currentRollout[1], currentRollout[1] + r.percentageValue * 0.01]
         return {
           rollout: currentRollout,
           id: r.id

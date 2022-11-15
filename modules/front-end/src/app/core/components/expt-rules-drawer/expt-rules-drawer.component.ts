@@ -3,7 +3,12 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { ISegment } from '@features/safe/segments/types/segments-index';
 import { ruleOps, IRuleOp } from "@core/components/find-rule/ruleConfig";
 import { SegmentService } from '@services/segment.service';
-import { isSegmentRule, isSingleOperator } from '@utils/index';
+import {
+  getPercentageFromDecimal,
+  getPercentageFromRolloutPercentageArray,
+  isSegmentRule,
+  isSingleOperator
+} from '@utils/index';
 import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {IRuleVariation, isNotPercentageRollout} from "@shared/rules";
 import {FeatureFlagService} from "@services/feature-flag.service";
@@ -60,7 +65,7 @@ export class ExptRulesDrawerComponent {
             includedInExpt: !!rule.includedInExpt,
             isNotPercentageRollout: isNotPercentageRollout(rule.variations),
             variations: rule.variations.map(variation => Object.assign({}, variation, {
-              percentage: (parseFloat((variation.rollout[1] - variation.rollout[0]).toFixed(2))) * 100
+              percentage: getPercentageFromRolloutPercentageArray(variation.rollout)
             }))
           };
 
@@ -72,7 +77,7 @@ export class ExptRulesDrawerComponent {
           includedInExpt: !!ff.fallthrough?.includedInExpt,
           isNotPercentageRollout: isNotPercentageRollout(ff.fallthrough.variations),
           variations: ff.fallthrough.variations.map(item => Object.assign({}, item, {
-            percentage: (parseFloat((item.rollout[1] - item.rollout[0]).toFixed(2))) * 100
+            percentage: getPercentageFromRolloutPercentageArray(item.rollout)
           }))
         }
       });
@@ -98,7 +103,7 @@ export class ExptRulesDrawerComponent {
         self.setDefaultExperimentRollout(variation);
       }
       else {
-        variation.exptPercentage = variation.exptRollout * 100;
+        variation.exptPercentage = getPercentageFromDecimal(variation.exptRollout);
       }
     });
   }
@@ -165,7 +170,7 @@ export class ExptRulesDrawerComponent {
 
   exptPercentageChange(ruleValue: IRuleVariation) {
     if (ruleValue) {
-      ruleValue.exptRollout = ruleValue.exptPercentage / 100;
+      ruleValue.exptRollout = Number((ruleValue.exptPercentage * 0.01).toFixed(12));
     }
   }
 

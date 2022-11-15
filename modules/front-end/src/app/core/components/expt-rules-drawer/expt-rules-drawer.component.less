@@ -32,12 +32,26 @@
 
           &:first-child {
             background-color: #fafafa;
-            height: 40px;
+            height: 36px;
           }
 
-          button.ant-input-search-button {
-            height: 40px;
+          .ant-input-group-wrapper {
+            width: 150px;
+            input {
+              height: 36px;
+              border-color: #d9d9d9;
+              &:hover {
+                border-right: none;
+              }
+            }
+            button.ant-input-search-button {
+              border-left: none;
+              border-top-right-radius: 8px;
+              border-bottom-right-radius: 8px;
+              height: 36px;
+            }
           }
+
         }
       }
       .expt-pencentage {

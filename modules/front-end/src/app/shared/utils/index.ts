@@ -65,7 +65,11 @@ export function tryParseJSONObject (jsonString: string): Object | false {
 
 export function getPercentageFromRolloutPercentageArray(arr: number[]): number {
   const diff = arr[1] - arr[0];
-  return Number((Number(diff.toFixed(2)) * 100).toFixed(0));
+  return getPercentageFromDecimal(diff);
+}
+
+export function getPercentageFromDecimal(param: number): number {
+  return Number((param * 100).toFixed(12));
 }
 
 export function randomString(length: number): string {
