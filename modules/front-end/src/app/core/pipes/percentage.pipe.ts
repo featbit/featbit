@@ -4,11 +4,11 @@ import { Pipe, PipeTransform } from "@angular/core";
 export class PercentagePipe implements PipeTransform {
   constructor() {}
 
-  transform(value) {
+  transform(value, precision: number = 2) {
     if (value === -1 || value === '--') {
       return '--'
     } else {
-      return (value * 100).toFixed(1) + '%'
+      return `${Number((value * 100).toFixed(2))}%`
     }
   }
 }
