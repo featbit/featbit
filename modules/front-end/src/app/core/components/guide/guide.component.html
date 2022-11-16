@@ -1,14 +1,14 @@
 <!-- react tutorial drawer -->
-<nz-drawer 
-  [nzClosable]="false" 
-  [nzVisible]="isVisible" 
-  [nzWidth]="450" 
-  nzPlacement="right" 
+<nz-drawer
+  [nzClosable]="false"
+  [nzVisible]="isVisible"
+  [nzWidth]="450"
+  nzPlacement="right"
   (nzOnClose)="onClose()"
   [nzFooter]="footer">
   <ng-container *nzDrawerContent>
     <div class="guide-body">
-      <a i18n="@@guide.go-to-doc" href="https://featbit.gitbook.io/docs">Go to documentation</a>
+      <a target="_blank" i18n="@@guide.go-to-doc" href="https://featbit.gitbook.io/docs">Go to documentation</a>
       <div class="block">
         <h4 nz-typography i18n="@@guide.get-started">Get started</h4>
         <a class="btn-link" target="_blank" href="https://featbit.gitbook.io/docs/">
