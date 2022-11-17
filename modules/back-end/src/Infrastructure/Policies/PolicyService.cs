@@ -122,6 +122,7 @@ public class PolicyService : MongoDbService<Policy>, IPolicyService
             select new
             {
                 user.Id,
+                user.Name,
                 user.Email,
                 AllMemberPolicies = allMemberPolicies,
             };
@@ -151,6 +152,7 @@ public class PolicyService : MongoDbService<Policy>, IPolicyService
         var vms = items.Select(x => new PolicyMember
         {
             Id = x.Id,
+            Name = x.Name,
             Email = x.Email,
             IsPolicyMember =
                 x.AllMemberPolicies.Any(y => y.OrganizationId == organizationId && y.PolicyId == policyId),
