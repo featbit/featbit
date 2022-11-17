@@ -203,7 +203,7 @@
     <nz-alert
       nzType="warning"
       i18n-nzDescription="@@ff.idx.only-following-fields-are-copied"
-      nzDescription="Only following fields are copied: name, key, status, variation and default rule."
+      nzDescription="Targeting user and rules will not be copied."
       nzShowIcon
       nzIconType="icons:icon-warning"
     ></nz-alert>
@@ -218,7 +218,7 @@
       </nz-list>
       <div class="transfer-text">
         <i nz-icon nzType="icons:icon-copy-to"></i>
-        <ng-container i18n="@@common.copy-to">Copy to</ng-container>
+        <span i18n="@@common.copy-to">Copy</span>
       </div>
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
         <nz-list-item

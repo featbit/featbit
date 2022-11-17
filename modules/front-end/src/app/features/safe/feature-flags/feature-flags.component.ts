@@ -5,7 +5,4 @@ import { Component } from '@angular/core';
   template: `<router-outlet></router-outlet>`
 })
 export class FeatureFlagsComponent {
-  constructor(
-  ) {
-  }
 }
