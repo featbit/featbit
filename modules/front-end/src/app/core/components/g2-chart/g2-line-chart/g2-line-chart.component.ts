@@ -100,9 +100,12 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
     }
 
     this.chart.legend({
-      padding: [-5, -5, -5, -5]
+      padding: [-5, -5, -5, -5],
+      marker: {
+        symbol: 'hyphen'
+      }
     });
-    
+
     this.chart.render();
   }
 
