@@ -80,6 +80,7 @@ public class GroupService : MongoDbService<Group>, IGroupService
             select new
             {
                 Id = member.Id,
+                Name = member.Name,
                 member.Email,
                 Groups = allGroups,
             };
@@ -105,6 +106,7 @@ public class GroupService : MongoDbService<Group>, IGroupService
         var vms = items.Select(x => new GroupMemberVm
         {
             Id = x.Id,
+            Name = x.Name,
             Email = x.Email,
             IsGroupMember = x.Groups.Any(y => y.GroupId == groupId),
         }).ToList();
