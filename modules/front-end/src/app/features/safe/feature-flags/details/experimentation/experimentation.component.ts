@@ -404,6 +404,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       source: source,
       dataGroupBy: 'variation',
       padding: [50, 50, 50, 70],
+      lineShape: 'smooth',
       toolTip: { tplFormatter: tpl => tpl.replace("{value}", `{value} ${valueUnit}`) },
     };
    }

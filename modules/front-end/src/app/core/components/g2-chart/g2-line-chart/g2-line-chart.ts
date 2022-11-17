@@ -20,6 +20,7 @@ export interface ChartConfig {
   readonly yAxis: AxisConfig;
   readonly padding: ViewPadding;
   readonly toolTip?: TooltipConfig;
+  readonly lineShape?: string;
 }
 
 export const defaultTooltipItemTplPlaceholder: string =

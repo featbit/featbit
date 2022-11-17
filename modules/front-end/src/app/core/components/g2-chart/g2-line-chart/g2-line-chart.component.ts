@@ -86,7 +86,8 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
 
     const line = this.chart
       .line()
-      .position(`${xAxis.field}*${yAxis.field}`);
+      .position(`${xAxis.field}*${yAxis.field}`)
+      .shape(this.chartConfig.lineShape || 'circle');
 
     const point = this.chart
       .point()
@@ -98,6 +99,10 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
       point.color(this.chartConfig.dataGroupBy, MacaronColors);
     }
 
+    this.chart.legend({
+      padding: [-5, -5, -5, -5]
+    });
+    
     this.chart.render();
   }
 

@@ -231,6 +231,7 @@ export class ReportingComponent implements OnInit {
           source: source as any,
           dataGroupBy: 'label',
           padding: [50, 50, 50, 70],
+          lineShape: 'smooth',
           toolTip: { tplFormatter: tpl => tpl.replace("{value}", `{value}`) },
         };
 
