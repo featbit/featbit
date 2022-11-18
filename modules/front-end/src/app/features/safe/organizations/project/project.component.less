@@ -50,17 +50,12 @@
       .env {
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
         padding: 24px;
         background: @grey5-color;
         border-radius: 10px;
 
         .env-basis {
-          max-width: 230px;
-          min-width: 100px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          width: 230px;
         }
 
         .desc-name {
@@ -72,12 +67,15 @@
         .desc-content {
           color: @grey50-color;
           margin-bottom: 12px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
 
         .env-secret {
           nz-input-group {
             padding: 8px 12px;
-            min-width: 620px;
+            min-width: 450px;
 
             input {
               color: @grey50-color;
@@ -100,6 +98,7 @@
           align-self: center;
           display: flex;
           justify-content: flex-end;
+          margin-left: auto;
         }
       }
     }
