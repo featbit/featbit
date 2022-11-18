@@ -25,11 +25,27 @@
           <div class="trigger-body">
             <div class="trigger-body-main">
               <div class="trigger-main">
-                <div class="trigger-action"><ng-container i18n="@@ff.triggers.turn-the-feature-flag">Turn the feature flag</ng-container>&nbsp;<nz-tag [class]="'action_' + trigger.action" class="action">{{flagTriggerActionLabel[trigger.action]}}</nz-tag></div>
+                <div class="first-line">
+                  <div class="trigger-action">
+                    <ng-container i18n="@@ff.triggers.turn-the-feature-flag">Turn the feature flag</ng-container>&nbsp;
+                    <nz-tag [class]="'action_' + trigger.action" class="action">{{flagTriggerActionLabel[trigger.action]}}</nz-tag>
+                  </div>
+                  <div class="trigger-status">
+                    <span>The trigger is</span>
+                    <nz-tag class="status_enabled status" *ngIf="trigger.isEnabled" i18n="@@common.enabled">Enabled</nz-tag>
+                    <nz-tag class="status_disabled status" *ngIf="!trigger.isEnabled" i18n="@@common.disabled">Disabled</nz-tag>
+                  </div>
+                </div>
                 <div class="trigger-description">{{trigger.description}}</div>
                 <div class="trigger-url">
                   <span *ngIf="!trigger.canCopyToken">{{getTriggerUrl(trigger.token)}}</span>
                   <span *ngIf="trigger.canCopyToken" nz-typography nzCopyable nzCopyText="{{ getTriggerUrl(trigger.token) }}">{{getTriggerUrl(trigger.token)}}</span>
+                </div>
+                <div class="warning" *ngIf="trigger.canCopyToken">
+                  <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+                  <div class="warning-content" i18n="@@ff.triggers.copy-url-warning">
+                    Copy and save this URL now, the URL will be masked once you leave the page.
+                  </div>
                 </div>
               </div>
             </div>
@@ -50,14 +66,15 @@
              nzPopconfirmPlacement="bottom" [nzPopconfirmOverlayStyle]="{minWidth: '370px'}"
              (nzOnConfirm)="resetToken(trigger)" [nzIcon]="iconTpl">
             <i nz-icon nzType="edit" nzTheme="outline"></i>&nbsp;
-            <ng-container i18n="@@ff.triggers.regenerate-url">Regenerate URL</ng-container>
+            <ng-container i18n="@@ff.triggers.regenerate-url">Reset URL</ng-container>
           </a>
         </ng-template>
         <ng-template #actionRemove>
           <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom"
              [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
              (nzOnConfirm)="removeTrigger(trigger)" [nzIcon]="iconTpl">
-            <i style="color: #9A95CC;" nz-icon nzType="delete" nzTheme="fill"></i>
+            <i style="color: #9A95CC;" nz-icon nzType="delete" nzTheme="fill"></i>&nbsp;
+            <ng-container i18n="@@common.remove">Remove</ng-container>
           </a>
         </ng-template>
         <ng-template #iconTpl>

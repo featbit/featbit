@@ -83,7 +83,7 @@ export class FlagTriggersComponent implements OnInit {
   removeTrigger(trigger: IFlagTrigger){
     this.flagTriggerService.delete(trigger.id).subscribe(() => {
       this.triggers = this.triggers.filter(t => t.id !== trigger.id);
-      this.message.success('成功删除触发器！');
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
     }, () => {
       this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
     });

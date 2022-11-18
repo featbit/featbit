@@ -103,13 +103,7 @@
         }
 
         .trigger-body {
-          display:flex;
-          justify-content: space-between;
-
           .trigger-body-main {
-            display:flex;
-            align-items:center;
-
             .avatar {
               margin-right: 10px;
               font-size: 32px;
@@ -119,10 +113,6 @@
               &.status_2 {
                 color: rgba(0, 0, 0, 0.45);
               }
-            }
-
-            .trigger-main {
-              max-width: 800px;
             }
 
             .trigger-type {
@@ -135,25 +125,52 @@
               margin-bottom: 8px;
             }
 
-            .trigger-action {
-              font-size: 16px;
-              margin-bottom: 8px;
-              .action {
-                border-radius: 10px;
+            .first-line {
+              display: flex;
+              justify-content: space-between;
 
-                &.action_turn-on {
-                  color: #389e0d;
-                  background: #f6ffed;
-                  border-color: #b7eb8f;
-                }
-                &.action_turn-off {
-                  color: #cf1322;
-                  background: #fff1f0;
-                  border-color: #ffa39e
+              .trigger-action {
+                font-size: 16px;
+                margin-bottom: 8px;
+                .action {
+                  border-radius: 10px;
+
+                  &.action_turn-on {
+                    color: #389e0d;
+                    background: #f6ffed;
+                    border-color: #b7eb8f;
+                  }
+                  &.action_turn-off {
+                    color: #cf1322;
+                    background: #fff1f0;
+                    border-color: #ffa39e
+                  }
                 }
               }
+              .trigger-status {
+                display: flex;
+                gap: 5px;
+                font-size: 16px;
+                margin-bottom: 8px;
+                .status {
+                  display: flex;
+                  align-items: center;
+                  border-radius: 10px;
 
+                  &.status_enabled {
+                    color: #389e0d;
+                    background: #f6ffed;
+                    border-color: #b7eb8f;
+                  }
+                  &.status_disabled {
+                    color: #cf1322;
+                    background: #fff1f0;
+                    border-color: #ffa39e
+                  }
+                }
+              }
             }
+
 
             .trigger-description {
               color: rgba(0, 0, 0, 0.45);
@@ -162,6 +179,17 @@
 
             .trigger-url{
               color: rgba(0, 0, 0, 0.85);
+            }
+
+            .warning {
+              display: flex;
+              justify-content: flex-start;
+              gap: 5px;
+              margin-top: 5px;
+
+              .warning-icon {
+                color: #ff912b;
+              }
             }
           }
         }
