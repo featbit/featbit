@@ -8,20 +8,10 @@
 
 
 
-**FeatBit** is a scalable and high-performance **Feature Management** platform. Our mission statement is to **Empower all teams to deliver, control, experiment with, and monetize their software**.
+**FeatBit** is a scalable and high-performance **Feature Management** platform. FeatBit's mission is to Empower all teams to deliver, control, experiment with, and monetize their software. 
+  
+![featbit-readme4](https://user-images.githubusercontent.com/68597908/202688653-d9dbe87d-9c51-41f2-98f7-ded536459cbc.gif)
 
-Our first task is to provide an open source tool to better achieve the following works：
-
-- Testing in production
-- Targeted & Progressive release
-- Entitlement Management & Software monetization
-- Progressive Experimentation
-- Beta testing and qualitative feedback
-- Data Rollback & Cloud Migration
-- Faster incident resolution
-- etc.
-
-FeatBit started with a consensus that We use open source to make software innovation faster.
 
 ## Getting Started
 
@@ -31,7 +21,7 @@ FeatBit's first version is still under development, but you can run and test the
 docker-compose -f docker-compose-dev.yml up -d
 ```
 
-After FeatBit's docker container is etablished, you can open FeatBit's portal UI to start your journey. The default URL is [http://localhost:8081](http://localhost:8081) .
+After FeatBit's docker container is established, you can open FeatBit's portal UI to start your journey. The default URL is [http://localhost:8081](http://localhost:8081) .
 
 The default admin username is `test@featbit.com`, password is `123456`.
 
@@ -40,17 +30,17 @@ The default admin username is `test@featbit.com`, password is `123456`.
 
 ◆ To learn how to use FeatBit, you can visit [**FeatBit's documentation page**](https://featbit.gitbook.io/docs/)
 
-◆ If you met an issues, you can report it to our [**Issues page**](https://github.com/featbit/featbit/issues)
+◆ If you met issues, you can report it to our [**Issues page**](https://github.com/featbit/featbit/issues)
 
-◆ If you want to request a new feature, you can post it in our [**Discussion's feature suggestions page**](https://github.com/featbit/featbit/discussions/categories/feature-suggestions)
+◆ If you want to request a new feature, you can post it on our [**Discussion's feature suggestions page**](https://github.com/featbit/featbit/discussions/categories/feature-suggestions)
 
-◆ All important announcement will be posted in our [**Discusssion's announcement page**](https://github.com/featbit/featbit/discussions/categories/announcements)
+◆ All important announcements will be posted on our [**Discusssion announcement page**](https://github.com/featbit/featbit/discussions/categories/announcements). It includes information like release, milestones, roadmap, thanks, reward, etc.
 
 ◆ Any other requirements (such as Q&A, pool, show-n-tell, general topics), you can join our [**Discussions's page**](https://github.com/featbit/featbit/discussions) .
 
-◆ If you have further questions and would like to contact us, you can join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
+◆ If you have further questions and want to contact us, you can join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
 
-◆ All approved stories, tasks will be displayed and managed in [**GitHub's project page**](https://github.com/orgs/featbit/projects).
+◆ All approved stories and tasks will be displayed and managed in [**GitHub's project page**](https://github.com/orgs/featbit/projects).
 
 
 ## Other useful links
@@ -68,9 +58,9 @@ The default admin username is `test@featbit.com`, password is `123456`.
 
 ## Contribute to FeatBit
 
-Building FeatBit is a collaborative effort, and we owe a lot of gratitude to many smart and talented individuals. Building it together with community ensures that we build a product that solves real problems for real people. 
+Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. Building it together with the community ensures that we make a product that solves real problems for real people. 
 
-We'd love to have your help too. Feel free to open issues, provide pull requests, and become a contributor.
+We'd love to have your help too. Feel free to open issues, providing pull requests, and become a contributor.
 
 ## License
 
