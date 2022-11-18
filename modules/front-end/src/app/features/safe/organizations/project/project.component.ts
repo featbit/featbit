@@ -150,6 +150,10 @@ export class ProjectComponent implements OnInit {
   envClosed(data: any) {
     this.creatEditEnvFormVisible = false;
 
+    if (!data) {
+      return;
+    }
+
     if (data.isEditing) {
       this.project.environments = this.project.environments.map(e => e.id === data.env.id ? { ...e, ...data.env } : e);
       this.env = { ...this.env, ...data.env };

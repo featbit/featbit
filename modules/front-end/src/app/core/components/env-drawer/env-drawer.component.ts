@@ -4,8 +4,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { IEnvironment, IEnvKey, EnvKeyNameEnum } from '@shared/types';
 import { EnvService } from '@services/env.service';
 import { ProjectService } from "@services/project.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
-import {PermissionsService} from "@services/permissions.service";
+import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
+import { PermissionsService } from "@services/permissions.service";
 
 @Component({
   selector: 'app-env-drawer',
@@ -41,7 +41,6 @@ export class EnvDrawerComponent implements OnInit {
     return this._env;
   }
 
-  @Input() currentOrganizationId: number;
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
 
@@ -78,7 +77,7 @@ export class EnvDrawerComponent implements OnInit {
   }
 
   onClose() {
-    this.close.emit({ isEditing: false });
+    this.close.emit();
   }
 
   doSubmit() {
