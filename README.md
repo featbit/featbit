@@ -10,18 +10,8 @@
 
 **FeatBit** is a scalable and high-performance **Feature Management** platform. Our mission statement is to **Empower all teams to deliver, control, experiment with, and monetize their software**.
 
-Our first task is to provide an open source tool to better achieve the following works：
+![featbit-readme4](https://user-images.githubusercontent.com/68597908/202688653-d9dbe87d-9c51-41f2-98f7-ded536459cbc.gif)
 
-- Testing in production
-- Targeted & Progressive release
-- Entitlement Management & Software monetization
-- Progressive Experimentation
-- Beta testing and qualitative feedback
-- Data Rollback & Cloud Migration
-- Faster incident resolution
-- etc.
-
-FeatBit started with a consensus that We use open source to make software innovation faster.
 
 ## Getting Started
 
@@ -58,6 +48,10 @@ The default admin username is `test@featbit.com`, password is `123456`.
 ◆  [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
 
 ◆  [Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience for everyone in our community.
+
+## Milestones & Roadmap
+
+Comming soon...
 
 ## Tech Stack
 
