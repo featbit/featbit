@@ -8,7 +8,7 @@
 
 
 
-**FeatBit** is a scalable and high-performance **Feature Management** platform. Our mission statement is to **Empower all teams to deliver, control, experiment with, and monetize their software**.
+**FeatBit** is a scalable and high-performance **Feature Management** platform. FeatBit's mission is to Empower all teams to deliver, control, experiment with, and monetize their software. 
   
 ![featbit-readme4](https://user-images.githubusercontent.com/68597908/202688653-d9dbe87d-9c51-41f2-98f7-ded536459cbc.gif)
 
