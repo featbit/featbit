@@ -309,11 +309,9 @@ export class SettingComponent implements OnInit {
 
 
   onArchiveClick() {
-    const disabledVariation = this.featureFlag.diabledVariation;
-    const msg = $localize `:@@ff.when-archived-status-change-to-off:When archived, the status would be changed to`
-      + ' <strong>OFF</strong> '
-      + $localize `:@@ff.and-return-varation-change-to:and the returning variation would be changed to`
-      + ` <strong>${disabledVariation?.value}</strong>`;
+    let msg = $localize `:@@ff.archive-flag-warning:Flag {flagName} will be archived, and the value defined in your code will be returned for all your users. Remove code references to {flagKey} from your application before archiving.`
+      .replace('{flagName}', `<strong>${this.featureFlag.name}</strong>`)
+      .replace('{flagKey}', `<strong>${this.featureFlag.key}</strong>`);
 
     this.modal.confirm({
       nzContent: msg,

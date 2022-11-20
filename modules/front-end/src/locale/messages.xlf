@@ -302,21 +302,21 @@
         <source>Environment successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">107</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.envCreateSuccess" datatype="html">
         <source>Environment successfully created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">120</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.envRegenerateSuccess" datatype="html">
         <source>Successfully regenerated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">144</context>
+          <context context-type="linenumber">143</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.overview.expt" datatype="html">
@@ -664,15 +664,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">328</context>
+          <context context-type="linenumber">327</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">341</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">350</context>
+          <context context-type="linenumber">349</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -787,7 +787,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">353</context>
+          <context context-type="linenumber">352</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -1445,7 +1445,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">172</context>
+          <context context-type="linenumber">176</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.title" datatype="html">
@@ -1769,7 +1769,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">332</context>
+          <context context-type="linenumber">331</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
@@ -3908,25 +3908,18 @@
           <context context-type="linenumber">253</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.when-archived-status-change-to-off" datatype="html">
-        <source>When archived, the status would be changed to</source>
+      <trans-unit id="ff.archive-flag-warning" datatype="html">
+        <source>Flag {flagName} will be archived, and the value defined in your code will be returned for all your users. Remove code references to {flagKey} from your application before archiving.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">313</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="ff.and-return-varation-change-to" datatype="html">
-        <source>and the returning variation would be changed to</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">315,313</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-archive-ff" datatype="html">
         <source>Are you sure to archive this feature flag?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">320,318</context>
+          <context context-type="linenumber">319,317</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.setabtestrule" datatype="html">

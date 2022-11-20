@@ -309,7 +309,7 @@
         <source>Environment successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">107</context>
         </context-group>
         <target>环境更新成功</target>
       </trans-unit>
@@ -317,7 +317,7 @@
         <source>Environment successfully created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">120</context>
         </context-group>
         <target>环境创建成功</target>
       </trans-unit>
@@ -325,7 +325,7 @@
         <source>Successfully regenerated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">144</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <target>重新生成 secret 成功</target>
       </trans-unit>
@@ -693,15 +693,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">328</context>
+          <context context-type="linenumber">327</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">341</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">350</context>
+          <context context-type="linenumber">349</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -817,7 +817,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">353</context>
+          <context context-type="linenumber">352</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -1545,7 +1545,7 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">172</context>
+          <context context-type="linenumber">176</context>
         </context-group>
         <target>复制成功</target>
       </trans-unit>
@@ -1901,7 +1901,7 @@ Entitlement management        </source>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">332</context>
+          <context context-type="linenumber">331</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
@@ -4253,27 +4253,19 @@ Entitlement management        </source>
         </context-group>
         <target>该状态已经在开关处于 OFF 状态的返回值中被使用，移除后方可删除！</target>
       </trans-unit>
-      <trans-unit id="ff.when-archived-status-change-to-off" datatype="html">
-        <source>When archived, the status would be changed to</source>
+      <trans-unit id="ff.archive-flag-warning" datatype="html">
+        <source>Flag {flagName} will be archived, and the value defined in your code will be returned for all your users. Remove code references to {flagKey} from your application before archiving.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">313</context>
         </context-group>
-        <target>存档后开关将从开关列表中移除，开关将处于</target>
-      </trans-unit>
-      <trans-unit id="ff.and-return-varation-change-to" datatype="html">
-        <source>and the returning variation would be changed to</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">315,313</context>
-        </context-group>
-        <target>且返回值将变为</target>
+        <target>开关 {flagName} 将被归档，在你的代码中定义的值将被返回给所有的用户。在归档之前，你应该从你的应用程序中删除对 {flagKey} 的代码引用。</target>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-archive-ff" datatype="html">
         <source>Are you sure to archive this feature flag?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">320,318</context>
+          <context context-type="linenumber">319,317</context>
         </context-group>
         <target>确定要存档该开关吗？</target>
       </trans-unit>
