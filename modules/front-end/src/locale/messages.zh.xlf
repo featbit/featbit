@@ -2558,7 +2558,7 @@ Entitlement management        </source>
           <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
           <context context-type="linenumber">17</context>
         </context-group>
-        <target>在数据同步时，对于开关用户数据，仅做新增/更新操作；对于开关用户属性，仅做新增操作。</target>
+        <target>在数据同步时，对于开关用户数据，仅执行新增/更新操作；对于开关用户属性，仅执行新增操作。</target>
       </trans-unit>
       <trans-unit id="select-file-to-upload" datatype="html">
         <source>Please select the file to upload (only support JSON file).</source>
@@ -2894,7 +2894,7 @@ Entitlement management        </source>
           <context context-type="sourcefile">src/app/features/safe/data-sync/local-sync/local-sync.component.html</context>
           <context context-type="linenumber">4</context>
         </context-group>
-        <target>数据同步只针对当前选择的项目和环境（</target>
+        <target>数据同步仅针对当前环境（</target>
       </trans-unit>
       <trans-unit id="including" datatype="html">
         <source>), including</source>

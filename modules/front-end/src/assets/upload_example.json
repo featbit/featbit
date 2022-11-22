@@ -3,8 +3,6 @@
     {
       "keyId": "tester-id",
       "name": "tester",
-      "email": "tester@gmail.com",
-      "country": "cn",
       "customizedProperties": [
         {
           "name": "role",
@@ -13,10 +11,6 @@
         {
           "name": "browser",
           "value": "chrome"
-        },
-        {
-          "name": "location",
-          "value": "beijing"
         }
       ]
     }

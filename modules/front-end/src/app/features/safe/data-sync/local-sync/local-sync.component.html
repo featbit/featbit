@@ -1,7 +1,7 @@
 <nz-spin [nzSpinning]="isDownloading" i18n-nzTip="@@downloading" nzTip="Downloading...">
   <div class="container">
     <div class="description" nz-typography>
-      <ng-container i18n="@@only-applies-to-current-project-env">Only applies to current project and environment (</ng-container> <span class="project-env">{{ projectEnv.projectName }} - {{ projectEnv.envName }}</span><ng-container i18n="@@including">), including</ng-container>
+      <ng-container i18n="@@only-applies-to-current-project-env">Only applies to current environment (</ng-container> <span class="project-env">{{ projectEnv.projectName }} - {{ projectEnv.envName }}</span><ng-container i18n="@@including">), including</ng-container>
     </div>
     <div class="data-sync-list">
       <nz-card i18n-nzTitle="@@users" nzTitle="Users">
