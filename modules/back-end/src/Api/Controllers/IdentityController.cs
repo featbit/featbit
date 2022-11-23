@@ -15,4 +15,12 @@ public class IdentityController : ApiControllerBase
             ? Ok(new LoginToken(loginResult.Token))
             : Error<LoginToken>(loginResult.ErrorCode);
     }
+
+    [HttpPut("reset-password")]
+    public async Task<ApiResponse<ResetPasswordResult>> ResetPasswordAsync(ResetPassword request)
+    {
+        var resetPasswordResult = await Mediator.Send(request);
+
+        return Ok(resetPasswordResult);
+    }
 }
