@@ -4246,12 +4246,12 @@
         <target>该状态已经在开关处于 OFF 状态的返回值中被使用，移除后方可删除！</target>
       </trans-unit>
       <trans-unit id="ff.archive-flag-warning" datatype="html">
-        <source>Flag {flagName} will be archived, and the value defined in your code will be returned for all your users. Remove code references to {flagKey} from your application before archiving.</source>
+        <source>Flag [flagName] will be archived, and the value defined in your code will be returned for all your users. Remove code references to [flagKey] from your application before archiving.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">312</context>
         </context-group>
-        <target>开关 {flagName} 将被归档，在你的代码中定义的值将被返回给所有的用户。在归档之前，你应该从你的应用程序中删除对 {flagKey} 的代码引用。</target>
+        <target>开关 [flagName] 将被归档，在你的代码中定义的值将被返回给所有的用户。在归档之前，你应该从你的应用程序中删除对 [flagKey] 的代码引用。</target>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-archive-ff" datatype="html">
         <source>Are you sure to archive this feature flag?</source>
@@ -5385,29 +5385,117 @@
         </context-group>
         <target>邮箱</target>
       </trans-unit>
-      <trans-unit id="org.profile.save" datatype="html">
-        <source>Save</source>
+      <trans-unit id="org.profile.update" datatype="html">
+        <source>Update Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
           <context context-type="linenumber">27</context>
         </context-group>
-        <target>保存</target>
+        <target>更新信息</target>
+      </trans-unit>
+      <trans-unit id="org.profile.current-password" datatype="html">
+        <source>Current Password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <target>当前密码</target>
+      </trans-unit>
+      <trans-unit id="org.profile.current-password-is-required" datatype="html">
+        <source>Please input your current password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <target>请输入当前密码</target>
+      </trans-unit>
+      <trans-unit id="org.profile.new-password" datatype="html">
+        <source>New Password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+        <target>新密码</target>
+      </trans-unit>
+      <trans-unit id="org.profile.password-hint" datatype="html">
+        <source>Your password must be at least 6 characters long</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <target>密码至少包含 6 位字符</target>
+      </trans-unit>
+      <trans-unit id="org.profile.new-password-is-required" datatype="html">
+        <source>Please input your new password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+        <target>请输入新密码</target>
+      </trans-unit>
+      <trans-unit id="org.profile.new-password-is-too-short" datatype="html">
+        <source>Password must be at least 6 characters</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <target>密码至少包含 6 位字符</target>
+      </trans-unit>
+      <trans-unit id="org.profile.confirm-password" datatype="html">
+        <source>Confirm new password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+        <target>确认新密码</target>
+      </trans-unit>
+      <trans-unit id="org.profile.confirm-password-is-required" datatype="html">
+        <source>Please confirm your password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <target>请确认新密码</target>
+      </trans-unit>
+      <trans-unit id="org.profile.confirm-password-is-inconsistent" datatype="html">
+        <source>Password is inconsistent</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <target>新密码不一致</target>
+      </trans-unit>
+      <trans-unit id="org.profile.reset-password" datatype="html">
+        <source>Reset Password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <target>重置密码</target>
       </trans-unit>
       <trans-unit id="org.profile.profileUpdateSuccess" datatype="html">
         <source>Profile successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <target>个人信息更新成功</target>
       </trans-unit>
-      <trans-unit id="org.profile.featureUnderConstruction" datatype="html">
-        <source>This feature will be released soon!</source>
+      <trans-unit id="org.profile.reset-password-success" datatype="html">
+        <source>Reset password success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">94</context>
         </context-group>
-        <target>该功能正在开发中</target>
+        <target>重置密码成功</target>
+      </trans-unit>
+      <trans-unit id="org.profile.reset-password-failed" datatype="html">
+        <source>Reset password failed, reason: [reason].</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+        <target>重置密码失败，原因: [reason]。</target>
       </trans-unit>
       <trans-unit id="org.project.projectFilterPlacehoder" datatype="html">
         <source>Filter by name</source>

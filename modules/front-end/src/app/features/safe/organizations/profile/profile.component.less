@@ -1,18 +1,21 @@
 @import "variables";
 
 .standard-div {
-  padding-bottom: 96px;
-}
-
-label {
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 150%;
-  color: @grey70-color;
-  margin-bottom: 12px;
+  padding-bottom: 64px;
+  margin-bottom: 16px;
 }
 
 .submit-btn {
-  margin-top: 16px;
   float: right;
+}
+
+.label-hint {
+  margin-left: 8px;
+  font-size: 16px !important;
+  color: @grey50-color;
+
+  &:hover {
+    cursor: pointer;
+    color: @grey70-color;
+  }
 }

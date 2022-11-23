@@ -10,8 +10,10 @@ import {
 } from "@utils/localstorage-keys";
 import { Router } from "@angular/router";
 import { OrganizationService } from '@services/organization.service';
-import {UserService} from "@services/user.service";
-import {IResponse} from "@shared/types";
+import { UserService } from "@services/user.service";
+import { IResponse } from "@shared/types";
+import { Observable } from "rxjs";
+import { IResetPasswordResult } from "@features/safe/organizations/types/profiles";
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +31,10 @@ export class IdentityService {
 
   loginByEmail(email: string, password: string) {
     return this.http.post(`${this.baseUrl}/login-by-email`, { email, password });
+  }
+
+  resetPassword(currentPassword: string, newPassword: string): Observable<IResetPasswordResult> {
+    return this.http.put<IResetPasswordResult>(`${this.baseUrl}/reset-password`, { currentPassword, newPassword })
   }
 
   async doLoginUser(token: string): Promise<void> {
