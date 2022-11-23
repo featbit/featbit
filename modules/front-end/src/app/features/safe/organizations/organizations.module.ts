@@ -15,7 +15,7 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzModalModule  } from 'ng-zorro-antd/modal';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -26,9 +26,10 @@ import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { ProjectFilterPipe } from "./project/project-filter.pipe";
-import {NzSkeletonModule} from "ng-zorro-antd/skeleton";
-import {NzTagModule} from "ng-zorro-antd/tag";
-import {CoreModule} from "@core/core.module";
+import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
+import { NzTagModule } from "ng-zorro-antd/tag";
+import { CoreModule } from "@core/core.module";
+import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 
 @NgModule({
   declarations: [
@@ -64,7 +65,8 @@ import {CoreModule} from "@core/core.module";
     ScrollingModule,
     ReactiveFormsModule,
     OrganizationsRoutingModule,
-    CoreModule
+    CoreModule,
+    NzToolTipModule
   ]
 })
 export class OrganizationsModule { }

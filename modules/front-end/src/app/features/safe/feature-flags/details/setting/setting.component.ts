@@ -309,9 +309,9 @@ export class SettingComponent implements OnInit {
 
 
   onArchiveClick() {
-    let msg = $localize `:@@ff.archive-flag-warning:Flag {flagName} will be archived, and the value defined in your code will be returned for all your users. Remove code references to {flagKey} from your application before archiving.`
-      .replace('{flagName}', `<strong>${this.featureFlag.name}</strong>`)
-      .replace('{flagKey}', `<strong>${this.featureFlag.key}</strong>`);
+    let msg = $localize `:@@ff.archive-flag-warning:Flag [flagName] will be archived, and the value defined in your code will be returned for all your users. Remove code references to [flagKey] from your application before archiving.`
+      .replace('[flagName]', `<strong>${this.featureFlag.name}</strong>`)
+      .replace('[flagKey]', `<strong>${this.featureFlag.key}</strong>`);
 
     this.modal.confirm({
       nzContent: msg,

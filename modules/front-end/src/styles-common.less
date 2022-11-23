@@ -223,6 +223,11 @@ app-root {
   }
 }
 
+.standard-form-input {
+  .standard-bordered-input;
+  height: 40px;
+}
+
 // standard div
 .standard-div {
   border-radius: 20px;
@@ -252,23 +257,22 @@ app-root {
   }
 }
 
+// form label
+.ant-form-item-label > label {
+  font-size: 14px;
+  line-height: 150%;
+  color: @grey70-color;
+}
+
 // standard form
 .standard-form {
   nz-form-control {
     max-width: unset;
   }
 
-  // form label
-  .ant-form-item-label>label {
-    font-size: 14px;
-    line-height: 150%;
-    color: @grey70-color;
-  }
-
   // input
   input {
-    .standard-bordered-input;
-    height: 40px;
+    .standard-form-input;
   }
 
   // select
