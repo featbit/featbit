@@ -64,7 +64,7 @@
           <input nz-input formControlName="name" />
           <ng-template #segmentNameErrorTpl let-control>
             <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('invalid_character')" i18n="@@common.name-cannot-include---">Name cannot include '__'</ng-container>
+            <ng-container *ngIf="control.hasError('invalid_character')" i18n="@@common.name-cannot-include---">Name cannot include __</ng-container>
             <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-unavailable">This name is unavailable</ng-container>
             <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
           </ng-template>

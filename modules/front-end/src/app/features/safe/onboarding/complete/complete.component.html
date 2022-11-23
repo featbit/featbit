@@ -1,12 +1,12 @@
-<nz-modal [(nzVisible)]="isVisible" 
-          [nzCentered]="true" 
-          [nzTitle]="modalTitle" 
+<nz-modal [(nzVisible)]="isVisible"
+          [nzCentered]="true"
+          [nzTitle]="modalTitle"
           [nzContent]="editModalContent"
-          [nzFooter]="editModalFooter" 
+          [nzFooter]="editModalFooter"
           (nzOnCancel)="onClose()">
   <ng-template #modalTitle>
-    <ng-container i18n="@@onboarding.complete.title">We've created a project for</ng-container><span
-      style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentOrg.name}}</span>
+    <ng-container i18n="@@onboarding.complete.title">We've created a project for</ng-container>
+    <span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentOrg.name}}</span>
     <ng-container i18n="@@onboarding.complete.title-suffix">.</ng-container>
   </ng-template>
   <ng-template #editModalContent>
@@ -17,13 +17,9 @@
         <li>Dev</li>
       </ul>
 
-      <div class="paragraph" i18n="@@onboarding.complete.second-paragraph">Each environment has its own SDK secret, you
-        can develop and
-        test in Dev before rolling out to Prod.
-      </div>
-
-      <div i18n="@@onboarding.complete.third-paragrah">
-        Next, click on the 'Quick Start Doc' button on the top-right corner to get started!!!
+      <div class="paragraph" i18n="@@onboarding.complete.second-paragraph">Each environment has its own SDK secret, you can develop and test in Dev before rolling out to Prod.</div>
+      <div>
+        <ng-container i18n="@@onboarding.complete.third-paragrah">Next, click on the 'Quick Start Doc' button on the top-right corner to get started!</ng-container>
         <img style="width:100%;margin-top:20px;" src="assets/get-started/docpointer.png" />
       </div>
     </div>

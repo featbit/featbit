@@ -5,9 +5,7 @@
       <div class="warning-message">
         <div class="warning">
           <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-          <div class="warning-content" i18n="@@expt.rule-drawer.warning">
-            When saved, the following changes would be effective immediately, all experiments related to this feature flag would be affected. We strongly recommend that you pause all those experiments and start over.
-          </div>
+          <div class="warning-content" i18n="@@expt.rule-drawer.warning">When saved, the following changes would be effective immediately, all experiments related to this feature flag would be affected. We strongly recommend that you pause all those experiments and start over.</div>
         </div>
       </div>
 
@@ -32,9 +30,7 @@
         <ng-container *ngIf="featureFlag.exptIncludeAllTargets">
           <tr>
             <td>
-              <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllTargets" [nzDisabled]="true" i18n="@@expt.rule-drawer.targeting-users">
-                Targeting users
-              </label>
+              <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllTargets" [nzDisabled]="true" i18n="@@expt.rule-drawer.targeting-users">Targeting users</label>
             </td>
             <td class="rule-content">
               <div *ngFor="let target of featureFlag.targetUsers">
@@ -44,9 +40,7 @@
           </tr>
           <tr *ngFor="let rule of featureFlag.rules">
             <td>
-              <label nz-checkbox [(ngModel)]="rule.includedInExpt" [nzDisabled]="true" i18n="@@expt.rule-drawer.rule">
-                Rule
-              </label>
+              <label nz-checkbox [(ngModel)]="rule.includedInExpt" [nzDisabled]="true" i18n="@@expt.rule-drawer.rule">Rule</label>
             </td>
             <td class="rule-content">
               <div *ngFor="let clause of rule.conditions">
@@ -92,9 +86,7 @@
           </tr>
           <tr>
             <td>
-              <label nz-checkbox [(ngModel)]="featureFlag.fallthrough.includedInExpt" [nzDisabled]="true" i18n="@@expt.rule-drawer.default-rule">
-                Default rule
-              </label>
+              <label nz-checkbox [(ngModel)]="featureFlag.fallthrough.includedInExpt" [nzDisabled]="true" i18n="@@expt.rule-drawer.default-rule">Default rule</label>
             </td>
             <td class="rule-content">
               <div class="rollout-table">
@@ -124,9 +116,7 @@
           <tr>
             <td>
               <!-- It's always false here -->
-              <label nz-checkbox [(ngModel)]="customRules" [nzDisabled]="true" i18n="@@expt.rule-drawer.targeting-users">
-                Targeting users
-              </label>
+              <label nz-checkbox [(ngModel)]="customRules" [nzDisabled]="true" i18n="@@expt.rule-drawer.targeting-users">Targeting users</label>
             </td>
             <td class="rule-content">
               <div *ngFor="let target of featureFlag.targetUsers">
@@ -136,9 +126,7 @@
           </tr>
           <tr *ngFor="let rule of featureFlag.rules">
             <td>
-              <label nz-checkbox [(ngModel)]="rule.includedInExpt" i18n="@@expt.rule-drawer.rule">
-                Rule
-              </label>
+              <label nz-checkbox [(ngModel)]="rule.includedInExpt" i18n="@@expt.rule-drawer.rule">Rule</label>
             </td>
             <td class="rule-content">
               <div *ngFor="let clause of rule.conditions">
@@ -184,9 +172,7 @@
           </tr>
           <tr>
             <td>
-              <label nz-checkbox [(ngModel)]="featureFlag.fallthrough.includedInExpt" i18n="@@expt.rule-drawer.default-rule">
-                Default rule
-              </label>
+              <label nz-checkbox [(ngModel)]="featureFlag.fallthrough.includedInExpt" i18n="@@expt.rule-drawer.default-rule">Default rule</label>
             </td>
             <td class="rule-content">
               <div class="rollout-table">
