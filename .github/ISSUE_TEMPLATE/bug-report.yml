@@ -21,42 +21,60 @@ body:
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us, what did you expect to happen?
+      description: Describe the bug.
       placeholder: Tell us what you see!
       value: "A bug happened!"
     validations:
       required: true
-  - type: dropdown
-    id: version
+  - type: textarea
+    id: to-reproduce
     attributes:
-      label: Version
-      description: What version of our software are you running?
-      options:
-        - 1.0.2 (Default)
-        - 1.0.3 (Edge)
+      label: To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: Tell us how to reproduce the bug.
+      value: "1. Go to..."
     validations:
       required: true
-  - type: dropdown
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: Tell us what is the expected behavior.
+      value: "N/A"
+    validations:
+      required: false   
+  - type: textarea
+    id: screenshots 
+    attributes:
+      label: Screenshots 
+      description:  If applicable, add screenshots to help explain your problem.
+      placeholder:
+      value:
+    validations:
+      required: false
+  - type: input
     id: browsers
     attributes:
-      label: What browsers are you seeing the problem on?
-      multiple: true
-      options:
-        - Firefox
-        - Chrome
-        - Safari
-        - Microsoft Edge
+      label: Browsers
+      description: What browsers are you seeing the problem on? 
+      placeholder: ex. Chrome, Firfox  
+    validations:
+      required: false
   - type: textarea
-    id: logs
+    id: additional-context
     attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
-      render: shell
+      label: Additional context
+      description: Add any other context about the problem here.
+      placeholder:
+      value:
+    validations:
+      required: false  
   - type: checkboxes
     id: terms
     attributes:
       label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com)
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md)
       options:
         - label: I agree to follow this project's Code of Conduct
           required: true
