@@ -1,5 +1,5 @@
 ---
-name: Bug report with a form
+name: Bug report with markdown
 about: Create a report to help us improve
 title: "[BUG] xxxxxx"
 labels: ''
