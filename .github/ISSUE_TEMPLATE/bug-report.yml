@@ -1,4 +1,4 @@
-name: Bug Report
+name: Bug Report with form
 description: File a bug report
 title: "[Bug]: "
 labels: ["bug", "triage"]
