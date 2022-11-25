@@ -11,14 +11,14 @@ services:
         DEMO_URL: http://localhost:5173
         EVALUATION_URL: http://localhost:5100
     depends_on:
-      - api
+      - api-server
       - demo-dino-game-vue
     ports:
       - "8081:80"
     networks:
       - featbit-network
 
-  api:
+  api-server:
     image: featbit/api
     container_name: api-dev
     build:
