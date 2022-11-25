@@ -43,23 +43,23 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # - name: Build and push - UI
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     context: "{{defaultContext}}:modules/front-end"
-      #     file: ./Dockerfile
-      #     push: true
-      #     tags: |
-      #       ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
-      #       ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.LATEST_TAG }}
-      #     cache-from: type=gha
-      #     cache-to: type=gha,mode=max
+      - name: Build and push - UI
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/front-end"
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push - API-Server
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:modules/back-end"
-          file: ./Dockerfile
+          file: ./deploy/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
@@ -83,7 +83,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:modules/evaluation-server"
-          file: ./Dockerfile
+          file: ./deploy/Dockerfile
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.VERSION_TAG }}
