@@ -52,6 +52,25 @@ services:
     networks:
       - featbit-network
 
+  da-server:
+    image: featbit/da-server
+    container_name: da-server-dev
+    build:
+      context: ./modules/data-analytics
+      dockerfile: ./Dockerfile
+    depends_on:
+      - zookeeper
+      - kafka
+      - clickhouse-server
+    ports:
+      - "8200:80"
+    networks:
+      - featbit-network
+    environment:
+      KAFKA_HOSTS: kafka:9092
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+
   mongodb:
     image: mongo
     container_name: mongodb-dev
@@ -168,23 +187,6 @@ services:
       - infinity
     networks:
       - featbit-network
-  
-  da-server:
-    build: ./modules/data-analytics/
-    image: featbit/da-server
-    container_name: da-server-dev
-    depends_on:
-      - zookeeper
-      - kafka
-      - clickhouse-server
-    ports:
-      - "8200:80"
-    networks:
-      - featbit-network
-    environment:
-      KAFKA_HOSTS: kafka:9092
-      CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
 
   demo-dino-game-vue:
     image: featbitdocker/demo-dino-game-vue:latest
