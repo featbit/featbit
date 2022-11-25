@@ -54,7 +54,7 @@ services:
 
   da-server:
     image: featbit/da-server
-    container_name: da-server-dev
+    container_name: data-analytics-server-dev
     build:
       context: ./modules/data-analytics
       dockerfile: ./Dockerfile
