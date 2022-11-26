@@ -53,7 +53,7 @@ services:
       - featbit-network
 
   da-server:
-    image: featbit/da-server
+    image: featbit/data-analytics-server
     container_name: data-analytics-server-dev
     build:
       context: ./modules/data-analytics
