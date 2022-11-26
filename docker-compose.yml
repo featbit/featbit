@@ -3,11 +3,10 @@ services:
   ui:
     image: featbitdocker/featbit-ui
     container_name: ui
-    build:
-      args:
-        API_URL: http://localhost:5000
-        DEMO_URL: http://localhost:5173
-        EVALUATION_URL: http://localhost:5100
+    environment:
+      - API_URL=http://localhost:5000
+      - DEMO_URL=http://localhost:5173
+      - EVALUATION_URL= http://localhost:5100
     depends_on:
       - api-server
     ports:
