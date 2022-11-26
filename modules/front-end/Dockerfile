@@ -11,7 +11,7 @@ RUN npm run build:prod
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
 FROM nginx:1.23
 
-RUN apt-get install gettext-base
+RUN apt-get update -y && apt-get install gettext-base
 
 COPY --from=build-stage /app/dist/featbit/ /usr/share/nginx/featbit/
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf

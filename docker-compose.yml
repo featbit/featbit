@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   ui:
-    image: featbitdocker/featbit-ui
+    image: featbitdocker/featbit-ui:latest
     container_name: ui
     environment:
       - API_URL=http://localhost:5000
@@ -59,7 +59,7 @@ services:
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
 
   mongodb:
-    image: mongo
+    image: mongo:latest
     container_name: mongodb
     restart: on-failure
     ports:
@@ -124,7 +124,7 @@ services:
       - kafka:/bitnami/kafka
 
   kafka-ui:
-    image: provectuslabs/kafka-ui
+    image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     depends_on:
       - zookeeper
@@ -140,7 +140,7 @@ services:
       - featbit-network
 
   clickhouse-server:
-    image: yandex/clickhouse-server
+    image: yandex/clickhouse-server:latest
     container_name: clickhouse-server
     restart: on-failure
     depends_on:
@@ -166,7 +166,7 @@ services:
       - clickhouse-server:/var/lib/clickhouse
 
   clickhouse-client:
-    image: yandex/clickhouse-client
+    image: yandex/clickhouse-client:latest
     container_name: clickhouse-client
     restart: on-failure
     entrypoint:
