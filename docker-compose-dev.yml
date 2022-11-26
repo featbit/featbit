@@ -72,7 +72,7 @@ services:
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
 
   mongodb:
-    image: mongo
+    image: mongo:5.0.14
     container_name: mongodb-dev
     restart: on-failure
     ports:
@@ -88,7 +88,7 @@ services:
       - featbit-network
 
   redis:
-    image: 'bitnami/redis:latest'
+    image: bitnami/redis:6.2.7
     container_name: redis-dev
     restart: on-failure
     environment:
@@ -101,7 +101,7 @@ services:
       - redis:/bitnami/redis/data
 
   zookeeper:
-    image: bitnami/zookeeper:latest
+    image: bitnami/zookeeper:3.8.0
     container_name: zookeeper-dev
     restart: on-failure
     ports:
@@ -114,7 +114,7 @@ services:
       - featbit-network
 
   kafka:
-    image: bitnami/kafka:latest
+    image: bitnami/kafka:3.2.3
     container_name: kafka-dev
     restart: on-failure
     depends_on:
@@ -137,7 +137,7 @@ services:
       - kafka:/bitnami/kafka
 
   kafka-ui:
-    image: provectuslabs/kafka-ui
+    image: provectuslabs/kafka-ui:5f232a3966cda70eac34aa2b32ec4a610404d1c6
     container_name: kafka-ui-dev
     ports:
       - "8080:8080"
@@ -153,7 +153,7 @@ services:
       - featbit-network
 
   clickhouse-server:
-    image: yandex/clickhouse-server
+    image: yandex/clickhouse-server:21.3.20.1
     container_name: clickhouse-server-dev
     restart: on-failure
     depends_on:
@@ -177,19 +177,8 @@ services:
       - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-server:/var/lib/clickhouse
 
-  clickhouse-client:
-    image: yandex/clickhouse-client
-    container_name: clickhouse-client-dev
-    restart: on-failure
-    entrypoint:
-      - /bin/sleep
-    command:
-      - infinity
-    networks:
-      - featbit-network
-
   demo-dino-game-vue:
-    image: featbitdocker/demo-dino-game-vue:latest
+    image: featbitdocker/demo-dino-game-vue:1.0.0
     container_name: demo-dino-game-vue
     networks:
       - featbit-network
