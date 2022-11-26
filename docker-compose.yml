@@ -1,5 +1,63 @@
 version: "3.9"
 services:
+  ui:
+    image: featbitdocker/featbit-ui
+    container_name: ui
+    environment:
+      - API_URL=http://localhost:5000
+      - DEMO_URL=http://localhost:5173
+      - EVALUATION_URL= http://localhost:5100
+    depends_on:
+      - api-server
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
+      
+  api-server:
+    image: featbitdocker/featbit-api-server:latest
+    container_name: api-server
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - mongodb
+      - kafka
+      - da-server
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
+
+  evaluation-server:
+    image: featbitdocker/featbit-evaluation-server:latest
+    container_name: evaluation-server
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - mongodb
+      - kafka
+      - redis
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
+
+  da-server:
+    image: featbitdocker/featbit-data-analytics-server:latest
+    container_name: data-analytics-server
+    depends_on:
+      - zookeeper
+      - kafka
+      - clickhouse-server
+    ports:
+      - "8200:80"
+    networks:
+      - featbit-network
+    environment:
+      KAFKA_HOSTS: kafka:9092
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+
   mongodb:
     image: mongo
     container_name: mongodb
@@ -117,22 +175,6 @@ services:
       - infinity
     networks:
       - featbit-network
-
-  da-server:
-    build: ./modules/data-analytics/
-    image: da-server
-    depends_on:
-      - zookeeper
-      - kafka
-      - clickhouse-server
-    ports:
-      - "8200:80"
-    networks:
-      - featbit-network
-    environment:
-      KAFKA_HOSTS: kafka:9092
-      CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
 
 networks:
   featbit-network:

@@ -6,10 +6,10 @@ services:
     build:
       context: ./modules/front-end
       dockerfile: ./Dockerfile
-      args:
-        API_URL: http://localhost:5000
-        DEMO_URL: http://localhost:5173
-        EVALUATION_URL: http://localhost:5100
+    environment:
+      - API_URL=http://localhost:5000
+      - DEMO_URL=http://localhost:5173
+      - EVALUATION_URL= http://localhost:5100
     depends_on:
       - api-server
       - demo-dino-game-vue
@@ -54,7 +54,7 @@ services:
 
   da-server:
     image: featbit/da-server
-    container_name: da-server-dev
+    container_name: data-analytics-server-dev
     build:
       context: ./modules/data-analytics
       dockerfile: ./Dockerfile

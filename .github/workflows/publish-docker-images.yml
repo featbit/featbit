@@ -21,7 +21,7 @@ env:
   VERSION_TAG: ${{ github.event.inputs.version || github.ref_name }}
   APP_UI: featbit-ui
   APP_API: featbit-api-server
-  APP_DA: featbit-da-server
+  APP_DA: featbit-data-analytics-server
   APP_EVAL: featbit-evaluation-server
 
 jobs:
