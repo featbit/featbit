@@ -16,7 +16,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 </div>
 
-**FeatBit** is a scalable and high-performance **Feature Management** platform. FeatBit's mission is to Empower all teams to deliver, control, experiment with, and monetize their software. ([Click to see Why FeatBit](/why_featbit.md))
+**FeatBit** is a scalable and high-performance **Feature Management** platform. FeatBit's mission is to Empower all teams to deliver, control, experiment with, and monetize their software. ([More about FeatBit](/what_is_featbit.md) & [Why FeatBit](/why_featbit.md))
   
 ![featbit-readme4](https://user-images.githubusercontent.com/68597908/202688653-d9dbe87d-9c51-41f2-98f7-ded536459cbc.gif)
 
