@@ -1,4 +1,12 @@
-## Introduction
+<h1 align="center">
+Introduction
+</h1> 
+
+<div align="center">
+<!--
+Make New Badge Pattern badges inline
+See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
+-->
 
 [![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
@@ -6,7 +14,7 @@
 [![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)
 [![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)  
 
-
+</div>
 
 **FeatBit** is a scalable and high-performance **Feature Management** platform. FeatBit's mission is to Empower all teams to deliver, control, experiment with, and monetize their software. 
   
