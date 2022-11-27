@@ -59,24 +59,24 @@ Three variables could be override by environment variables when running the cont
 - **DEMO_URL**: set the value if you deploy the [dino-game demo](https://github.com/featbit/featbit-samples/tree/main/samples/dino-game/interactive-demo-vue) on your own server, otherwise it would use our demo deployed on https://featbit-samples.vercel.app. The link doesn't work if you click directly on it, it needs extra parameters. **demoUrl**
 - **EVALUATION_URL**: the url of the evaluation server, this is used by the demo, ignore it if you don't want to run the demo, the default value is http://localhost:5100. It overrides **evaluationUrl**
 
-Bind the port 8080 or any other available port to 80.
+Bind the port 8081 or any other available port to 80.
 
 ### Build docker image and run container from the source code
 ```
 docker build -t featbit/ui .
-docker run -d -p 8080:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/ui
+docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/ui
 ```
 
 ### Run docker container from our prebuilt docker hub image
 ```
-docker run -d -p 8080:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbitdocker/featbit-ui:latest
+docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbitdocker/featbit-ui:latest
 ```
 
-Then go to http://localhost:8080
+Then go to http://localhost:8081
 
 ### Switch UI language
 
-When you put http://localhost:8080 in your browser, by default, the UI will redirect to the language defined by **accept-language** of the request headers,
+When you put http://localhost:8081 in your browser, by default, the UI will redirect to the language defined by **accept-language** of the request headers,
 you can manually switch the language with the language switcher in the UI.
 
 As **ng serve** only support one single locale, during development, the locale-switcher compoent doesn't work. If you want to check different language,
