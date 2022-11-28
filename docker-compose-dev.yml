@@ -179,7 +179,7 @@ services:
       - clickhouse-server:/var/lib/clickhouse
 
   demo-dino-game-vue:
-    image: featbitdocker/demo-dino-game-vue:0.1.1
+    image: featbit/demo-dino-game-vue:1.0.0
     container_name: demo-dino-game-vue
     networks:
       - featbit-network

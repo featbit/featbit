@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   ui:
-    image: featbit/featbit-ui:latest
+    image: featbit/featbit-ui:1.0.0
     container_name: ui
     environment:
       - API_URL=http://localhost:5000
@@ -15,7 +15,7 @@ services:
       - featbit-network
       
   api-server:
-    image: featbit/featbit-api-server:latest
+    image: featbit/featbit-api-server:1.0.0
     container_name: api-server
     depends_on:
       - mongodb
@@ -27,7 +27,7 @@ services:
       - featbit-network
 
   evaluation-server:
-    image: featbit/featbit-evaluation-server:latest
+    image: featbit/featbit-evaluation-server:1.0.0
     container_name: evaluation-server
     depends_on:
       - mongodb
@@ -39,7 +39,7 @@ services:
       - featbit-network
 
   da-server:
-    image: featbit/featbit-data-analytics-server:latest
+    image: featbit/featbit-data-analytics-server:1.0.0
     container_name: data-analytics-server
     depends_on:
       - zookeeper

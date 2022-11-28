@@ -40,7 +40,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 ## Getting Started
 
-You can launch all the docker containers by docker compose, all the images are available on [docker hub]().
+You can launch all the docker containers by docker compose, all the images are available on [docker hub](https://hub.docker.com/u/featbit).
 
 Before launching FeatBit, make sure you have git and docker installed. Then do the following steps:
 
