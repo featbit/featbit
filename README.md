@@ -38,16 +38,27 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 ## Getting Started
 
-FeatBit's first version is still under development, but you can run and test the project with `docker-compose-dev.yml`.
+You can launch all the docker containers by docker compose, all the images are available on [docker hub]().
 
+Before launching FeatBit, make sure you have git and docker installed. Then do the following steps:
+- Clone the repository to your server or local machine and boot up the services. Change the ports defined in docker-compose.yml as needed
 ```
-docker-compose -f docker-compose-dev.yml up -d
+git clone https://github.com/featbit/featbit
+cd featbit
+docker compose up -d
 ```
+    
+- Go to UI/Portal at [http://localhost:8081](http://localhost:8081) and use the default credentials to log in (Note that you should replace 8081 with your port number if you made any changes previously).
+- Remember to update the admin password after first connection.
+  - username: **test@featbit.com**
+  - password: **123456**
 
-After FeatBit's docker container is established, you can open FeatBit's portal UI to start your journey. The default URL is [http://localhost:8081](http://localhost:8081) .
-
-The default admin username is `test@featbit.com`, password is `123456`.
-
+If you want to build the images and launch the containers from the source code, you can also do as follows:
+```
+git clone https://github.com/featbit/featbit
+cd featbit
+docker compose -f ./docker-compose-dev.yml up -d
+```
 
 ## Documentation & Communities
 
