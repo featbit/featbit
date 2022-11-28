@@ -17,8 +17,6 @@ services:
   api-server:
     image: featbitdocker/featbit-api-server:latest
     container_name: api-server
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - mongodb
       - kafka
@@ -31,8 +29,6 @@ services:
   evaluation-server:
     image: featbitdocker/featbit-evaluation-server:latest
     container_name: evaluation-server
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
       - mongodb
       - kafka
