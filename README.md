@@ -17,14 +17,12 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 </div>
 
 <p align="center">
-  <a href="#overview">🤔 Overview</a> •
-  <a href="#getting-started">🪄 Getting Started</a> •
-  <a href="#documentation--communities">💻 Docs & Communities</a> •
-  <a href="#other-useful-links">🔧 Architecture</a> •
-  <a href="#contribute-to-featbit">🧠 Contribution</a>
+  <a href="#overview">Overview</a> •
+  <a href="#getting-started">Getting Started</a> •
+  <a href="#documentation--communities">Docs & Communities</a> •
+  <a href="#other-useful-links">Architecture</a> •
+  <a href="#contribute-to-featbit">Contribution</a>
 </p>
-
--------------------------------------------------------------------
 
 ## Overview
 
