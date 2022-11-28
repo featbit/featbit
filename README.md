@@ -7,7 +7,9 @@
     <br>
 </h1>
 
-A scalable and high-performance **Feature Flags & Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly. ([More about FeatBit](/what_is_featbit.md) & [Why FeatBit](/why_featbit.md))
+A scalable and high-performance **Feature Flags & Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly. 
+
+[More about FeatBit](/what_is_featbit.md) & [Why FeatBit](/why_featbit.md)
 
 
 </div>
