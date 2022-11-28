@@ -1,6 +1,16 @@
-<h1 align="center">
-FeatBit
-</h1> 
+
+<div align="center">
+
+<h1 style="border-bottom: none">
+    <b>FeatBit - </b>
+    A BizDevOps Tool/Platform
+    <br>
+</h1>
+
+**FeatBit** is a scalable and high-performance **Feature Management** platform. FeatBit's mission is to Empower all teams to deliver, control, experiment with, and monetize their software. ([More about FeatBit](/what_is_featbit.md) & [Why FeatBit](/why_featbit.md))
+
+
+</div>
 
 <div align="center">
 <!--
@@ -17,39 +27,35 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 </div>
 
 <p align="center">
-  <a href="#overview">Overview</a> •
   <a href="#getting-started">Getting Started</a> •
   <a href="#documentation--communities">Docs & Communities</a> •
   <a href="#other-useful-links">Architecture</a> •
-  <a href="#contribute-to-featbit">Contribution</a>
+  <a href="#contribute-to-featbit">Contribution</a> •
+  <a href="#licenset">License</a>
 </p>
 
-## Overview
-
-**FeatBit** is a scalable and high-performance **Feature Management** platform. FeatBit's mission is to Empower all teams to deliver, control, experiment with, and monetize their software. ([More about FeatBit](/what_is_featbit.md) & [Why FeatBit](/why_featbit.md))
-
-
-
-  
 ![featbit-readme4](https://user-images.githubusercontent.com/68597908/202688653-d9dbe87d-9c51-41f2-98f7-ded536459cbc.gif)
 
+--------------------------------------------------
 
 ## Getting Started
 
 You can launch all the docker containers by docker compose, all the images are available on [docker hub]().
 
 Before launching FeatBit, make sure you have git and docker installed. Then do the following steps:
-- Clone the repository to your server or local machine and boot up the services. Change the ports defined in docker-compose.yml as needed
+
+1. Clone the repository to your server or local machine and boot up the services. Change the ports defined in docker-compose.yml as needed
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
 docker compose up -d
 ```
     
-- Go to UI/Portal at [http://localhost:8081](http://localhost:8081) and use the default credentials to log in (Note that you should replace 8081 with your port number if you made any changes previously).
-- Remember to update the admin password after first connection.
-  - username: **test@featbit.com**
-  - password: **123456**
+2. Go to UI/Portal at [http://localhost:8081](http://localhost:8081) and use the default credentials to log in (Note that you should replace 8081 with your port number if you made any changes previously).
+
+3. Remember to update the admin password after first connection.
+    - username: **test@featbit.com**
+    - password: **123456**
 
 If you want to build the images and launch the containers from the source code, you can also do as follows:
 ```
