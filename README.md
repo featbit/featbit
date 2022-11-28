@@ -3,7 +3,7 @@
 
 <h1 style="border-bottom: none">
     <b>FeatBit - </b>
-    A BizDevOps Tool/Platform
+    Evolution to BizDevOps
     <br>
 </h1>
 
