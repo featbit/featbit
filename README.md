@@ -1,5 +1,5 @@
 <h1 align="center">
-Introduction
+FeatBit
 </h1> 
 
 <div align="center">
@@ -17,11 +17,16 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 </div>
 
 <p align="center">
+  <a href="#overview">🤔 Overview</a> •
   <a href="#getting-started">🪄 Getting Started</a> •
-  <a href="#documentation--communities">🤔 Documentation & Communities</a>
+  <a href="#documentation--communities">💻 Docs & Communities</a>
   <a href="#other-useful-links">🔧 Architecture</a> •
   <a href="#contribute-to-featbit">🧠 Contribution</a>
 </p>
+
+-------------------------------------------------------------------
+
+## Overview
 
 **FeatBit** is a scalable and high-performance **Feature Management** platform. FeatBit's mission is to Empower all teams to deliver, control, experiment with, and monetize their software. ([More about FeatBit](/what_is_featbit.md) & [Why FeatBit](/why_featbit.md))
 
