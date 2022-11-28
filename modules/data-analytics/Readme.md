@@ -16,9 +16,9 @@ git clone https://github.com/featbit/featbit.git
 cd featbit/
 
 # run on prod
-docker compose up -d
+docker compose up da-server -d
 
 # run on dev
-docker-compose -f docker-compose-dev.yml up -d      
+docker-compose -f docker-compose-dev.yml up da-server -d      
 
 ```
