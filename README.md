@@ -31,7 +31,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
   <a href="#documentation--communities">Docs & Communities</a> •
   <a href="#other-useful-links">Architecture</a> •
   <a href="#contribute-to-featbit">Contribution</a> •
-  <a href="#licenset">License</a>
+  <a href="#license">License</a>
 </p>
 
 ![featbit-readme4](https://user-images.githubusercontent.com/68597908/202688653-d9dbe87d-9c51-41f2-98f7-ded536459cbc.gif)
@@ -44,25 +44,15 @@ You can launch all the docker containers by docker compose, all the images are a
 
 Before launching FeatBit, make sure you have git and docker installed. Then do the following steps:
 
-1. Clone the repository to your server or local machine and boot up the services. Change the ports defined in docker-compose.yml as needed
+Clone the repository to your server or local machine and boot up the services.
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
 docker compose up -d
 ```
-    
-2. Go to UI/Portal at [http://localhost:8081](http://localhost:8081) and use the default credentials to log in (Note that you should replace 8081 with your port number if you made any changes previously).
-
-3. Remember to update the admin password after first connection.
-    - username: **test@featbit.com**
-    - password: **123456**
-
-If you want to build the images and launch the containers from the source code, you can also do as follows:
-```
-git clone https://github.com/featbit/featbit
-cd featbit
-docker compose -f ./docker-compose-dev.yml up -d
-```
+Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and use the default credentials to log in.
+- username: **test@featbit.com**
+- password: **123456**
 
 ## Documentation & Communities
 
