@@ -2,12 +2,13 @@ using Application.Identity;
 
 namespace Application.IntegrationTests.Identity;
 
+[Collection(nameof(TestApp))]
 [UsesVerify]
-public class IdentityControllerTests : IClassFixture<IdentityApp>
+public class IdentityControllerTests
 {
-    private readonly IdentityApp _app;
+    private readonly TestApp _app;
 
-    public IdentityControllerTests(IdentityApp app)
+    public IdentityControllerTests(TestApp app)
     {
         _app = app;
     }

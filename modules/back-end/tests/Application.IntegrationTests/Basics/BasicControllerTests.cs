@@ -1,7 +1,8 @@
 namespace Application.IntegrationTests.Basics;
 
+[Collection(nameof(TestApp))]
 [UsesVerify]
-public class BasicControllerTests : IClassFixture<TestApp>
+public class BasicControllerTests
 {
     private readonly TestApp _app;
 

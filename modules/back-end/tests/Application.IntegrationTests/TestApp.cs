@@ -3,15 +3,41 @@ using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 using Application.Services;
+using Application.Users;
 using Domain.Users;
+using Infrastructure.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Application.IntegrationTests;
 
 public class TestApp : WebApplicationFactory<Program>
 {
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureServices(collection =>
+        {
+            var userStore = new ServiceDescriptor(typeof(IUserStore),
+                typeof(InMemoryUserStore),
+                ServiceLifetime.Scoped
+            );
+            var passwordHasher = new ServiceDescriptor(
+                typeof(IPasswordHasher<User>),
+                typeof(TestPasswordHasher),
+                ServiceLifetime.Scoped
+            );
+            var currentUser = ServiceDescriptor.Singleton<ICurrentUser>(new TestCurrentUser(TestUser.Id));
+
+            collection.Replace(userStore);
+            collection.Replace(passwordHasher);
+            collection.Replace(currentUser);
+        });
+    }
+
     public async Task<HttpResponseMessage> GetAsync(string uri, bool authenticated = true)
     {
         var client = CreateClient();
