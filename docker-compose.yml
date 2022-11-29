@@ -119,23 +119,6 @@ services:
     volumes:
       - kafka:/bitnami/kafka
 
-  # optional, an UI util to manage kafka, uncomment the following code if you want it
-  kafka-ui:
-    image: provectuslabs/kafka-ui:5f232a3966cda70eac34aa2b32ec4a610404d1c6
-    container_name: kafka-ui
-    depends_on:
-      - zookeeper
-      - kafka
-    ports:
-      - "8080:8080"
-    restart: on-failure
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=featbit-kafka
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
-      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
-    networks:
-      - featbit-network
-
   clickhouse-server:
     image: yandex/clickhouse-server:21.3.20.1
     container_name: clickhouse-server
