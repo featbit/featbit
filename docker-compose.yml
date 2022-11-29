@@ -5,8 +5,8 @@ services:
     container_name: ui
     environment:
       - API_URL=http://localhost:5000
-      - DEMO_URL=http://localhost:5173
-      - EVALUATION_URL= http://localhost:5100
+      - DEMO_URL=https://featbit-samples.vercel.app
+      - EVALUATION_URL=http://localhost:5100
     depends_on:
       - api-server
     ports:
