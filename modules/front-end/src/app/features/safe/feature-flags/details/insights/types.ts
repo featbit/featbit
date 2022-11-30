@@ -28,7 +28,7 @@ export interface IVariationStats {
   count: number
 }
 
-export interface IReportingFilter {
+export interface IInsightsFilter {
   featureFlagKey: string,
   intervalType: IntervalType,
   from: string, // included
@@ -60,7 +60,7 @@ export interface IFeatureFlagEndUserPagedResult {
 }
 
 
-export class ReportFilter {
+export class InsightsFilter {
   period: PeriodOption = PeriodOption.Last7D;
   intervalType: IntervalType = IntervalType.Day;
 
@@ -72,7 +72,7 @@ export class ReportFilter {
   constructor(public featureFlagKey: string) {
   }
 
-  get filter(): IReportingFilter {
+  get filter(): IInsightsFilter {
     const [from, to] = this.getFromAndTo();
 
     return {

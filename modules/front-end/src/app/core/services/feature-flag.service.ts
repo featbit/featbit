@@ -15,7 +15,7 @@ import {
   ISettingPayload,
   IVariationsPayload
 } from "@features/safe/feature-flags/types/details";
-import {IReportingFilter, IStatsByVariation} from "@features/safe/feature-flags/details/reporting/types";
+import {IInsightsFilter, IStatsByVariation} from "@features/safe/feature-flags/details/insights/types";
 
 @Injectable({
   providedIn: 'root'
@@ -128,7 +128,7 @@ export class FeatureFlagService {
     return this.http.put<boolean>(url, flag.tags);
   }
 
-  public getReport(filter: IReportingFilter): Observable<IStatsByVariation[]> {
+  public getReport(filter: IInsightsFilter): Observable<IStatsByVariation[]> {
     const queryParam = {...filter};
     const url = `${this.baseUrl}/stats`;
     return this.http.get<IStatsByVariation[]>(url, {params: new HttpParams({fromObject: queryParam})});
