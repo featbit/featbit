@@ -20,6 +20,19 @@ public class MemberController : ApiControllerBase
         return Ok(member);
     }
 
+    [HttpDelete("{memberId:guid}")]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid organizationId, Guid memberId)
+    {
+        var request = new DeleteMember
+        {
+            OrganizationId = organizationId,
+            MemberId = memberId
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
     [HttpGet]
     public async Task<ApiResponse<PagedResult<MemberVm>>> GetListAsync(
         Guid organizationId,
