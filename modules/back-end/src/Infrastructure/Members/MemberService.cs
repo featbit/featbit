@@ -322,8 +322,7 @@ public class MemberService : IMemberService
     public async Task AddPolicyAsync(MemberPolicy policy)
     {
         var existed = await _mongoDb.QueryableOf<MemberPolicy>().AnyAsync(
-            x => x.OrganizationId == policy.OrganizationId && x.MemberId == policy.MemberId &&
-                 x.PolicyId == policy.PolicyId
+            x => x.OrganizationId == policy.OrganizationId && x.MemberId == policy.MemberId && x.PolicyId == policy.PolicyId
         );
         if (existed)
         {
