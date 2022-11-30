@@ -51,6 +51,21 @@ public class MemberService : IMemberService
         return member;
     }
 
+    public async Task DeleteAsync(Guid organizationId, Guid memberId)
+    {
+        // delete organization user
+        await _mongoDb.CollectionOf<OrganizationUser>()
+            .DeleteManyAsync(x => x.OrganizationId == organizationId && x.UserId == memberId);
+
+        // delete group member
+        await _mongoDb.CollectionOf<GroupMember>()
+            .DeleteManyAsync(x => x.OrganizationId == organizationId && x.MemberId == memberId);
+
+        // delete member policies
+        await _mongoDb.CollectionOf<MemberPolicy>()
+            .DeleteManyAsync(x => x.OrganizationId == organizationId && x.MemberId == memberId);
+    }
+
     public async Task<PagedResult<Member>> GetListAsync(Guid organizationId, MemberFilter filter)
     {
         var users = _mongoDb.QueryableOf<User>();
@@ -313,7 +328,7 @@ public class MemberService : IMemberService
         {
             return;
         }
-        
+
         await _mongoDb.CollectionOf<MemberPolicy>().InsertOneAsync(policy);
     }
 
