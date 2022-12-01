@@ -2,8 +2,7 @@
 <div align="center">
 
 <h1 style="border-bottom: none">
-    <b>FeatBit - </b>
-    Evolution to BizDevOps
+    <b>FeatBit</b>
     <br>
 </h1>
 
