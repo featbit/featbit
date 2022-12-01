@@ -33,7 +33,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { TargetingComponent } from './targeting/targeting.component';
 import { SettingComponent } from './setting/setting.component';
 import { TriggersComponent } from './triggers/triggers.component';
-import { ReportingComponent } from './reporting/reporting.component';
+import { InsightsComponent } from './insights/insights.component';
 import { ExperimentationComponent } from './experimentation/experimentation.component';
 import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
 import {NzGridModule} from "ng-zorro-antd/grid";
@@ -45,7 +45,7 @@ import {CoreModule} from "@core/core.module";
     SettingComponent,
     TargetingComponent,
     TriggersComponent,
-    ReportingComponent,
+    InsightsComponent,
     ExperimentationComponent,
     SafeHtmlPipe
   ],

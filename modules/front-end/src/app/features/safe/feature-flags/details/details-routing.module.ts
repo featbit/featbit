@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { DetailsComponent } from './details.component';
 import { TargetingComponent } from './targeting/targeting.component';
 import { SettingComponent } from './setting/setting.component';
+import {InsightsComponent} from "@features/safe/feature-flags/details/insights/insights.component";
 
 
 const routes: Routes = [
@@ -17,10 +18,10 @@ const routes: Routes = [
           breadcrumb: $localize `:@@ff.routing.details.targeting:Targeting`
         }
       }, {
-        path: 'reporting',
-        component: SettingComponent,
+        path: 'insights',
+        component: InsightsComponent,
         data: {
-          breadcrumb: $localize `:@@ff.routing.details.reporting:Reporting`
+          breadcrumb: $localize `:@@ff.routing.details.insights:Insights`
         }
       }, {
         path: 'triggers',

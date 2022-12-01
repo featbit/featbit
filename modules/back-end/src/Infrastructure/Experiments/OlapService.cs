@@ -29,14 +29,14 @@ public class OlapService : IOlapService
         return result.Data;
     }
     
-    public async Task<ICollection<FeatureFlagStats>> GetFeatureFlagStatusByVariation(StatsByVariationParam param)
+    public async Task<ICollection<Insights>> GetFeatureFlagInsights(InsightsParam param)
     {
         param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
         param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
         
         var response = await _httpClient.PostAsJsonAsync("/api/events/stat/featureflag", param);
 
-        var result = await response.Content.ReadFromJsonAsync<StatsByVariationResponse>();
+        var result = await response.Content.ReadFromJsonAsync<InsightsResponse>();
 
         return result.Data;
     }
