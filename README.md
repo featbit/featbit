@@ -29,11 +29,11 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 </div>
 
 <p align="center">
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#documentation--communities">Docs & Communities</a> •
-  <a href="#other-useful-links">Architecture</a> •
-  <a href="#contribute-to-featbit">Contribution</a> •
-  <a href="#license">License</a>
+  <a href="https://featbit.gitbook.io/docs/installation">Installation</a> •
+  <a href="https://featbit.gitbook.io/">Getting Started</a> •
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Chat</a> •
+  <a href="https://github.com/featbit/featbit/discussions">Forum</a> •
+  <a href="#other-useful-links">Architecture</a>
 </p>
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/205070601-bd35f8e8-6765-49e7-8d85-88364be9934b.gif)
