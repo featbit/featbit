@@ -18,12 +18,12 @@ export enum IntervalType {
   Minute = 'MINUTE'
 }
 
-export interface IStatsByVariation {
+export interface IInsights {
   time: Date,
-  variations: IVariationStats[]
+  variations: IVariationInsights[]
 }
 
-export interface IVariationStats {
+export interface IVariationInsights {
   variation: string,
   count: number
 }

@@ -193,7 +193,7 @@ export class InsightsComponent implements OnInit {
   public loadFeatureFlagUsage() {
     this.isLoading = true;
 
-    this.featureFlagService.getReport(this.filter.filter)
+    this.featureFlagService.getInsights(this.filter.filter)
       .subscribe((res) => {
         const source = res.flatMap((stat) => {
           const sum = stat.variations.reduce((acc, cur) => acc + cur.count, 0);

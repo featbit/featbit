@@ -3,15 +3,15 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class GetStatsByVariation : IRequest<IEnumerable<StatsByVariationVm>>
+public class GetInsights : IRequest<IEnumerable<InsightsVm>>
 {
     public Guid EnvId { get; set; }
     public StatsByVariationFilter Filter { get; set; }
 }
 
-public class GetStatsByVariationValidator : AbstractValidator<GetStatsByVariation>
+public class GetInsightsValidator : AbstractValidator<GetInsights>
 {
-    public GetStatsByVariationValidator()
+    public GetInsightsValidator()
     {
         RuleFor(x => x.Filter.FeatureFlagKey)
             .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired);
@@ -27,22 +27,22 @@ public class GetStatsByVariationValidator : AbstractValidator<GetStatsByVariatio
     }
 }
 
-public class GetStatsByVariationHandler : IRequestHandler<GetStatsByVariation, IEnumerable<StatsByVariationVm>>
+public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<InsightsVm>>
 {
     private readonly IFeatureFlagService _service;
     private readonly IOlapService _olapService;
 
-    public GetStatsByVariationHandler(IFeatureFlagService service, IOlapService olapService)
+    public GetInsightsHandler(IFeatureFlagService service, IOlapService olapService)
     {
         _service = service;
         _olapService = olapService;
     }
     
-    public async Task<IEnumerable<StatsByVariationVm>> Handle(GetStatsByVariation request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<InsightsVm>> Handle(GetInsights request, CancellationToken cancellationToken)
     {
         var featureFlag = await _service.GetAsync(request.EnvId, request.Filter.FeatureFlagKey);
         
-        var param = new StatsByVariationParam
+        var param = new InsightsParam
         {
             EnvId = request.EnvId,
             FlagExptId = $"{request.EnvId}-{request.Filter.FeatureFlagKey}",
@@ -51,12 +51,12 @@ public class GetStatsByVariationHandler : IRequestHandler<GetStatsByVariation, I
             EndTime = request.Filter.To
         };
 
-        var stats = await _olapService.GetFeatureFlagStatusByVariation(param);
+        var stats = await _olapService.GetFeatureFlagInsights(param);
         
-        return stats.Select(s => new StatsByVariationVm
+        return stats.Select(s => new InsightsVm
         {
             Time = s.Time,
-            Variations = featureFlag.Variations.Select(v => new VariationStatsVm
+            Variations = featureFlag.Variations.Select(v => new VariationInsightsVm
             {
                 Variation = v.Value,
                 Count = s.Variations.FirstOrDefault(x => x.Id == v.Id)?.Val ?? 0
