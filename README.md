@@ -36,7 +36,8 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
   <a href="#license">License</a>
 </p>
 
-![featbit-readme4](https://user-images.githubusercontent.com/68597908/202688653-d9dbe87d-9c51-41f2-98f7-ded536459cbc.gif)
+![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/205070601-bd35f8e8-6765-49e7-8d85-88364be9934b.gif)
+
 
 --------------------------------------------------
 
