@@ -28,11 +28,10 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 </div>
 
 <p align="center">
-  <a href="https://featbit.gitbook.io/docs/installation">Installation</a> •
-  <a href="https://featbit.gitbook.io/">Getting Started</a> •
-  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Chat</a> •
-  <a href="https://github.com/featbit/featbit/discussions">Forum</a> •
-  <a href="#other-useful-links">Architecture</a>
+  <a href="https://featbit.gitbook.io/docs/installation"><b> Installation </b></a>  •
+  <a href="https://featbit.gitbook.io/"><b> Getting Started </b></a>  •
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ"><b> Chat </b></a>  •
+  <a href="https://github.com/featbit/featbit/discussions"><b> Forum </b></a>
 </p>
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/205070601-bd35f8e8-6765-49e7-8d85-88364be9934b.gif)
