@@ -261,7 +261,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">12,13</context>
+          <context context-type="linenumber">15,16</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -4257,61 +4257,85 @@
         </context-group>
         <target>确定要存档该开关吗？</target>
       </trans-unit>
+      <trans-unit id="ff.components.details.targeting.settings-ineffective-warning" datatype="html">
+        <source>Following settings won&apos;t be effective until you turn the flag on</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">6,9</context>
+        </context-group>
+        <target>以下设定在你开启开关之前不会生效</target>
+      </trans-unit>
       <trans-unit id="ff.components.details.targeting.setabtestrule" datatype="html">
         <source>Set A/B test rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">8,10</context>
+          <context context-type="linenumber">11,13</context>
         </context-group>
         <target>设置AB测试规则</target>
       </trans-unit>
-      <trans-unit id="ff.components.details.targeting.defaultrule" datatype="html">
-        <source>Default rule</source>
+      <trans-unit id="ff.components.details.targeting.default" datatype="html">
+        <source>Default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">19,20</context>
+          <context context-type="linenumber">22,23</context>
         </context-group>
         <target>默认规则</target>
       </trans-unit>
-      <trans-unit id="ff.components.details.targeting.defaultrule-tooltip" datatype="html">
-        <source>If the flag is turned on, the following variation is served</source>
+      <trans-unit id="ff.components.details.targeting.default-tooltip" datatype="html">
+        <source>Serve a variation if the user doesn&apos;t met Individual targeting or Targeting Rules.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">25,27</context>
         </context-group>
-        <target>如果开关被开启则返回以下结果</target>
+        <target>设定当用户既不是目标用户也不满足任何匹配规则时的开关返回值</target>
       </trans-unit>
-      <trans-unit id="ff.components.details.targeting.individualtargeting" datatype="html">
-        <source>Targeting users</source>
+      <trans-unit id="common.check.the.docs" datatype="html">
+        <source>Check the docs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">34,35</context>
+          <context context-type="linenumber">27,29</context>
         </context-group>
-        <target>黑/白名单</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">52,54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">76,78</context>
+        </context-group>
+        <target>查阅文档</target>
       </trans-unit>
-      <trans-unit id="ff.components.details.targeting.coverdefaultrule-tooltip" datatype="html">
-        <source>The default rule will be overridden when the rules are met</source>
+      <trans-unit id="ff.components.details.targeting.individual" datatype="html">
+        <source>Individual targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">42,43</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
-        <target>满足规则后将覆盖原有的默认规则</target>
+        <target>目标用户</target>
       </trans-unit>
-      <trans-unit id="common.rules" datatype="html">
-        <source>Rules</source>
+      <trans-unit id="ff.components.details.targeting.individual-tooltip" datatype="html">
+        <source>Serve a variation to specific targets based on their key</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">58,59</context>
+          <context context-type="linenumber">50,52</context>
         </context-group>
+        <target>为指定用户设定开关返回值</target>
+      </trans-unit>
+      <trans-unit id="ff.components.details.targeting.rules" datatype="html">
+        <source>Targeting rules</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">71,72</context>
         </context-group>
-        <target>规则</target>
+        <target>匹配规则</target>
+      </trans-unit>
+      <trans-unit id="ff.components.details.targeting.rules-tooltip" datatype="html">
+        <source>Serve a variation to specific targets based on their attributes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">74,76</context>
+        </context-group>
+        <target>根据用户属性设定相应的开关返回值</target>
       </trans-unit>
       <trans-unit id="common.rule" datatype="html">
         <source>Rule</source>
@@ -5764,6 +5788,14 @@
           <context context-type="linenumber">49</context>
         </context-group>
         <target>不包含用户</target>
+      </trans-unit>
+      <trans-unit id="common.rules" datatype="html">
+        <source>Rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <target>规则</target>
       </trans-unit>
       <trans-unit id="segment.idx.filter-by-name" datatype="html">
         <source>Filter by name</source>
