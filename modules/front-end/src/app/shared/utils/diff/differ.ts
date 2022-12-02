@@ -1,5 +1,5 @@
-import { IChange } from "ffc-json-diff";
-import { IReadableChange, ITranslationConfig, Translation } from "./types";
+import {IChange} from "ffc-json-diff";
+import { IReadableChange, ITranslationConfig } from "./types";
 import { isKeyPathExactMatchPattern, isKeyPathLeftMatchPattern, isLeafNode } from "./utils";
 import changesets from 'ffc-json-diff';
 
@@ -11,15 +11,18 @@ export class Differ {
   }
 
   generateDiff(objA: any, objB: any): [number, string] {
-    const normalizedA = this.options.normalizeFn(objA);
-    const normalizedB = this.options.normalizeFn(objB);
+    const normalizedA = this.options.normalizeFunc(objA);
+    const normalizedB = this.options.normalizeFunc(objB);
 
     const diffs = changesets.diff(normalizedA, normalizedB, this.options.embededKeys);
-    return translateChanges(diffs, this.options.ignoredKeyPaths, this.options.translationConfigs, this.options.translation);
+    //return transformDiffsToHtml(diffs, this.options.ignoredKeyPaths, this.options.translationConfigs, this.options.translation);
+    const r = transformDiffsToHtml(diffs, this.options.ignoredKeyPaths, this.options.translationConfigs);
+    console.log(r);
+    return r;
   }
 }
 
-const translateChanges = (changesets: IChange[], ignoredKeyPathPatterns: string[][], translationConfigs: ITranslationConfig[], translations: Translation): [number, string] => {
+const transformDiffsToHtml = (changesets: IChange[], ignoredKeyPathPatterns: string[][], translationConfigs: ITranslationConfig[]): [number, string] => {
   let flatChanges: IReadableChange[] = getFlatChanges(changesets, []);
 
   flatChanges = flatChanges.filter(r => !isKeyPathLeftMatchPattern(r.keyPath, ignoredKeyPathPatterns));
@@ -32,10 +35,10 @@ const translateChanges = (changesets: IChange[], ignoredKeyPathPatterns: string[
               return null;
           }
 
-          return config.getContentFunc(matchedChanges, translations);
+          return config.getContentFunc(matchedChanges);
       }).filter(r => r !== null);
 
-  return [readable.length, readable.join('')];
+  return [readable.reduce((acc, cur) => acc + cur.count, 0), readable.map((r) => r.html).join('')];
 }
 
 const getFlatChanges = (changesets: IChange[], keyPath: string[]): IReadableChange[] => {

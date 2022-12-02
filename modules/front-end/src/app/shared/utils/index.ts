@@ -102,3 +102,7 @@ export function trackByFunction(index: number, item: any) {
 export const isNumber = (value: number): boolean => {
   return typeof value === 'number' && isFinite(value);
 }
+
+export const deepCopy = (obj: any): any => {
+  return JSON.parse(JSON.stringify(obj));
+}

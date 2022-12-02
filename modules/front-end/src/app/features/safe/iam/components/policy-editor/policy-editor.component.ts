@@ -8,7 +8,7 @@ import {
   ResourceType,
   ResourceTypeEnum
 } from "@features/safe/iam/components/policy-editor/types";
-import {encodeURIComponentFfc, uuidv4} from "@utils/index";
+import {deepCopy, encodeURIComponentFfc, uuidv4} from "@utils/index";
 import {IPolicy, IPolicyStatement} from "@features/safe/iam/types/policy";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {PolicyService} from "@services/policy.service";
@@ -124,7 +124,7 @@ export class PolicyEditorComponent {
   @Input('policy')
   set _(policy: IPolicy) {
     if (policy) {
-      this._policy = JSON.parse(JSON.stringify(policy));
+      this._policy = deepCopy(policy);
       this.readonly = policy.type === 'SysManaged';
       this.statements = policy.statements.map(statement => new PolicyStatementViewModel(statement));
     }

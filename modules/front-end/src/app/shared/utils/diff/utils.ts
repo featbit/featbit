@@ -28,6 +28,10 @@ export const isKeyPathExactMatchPattern = (keyPath: string[], patterns: string[]
 };
 
 export const isKeyPathLeftMatchPattern = (keyPath: string[], patterns: string[][]): boolean => {
+  if (patterns.length === 0 || patterns.flatMap(p => p).length === 0) {
+    return false;
+  }
+
   for (let pattern of patterns) {
       if (keyPath.length < pattern.length) {
           return false;
@@ -40,6 +44,11 @@ export const isKeyPathLeftMatchPattern = (keyPath: string[], patterns: string[][
           }
 
           idx++;
+
+          if (idx === pattern.length) {
+            // keyPath including pattern => left match
+            return true;
+          }
       }
   }
 
