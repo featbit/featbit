@@ -10,7 +10,7 @@
       <div class="label" i18n="@@common.name">Name</div>
       <div class="value">
         <ng-container>
-          <div [nz-tooltip] class="text">{{member.name || member.email || '--'}}</div>
+          <div class="text">{{member.name || member.email || '--'}}</div>
         </ng-container>
       </div>
     </div>
@@ -30,7 +30,7 @@
   <ng-container *ngIf="!isLoading && canDelete()">
     <div class="block" *ngIf="!isLoading; else loadingTem;" >
       <div class="delete">
-        <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it??"
+        <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                 nzPopconfirmPlacement="bottomRight"
                 [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                 (nzOnConfirm)="deleteMember()" [nzIcon]="iconTplIamUser">

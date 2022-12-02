@@ -221,7 +221,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.html</context>
-          <context context-type="linenumber">207,208</context>
+          <context context-type="linenumber">206</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
@@ -429,7 +429,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">210,211</context>
+          <context context-type="linenumber">208,209</context>
         </context-group>
         <target>基准特性</target>
       </trans-unit>
@@ -1405,7 +1405,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">240,241</context>
+          <context context-type="linenumber">238,239</context>
         </context-group>
         <target>关闭</target>
       </trans-unit>
@@ -1854,7 +1854,7 @@
         <target>低于基准值</target>
       </trans-unit>
       <trans-unit id="common.operation-failed-try-again" datatype="html">
-        <source>@@common.operation-failed-try-again</source>
+        <source>Operation failed, please try again</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
           <context context-type="linenumber">244</context>
@@ -2137,7 +2137,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">212,214</context>
+          <context context-type="linenumber">210,212</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -2345,7 +2345,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">70</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -2353,7 +2353,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>移除</target>
       </trans-unit>
@@ -2381,7 +2381,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -2389,7 +2389,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">120</context>
+          <context context-type="linenumber">118</context>
         </context-group>
         <target>取消</target>
       </trans-unit>
@@ -3200,7 +3200,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <target>全部</target>
       </trans-unit>
@@ -3352,7 +3352,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">209,210</context>
+          <context context-type="linenumber">207,208</context>
         </context-group>
         <target>Metric 名称</target>
       </trans-unit>
@@ -3372,7 +3372,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">211,212</context>
+          <context context-type="linenumber">209,210</context>
         </context-group>
         <target>状态</target>
       </trans-unit>
@@ -3384,7 +3384,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">230,233</context>
+          <context context-type="linenumber">228,231</context>
         </context-group>
         <note priority="1" from="description">expt.overview.check-experiment</note>
         <target>查看实验</target>
@@ -3675,11 +3675,15 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
           <context context-type="linenumber">83</context>
         </context-group>
+        <target>删除实验</target>
+      </trans-unit>
+      <trans-unit id="ff.expt.restart-experiment" datatype="html">
+        <source>Restart</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
           <context context-type="linenumber">96</context>
         </context-group>
-        <target>删除实验</target>
+        <target>重新开始</target>
       </trans-unit>
       <trans-unit id="ff.expt.pause-experiment" datatype="html">
         <source>Pause</source>
@@ -3846,14 +3850,14 @@
         <target>查看图表</target>
       </trans-unit>
       <trans-unit id="common.time" datatype="html">
-        <source>time</source>
+        <source>Time</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
           <context context-type="linenumber">356</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">220</context>
+          <context context-type="linenumber">219</context>
         </context-group>
         <target>时间</target>
       </trans-unit>
@@ -3889,47 +3893,63 @@
         </context-group>
         <target>最后调用于</target>
       </trans-unit>
-      <trans-unit id="common.month" datatype="html">
+      <trans-unit id="common.minute" datatype="html">
         <source>Minute</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">76</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+        <target>分钟</target>
+      </trans-unit>
+      <trans-unit id="common.hour" datatype="html">
+        <source>Hour</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
+          <context context-type="linenumber">84</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+        <target>小时</target>
+      </trans-unit>
+      <trans-unit id="common.day" datatype="html">
+        <source>Day</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">97</context>
+          <context context-type="linenumber">112</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">105</context>
+          <context context-type="linenumber">127</context>
+        </context-group>
+        <target>天</target>
+      </trans-unit>
+      <trans-unit id="common.week" datatype="html">
+        <source>Week</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">131</context>
         </context-group>
+        <target>周</target>
+      </trans-unit>
+      <trans-unit id="common.month" datatype="html">
+        <source>Month</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">117</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">128</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">132</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>分钟</target>
       </trans-unit>
@@ -3937,7 +3957,7 @@
         <source>Last 30 minutes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">147</context>
+          <context context-type="linenumber">146</context>
         </context-group>
         <target>过去30分钟</target>
       </trans-unit>
@@ -3945,7 +3965,7 @@
         <source>Last 2 hours</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">151</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <target>过去2小时</target>
       </trans-unit>
@@ -3953,7 +3973,7 @@
         <source>Last 24 hours</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">154</context>
         </context-group>
         <target>过去24小时</target>
       </trans-unit>
@@ -3961,7 +3981,7 @@
         <source>Last 7 days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">159</context>
+          <context context-type="linenumber">158</context>
         </context-group>
         <target>过去7天</target>
       </trans-unit>
@@ -3969,7 +3989,7 @@
         <source>Last 14 days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">162</context>
         </context-group>
         <target>过去14天</target>
       </trans-unit>
@@ -3977,7 +3997,7 @@
         <source>Last 1 month</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">167</context>
+          <context context-type="linenumber">166</context>
         </context-group>
         <target>过去1个月</target>
       </trans-unit>
@@ -3985,7 +4005,7 @@
         <source>Last 2 months</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">171</context>
+          <context context-type="linenumber">170</context>
         </context-group>
         <target>过去两个月</target>
       </trans-unit>
@@ -3993,7 +4013,7 @@
         <source>Last 6 months</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">175</context>
+          <context context-type="linenumber">174</context>
         </context-group>
         <target>过去6个月</target>
       </trans-unit>
@@ -4001,7 +4021,7 @@
         <source>Last 12 months</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">179</context>
+          <context context-type="linenumber">178</context>
         </context-group>
         <target>过去12个月</target>
       </trans-unit>
@@ -4009,7 +4029,7 @@
         <source>Total</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/reporting/reporting.component.ts</context>
-          <context context-type="linenumber">201</context>
+          <context context-type="linenumber">200</context>
         </context-group>
         <target>总共</target>
       </trans-unit>
@@ -4169,37 +4189,13 @@
         </context-group>
         <target>删除返回值</target>
       </trans-unit>
-      <trans-unit id="segment.segment-used-by" datatype="html">
-        <source>This variation is used by following</source>
+      <trans-unit id="ff.variation-used-by-experiments" datatype="html">
+        <source>This variation is used by <x id="INTERPOLATION" equiv-text="{{variationExptReferences.length}}"/> experiment(s), remove all references before the variation can be safely removed!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">192,193</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">108</context>
-        </context-group>
-        <target>该用户组在下边列出的</target>
-      </trans-unit>
-      <trans-unit id="segment.num-segment-remove-to-use" datatype="html">
-        <source>experiment(s), remove all references before the variation can be safely removed!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">194,196</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">61</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">110</context>
-        </context-group>
-        <target>个开关中被引用，移除所有引用后方可删除！</target>
+        <target>该返回值正在被 <x id="INTERPOLATION" equiv-text="{{variationExptReferences.length}}"/> 个实验所引用，在删除该返回值之前需要先移除这些引用！</target>
       </trans-unit>
       <trans-unit id="common.create-tag" datatype="html">
         <source>Create Tag</source>
@@ -4223,11 +4219,7 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">238</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">248</context>
-        </context-group>
-        <target>该状态已经在目标用户中被使用，移除后方可删除！</target>
+        <target>该返回值已经在目标用户中使用，移除后方可删除！</target>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-rules" datatype="html">
         <source>This variation is used by rules, remove the reference before it can be safely removed</source>
@@ -4235,7 +4227,15 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">243</context>
         </context-group>
-        <target>该状态已经在匹配条件的规则中被使用，移除后方可删除！</target>
+        <target>该返回值已经在匹配条件的规则中使用，移除后方可删除！</target>
+      </trans-unit>
+      <trans-unit id="ff.variation-used-by-default-rule" datatype="html">
+        <source>This variation is used by default rule, remove the reference before it can be safely removed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">248</context>
+        </context-group>
+        <target>该返回值已经在默认规则中使用，移除后方可删除！</target>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-off" datatype="html">
         <source>This variation is used by the value returned when the feature flag is OFF, remove the reference before it can be safely removed</source>
@@ -4243,7 +4243,7 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">253</context>
         </context-group>
-        <target>该状态已经在开关处于 OFF 状态的返回值中被使用，移除后方可删除！</target>
+        <target>该返回值已经在开关处于 OFF 状态的返回值中使用，移除后方可删除！</target>
       </trans-unit>
       <trans-unit id="ff.archive-flag-warning" datatype="html">
         <source>Flag [flagName] will be archived, and the value defined in your code will be returned for all your users. Remove code references to [flagKey] from your application before archiving.</source>
@@ -5736,6 +5736,18 @@
           <context context-type="linenumber">53</context>
         </context-group>
         <target>将被永久删除，且删除后不可恢复！</target>
+      </trans-unit>
+      <trans-unit id="segment.segment-used-by-flags" datatype="html">
+        <source>This segment is used by <x id="INTERPOLATION" equiv-text="{{flagReferences.length}}"/> flags(s), remove all references before the segment can be safely removed!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">108</context>
+        </context-group>
+        <target>该用户组正在被 <x id="INTERPOLATION" equiv-text="{{flagReferences.length}}"/> 个开关所引用，在删除该用户组之前需要先移除这些引用！</target>
       </trans-unit>
       <trans-unit id="segment.details.segment-not-used" datatype="html">
         <source>This segment is not used by any feature flag</source>

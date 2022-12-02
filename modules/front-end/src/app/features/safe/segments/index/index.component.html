@@ -105,9 +105,7 @@
       <div class="warning">
         <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
         <div class="warning-content">
-          <ng-container i18n="@@segment.segment-used-by">This segment is used by following</ng-container>
-          <span style="font-weight:800;display:inline-block;margin:0 3px;"> {{currentDeletingSegmentFlagReferences.length}} </span>
-          <ng-container i18n="@@segment.num-segment-remove-to-use">segment(s), remove all references before the segment can be safely removed!</ng-container>
+          <ng-container i18n="@@segment.segment-used-by-flags">This segment is used by {{currentDeletingSegmentFlagReferences.length}} flags(s), remove all references before the segment can be safely removed!</ng-container>
         </div>
       </div>
     </div>

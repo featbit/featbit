@@ -149,7 +149,7 @@ export class PolicyEditorComponent {
 
   saveStatements() {
     if (this.readonly) {
-      this.message.warning($localize `:@@iam.policies.details.managed-policies-cannot-be-modified:Managed policies cannot be modified`);
+      this.message.warning($localize `:@@iam.policies.details.managed-policies-cannot-be-modified:System Managed policies cannot be modified. If needed, you can make a copy and modify it for your own needs.`);
       return;
     }
 

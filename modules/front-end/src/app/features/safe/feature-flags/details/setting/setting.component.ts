@@ -245,7 +245,7 @@ export class SettingComponent implements OnInit {
     }
 
     if(this.featureFlag.fallthrough.variations.length > 0 && this.featureFlag.fallthrough.variations.find(x => x.id === id)) {
-      this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by default rule, remove the reference before it can be safely removed`);
+      this.message.warning($localize `:@@ff.variation-used-by-default-rule:This variation is used by default rule, remove the reference before it can be safely removed`);
       return;
     }
 

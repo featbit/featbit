@@ -353,7 +353,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const xAxisName = $localize `:@@common.time:time`;
+    const xAxisName = $localize `:@@common.time:Time`;
     const trackOption = iterations[0].customEventTrackOption;
     const valueUnit = trackOption === CustomEventTrackOption.Conversion
       ? '%' : (iterations[0].customEventUnit ? iterations[0].customEventUnit : '');

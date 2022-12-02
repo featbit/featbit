@@ -241,7 +241,7 @@ export class MetricDrawerComponent implements OnInit {
             this.message.success($localize `:@@common.operation-success:Operation succeeded`);
           },
           _ => {
-            this.message.error($localize `:@@common.operation-failed-try-again:@@common.operation-failed-try-again`);
+            this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
             this.isLoading = false;
           }
         );
