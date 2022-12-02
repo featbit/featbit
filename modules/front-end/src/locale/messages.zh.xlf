@@ -4069,17 +4069,21 @@
         </context-group>
         <target>此开关</target>
       </trans-unit>
-      <trans-unit id="ff.use-key-in-code-to-get-variation" datatype="html">
-        <source>Use key in your code to get the feature flag variation</source>
+      <trans-unit id="ff.key-description" datatype="html">
+        <source>Use key(case-sensitive) in your code to get the feature flag variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">42,43</context>
+          <context context-type="linenumber">42</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">72</context>
         </context-group>
-        <target>用于在代码中引用以获取开关返回值</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">179</context>
+        </context-group>
+        <target>在代码中使用 key （大小写敏感）来获取开关返回值</target>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-turn-ff-off" datatype="html">
         <source>Are you sure to turn it off? The variation set below would be returned.</source>
@@ -4520,14 +4524,6 @@
           <context context-type="linenumber">69</context>
         </context-group>
         <target>名称校验失败</target>
-      </trans-unit>
-      <trans-unit id="ff.key-description" datatype="html">
-        <source>Use key(case-sensitive) in your code to get the feature flag variation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">179</context>
-        </context-group>
-        <target>在代码中使用 key （大小写敏感）来获取开关返回值</target>
       </trans-unit>
       <trans-unit id="ff.idx.key-generated-from-name" datatype="html">
         <source>key is auto-generated from name</source>
