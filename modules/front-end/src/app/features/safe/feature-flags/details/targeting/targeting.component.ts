@@ -216,6 +216,7 @@ export class TargetingComponent implements OnInit {
   numChanges = 0;
   changes = '';
 
+  reviewModalVisible = false;
   validationErrors: IFlagValidationError[] = [];
 
   onReviewChanges(validationErrortpl: TemplateRef<void>) {
@@ -247,7 +248,9 @@ export class TargetingComponent implements OnInit {
       const [ numChanges, changes]  = featureFlagDiffer.generateDiff(this.featureFlag.originalData, this.featureFlag, {targetingUsers: this.allTargetingUsers, segments});
       this.numChanges = numChanges;
       this.changes = changes;
-    }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:@@common.operation-failed-try-again`))
+    }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:@@common.operation-failed-try-again`));
+
+    this.reviewModalVisible = true;
   }
 
   onSave() {

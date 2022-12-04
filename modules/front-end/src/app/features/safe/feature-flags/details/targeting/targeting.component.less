@@ -167,7 +167,7 @@
   font-weight: 600;
 }
 
-::ng-deep .target-approval {
+::ng-deep .review-modal {
   .ant-modal-header {
     border: none;
 
@@ -186,6 +186,7 @@
     font-size: 15px;
     font-weight: 500;
     padding: 10px;
+    border-radius: 10px;
   }
 
   .warning-message {
@@ -195,6 +196,7 @@
     border: 1px solid #d2d2d2;
     margin-top: 15px;
     border-left: 3px solid #ff912b;
+    border-radius: 10px;
 
     .warning {
       display: flex;
@@ -212,6 +214,7 @@
   .pending-changes {
     border-bottom: 1px solid #d2d2d2;
     margin-top: 10px;
+    padding-bottom: 10px;
 
     h3.pending-changes-title {
       font-size: 15px;
@@ -221,59 +224,47 @@
       margin-bottom: 5px;
     }
 
-    .change-instructions {
+    .change {
       padding-left: 5px;
 
-      .instruction-count {
+      .change-count {
         margin-bottom: 5px;
       }
 
-      .instruction-list {
+      .change-list {
         padding-left: 0;
 
-        .instruction-category {
-          h3 {
+        .diff-category {
+          .diff-category-title {
             margin-bottom: 0;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 700;
             line-height: 19.5px;
           }
 
-          list-style-type: none;
-
-          .instructions {
+          ul.diff-category-instructions {
             padding-left: 30px;
             line-height: 25px;
 
-            a {
-              color: green;
-              text-decoration: underline;
-            }
+            .diff-instruction {
+              .remove-item {
+                text-decoration: line-through;
+              }
 
-            ul.no-style {
-              list-style-type: none;
-              padding-left: 0;
+              .diff-rule-description {
+                padding-left: 15px;
 
-              li {
-                span {
-                  padding-left: 5px;
+                .diff-rule-condition {
+                  display: flex;
+                  gap: 5px;
+                  justify-content: flex-start;
                   color: #646f7a;
-                  font-weight: 500;
+                }
+
+                .condition-keyword {
+                  font-weight: 600;
                 }
               }
-
-              li.clause {
-                color: #646f7a;
-                font-weight: 500;
-              }
-
-              li.and {
-                height: 30px;
-                font-weight: 900;
-                line-height: 30px;
-                color: #00000080;
-              }
-
             }
           }
         }

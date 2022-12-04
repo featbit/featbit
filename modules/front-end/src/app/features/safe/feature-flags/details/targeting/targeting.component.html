@@ -111,5 +111,48 @@
   </ng-template>
 </section>
 
+<nz-modal [nzWidth]='800' nzClassName="review-modal" [(nzVisible)]="reviewModalVisible"
+          [nzTitle]="'保存改动'"
+          [nzClosable]="false"
+          (nzOnCancel)="reviewModalVisible=false">
+  <ng-container *nzModalContent>
+    <div class="">
+      <section class="context">
+        <div><span>{{featureFlag.name}}</span><span> ({{featureFlag.key}}) </span>
+        </div>
+        <div><span>环境 : </span><span>{{currentProjectEnv.envName}}</span></div>
+      </section>
+      <section class="warning-message">
+        <div class="warning">
+          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+          <div class="warning-content">以下改动将可能会影响到统计数据</div>
+        </div>
+      </section>
+      <section class="pending-changes">
+        <h3 class="pending-changes-title">改动</h3>
+        <div class="change">
+          <p class="change-count">
+            <span>{{numChanges}}</span> 个待提交改动
+          </p>
+          <div class="change-list" [innerHtml]="changes | safeHtml"></div>
+        </div>
+      </section>
+
+      <section class="save">
+        <div class="save-title">评论</div>
+        <textarea class="ffc-input" rows="4" nz-input></textarea>
+      </section>
+    </div>
+  </ng-container>
+  <div *nzModalFooter>
+    <span style="display:inline-box;color:red;margin-right:10px"
+          *ngIf="numChanges === 0">只有在存在改动的情况下才可保存
+    </span>
+    <button nz-button nzType="default" (click)="reviewModalVisible=false">取消</button>
+    <button [disabled]="numChanges === 0" nz-button nzType="primary"
+            (click)="onSave()">保存改动</button>
+  </div>
+</nz-modal>
+
 <app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
   [featureFlag]="featureFlag"></app-expt-rules-drawer>

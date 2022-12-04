@@ -173,7 +173,7 @@ const translationConfigs = [
 
       return generateHtmlFromReadableOp({
         title: $localize `:@@ff.diff.default-rule:Default rule`,
-        changes: [`<div class="serve-values">${$localize `:@@common.diff.set:Set`} <div class="serve-value">${op.join('</div><div class="serve-value">')}</div></div>`]
+        changes: [`<li><span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.set-as:Set as`}</span> <span class="ant-tag">${op.join('</span><span class="ant-tag">')}</span></li>`]
       });
     }
   },
@@ -188,13 +188,13 @@ const translationConfigs = [
         switch (op.change.type) {
           case Operation.ADD:
             key = op.keyPath[1];
-            return `${$localize `:@@common.diff.to:To`} ${key} ${$localize `:@@common.diff.add:Add`} ${op.change.value.name}`;
+            return `<span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.add:Add`}</span> <span class="ant-tag">${op.change.value.name}</span>${$localize `:@@common.diff.to:To`} <span class="ant-tag">${key}</span>`;
           case Operation.REMOVE:
             key = op.keyPath[1];
-            return `${$localize `:@@common.diff.from:From`} ${key} ${$localize `:@@common.diff.remove:Remove`} ${op.change.value.name}`;
+            return `<span class="operation ant-typography ant-typography-danger">${$localize `:@@common.diff.remove:Remove`}</span> <span class="ant-tag remove-item">${op.change.value.name}</span>${$localize `:@@common.diff.from:From`} <span class="ant-tag">${key}</span>`;
           case Operation.UPDATE:
             key = op.keyPath[1];
-            return `${key} ${$localize `:@@common.diff.in:In`} ${$localize `:@@common.diff.rename:Rename`} ${op.change.oldValue} ${$localize `:@@common.diff.as:As`} ${op.change.value}`;
+            return `<span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.rename:Rename`}</span> <span class="ant-tag remove-item">${op.change.oldValue}</span>${$localize `:@@common.diff.as:As`} <span class="ant-tag">${op.change.value}</span>${$localize `:@@common.diff.in:In`} <span class="ant-tag">${key}</span>`;
           default:
             return null;
         }
@@ -202,7 +202,7 @@ const translationConfigs = [
 
       return generateHtmlFromReadableOp({
         title: $localize `:@@ff.diff.targeting-users:Targeting users`,
-        changes: contentArr.map((c) => `<div class="ffc-diff-content-item ffc-diff-content-item-individual">${c}</div>`)
+        changes: contentArr.map((c) => `<li class="diff-instruction diff-instruction-targeting-user">${c}</li>`)
       });
     }
   },
@@ -218,15 +218,15 @@ const translationConfigs = [
         const rule = op.change.value.rule;
         switch (op.change.type) {
           case Operation.ADD:
-            return `<div class="diff-content-item diff-content-item-rule">
-                          <div class="diff-rule-name">${$localize `:@@common.diff.add-rule:Add rule`} ${rule.name}</div>
+            return `<li class="diff-instruction diff-instruction-rule">
+                          <div class="diff-rule-name"><span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.add:Add`}</span>: ${rule.name}</div>
                           <div class="diff-rule-description">${generateRuleHtmlDescription(rule.conditions, rule.variations)}</div>
-                      </div>`;
+                      </li>`;
           case Operation.REMOVE:
-            return `<div class="diff-content-item diff-content-item-rule">
-                          <div class="diff-rule-name">${$localize `:@@common.diff.remove-rule:Remove rule`} ${rule.name}</div>
+            return `<li class="diff-instruction diff-instruction-rule">
+                          <div class="diff-rule-name"><span class="operation ant-typography ant-typography-danger">${$localize `:@@common.diff.remove-rule:Remove`}</span>: ${rule.name}</div>
                           <div class="diff-rule-description">${generateRuleHtmlDescription(rule.conditions, rule.variations)}</div>
-                      </div>`;
+                      </li>`;
           default:
             return null;
         }
@@ -243,10 +243,10 @@ const translationConfigs = [
       const ruleUpdate = Object.keys(ruleUpdateDict).map(ruleId => {
         const op = ruleUpdateDict[ruleId][0];
         const rule = op.change.value.rule;
-        return `<div class="diff-content-item diff-content-item-rule">
-                  <div class="diff-rule-name">${$localize `:@@common.diff.update-rule:Update rule`} ${rule.name}</div>
+        return `<li class="diff-instruction diff-instruction-rule">
+                  <div class="diff-rule-name"><span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.update:Update`}</span>: ${rule.name}</div>
                   <div class="diff-rule-description">${generateRuleHtmlDescription(rule.conditions, rule.variations)}</div>
-              </div>`;
+              </li>`;
       });
 
       return generateHtmlFromReadableOp({
@@ -265,14 +265,14 @@ interface IReadableOp {
 const generateHtmlFromReadableOp = (op: IReadableOp): IHtmlChanges => {
   return {
     count: op.changes.length,
-    html: `<div class="diff-container"><div class="diff-title">${op.title}</div><div class="diff-content">${op.changes.join('')}</div></div>`
+    html: `<div class="diff-category"><div class="diff-category-title">${op.title}</div><ul class="diff-category-instructions">${op.changes.join('')}</ul></div>`
   };
 }
 
 const generateRuleHtmlDescription = (conditions: IFlatRuleCondition[], variations: IFlatRuleVariation[]): string => {
-  const serveStr = `<div class="serve-value">${variations.map(v => `${v.variation.value} (${v.percentage}%)`).join('</div><div class="serve-value">')}</div>`;
+  const serveStr = `<span class="ant-tag">${variations.map(v => `${v.variation.value} (${v.percentage}%)`).join('</span><span class="ant-tag">')}</span>`;
 
-  const clausesStr = '<div class="diff-rule-clause">' +
+  const clausesStr = '<div class="diff-rule-condition">' +
     conditions.map((condition) => {
       let contentStr = '';
 
@@ -296,15 +296,15 @@ const generateRuleHtmlDescription = (conditions: IFlatRuleCondition[], variation
       let clauseStr = `<div class="condition-keyword">${$localize `:@@common.diff.if:If`}</div>`;
 
       if (isSegment) {
-        clauseStr += `${condition.property} ${valueStr}`;
+        clauseStr += `<span>${condition.property}</span> <span>${valueStr}</span>`;
       } else if (condition.type === 'boolean') {
-        clauseStr += `${condition.property} ${condition.op}`;
+        clauseStr += `<span>${condition.property}</span> <span>${condition.op}</span>`;
       } else {
-        clauseStr += `${condition.property} ${condition.op} ${valueStr}`;
+        clauseStr += `<span>${condition.property}</span> <span>${condition.op}</span> <span>${valueStr}</span>`;
       }
 
       return clauseStr;
-    }).join(`</div><div class="condition-keyword">${$localize `:@@common.diff.and:And`}</div><div class="diff-rule-clause">`) +
+    }).join(`</div><div class="condition-keyword">${$localize `:@@common.diff.and:And`}</div><div class="diff-rule-condition">`) +
     '</div>';
 
   return `<div class="diff-rule-clauses">${clausesStr}</div><div class="diff-rule-serve"><div class="condition-keyword">${$localize `:@@common.diff.serve:Serve`}</div><div class="serve-values">${serveStr}</div></div>`;
