@@ -80,15 +80,15 @@ export function encodeURIComponentFfc(url: string): string {
   return encodeURIComponent(url).replace(/\(/g, "%28").replace(/\)/g, '%29');
 }
 
-export function isSegmentRule(rule: ICondition | any): boolean {
+export function isSegmentCondition(condition: ICondition): boolean {
   const segmentRuleProperties = [USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT];
 
-  return segmentRuleProperties.includes(rule.property);
+  return segmentRuleProperties.includes(condition.property);
 }
 
 // determine if a rule operation is single operater
 export function isSingleOperator(operationType: string): boolean {
-  return !['string', 'number', 'regex', 'multi'].includes(operationType);
+  return ['boolean'].includes(operationType);
 }
 
 // the general trackBy function

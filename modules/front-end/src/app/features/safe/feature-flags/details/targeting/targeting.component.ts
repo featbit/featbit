@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, TemplateRef} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IOrganization, IProjectEnv } from '@shared/types';
@@ -13,7 +13,20 @@ import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
 import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {ICondition, IRule, IRuleVariation} from "@shared/rules";
 import {FeatureFlagService} from "@services/feature-flag.service";
-import {uuidv4} from "@utils/index";
+import {isSegmentCondition, isSingleOperator, uuidv4} from "@utils/index";
+import featureFlagDiffer from "@utils/diff/feature-flag.differ";
+import {SegmentService} from "@services/segment.service";
+
+enum FlagValidationErrorKindEnum {
+  fallthrough = 0,
+  rules = 1
+}
+
+interface IFlagValidationError {
+  kind: FlagValidationErrorKindEnum,
+  ids: string[],
+  message: string
+}
 
 @Component({
   selector: 'ff-targeting',
@@ -55,6 +68,7 @@ export class TargetingComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
+    private segmentService: SegmentService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService,
@@ -80,6 +94,8 @@ export class TargetingComponent implements OnInit {
   }
 
   public targetingUsersByVariation: { [key: string]: IUserType[] } = {}; // {variationId: users}
+  public allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
+
   loadFeatureFlag() {
     return new Promise((resolve, reject) => {
       this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
@@ -97,6 +113,8 @@ export class TargetingComponent implements OnInit {
               return acc;
             }, {});
 
+            this.allTargetingUsers = Object.values(this.targetingUsersByVariation).flatMap((x) => x);
+
             resolve(null);
           }, () => resolve(null));
         } else {
@@ -104,6 +122,8 @@ export class TargetingComponent implements OnInit {
             acc[cur.id] = [];
             return acc;
           }, {});
+
+          this.allTargetingUsers = Object.values(this.targetingUsersByVariation).flatMap((x) => x);
 
           resolve(null);
         }
@@ -182,22 +202,56 @@ export class TargetingComponent implements OnInit {
 
   public onSelectedUserListChange(data: IUserType[], variationId: string) {
     this.targetingUsersByVariation[variationId] = [...data];
+
+    this.allTargetingUsers = [
+      ...this.allTargetingUsers.filter((u) => !data.find((d) => d.keyId === u.keyId)),
+      ...data
+    ];
   }
 
   public onFallthroughChange(value: IRuleVariation[]) {
     this.featureFlag.fallthrough.variations = [...value];
   }
 
-  public onSave() {
-    const validationErrs = this.validateFeatureFlag();
+  numChanges = 0;
+  changes = '';
 
-    if (validationErrs.length > 0) {
-      this.msg.error(validationErrs[0]); // TODO display all messages by multiple lines
+  validationErrors: IFlagValidationError[] = [];
+
+  onReviewChanges(validationErrortpl: TemplateRef<void>) {
+    this.validationErrors = this.validateFeatureFlag();
+
+    if (this.validationErrors.length > 0) {
+      console.log(this.validationErrors);
+      this.msg.create('', validationErrortpl, { nzDuration: 500000 });
       return false;
     }
 
-    this.isLoading = true;
     this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
+
+    // get all segmentIds from originalData and new Data
+    const previousSegmentIdRefs: string[] = this.featureFlag.originalData.rules.flatMap((rule) => rule.conditions)
+      .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
+      .flatMap((condition: ICondition) => JSON.parse(condition.value))
+      .filter((id) => id !== null && id.length > 0);
+
+    const currentSegmentIdRefs: string[] = this.featureFlag.rules.flatMap((rule) => rule.conditions)
+      .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
+      .flatMap((condition: ICondition) => JSON.parse(condition.value))
+      .filter((id) => id !== null && id.length > 0);
+
+    let segmentIdRefs: string[] = [...previousSegmentIdRefs, ...currentSegmentIdRefs];
+    segmentIdRefs = segmentIdRefs.filter((id, idx) => segmentIdRefs.indexOf(id) === idx); // get unique values
+
+    this.segmentService.getByIds(segmentIdRefs).subscribe((segments) => {
+      const [ numChanges, changes]  = featureFlagDiffer.generateDiff(this.featureFlag.originalData, this.featureFlag, {targetingUsers: this.allTargetingUsers, segments});
+      this.numChanges = numChanges;
+      this.changes = changes;
+    }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:@@common.operation-failed-try-again`))
+  }
+
+  onSave() {
+    this.isLoading = true;
 
     const { id, targetUsers, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
 
@@ -207,17 +261,25 @@ export class TargetingComponent implements OnInit {
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key));
       }, _ => {
-        this.msg.error($localize `:@@common.save-fial:Failed to Save`);
+        this.msg.error($localize `:@@common.save-fail:Failed to Save`);
         this.isLoading = false;
       })
   }
 
-  private validateFeatureFlag(): string[]  {
-    const validatonErrs = [];
+  isRuleInvalid(ruleId: string): boolean {
+    return this.validationErrors.some((err) => err.kind === FlagValidationErrorKindEnum.rules && err.ids.includes(ruleId));
+  }
+
+  private validateFeatureFlag(): IFlagValidationError[]  {
+    const validationErrs = [];
 
     // default value
     if (this.featureFlag.fallthrough === null || this.featureFlag.fallthrough.variations.length === 0) {
-      validatonErrs.push($localize `:@@ff.components.details.targeting.fallthrough-mandatory:Fallthrough rule can not be empty`);
+      validationErrs.push({
+        kind: FlagValidationErrorKindEnum.fallthrough,
+        ids: [],
+        message: $localize `:@@ff.components.details.targeting.fallthrough-mandatory:Fallthrough rule can not be empty`
+      });
     }
 
     const fallthroughPercentage = this.featureFlag.fallthrough?.variations?.reduce((acc, curr: IRuleVariation) => {
@@ -225,24 +287,54 @@ export class TargetingComponent implements OnInit {
     }, 0);
 
     if (fallthroughPercentage !== undefined && fallthroughPercentage !== 1) {
-      validatonErrs.push($localize `:@@ff.components.details.targeting.fallthrough-rollout-sum-must-be-100%:The sum of fallthrough rollout must be 100%`);
+      validationErrs.push({
+        kind: FlagValidationErrorKindEnum.fallthrough,
+        ids: [],
+        message: $localize `:@@ff.components.details.targeting.fallthrough-rollout-sum-must-be-100%:The sum of fallthrough rollout must be 100%`
+      });
     }
 
     // rules
+    const rulesWithoutConditions = this.featureFlag.rules.filter(f => f.conditions.length === 0);
+    if (rulesWithoutConditions.length > 0) {
+      validationErrs.push({
+        kind: FlagValidationErrorKindEnum.rules,
+        ids: rulesWithoutConditions.map((rule) => rule.id),
+        message: $localize `:@@ff.components.details.targeting.rule-conditions-must-be-set:The conditions of each rule must be set`
+      });
+    }
+
     this.featureFlag.rules.filter(f => f.conditions.length > 0).forEach((rule: IRule) => {
+      const invalidCondition = rule.conditions.some((condition) =>
+        condition.property?.length === 0 || // property must be set
+        (isSegmentCondition(condition) && JSON.parse(condition.value).length === 0) || // segment condition's value must be set
+        (!isSegmentCondition(condition) && condition.op?.length === 0) || // non segment condition's operation must be set if not segment
+        (!isSingleOperator(condition.op) && (condition.type === 'multi' ? JSON.parse(condition.value).length === 0 : condition.value?.length === 0)) // value must be set for non-single operator
+      );
+
+      if (invalidCondition) {
+        validationErrs.push({
+          kind: FlagValidationErrorKindEnum.rules,
+          ids: [rule.id],
+          message: $localize `:@@ff.components.details.targeting.rule-conditions-must-be-set:The conditions of each rule must be set`
+        });
+      }
+
       const percentage = rule.variations.reduce((acc, curr: IRuleVariation) => {
         return acc + (curr.rollout[1] - curr.rollout[0]);
       }, 0);
 
       if (percentage !== 1) {
-        validatonErrs.push($localize `:@@ff.components.details.targeting.rule-rollout-must-be-100%:The sum of each rule's rollout must be 100%`);
-        return false;
+        validationErrs.push({
+          kind: FlagValidationErrorKindEnum.rules,
+          ids: [rule.id],
+          message: $localize `:@@ff.components.details.targeting.rule-rollout-must-be-100%:The sum of each rule's rollout must be 100%`
+        });
       }
     })
 
-    return validatonErrs;
+    return validationErrs.filter((err, idx) => idx === validationErrs.findIndex((it) => it.kind === err.kind && it.ids.sort().join('') === err.ids.sort().join(''))); // return only unique values
   }
-
 
   public onRuleVariationsChange(value: IRuleVariation[], ruleId: string) {
     this.featureFlag.rules = this.featureFlag.rules.map(rule => {

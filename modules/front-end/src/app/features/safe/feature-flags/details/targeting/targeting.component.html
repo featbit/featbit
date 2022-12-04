@@ -10,12 +10,13 @@
           <i nz-icon nzType="filter" nzTheme="outline"></i>
           <ng-container i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</ng-container>
         </button>
-        <button nz-button nzType="primary" class="save-btn" (click)="onSave()">
+        <button nz-button nzType="primary" class="save-btn" (click)="onReviewChanges(validationErrorTpl)">
           <i nz-icon nzType="icons:icon-save"></i>
           <ng-container i18n="@@common.save">Save</ng-container>
         </button>
       </div>
     </div>
+
     <div class="content-container">
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
@@ -80,7 +81,7 @@
         </div>
         <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
           <ng-container *ngFor="let rule of featureFlag.rules; trackBy: trackRuleById;">
-            <div class="drop-box rule" cdkDrag>
+            <div class="drop-box rule" cdkDrag [class]="{active: isRuleInvalid(rule.id) }">
               <find-rule
                 [data]="rule"
                 [variationOptions]="featureFlag.variations"
@@ -100,6 +101,13 @@
     <div class="block" style="margin: auto;text-align: center">
       <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
     </div>
+  </ng-template>
+  <ng-template #validationErrorTpl>
+    <i nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f"></i>
+    <span class="validation-errors-title" i18n="@@common.validation-errors">Validation errors</span>
+    <ul style="list-style-type:none;padding:0;margin:5px 0">
+      <li style="text-align: center;" *ngFor="let msg of validationErrors">{{msg.message}}</li>
+    </ul>
   </ng-template>
 </section>
 

@@ -1,13 +1,27 @@
 import {Differ} from "@utils/diff/differ";
 import {IHtmlChanges, IOptions, IReadableChange, ITranslationConfig} from "@utils/diff/types";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {IRule, IVariation} from "@shared/rules";
-import {deepCopy, isSingleOperator} from "@utils/index";
-import {convertIntervalToPercentage, isKeyPathExactMatchPattern} from "@utils/diff/utils";
+import {ICondition, IRule, IVariation} from "@shared/rules";
+import {deepCopy, getPercentageFromRolloutPercentageArray, isSegmentCondition, isSingleOperator} from "@utils/index";
+import {getTypeOfObj, isKeyPathExactMatchPattern} from "@utils/diff/utils";
 import {ruleOps} from "@core/components/find-rule/ruleConfig";
-import {Operation} from "ffc-json-diff";
+import {ObjectType, Operation} from "ffc-json-diff";
+import {IUserType} from "@shared/types";
+import {ISegment} from "@features/safe/segments/types/segments-index";
+
+interface IFlatVariationUsers {
+  variation: string,
+  users: IUserType[]
+}
+
+interface IFlatFallthrough {
+  includedInExpt: boolean
+  variations: IFlatRuleVariation[],
+}
 
 interface IFlatFeatureFlag {
+  targetUsers: IFlatVariationUsers[],
+  fallthrough: IFlatFallthrough,
   rules: IFlatRule[]
 }
 
@@ -37,10 +51,6 @@ interface IFlatRule {
   variations: IFlatRuleVariation[]
 }
 
-const isSegmentClause = (property: string): boolean => {
-  return ['User is in segment', 'User is not in segment'].includes(property);
-}
-
 const isMultiValueOperation = (op: string): boolean => {
   switch (op) {
     case 'IsOneOf':
@@ -51,47 +61,59 @@ const isMultiValueOperation = (op: string): boolean => {
   return false;
 }
 
-const getReferenceFunc = (featureFlag: IFeatureFlag): IFlatRule[] => {
-  return featureFlag.rules.map((rule) => {
-    const newRule = deepCopy(rule);
-    newRule.variations = rule.variations.map((ruleVariation) => ({
-      percentage: `${convertIntervalToPercentage(ruleVariation.rollout)}`,
-      exptRollout: ruleVariation.exptRollout,
-      variation: featureFlag.variations.find((v) => v.id === ruleVariation.id)
-    }));
-
-    newRule.conditions = rule.conditions.map(r => {
-      const { op, property, value } = r;
-      return {
-        op,
-        property,
-        type: ruleOps.find(r => r.value === op)?.type,
-        value: isSegmentClause(property) || isMultiValueOperation(op) ? JSON.parse(value) : value
-      }
-    });
-
-    return newRule;
-  });
+interface refType {
+  targetingUsers: IUserType[],
+  segments: ISegment[]
 }
 
-const normalizeFunc = (featureFlag: IFeatureFlag): IFlatFeatureFlag => {
+const normalize = (featureFlag: IFeatureFlag, ref: refType): IFlatFeatureFlag => {
   const flatFeatureFlag: IFlatFeatureFlag = deepCopy(featureFlag);
+
+  flatFeatureFlag.targetUsers = featureFlag.targetUsers.map((t) => ({
+    variation: featureFlag.variations.find((v) => v.id === t.variationId)?.value,
+    users: ref.targetingUsers.filter((u) => t.keyIds.includes(u.keyId))
+      .map((u) => ({...u, name: u.name?.length > 0 ? `${u.name} (${u.keyId})`: u.keyId}))
+  }));
+
+  flatFeatureFlag.fallthrough = {
+    includedInExpt: featureFlag.fallthrough.includedInExpt,
+    variations: featureFlag.fallthrough.variations.map((ruleVariation) => {
+      const variation = featureFlag.variations.find((v) => v.id === ruleVariation.id);
+
+      return {
+        percentage: `${getPercentageFromRolloutPercentageArray(ruleVariation.rollout)}`,
+        exptRollout: ruleVariation.exptRollout,
+        variation: variation,
+        variationValue: variation.value
+      }})
+  }
 
   flatFeatureFlag.rules = featureFlag.rules.map((rule) => {
     const newRule = deepCopy(rule);
     newRule.variations = rule.variations.map((ruleVariation) => ({
-      percentage: `${convertIntervalToPercentage(ruleVariation.rollout)}`,
+      percentage: `${getPercentageFromRolloutPercentageArray(ruleVariation.rollout)}`,
       exptRollout: ruleVariation.exptRollout,
       variation: featureFlag.variations.find((v) => v.id === ruleVariation.id)
     }));
 
-    newRule.conditions = rule.conditions.map(r => {
-      const { op, property, value } = r;
+    newRule.conditions = rule.conditions.map((condition) => {
+      let { op, property, value } = condition;
+
+      if (isSegmentCondition(condition)) {
+        const segmentIds = JSON.parse(value);
+        value =  segmentIds.map((segmentId) => {
+          const segment = ref.segments.find((seg) => seg.id === segmentId);
+          return segment || { id: segmentId }
+        });
+      } else if (isMultiValueOperation(op)) {
+        value = JSON.parse(value)
+      }
+
       return {
         op,
         property,
         type: ruleOps.find(r => r.value === op)?.type,
-        value: isSegmentClause(property) || isMultiValueOperation(op) ? JSON.parse(value) : value
+        value
       }
     });
 
@@ -122,10 +144,14 @@ const normalizeFunc = (featureFlag: IFeatureFlag): IFlatFeatureFlag => {
 }
 
 const embededKeys = {
+  'targetUsers': 'variation',
+  'targetUsers.users': 'keyId',
+
+  'fallthrough.variations': 'variationValue',
+
   'rules': 'id',
   'rules.variations': 'id',
   'rules.conditions': 'id',
-  /**** above is for normalized properties ****/
 }
 
 const ignoredKeyPaths = [
@@ -135,6 +161,51 @@ const ignoredKeyPaths = [
 ]
 
 const translationConfigs = [
+  {
+    order: 1,
+    keyPathPatterns: [['fallthrough', 'variations', '*'], ['fallthrough', 'variations', '*', 'percentage']],
+    getContentFunc: function (ops: IReadableChange[]) { // do not use arrow function because we need this
+      const op = ops.filter(op => op.change.type !== Operation.REMOVE).map((op: any) => {
+        const key = op.keyPath[2];
+        const value = getTypeOfObj(op.change.value) === "Object" ? op.change.value.percentage : op.change.value;
+        return `${key} (${value}%)`;
+      })
+
+      return generateHtmlFromReadableOp({
+        title: $localize `:@@ff.diff.default-rule:Default rule`,
+        changes: [`<div class="serve-values">${$localize `:@@common.diff.set:Set`} <div class="serve-value">${op.join('</div><div class="serve-value">')}</div></div>`]
+      });
+    }
+  },
+  {
+    order: 2,
+    keyPathPatterns: [
+      ["targetUsers", "*", "users","*"],
+      ['targetUsers', '*', 'users', '*', 'name']],
+    getContentFunc: function (ops: IReadableChange[]) { // do not use arrow function because we need this
+      const contentArr = ops.map((op: IReadableChange) => {
+        let key: string;
+        switch (op.change.type) {
+          case Operation.ADD:
+            key = op.keyPath[1];
+            return `${$localize `:@@common.diff.to:To`} ${key} ${$localize `:@@common.diff.add:Add`} ${op.change.value.name}`;
+          case Operation.REMOVE:
+            key = op.keyPath[1];
+            return `${$localize `:@@common.diff.from:From`} ${key} ${$localize `:@@common.diff.remove:Remove`} ${op.change.value.name}`;
+          case Operation.UPDATE:
+            key = op.keyPath[1];
+            return `${key} ${$localize `:@@common.diff.in:In`} ${$localize `:@@common.diff.rename:Rename`} ${op.change.oldValue} ${$localize `:@@common.diff.as:As`} ${op.change.value}`;
+          default:
+            return null;
+        }
+      }).filter(c => c!== null);
+
+      return generateHtmlFromReadableOp({
+        title: $localize `:@@ff.diff.targeting-users:Targeting users`,
+        changes: contentArr.map((c) => `<div class="ffc-diff-content-item ffc-diff-content-item-individual">${c}</div>`)
+      });
+    }
+  },
   {
     order: 3,
     keyPathPatterns: [
@@ -182,8 +253,7 @@ const translationConfigs = [
         title: $localize `:@@ff.diff.rules:Rules`,
         changes: [...ruleAddOrRemove, ...ruleUpdate]
       });
-    },
-    code: 'RULES'
+    }
   }
 ]
 
@@ -203,11 +273,37 @@ const generateRuleHtmlDescription = (conditions: IFlatRuleCondition[], variation
   const serveStr = `<div class="serve-value">${variations.map(v => `${v.variation.value} (${v.percentage}%)`).join('</div><div class="serve-value">')}</div>`;
 
   const clausesStr = '<div class="diff-rule-clause">' +
-    conditions.map(clause => {
-      const clauseType: string = isSegmentClause(clause.property) ? 'multi': ruleOps.filter((rule) => rule.value === clause.op)[0].type;
-      const valueStr = !isSingleOperator(clause.type!) ? `<div class="value-item">${clauseType === "multi" ? (clause.value as string[]).join('</span><span class="ant-tag">') : clause.value}</div>` : clause.value;
+    conditions.map((condition) => {
+      let contentStr = '';
 
-      return `<div class="condition-keyword">${$localize `:@@common.diff.if:If`}</div> ${clause.property} ${clause.op} ${valueStr}`;
+      const isSegment = isSegmentCondition(condition as ICondition);
+      if (isSegment) {
+        contentStr = '<span class="ant-tag">' + (condition.value as any as ISegment[]).map((segment) => segment.name || segment.id).join('</span><span class="ant-tag">') + '</span>';
+      } else if (!isSingleOperator(condition.type!)) {
+        const conditionType: string = isSegment ? 'multi': ruleOps.filter((rule) => rule.value === condition.op)[0].type;
+
+        if (conditionType === "multi") {
+          contentStr = '<span class="ant-tag">' + (condition.value as string[]).join('</span><span class="ant-tag">') + '</span>';
+        } else {
+          contentStr = condition.value as string;
+        }
+      } else {
+        contentStr = condition.value as string;
+      }
+
+      const valueStr = '<div class="value-item">#CONTENT</div>'.replace('#CONTENT', contentStr);
+
+      let clauseStr = `<div class="condition-keyword">${$localize `:@@common.diff.if:If`}</div>`;
+
+      if (isSegment) {
+        clauseStr += `${condition.property} ${valueStr}`;
+      } else if (condition.type === 'boolean') {
+        clauseStr += `${condition.property} ${condition.op}`;
+      } else {
+        clauseStr += `${condition.property} ${condition.op} ${valueStr}`;
+      }
+
+      return clauseStr;
     }).join(`</div><div class="condition-keyword">${$localize `:@@common.diff.and:And`}</div><div class="diff-rule-clause">`) +
     '</div>';
 
@@ -216,10 +312,11 @@ const generateRuleHtmlDescription = (conditions: IFlatRuleCondition[], variation
 
 class FeatureFlagDiffer {
   private differ: Differ;
+  private ref: { [key: string]: IUserType[] }
 
   constructor() {
     const options: IOptions = {
-      normalizeFunc,
+      normalizeFunc: normalize,
       deNormalizeFunc: null,
       embededKeys,
       ignoredKeyPaths,
@@ -229,8 +326,8 @@ class FeatureFlagDiffer {
     this.differ = new Differ(options);
   }
 
-  generateDiff(ff1: IFeatureFlag, ff2: IFeatureFlag): [number, string] {
-    return this.differ.generateDiff(ff1, ff2);
+  generateDiff(ff1: IFeatureFlag, ff2: IFeatureFlag, ref?: ObjectType): [number, string] {
+    return this.differ.generateDiff(ff1, ff2, ref);
   }
 }
 

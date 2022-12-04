@@ -148,6 +148,10 @@
       }
 
       .rule {
+        &.active {
+          border: 2px solid @red50-color;
+        }
+
         margin-top: 24px;
 
         nz-card {
@@ -156,6 +160,10 @@
       }
     }
   }
+}
+
+.validation-errors-title {
+  font-weight: 600;
 }
 
 ::ng-deep .target-approval {

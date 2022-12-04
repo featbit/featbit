@@ -134,7 +134,7 @@ export class IndexComponent implements OnInit, OnDestroy {
         this.toRouter(result.id);
         this.creating = false;
       }, err => {
-        this.msg.error(err.error);
+        this.msg.error($localize `:@@common.operation-failed:Operation failed`);
         this.creating = false;
       });
   }
