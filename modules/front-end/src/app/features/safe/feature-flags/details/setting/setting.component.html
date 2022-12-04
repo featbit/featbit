@@ -13,11 +13,11 @@
     <div class="content">
       <ng-container i18n="@@ff.you-can">You can</ng-container>
       <a class="restore"
-         i18n-nz-popconfirm="@@ff.are-you-sure-to-recover-ff"
-         nz-popconfirm="Are you sure to recover this feature flag?"
-         (nzOnConfirm)="restoreFlag()">&nbsp;<ng-container i18n="@@ff.recover">Recover</ng-container>&nbsp;</a>
+         i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
+         nz-popconfirm="Are you sure to restore this feature flag?"
+         (nzOnConfirm)="restoreFlag()">&nbsp;<ng-container i18n="@@common.restore">Restore</ng-container>&nbsp;</a>
       <ng-container i18n="@@common.or">or</ng-container>
-      <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;<ng-container i18n="@@common.permanetly-remove">Permanetly Remove</ng-container>&nbsp;</a>
+      <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;<ng-container i18n="@@common.remove">Remove</ng-container>&nbsp;</a>
       <ng-container i18n="@@ff.the-ff">the feature flag</ng-container>
     </div>
   </div>

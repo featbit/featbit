@@ -84,7 +84,7 @@
             [nzChecked]="itemChecked(featureFlag)"
             (nzCheckedChange)="onItemChecked(featureFlag)"
           ></td>
-          <td style="cursor:pointer" (click)="onIntoFeatureFlagDetail(featureFlag)">
+          <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag)">
               <span>{{featureFlag.name}}</span>
           </td>
           <td>
@@ -141,8 +141,29 @@
             </div>
           </td>
           <td>{{getLocalDate(featureFlag.updatedAt) | date: 'YYYY-MM-dd HH:mm'}}</td>
-          <td class="table-operations" style="min-width: 50px;">
-              <a (click)="onIntoFeatureFlagDetail(featureFlag)" i18n="@@common.details">Details</a>
+          <td>
+            <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag)" i18n="@@common.details">Details</a>
+            <ng-container *ngIf="featureFlagFilter.isArchived;then archivedOps else unarchivedOps"></ng-container>
+            <ng-template #archivedOps>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a style="color: #717D8A"
+                 i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
+                 nz-popconfirm="Are you sure to restore this feature flag?"
+                 (nzOnConfirm)="restore(featureFlag)">
+                <ng-container i18n="@@common.restore">Restore</ng-container>
+              </a>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a style="color: #FF513A"
+                 i18n-nz-popconfirm="@@common.remove-confirm"
+                 nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                 (nzOnConfirm)="delete(featureFlag)">
+                <ng-container i18n="@@common.remove">Remove</ng-container>
+              </a>
+            </ng-template>
+            <ng-template #unarchivedOps>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a style="color: #717D8A" i18n="@@common.archive" (click)="archive(featureFlag)">Archive</a>
+            </ng-template>
           </td>
         </tr>
         </tbody>

@@ -27,6 +27,7 @@ import { NzAlertModule } from "ng-zorro-antd/alert";
 import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
 import { NzNotificationModule } from "ng-zorro-antd/notification";
 import { CoreModule } from "@core/core.module";
+import { NzDividerModule } from "ng-zorro-antd/divider";
 
 
 @NgModule({
@@ -58,7 +59,8 @@ import { CoreModule } from "@core/core.module";
     NzListModule,
     NzAlertModule,
     NzCheckboxModule,
-    NzNotificationModule
+    NzNotificationModule,
+    NzDividerModule
   ]
 })
 export class IndexModule { }
