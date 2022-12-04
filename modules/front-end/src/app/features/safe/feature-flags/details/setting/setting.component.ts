@@ -1,22 +1,21 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NzMessageService} from 'ng-zorro-antd/message';
-import {NzModalService} from 'ng-zorro-antd/modal';
-import {MessageQueueService} from '@services/message-queue.service';
-import {IProjectEnv} from '@shared/types';
-import {CURRENT_PROJECT} from '@utils/localstorage-keys';
-import {getPathPrefix, isNumeric, tryParseJSONObject, uuidv4} from "@utils/index";
-import {editor} from "monaco-editor";
-import {FeatureFlagService} from "@services/feature-flag.service";
+import { ActivatedRoute, Router } from '@angular/router';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { MessageQueueService } from '@services/message-queue.service';
+import { IProjectEnv } from '@shared/types';
+import { CURRENT_PROJECT } from '@utils/localstorage-keys';
+import { getPathPrefix, isNumeric, tryParseJSONObject, uuidv4 } from "@utils/index";
+import { editor } from "monaco-editor";
+import { FeatureFlagService } from "@services/feature-flag.service";
 import {
   FeatureFlag,
   IFeatureFlag,
   ISettingPayload, IVariationsPayload,
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
-import {IVariation} from "@shared/rules";
-import {ExperimentService} from "@services/experiment.service";
-import {ExperimentStatus, IExpt} from "@features/safe/experiments/types";
+import { IVariation } from "@shared/rules";
+import { ExperimentService } from "@services/experiment.service";
+import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 
 @Component({
@@ -104,7 +103,6 @@ export class SettingComponent implements OnInit {
     private experimentService: ExperimentService,
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
-    private modal: NzModalService,
     private router: Router
   ) {
     this.isLoading = true;
@@ -305,31 +303,6 @@ export class SettingComponent implements OnInit {
         this.originalVariations = [...this.featureFlag.variations];
         cb && cb();
       }, errResponse => this.message.error(errResponse.error));
-  }
-
-
-  onArchiveClick() {
-    let msg = $localize `:@@ff.archive-flag-warning:Flag <strong>${this.featureFlag.name}</strong> will be archived, and the value defined in your code will be returned for all your users. Remove code references to <strong>${this.featureFlag.key}</strong> from your application before archiving.`
-
-    this.modal.confirm({
-      nzContent: msg,
-      nzTitle: $localize `:@@ff.are-you-sure-to-archive-ff:Are you sure to archive this feature flag?`,
-      nzCentered: true,
-      nzClassName: 'information-modal-dialog',
-      nzOnOk: () => {
-        this.featureFlagService.archive(this.featureFlag.id)
-          .subscribe(
-            _ => {
-              this.featureFlag.isArchived = true;
-              this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-              this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
-            },
-            _ => {
-              this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
-            }
-          );
-      }
-    });
   }
 
   restoreFlag() {

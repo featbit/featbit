@@ -135,15 +135,6 @@
       </nz-select>
     </div>
   </div>
-
-  <div class="block" *ngIf="!featureFlag.isArchived">
-    <div *ngIf="!isLoading; else loadingTem;" class="delete">
-      <button nz-button nzType="default" (click)="onArchiveClick()">
-        <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
-        <ng-container i18n="@@common.archive">Archive</ng-container>
-      </button>
-    </div>
-  </div>
 </section>
 
 <nz-modal
