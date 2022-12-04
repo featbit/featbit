@@ -8,7 +8,7 @@
 
 A scalable and high-performance **Feature Flags & Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly and more. 
 
-[More about FeatBit](/what_is_featbit.md) & [Why FeatBit](/why_featbit.md)
+[More about FeatBit & Why FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a)
 
 
 </div>
@@ -31,8 +31,8 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 <p align="center">
   <a href="https://featbit.gitbook.io/docs/installation"><b> Installation </b></a>  •
   <a href="https://featbit.gitbook.io/"><b> Getting Started </b></a>  •
-  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ"><b> Chat </b></a>  •
-  <a href="https://github.com/featbit/featbit/discussions"><b> Forum </b></a>
+  <a href="https://github.com/featbit/featbit/discussions/categories/announcements"><b> Milestones </b></a>  •
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ"><b> Slack </b></a>  •
 </p>
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/205070601-bd35f8e8-6765-49e7-8d85-88364be9934b.gif)
