@@ -8,7 +8,7 @@
 
 A scalable and high-performance **Feature Flags & Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly and more. 
 
-[More about FeatBit](/what_is_featbit.md) & [Why FeatBit](/why_featbit.md)
+[More about FeatBit & Why FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a)
 
 
 </div>
@@ -23,16 +23,18 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?logo=python&logoColor=white)](https://www.python.org/)
 [![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)
-[![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)  
+
+    
 [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
+[![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)  
 
 </div>
 
 <p align="center">
   <a href="https://featbit.gitbook.io/docs/installation"><b> Installation </b></a>  •
   <a href="https://featbit.gitbook.io/"><b> Getting Started </b></a>  •
-  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ"><b> Chat </b></a>  •
-  <a href="https://github.com/featbit/featbit/discussions"><b> Forum </b></a>
+  <a href="https://github.com/featbit/featbit/discussions/categories/announcements"><b> Milestones </b></a>  •
+  <a href="https://featbit.gitbook.io/docs/tech-stack/architecture"><b> Architecture </b></a>
 </p>
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/205070601-bd35f8e8-6765-49e7-8d85-88364be9934b.gif)
