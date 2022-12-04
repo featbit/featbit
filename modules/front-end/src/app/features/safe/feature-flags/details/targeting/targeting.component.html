@@ -81,7 +81,7 @@
         </div>
         <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
           <ng-container *ngFor="let rule of featureFlag.rules; trackBy: trackRuleById;">
-            <div class="drop-box rule" cdkDrag [class]="{active: isRuleInvalid(rule.id) }">
+            <div class="drop-box rule" cdkDrag [class]="{'validation-error': isRuleInvalid(rule.id)}">
               <find-rule
                 [data]="rule"
                 [variationOptions]="featureFlag.variations"

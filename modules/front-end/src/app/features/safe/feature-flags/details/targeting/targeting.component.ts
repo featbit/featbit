@@ -223,7 +223,7 @@ export class TargetingComponent implements OnInit {
 
     if (this.validationErrors.length > 0) {
       console.log(this.validationErrors);
-      this.msg.create('', validationErrortpl, { nzDuration: 500000 });
+      this.msg.create('', validationErrortpl, { nzDuration: 5000 });
       return false;
     }
 
