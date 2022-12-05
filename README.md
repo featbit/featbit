@@ -5,13 +5,16 @@
 
 
 
-A scalable and high-performance **Feature Flags & Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly and more.  [More about FeatBit & Why FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a)
+A scalable and high-performance **Feature Flags & Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly, Unleash and more.  
+  
+[More about FeatBit & Why FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a)
 
 <p align="left">
   <a href="https://featbit.gitbook.io/docs/installation"><b> Installation </b></a>  •
   <a href="https://featbit.gitbook.io/"><b> Getting Started </b></a>  •
-  <a href="https://github.com/featbit/featbit/discussions/categories/announcements"><b> Milestones </b></a>  •
-  <a href="https://featbit.gitbook.io/docs/tech-stack/architecture"><b> Architecture </b></a>
+  <a href="https://featbit.gitbook.io/docs/tech-stack/architecture"><b> Architecture </b></a>  •
+  <a href="https://featbit.gitbook.io/"><b> Documentation </b></a>  •
+  <a href="https://github.com/featbit/featbit/discussions/categories/announcements"><b> Milestones </b></a>
 </p>
 
 </div>
@@ -22,14 +25,14 @@ Make New Badge Pattern badges inline
 See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 -->
 
-[![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
+[![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)                              [![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?logo=python&logoColor=white)](https://www.python.org/)
 [![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)
 
     
-[![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
-[![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)  
+<!-- [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit) -->
+
 
 </div>
 
