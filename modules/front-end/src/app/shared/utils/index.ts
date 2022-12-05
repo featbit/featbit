@@ -41,27 +41,21 @@ export function isNumeric(str: string) {
  *     'null' -> false
  *     '"I'm a string"' -> false
  */
-export function tryParseJSONObject (jsonString: string): Object | false {
+export function tryParseJSONObject (jsonString: string): boolean {
   try {
-    var o = JSON.parse(jsonString);
-
-    // Handle non-exception-throwing cases:
-    // true, false, null are valid json
-    // Neither JSON.parse(false) or JSON.parse(1234) throw errors, hence the type-checking,
-    // but... JSON.parse(null) returns null, and typeof null === "object",
-    // so we must check for that, too. Thankfully, null is falsey, so this suffices:
-    if (o === true || o === false || o === null || isNumeric(jsonString)) {
-      return true;
+    const value = JSON.parse(jsonString);
+    if (value === true || value === false || value === null || isNumeric(jsonString)) {
+      return false;
     }
 
-    if (o && typeof o === "object") {
+    if (value && typeof value === "object") {
       return true;
     }
   }
   catch (e) { }
 
   return false;
-};
+}
 
 export function getPercentageFromRolloutPercentageArray(arr: number[]): number {
   const diff = arr[1] - arr[0];
