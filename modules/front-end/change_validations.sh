@@ -10,8 +10,8 @@ GREEN='\033[0;32m'        # Green
 
 # i18n validations
 echo "i18n validations: Validating i18n..."
-echo "$PWD"
-if grep -Fxq "<target></target>" ./src/locale/messages.zh.xlf
+
+if grep -Fq "<target></target>" ./src/locale/messages.zh.xlf
 then
   echo -e "${RED}i18n validations: Empty translations found in src/locale/messages.zh.xlf${COLOR_OFF}"
   exit 1
