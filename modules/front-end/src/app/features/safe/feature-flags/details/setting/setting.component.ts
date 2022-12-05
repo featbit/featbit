@@ -1,22 +1,21 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NzMessageService} from 'ng-zorro-antd/message';
-import {NzModalService} from 'ng-zorro-antd/modal';
-import {MessageQueueService} from '@services/message-queue.service';
-import {IProjectEnv} from '@shared/types';
-import {CURRENT_PROJECT} from '@utils/localstorage-keys';
-import {getPathPrefix, isNumeric, tryParseJSONObject, uuidv4} from "@utils/index";
-import {editor} from "monaco-editor";
-import {FeatureFlagService} from "@services/feature-flag.service";
+import { Component, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { MessageQueueService } from '@services/message-queue.service';
+import { IProjectEnv } from '@shared/types';
+import { CURRENT_PROJECT } from '@utils/localstorage-keys';
+import { getPathPrefix, isNumeric, tryParseJSONObject, uuidv4 } from "@utils/index";
+import { editor } from "monaco-editor";
+import { FeatureFlagService } from "@services/feature-flag.service";
 import {
   FeatureFlag,
   IFeatureFlag,
   ISettingPayload, IVariationsPayload,
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
-import {IVariation} from "@shared/rules";
-import {ExperimentService} from "@services/experiment.service";
-import {ExperimentStatus, IExpt} from "@features/safe/experiments/types";
+import { IVariation } from "@shared/rules";
+import { ExperimentService } from "@services/experiment.service";
+import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 
 @Component({
@@ -24,7 +23,7 @@ import { NzSelectComponent } from "ng-zorro-antd/select";
   templateUrl: './setting.component.html',
   styleUrls: ['./setting.component.less']
 })
-export class SettingComponent implements OnInit {
+export class SettingComponent {
 
   trackById(_, v: IVariation) {
     return v.id;
@@ -44,7 +43,11 @@ export class SettingComponent implements OnInit {
     );
   }
 
-  public originalVariations: IVariation[];
+  public lastSavedVariations: IVariation[];
+  setLastSavedVariations() {
+    this.lastSavedVariations = JSON.parse(JSON.stringify(this.featureFlag.variations));
+  }
+
   public featureFlag: FeatureFlag = {} as FeatureFlag;
   public isLoading = true;
   public isEditingTitle = false;
@@ -104,7 +107,6 @@ export class SettingComponent implements OnInit {
     private experimentService: ExperimentService,
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
-    private modal: NzModalService,
     private router: Router
   ) {
     this.isLoading = true;
@@ -141,7 +143,7 @@ export class SettingComponent implements OnInit {
   private loadData() {
     this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
       this.featureFlag = new FeatureFlag(result);
-      this.originalVariations = [...this.featureFlag.variations];
+      this.setLastSavedVariations();
       this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
       this.isLoading = false;
     }, () => this.isLoading = false)
@@ -160,8 +162,12 @@ export class SettingComponent implements OnInit {
     this.isEditingTitle = !this.isEditingTitle;
   }
 
-  toggleVariationEditState(): void {
+  toggleVariationEditState(resetVariations: boolean = false): void {
     this.isEditingVariations = !this.isEditingVariations;
+
+    if (resetVariations) {
+      this.featureFlag.variations = JSON.parse(JSON.stringify(this.lastSavedVariations));
+    }
   }
 
   saveVariations() {
@@ -172,19 +178,22 @@ export class SettingComponent implements OnInit {
     this.toggleVariationEditState();
 
     const { id, variationType, variations } = this.featureFlag;
-    const payload: IVariationsPayload = { id, variationType: variationType || VariationTypeEnum.string, variations: variations.filter(v => !v.isInvalid) };
+    const payload: IVariationsPayload = {
+      id,
+      variationType: variationType || VariationTypeEnum.string,
+      variations: variations.filter(v => !v.isInvalid)
+    };
 
-    this.featureFlagService.updateVariations(payload)
-      .subscribe(() => {
+    this.featureFlagService.updateVariations(payload).subscribe({
+      next: () => {
         this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
-        this.originalVariations = [...this.featureFlag.variations];
+        this.setLastSavedVariations();
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
-      }, errResponse => this.message.error(errResponse.error));
-  }
-
-  ngOnInit(): void {
+      },
+      error: err => this.message.error(err.error)
+    });
   }
 
   addVariationOption(): void {
@@ -245,7 +254,7 @@ export class SettingComponent implements OnInit {
     }
 
     if(this.featureFlag.fallthrough.variations.length > 0 && this.featureFlag.fallthrough.variations.find(x => x.id === id)) {
-      this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by default rule, remove the reference before it can be safely removed`);
+      this.message.warning($localize `:@@ff.variation-used-by-default-rule:This variation is used by default rule, remove the reference before it can be safely removed`);
       return;
     }
 
@@ -275,19 +284,22 @@ export class SettingComponent implements OnInit {
       return !this.featureFlag.variations.some(v => v.isInvalid);
   }
 
+  validateVariation(variation: IVariation) {
+    variation.isInvalid = !this.validateVariationDataType(variation.value);
+  }
+
   //!isNaN(parseFloat(num)) && isFinite(num);
   validateVariationDataType(value: string): boolean {
     switch (this.featureFlag.variationType) {
       case VariationTypeEnum.string:
-        // the real value is alway string
+        // the real value is always string
         return value.trim().length > 0;
       case VariationTypeEnum.boolean:
         return value === 'true' || value === 'false';
       case VariationTypeEnum.number:
         return isNumeric(value);
       case VariationTypeEnum.json:
-        const result = tryParseJSONObject(value);
-        return result !== false;
+        return tryParseJSONObject(value);
       default:
         return false;
     }
@@ -295,42 +307,23 @@ export class SettingComponent implements OnInit {
 
   onSaveSettings(cb?: Function) {
     const { id, name, isEnabled, variationType, disabledVariationId, variations } = this.featureFlag;
-    const payload: ISettingPayload = { id, name, isEnabled, variationType: variationType || VariationTypeEnum.string, disabledVariationId, variations: variations.filter(v => !v.isInvalid) };
+    const payload: ISettingPayload = {
+      id,
+      name,
+      isEnabled,
+      variationType: variationType || VariationTypeEnum.string,
+      disabledVariationId,
+      variations: variations.filter(v => !v.isInvalid)
+    };
 
-    this.featureFlagService.updateSetting(payload)
-      .subscribe(() => {
+    this.featureFlagService.updateSetting(payload).subscribe({
+      next: () => {
         this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
-        this.originalVariations = [...this.featureFlag.variations];
         cb && cb();
-      }, errResponse => this.message.error(errResponse.error));
-  }
-
-
-  onArchiveClick() {
-    let msg = $localize `:@@ff.archive-flag-warning:Flag [flagName] will be archived, and the value defined in your code will be returned for all your users. Remove code references to [flagKey] from your application before archiving.`
-      .replace('[flagName]', `<strong>${this.featureFlag.name}</strong>`)
-      .replace('[flagKey]', `<strong>${this.featureFlag.key}</strong>`);
-
-    this.modal.confirm({
-      nzContent: msg,
-      nzTitle: $localize `:@@ff.are-you-sure-to-archive-ff:Are you sure to archive this feature flag?`,
-      nzCentered: true,
-      nzClassName: 'information-modal-dialog',
-      nzOnOk: () => {
-        this.featureFlagService.archive(this.featureFlag.id)
-          .subscribe(
-            _ => {
-              this.featureFlag.isArchived = true;
-              this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-              this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
-            },
-            _ => {
-              this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
-            }
-          );
-      }
+      },
+      error: err => this.message.error(err.error)
     });
   }
 

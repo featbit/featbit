@@ -14,10 +14,6 @@ export class FeatureFlag implements IFeatureFlag {
     this.originalData = JSON.parse(JSON.stringify(data));
   }
 
-  public get diabledVariation() {
-    return this.variations.find(v => v.id === this.disabledVariationId);
-  }
-
   addTag(tag: string) {
     this.tags = [...this.tags, tag];
   }

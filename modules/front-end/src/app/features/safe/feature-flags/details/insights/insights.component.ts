@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {ChartConfig} from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
 import {FeatureFlagService} from "@services/feature-flag.service";
 import {IVariation} from "@shared/rules";
@@ -36,10 +36,8 @@ export class InsightsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
-    private endUserService: EnvUserService,
-    private router: Router
-  ) {
-  }
+    private endUserService: EnvUserService
+  ) { }
 
   ngOnInit(): void {
     this.$chartSearch.pipe(
@@ -73,7 +71,7 @@ export class InsightsComponent implements OnInit {
       case PeriodOption.Last30m:
         this.intervalTypes = [{
           value: IntervalType.Minute,
-          label: $localize `:@@common.month:Minute`
+          label: $localize `:@@common.minute:Minute`
         }];
 
         break;
@@ -81,11 +79,11 @@ export class InsightsComponent implements OnInit {
         this.intervalTypes = [
           {
             value: IntervalType.Hour,
-            label: $localize `:@@common.month:Hour`
+            label: $localize `:@@common.hour:Hour`
           },
           {
             value: IntervalType.Minute,
-            label: $localize `:@@common.month:Minute`
+            label: $localize `:@@common.minute:Minute`
           }
         ];
 
@@ -93,7 +91,7 @@ export class InsightsComponent implements OnInit {
       case PeriodOption.Last24H:
         this.intervalTypes = [{
           value: IntervalType.Hour,
-          label: $localize `:@@common.month:Hour`
+          label: $localize `:@@common.hour:Hour`
         }];
 
         break;
@@ -101,7 +99,7 @@ export class InsightsComponent implements OnInit {
       case PeriodOption.Last14D:
         this.intervalTypes = [{
           value: IntervalType.Day,
-          label: $localize `:@@common.month:Day`
+          label: $localize `:@@common.day:Day`
         }];
 
         break;
@@ -109,11 +107,11 @@ export class InsightsComponent implements OnInit {
         this.intervalTypes = [
           {
             value: IntervalType.Day,
-            label: $localize `:@@common.month:Day`
+            label: $localize `:@@common.day:Day`
           },
           {
             value: IntervalType.Week,
-            label: $localize `:@@common.month:Week`
+            label: $localize `:@@common.week:Week`
           }
         ];
 
@@ -124,11 +122,11 @@ export class InsightsComponent implements OnInit {
         this.intervalTypes = [
           {
             value: IntervalType.Day,
-            label: $localize `:@@common.month:Day`
+            label: $localize `:@@common.day:Day`
           },
           {
             value: IntervalType.Week,
-            label: $localize `:@@common.month:Week`
+            label: $localize `:@@common.week:Week`
           },
           {
             value: IntervalType.Month,

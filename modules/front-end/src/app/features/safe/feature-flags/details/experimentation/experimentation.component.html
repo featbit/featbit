@@ -93,7 +93,7 @@
                   <div class="action-wrapper">
                     <button class="status paused" *ngIf="experiment.status === exptStatusPaused" nz-button nzType="default" (click)="onStartIterationClick(experiment)">
                       <i class="status paused" nz-icon nzType="pause-circle" nzTheme="outline"></i>
-                      <ng-container i18n="@@ff.expt.remove-experiment">Restart</ng-container>
+                      <ng-container i18n="@@ff.expt.restart-experiment">Restart</ng-container>
                     </button>
                     <button class="status on-going" *ngIf="experiment.status === exptStatusRecording" nz-button nzType="default" (click)="onStopIterationClick(experiment)">
                       <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
@@ -250,7 +250,7 @@
                                   </div>
                                 </div>
                                 <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0]}} {{experiment.metricCustomEventUnit}} - {{data.confidenceInterval[1]}} {{experiment.metricCustomEventUnit}}</div>
-                                <div *ngIf="data.confidenceInterval[0] === -1"class="confidence_interval"> -- </div>
+                                <div *ngIf="data.confidenceInterval[0] === -1" class="confidence_interval"> -- </div>
                               </td>
                             </ng-container>
 

@@ -13,11 +13,11 @@
     <div class="content">
       <ng-container i18n="@@ff.you-can">You can</ng-container>
       <a class="restore"
-         i18n-nz-popconfirm="@@ff.are-you-sure-to-recover-ff"
-         nz-popconfirm="Are you sure to recover this feature flag?"
-         (nzOnConfirm)="restoreFlag()">&nbsp;<ng-container i18n="@@ff.recover">Recover</ng-container>&nbsp;</a>
+         i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
+         nz-popconfirm="Are you sure to restore this feature flag?"
+         (nzOnConfirm)="restoreFlag()">&nbsp;<ng-container i18n="@@common.restore">Restore</ng-container>&nbsp;</a>
       <ng-container i18n="@@common.or">or</ng-container>
-      <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;<ng-container i18n="@@common.permanetly-remove">Permanetly Remove</ng-container>&nbsp;</a>
+      <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;<ng-container i18n="@@common.remove">Remove</ng-container>&nbsp;</a>
       <ng-container i18n="@@ff.the-ff">the feature flag</ng-container>
     </div>
   </div>
@@ -39,7 +39,7 @@
       <ng-template #copySuffix>
         <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(featureFlag.key)"></i>
       </ng-template>
-      <i nz-icon i18n-nz-tooltip="@@ff.use-key-in-code-to-get-variation" nz-tooltip="Use key in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
+      <i nz-icon i18n-nz-tooltip="@@ff.key-description" nz-tooltip="Use key(case-sensitive) in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
     </div>
     <div class="status-switcher" >
       <div class="switcher">
@@ -55,7 +55,7 @@
           (ngModelChange)="onChangeDisabledVariation()"
           i18n-nzPlaceHolder="@@ff.select-variation"
           nzPlaceHolder="Select variation">
-          <nz-option *ngFor="let variation of originalVariations" nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.value">
+          <nz-option *ngFor="let variation of lastSavedVariations" nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.value">
             {{variation.value}}
           </nz-option>
         </nz-select>
@@ -67,9 +67,8 @@
       <span class="text" i18n="@@common.variations">Variations</span>
       <i *ngIf="!isEditingVariations" class="edit-save" (click)="toggleVariationEditState()" nz-icon nzType="icons:icon-edit"></i>
       <i *ngIf="isEditingVariations" class="edit-save" (click)="addVariationOption()" nz-icon nzType="icons:icon-add-outline"></i>
-      <i *ngIf="isEditingVariations" style="font-size: 14px" class="edit-save" (click)="saveVariations()" nz-icon nzType="icons:icon-save"></i>
     </div>
-    <div class="varation-type">
+    <div class="variation-type">
       <span class="label" i18n="@@common.data-type">Data type</span>
       <ng-container *ngIf="!isEditingVariations">
         <div class="value">
@@ -91,12 +90,12 @@
           <div class="variation-value" *ngIf="!isEditingVariations">{{variation.value}}</div>
           <ng-container *ngIf="isEditingVariations">
             <nz-input-group *ngIf="['json', 'string'].includes(featureFlag.variationType)" [nzSuffix]="suffixIconButton" [class]="{'invalid': variation.isInvalid}">
-              <input type="text" nz-input [(ngModel)]="variation.value" />
+              <input type="text" nz-input [(ngModel)]="variation.value" (ngModelChange)="validateVariation(variation)"/>
+              <ng-template #suffixIconButton>
+                <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(variation)"></i>
+              </ng-template>
             </nz-input-group>
-            <ng-template #suffixIconButton>
-              <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(variation)"></i>
-            </ng-template>
-            <input class="simple" *ngIf="!['json', 'string'].includes(featureFlag.variationType)" type="text" nz-input [(ngModel)]="variation.value" [class]="{'invalid': variation.isInvalid}"/>
+            <input *ngIf="!['json', 'string'].includes(featureFlag.variationType)" class="simple" type="text" nz-input [(ngModel)]="variation.value" (ngModelChange)="validateVariation(variation)" [class]="{'invalid': variation.isInvalid}"/>
           </ng-container>
         </div>
         <i class="expand-icon" *ngIf="!isEditingVariations && ['json', 'string'].includes(featureFlag.variationType)" nz-icon nzType="expand" (click)="expandVariationOption(variation, true)"></i>
@@ -107,6 +106,10 @@
           </span>
         </div>
       </div>
+    </div>
+    <div *ngIf="isEditingVariations" class="operations">
+      <button nz-button class="cancel-btn" (click)="toggleVariationEditState(true)">Cancel</button>
+      <button nz-button class="save-btn" (click)="saveVariations()">Save</button>
     </div>
   </div>
 
@@ -133,15 +136,6 @@
           <ng-container i18n="@@common.loading">Loading...</ng-container>
         </nz-option>
       </nz-select>
-    </div>
-  </div>
-
-  <div class="block" *ngIf="!featureFlag.isArchived">
-    <div *ngIf="!isLoading; else loadingTem;" class="delete">
-      <button nz-button nzType="default" (click)="onArchiveClick()">
-        <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
-        <ng-container i18n="@@common.archive">Archive</ng-container>
-      </button>
     </div>
   </div>
 </section>
@@ -189,9 +183,7 @@
         <div class="warning">
           <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
           <div class="warning-content">
-            <ng-container i18n="@@segment.segment-used-by">This variation is used by following</ng-container>
-            <span style="font-weight:800;display:inline-block;margin:0 3px;"> {{variationExptReferences.length}} </span>
-            <ng-container i18n="@@segment.num-segment-remove-to-use">experiment(s), remove all references before the variation can be safely removed!</ng-container>
+            <ng-container i18n="@@ff.variation-used-by-experiments">This variation is used by {{variationExptReferences.length}} experiment(s), remove all references before the variation can be safely removed!</ng-container>
           </div>
         </div>
       </div>

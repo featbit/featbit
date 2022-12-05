@@ -15,8 +15,9 @@ import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env
 import { ProjectService } from "@services/project.service";
 import { IEnvironment } from "@shared/types";
 import { NzNotificationService } from "ng-zorro-antd/notification";
-import {FeatureFlagService} from "@services/feature-flag.service";
-import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
+import { FeatureFlagService } from "@services/feature-flag.service";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { NzModalService } from "ng-zorro-antd/modal";
 
 @Component({
   selector: 'index',
@@ -31,7 +32,8 @@ export class IndexComponent implements OnInit {
     private msg: NzMessageService,
     private fb: FormBuilder,
     private projectService: ProjectService,
-    private notification: NzNotificationService
+    private notification: NzNotificationService,
+    private modal: NzModalService,
   ) {
     this.featureFlagForm = this.fb.group({
       name: ['', [this.featureFlagNameValidator], [this.featureFlagNameAsyncValidator], 'change'],
@@ -256,15 +258,16 @@ export class IndexComponent implements OnInit {
 
     const name = this.featureFlagForm.get('name').value;
 
-    this.featureFlagService.create(name)
-      .subscribe((result: IFeatureFlag) => {
-        this.featureFlagService.setCurrentFeatureFlag(result);
-        this.toFeatureFlagDetail(result.key);
+    this.featureFlagService.create(name).subscribe({
+      next: (result: IFeatureFlag) => {
+        this.navigateToFlagDetail(result);
         this.creating = false;
-      }, err => {
+      },
+      error: (err) => {
         this.msg.error(err.error);
         this.creating = false;
-      });
+      }
+    });
   }
 
   closeCreateModal() {
@@ -292,17 +295,50 @@ export class IndexComponent implements OnInit {
       });
   }
 
-  public onIntoFeatureFlagDetail(data: IFeatureFlag) {
+  public navigateToFlagDetail(data: IFeatureFlag) {
     this.featureFlagService.setCurrentFeatureFlag(data);
-    this.toFeatureFlagDetail(data.key);
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(data.key)}/targeting`);
   }
 
-  public onIntoCompareAndCopy() {
-    this.router.navigateByUrl('/compare-and-copy');
+  archive(flag: IFeatureFlag) {
+    let msg = $localize`:@@ff.archive-flag-warning:Flag <strong>${flag.name}</strong> will be archived, and the value defined in your code will be returned for all your users. Remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
+
+    this.modal.confirm({
+      nzContent: msg,
+      nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive this feature flag?`,
+      nzCentered: true,
+      nzClassName: 'information-modal-dialog',
+      nzOnOk: () => {
+        this.featureFlagService.archive(flag.id).subscribe({
+            next: () => {
+              this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+              this.onSearch();
+            },
+            error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
+          }
+        );
+      }
+    });
   }
 
-  private toFeatureFlagDetail(key: string) {
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`);
+  restore(flag: IFeatureFlag) {
+    this.featureFlagService.restore(flag.id).subscribe({
+      next: () => {
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.onSearch();
+      },
+      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    });
+  }
+
+  delete(flag: IFeatureFlag) {
+    this.featureFlagService.delete(flag.id).subscribe({
+      next: () => {
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.onSearch();
+      },
+      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    });
   }
 
   getLocalDate(date: string) {
