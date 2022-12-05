@@ -141,11 +141,8 @@
         <form nz-form [formGroup]="reviewForm" nzLayout="vertical">
           <nz-form-item>
             <nz-form-label nzRequired class="section-title" i18n="@@common.comment">Comment</nz-form-label>
-            <nz-form-control [nzErrorTip]="commentErrorTpl">
+            <nz-form-control i18n-nzErrorTip="@@common.comment-cannot-be-empty" nzErrorTip="Comment cannot be empty">
               <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
-              <ng-template #commentErrorTpl let-control>
-                <ng-container *ngIf="control.hasError('required')" i18n="@@common.comment-cannot-be-empty">Comment cannot be empty</ng-container>
-              </ng-template>
             </nz-form-control>
           </nz-form-item>
         </form>
