@@ -38,6 +38,7 @@ import { ExperimentationComponent } from './experimentation/experimentation.comp
 import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
 import {NzGridModule} from "ng-zorro-antd/grid";
 import {CoreModule} from "@core/core.module";
+import {NzFormModule} from "ng-zorro-antd/form";
 
 @NgModule({
   declarations: [
@@ -49,39 +50,40 @@ import {CoreModule} from "@core/core.module";
     ExperimentationComponent,
     SafeHtmlPipe
   ],
-  imports: [
-    LocalComponentsModule,
-    CommonModule,
-    FormsModule,
-    NzTabsModule,
-    NzCardModule,
-    NzSpinModule,
-    NzSelectModule,
-    NzEmptyModule,
-    NzTableModule,
-    NzButtonModule,
-    NzIconModule,
-    NzInputModule,
-    NzTagModule,
-    NzSpaceModule,
-    NzPopconfirmModule,
-    CoreModule,
-    NzMessageModule,
-    NzTypographyModule,
-    NzDividerModule,
-    NzModalModule,
-    NzDropDownModule,
-    NzSwitchModule,
-    NzCollapseModule,
-    DragDropModule,
-    NzRadioModule,
-    NzResultModule,
-    NzToolTipModule,
-    NzSkeletonModule,
-    NzCodeEditorModule,
-    DetailsRoutingModule,
-    NzGridModule
-  ],
+    imports: [
+        LocalComponentsModule,
+        CommonModule,
+        FormsModule,
+        NzTabsModule,
+        NzCardModule,
+        NzSpinModule,
+        NzSelectModule,
+        NzEmptyModule,
+        NzTableModule,
+        NzButtonModule,
+        NzIconModule,
+        NzInputModule,
+        NzTagModule,
+        NzSpaceModule,
+        NzPopconfirmModule,
+        CoreModule,
+        NzMessageModule,
+        NzTypographyModule,
+        NzDividerModule,
+        NzModalModule,
+        NzDropDownModule,
+        NzSwitchModule,
+        NzCollapseModule,
+        DragDropModule,
+        NzRadioModule,
+        NzResultModule,
+        NzToolTipModule,
+        NzSkeletonModule,
+        NzCodeEditorModule,
+        DetailsRoutingModule,
+        NzGridModule,
+        NzFormModule
+    ],
   providers: [
   ]
 })

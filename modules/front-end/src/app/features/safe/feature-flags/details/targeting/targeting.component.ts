@@ -16,6 +16,8 @@ import {FeatureFlagService} from "@services/feature-flag.service";
 import {isSegmentCondition, isSingleOperator, uuidv4} from "@utils/index";
 import featureFlagDiffer from "@utils/diff/feature-flag.differ";
 import {SegmentService} from "@services/segment.service";
+import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {phoneNumberOrEmailValidator} from "@utils/form-validators";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -38,6 +40,7 @@ export class TargetingComponent implements OnInit {
     return rule.id;
   }
 
+  reviewForm: FormGroup;
   public featureFlag: FeatureFlag = {} as FeatureFlag;
   public userList: IUserType[] = [];
 
@@ -66,6 +69,7 @@ export class TargetingComponent implements OnInit {
   }
 
   constructor(
+    private fb: FormBuilder,
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
     private segmentService: SegmentService,
@@ -82,7 +86,11 @@ export class TargetingComponent implements OnInit {
       this.key = decodeURIComponent(paramMap.get('key'));
       this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.loadData());
       this.loadData();
-    })
+    });
+
+    // this.reviewForm = this.fb.group({
+    //   comment: ['', [Validators.required]]
+    // });
   }
 
   async loadData() {
@@ -248,17 +256,33 @@ export class TargetingComponent implements OnInit {
       const [ numChanges, changes]  = featureFlagDiffer.generateDiff(this.featureFlag.originalData, this.featureFlag, {targetingUsers: this.allTargetingUsers, segments});
       this.numChanges = numChanges;
       this.changes = changes;
-    }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:@@common.operation-failed-try-again`));
+    }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
+
+    this.reviewForm = this.fb.group({
+      comment: ['', [Validators.required]]
+    });
 
     this.reviewModalVisible = true;
   }
 
   onSave() {
+    if (this.reviewForm.invalid) {
+      Object.values(this.reviewForm.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({ onlySelf: true });
+        }
+      });
+
+      return;
+    }
+
     this.isLoading = true;
 
     const { id, targetUsers, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
+    const { comment } = this.reviewForm.value;
 
-    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets })
+    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment })
       .subscribe((result) => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
