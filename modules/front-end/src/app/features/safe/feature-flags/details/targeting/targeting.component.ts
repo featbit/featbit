@@ -267,6 +267,8 @@ export class TargetingComponent implements OnInit {
         this.msg.error($localize `:@@common.save-fail:Failed to Save`);
         this.isLoading = false;
       })
+
+    this.reviewModalVisible = false;
   }
 
   isRuleInvalid(ruleId: string): boolean {

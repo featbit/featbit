@@ -3,7 +3,7 @@ import {IHtmlChanges, IOptions, IReadableChange, ITranslationConfig} from "@util
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {ICondition, IRule, IVariation} from "@shared/rules";
 import {deepCopy, getPercentageFromRolloutPercentageArray, isSegmentCondition, isSingleOperator} from "@utils/index";
-import {getTypeOfObj, isKeyPathExactMatchPattern} from "@utils/diff/utils";
+import {isKeyPathExactMatchPattern} from "@utils/diff/utils";
 import {ruleOps} from "@core/components/find-rule/ruleConfig";
 import {ObjectType, Operation} from "ffc-json-diff";
 import {IUserType} from "@shared/types";
@@ -16,7 +16,7 @@ interface IFlatVariationUsers {
 
 interface IFlatFallthrough {
   includedInExpt: boolean
-  variations: IFlatRuleVariation[],
+  variations: string // json string of variations
 }
 
 interface IFlatFeatureFlag {
@@ -39,7 +39,7 @@ interface IFlatRuleVariation {
   rule?: IRule, // for reference only
   exptRollout: null | number,
   percentage: string,
-  variation: IVariation
+  variation?: IVariation
 }
 
 interface IFlatRule {
@@ -77,15 +77,13 @@ const normalize = (featureFlag: IFeatureFlag, ref: refType): IFlatFeatureFlag =>
 
   flatFeatureFlag.fallthrough = {
     includedInExpt: featureFlag.fallthrough.includedInExpt,
-    variations: featureFlag.fallthrough.variations.map((ruleVariation) => {
+    variations: JSON.stringify(featureFlag.fallthrough.variations.map((ruleVariation) => {
       const variation = featureFlag.variations.find((v) => v.id === ruleVariation.id);
 
       return {
         percentage: `${getPercentageFromRolloutPercentageArray(ruleVariation.rollout)}`,
-        exptRollout: ruleVariation.exptRollout,
-        variation: variation,
-        variationValue: variation.value
-      }})
+        value: variation.value
+      }}))
   }
 
   flatFeatureFlag.rules = featureFlag.rules.map((rule) => {
@@ -147,8 +145,6 @@ const embededKeys = {
   'targetUsers': 'variation',
   'targetUsers.users': 'keyId',
 
-  'fallthrough.variations': 'variationValue',
-
   'rules': 'id',
   'rules.variations': 'id',
   'rules.conditions': 'id',
@@ -163,18 +159,22 @@ const ignoredKeyPaths = [
 const translationConfigs = [
   {
     order: 1,
-    keyPathPatterns: [['fallthrough', 'variations', '*'], ['fallthrough', 'variations', '*', 'percentage']],
+    keyPathPatterns: [['fallthrough', 'variations']],
     getContentFunc: function (ops: IReadableChange[]) { // do not use arrow function because we need this
-      const op = ops.filter(op => op.change.type !== Operation.REMOVE).map((op: any) => {
-        const key = op.keyPath[2];
-        const value = getTypeOfObj(op.change.value) === "Object" ? op.change.value.percentage : op.change.value;
-        return `${key} (${value}%)`;
-      })
+      const updateOp = ops.find(op => op.change.type === Operation.UPDATE);
 
-      return generateHtmlFromReadableOp({
-        title: $localize `:@@ff.diff.default-rule:Default rule`,
-        changes: [`<li><span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.set-as:Set as`}</span> <span class="ant-tag">${op.join('</span><span class="ant-tag">')}</span></li>`]
-      });
+      if (updateOp && updateOp.change?.value?.length > 0) {
+        const variations = JSON.parse(updateOp.change.value).map((variation) => `${variation.value} (${variation.percentage}%)`)
+        return generateHtmlFromReadableOp({
+          title: $localize `:@@ff.diff.default-rule:Default rule`,
+          changes: [`<li><span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.set-as:Set as`}</span> <span class="ant-tag">${variations.join('</span><span class="ant-tag">')}</span></li>`]
+        });
+      }
+
+      return {
+        count: 0,
+        html: ''
+      }
     }
   },
   {
