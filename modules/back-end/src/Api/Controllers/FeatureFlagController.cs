@@ -174,12 +174,12 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpGet]
-    [Route("stats")]
-    public async Task<ApiResponse<IEnumerable<StatsByVariationVm>>> GetStatsByVariationAsync(
+    [Route("insights")]
+    public async Task<ApiResponse<IEnumerable<InsightsVm>>> GetStatsByVariationAsync(
         Guid envId,
         [FromQuery] StatsByVariationFilter filter)
     {
-        var request = new GetStatsByVariation
+        var request = new GetInsights
         {
             EnvId = envId,
             Filter = filter

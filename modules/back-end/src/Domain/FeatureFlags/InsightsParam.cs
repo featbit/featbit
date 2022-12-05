@@ -1,6 +1,6 @@
 ﻿namespace Domain.FeatureFlags;
 
-public class StatsByVariationParam
+public class InsightsParam
 {
     public string FlagExptId { get; set; }
     public Guid EnvId { get; set; }
@@ -9,20 +9,20 @@ public class StatsByVariationParam
     public long EndTime { get; set; }
 }
 
-public class StatsByVariationResponse
+public class InsightsResponse
 {
     public int Code { get; set; }
-    public ICollection<FeatureFlagStats> Data { get; set; }
+    public ICollection<Insights> Data { get; set; }
     public string Error { get; set; }
 }
 
-public class FeatureFlagStats
+public class Insights
 {
     public string Time { get; set; }
-    public ICollection<VariationStats> Variations { get; set; }
+    public ICollection<VariationInsights> Variations { get; set; }
 }
 
-public class VariationStats
+public class VariationInsights
 {
     public string Id { get; set; }
     

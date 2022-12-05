@@ -11,15 +11,15 @@ import {
   IFeatureFlagEndUserPagedResult,
   IntervalType,
   PeriodOption,
-  ReportFilter
-} from "@features/safe/feature-flags/details/reporting/types";
+  InsightsFilter
+} from "@features/safe/feature-flags/details/insights/types";
 
 @Component({
-  selector: 'ff-reporting',
-  templateUrl: './reporting.component.html',
-  styleUrls: ['./reporting.component.less']
+  selector: 'insights',
+  templateUrl: './insights.component.html',
+  styleUrls: ['./insights.component.less']
 })
-export class ReportingComponent implements OnInit {
+export class InsightsComponent implements OnInit {
 
   public usage: string = '';
 
@@ -53,7 +53,7 @@ export class ReportingComponent implements OnInit {
     });
 
     this.route.paramMap.subscribe(paramMap => {
-      this.filter = new ReportFilter(decodeURIComponent(paramMap.get('key')));
+      this.filter = new InsightsFilter(decodeURIComponent(paramMap.get('key')));
       this.featureFlagService.getByKey(this.filter.featureFlagKey).subscribe((res) => {
         this.variations = [{ id: this.featureFlagVariationAllId, value: $localize `:@@common.all:All`}, ...res.variations];
         this.filter.variationId = this.featureFlagVariationAllId;
@@ -63,7 +63,7 @@ export class ReportingComponent implements OnInit {
     });
   }
 
-  filter: ReportFilter;
+  filter: InsightsFilter;
 
   intervalTypes: any[];
   private setIntervalTypes() {
@@ -191,7 +191,7 @@ export class ReportingComponent implements OnInit {
   public loadFeatureFlagUsage() {
     this.isLoading = true;
 
-    this.featureFlagService.getReport(this.filter.filter)
+    this.featureFlagService.getInsights(this.filter.filter)
       .subscribe((res) => {
         const source = res.flatMap((stat) => {
           const sum = stat.variations.reduce((acc, cur) => acc + cur.count, 0);

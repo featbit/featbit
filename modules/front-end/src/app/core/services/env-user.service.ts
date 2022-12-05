@@ -13,7 +13,7 @@ import {
 import {
   IFeatureFlagEndUserFilter,
   IFeatureFlagEndUserPagedResult
-} from "@features/safe/feature-flags/details/reporting/types";
+} from "@features/safe/feature-flags/details/insights/types";
 
 @Injectable({
   providedIn: 'root'
