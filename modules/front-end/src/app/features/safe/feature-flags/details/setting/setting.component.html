@@ -55,7 +55,7 @@
           (ngModelChange)="onChangeDisabledVariation()"
           i18n-nzPlaceHolder="@@ff.select-variation"
           nzPlaceHolder="Select variation">
-          <nz-option *ngFor="let variation of originalVariations" nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.value">
+          <nz-option *ngFor="let variation of lastSavedVariations" nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.value">
             {{variation.value}}
           </nz-option>
         </nz-select>
@@ -67,9 +67,8 @@
       <span class="text" i18n="@@common.variations">Variations</span>
       <i *ngIf="!isEditingVariations" class="edit-save" (click)="toggleVariationEditState()" nz-icon nzType="icons:icon-edit"></i>
       <i *ngIf="isEditingVariations" class="edit-save" (click)="addVariationOption()" nz-icon nzType="icons:icon-add-outline"></i>
-      <i *ngIf="isEditingVariations" style="font-size: 14px" class="edit-save" (click)="saveVariations()" nz-icon nzType="icons:icon-save"></i>
     </div>
-    <div class="varation-type">
+    <div class="variation-type">
       <span class="label" i18n="@@common.data-type">Data type</span>
       <ng-container *ngIf="!isEditingVariations">
         <div class="value">
@@ -91,12 +90,12 @@
           <div class="variation-value" *ngIf="!isEditingVariations">{{variation.value}}</div>
           <ng-container *ngIf="isEditingVariations">
             <nz-input-group *ngIf="['json', 'string'].includes(featureFlag.variationType)" [nzSuffix]="suffixIconButton" [class]="{'invalid': variation.isInvalid}">
-              <input type="text" nz-input [(ngModel)]="variation.value" />
+              <input type="text" nz-input [(ngModel)]="variation.value" (ngModelChange)="validateVariation(variation)"/>
+              <ng-template #suffixIconButton>
+                <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(variation)"></i>
+              </ng-template>
             </nz-input-group>
-            <ng-template #suffixIconButton>
-              <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(variation)"></i>
-            </ng-template>
-            <input class="simple" *ngIf="!['json', 'string'].includes(featureFlag.variationType)" type="text" nz-input [(ngModel)]="variation.value" [class]="{'invalid': variation.isInvalid}"/>
+            <input *ngIf="!['json', 'string'].includes(featureFlag.variationType)" class="simple" type="text" nz-input [(ngModel)]="variation.value" (ngModelChange)="validateVariation(variation)" [class]="{'invalid': variation.isInvalid}"/>
           </ng-container>
         </div>
         <i class="expand-icon" *ngIf="!isEditingVariations && ['json', 'string'].includes(featureFlag.variationType)" nz-icon nzType="expand" (click)="expandVariationOption(variation, true)"></i>
@@ -107,6 +106,10 @@
           </span>
         </div>
       </div>
+    </div>
+    <div *ngIf="isEditingVariations" class="operations">
+      <button nz-button class="cancel-btn" (click)="toggleVariationEditState(true)">Cancel</button>
+      <button nz-button class="save-btn" (click)="saveVariations()">Save</button>
     </div>
   </div>
 

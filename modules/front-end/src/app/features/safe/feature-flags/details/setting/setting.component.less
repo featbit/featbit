@@ -63,7 +63,7 @@
     }
   }
 
-  .varation-type {
+  .variation-type {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -262,6 +262,35 @@
 
       &:hover, &:focus {
         box-shadow: 0 0 0 2px rgb(255 0 0 / 20%);
+      }
+    }
+  }
+
+  .operations {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    button {
+      min-width: 72px;
+      border-radius: 8px;
+    }
+
+    .save-btn {
+      border: 1px solid @green60-color;
+      color: @green60-color;
+
+      &:hover {
+        background-color: @green10-color;
+      }
+    }
+
+    .cancel-btn {
+      color: @grey50-color;
+      border: 1px solid @grey40-color;
+
+      &:hover {
+        background-color: @grey10-color;
       }
     }
   }

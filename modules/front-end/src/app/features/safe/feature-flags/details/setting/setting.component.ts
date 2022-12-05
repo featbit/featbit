@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { MessageQueueService } from '@services/message-queue.service';
@@ -23,7 +23,7 @@ import { NzSelectComponent } from "ng-zorro-antd/select";
   templateUrl: './setting.component.html',
   styleUrls: ['./setting.component.less']
 })
-export class SettingComponent implements OnInit {
+export class SettingComponent {
 
   trackById(_, v: IVariation) {
     return v.id;
@@ -43,7 +43,11 @@ export class SettingComponent implements OnInit {
     );
   }
 
-  public originalVariations: IVariation[];
+  public lastSavedVariations: IVariation[];
+  setLastSavedVariations() {
+    this.lastSavedVariations = JSON.parse(JSON.stringify(this.featureFlag.variations));
+  }
+
   public featureFlag: FeatureFlag = {} as FeatureFlag;
   public isLoading = true;
   public isEditingTitle = false;
@@ -139,7 +143,7 @@ export class SettingComponent implements OnInit {
   private loadData() {
     this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
       this.featureFlag = new FeatureFlag(result);
-      this.originalVariations = [...this.featureFlag.variations];
+      this.setLastSavedVariations();
       this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
       this.isLoading = false;
     }, () => this.isLoading = false)
@@ -158,8 +162,12 @@ export class SettingComponent implements OnInit {
     this.isEditingTitle = !this.isEditingTitle;
   }
 
-  toggleVariationEditState(): void {
+  toggleVariationEditState(resetVariations: boolean = false): void {
     this.isEditingVariations = !this.isEditingVariations;
+
+    if (resetVariations) {
+      this.featureFlag.variations = JSON.parse(JSON.stringify(this.lastSavedVariations));
+    }
   }
 
   saveVariations() {
@@ -170,19 +178,22 @@ export class SettingComponent implements OnInit {
     this.toggleVariationEditState();
 
     const { id, variationType, variations } = this.featureFlag;
-    const payload: IVariationsPayload = { id, variationType: variationType || VariationTypeEnum.string, variations: variations.filter(v => !v.isInvalid) };
+    const payload: IVariationsPayload = {
+      id,
+      variationType: variationType || VariationTypeEnum.string,
+      variations: variations.filter(v => !v.isInvalid)
+    };
 
-    this.featureFlagService.updateVariations(payload)
-      .subscribe(() => {
+    this.featureFlagService.updateVariations(payload).subscribe({
+      next: () => {
         this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
-        this.originalVariations = [...this.featureFlag.variations];
+        this.setLastSavedVariations();
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
-      }, errResponse => this.message.error(errResponse.error));
-  }
-
-  ngOnInit(): void {
+      },
+      error: err => this.message.error(err.error)
+    });
   }
 
   addVariationOption(): void {
@@ -273,19 +284,22 @@ export class SettingComponent implements OnInit {
       return !this.featureFlag.variations.some(v => v.isInvalid);
   }
 
+  validateVariation(variation: IVariation) {
+    variation.isInvalid = !this.validateVariationDataType(variation.value);
+  }
+
   //!isNaN(parseFloat(num)) && isFinite(num);
   validateVariationDataType(value: string): boolean {
     switch (this.featureFlag.variationType) {
       case VariationTypeEnum.string:
-        // the real value is alway string
+        // the real value is always string
         return value.trim().length > 0;
       case VariationTypeEnum.boolean:
         return value === 'true' || value === 'false';
       case VariationTypeEnum.number:
         return isNumeric(value);
       case VariationTypeEnum.json:
-        const result = tryParseJSONObject(value);
-        return result !== false;
+        return tryParseJSONObject(value);
       default:
         return false;
     }
@@ -293,16 +307,24 @@ export class SettingComponent implements OnInit {
 
   onSaveSettings(cb?: Function) {
     const { id, name, isEnabled, variationType, disabledVariationId, variations } = this.featureFlag;
-    const payload: ISettingPayload = { id, name, isEnabled, variationType: variationType || VariationTypeEnum.string, disabledVariationId, variations: variations.filter(v => !v.isInvalid) };
+    const payload: ISettingPayload = {
+      id,
+      name,
+      isEnabled,
+      variationType: variationType || VariationTypeEnum.string,
+      disabledVariationId,
+      variations: variations.filter(v => !v.isInvalid)
+    };
 
-    this.featureFlagService.updateSetting(payload)
-      .subscribe(() => {
+    this.featureFlagService.updateSetting(payload).subscribe({
+      next: () => {
         this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
-        this.originalVariations = [...this.featureFlag.variations];
         cb && cb();
-      }, errResponse => this.message.error(errResponse.error));
+      },
+      error: err => this.message.error(err.error)
+    });
   }
 
   restoreFlag() {
