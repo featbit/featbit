@@ -38,5 +38,6 @@ jobs:
               npm ci
               npm run i18n
               chmod +x ./change_validations.sh
+              ./change_validations.sh
               npm run build --if-present
         shell: bash
