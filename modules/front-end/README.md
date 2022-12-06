@@ -13,7 +13,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 [![Node](https://img.shields.io/badge/node->=16.0-success?logo=node.js&logoColor=white)](https://www.typescriptlang.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/featbit/featbit/FeatBit%20UI)](https://github.com/featbit/featbit/actions/workflows/ui-build.yml?branch=main)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/featbit/featbit/FeatBit%20UI%20change%20validations)](https://github.com/featbit/featbit/actions/workflows/ui-change-validations.yml?branch=main)
 
 </div>
 
