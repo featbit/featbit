@@ -1,12 +1,19 @@
-import { Component, OnDestroy, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { IOrganization, IAccountUser, IProjectEnv } from '@shared/types';
+import { IOrganization, IProjectEnv } from '@shared/types';
 import { MetricService } from '@services/metric.service';
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
-import {IPagedMetric, MetricListFilter, CustomEventSuccessCriteria, CustomEventTrackOption, EventType, IMetric} from "@features/safe/experiments/types";
+import {
+  IPagedMetric,
+  MetricListFilter,
+  CustomEventSuccessCriteria,
+  CustomEventTrackOption,
+  EventType,
+  IMetric
+} from "@features/safe/experiments/types";
 
 @Component({
   selector: 'experiments-metrics',
@@ -23,9 +30,6 @@ export class MetricsComponent implements OnInit, OnDestroy {
     totalCount: 0,
     items: []
   };
-
-  accountMemberList: IAccountUser[] = [];
-
   currentProjectEnv: IProjectEnv = null;
   currentAccount: IOrganization = null;
 
@@ -73,22 +77,24 @@ export class MetricsComponent implements OnInit, OnDestroy {
     this.detailViewVisible = true;
   }
 
-  errorMsgTitle: string;
-  errorMsgs: string[] = [];
-  onDeleteClick(metric: IMetric, tpl: TemplateRef<void>) {
+  archiveMetric(metric: IMetric) {
     this.isLoading = true;
-    this.metricService.archiveMetric(metric.id).subscribe(res => {
-      this.pagedMetric.items = this.pagedMetric.items.filter(m => metric.id !== m.id);
-      this.isLoading = false;
-      this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-    }, err => {
-      this.isLoading = false;
-      if (!!err?.error?.messages) {
-        this.errorMsgTitle = $localize`:@@expt.overview.metric-used-by-following-expt-remove-first:The Metric is used by the following experiments, please remove those experiments first`;
-        this.errorMsgs = err?.error?.messages || [];
-        this.message.create('', tpl, { nzDuration: 5000 });
-      } else {
-        this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
+    this.metricService.archiveMetric(metric.id).subscribe({
+      next: () => {
+        this.pagedMetric.items = this.pagedMetric.items.filter(m => metric.id !== m.id);
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+
+        this.isLoading = false;
+      },
+      error: httpErrorResponse => {
+        const error = httpErrorResponse.error.errors[0];
+        let errorMsg = error === 'MetricIsBeingUsed'
+          ? $localize `:@@expt.metric.cannot-remove-metric-because-it-is-being-used:Cannot remove this metric because it's being used by experiment`
+          : error;
+
+        this.message.error(errorMsg);
+
+        this.isLoading = false;
       }
     });
   }

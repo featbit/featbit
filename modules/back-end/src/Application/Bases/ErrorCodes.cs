@@ -61,4 +61,5 @@ public static class ErrorCodes
     public const string MaintainerIsRequired = nameof(MaintainerIsRequired);
     public const string EventTypeIsRequired = nameof(EventTypeIsRequired);
     public const string EventNameIsRequired = nameof(EventNameIsRequired);
+    public const string MetricIsBeingUsedByExperiment = nameof(MetricIsBeingUsedByExperiment);
 }

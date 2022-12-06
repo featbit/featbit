@@ -6,7 +6,6 @@ namespace Application.ExperimentMetrics;
 public class UpdateExperimentMetric : IRequest<ExperimentMetricVm>
 {
     public Guid Id { get; set; }
-    public Guid EnvId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public Guid MaintainerUserId { get; set; }
@@ -15,11 +14,8 @@ public class UpdateExperimentMetric : IRequest<ExperimentMetricVm>
     public CustomEventTrackOption CustomEventTrackOption { get; set; }
     public string CustomEventUnit { get; set; }
     public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
-
     public string ElementTargets { get; set; }
     public List<TargetUrl> TargetUrls { get; set; }
-
-    public bool IsArvhived { get; set; }
 }
 
 public class UpdateExperimentMetricValidator : AbstractValidator<UpdateExperimentMetric>
@@ -28,6 +24,8 @@ public class UpdateExperimentMetricValidator : AbstractValidator<UpdateExperimen
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+        RuleFor(x => x.EventName)
+            .NotEmpty().WithErrorCode(ErrorCodes.EventNameIsRequired);
         RuleFor(x => x.EventType)
             .NotEmpty().WithErrorCode(ErrorCodes.EventTypeIsRequired);
         RuleFor(x => x.MaintainerUserId)
@@ -41,8 +39,9 @@ public class UpdateExperimentMetricHandler : IRequestHandler<UpdateExperimentMet
     private readonly IUserService _userService;
     private readonly IMapper _mapper;
 
-    public UpdateExperimentMetricHandler(IExperimentMetricService service,
-        IUserService userService, 
+    public UpdateExperimentMetricHandler(
+        IExperimentMetricService service,
+        IUserService userService,
         IMapper mapper)
     {
         _service = service;

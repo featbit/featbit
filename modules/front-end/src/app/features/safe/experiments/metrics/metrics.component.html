@@ -76,7 +76,7 @@
               i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
               nzPopconfirmPlacement="bottomRight"
               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-              (nzOnConfirm)="onDeleteClick(data, errorMsgsTpl)" [nzIcon]="iconTplDelete">
+              (nzOnConfirm)="archiveMetric(data)" [nzIcon]="iconTplDelete">
               <ng-container i18n="@@common.remove">Remove</ng-container>
             </a>
             <ng-template #iconTplDelete>
@@ -89,10 +89,4 @@
     </div>
   </div>
 </div>
-<ng-template #errorMsgsTpl>
-  <i nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f"></i><span>{{errorMsgTitle}}</span>
-  <ul style="list-style-type:none;padding:0;margin:5px 0">
-    <li style="text-align: center;" *ngFor="let msg of errorMsgs">{{msg}}</li>
-  </ul>
-</ng-template>
 <app-metric-drawer [visible]="detailViewVisible" (close)="onDetailViewClosed($event)" [metric]="currentMetric"></app-metric-drawer>
