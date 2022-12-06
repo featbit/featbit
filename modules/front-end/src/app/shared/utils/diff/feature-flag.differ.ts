@@ -192,9 +192,6 @@ const translationConfigs = [
           case Operation.REMOVE:
             key = op.keyPath[1];
             return `<span class="operation ant-typography ant-typography-danger">${$localize `:@@common.diff.remove:Remove`}</span> <span class="ant-tag remove-item">${op.change.value.name}</span>${$localize `:@@common.diff.from:From`} <span class="ant-tag">${key}</span>`;
-          case Operation.UPDATE:
-            key = op.keyPath[1];
-            return `<span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.rename:Rename`}</span> <span class="ant-tag remove-item">${op.change.oldValue}</span>${$localize `:@@common.diff.as:As`} <span class="ant-tag">${op.change.value}</span>${$localize `:@@common.diff.in:In`} <span class="ant-tag">${key}</span>`;
           default:
             return null;
         }

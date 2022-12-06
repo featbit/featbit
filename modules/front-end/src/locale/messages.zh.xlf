@@ -261,7 +261,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">15,16</context>
+          <context context-type="linenumber">157,159</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -923,6 +923,14 @@
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
           <context context-type="linenumber">100</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
+          <context context-type="linenumber">137</context>
+        </context-group>
         <target>操作失败</target>
       </trans-unit>
       <trans-unit id="common.view-matched-users" datatype="html">
@@ -1445,7 +1453,7 @@
         </context-group>
         <target>项目</target>
       </trans-unit>
-      <trans-unit id="7466516352172806111" datatype="html">
+      <trans-unit id="common.environments" datatype="html">
         <source>Environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
@@ -1900,6 +1908,10 @@
           <context context-type="linenumber">274</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">259</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
           <context context-type="linenumber">317</context>
         </context-group>
@@ -2114,6 +2126,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/details/details.component.html</context>
           <context context-type="linenumber">19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">145,146</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">147</context>
         </context-group>
         <target>备注</target>
       </trans-unit>
@@ -2396,6 +2416,10 @@
           <context context-type="linenumber">162,163</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">155,156</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">210</context>
         </context-group>
@@ -2540,7 +2564,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">207</context>
+          <context context-type="linenumber">288</context>
         </context-group>
         <target>保存与更新成功</target>
       </trans-unit>
@@ -3308,7 +3332,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">164</context>
         </context-group>
         <target>数据加载失败，请重试</target>
       </trans-unit>
@@ -3803,6 +3827,10 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
           <context context-type="linenumber">160</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">133,134</context>
+        </context-group>
         <target>变化</target>
       </trans-unit>
       <trans-unit id="ff.expt.p-value" datatype="html">
@@ -4277,11 +4305,23 @@
         </context-group>
         <target>设置AB测试规则</target>
       </trans-unit>
+      <trans-unit id="common.review-and-save" datatype="html">
+        <source>Review and save</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">15,17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">116,118</context>
+        </context-group>
+        <target>预览</target>
+      </trans-unit>
       <trans-unit id="ff.components.details.targeting.default" datatype="html">
         <source>Default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">22,23</context>
+          <context context-type="linenumber">23,24</context>
         </context-group>
         <target>默认规则</target>
       </trans-unit>
@@ -4289,7 +4329,7 @@
         <source>Serve a variation if the user doesn&apos;t met Individual targeting or Targeting Rules.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">25,27</context>
+          <context context-type="linenumber">26,28</context>
         </context-group>
         <target>设定当用户既不是目标用户也不满足任何匹配规则时的开关返回值</target>
       </trans-unit>
@@ -4297,15 +4337,15 @@
         <source>Check the docs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">27,29</context>
+          <context context-type="linenumber">28,30</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">52,54</context>
+          <context context-type="linenumber">53,55</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">76,78</context>
+          <context context-type="linenumber">77,79</context>
         </context-group>
         <target>查阅文档</target>
       </trans-unit>
@@ -4313,7 +4353,7 @@
         <source>Individual targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">42,43</context>
+          <context context-type="linenumber">43,44</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -4321,7 +4361,7 @@
         <source>Serve a variation to specific targets based on their key</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">50,52</context>
+          <context context-type="linenumber">51,53</context>
         </context-group>
         <target>为指定用户设定开关返回值</target>
       </trans-unit>
@@ -4329,7 +4369,7 @@
         <source>Targeting rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">71,72</context>
+          <context context-type="linenumber">72,73</context>
         </context-group>
         <target>匹配规则</target>
       </trans-unit>
@@ -4337,15 +4377,55 @@
         <source>Serve a variation to specific targets based on their attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">74,76</context>
+          <context context-type="linenumber">75,77</context>
         </context-group>
         <target>根据用户属性设定相应的开关返回值</target>
+      </trans-unit>
+      <trans-unit id="common.errors" datatype="html">
+        <source>Validation errors</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">107,108</context>
+        </context-group>
+        <target>错误</target>
+      </trans-unit>
+      <trans-unit id="common.environment" datatype="html">
+        <source>Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">124</context>
+        </context-group>
+        <target>环境</target>
+      </trans-unit>
+      <trans-unit id="ff.targeting.the-following-changes-may-affect-insights" datatype="html">
+        <source>The following changes may affects the insights data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">129,132</context>
+        </context-group>
+        <target>以下改动可能会影响到统计数据</target>
+      </trans-unit>
+      <trans-unit id="common.number-of-changes-to-submit" datatype="html">
+        <source>changes to submit</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">137,139</context>
+        </context-group>
+        <target>个待提交改动</target>
+      </trans-unit>
+      <trans-unit id="common.comment-cannot-be-empty" datatype="html">
+        <source>Comment cannot be empty</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">146,147</context>
+        </context-group>
+        <target>评论不能为空</target>
       </trans-unit>
       <trans-unit id="common.rule" datatype="html">
         <source>Rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">156</context>
+          <context context-type="linenumber">184</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
@@ -4353,11 +4433,11 @@
         </context-group>
         <target>规则</target>
       </trans-unit>
-      <trans-unit id="common.save-fial" datatype="html">
+      <trans-unit id="common.save-fail" datatype="html">
         <source>Failed to Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">210</context>
+          <context context-type="linenumber">291</context>
         </context-group>
         <target>保存失败</target>
       </trans-unit>
@@ -4365,7 +4445,7 @@
         <source>Fallthrough rule can not be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">220</context>
+          <context context-type="linenumber">310</context>
         </context-group>
         <target>默认返回值不能为空</target>
       </trans-unit>
@@ -4373,15 +4453,27 @@
         <source>The sum of fallthrough rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">228</context>
+          <context context-type="linenumber">322</context>
         </context-group>
         <target>请确认默认返回值的总百分比必须为100%</target>
+      </trans-unit>
+      <trans-unit id="ff.components.details.targeting.rule-conditions-must-be-set" datatype="html">
+        <source>The conditions of each rule must be set</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">332</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">348</context>
+        </context-group>
+        <target>每条规则的所有条件都不能为空</target>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.rule-rollout-must-be-100%" datatype="html">
         <source>The sum of each rule&apos;s rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">238</context>
+          <context context-type="linenumber">360</context>
         </context-group>
         <target>请确认匹配条件中每条规则的总百分比必须为100%！</target>
       </trans-unit>
@@ -5868,6 +5960,114 @@
           <context context-type="linenumber">9</context>
         </context-group>
         <target>用户组</target>
+      </trans-unit>
+      <trans-unit id="ff.diff.default-rule" datatype="html">
+        <source>Default rule</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">169</context>
+        </context-group>
+        <target>默认规则</target>
+      </trans-unit>
+      <trans-unit id="common.diff.set-as" datatype="html">
+        <source>Set as</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">170</context>
+        </context-group>
+        <target>设置为</target>
+      </trans-unit>
+      <trans-unit id="common.diff.add" datatype="html">
+        <source>Add</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">191</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">219</context>
+        </context-group>
+        <target>添加</target>
+      </trans-unit>
+      <trans-unit id="common.diff.to" datatype="html">
+        <source>To</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">191</context>
+        </context-group>
+        <target>到</target>
+      </trans-unit>
+      <trans-unit id="common.diff.remove" datatype="html">
+        <source>Remove</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">194</context>
+        </context-group>
+        <target>移除</target>
+      </trans-unit>
+      <trans-unit id="common.diff.from" datatype="html">
+        <source>From</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">194</context>
+        </context-group>
+        <target>从</target>
+      </trans-unit>
+      <trans-unit id="ff.diff.targeting-users" datatype="html">
+        <source>Targeting users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">201</context>
+        </context-group>
+        <target>目标用户</target>
+      </trans-unit>
+      <trans-unit id="common.diff.remove-rule" datatype="html">
+        <source>Remove</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">224</context>
+        </context-group>
+        <target>移除规则</target>
+      </trans-unit>
+      <trans-unit id="common.diff.update" datatype="html">
+        <source>Update</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">244</context>
+        </context-group>
+        <target>更新</target>
+      </trans-unit>
+      <trans-unit id="ff.diff.rules" datatype="html">
+        <source>Rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">250</context>
+        </context-group>
+        <target>规则</target>
+      </trans-unit>
+      <trans-unit id="common.diff.if" datatype="html">
+        <source>If</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">293</context>
+        </context-group>
+        <target>如果</target>
+      </trans-unit>
+      <trans-unit id="common.diff.and" datatype="html">
+        <source>And</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">304</context>
+        </context-group>
+        <target>并且</target>
+      </trans-unit>
+      <trans-unit id="common.diff.serve" datatype="html">
+        <source>Serve</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">307</context>
+        </context-group>
+        <target>返回</target>
       </trans-unit>
     </body>
   </file>

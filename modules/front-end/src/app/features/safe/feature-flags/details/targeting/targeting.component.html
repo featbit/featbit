@@ -104,7 +104,7 @@
   </ng-template>
   <ng-template #validationErrorTpl>
     <i nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f"></i>
-    <span class="validation-errors-title" i18n="@@common.validation-errors">Validation errors</span>
+    <span class="validation-errors-title" i18n="@@common.errors">Validation errors</span>
     <ul style="list-style-type:none;padding:0;margin:5px 0">
       <li style="text-align: center;" *ngFor="let msg of validationErrors">{{msg.message}}</li>
     </ul>
@@ -112,7 +112,8 @@
 </section>
 
 <nz-modal [nzWidth]='800' nzClassName="review-modal" [(nzVisible)]="reviewModalVisible"
-          [nzTitle]="'保存改动'"
+          i18n-nzTitle="@@common.review-and-save"
+          nzTitle="Review and save"
           [nzClosable]="false"
           (nzOnCancel)="reviewModalVisible=false">
   <ng-container *nzModalContent>
@@ -120,19 +121,20 @@
       <section class="context">
         <div><span>{{featureFlag.name}}</span><span> ({{featureFlag.key}}) </span>
         </div>
-        <div><span>环境 : </span><span>{{currentProjectEnv.envName}}</span></div>
+        <div><span i18n="@@common.environment">Environment</span>: <span>{{currentProjectEnv.envName}}</span></div>
       </section>
       <section class="warning-message">
         <div class="warning">
           <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-          <div class="warning-content">以下改动将可能会影响到统计数据</div>
+          <div class="warning-content" i18n="@@ff.targeting.the-following-changes-may-affect-insights">The following changes may affects the insights data</div>
         </div>
       </section>
       <section class="pending-changes">
-        <h3 class="section-title">改动</h3>
+        <h3 class="section-title" i18n="@@common.changes">Changes</h3>
         <div class="change">
           <p class="change-count">
-            <span>{{numChanges}}</span> 个待提交改动
+            <span>{{numChanges}}</span>
+            <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
           </p>
           <div class="change-list" [innerHtml]="changes | safeHtml"></div>
         </div>
@@ -150,12 +152,9 @@
     </div>
   </ng-container>
   <div *nzModalFooter>
-    <span style="color:red;margin-right:10px"
-          *ngIf="numChanges === 0">只有在存在改动的情况下才可保存
-    </span>
-    <button nz-button nzType="default" (click)="reviewModalVisible=false">取消</button>
+    <button nz-button nzType="default" (click)="reviewModalVisible=false" i18n="@@common.cancel">Cancel</button>
     <button [disabled]="numChanges === 0" nz-button nzType="primary"
-            (click)="onSave()">保存改动</button>
+            (click)="onSave()" i18n="@@common.save">Save</button>
   </div>
 </nz-modal>
 
