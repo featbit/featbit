@@ -310,8 +310,14 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 
     public async Task<IEnumerable<ExperimentStatusCountVm>> GetStatusCountAsync(Guid envId)
     {
-        var query = Queryable.GroupBy(expt => expt.Status)
-            .Select(group => new ExperimentStatusCountVm { Status = group.Key, Count = group.Count() });
+        var query = Queryable
+            .Where(x => !x.IsArchived)
+            .GroupBy(expt => expt.Status)
+            .Select(group => new ExperimentStatusCountVm
+            {
+                Status = group.Key,
+                Count = group.Count()
+            });
 
         return await query.ToListAsync();
     }

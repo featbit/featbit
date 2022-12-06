@@ -1,3 +1,6 @@
+using Application.Bases;
+using Application.Bases.Exceptions;
+
 namespace Application.ExperimentMetrics;
 
 public class ArchiveExperimentMetric : IRequest<bool>
@@ -7,19 +10,29 @@ public class ArchiveExperimentMetric : IRequest<bool>
 
 public class ArchiveExperimentMetricHandler : IRequestHandler<ArchiveExperimentMetric, bool>
 {
-    private readonly IExperimentMetricService _service;
+    private readonly IExperimentMetricService _metricService;
+    private readonly IExperimentService _experimentService;
 
-    public ArchiveExperimentMetricHandler(IExperimentMetricService service)
+    public ArchiveExperimentMetricHandler(
+        IExperimentMetricService metricService,
+        IExperimentService experimentService)
     {
-        _service = service;
+        _metricService = metricService;
+        _experimentService = experimentService;
     }
-    
+
     public async Task<bool> Handle(ArchiveExperimentMetric request, CancellationToken cancellationToken)
     {
-        var metric = await _service.GetAsync(request.Id);
+        var isBeingUsedByExperiment = await _experimentService.AnyAsync(x => x.MetricId == request.Id && !x.IsArchived);
+        if (isBeingUsedByExperiment)
+        {
+            throw new BusinessException(ErrorCodes.MetricIsBeingUsedByExperiment);
+        }
+
+        var metric = await _metricService.GetAsync(request.Id);
         metric.UpdatedAt = DateTime.UtcNow;
         metric.IsArvhived = true;
-        await _service.UpdateAsync(metric);
+        await _metricService.UpdateAsync(metric);
 
         return true;
     }

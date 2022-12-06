@@ -452,10 +452,6 @@
           <context context-type="linenumber">261</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
-          <context context-type="linenumber">91</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
           <context context-type="linenumber">36</context>
         </context-group>
@@ -657,7 +653,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
@@ -3296,7 +3292,7 @@
         <source>Loading failed, please try again</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
-          <context context-type="linenumber">60</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
@@ -3316,13 +3312,13 @@
         </context-group>
         <target>数据加载失败，请重试</target>
       </trans-unit>
-      <trans-unit id="expt.overview.metric-used-by-following-expt-remove-first" datatype="html">
-        <source>The Metric is used by the following experiments, please remove those experiments first</source>
+      <trans-unit id="expt.metric.cannot-remove-metric-because-it-is-being-used" datatype="html">
+        <source>Cannot remove this metric because it&apos;s being used by experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">92</context>
         </context-group>
-        <target>该 Metric 在以下开关的实验中被使用，请先删除实验</target>
+        <target>该 Metric 正在被实验所引用，无法删除</target>
       </trans-unit>
       <trans-unit id="expt.overview.in-progress" datatype="html">
         <source>In Progress</source>
