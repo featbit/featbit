@@ -17,7 +17,6 @@ import {isSegmentCondition, isSingleOperator, uuidv4} from "@utils/index";
 import featureFlagDiffer from "@utils/diff/feature-flag.differ";
 import {SegmentService} from "@services/segment.service";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {phoneNumberOrEmailValidator} from "@utils/form-validators";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -134,13 +133,6 @@ export class TargetingComponent implements OnInit {
           this.allTargetingUsers = Object.values(this.targetingUsersByVariation).flatMap((x) => x);
 
           resolve(null);
-        }
-
-        if (this.featureFlag.fallthrough.variations.length === 0) {
-          this.featureFlag.fallthrough.variations = [{
-            rollout: [0, 1],
-            id: this.featureFlag.variations[0].id
-          }];
         }
 
         this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
@@ -279,18 +271,21 @@ export class TargetingComponent implements OnInit {
 
     this.isLoading = true;
 
-    const { id, targetUsers, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
+    const { id, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
     const { comment } = this.reviewForm.value;
+    const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
 
-    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment })
-      .subscribe((result) => {
+    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment }).subscribe({
+      next: () => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key));
-      }, _ => {
+      },
+      error: () => {
         this.msg.error($localize `:@@common.save-fail:Failed to Save`);
         this.isLoading = false;
-      })
+      }
+    });
 
     this.reviewModalVisible = false;
   }

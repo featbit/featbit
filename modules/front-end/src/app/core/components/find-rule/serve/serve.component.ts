@@ -33,10 +33,11 @@ export class ServeComponent implements OnInit {
 
   ngOnInit(): void {
     if (isNotPercentageRollout(this.ruleVariations)) {
-      this.selectedVariationId = this.ruleVariations[0]?.id || null;
+      this.selectedVariationId = this.ruleVariations[0]?.id;
       this.ruleVariationValues = this.availableVariations.map((v, idx) => ({
         rollout: [0, idx === 0 ? 1 : 0],
         id: v.id,
+        exptRollout: this.ruleVariations[0]?.exptRollout ?? 1,
         percentageValue: idx === 0 ? 100 : 0
       }));
     } else {
@@ -46,6 +47,7 @@ export class ServeComponent implements OnInit {
         const result = {
           rollout: [0, 0],
           id: v.id,
+          exptRollout: rule?.exptRollout ?? 1,
           percentageValue: 0
         }
         if (rule) {
@@ -65,15 +67,18 @@ export class ServeComponent implements OnInit {
         currentRollout = [currentRollout[1], currentRollout[1] + r.percentageValue * 0.01]
         return {
           rollout: currentRollout,
-          id: r.id
+          id: r.id,
+          exptRollout: r.exptRollout
         };
       });
     } else {
       const variation = this.availableVariations.find(x => x.id === this.selectedVariationId);
+      const rule = this.ruleVariations.find(x => x.id === variation.id);
       this.result = [
         {
           rollout: [0, 1],
-          id: variation.id
+          id: variation.id,
+          exptRollout: rule?.exptRollout ?? 1
         }
       ];
     }
