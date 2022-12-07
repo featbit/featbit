@@ -7,7 +7,6 @@ import { SegmentListFilter, ISegment, ISegmentListModel, ISegmentFlagReference }
 import { SegmentService } from "@services/segment.service";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import {CURRENT_LANGUAGE} from "@utils/localstorage-keys";
 
 @Component({
   selector: 'segments-index',

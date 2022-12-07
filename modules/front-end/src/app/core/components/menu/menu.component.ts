@@ -1,8 +1,7 @@
-import {Component, EventEmitter, Inject, Input, LOCALE_ID, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import { IMenuItem } from './menu';
 import { getAuth } from "@utils/index";
 import { IAuthProps } from "@shared/types";
-import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 import {MessageQueueService} from "@services/message-queue.service";
 
 @Component({

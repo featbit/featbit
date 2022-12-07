@@ -104,10 +104,14 @@ export class SafeComponent implements OnInit, OnDestroy {
             path: '/iam/policies'
           }
         ]
-      }
+      },
+      {
+        title: $localize `:@@auditlogs.audit-logs:Audit logs`,
+        icon: 'audit',
+        path: '/audit-logs'
+      },
     ];
   }
-
 
   public async logout() {
     await this.identityService.doLogoutUser();
