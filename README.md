@@ -7,7 +7,8 @@
 <h3 align="center">Feature management, for all teams</h3>
 
 <p>
-A high-performance and holistic framework for Feature Flags, A/B testing, and more.
+A scalable, high-performance and holistic framework for Feature Flags, A/B testing, and more.<br />
+a free replacement for Launchdarkly & Unleash.
 </p>
 
 <!--
@@ -22,13 +23,13 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 
 <p>
-    <a href="https://medium.com/@featbit"><img src="https://img.shields.io/badge/-Medium-red?style=social&logo=medium" height=25></a>   
+    <a href="https://medium.com/@featbit"><img src="https://img.shields.io/badge/-Medium-red?style=social&logo=medium" height=23></a>   
     &nbsp;
-    <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ"><img src="https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack" height=25></a>
+    <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ"><img src="https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack" height=23></a>
     &nbsp;
-    <a href="https://twitter.com/RealFeatBit"><img src="https://img.shields.io/badge/-Twitter-red?style=social&logo=twitter" height=25></a>
+    <a href="https://twitter.com/RealFeatBit"><img src="https://img.shields.io/badge/-Twitter-red?style=social&logo=twitter" height=23></a>
     &nbsp;
-    <a href="https://twitter.com/intent/tweet?text=A%20scalable%2C%20high-performance%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" height=25></a>
+    <a href="https://twitter.com/intent/tweet?text=A%20scalable%2C%20high-performance%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" height=23></a>
 </p>
 
 
