@@ -35,9 +35,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 FeatBit is a scalable and high-performance **Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly, Unleash and more.  
 
-FeatBit provides a holistic framework for **Feature Flag** driven development, **A/B testing**, and experimentation, enabling teams to use flags on a massive scale across various use cases. With feature flags, you can progressively release or roll back individual features to or from a specific group of users without redeployment. You can toggle a feature on and off to subsets of users. 
-
-FeatBit empowers:
+FeatBit provides a holistic framework for **Feature Flag** driven development, **A/B testing**, and experimentation, enabling teams to use flags on a massive scale across various use cases. With feature flags, you can progressively release or roll back individual features to or from a specific group of users without redeployment. You can toggle a feature on and off to subsets of users. FeatBit empowers:
 
 - Engineering teams to 
 
@@ -55,8 +53,18 @@ FeatBit empowers:
 [**Get more information about FeatBit and why FeatBit**](https://featbit.medium.com/introducing-featbit-e0cef61572a)
 
 
+🔥🔥🔥🚀🚀🚀
+<p align="left">
+  <a href="https://featbit.gitbook.io/docs/installation"><b> Installation </b></a>  •
+  <a href="https://featbit.gitbook.io/"><b> Getting Started </b></a>  •
+  <a href="https://featbit.gitbook.io/docs/tech-stack/architecture"><b> Architecture </b></a>  •
+  <a href="https://featbit.gitbook.io/"><b> Documentation </b></a>  •
+  <a href="https://github.com/featbit/featbit/discussions/categories/announcements"><b> Milestones </b></a>
+</p>
+
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/205070601-bd35f8e8-6765-49e7-8d85-88364be9934b.gif)
+
 
 
 --------------------------------------------------
