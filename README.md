@@ -7,8 +7,7 @@
 <h3 align="center">Feature management, for all teams</h3>
 
 <p>
-A scalable, high-performance and holistic framework for Feature Flags, A/B testing, and more.<br />
-a free replacement for Launchdarkly & Unleash.
+A high-performance and holistic framework for Feature Flags, A/B testing, and more.
 </p>
 
 <!--
