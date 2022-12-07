@@ -3,12 +3,6 @@
 
 <div align="left">
 
-
-
-A scalable and high-performance **Feature Flags & Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly, Unleash and more.  
-  
-[More about FeatBit & Why FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a)
-
 <p align="left">
   <a href="https://featbit.gitbook.io/docs/installation"><b> Installation </b></a>  •
   <a href="https://featbit.gitbook.io/"><b> Getting Started </b></a>  •
@@ -35,6 +29,30 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 
 </div>
+
+
+
+
+FeatBit is a scalable and high-performance **Feature Management** platform that empowers all teams to deliver, control, experiment with, and monetize their software - a free replacement for Launchdarkly, Unleash and more.  
+
+FeatBit provides a holistic framework for **Feature Flag** driven development, **A/B testing**, and experimentation, enabling teams to use flags on a massive scale across various use cases. With feature flags, you can progressively release or roll back individual features to or from a specific group of users without redeployment. You can toggle a feature on and off to subsets of users. 
+
+FeatBit empowers:
+
+- Engineering teams to 
+
+  - Reduce delivery risk & lower deployment stres
+  - Achieve continuous delivery and Speed-up feature release
+  - Enable experimental feature development and trunk-based development
+  
+- Help product managers to improve user experience by fine-grained targeting for who sees what experiences and when, measuring the impact of features’ rollouts, and running A/B tests to improve feature quality.
+- Enable Sales and Customer Success to close more deals with live demos and feature trials at the push of a button.
+- Help Support debug exactly which features and tests a customer has for faster resolution.
+- Give Marketing and Design the ability to fine-tune target audiences, coordinate announcements, and manage special customer programs.
+- Empower finance teams quickly get the billing report of how customers used and paid for the different features and subscriptions.
+- Etc.
+
+[**Get more information about FeatBit and why FeatBit**](https://featbit.medium.com/introducing-featbit-e0cef61572a)
 
 
 
