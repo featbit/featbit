@@ -69,11 +69,14 @@ interface refType {
 const normalize = (featureFlag: IFeatureFlag, ref: refType): IFlatFeatureFlag => {
   const flatFeatureFlag: IFlatFeatureFlag = deepCopy(featureFlag);
 
-  flatFeatureFlag.targetUsers = featureFlag.targetUsers.map((t) => ({
-    variation: featureFlag.variations.find((v) => v.id === t.variationId)?.value,
-    users: ref.targetingUsers.filter((u) => t.keyIds.includes(u.keyId))
+  flatFeatureFlag.targetUsers = featureFlag.variations.map((variation) => {
+    const variationTargetUsers = featureFlag.targetUsers.find((tu) => tu.variationId === variation.id);
+    return {
+    variation: variation.value,
+    users: variationTargetUsers === undefined ? [] : ref.targetingUsers.filter((u) => variationTargetUsers.keyIds.includes(u.keyId))
       .map((u) => ({...u, name: u.name?.length > 0 ? `${u.name} (${u.keyId})`: u.keyId}))
-  }));
+    }
+  });
 
   flatFeatureFlag.fallthrough = {
     includedInExpt: featureFlag.fallthrough.includedInExpt,
@@ -181,7 +184,7 @@ const translationConfigs = [
     order: 2,
     keyPathPatterns: [
       ["targetUsers", "*", "users","*"],
-      ['targetUsers', '*', 'users', '*', 'name']],
+    ],
     getContentFunc: function (ops: IReadableChange[]) { // do not use arrow function because we need this
       const contentArr = ops.map((op: IReadableChange) => {
         let key: string;
