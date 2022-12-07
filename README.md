@@ -1,31 +1,34 @@
 
-# FeatBit &nbsp;  [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20scalable%2C%20high-performance%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit)
 
-<div align="left">
+<div align="center">
 
-<p align="left">
-  <a href="https://featbit.gitbook.io/docs/installation"><b> Installation </b></a>  •
-  <a href="https://featbit.gitbook.io/"><b> Getting Started </b></a>  •
-  <a href="https://featbit.gitbook.io/docs/tech-stack/architecture"><b> Architecture </b></a>  •
-  <a href="https://featbit.gitbook.io/"><b> Documentation </b></a>  •
-  <a href="https://github.com/featbit/featbit/discussions/categories/announcements"><b> Milestones </b></a>
+<img src="https://user-images.githubusercontent.com/68597908/206148625-43f14f58-f3c0-4042-82a0-9f9421c270fa.png" width="288" > 
+
+<h3 align="center">Feature management, for all teams</h3>
+
+<p>
+A scalable, high-performance feature flags driven management and progressive experimentation platform
 </p>
 
-</div>
-
-<div align="left">
 <!--
 Make New Badge Pattern badges inline
 See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 -->
 
-[![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)                              [![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
+[![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)                   [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE)
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?logo=python&logoColor=white)](https://www.python.org/)
-[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)
+[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)                                                      [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
 
-    
-<!-- [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit) -->
+[![slack-community](https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)                              [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20scalable%2C%20high-performance%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit)  
+
+<p align="center">
+  <a href="https://featbit.gitbook.io/docs/installation">Installation</a>  •
+  <a href="https://featbit.gitbook.io/">Getting Started</a>  •
+  <a href="https://featbit.gitbook.io/docs/tech-stack/architecture">Architecture</a>  •
+  <a href="https://featbit.gitbook.io/">Documentation</a>  •
+  <a href="https://github.com/featbit/featbit/discussions/categories/announcements">Milestones</a>
+</p>
 
 
 </div>
