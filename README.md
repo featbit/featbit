@@ -38,16 +38,22 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 --------------------------------------------------
 
+## Introduction
 
-**FeatBit** provides a holistic framework for **Feature Flag** driven development, **A/B testing**, and experimentation, enabling teams to use flags on a massive scale across various use cases. FeatBit empowers all teams:
+**FeatBit** provides a holistic framework for Feature Flag-driven development, A/B testing, and experimentation, enabling teams to use flags on a massive scale across various use cases. FeatBit empowers all teams:
 
-- Reduce delivery risk by progressively releasing/rollback features to/from a specific group of users without redeployment.
-- Help product managers to measure the impact of features’ rollouts, and run A/B tests to improve feature quality
-- Enable Sales and Customer Success to close more deals with live demos and feature trials at the push of a button.
-- Give Marketing the ability to fine-tune target audiences, coordinate announcements, and manage special customer programs.
-- Etc.
+-	Reduce delivery risk by progressively releasing/rollback features to/from a specific group of users without redeployment.
 
-[**You can check more use cases and why FeatBit with our Medium article**](https://featbit.medium.com/introducing-featbit-e0cef61572a)
+-	Measure the impact of features’ rollouts and run A/B tests to improve feature quality.
+
+-	Enable Sales and Customer Success to close more deals with live demos and feature trials at the push of a button.
+
+-	Give Marketing the ability to fine-tune target audiences, coordinate announcements, and manage customer programs.
+
+-	Etc.
+
+
+[**Click here to get more use cases about FeatBit and why FeatBit.**](https://featbit.medium.com/introducing-featbit-e0cef61572a)
 
 
 
