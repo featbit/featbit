@@ -2,6 +2,7 @@ using System.Text;
 using Domain.Identity;
 using Domain.Messages;
 using Domain.Users;
+using Infrastructure.AuditLogs;
 using Infrastructure.HostedServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
@@ -92,7 +93,9 @@ public static class ConfigureServices
         services.AddTransient<IDataSyncService, DataSyncService>();
         services.AddTransient<IExperimentService, ExperimentService>();
         services.AddTransient<IExperimentMetricService, ExperimentMetricService>();
+        services.AddTransient<IAuditLogService, AuditLogService>();
         services.AddSingleton<IEvaluator, Evaluator>();
+
         return services;
     }
 }
