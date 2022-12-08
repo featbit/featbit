@@ -1,16 +1,14 @@
 using System.Text.Json;
 using MongoDB.Bson;
 using StackExchange.Redis;
+using Moq;
 
 namespace Infrastructure.Caches;
 
-public class RedisService: IRedisService
+public class FakeRedisService: IRedisService
 {
-    private readonly IDatabase _redis;
-
-    public RedisService(IConnectionMultiplexer multiplexer)
-    {
-        _redis = multiplexer.GetDatabase();
+    public FakeRedisService(IConnectionMultiplexer multiplexer)
+    {        
     }
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)

@@ -12,12 +12,12 @@ public class SegmentChangeMessageHandler : IKafkaMessageHandler
 {
     public string Topic => Topics.SegmentChange;
 
-    private readonly RedisService _redisService;
+    private readonly IRedisService _redisService;
     private readonly IConnectionManager _connectionManager;
     private readonly IDataSyncService _dataSyncService;
 
     public SegmentChangeMessageHandler(
-        RedisService redisService,
+        IRedisService redisService,
         IConnectionManager connectionManager,
         IDataSyncService dataSyncService)
     {

@@ -7,9 +7,9 @@ namespace Infrastructure.Services;
 
 public class TargetRuleMatcher
 {
-    private readonly RedisService _redisService;
+    private readonly IRedisService _redisService;
 
-    public TargetRuleMatcher(RedisService redisService)
+    public TargetRuleMatcher(IRedisService redisService)
     {
         _redisService = redisService;
     }

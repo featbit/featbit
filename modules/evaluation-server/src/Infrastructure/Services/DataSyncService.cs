@@ -11,10 +11,10 @@ namespace Infrastructure.Services;
 
 public class DataSyncService : IDataSyncService
 {
-    private readonly RedisService _redisService;
+    private readonly IRedisService _redisService;
     private readonly EvaluationService _evaluationService;
 
-    public DataSyncService(RedisService redisService, EvaluationService evaluationService)
+    public DataSyncService(IRedisService redisService, EvaluationService evaluationService)
     {
         _redisService = redisService;
         _evaluationService = evaluationService;

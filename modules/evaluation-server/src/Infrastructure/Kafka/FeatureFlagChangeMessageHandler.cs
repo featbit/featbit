@@ -12,12 +12,12 @@ public class FeatureFlagChangeMessageHandler : IKafkaMessageHandler
 {
     public string Topic => Topics.FeatureFlagChange;
 
-    private readonly RedisService _redisService;
+    private readonly IRedisService _redisService;
     private readonly IConnectionManager _connectionManager;
     private readonly IDataSyncService _dataSyncService;
 
     public FeatureFlagChangeMessageHandler(
-        RedisService redisService,
+        IRedisService redisService,
         IConnectionManager connectionManager,
         IDataSyncService dataSyncService)
     {
