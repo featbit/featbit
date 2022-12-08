@@ -37,6 +37,8 @@ public static class ServicesRegister
                 .AllowAnyMethod();
         }));
 
+        bool ifMockEnv = configuration["IsMockEnv"] == "true";
+
         // add app services
         services.TryAddSingleton<ISystemClock, SystemClock>();
         services.AddSingleton<IConnectionManager, ConnectionManager>();
@@ -63,7 +65,10 @@ public static class ServicesRegister
         );
         services.AddTransient<IPopulatingService, RedisPopulatingService>();
         services.AddHostedService<RedisPopulatingHostedService>();
-        services.AddSingleton<IRedisService, RedisService>();
+        if (ifMockEnv == false)
+            services.AddSingleton<IRedisService, RedisService>();
+        else
+            services.AddSingleton<IRedisService, FakeRedisService>();
         services.AddSingleton<EvaluationService>();
         services.AddSingleton<TargetRuleMatcher>();
 
