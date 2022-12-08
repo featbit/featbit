@@ -10,6 +10,8 @@ public class AuditLog : Entity
 
     public string RefType { get; set; }
 
+    public string Keyword { get; set; }
+
     public string Operation { get; set; }
 
     public DataChange DataChange { get; set; }
@@ -24,6 +26,7 @@ public class AuditLog : Entity
         Guid envId,
         string refId,
         string refType,
+        string keyword,
         string operation,
         DataChange dataChange,
         string comment,
@@ -43,6 +46,7 @@ public class AuditLog : Entity
 
         RefId = refId;
         RefType = refType;
+        Keyword = keyword;
         Operation = operation;
         DataChange = dataChange;
 
@@ -62,6 +66,7 @@ public class AuditLog : Entity
             flag.EnvId,
             flag.Id.ToString(),
             AuditLogRefTypes.FeatureFlag,
+            Keywords.For(flag),
             operation,
             dataChange,
             comment,
