@@ -36,7 +36,7 @@
       </thead>
       <tbody>
       <tr *ngFor="let item of table.data">
-        <td (click)="navigateToDetail(item.id)">{{ item.name || item.email || '--' }}</td>
+        <td (click)="navigateToDetail(item.id)">{{ item.name || '--' }}</td>
         <td (click)="navigateToDetail(item.id)">{{ item.email || '--' }}</td>
         <td>
           <i (click)="copyText(resourceName(item))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>

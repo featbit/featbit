@@ -18,7 +18,7 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
-import { NzModalModule  } from 'ng-zorro-antd/modal';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 
 import { ComponentsModule as LocalComponentsModule } from '../components/components.module';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
@@ -36,9 +36,9 @@ import { TriggersComponent } from './triggers/triggers.component';
 import { InsightsComponent } from './insights/insights.component';
 import { ExperimentationComponent } from './experimentation/experimentation.component';
 import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
-import {NzGridModule} from "ng-zorro-antd/grid";
-import {CoreModule} from "@core/core.module";
-import {NzFormModule} from "ng-zorro-antd/form";
+import { NzGridModule } from "ng-zorro-antd/grid";
+import { CoreModule } from "@core/core.module";
+import { NzFormModule } from "ng-zorro-antd/form";
 
 @NgModule({
   declarations: [
