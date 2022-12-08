@@ -125,7 +125,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 
         if (iteration == null)
         {
-            return null;
+            return null!;
         }
 
         if (experiment.Iterations.Any(it => !it.IsFinish))
