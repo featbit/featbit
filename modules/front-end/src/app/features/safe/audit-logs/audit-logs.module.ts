@@ -6,13 +6,12 @@ import { AuditLogsComponent } from './audit-logs.component';
 
 @NgModule({
   declarations: [
-    AuditLogsComponent
+    AuditLogsComponent,
   ],
   imports: [
     CommonModule,
     AuditLogsRoutingModule
   ],
-  providers: [
-  ]
+  providers: []
 })
 export class AuditLogsModule { }

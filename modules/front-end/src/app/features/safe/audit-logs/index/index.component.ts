@@ -2,7 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Subject} from 'rxjs';
-import {AuditLogListFilter, IAuditLogListModel, RefTypeEnum} from "../types/audit-logs";
+import {AuditLog, AuditLogListFilter, IAuditLog, IAuditLogListModel, RefTypeEnum} from "../types/audit-logs";
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {AuditLogService} from "@services/audit-log.service";
 import {MemberService} from "@services/member.service";
@@ -16,10 +16,9 @@ import {IMember, IMemberListModel, MemberFilter} from "@features/safe/iam/types/
 export class IndexComponent implements OnInit, OnDestroy {
   private destory$: Subject<void> = new Subject();
 
-  listModel: IAuditLogListModel = {
-    items: [],
-    totalCount: 0
-  };
+  private auditLogs: IAuditLog[] = [];
+
+  groupedAuditLogs: {key: string, items: AuditLog[]}[] = [];
 
   memberListModel: IMemberListModel = {
     items: [],
@@ -35,9 +34,36 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.auditLogService
       .getList(this.auditLogFilter)
       .subscribe((auditLogs: IAuditLogListModel) => {
-        this.listModel = auditLogs;
+        if (this.auditLogFilter.pageIndex === 1) {
+          this.auditLogs = auditLogs.items;
+        } else {
+          this.auditLogs = [...this.auditLogs, ...auditLogs.items];
+        }
+
+        this.groupedAuditLogs = this.auditLogs
+          .map((auditLog) => ({...auditLog, createdDateStr: auditLog.createdAt.slice(0,10)}))
+          .sort((auditLog) => -(new Date(auditLog.createdAt)).getTime())
+          .reduce((acc, cur) => {
+            let auditLogsByDate = acc.find((itm) => itm.key === cur.createdDateStr);
+            const auditLog = new AuditLog(cur);
+            if (auditLogsByDate) {
+              auditLogsByDate.items = [...auditLogsByDate.items, auditLog];
+            } else {
+              auditLogsByDate = [auditLog];
+              acc = [...acc, { key: cur.createdDateStr, items: auditLogsByDate }];
+            }
+
+            return acc;
+          }, []);
+
         this.loading = false;
       });
+  }
+
+  loadMoreAuditLogs() {
+    this.auditLogFilter.pageIndex++;
+
+    this.loadAuditLogList();
   }
 
   loadMemberList(query?: string) {
@@ -115,7 +141,7 @@ export class IndexComponent implements OnInit, OnDestroy {
     let label = member.email;
 
     if (member.name?.length > 0) {
-      label += ` (${member.name})`
+      label += ` (${member.name})`;
     }
 
     return label;

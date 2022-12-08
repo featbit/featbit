@@ -32,38 +32,54 @@
       </div>
     </div>
 
-    <div class="table-wrapper">
-      <nz-table #table nzSize="small"
-                nzShowSizeChanger
-                [nzData]="listModel.items"
-                [nzFrontPagination]="false"
-                [nzLoading]="loading"
-                [nzTotal]="listModel.totalCount"
-                [(nzPageSize)]="auditLogFilter.pageSize"
-                (nzPageSizeChange)="onSearch()"
-                [nzPageSizeOptions]="[10,20,30]"
-                [(nzPageIndex)]="auditLogFilter.pageIndex"
-                (nzPageIndexChange)="onSearch()">
-        <thead>
-          <tr>
-            <th nzWidth="35%" i18n="@@common.name">Name</th>
-            <th nzWidth="35%" i18n="@@common.last-updated">Last updated</th>
-            <th i18n="@@common.actions">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of table.data">
-            <td style="cursor: pointer;">
-              <span>{{item.comment}}</span>
-            </td>
-            <td>{{getLocalDate(item.createdAt) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
-            <td>
-              <a style="color:#23AD7F;"  i18n="@@common.details">Details</a>
-            </td>
-          </tr>
-        </tbody>
-      </nz-table>
+    <div class="audit-logs">
+      <div *ngFor="let group of groupedAuditLogs" class="audit-logs-group">
+        <nz-card nzBorderless>
+          <nz-descriptions nzTitle="{{group.key}}"></nz-descriptions>
+          <div class="audit-log-list">
+            <div *ngFor="let auditLog of group.items">
+              <div>{{ auditLog.title }}</div>
+              <div>{{ auditLog.data.createdAt | date: "YYYY-MM-dd HH:mm"}}</div>
+              <div class="change-list" [innerHtml]="auditLog.diffHtml | safeHtml"></div>
+            </div>
+          </div>
+        </nz-card>
+      </div>
     </div>
+
+
+<!--    <div class="table-wrapper">-->
+<!--      <nz-table #table nzSize="small"-->
+<!--                nzShowSizeChanger-->
+<!--                [nzData]="listModel.items"-->
+<!--                [nzFrontPagination]="false"-->
+<!--                [nzLoading]="loading"-->
+<!--                [nzTotal]="listModel.totalCount"-->
+<!--                [(nzPageSize)]="auditLogFilter.pageSize"-->
+<!--                (nzPageSizeChange)="onSearch()"-->
+<!--                [nzPageSizeOptions]="[10,20,30]"-->
+<!--                [(nzPageIndex)]="auditLogFilter.pageIndex"-->
+<!--                (nzPageIndexChange)="onSearch()">-->
+<!--        <thead>-->
+<!--          <tr>-->
+<!--            <th nzWidth="35%" i18n="@@common.name">Name</th>-->
+<!--            <th nzWidth="35%" i18n="@@common.last-updated">Last updated</th>-->
+<!--            <th i18n="@@common.actions">Actions</th>-->
+<!--          </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--          <tr *ngFor="let item of table.data">-->
+<!--            <td style="cursor: pointer;">-->
+<!--              <span>{{item.comment}}</span>-->
+<!--            </td>-->
+<!--            <td>{{getLocalDate(item.createdAt) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>-->
+<!--            <td>-->
+<!--              <a style="color:#23AD7F;"  i18n="@@common.details">Details</a>-->
+<!--            </td>-->
+<!--          </tr>-->
+<!--        </tbody>-->
+<!--      </nz-table>-->
+<!--    </div>-->
   </div>
 </section>
 
