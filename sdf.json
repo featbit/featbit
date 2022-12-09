@@ -1,0 +1,62 @@
+{
+    "envId": "2161d4c0-a7d8-4f95-84b1-665c0cd40083",
+    "name": "difficulty mode",
+    "key": "difficulty-mode",
+    "variationType": "string",
+    "variations": [
+        {
+            "id": "748007f1-00c2-43c0-88e1-7383b34b66b1",
+            "value": "hard"
+        },
+        {
+            "id": "1ea4fa2d-4814-4c7b-817e-1545b66d3283",
+            "value": "easy"
+        },
+        {
+            "id": "309dbe40-3d96-421d-a924-7b6432a11262",
+            "value": "normal"
+        }
+    ],
+    "targetUsers": [
+        {
+            "keyIds": [],
+            "variationId": "748007f1-00c2-43c0-88e1-7383b34b66b1"
+        },
+        {
+            "keyIds": [],
+            "variationId": "1ea4fa2d-4814-4c7b-817e-1545b66d3283"
+        },
+        {
+            "keyIds": [],
+            "variationId": "309dbe40-3d96-421d-a924-7b6432a11262"
+        }
+    ],
+    "rules": [],
+    "isEnabled": true,
+    "disabledVariationId": "1ea4fa2d-4814-4c7b-817e-1545b66d3283",
+    "fallthrough": {
+        "includedInExpt": true,
+        "variations": [
+            {
+                "id": "748007f1-00c2-43c0-88e1-7383b34b66b1",
+                "rollout": [
+                    0,
+                    1
+                ],
+                "exptRollout": 0
+            }
+        ]
+    },
+    "exptIncludeAllTargets": true,
+    "tags": [],
+    "isArchived": false,
+    "disabledVariation": {
+        "id": "1ea4fa2d-4814-4c7b-817e-1545b66d3283",
+        "value": "easy"
+    },
+    "creatorId": "4526975f-4f6b-4420-9dde-84c276148832",
+    "updatorId": "4526975f-4f6b-4420-9dde-84c276148832",
+    "createdAt": "2022-11-29T04:13:38.301Z",
+    "updatedAt": "2022-11-29T04:38:33.5661283Z",
+    "id": "9ee32e3a-1a55-452f-83c4-af5c0045a9f2"
+}

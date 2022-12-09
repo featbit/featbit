@@ -24,7 +24,7 @@ public class RedisService: IRedisService
         var tasks = keys.Select(key => _redis.StringGetAsync(key));
         var values = await Task.WhenAll(tasks);
         var jsonBytes = values.Select(x => (byte[])x!);
-
+        var s = System.Text.Encoding.Default.GetString(jsonBytes.FirstOrDefault());
         return jsonBytes;
     }
 

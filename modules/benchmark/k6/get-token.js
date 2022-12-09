@@ -1,4 +1,4 @@
-const envSecret = 'NF6FATso3UWtoxOlb0GQXAwNRhIdinlU-EsWZcDNQAgw';
+const envSecret = 'KUN1pJU8i0q0T3SaAs1-fAp4vX5E3XM0iC1dHJgoPR_A';
 
 const alphabet = {
   "0": "Q",

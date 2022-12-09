@@ -60,15 +60,21 @@ public static class ServicesRegister
         services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
         // redis
-        services.AddSingleton<IConnectionMultiplexer>(
-            _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
-        );
-        services.AddTransient<IPopulatingService, RedisPopulatingService>();
-        services.AddHostedService<RedisPopulatingHostedService>();
         if (ifMockEnv == false)
+        {
+            services.AddSingleton<IConnectionMultiplexer>(
+                _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
+            );
             services.AddSingleton<IRedisService, RedisService>();
+            services.AddTransient<IPopulatingService, RedisPopulatingService>();
+            services.AddHostedService<RedisPopulatingHostedService>();
+        }
         else
+        {
             services.AddSingleton<IRedisService, FakeRedisService>();
+            services.AddTransient<IPopulatingService, FakeRedisPopulatingService>();
+            services.AddHostedService<FakeRedisPopulatingHostedService>();
+        }
         services.AddSingleton<EvaluationService>();
         services.AddSingleton<TargetRuleMatcher>();
 
@@ -77,8 +83,16 @@ public static class ServicesRegister
         services.AddSingleton<MongoDbClient>();
 
         // kafka message producer & consumer
-        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
-        services.AddHostedService<KafkaMessageConsumer>();
+        if (ifMockEnv == false)
+        {
+            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+            services.AddHostedService<KafkaMessageConsumer>();
+        }
+        else
+        {
+            services.AddSingleton<IMessageProducer, FakeKafkaMessageProducer>();
+            services.AddHostedService<FakeKafkaMessageConsumer>();
+        }
 
         // kafka message handlers
         services.AddSingleton<IKafkaMessageHandler, FeatureFlagChangeMessageHandler>();

@@ -13,13 +13,10 @@ export const options = {
       executor: "ramping-vus",
       startVus: 1,
       stages: [
-        // { duration: "2s", target: 2048 },
-        // { duration: "5s", target: 2048 },
-        { duration: "10s", target: 2048 },
-        { duration: "20s", target: 2048 },
+        { duration: "5s", target: 1 },
+        { duration: "5s", target: 1 },
       ],
-      // gracefulStop: '5s'
-      gracefulStop: '20s'
+      gracefulStop: '5s'
     },
   },
 };
@@ -38,7 +35,7 @@ const pongCounter = new Counter("pong-received");
 export default function () {
   const token = getToken();
 
-  const url = `ws://172.24.128.1:5100/streaming?type=client&token=${token}`;
+  const url = `ws://localhost:5100/streaming?type=client&token=${token}`;
   ws.connect(url, function (socket) {
     let dataSyncSendTime;
 
@@ -72,6 +69,8 @@ export default function () {
         res.data.userKeyId === user
       ) {
         dataSyncSuccessCounter.add(1);
+
+        console.log(res.data.featureFlags);
 
         const dataSyncReceiveTime = Date.now();
         dataSyncTrend.add(dataSyncReceiveTime - dataSyncSendTime);
