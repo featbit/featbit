@@ -1,7 +1,6 @@
-import {IChange, ObjectType} from "ffc-json-diff";
+import changesets, { IChange, ObjectType } from "ffc-json-diff";
 import { IReadableChange, ITranslationConfig } from "./types";
 import { isKeyPathExactMatchPattern, isKeyPathLeftMatchPattern, isLeafNode } from "./utils";
-import changesets from 'ffc-json-diff';
 
 export class Differ {
   constructor(private options) {
@@ -15,10 +14,7 @@ export class Differ {
     const normalizedB = this.options.normalizeFunc(objB, ref);
 
     const diffs = changesets.diff(normalizedA, normalizedB, this.options.embededKeys);
-    //return transformDiffsToHtml(diffs, this.options.ignoredKeyPaths, this.options.translationConfigs, this.options.translation);
-    const r = transformDiffsToHtml(diffs, this.options.ignoredKeyPaths, this.options.translationConfigs);
-    console.log(r);
-    return r;
+    return transformDiffsToHtml(diffs, this.options.ignoredKeyPaths, this.options.translationConfigs);
   }
 }
 

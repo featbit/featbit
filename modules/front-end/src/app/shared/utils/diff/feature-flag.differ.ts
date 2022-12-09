@@ -11,7 +11,7 @@ import {ISegment} from "@features/safe/segments/types/segments-index";
 
 interface IFlatVariationUsers {
   variation: string,
-  users: IUserType[]
+  users: string[]
 }
 
 interface IFlatFallthrough {
@@ -72,9 +72,17 @@ const normalize = (featureFlag: IFeatureFlag, ref: refType): IFlatFeatureFlag =>
   flatFeatureFlag.targetUsers = featureFlag.variations.map((variation) => {
     const variationTargetUsers = featureFlag.targetUsers.find((tu) => tu.variationId === variation.id);
     return {
-    variation: variation.value,
-    users: variationTargetUsers === undefined ? [] : ref.targetingUsers.filter((u) => variationTargetUsers.keyIds.includes(u.keyId))
-      .map((u) => ({...u, name: u.name?.length > 0 ? `${u.name} (${u.keyId})`: u.keyId}))
+      variation: variation.value,
+      users: variationTargetUsers === undefined ? [] : variationTargetUsers.keyIds.map((keyId) => {
+        const user = ref.targetingUsers.find((user) => user.keyId === keyId);
+        if (!user) {
+          return keyId;
+        }
+
+        return user.name?.length > 0
+          ? `${user.name} (${user.keyId})`
+          : user.keyId;
+      })
     }
   });
 
@@ -191,10 +199,10 @@ const translationConfigs = [
         switch (op.change.type) {
           case Operation.ADD:
             key = op.keyPath[1];
-            return `<span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.add:Add`}</span> <span class="ant-tag">${op.change.value.name}</span>${$localize `:@@common.diff.to:To`} <span class="ant-tag">${key}</span>`;
+            return `<span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.add:Add`}</span> <span class="ant-tag">${op.change.value}</span>${$localize `:@@common.diff.to:To`} <span class="ant-tag">${key}</span>`;
           case Operation.REMOVE:
             key = op.keyPath[1];
-            return `<span class="operation ant-typography ant-typography-danger">${$localize `:@@common.diff.remove:Remove`}</span> <span class="ant-tag remove-item">${op.change.value.name}</span>${$localize `:@@common.diff.from:From`} <span class="ant-tag">${key}</span>`;
+            return `<span class="operation ant-typography ant-typography-danger">${$localize `:@@common.diff.remove:Remove`}</span> <span class="ant-tag remove-item">${op.change.value}</span>${$localize `:@@common.diff.from:From`} <span class="ant-tag">${key}</span>`;
           default:
             return null;
         }
@@ -274,7 +282,7 @@ const generateRuleHtmlDescription = (conditions: IFlatRuleCondition[], variation
 
   const clausesStr = '<div class="diff-rule-condition">' +
     conditions.map((condition) => {
-      let contentStr = '';
+      let contentStr: string;
 
       const isSegment = isSegmentCondition(condition as ICondition);
       if (isSegment) {
@@ -312,7 +320,6 @@ const generateRuleHtmlDescription = (conditions: IFlatRuleCondition[], variation
 
 class FeatureFlagDiffer {
   private differ: Differ;
-  private ref: { [key: string]: IUserType[] }
 
   constructor() {
     const options: IOptions = {
