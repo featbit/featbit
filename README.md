@@ -7,7 +7,7 @@
 <h3 align="center">Feature management, for all teams</h3>
 
 <p>
-A scalable and high-performance framework for Feature Flags, A/B testing, Monetization, and more.
+A scalable and high-performance platform for Feature Flags, A/B testing, Monetization, and more.
 </p>
 
 <!--
