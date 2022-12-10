@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'segment-manage',
+  selector: 'audit-log-manage',
   template: `<router-outlet></router-outlet>`
 })
 export class AuditLogsComponent {

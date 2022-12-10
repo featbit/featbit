@@ -26,6 +26,7 @@ import {NzCardModule} from "ng-zorro-antd/card";
 import {NzDescriptionsModule} from "ng-zorro-antd/descriptions";
 import {AuditLogsModule} from "@features/safe/audit-logs/audit-logs.module";
 import {DetailsModule} from "@features/safe/feature-flags/details/details.module";
+import {NzTimelineModule} from "ng-zorro-antd/timeline";
 
 @NgModule({
   declarations: [IndexComponent],
@@ -55,7 +56,8 @@ import {DetailsModule} from "@features/safe/feature-flags/details/details.module
     NzListModule,
     NzCardModule,
     NzDescriptionsModule,
-    AuditLogsModule
+    AuditLogsModule,
+    NzTimelineModule
   ]
 })
 export class IndexModule { }

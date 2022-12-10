@@ -1,5 +1,6 @@
 ﻿import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import featureFlagDiffer from "@utils/diff/feature-flag.differ";
+import {encodeURIComponentFfc} from "@utils/index";
 
 export interface IAuditLogListModel {
   items: IAuditLog[];
@@ -53,7 +54,7 @@ export class AuditLog {
   private previous: IFeatureFlag | string;
   private current: IFeatureFlag | string;
 
-  private get targetData(): IFeatureFlag | string {
+  get targetData(): IFeatureFlag | string {
     switch (this.data.operation) {
       case AuditLogOpEnum.Create:
         return this.current;
@@ -99,7 +100,16 @@ export class AuditLog {
     return {...this.data};
   }
 
-  get title(): string {
+  get name(): string {
+    switch (this.data.refType) {
+      case RefTypeEnum.Flag:
+        return (this.targetData as IFeatureFlag).name;
+      default:
+        return (this.targetData as IFeatureFlag).name;
+    }
+  }
+
+  get titlePrefix(): string {
     let result = this.data.creatorEmail;
 
     if (this.data.creatorName?.length > 0) {
@@ -125,10 +135,9 @@ export class AuditLog {
 
     switch (this.data.refType) {
       case RefTypeEnum.Flag:
-        result += ` ${$localize `:@@auditlogs.idx.reftype-flag:the flag`} ${(this.targetData as IFeatureFlag).name}`;
+        result += ` ${$localize `:@@auditlogs.idx.reftype-flag:the flag`}`;
         break;
       default:
-        result += ` ${(this.targetData as IFeatureFlag).name}`;
         break;
     }
 

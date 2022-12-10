@@ -32,89 +32,22 @@
       </div>
     </div>
 
-    <div class="audit-logs">
-      <div *ngFor="let group of groupedAuditLogs" class="audit-logs-group">
-        <nz-card nzBorderless>
-          <nz-descriptions nzTitle="{{group.key}}"></nz-descriptions>
-          <div class="audit-log-list">
-            <div *ngFor="let auditLog of group.items">
-              <div>{{ auditLog.title }}</div>
-              <div>{{ auditLog.data.createdAt | date: "YYYY-MM-dd HH:mm"}}</div>
-              <div class="change-list" [innerHtml]="auditLog.diffHtml | safeHtml"></div>
+    <div class="audit-logs standard-div">
+      <nz-timeline>
+          <nz-timeline-item *ngFor="let group of groupedAuditLogs">
+            <div  class="audit-logs-group">
+              <div class="group-title">{{group.key}}</div>
+              <div class="group-items">
+                <div *ngFor="let auditLog of group.items" class="audit-log">
+                  <div class="audit-log-title">{{auditLog.titlePrefix}} <a (click)="goToTargetPage(auditLog)">{{auditLog.name}}</a></div>
+                  <div class="audit-log-createdat">{{ auditLog.data.createdAt | date: "YYYY-MM-dd HH:mm"}}</div>
+                  <div class="audit-log-comment">{{auditLog.data.comment}}</div>
+                  <div class="change-list" [innerHtml]="auditLog.diffHtml | safeHtml"></div>
+                </div>
+              </div>
             </div>
-          </div>
-        </nz-card>
-      </div>
+          </nz-timeline-item>
+      </nz-timeline>
     </div>
-
-
-<!--    <div class="table-wrapper">-->
-<!--      <nz-table #table nzSize="small"-->
-<!--                nzShowSizeChanger-->
-<!--                [nzData]="listModel.items"-->
-<!--                [nzFrontPagination]="false"-->
-<!--                [nzLoading]="loading"-->
-<!--                [nzTotal]="listModel.totalCount"-->
-<!--                [(nzPageSize)]="auditLogFilter.pageSize"-->
-<!--                (nzPageSizeChange)="onSearch()"-->
-<!--                [nzPageSizeOptions]="[10,20,30]"-->
-<!--                [(nzPageIndex)]="auditLogFilter.pageIndex"-->
-<!--                (nzPageIndexChange)="onSearch()">-->
-<!--        <thead>-->
-<!--          <tr>-->
-<!--            <th nzWidth="35%" i18n="@@common.name">Name</th>-->
-<!--            <th nzWidth="35%" i18n="@@common.last-updated">Last updated</th>-->
-<!--            <th i18n="@@common.actions">Actions</th>-->
-<!--          </tr>-->
-<!--        </thead>-->
-<!--        <tbody>-->
-<!--          <tr *ngFor="let item of table.data">-->
-<!--            <td style="cursor: pointer;">-->
-<!--              <span>{{item.comment}}</span>-->
-<!--            </td>-->
-<!--            <td>{{getLocalDate(item.createdAt) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>-->
-<!--            <td>-->
-<!--              <a style="color:#23AD7F;"  i18n="@@common.details">Details</a>-->
-<!--            </td>-->
-<!--          </tr>-->
-<!--        </tbody>-->
-<!--      </nz-table>-->
-<!--    </div>-->
   </div>
 </section>
-
-<!--<nz-modal [(nzVisible)]="createModalVisible"-->
-<!--          [nzTitle]="modalTitle"-->
-<!--          [nzCentered]="true"-->
-<!--          [nzContent]="modalContent"-->
-<!--  [nzFooter]="modalFooter" (nzOnCancel)="closeCreateModal()">-->
-<!--  <ng-template #modalTitle><ng-container i18n="@@segment.idx.add-segment">Add segment</ng-container></ng-template>-->
-<!--  <ng-template #modalContent>-->
-<!--    <form nz-form [formGroup]="segmentForm" nzLayout="vertical">-->
-<!--      <nz-form-item>-->
-<!--        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>-->
-<!--        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="segmentNameErrorTpl">-->
-<!--          <input nz-input formControlName="name" />-->
-<!--          <ng-template #segmentNameErrorTpl let-control>-->
-<!--            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>-->
-<!--            <ng-container *ngIf="control.hasError('invalid_character')" i18n="@@common.name-cannot-include-&#45;&#45;">Name cannot include __</ng-container>-->
-<!--            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-unavailable">This name is unavailable</ng-container>-->
-<!--            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>-->
-<!--          </ng-template>-->
-<!--        </nz-form-control>-->
-<!--      </nz-form-item>-->
-<!--      <nz-form-item>-->
-<!--        <nz-form-label i18n="@@common.description">Description</nz-form-label>-->
-<!--        <nz-form-control>-->
-<!--          <textarea style="resize: none" nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description"></textarea>-->
-<!--        </nz-form-control>-->
-<!--      </nz-form-item>-->
-<!--    </form>-->
-<!--  </ng-template>-->
-
-<!--  <ng-template #modalFooter>-->
-<!--    <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>-->
-<!--    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!segmentForm.valid"-->
-<!--      (click)="createSegment()" i18n="@@common.save">Save</button>-->
-<!--  </ng-template>-->
-<!--</nz-modal>-->
