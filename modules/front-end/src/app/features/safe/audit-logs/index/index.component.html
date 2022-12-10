@@ -33,6 +33,7 @@
     </div>
 
     <div class="audit-logs standard-div">
+      <nz-empty i18n-nzNotFoundContent="@@common.no-data" nzNotFoundContent="No data" *ngIf="groupedAuditLogs.length === 0"></nz-empty>
       <nz-timeline>
           <nz-timeline-item *ngFor="let group of groupedAuditLogs">
             <div  class="audit-logs-group">
