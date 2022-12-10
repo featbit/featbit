@@ -37,7 +37,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
   <span> · </span>
   <a href="https://featbit.gitbook.io/">Getting Started</a>
   <span> · </span>
-  <a href="https://featbit.gitbook.io/docs/tech-stack/architecture">Architecture</a>
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support</a>
   <span> · </span>
   <a href="https://featbit.gitbook.io/">Documentation</a>  
   <span> · </span>
