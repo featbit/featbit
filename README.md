@@ -22,7 +22,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 
 <p>
-    <a href="https://medium.com/@featbit"><img src="https://img.shields.io/badge/-Medium-red?style=social&logo=medium" height=23></a>   
+    <a href="https://featbit.medium.com/introducing-featbit-e0cef61572a"><img src="https://img.shields.io/badge/-Medium-red?style=social&logo=medium" height=23></a>   
     &nbsp;
     <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ"><img src="https://img.shields.io/badge/slack-join-3CC798?style=social&logo=slack" height=23></a>
     &nbsp;
