@@ -1,6 +1,8 @@
 <section class="body-container">
   <div class="detail-body">
     <div class="banner">
+      <div class="warning" *ngIf="featureFlag.isEnabled" class="placeholder">
+      </div>
       <div class="warning" *ngIf="!featureFlag.isEnabled">
         <i nz-icon nzType="icons:icon-warning"></i>
         <ng-container i18n="@@ff.components.details.targeting.settings-ineffective-warning">Following settings won't be effective until you turn the flag on</ng-container>
