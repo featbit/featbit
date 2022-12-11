@@ -54,6 +54,12 @@ public class EndUserFilter : PagedRequest
         // custom properties filter
         foreach (var property in properties)
         {
+            var isBuiltInProperty = EndUserConsts.BuiltInProperties.Contains(property, StringComparer.OrdinalIgnoreCase);
+            if (isBuiltInProperty)
+            {
+                continue;
+            }
+
             var customizedProperty = new EndUserCustomizedProperty
             {
                 Name = property,
