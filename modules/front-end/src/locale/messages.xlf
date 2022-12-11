@@ -80,14 +80,6 @@
           <context context-type="linenumber">85,86</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">62</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
           <context context-type="linenumber">25</context>
         </context-group>
@@ -260,16 +252,12 @@
           <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">85</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">164,166</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">157,159</context>
+          <context context-type="linenumber">159,161</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -381,6 +369,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
           <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
@@ -802,10 +794,6 @@
           <context context-type="linenumber">134</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.ts</context>
-          <context context-type="linenumber">137</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">344</context>
         </context-group>
@@ -915,7 +903,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">137</context>
+          <context context-type="linenumber">136</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.view-matched-users" datatype="html">
@@ -1150,10 +1138,6 @@
           <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">63</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">186</context>
         </context-group>
@@ -1217,14 +1201,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
           <context context-type="linenumber">155</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">74</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">76</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.html</context>
@@ -1942,10 +1918,6 @@
           <context context-type="linenumber">146</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">12</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.html</context>
           <context context-type="linenumber">17</context>
         </context-group>
@@ -2024,11 +1996,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">145,146</context>
+          <context context-type="linenumber">147,148</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">147</context>
+          <context context-type="linenumber">149</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.actions" datatype="html">
@@ -2044,10 +2016,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
           <context context-type="linenumber">87,89</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">32</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
@@ -2206,14 +2174,6 @@
           <context context-type="linenumber">95</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">44</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">121</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
           <context context-type="linenumber">80</context>
         </context-group>
@@ -2313,20 +2273,12 @@
           <context context-type="linenumber">67</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">83</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">118</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">162,163</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">155,156</context>
+          <context context-type="linenumber">157,158</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -2573,10 +2525,6 @@
           <context context-type="linenumber">99,101</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">125</context>
         </context-group>
@@ -2641,10 +2589,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
           <context context-type="linenumber">86,87</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">31</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
@@ -2786,160 +2730,91 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">109,108</context>
+          <context context-type="linenumber">79,78</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="segment.idx.filter-by-name" datatype="html">
-        <source>Filter by name</source>
+      <trans-unit id="auditlogs.idx.filter-by" datatype="html">
+        <source>Filter by name, key, comment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">5</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">5</context>
+          <context context-type="linenumber">6</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="segment.idx.add-segment" datatype="html">
-        <source>Add segment</source>
+      <trans-unit id="auditlogs.idx.filter-by-team-member" datatype="html">
+        <source>Filter by team member</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">58</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">19</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.name-cannot-be-empty" datatype="html">
-        <source>Name cannot be empty</source>
+      <trans-unit id="ff.idx.filter-by-type" datatype="html">
+        <source>Filter by type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">66</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">189</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">28</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.name-cannot-include---" datatype="html">
-        <source>Name cannot include __</source>
+      <trans-unit id="auditlogs.idx.ref-type-flag" datatype="html">
+        <source>Feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">67</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">190</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.name-unavailable" datatype="html">
-        <source>This name is unavailable</source>
+      <trans-unit id="common.no-data" datatype="html">
+        <source>No data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">68</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">36</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.name-validation-failed" datatype="html">
-        <source>Name validation failed</source>
+      <trans-unit id="common.more" datatype="html">
+        <source>More</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">69</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">192</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">55</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="segment.remove-segment" datatype="html">
-        <source>Remove segment</source>
+      <trans-unit id="auditlogs.idx.failed-to-load-members" datatype="html">
+        <source>Failed to load team members</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">96</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">34</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">47</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.ts</context>
+          <context context-type="linenumber">88</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.segment" datatype="html">
-        <source>Segment</source>
+      <trans-unit id="auditlogs.idx.operation-create" datatype="html">
+        <source>created</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">100</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">51</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
+          <context context-type="linenumber">121</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="segment.permanent-remove-msg" datatype="html">
-        <source>will be permanently removed, this operation cannot be recovered!</source>
+      <trans-unit id="auditlogs.idx.operation-update" datatype="html">
+        <source>updated</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">102</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
+          <context context-type="linenumber">124</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="segment.segment-used-by-flags" datatype="html">
-        <source>This segment is used by <x id="INTERPOLATION" equiv-text="{{currentDeletingSegmentFlagReferences.length}}"/> flags(s), remove all references before the segment can be safely removed!</source>
+      <trans-unit id="auditlogs.idx.operation-archive" datatype="html">
+        <source>archived</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">108</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
+          <context context-type="linenumber">127</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.rule" datatype="html">
-        <source>Rule</source>
+      <trans-unit id="auditlogs.idx.operation-remove" datatype="html">
+        <source>removed</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/types/segments-index.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
+          <context context-type="linenumber">130</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="auditlogs.idx.reftype-flag" datatype="html">
+        <source>the flag</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">176</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
+          <context context-type="linenumber">138</context>
         </context-group>
       </trans-unit>
       <trans-unit id="sync-locally" datatype="html">
@@ -3772,7 +3647,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">133,134</context>
+          <context context-type="linenumber">135,136</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.p-value" datatype="html">
@@ -4184,117 +4059,128 @@
         <source>Following settings won&apos;t be effective until you turn the flag on</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">6,9</context>
+          <context context-type="linenumber">8,11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.setabtestrule" datatype="html">
         <source>Set A/B test rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">11,13</context>
+          <context context-type="linenumber">13,15</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.review-and-save" datatype="html">
         <source>Review and save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">15,17</context>
+          <context context-type="linenumber">17,19</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">116,118</context>
+          <context context-type="linenumber">118,120</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.default" datatype="html">
         <source>Default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">23,24</context>
+          <context context-type="linenumber">25,26</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.default-tooltip" datatype="html">
         <source>Serve a variation if the user doesn&apos;t met Individual targeting or Targeting Rules.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">26,28</context>
+          <context context-type="linenumber">28,30</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.check.the.docs" datatype="html">
         <source>Check the docs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">30,32</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">53,55</context>
+          <context context-type="linenumber">55,57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">77,79</context>
+          <context context-type="linenumber">79,81</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.individual" datatype="html">
         <source>Individual targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">43,44</context>
+          <context context-type="linenumber">45,46</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.individual-tooltip" datatype="html">
         <source>Serve a variation to specific targets based on their key</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">51,53</context>
+          <context context-type="linenumber">53,55</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.rules" datatype="html">
         <source>Targeting rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">72,73</context>
+          <context context-type="linenumber">74,75</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.rules-tooltip" datatype="html">
         <source>Serve a variation to specific targets based on their attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">75,77</context>
+          <context context-type="linenumber">77,79</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.errors" datatype="html">
         <source>Validation errors</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">107,108</context>
+          <context context-type="linenumber">109,110</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.environment" datatype="html">
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">126</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.targeting.the-following-changes-may-affect-insights" datatype="html">
         <source>The following changes may affects the insights data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">129,132</context>
+          <context context-type="linenumber">131,134</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.number-of-changes-to-submit" datatype="html">
         <source>changes to submit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">137,139</context>
+          <context context-type="linenumber">139,141</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.comment-cannot-be-empty" datatype="html">
         <source>Comment cannot be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">146,147</context>
+          <context context-type="linenumber">148,149</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.rule" datatype="html">
+        <source>Rule</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">176</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
+          <context context-type="linenumber">90</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.save-fail" datatype="html">
@@ -4427,11 +4313,44 @@
           <context context-type="linenumber">181</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="common.name-cannot-be-empty" datatype="html">
+        <source>Name cannot be empty</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">189</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.name-cannot-include---" datatype="html">
+        <source>Name cannot include __</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">190</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">67</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.name-keyName-unavailable" datatype="html">
         <source>This name/KeyName is unavailable</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">191</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.name-validation-failed" datatype="html">
+        <source>Name validation failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">192</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">69</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.key-generated-from-name" datatype="html">
@@ -5454,35 +5373,61 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">82,81</context>
+          <context context-type="linenumber">87,86</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.iam" datatype="html">
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">87,86</context>
+          <context context-type="linenumber">92,91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.iam.team" datatype="html">
         <source>Team</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">92,91</context>
+          <context context-type="linenumber">97,96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.iam.group" datatype="html">
         <source>Groups</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">97,96</context>
+          <context context-type="linenumber">102,101</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.iam.policies" datatype="html">
         <source>Policies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">102,101</context>
+          <context context-type="linenumber">107,106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="segment.remove-segment" datatype="html">
+        <source>Remove segment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.segment" datatype="html">
+        <source>Segment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">100</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.permanent-remove-msg" datatype="html">
@@ -5490,6 +5435,17 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
           <context context-type="linenumber">53</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="segment.segment-used-by-flags" datatype="html">
+        <source>This segment is used by <x id="INTERPOLATION" equiv-text="{{flagReferences.length}}"/> flags(s), remove all references before the segment can be safely removed!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">108</context>
         </context-group>
       </trans-unit>
       <trans-unit id="segment.details.segment-not-used" datatype="html">
@@ -5541,6 +5497,34 @@
           <context context-type="linenumber">61</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="segment.idx.filter-by-name" datatype="html">
+        <source>Filter by name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="segment.idx.add-segment" datatype="html">
+        <source>Add segment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.name-unavailable" datatype="html">
+        <source>This name is unavailable</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="segment.permanent-remove-msg" datatype="html">
+        <source>will be permanently removed, this operation cannot be recovered!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">102</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="segments.segments" datatype="html">
         <source>Segments</source>
         <context-group purpose="location">
@@ -5552,95 +5536,95 @@
         <source>Default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">172</context>
+          <context context-type="linenumber">187</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.set-as" datatype="html">
         <source>Set as</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">173</context>
+          <context context-type="linenumber">188</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.add" datatype="html">
         <source>Add</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">194</context>
+          <context context-type="linenumber">209</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">222</context>
+          <context context-type="linenumber">237</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.to" datatype="html">
         <source>To</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">194</context>
+          <context context-type="linenumber">209</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.remove" datatype="html">
         <source>Remove</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">212</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.from" datatype="html">
         <source>From</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">212</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.diff.targeting-users" datatype="html">
         <source>Targeting users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">204</context>
+          <context context-type="linenumber">219</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.remove-rule" datatype="html">
         <source>Remove</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">227</context>
+          <context context-type="linenumber">242</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.update" datatype="html">
         <source>Update</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">247</context>
+          <context context-type="linenumber">262</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.diff.rules" datatype="html">
         <source>Rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">253</context>
+          <context context-type="linenumber">268</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.if" datatype="html">
         <source>If</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">296</context>
+          <context context-type="linenumber">311</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.and" datatype="html">
         <source>And</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">307</context>
+          <context context-type="linenumber">322</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.diff.serve" datatype="html">
         <source>Serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">310</context>
+          <context context-type="linenumber">325</context>
         </context-group>
       </trans-unit>
     </body>
