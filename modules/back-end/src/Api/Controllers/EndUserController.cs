@@ -43,8 +43,8 @@ public class EndUserController : ApiControllerBase
         return Ok(user);
     }
 
-    [HttpGet("by-keyIds")]
-    public async Task<ApiResponse<IEnumerable<EndUser>>> GetByKeyIdsAsync(Guid envId, [FromQuery] string[] keyIds)
+    [HttpPost("by-keyIds")]
+    public async Task<ApiResponse<IEnumerable<EndUser>>> GetByKeyIdsAsync(Guid envId, [FromBody] string[] keyIds)
     {
         var request = new GetEndUserByKeyIds
         {

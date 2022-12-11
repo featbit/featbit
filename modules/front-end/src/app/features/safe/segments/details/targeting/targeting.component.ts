@@ -68,7 +68,7 @@ export class TargetingComponent {
     // load users
     const userKeyIds = [...segment.included, ...segment.excluded];
     if (userKeyIds.length > 0) {
-      this.envUserService.getUsersByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
+      this.envUserService.getByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
         this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId));
         this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId));
         this.isLoading = false;

@@ -88,7 +88,7 @@ export class TargetingComponent implements OnInit {
 
         const userKeyIds = this.featureFlag.targetUsers.flatMap(tu => tu.keyIds);
         if (userKeyIds.length > 0) {
-          this.envUserService.getUsersByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
+          this.envUserService.getByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
             this.targetingUsersByVariation = this.featureFlag.variations.reduce((acc, cur) => {
               acc[cur.id] =  this.featureFlag.targetUsers
                 .find(tu => tu.variationId === cur.id)
