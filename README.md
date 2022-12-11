@@ -91,7 +91,7 @@ Once all containers have started, go to FeatBit's portal [http://localhost:8081]
 - username: **test@featbit.com**
 - password: **123456**
 
-**Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have ran docker compose), please read [the doc](https://featbit.gitbook.io/docs/installation) to make it accessible publicly.
+**Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [the doc](https://featbit.gitbook.io/docs/installation) to make it accessible publicly.
 
 ## Documentation & Communities
 
