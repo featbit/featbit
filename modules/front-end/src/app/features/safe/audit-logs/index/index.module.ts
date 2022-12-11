@@ -21,11 +21,6 @@ import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { NzFormModule } from "ng-zorro-antd/form";
 import {CoreModule} from "@core/core.module";
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
-import {NzListModule} from "ng-zorro-antd/list";
-import {NzCardModule} from "ng-zorro-antd/card";
-import {NzDescriptionsModule} from "ng-zorro-antd/descriptions";
-import {AuditLogsModule} from "@features/safe/audit-logs/audit-logs.module";
-import {DetailsModule} from "@features/safe/feature-flags/details/details.module";
 import {NzTimelineModule} from "ng-zorro-antd/timeline";
 import {NzEmptyModule} from "ng-zorro-antd/empty";
 
@@ -53,13 +48,9 @@ import {NzEmptyModule} from "ng-zorro-antd/empty";
     NzFormModule,
     NzDatePickerModule,
     ReactiveFormsModule,
-    CoreModule,
-    NzListModule,
-    NzCardModule,
-    NzDescriptionsModule,
-    AuditLogsModule,
     NzTimelineModule,
-    NzEmptyModule
+    NzEmptyModule,
+    CoreModule,
   ]
 })
 export class IndexModule { }
