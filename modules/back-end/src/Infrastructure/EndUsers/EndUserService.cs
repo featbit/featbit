@@ -67,7 +67,7 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         var totalCount = await Collection.CountDocumentsAsync(filter);
         var itemsQuery = Collection
             .Find(filter)
-            .Sort("{_id: -1}")
+            .SortByDescending(x => x.UpdatedAt)
             .Skip(userFilter.PageIndex * userFilter.PageSize)
             .Limit(userFilter.PageSize);
         var items = await itemsQuery.ToListAsync();
