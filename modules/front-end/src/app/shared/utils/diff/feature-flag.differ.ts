@@ -9,9 +9,14 @@ import {ObjectType, Operation} from "ffc-json-diff";
 import {IUserType} from "@shared/types";
 import {ISegment} from "@features/safe/segments/types/segments-index";
 
+interface IFlatUserType {
+  keyId: string,
+  name: string
+}
+
 interface IFlatVariationUsers {
   variation: string,
-  users: string[]
+  users: IFlatUserType[]
 }
 
 interface IFlatFallthrough {
@@ -75,13 +80,15 @@ const normalize = (featureFlag: IFeatureFlag, ref: refType): IFlatFeatureFlag =>
       variation: variation.value,
       users: variationTargetUsers === undefined ? [] : variationTargetUsers.keyIds.map((keyId) => {
         const user = ref.targetingUsers.find((user) => user.keyId === keyId);
-        if (!user) {
-          return keyId;
+        let name = keyId;
+
+        if (user) {
+          name = user.name?.length > 0
+            ? `${user.name} (${user.keyId})`
+            : user.keyId;
         }
 
-        return user.name?.length > 0
-          ? `${user.name} (${user.keyId})`
-          : user.keyId;
+        return { keyId, name };
       })
     }
   });
@@ -199,10 +206,10 @@ const translationConfigs = [
         switch (op.change.type) {
           case Operation.ADD:
             key = op.keyPath[1];
-            return `<span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.add:Add`}</span> <span class="ant-tag">${op.change.value}</span>${$localize `:@@common.diff.to:To`} <span class="ant-tag">${key}</span>`;
+            return `<span class="operation ant-typography ant-typography-success">${$localize `:@@common.diff.add:Add`}</span> <span class="ant-tag">${op.change.value.name}</span>${$localize `:@@common.diff.to:To`} <span class="ant-tag">${key}</span>`;
           case Operation.REMOVE:
             key = op.keyPath[1];
-            return `<span class="operation ant-typography ant-typography-danger">${$localize `:@@common.diff.remove:Remove`}</span> <span class="ant-tag remove-item">${op.change.value}</span>${$localize `:@@common.diff.from:From`} <span class="ant-tag">${key}</span>`;
+            return `<span class="operation ant-typography ant-typography-danger">${$localize `:@@common.diff.remove:Remove`}</span> <span class="ant-tag remove-item">${op.change.value.name}</span>${$localize `:@@common.diff.from:From`} <span class="ant-tag">${key}</span>`;
           default:
             return null;
         }

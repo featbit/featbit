@@ -33,7 +33,7 @@
     </div>
 
     <div class="audit-logs standard-div">
-      <nz-empty i18n-nzNotFoundContent="@@common.no-data" nzNotFoundContent="No data" *ngIf="groupedAuditLogs.length === 0"></nz-empty>
+      <nz-empty i18n-nzNotFoundContent="@@common.no-data" nzNotFoundContent="No data" *ngIf="!loading && groupedAuditLogs.length === 0"></nz-empty>
       <nz-timeline>
           <nz-timeline-item *ngFor="let group of groupedAuditLogs">
             <div  class="audit-logs-group">
@@ -49,6 +49,12 @@
             </div>
           </nz-timeline-item>
       </nz-timeline>
+      <div *ngIf="auditLogs.length < totalCount" class="load-more">
+        <button nz-button nzType="primary" class="save-btn" (click)="loadMoreAuditLogs()">
+          <i nz-icon nzType="icons:icon-sync"></i>
+          <ng-container i18n="@@common.review-and-save">More</ng-container>
+        </button>
+      </div>
     </div>
   </div>
 </section>

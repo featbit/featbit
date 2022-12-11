@@ -24,7 +24,7 @@ import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 export class IndexComponent implements OnInit, OnDestroy {
   private destory$: Subject<void> = new Subject();
 
-  private auditLogs: IAuditLog[] = [];
+  auditLogs: IAuditLog[] = [];
 
   groupedAuditLogs: {key: string, items: AuditLog[]}[] = [];
 
@@ -36,12 +36,15 @@ export class IndexComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   membersLoading: boolean = false;
   refTypeFlag: RefTypeEnum = RefTypeEnum.Flag;
+  totalCount: number = 0;
 
   loadAuditLogList() {
     this.loading = true;
     this.auditLogService
       .getList(this.auditLogFilter)
       .subscribe((auditLogs: IAuditLogListModel) => {
+        this.totalCount = auditLogs.totalCount;
+
         if (this.auditLogFilter.pageIndex === 1) {
           this.auditLogs = auditLogs.items;
         } else {
