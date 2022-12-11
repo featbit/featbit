@@ -19,10 +19,10 @@ public class EndUserController : ApiControllerBase
         return Ok(user);
     }
 
-    [HttpGet]
-    public async Task<ApiResponse<PagedResult<EndUser>>> GetListAsync(Guid envId)
+    [HttpPost]
+    public async Task<ApiResponse<PagedResult<EndUser>>> GetListAsync(Guid envId, SearchEndUser query)
     {
-        var filter = new EndUserFilter(Request.Query);
+        var filter = new EndUserFilter(query);
 
         var request = new GetEndUserList
         {

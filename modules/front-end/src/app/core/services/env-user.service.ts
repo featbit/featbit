@@ -47,14 +47,14 @@ export class EnvUserService {
   }
 
   search(filter: EnvUserFilter = new EnvUserFilter()): Observable<EnvUserPagedResult> {
-    const queryParam = {
+    const query = {
       searchText: filter.searchText ?? '',
       properties: filter.properties || [],
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };
 
-    return this.http.get<EnvUserPagedResult>(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
+    return this.http.post<EnvUserPagedResult>(this.baseUrl, query);
   }
 
   getFlags(id: string, filter: EndUserFlagFilter = new EndUserFlagFilter()): Observable<IPagedEndUserFlag> {

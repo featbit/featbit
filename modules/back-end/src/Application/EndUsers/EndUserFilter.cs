@@ -1,6 +1,5 @@
 using Application.Bases.Models;
 using Domain.EndUsers;
-using Microsoft.AspNetCore.Http;
 
 namespace Application.EndUsers;
 
@@ -12,21 +11,14 @@ public class EndUserFilter : PagedRequest
 
     public List<EndUserCustomizedProperty> CustomizedProperties { get; set; } = new();
 
-    public EndUserFilter(IQueryCollection query)
+    public EndUserFilter(SearchEndUser query)
     {
         // pagination params
-        if (int.TryParse(query["pageIndex"].ToString(), out var pageIndex))
-        {
-            PageIndex = pageIndex;
-        }
-
-        if (int.TryParse(query["pageSize"].ToString(), out var pageSize))
-        {
-            PageSize = pageSize;
-        }
+        PageIndex = query.PageIndex;
+        PageSize = query.PageSize;
 
         // search text (value for multiple fields)
-        var searchText = query["searchText"].ToString();
+        var searchText = query.SearchText;
         if (string.IsNullOrWhiteSpace(searchText))
         {
             // no search text
@@ -34,8 +26,8 @@ public class EndUserFilter : PagedRequest
         }
 
         // properties
-        var properties = query["properties"].ToList();
-        if (!properties.Any())
+        var properties = query.Properties;
+        if (properties == null || !properties.Any())
         {
             // if no properties specified, default to keyId & name
             KeyId = searchText;
