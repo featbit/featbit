@@ -44,10 +44,10 @@ public class EndUserFilter : PagedRequest
         }
 
         // built-in properties
-        KeyId = properties.Exists(x => x.Equals("keyId", StringComparison.OrdinalIgnoreCase))
+        KeyId = properties.Exists(x => x.Equals(EndUserConsts.KeyId, StringComparison.OrdinalIgnoreCase))
             ? searchText
             : string.Empty;
-        Name = properties.Exists(x => x.Equals("name", StringComparison.OrdinalIgnoreCase))
+        Name = properties.Exists(x => x.Equals(EndUserConsts.Name, StringComparison.OrdinalIgnoreCase))
             ? searchText
             : string.Empty;
 

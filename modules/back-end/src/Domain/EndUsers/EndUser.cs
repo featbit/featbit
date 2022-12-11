@@ -50,12 +50,12 @@ public class EndUser : AuditedEntity
             return string.Empty;
         }
 
-        if (property == "keyId")
+        if (property == EndUserConsts.KeyId)
         {
             return KeyId;
         }
 
-        if (property == "name")
+        if (property == EndUserConsts.Name)
         {
             return Name;
         }
