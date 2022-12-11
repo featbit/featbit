@@ -140,7 +140,7 @@ export class TargetingComponent implements OnInit {
   }
 
   public onSearchUser(searchText: string = '') {
-    const filter = new EnvUserFilter(searchText, ['Name', 'KeyId'], 1, 5);
+    const filter = new EnvUserFilter(searchText, [], 1, 5);
     this.envUserService.search(filter).subscribe(pagedResult => {
       this.userList = [...pagedResult.items];
     })
