@@ -96,6 +96,10 @@ export class AuditLog {
     }
   }
 
+  get shouldShowChangeList(): boolean {
+    return this.data.operation === AuditLogOpEnum.Update;
+  }
+
   get auditLog() {
     return {...this.data};
   }
