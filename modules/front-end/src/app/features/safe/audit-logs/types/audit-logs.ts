@@ -15,6 +15,7 @@ export enum AuditLogOpEnum {
   Create = 'Create',
   Update = 'Update',
   Archive = 'Archive',
+  Restore = 'Restore',
   Remove = 'Remove'
 }
 
@@ -130,6 +131,9 @@ export class AuditLog {
       case AuditLogOpEnum.Archive:
         result += ` ${$localize `:@@auditlogs.idx.operation-archive:archived`}`;
         break;
+      case AuditLogOpEnum.Restore:
+        result += ` ${$localize `:@@auditlogs.idx.operation-restore:restored`}`;
+        break;
       case AuditLogOpEnum.Remove:
         result += ` ${$localize `:@@auditlogs.idx.operation-remove:removed`}`;
         break;
@@ -147,18 +151,4 @@ export class AuditLog {
 
     return result;
   }
-
-  // get dataToSave() {
-  //   try{
-  //     this.data.rules = handleRulesBeforeSave(this.data.rules);
-  //
-  //     return {
-  //       ...this.data,
-  //       included: this._includedUsers.map(u => u.keyId),
-  //       excluded: this._excludedUsers.map(u => u.keyId)
-  //     };
-  //   } catch (err){
-  //     console.log(err);
-  //   }
-  // }
 }

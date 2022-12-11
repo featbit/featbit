@@ -2786,35 +2786,42 @@
         <source>created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">126</context>
         </context-group>
       </trans-unit>
       <trans-unit id="auditlogs.idx.operation-update" datatype="html">
         <source>updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">129</context>
         </context-group>
       </trans-unit>
       <trans-unit id="auditlogs.idx.operation-archive" datatype="html">
         <source>archived</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">132</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="auditlogs.idx.operation-restore" datatype="html">
+        <source>restored</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
+          <context context-type="linenumber">135</context>
         </context-group>
       </trans-unit>
       <trans-unit id="auditlogs.idx.operation-remove" datatype="html">
         <source>removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">130</context>
+          <context context-type="linenumber">138</context>
         </context-group>
       </trans-unit>
       <trans-unit id="auditlogs.idx.reftype-flag" datatype="html">
         <source>the flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">138</context>
+          <context context-type="linenumber">146</context>
         </context-group>
       </trans-unit>
       <trans-unit id="sync-locally" datatype="html">

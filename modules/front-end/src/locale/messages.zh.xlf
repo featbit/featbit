@@ -2980,39 +2980,47 @@
         <source>created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">126</context>
         </context-group>
-        <target>创建</target>
+        <target>创建了</target>
       </trans-unit>
       <trans-unit id="auditlogs.idx.operation-update" datatype="html">
         <source>updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">129</context>
         </context-group>
-        <target>更新</target>
+        <target>更新了</target>
       </trans-unit>
       <trans-unit id="auditlogs.idx.operation-archive" datatype="html">
         <source>archived</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">132</context>
         </context-group>
-        <target>存档</target>
+        <target>存档了</target>
+      </trans-unit>
+      <trans-unit id="auditlogs.idx.operation-restore" datatype="html">
+        <source>restored</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
+          <context context-type="linenumber">135</context>
+        </context-group>
+        <target>恢复了</target>
       </trans-unit>
       <trans-unit id="auditlogs.idx.operation-remove" datatype="html">
         <source>removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">130</context>
+          <context context-type="linenumber">138</context>
         </context-group>
-        <target>删除</target>
+        <target>删除了</target>
       </trans-unit>
       <trans-unit id="auditlogs.idx.reftype-flag" datatype="html">
         <source>the flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/types/audit-logs.ts</context>
-          <context context-type="linenumber">138</context>
+          <context context-type="linenumber">146</context>
         </context-group>
         <target>开关</target>
       </trans-unit>
