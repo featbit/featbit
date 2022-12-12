@@ -1909,7 +1909,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">250</context>
+          <context context-type="linenumber">246</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
@@ -2564,7 +2564,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">280</context>
+          <context context-type="linenumber">276</context>
         </context-group>
         <target>保存与更新成功</target>
       </trans-unit>
@@ -3452,7 +3452,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">156</context>
+          <context context-type="linenumber">152</context>
         </context-group>
         <target>数据加载失败，请重试</target>
       </trans-unit>
@@ -4545,7 +4545,7 @@
         <source>Rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">175</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
@@ -4557,7 +4557,7 @@
         <source>Failed to Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">284</context>
+          <context context-type="linenumber">280</context>
         </context-group>
         <target>保存失败</target>
       </trans-unit>
@@ -4565,7 +4565,7 @@
         <source>Fallthrough rule can not be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">304</context>
+          <context context-type="linenumber">300</context>
         </context-group>
         <target>默认返回值不能为空</target>
       </trans-unit>
@@ -4573,7 +4573,7 @@
         <source>The sum of fallthrough rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">316</context>
+          <context context-type="linenumber">312</context>
         </context-group>
         <target>请确认默认返回值的总百分比必须为100%</target>
       </trans-unit>
@@ -4581,11 +4581,11 @@
         <source>The conditions of each rule must be set</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">326</context>
+          <context context-type="linenumber">322</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">338</context>
         </context-group>
         <target>每条规则的所有条件都不能为空</target>
       </trans-unit>
@@ -4593,7 +4593,7 @@
         <source>The sum of each rule&apos;s rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">354</context>
+          <context context-type="linenumber">350</context>
         </context-group>
         <target>请确认匹配条件中每条规则的总百分比必须为100%！</target>
       </trans-unit>

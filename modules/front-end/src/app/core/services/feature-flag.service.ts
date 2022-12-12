@@ -17,7 +17,6 @@ import {
 } from "@features/safe/feature-flags/types/details";
 import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
 
-
 @Injectable({
   providedIn: 'root'
 })

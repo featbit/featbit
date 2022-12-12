@@ -86,10 +86,6 @@ export class TargetingComponent implements OnInit {
       this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.loadData());
       this.loadData();
     });
-
-    // this.reviewForm = this.fb.group({
-    //   comment: ['', [Validators.required]]
-    // });
   }
 
   async loadData() {
