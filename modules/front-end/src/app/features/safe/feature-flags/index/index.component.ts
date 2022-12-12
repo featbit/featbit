@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { encodeURIComponentFfc } from '@shared/utils';
+import { encodeURIComponentFfc, slugify } from '@shared/utils';
 import {
   IFeatureFlagListCheckItem,
   IFeatureFlagListFilter,
@@ -36,8 +36,8 @@ export class IndexComponent implements OnInit {
     private modal: NzModalService,
   ) {
     this.featureFlagForm = this.fb.group({
-      name: ['', [this.featureFlagNameValidator], [this.featureFlagNameAsyncValidator], 'change'],
-      keyName: [{ value: '', disabled: true }, [Validators.required]]
+      name: ['', Validators.required],
+      key: ['', Validators.required, this.flagKeyAsyncValidator]
     });
   }
 
@@ -224,22 +224,11 @@ export class IndexComponent implements OnInit {
   createModalVisible: boolean = false;
   featureFlagForm: FormGroup;
 
-  featureFlagNameValidator = (control: FormControl) => {
-    const name = control.value;
-    if (!name) {
-      return { error: true, required: true };
-    }
-
-    if (name.includes('__')) {
-      return { error: true, invalid_character: true };
-    }
-  }
-
-  featureFlagNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+  flagKeyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
     switchMap(value => this.featureFlagService.isKeyUsed(value as string)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
+    map(isKeyUsed => {
+      switch (isKeyUsed) {
         case true:
           return { error: true, duplicated: true };
         case undefined:
@@ -253,12 +242,16 @@ export class IndexComponent implements OnInit {
 
   creating: boolean = false;
 
-  createFeatureFlag() {
+  nameChange(name: string) {
+    let keyControl = this.featureFlagForm.get('key')!;
+    keyControl.setValue(slugify(name));
+    keyControl.markAsDirty();
+  }
+
+  create() {
     this.creating = true;
 
-    const name = this.featureFlagForm.get('name').value;
-
-    this.featureFlagService.create(name).subscribe({
+    this.featureFlagService.create(this.featureFlagForm.value).subscribe({
       next: (result: IFeatureFlag) => {
         this.navigateToFlagDetail(result);
         this.creating = false;

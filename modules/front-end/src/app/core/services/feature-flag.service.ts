@@ -88,13 +88,8 @@ export class FeatureFlagService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  public create(name) {
-    const body = {
-      name: name,
-      environmentId: this.envId,
-    };
-
-    return this.http.post(this.baseUrl, body);
+  public create(payload) {
+    return this.http.post(this.baseUrl, payload);
   }
 
   public copyToEnv(targetEnvId: string, flagIds: string[]): Observable<ICopyToEnvResult> {

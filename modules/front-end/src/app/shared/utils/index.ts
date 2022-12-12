@@ -102,3 +102,11 @@ export function trackByFunction(index: number, item: any) {
 export const isNumber = (value: number): boolean => {
   return typeof value === 'number' && isFinite(value);
 }
+
+// https://github.com/30-seconds/30-seconds-of-code/blob/master/snippets/slugify.md
+export const slugify = str => str
+  .toLowerCase()
+  .trim()
+  .replace(/[^\w\s-]/g, '')
+  .replace(/[\s_-]+/g, '-')
+  .replace(/^-+|-+$/g, '');

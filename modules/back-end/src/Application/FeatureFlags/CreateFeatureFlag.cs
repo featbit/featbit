@@ -9,6 +9,8 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
     public Guid EnvId { get; set; }
 
     public string Name { get; set; }
+
+    public string Key { get; set; }
 }
 
 public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
@@ -17,6 +19,9 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+
+        RuleFor(x => x.Key)
+            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired);
     }
 }
 
@@ -35,7 +40,7 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
 
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = new FeatureFlag(request.EnvId, request.Name, _currentUser.Id);
+        var flag = new FeatureFlag(request.EnvId, request.Name, request.Key, _currentUser.Id);
         await _service.AddOneAsync(flag);
 
         // publish on feature flag change notification
