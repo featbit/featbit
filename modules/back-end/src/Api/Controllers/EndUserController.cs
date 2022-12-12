@@ -19,10 +19,10 @@ public class EndUserController : ApiControllerBase
         return Ok(user);
     }
 
-    [HttpGet]
-    public async Task<ApiResponse<PagedResult<EndUser>>> GetListAsync(Guid envId)
+    [HttpPost]
+    public async Task<ApiResponse<PagedResult<EndUser>>> GetListAsync(Guid envId, SearchEndUser query)
     {
-        var filter = new EndUserFilter(Request.Query);
+        var filter = new EndUserFilter(query);
 
         var request = new GetEndUserList
         {
@@ -43,8 +43,8 @@ public class EndUserController : ApiControllerBase
         return Ok(user);
     }
 
-    [HttpGet("by-keyIds")]
-    public async Task<ApiResponse<IEnumerable<EndUser>>> GetByKeyIdsAsync(Guid envId, [FromQuery] string[] keyIds)
+    [HttpPost("by-keyIds")]
+    public async Task<ApiResponse<IEnumerable<EndUser>>> GetByKeyIdsAsync(Guid envId, [FromBody] string[] keyIds)
     {
         var request = new GetEndUserByKeyIds
         {

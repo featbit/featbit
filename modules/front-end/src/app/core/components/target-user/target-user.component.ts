@@ -6,7 +6,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import {CURRENT_PROJECT} from "@utils/localstorage-keys";
+import { CURRENT_PROJECT } from "@utils/localstorage-keys";
+import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 
 @Component({
   selector: 'target-user',
@@ -16,7 +17,6 @@ import {CURRENT_PROJECT} from "@utils/localstorage-keys";
 export class TargetUserComponent implements OnInit {
 
   private envId;
-  private inputs = new Subject<any>();
   public compareWith: (obj1: IUserType, obj2: IUserType) => boolean = (obj1: IUserType, obj2: IUserType) => {
     if(obj1 && obj2) {
       return obj1.id === obj2.id;
@@ -59,7 +59,8 @@ export class TargetUserComponent implements OnInit {
     });
   }
 
-  @Output() search = new EventEmitter<string>();
+  debouncer = new Subject<EnvUserFilter>();
+  @Output() search = new EventEmitter<EnvUserFilter>();
   @Output() onSelectedUserListChange = new EventEmitter<IUserType[]>();
 
   public selectModel: IUserType;
@@ -84,12 +85,10 @@ export class TargetUserComponent implements OnInit {
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService) {
     this.envId = JSON.parse(localStorage.getItem(CURRENT_PROJECT()))?.envId;
-    this.inputs.pipe(
+    this.debouncer.pipe(
       debounceTime(500),
       distinctUntilChanged()
-    ).subscribe(e => {
-      this.search.next(e);
-    });
+    ).subscribe(filter => this.search.next(filter));
   }
 
   ngOnInit() {
@@ -98,7 +97,13 @@ export class TargetUserComponent implements OnInit {
 
   public onSearch(value: string = '') {
     this.isLoadingUsers = true;
-    this.inputs.next(value);
+
+    const excludedKeyIds = this.selectedUserDetailList
+      .filter(x => x.name.includes(value) || x.keyId.includes(value))
+      .map(x => x.keyId);
+
+    const filter = new EnvUserFilter(value, [], excludedKeyIds, 1, 5);
+    this.debouncer.next(filter);
   }
 
   public isSelected(user: IUserType): boolean {

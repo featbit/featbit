@@ -1,4 +1,4 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IOrganization, IProjectEnv } from '@shared/types';
@@ -8,15 +8,15 @@ import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { MessageQueueService } from '@services/message-queue.service';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import {USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP} from "@shared/constants";
-import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
-import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {ICondition, IRule, IRuleVariation} from "@shared/rules";
-import {FeatureFlagService} from "@services/feature-flag.service";
-import {isSegmentCondition, isSingleOperator, uuidv4} from "@utils/index";
+import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
+import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { FeatureFlag, IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { ICondition, IRule, IRuleVariation } from "@shared/rules";
+import { FeatureFlagService } from "@services/feature-flag.service";
+import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import featureFlagDiffer from "@utils/diff/feature-flag.differ";
-import {SegmentService} from "@services/segment.service";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import { SegmentService } from "@services/segment.service";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -104,14 +104,14 @@ export class TargetingComponent implements OnInit {
   public allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
 
   loadFeatureFlag() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
         this.featureFlag = new FeatureFlag(result);
         this.isTargetUsersActive = this.featureFlag.targetUsers.some(tu => tu.keyIds.length > 0);
 
         const userKeyIds = this.featureFlag.targetUsers.flatMap(tu => tu.keyIds);
         if (userKeyIds.length > 0) {
-          this.envUserService.getUsersByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
+          this.envUserService.getByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
             this.targetingUsersByVariation = this.featureFlag.variations.reduce((acc, cur) => {
               acc[cur.id] =  this.featureFlag.targetUsers
                 .find(tu => tu.variationId === cur.id)
@@ -143,7 +143,7 @@ export class TargetingComponent implements OnInit {
   }
 
   private loadUserPropsData() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.envUserPropService.get().subscribe((result) => {
         if (result) {
           this.userProps = [USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP, ...result];
@@ -159,8 +159,7 @@ export class TargetingComponent implements OnInit {
     });
   }
 
-  public onSearchUser(searchText: string = '') {
-    const filter = new EnvUserFilter(searchText, ['Name', 'KeyId'], 1, 5);
+  public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
     this.envUserService.search(filter).subscribe(pagedResult => {
       this.userList = [...pagedResult.items];
     })

@@ -1,7 +1,7 @@
 import { USER_PROFILE } from "./localstorage-keys";
-import {IAuthProps} from "../types";
-import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
-import {ICondition} from "@shared/rules";
+import { IAuthProps } from "../types";
+import { USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT } from "@shared/constants";
+import { ICondition } from "@shared/rules";
 
 export function getPathPrefix() {
   return location.pathname.match(/^(?<locale>\/en\/|\/zh\/)/i)?.groups['locale'] || '/';
@@ -106,3 +106,11 @@ export const isNumber = (value: number): boolean => {
 export const deepCopy = (obj: any): any => {
   return JSON.parse(JSON.stringify(obj));
 }
+
+// https://github.com/30-seconds/30-seconds-of-code/blob/master/snippets/slugify.md
+export const slugify = str => str
+  .toLowerCase()
+  .trim()
+  .replace(/[^\w\s-]/g, '')
+  .replace(/[\s_-]+/g, '-')
+  .replace(/^-+|-+$/g, '');

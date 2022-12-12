@@ -31,12 +31,12 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool IsArchived { get; set; }
 
-    public FeatureFlag(Guid envId, string name, Guid currentUserId) : base(currentUserId)
+    public FeatureFlag(Guid envId, string name, string key, Guid currentUserId) : base(currentUserId)
     {
         EnvId = envId;
 
         Name = name;
-        Key = name.Replace(new[] { ' ', '.', ':', '_', '\'', '/', '\\' }, '-');
+        Key = key;
 
         var falsyVariationId = Guid.NewGuid().ToString();
         var truthyVariationId = Guid.NewGuid().ToString();

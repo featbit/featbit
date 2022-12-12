@@ -36,9 +36,9 @@ export class EnvUserService {
   }
 
   // get users by key ids
-  public getUsersByKeyIds(keyIds: string[]): Observable<any> {
+  public getByKeyIds(keyIds: string[]): Observable<any> {
     const url = `${this.baseUrl}/by-keyIds`;
-    return this.http.get(url, {params: new HttpParams({fromObject: { keyIds }})});
+    return this.http.post(url, keyIds);
   }
 
   // upsert users
@@ -47,14 +47,15 @@ export class EnvUserService {
   }
 
   search(filter: EnvUserFilter = new EnvUserFilter()): Observable<EnvUserPagedResult> {
-    const queryParam = {
+    const query = {
       searchText: filter.searchText ?? '',
       properties: filter.properties || [],
+      excludedKeyIds: filter.excludedKeyIds || [],
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };
 
-    return this.http.get<EnvUserPagedResult>(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
+    return this.http.post<EnvUserPagedResult>(this.baseUrl, query);
   }
 
   getFlags(id: string, filter: EndUserFlagFilter = new EndUserFlagFilter()): Observable<IPagedEndUserFlag> {

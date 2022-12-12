@@ -18,8 +18,6 @@ export class IndexComponent implements OnInit, OnDestroy {
   private destory$: Subject<void> = new Subject();
 
   public createModalVisible: boolean = false;
-  public isOkLoading: boolean = false;
-  public segmentName: string = '';
   public isIntoing: boolean = false;
 
   public deleteModalVisible: boolean = false;
@@ -94,17 +92,6 @@ export class IndexComponent implements OnInit, OnDestroy {
 
   segmentForm: FormGroup;
 
-  segmentNameValidator = (control: FormControl) => {
-    const name = control.value;
-    if (!name) {
-      return {error: true, required: true};
-    }
-
-    if (name.includes('__')) {
-      return {error: true, invalid_character: true};
-    }
-  }
-
   segmentNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
     switchMap(value => this.segmentService.isNameUsed(value as string)),
@@ -154,9 +141,8 @@ export class IndexComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
   ) {
     this.segmentForm = this.fb.group({
-      name: ['', [this.segmentNameValidator], [this.segmentNameAsyncValidator], 'change'],
-      keyName: [{value: '', disabled: true}, [Validators.required]],
-      description: [null]
+      name: ['', Validators.required, this.segmentNameAsyncValidator],
+      description: ['']
     });
   }
 
