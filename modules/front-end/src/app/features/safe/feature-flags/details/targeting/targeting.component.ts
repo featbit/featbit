@@ -8,12 +8,12 @@ import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { MessageQueueService } from '@services/message-queue.service';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import {USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP} from "@shared/constants";
-import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
-import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {ICondition, IRule, IRuleVariation} from "@shared/rules";
-import {FeatureFlagService} from "@services/feature-flag.service";
-import {uuidv4} from "@utils/index";
+import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
+import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { FeatureFlag, IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { ICondition, IRule, IRuleVariation } from "@shared/rules";
+import { FeatureFlagService } from "@services/feature-flag.service";
+import { uuidv4 } from "@utils/index";
 
 @Component({
   selector: 'ff-targeting',
@@ -81,7 +81,7 @@ export class TargetingComponent implements OnInit {
 
   public targetingUsersByVariation: { [key: string]: IUserType[] } = {}; // {variationId: users}
   loadFeatureFlag() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
         this.featureFlag = new FeatureFlag(result);
         this.isTargetUsersActive = this.featureFlag.targetUsers.some(tu => tu.keyIds.length > 0);
@@ -123,7 +123,7 @@ export class TargetingComponent implements OnInit {
   }
 
   private loadUserPropsData() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.envUserPropService.get().subscribe((result) => {
         if (result) {
           this.userProps = [USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP, ...result];
@@ -139,8 +139,7 @@ export class TargetingComponent implements OnInit {
     });
   }
 
-  public onSearchUser(searchText: string = '') {
-    const filter = new EnvUserFilter(searchText, [], 1, 5);
+  public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
     this.envUserService.search(filter).subscribe(pagedResult => {
       this.userList = [...pagedResult.items];
     })
@@ -201,15 +200,17 @@ export class TargetingComponent implements OnInit {
 
     const { id, targetUsers, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
 
-    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets })
-      .subscribe((result) => {
+    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets }).subscribe({
+      next: () => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key));
-      }, _ => {
+      },
+      error: () => {
         this.msg.error($localize `:@@common.save-fial:Failed to Save`);
         this.isLoading = false;
-      })
+      }
+    });
   }
 
   private validateFeatureFlag(): string[]  {

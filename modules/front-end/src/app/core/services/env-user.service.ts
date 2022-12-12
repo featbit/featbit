@@ -50,6 +50,7 @@ export class EnvUserService {
     const query = {
       searchText: filter.searchText ?? '',
       properties: filter.properties || [],
+      excludedKeyIds: filter.excludedKeyIds || [],
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };

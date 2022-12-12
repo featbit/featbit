@@ -78,8 +78,7 @@ export class TargetingComponent {
     }
   }
 
-  public onSearchUser(searchText: string = '') {
-    const filter = new EnvUserFilter(searchText, [], 1, 5);
+  public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
     this.envUserService.search(filter).subscribe(pagedResult => {
       this.userList = [...pagedResult.items];
     })
