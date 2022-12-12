@@ -18,9 +18,22 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
     {
         var filterBuilder = Builders<EndUser>.Filter;
 
-        var filters = new List<FilterDefinition<EndUser>>();
+        var mustFilters = new List<FilterDefinition<EndUser>>
+        {
+            filterBuilder.Eq(x => x.EnvId, envId)
+        };
 
-        #region built-in properties filter
+        // excluded keyIds
+        var excludedKeyIds = userFilter.ExcludedKeyIds ?? Array.Empty<string>();
+        if (excludedKeyIds.Any())
+        {
+            var excludedKeyIdsFilter = filterBuilder.Nin(x => x.KeyId, excludedKeyIds);
+            mustFilters.Add(excludedKeyIdsFilter);
+        }
+
+        var orFilters = new List<FilterDefinition<EndUser>>();
+
+        // built-in properties
 
         // mongodb not support ordinal comparisons yet, use StringComparison.CurrentCultureIgnoreCase
         // https://jira.mongodb.org/browse/CSHARP-4090#:~:text=until%20the%20database%20supports%20ordinal%20comparisons.
@@ -30,20 +43,17 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         {
             var keyIdFilter =
                 filterBuilder.Where(x => x.KeyId.Contains(keyId, StringComparison.CurrentCultureIgnoreCase));
-            filters.Add(keyIdFilter);
+            orFilters.Add(keyIdFilter);
         }
 
         var name = userFilter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
             var nameFilter = filterBuilder.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
-            filters.Add(nameFilter);
+            orFilters.Add(nameFilter);
         }
 
-        #endregion
-
-        #region custom properties filter
-
+        // custom properties
         var customizedProperties = userFilter.CustomizedProperties ?? new List<EndUserCustomizedProperty>();
         foreach (var customizedProperty in customizedProperties)
         {
@@ -53,15 +63,13 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
                      y.Value.Contains(customizedProperty.Value, StringComparison.CurrentCultureIgnoreCase)
             );
 
-            filters.Add(customizedPropertyFilter);
+            orFilters.Add(customizedPropertyFilter);
         }
 
-        #endregion
-
-        var filter = filterBuilder.Eq(x => x.EnvId, envId);
-        if (filters.Any())
+        var filter = filterBuilder.And(mustFilters);
+        if (orFilters.Any())
         {
-            filter &= filterBuilder.Or(filters);
+            filter &= filterBuilder.Or(orFilters);
         }
 
         var totalCount = await Collection.CountDocumentsAsync(filter);

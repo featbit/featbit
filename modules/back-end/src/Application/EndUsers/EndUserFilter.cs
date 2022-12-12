@@ -9,13 +9,20 @@ public class EndUserFilter : PagedRequest
 
     public string Name { get; set; }
 
-    public List<EndUserCustomizedProperty> CustomizedProperties { get; set; } = new();
+    public List<EndUserCustomizedProperty> CustomizedProperties { get; set; }
+
+    public string[] ExcludedKeyIds { get; set; }
 
     public EndUserFilter(SearchEndUser query)
     {
+        CustomizedProperties = new List<EndUserCustomizedProperty>();
+
         // pagination params
         PageIndex = query.PageIndex;
         PageSize = query.PageSize;
+
+        // excluded keyIds
+        ExcludedKeyIds = query.ExcludedKeyIds ?? Array.Empty<string>();
 
         // search text (value for multiple fields)
         var searchText = query.SearchText;
