@@ -184,10 +184,13 @@
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
         <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
-          <input nz-input formControlName="name"
-                 placeholder="A human-friendly name for your feature flag"
-                 i18n-placeholder="@@ff.idx.feature-flag-name"
-          (ngModelChange)="nameChange($event)"/>
+          <input
+            nz-input
+            formControlName="name"
+            placeholder="A human-friendly name for your feature flag"
+            i18n-placeholder="@@ff.idx.feature-flag-name"
+            (ngModelChange)="nameChange($event)"
+          />
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
