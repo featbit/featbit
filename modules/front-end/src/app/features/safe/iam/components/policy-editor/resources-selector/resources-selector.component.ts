@@ -9,6 +9,7 @@ import {
   rscParamsDict
 } from "@features/safe/iam/components/policy-editor/types";
 import {ResourceService} from "@services/resource.service";
+import {deepCopy} from "@utils/index";
 
 @Component({
   selector: 'resources-selector',
@@ -106,7 +107,7 @@ export class ResourcesSelectorComponent {
   resetModalParams() {
     this.currentRn = {} as RNViewModel;
     //deep copy
-    this.rscParams = JSON.parse(JSON.stringify(rscParamsDict[this.resourceType.type]));
+    this.rscParams = deepCopy(rscParamsDict[this.resourceType.type]);
   }
 
   save() {

@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { isSegmentRule } from '@utils/index';
+import { isSegmentCondition } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { IRuleOp, ruleOps, findIndex } from '../ruleConfig';
@@ -35,7 +35,7 @@ export class RuleComponent  {
 
   @Input("condition")
   set content(data: ICondition) {
-    this.isSegmentRule = isSegmentRule(data);
+    this.isSegmentRule = isSegmentCondition(data);
     this.condition = { ...data };
   }
 
@@ -126,7 +126,7 @@ export class RuleComponent  {
   }
 
   public onPropertyChange() {
-    this.isSegmentRule = isSegmentRule(this.condition);
+    this.isSegmentRule = isSegmentCondition(this.condition);
 
     let result = findIndex(this.condition.op);
     this.condition.value = this.ruleValueConfig[result]?.default;

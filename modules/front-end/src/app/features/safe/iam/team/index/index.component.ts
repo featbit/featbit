@@ -5,7 +5,7 @@ import { debounceTime } from 'rxjs/operators';
 import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MemberService } from "@services/member.service";
-import {IMember, IPagedMember, MemberFilter, memberRn} from "@features/safe/iam/types/member";
+import {IMember, IMemberListModel, MemberFilter, memberRn} from "@features/safe/iam/types/member";
 import {IAuthProps} from "@shared/types";
 
 @Component({
@@ -40,7 +40,7 @@ export class IndexComponent implements OnInit {
   }
 
   isLoading: boolean = true;
-  pagedMember: IPagedMember = {
+  pagedMember: IMemberListModel = {
     items: [],
     totalCount: 0
   };

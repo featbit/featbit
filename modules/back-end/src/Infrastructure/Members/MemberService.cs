@@ -85,11 +85,14 @@ public class MemberService : IMemberService
                 InitialPassword = organizationUser.InitialPassword,
             };
 
-        // email filter
+        // email/name filter
         var searchText = filter.SearchText;
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            query = query.Where(x => x.Email.Contains(searchText, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x =>
+                x.Email.Contains(searchText, StringComparison.CurrentCultureIgnoreCase) ||
+                x.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)
+            );
         }
 
         var totalCount = await query.CountAsync();

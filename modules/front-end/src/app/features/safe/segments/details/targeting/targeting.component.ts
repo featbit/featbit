@@ -100,7 +100,7 @@ export class TargetingComponent {
         this.loadSegment(result);
         this.isLoading = false;
     }, _ => {
-      this.msg.error("修改失败!");
+      this.msg.error($localize `:@@common.operation-failed:Operation failed`);
       this.isLoading = false;
     })
   }

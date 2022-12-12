@@ -166,6 +166,11 @@ app-root {
   }
 }
 
+.ant-picker-range {
+  height: 40px;
+  border-radius: 20px;
+}
+
 .find-rule {
   .ant-card {
     min-width: 910px;
@@ -1078,4 +1083,43 @@ app-root {
 // enable ant-input-suffix pointer events
 .ant-input-suffix {
   pointer-events: unset;
+}
+
+.change-list {
+  padding-left: 0;
+
+  .diff-category {
+    .diff-category-title {
+      margin-bottom: 0;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 19.5px;
+    }
+
+    ul.diff-category-instructions {
+      padding-left: 30px;
+      line-height: 25px;
+
+      .diff-instruction {
+        .remove-item {
+          text-decoration: line-through;
+        }
+
+        .diff-rule-description {
+          padding-left: 15px;
+
+          .diff-rule-condition {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-start;
+            color: #646f7a;
+          }
+
+          .condition-keyword {
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
 }

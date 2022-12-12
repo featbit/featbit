@@ -1,8 +1,4 @@
 ﻿using System.Net.Http.Json;
-using System.Text;
-using Domain.Utils;
-using System.Net.Mime;
-using System.Text.Json;
 using Domain.Experiments;
 using Domain.FeatureFlags;
 
@@ -19,34 +15,34 @@ public class OlapService : IOlapService
 
     public async Task<FeatureFlagEndUserStats> GetFeatureFlagEndUserStats(FeatureFlagEndUserParam param)
     {
-        param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
-        param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
+        param.StartTime *= 1000; // milliseconds to microseconds
+        param.EndTime *= 1000; // milliseconds to microseconds
         
         var response = await _httpClient.PostAsJsonAsync("/api/events/stat/enduser", param);
 
         var result = await response.Content.ReadFromJsonAsync<FeatureFlagEndUserStatsResponse>();
 
-        return result.Data;
+        return result!.Data;
     }
     
     public async Task<ICollection<Insights>> GetFeatureFlagInsights(InsightsParam param)
     {
-        param.StartTime = param.StartTime * 1000; // milliseconds to microseconds
-        param.EndTime = param.EndTime * 1000; // milliseconds to microseconds
+        param.StartTime *= 1000; // milliseconds to microseconds
+        param.EndTime *= 1000; // milliseconds to microseconds
         
         var response = await _httpClient.PostAsJsonAsync("/api/events/stat/featureflag", param);
 
         var result = await response.Content.ReadFromJsonAsync<InsightsResponse>();
 
-        return result.Data;
+        return result!.Data;
     }
 
     public async Task<ExperimentIteration> GetExptIterationResultAsync(ExptIterationParam param)
     {
-        param.StartExptTime = param.StartExptTime * 1000; // milliseconds to microseconds
+        param.StartExptTime *= 1000; // milliseconds to microseconds
         if (param.EndExptTime.HasValue)
         {
-            param.EndExptTime = param.EndExptTime * 1000; // milliseconds to microseconds
+            param.EndExptTime *= 1000; // milliseconds to microseconds
         }
         
         var response = await _httpClient.PostAsJsonAsync("/api/expt/results", param);
@@ -55,7 +51,7 @@ public class OlapService : IOlapService
 
         return new ExperimentIteration
         {
-            Id = result.Data.IterationId,
+            Id = result!.Data.IterationId,
             StartTime = result.Data.StartTime,
             EndTime = result.Data.EndTime,
             UpdatedAt = DateTime.UtcNow,

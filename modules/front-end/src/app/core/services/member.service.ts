@@ -5,7 +5,7 @@ import { environment } from "src/environments/environment";
 import { Observable } from "rxjs";
 import {
   IMember, InheritedMemberPolicyFilter, IPagedInheritedMemberPolicy,
-  IPagedMember,
+  IMemberListModel,
   IPagedMemberGroup, IPagedMemberPolicy,
   MemberFilter,
   MemberGroupFilter,
@@ -24,14 +24,14 @@ export class MemberService {
     return `${environment.url}/api/v1/organizations/${organizationId}/members`;
   }
 
-  getList(filter: MemberFilter = new MemberFilter()): Observable<IPagedMember> {
+  getList(filter: MemberFilter = new MemberFilter()): Observable<IMemberListModel> {
     const queryParam = {
       searchText: filter.searchText ?? '',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };
 
-    return this.http.get<IPagedMember>(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
+    return this.http.get<IMemberListModel>(this.baseUrl, {params: new HttpParams({fromObject: queryParam})});
   }
 
   get(id: string) {

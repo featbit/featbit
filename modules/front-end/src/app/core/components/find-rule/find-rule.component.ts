@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, } from '@angular/core';
 import { SegmentService } from '@services/segment.service';
-import { isSegmentRule, trackByFunction } from '@utils/index';
+import { isSegmentCondition, trackByFunction } from '@utils/index';
 import { IRuleOp, ruleOps } from './ruleConfig';
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IUserProp } from "@shared/types";
@@ -48,7 +48,7 @@ export class FindRuleComponent {
       } as ICondition);
     } else {
       const segmentIds = value.conditions.flatMap((item: ICondition) => {
-        const isSegment = isSegmentRule(item);
+        const isSegment = isSegmentCondition(item);
         let opType: string = isSegment ? 'multi': ruleOps.filter((op: IRuleOp) => op.value === item.op)[0].type;
 
         let defaultValue: string;
@@ -108,7 +108,7 @@ export class FindRuleComponent {
 
   public onRuleChange(value: ICondition, index: number) {
     const rule = { ...value, ...{multipleValue: [...value.multipleValue]} };
-    if (isSegmentRule(rule)) {
+    if (isSegmentCondition(rule)) {
       rule.op = null;
     }
 

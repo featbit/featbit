@@ -76,6 +76,11 @@ export class SafeComponent implements OnInit, OnDestroy {
         path: '/data-sync'
       },
       {
+        title: $localize `:@@auditlogs.audit-logs:Audit logs`,
+        icon: 'audit',
+        path: '/audit-logs'
+      },
+      {
         line: true
       },
       {
@@ -107,7 +112,6 @@ export class SafeComponent implements OnInit, OnDestroy {
       }
     ];
   }
-
 
   public async logout() {
     await this.identityService.doLogoutUser();

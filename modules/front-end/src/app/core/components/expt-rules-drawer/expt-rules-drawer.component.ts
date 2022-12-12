@@ -6,7 +6,7 @@ import { SegmentService } from '@services/segment.service';
 import {
   getPercentageFromDecimal,
   getPercentageFromRolloutPercentageArray,
-  isSegmentRule,
+  isSegmentCondition,
   isSingleOperator
 } from '@utils/index';
 import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
@@ -48,7 +48,7 @@ export class ExptRulesDrawerComponent {
         rules: ff.rules.map(rule => {
           const result = {
             conditions: rule.conditions.map(condition => {
-              const isSegment = isSegmentRule(condition);
+              const isSegment = isSegmentCondition(condition);
               let ruleType: string = isSegment ? 'multi': ruleOps.filter((rule: IRuleOp) => rule.value === condition.op)[0].type;
 
               let multipleValue: string[] = [];

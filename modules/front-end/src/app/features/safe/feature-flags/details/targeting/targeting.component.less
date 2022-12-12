@@ -148,6 +148,11 @@
       }
 
       .rule {
+        &.validation-error {
+          border: 2px solid @red50-color;
+          border-radius: 20px;
+        }
+
         margin-top: 24px;
 
         nz-card {
@@ -158,7 +163,11 @@
   }
 }
 
-::ng-deep .target-approval {
+.validation-errors-title {
+  font-weight: 600;
+}
+
+::ng-deep .review-modal {
   .ant-modal-header {
     border: none;
 
@@ -177,6 +186,7 @@
     font-size: 15px;
     font-weight: 500;
     padding: 10px;
+    border-radius: 10px;
   }
 
   .warning-message {
@@ -186,6 +196,7 @@
     border: 1px solid #d2d2d2;
     margin-top: 15px;
     border-left: 3px solid #ff912b;
+    border-radius: 10px;
 
     .warning {
       display: flex;
@@ -200,111 +211,16 @@
     }
   }
 
-  .pending-changes {
-    border-bottom: 1px solid #d2d2d2;
-    margin-top: 10px;
-
-    h3.pending-changes-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #212529;
-      line-height: 22.5px;
-      margin-bottom: 5px;
-    }
-
-    .change-instructions {
-      padding-left: 5px;
-
-      .instruction-count {
-        margin-bottom: 5px;
-      }
-
-      .instruction-list {
-        padding-left: 0;
-
-        .instruction-category {
-          h3 {
-            margin-bottom: 0;
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 19.5px;
-          }
-
-          list-style-type: none;
-
-          .instructions {
-            padding-left: 30px;
-            line-height: 25px;
-
-            a {
-              color: green;
-              text-decoration: underline;
-            }
-
-            ul.no-style {
-              list-style-type: none;
-              padding-left: 0;
-
-              li {
-                span {
-                  padding-left: 5px;
-                  color: #646f7a;
-                  font-weight: 500;
-                }
-              }
-
-              li.clause {
-                color: #646f7a;
-                font-weight: 500;
-              }
-
-              li.and {
-                height: 30px;
-                font-weight: 900;
-                line-height: 30px;
-                color: #00000080;
-              }
-
-            }
-          }
-        }
-      }
-    }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #212529;
+    line-height: 22.5px;
+    margin-bottom: 5px;
   }
 
-  .approval-request {
-    border-bottom: 1px solid #d2d2d2;
-    padding-bottom: 10px;
-    margin-top: 10px;
-
-    .approval-request-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #212529;
-      line-height: 22.5px;
-      margin-bottom: 5px;
-      display: flex;
-      justify-content: space-between;
-    }
-  }
-
-  input,
-  textarea {
-    &.ffc-input {
-      width: 100%;
-    }
-  }
-
-  .save {
-    padding-top: 10px;
-
-    .approval-request-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #212529;
-      line-height: 22.5px;
-      margin-bottom: 5px;
-    }
+  .comment {
+    margin-top: 15px;
   }
 
   nz-select {

@@ -1,4 +1,5 @@
 using Application.Users;
+using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Targeting;
 
@@ -15,25 +16,33 @@ public class UpdateTargeting : IRequest<bool>
     public Fallthrough Fallthrough { get; set; }
 
     public bool ExptIncludeAllTargets { get; set; }
+
+    public string Comment { get; set; }
 }
 
 public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 {
-    private readonly IFeatureFlagService _service;
+    private readonly IFeatureFlagService _flagService;
+    private readonly IAuditLogService _auditLogService;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
 
-    public UpdateTargetingHandler(IFeatureFlagService service, ICurrentUser currentUser, IPublisher publisher)
+    public UpdateTargetingHandler(
+        IFeatureFlagService flagService,
+        IAuditLogService auditLogService,
+        ICurrentUser currentUser,
+        IPublisher publisher)
     {
-        _service = service;
+        _flagService = flagService;
+        _auditLogService = auditLogService;
         _currentUser = currentUser;
         _publisher = publisher;
     }
 
     public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.Id);
-        flag.UpdateTargeting(
+        var flag = await _flagService.GetAsync(request.Id);
+        var dataChange = flag.UpdateTargeting(
             request.TargetUsers,
             request.Rules,
             request.Fallthrough,
@@ -41,7 +50,11 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
             _currentUser.Id
         );
 
-        await _service.UpdateAsync(flag);
+        await _flagService.UpdateAsync(flag);
+
+        // write audit log
+        var auditLog = AuditLog.ForUpdate(flag, dataChange, request.Comment, _currentUser.Id);
+        await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification
         await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);

@@ -28,6 +28,10 @@ export const isKeyPathExactMatchPattern = (keyPath: string[], patterns: string[]
 };
 
 export const isKeyPathLeftMatchPattern = (keyPath: string[], patterns: string[][]): boolean => {
+  if (patterns.length === 0 || patterns.flatMap(p => p).length === 0) {
+    return false;
+  }
+
   for (let pattern of patterns) {
       if (keyPath.length < pattern.length) {
           return false;
@@ -40,6 +44,11 @@ export const isKeyPathLeftMatchPattern = (keyPath: string[], patterns: string[][
           }
 
           idx++;
+
+          if (idx === pattern.length) {
+            // keyPath including pattern => left match
+            return true;
+          }
       }
   }
 
@@ -56,11 +65,3 @@ export const getTypeOfObj = (obj: Object): string | null => {
   // @ts-ignore: Object is possibly 'null'.
   return Object.prototype.toString.call(obj).match(/^\[object\s(.*)\]$/)[1];
 };
-
-export const convertIntervalToPercentage = (interval: number[]) => {
-  return parseFloat((interval[1] - interval[0]).toFixed(2)) * 100;
-}
-
-export const convertPercentageToInterval = (percentageStr: string): number[] => {
-  return [0, (+percentageStr / 100)];
-}

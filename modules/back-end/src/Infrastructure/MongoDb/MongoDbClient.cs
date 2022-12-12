@@ -1,3 +1,4 @@
+using Domain.AuditLogs;
 using Domain.EndUsers;
 using Domain.ExperimentMetrics;
 using Domain.Experiments;
@@ -48,6 +49,7 @@ public class MongoDbClient
         { typeof(Segment), "Segments" },
         { typeof(FeatureFlag), "FeatureFlags" },
         { typeof(Trigger), "Triggers" },
+        { typeof(AuditLog), "AuditLogs" },
 
         { typeof(Group), "Groups" },
         { typeof(Policy), "Policies" },

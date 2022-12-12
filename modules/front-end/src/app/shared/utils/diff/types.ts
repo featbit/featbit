@@ -3,8 +3,7 @@ import { IChange, ObjectType } from "ffc-json-diff"
 export interface ITranslationConfig {
   order: number,
   keyPathPatterns: string[][],
-  getContentFunc: (param: IReadableChange[], translations: Translation) => string,
-  code: string
+  getContentFunc: (param: IReadableChange[]) => IHtmlChanges
 }
 
 export interface IReadableChange {
@@ -12,13 +11,15 @@ export interface IReadableChange {
   change: IChange
 }
 
-export type Translation = {[key: string]: string};
+export interface IHtmlChanges {
+  html: string,
+  count: number
+}
 
 export interface IOptions {
   embededKeys: {[key: string]: string},
   ignoredKeyPaths: string[][],
   translationConfigs: ITranslationConfig[],
-  translation: {[key: string]: string},
-  normalizeFn: (obj: ObjectType) => ObjectType,
-  deNormalizeFn: (obj: ObjectType) => ObjectType,
+  normalizeFunc: (obj: ObjectType, ref?: ObjectType) => ObjectType,
+  deNormalizeFunc: (obj: ObjectType) => ObjectType,
 }

@@ -55,7 +55,7 @@ export class MemberFilter {
   }
 }
 
-export interface IPagedMember {
+export interface IMemberListModel {
   totalCount: number;
   items: IMember[];
 }

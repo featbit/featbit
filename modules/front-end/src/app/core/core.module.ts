@@ -68,12 +68,14 @@ import { TranslationPipe } from "@core/pipes/translation.pipe";
 import { GuideComponent } from "@core/components/guide/guide.component";
 import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-variation-value.pipe";
+import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
 import { SlugifyPipe } from "@core/pipes/slugify";
 
 @NgModule({
   declarations: [
     SlugifyPipe,
     PercentagePipe,
+    SafeHtmlPipe,
     PolicyTypePipe,
     TranslationPipe,
     RuleVariationValuePipe,
@@ -150,6 +152,7 @@ import { SlugifyPipe } from "@core/pipes/slugify";
     FormsModule,
     SlugifyPipe,
     PercentagePipe,
+    SafeHtmlPipe,
     PolicyTypePipe,
     TranslationPipe,
     RuleVariationValuePipe,

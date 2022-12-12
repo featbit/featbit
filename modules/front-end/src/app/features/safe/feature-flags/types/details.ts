@@ -1,17 +1,18 @@
 import { IRule, IRuleVariation, IVariation } from "@shared/rules";
+import {deepCopy} from "@utils/index";
 
 export class FeatureFlag implements IFeatureFlag {
   originalData: IFeatureFlag;
   constructor(data: IFeatureFlag) {
     for (let p in data) {
       if (data[p] !== null && (Array.isArray(data[p]) || typeof data[p] === 'object')) {
-        this[p] = JSON.parse(JSON.stringify(data[p]));
+        this[p] = deepCopy(data[p]);
       } else {
         this[p] = data[p];
       }
     }
 
-    this.originalData = JSON.parse(JSON.stringify(data));
+    this.originalData = deepCopy(data);
   }
 
   addTag(tag: string) {
@@ -68,7 +69,8 @@ export interface IFeatureFlagTargeting {
   targetUsers: IVariationUser[],
   rules: IRule[],
   fallthrough: IFallthrough,
-  exptIncludeAllTargets: boolean
+  exptIncludeAllTargets: boolean,
+  comment?: string
 }
 
 export interface IFallthrough {

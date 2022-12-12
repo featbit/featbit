@@ -1,3 +1,5 @@
+import { startOfMinute } from 'date-fns'
+
 export enum PeriodOption {
   Last30m = '30m',
   Last2H = '2H',
@@ -180,11 +182,9 @@ export class InsightsFilter {
         break;
     }
 
-    startDate.setMilliseconds(0);
-    endDate.setMilliseconds(0);
+    from = startOfMinute(startDate).getTime();
+    to = startOfMinute(endDate).getTime();
 
-    from = startDate.getTime();
-    to = endDate.getTime();
     return [from, to];
   }
 }

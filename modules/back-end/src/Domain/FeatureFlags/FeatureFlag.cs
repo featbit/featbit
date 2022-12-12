@@ -1,3 +1,4 @@
+using Domain.AuditLogs;
 using Domain.Targeting;
 
 namespace Domain.FeatureFlags;
@@ -102,20 +103,28 @@ public class FeatureFlag : FullAuditedEntity
         return serves;
     }
 
-    public void Archive(Guid currentUserId)
+    public DataChange Archive(Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         IsArchived = true;
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 
-    public void UnArchive(Guid currentUserId)
+    public DataChange Restore(Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         IsArchived = false;
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 
     public void UpdateSetting(string name, bool isEnabled, string disabledVariationId, Guid currentUserId)
@@ -137,13 +146,15 @@ public class FeatureFlag : FullAuditedEntity
         UpdatorId = currentUserId;
     }
 
-    public void UpdateTargeting(
+    public DataChange UpdateTargeting(
         ICollection<TargetUser> targetUsers,
         ICollection<TargetRule> rules,
         Fallthrough fallthrough,
         bool exptIncludeAllTargets,
         Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         TargetUsers = targetUsers;
         Rules = rules;
         Fallthrough = fallthrough;
@@ -151,6 +162,8 @@ public class FeatureFlag : FullAuditedEntity
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 
     public void CopyToEnv(Guid targetEnvId, Guid currentUserId)

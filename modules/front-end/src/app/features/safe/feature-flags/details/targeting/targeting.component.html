@@ -1,6 +1,8 @@
 <section class="body-container">
   <div class="detail-body">
     <div class="banner">
+      <div class="warning" *ngIf="featureFlag.isEnabled" class="placeholder">
+      </div>
       <div class="warning" *ngIf="!featureFlag.isEnabled">
         <i nz-icon nzType="icons:icon-warning"></i>
         <ng-container i18n="@@ff.components.details.targeting.settings-ineffective-warning">Following settings won't be effective until you turn the flag on</ng-container>
@@ -10,12 +12,13 @@
           <i nz-icon nzType="filter" nzTheme="outline"></i>
           <ng-container i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</ng-container>
         </button>
-        <button nz-button nzType="primary" class="save-btn" (click)="onSave()">
+        <button nz-button nzType="primary" class="save-btn" (click)="onReviewChanges(validationErrorTpl)">
           <i nz-icon nzType="icons:icon-save"></i>
-          <ng-container i18n="@@common.save">Save</ng-container>
+          <ng-container i18n="@@common.review-and-save">Review and save</ng-container>
         </button>
       </div>
     </div>
+
     <div class="content-container">
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
@@ -80,7 +83,7 @@
         </div>
         <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
           <ng-container *ngFor="let rule of featureFlag.rules; trackBy: trackRuleById;">
-            <div class="drop-box rule" cdkDrag>
+            <div class="drop-box rule" cdkDrag [class]="{'validation-error': isRuleInvalid(rule.id)}">
               <find-rule
                 [data]="rule"
                 [variationOptions]="featureFlag.variations"
@@ -101,7 +104,61 @@
       <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
     </div>
   </ng-template>
+  <ng-template #validationErrorTpl>
+    <i nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f"></i>
+    <span class="validation-errors-title" i18n="@@common.errors">Validation errors</span>
+    <ul style="list-style-type:none;padding:0;margin:5px 0">
+      <li style="text-align: center;" *ngFor="let msg of validationErrors">{{msg.message}}</li>
+    </ul>
+  </ng-template>
 </section>
+
+<nz-modal [nzWidth]='800' nzClassName="review-modal" [(nzVisible)]="reviewModalVisible"
+          i18n-nzTitle="@@common.review-and-save"
+          nzTitle="Review and save"
+          [nzClosable]="false"
+          (nzOnCancel)="reviewModalVisible=false">
+  <ng-container *nzModalContent>
+    <div class="">
+      <section class="context">
+        <div><span>{{featureFlag.name}}</span><span> ({{featureFlag.key}}) </span>
+        </div>
+        <div><span i18n="@@common.environment">Environment</span>: <span>{{currentProjectEnv.envName}}</span></div>
+      </section>
+      <section class="warning-message">
+        <div class="warning">
+          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+          <div class="warning-content" i18n="@@ff.targeting.the-following-changes-may-affect-insights">The following changes may affects the insights data</div>
+        </div>
+      </section>
+      <section class="pending-changes">
+        <h3 class="section-title" i18n="@@common.changes">Changes</h3>
+        <div class="change">
+          <p class="change-count">
+            <span>{{numChanges}} </span>
+            <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
+          </p>
+          <div class="change-list" [innerHtml]="changes | safeHtml"></div>
+        </div>
+      </section>
+      <section class="comment">
+        <form nz-form [formGroup]="reviewForm" nzLayout="vertical">
+          <nz-form-item>
+            <nz-form-label nzRequired class="section-title" i18n="@@common.comment">Comment</nz-form-label>
+            <nz-form-control i18n-nzErrorTip="@@common.comment-cannot-be-empty" nzErrorTip="Comment cannot be empty">
+              <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </form>
+      </section>
+    </div>
+  </ng-container>
+  <div *nzModalFooter>
+    <button nz-button nzType="default" (click)="reviewModalVisible=false" i18n="@@common.cancel">Cancel</button>
+    <button [disabled]="numChanges === 0" nz-button nzType="primary"
+            (click)="onSave()" i18n="@@common.save">Save</button>
+  </div>
+</nz-modal>
 
 <app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
   [featureFlag]="featureFlag"></app-expt-rules-drawer>

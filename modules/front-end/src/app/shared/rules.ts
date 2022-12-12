@@ -33,7 +33,7 @@ export interface IRuleVariation {
   id: string; // variation id
 
   rollout: number[]; // only two elements, sta
-  exptRollout?: number; // 0.45 means 45% TODO this is not optional
+  exptRollout: number; // 0.45 means 45%
 
   // UI only
   percentage?: number; // the percentage representation of rolloutPercentage

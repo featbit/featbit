@@ -56,6 +56,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'audit-logs',
+        loadChildren: () => import("./audit-logs/audit-logs.module").then(m => m.AuditLogsModule),
+        data: {
+          breadcrumb: $localize `:@@auditlogs.audit-logs:Audit logs`
+        },
+      },
+      {
         path: '',
         redirectTo: '/feature-flags',
         pathMatch: 'full'

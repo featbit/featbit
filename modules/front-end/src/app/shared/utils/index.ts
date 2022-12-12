@@ -1,7 +1,7 @@
 import { USER_PROFILE } from "./localstorage-keys";
-import {IAuthProps} from "../types";
-import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
-import {ICondition} from "@shared/rules";
+import { IAuthProps } from "../types";
+import { USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT } from "@shared/constants";
+import { ICondition } from "@shared/rules";
 
 export function getPathPrefix() {
   return location.pathname.match(/^(?<locale>\/en\/|\/zh\/)/i)?.groups['locale'] || '/';
@@ -80,15 +80,15 @@ export function encodeURIComponentFfc(url: string): string {
   return encodeURIComponent(url).replace(/\(/g, "%28").replace(/\)/g, '%29');
 }
 
-export function isSegmentRule(rule: ICondition | any): boolean {
+export function isSegmentCondition(condition: ICondition): boolean {
   const segmentRuleProperties = [USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT];
 
-  return segmentRuleProperties.includes(rule.property);
+  return segmentRuleProperties.includes(condition.property);
 }
 
 // determine if a rule operation is single operater
 export function isSingleOperator(operationType: string): boolean {
-  return !['string', 'number', 'regex', 'multi'].includes(operationType);
+  return ['boolean'].includes(operationType);
 }
 
 // the general trackBy function
@@ -101,6 +101,10 @@ export function trackByFunction(index: number, item: any) {
 
 export const isNumber = (value: number): boolean => {
   return typeof value === 'number' && isFinite(value);
+}
+
+export const deepCopy = (obj: any): any => {
+  return JSON.parse(JSON.stringify(obj));
 }
 
 // https://github.com/30-seconds/30-seconds-of-code/blob/master/snippets/slugify.md

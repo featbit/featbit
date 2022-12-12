@@ -9,12 +9,12 @@ export const ruleOps: IRuleOp[] = [
     {
         label: $localize `:@@core.components.findrule.operators.istrue:is true`,
         value: 'IsTrue',
-        type: '',
+        type: 'boolean',
         default: 'IsTrue'
     },{
         label: $localize `:@@core.components.findrule.operators.isfalse:is false`,
         value: 'IsFalse',
-        type: '',
+        type: 'boolean',
         default: 'IsFalse'
     },{
         label: $localize `:@@core.components.findrule.operators.equals:equals`,
