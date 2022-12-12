@@ -86,4 +86,35 @@ public class AuditLog : Entity
 
         return auditLog;
     }
+
+    public static AuditLog ForCreate(FeatureFlag flag, Guid creatorId)
+    {
+        var dataChange = new DataChange(null).To(flag);
+
+        var auditLog = For(flag, Operations.Create, dataChange, string.Empty, creatorId);
+        return auditLog;
+    }
+
+    public static AuditLog ForArchive(FeatureFlag flag, DataChange dataChange, Guid operatorId)
+    {
+        var auditLog = For(flag, Operations.Archive, dataChange, string.Empty, operatorId);
+
+        return auditLog;
+    }
+
+    public static AuditLog ForRestore(FeatureFlag flag, DataChange dataChange, Guid operatorId)
+    {
+        var auditLog = For(flag, Operations.Restore, dataChange, string.Empty, operatorId);
+
+        return auditLog;
+    }
+
+    public static AuditLog ForRemove(FeatureFlag flag, Guid operatorId)
+    {
+        var dataChange = new DataChange(flag).To(null);
+
+        var auditLog = For(flag, Operations.Remove, dataChange, string.Empty, operatorId);
+
+        return auditLog;
+    }
 }

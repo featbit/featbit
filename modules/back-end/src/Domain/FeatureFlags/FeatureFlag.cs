@@ -103,20 +103,28 @@ public class FeatureFlag : FullAuditedEntity
         return serves;
     }
 
-    public void Archive(Guid currentUserId)
+    public DataChange Archive(Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         IsArchived = true;
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 
-    public void UnArchive(Guid currentUserId)
+    public DataChange Restore(Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         IsArchived = false;
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 
     public void UpdateSetting(string name, bool isEnabled, string disabledVariationId, Guid currentUserId)

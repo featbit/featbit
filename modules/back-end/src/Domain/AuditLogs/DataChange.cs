@@ -10,12 +10,18 @@ public class DataChange
 
     public DataChange(object from)
     {
-        Previous = JsonSerializer.Serialize(from, ReusableJsonSerializerOptions.Web);
+        Previous = from == null
+            ? string.Empty
+            : JsonSerializer.Serialize(from, ReusableJsonSerializerOptions.Web);
+
+        Current = string.Empty;
     }
 
     public DataChange To(object to)
     {
-        Current = JsonSerializer.Serialize(to, ReusableJsonSerializerOptions.Web);
+        Current = to == null
+            ? string.Empty
+            : JsonSerializer.Serialize(to, ReusableJsonSerializerOptions.Web);
 
         return this;
     }

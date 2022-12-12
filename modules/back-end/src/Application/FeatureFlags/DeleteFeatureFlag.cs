@@ -1,5 +1,7 @@
 using Application.Bases;
 using Application.Bases.Exceptions;
+using Application.Users;
+using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
@@ -14,11 +16,19 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
 {
     private readonly IFeatureFlagService _service;
     private readonly IPublisher _publisher;
+    private readonly ICurrentUser _currentUser;
+    private readonly IAuditLogService _auditLogService;
 
-    public DeleteFeatureFlagHandler(IFeatureFlagService service, IPublisher publisher)
+    public DeleteFeatureFlagHandler(
+        IFeatureFlagService service,
+        IPublisher publisher,
+        ICurrentUser currentUser,
+        IAuditLogService auditLogService)
     {
         _service = service;
         _publisher = publisher;
+        _currentUser = currentUser;
+        _auditLogService = auditLogService;
     }
 
     public async Task<bool> Handle(DeleteFeatureFlag request, CancellationToken cancellationToken)
@@ -30,6 +40,10 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
         }
 
         await _service.DeleteAsync(request.Id);
+
+        // write audit log
+        var auditLog = AuditLog.ForRemove(flag, _currentUser.Id);
+        await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag delete notification
         await _publisher.Publish(new OnFeatureFlagDeleted(request.EnvId, request.Id), cancellationToken);
