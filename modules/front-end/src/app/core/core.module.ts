@@ -27,7 +27,6 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
-import { SwitchKeyNamePipe } from './pipes/switch-key-name.pipe';
 import { NzTabsModule } from "ng-zorro-antd/tabs";
 import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
 import { NzStepsModule } from "ng-zorro-antd/steps";
