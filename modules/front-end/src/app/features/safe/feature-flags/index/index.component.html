@@ -69,7 +69,7 @@
           <th i18n="@@common.name">Name</th>
           <th>
             Key
-            <i nz-icon i18n-nz-tooltip="@@ff.key-description" nz-tooltip="Use key(case-sensitive) in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
+            <i nz-icon i18n-nz-tooltip="@@ff.key-description" nz-tooltip="Use key (case-sensitive) in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
           </th>
           <th i18n="@@common.status">Status</th>
           <th i18n="@@common.tags">Tags</th>
@@ -183,24 +183,30 @@
     <form nz-form [formGroup]="featureFlagForm" nzLayout="vertical">
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="switchNameErrorTpl">
-          <input nz-input formControlName="name" i18n-placeholder="@@common.name" placeholder="Name" />
-          <ng-template #switchNameErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('invalid_character')" i18n="@@common.name-cannot-include---">Name cannot include __</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-keyName-unavailable">This name/KeyName is unavailable</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
-          </ng-template>
+        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
+          <input
+            nz-input
+            formControlName="name"
+            placeholder="A human-friendly name for your feature flag"
+            i18n-placeholder="@@ff.idx.feature-flag-name"
+            (ngModelChange)="nameChange($event)"
+          />
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
         <nz-form-label
           nzRequired
           i18n-nzTooltipTitle="@@ff.key-description"
-          nzTooltipTitle="Use key(case-sensitive) in your code to get the feature flag variation">Key
+          nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation">
+          Key
         </nz-form-label>
-        <nz-form-control>
-          <input nz-input [value]="this.featureFlagForm.get('name').value | switchKeyName" formControlName="keyName" i18n-placeholder="@@ff.idx.key-generated-from-name" placeholder="key is auto-generated from name" />
+        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
+          <input nz-input formControlName="key" i18n-placeholder="@@ff.idx.key-generated-from-name" placeholder="Key can be auto-generated from name" />
+          <ng-template #keyErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@ff.idx.key-cannot-be-empty">Key cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@ff.idx.key-has-been-used">This key has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@ff.idx.key-validation-failed">Key validation failed</ng-container>
+          </ng-template>
         </nz-form-control>
       </nz-form-item>
     </form>
@@ -208,7 +214,7 @@
 
   <ng-template #modalFooter>
     <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!featureFlagForm.valid" (click)="createFeatureFlag()" i18n="@@common.save">Save</button>
+    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="featureFlagForm.invalid" (click)="create()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>
 
