@@ -15,6 +15,8 @@ import {MemberService} from "@services/member.service";
 import {IMember, IMemberListModel, MemberFilter} from "@features/safe/iam/types/member";
 import {encodeURIComponentFfc} from "@utils/index";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
+import {SegmentService} from "@services/segment.service";
+import {EnvUserService} from "@services/env-user.service";
 
 @Component({
   selector: 'auditlogs-index',
@@ -56,7 +58,7 @@ export class IndexComponent implements OnInit, OnDestroy {
           .sort((auditLog) => new Date(auditLog.createdAt).getTime())
           .reduce((acc, cur) => {
             let auditLogsByDate = acc.find((itm) => itm.key === cur.createdDateStr);
-            const auditLog = new AuditLog(cur);
+            const auditLog = new AuditLog(cur, this.segmentService, this.envUserService);
             if (auditLogsByDate) {
               auditLogsByDate.items = [...auditLogsByDate.items, auditLog];
             } else {
@@ -117,6 +119,8 @@ export class IndexComponent implements OnInit, OnDestroy {
     private router: Router,
     private auditLogService: AuditLogService,
     private memberService: MemberService,
+    private segmentService: SegmentService,
+    private envUserService: EnvUserService,
     private msg: NzMessageService,
   ) {
   }
