@@ -1,6 +1,10 @@
 ﻿import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import featureFlagDiffer from "@utils/diff/feature-flag.differ";
-import {encodeURIComponentFfc} from "@utils/index";
+import {encodeURIComponentFfc, isSegmentCondition} from "@utils/index";
+import {ICondition} from "@shared/rules";
+import {SegmentService} from "@services/segment.service";
+import {lastValueFrom} from "rxjs";
+import {EnvUserService} from "@services/env-user.service";
 
 export interface IAuditLogListModel {
   items: IAuditLog[];
@@ -52,8 +56,12 @@ export class AuditLogListFilter {
 export class AuditLog {
 
   readonly data: IAuditLog;
+  private segmentService: SegmentService;
+  private envUserService: EnvUserService;
   private previous: IFeatureFlag | string;
   private current: IFeatureFlag | string;
+
+  htmlDiff: string = '';
 
   get targetData(): IFeatureFlag | string {
     switch (this.data.operation) {
@@ -66,7 +74,10 @@ export class AuditLog {
     }
   }
 
-  constructor(data: IAuditLog) {
+  constructor(data: IAuditLog, segmentService: SegmentService, envUserService: EnvUserService) {
+    this.segmentService = segmentService;
+    this.envUserService = envUserService;
+
     this.data = {...data};
 
     if (this.data.dataChange.previous?.length > 0) {
@@ -84,15 +95,56 @@ export class AuditLog {
         this.current = this.data.dataChange.current;
       }
     }
+
+    if (this.shouldShowChangeList) {
+      this.calculateHtmlDiff();
+    }
   }
 
-  get diffHtml(): string {
+  async calculateHtmlDiff() {
     switch (this.data.refType) {
       case RefTypeEnum.Flag:
-        const [ numChanges, changes]  = featureFlagDiffer.generateDiff(this.previous as IFeatureFlag, this.current as IFeatureFlag, {targetingUsers: [], segments: []});
-        return changes;
+        const previous = this.previous as IFeatureFlag;
+        const current = this.current as IFeatureFlag;
+        // get all end users
+        const previousTargetUserIdRefs: string[] = previous.targetUsers.flatMap((v) => v.keyIds);
+        const currentTargetUserIdRefs: string[] = current.targetUsers.flatMap((v) => v.keyIds);
+        let targetUserIdRefs: string[] = [...previousTargetUserIdRefs, ...currentTargetUserIdRefs];
+        targetUserIdRefs = targetUserIdRefs.filter((id, idx) => targetUserIdRefs.indexOf(id) === idx);
+
+        // get all segmentIds from originalData and new Data
+        const previousSegmentIdRefs: string[] = previous.rules.flatMap((rule) => rule.conditions)
+          .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
+          .flatMap((condition: ICondition) => JSON.parse(condition.value))
+          .filter((id) => id !== null && id.length > 0);
+
+        const currentSegmentIdRefs: string[] = current.rules.flatMap((rule) => rule.conditions)
+          .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
+          .flatMap((condition: ICondition) => JSON.parse(condition.value))
+          .filter((id) => id !== null && id.length > 0);
+
+        let segmentIdRefs: string[] = [...previousSegmentIdRefs, ...currentSegmentIdRefs];
+        segmentIdRefs = segmentIdRefs.filter((id, idx) => segmentIdRefs.indexOf(id) === idx); // get unique values
+
+        const promises = [];
+
+        if (targetUserIdRefs.length) {
+          promises.push(lastValueFrom(this.envUserService.getByKeyIds(targetUserIdRefs)));
+        } else {
+          promises.push([]);
+        }
+
+        if (segmentIdRefs.length) {
+          promises.push(lastValueFrom(this.segmentService.getByIds(segmentIdRefs)));
+        } else {
+          promises.push([]);
+        }
+
+        const refs = await Promise.all(promises);
+        const [ _, diff]  = featureFlagDiffer.generateDiff(previous, current, {targetingUsers: refs[0], segments: refs[1]});
+        this.htmlDiff = diff;
+        return;
       default:
-        return '';
         break;
     }
   }

@@ -43,7 +43,7 @@
                   <div class="audit-log-title">{{auditLog.titlePrefix}} <a (click)="goToTargetPage(auditLog)">{{auditLog.name}}</a></div>
                   <div class="audit-log-createdat">{{ auditLog.data.createdAt | date: "YYYY-MM-dd HH:mm"}}</div>
                   <div class="audit-log-comment">{{auditLog.data.comment}}</div>
-                  <div class="change-list" *ngIf="auditLog.shouldShowChangeList" [innerHtml]="auditLog.diffHtml | safeHtml"></div>
+                  <div class="change-list" *ngIf="auditLog.shouldShowChangeList" [innerHtml]="auditLog.htmlDiff | safeHtml"></div>
                 </div>
               </div>
             </div>
