@@ -1,0 +1,26 @@
+@import "variables";
+
+.audit-log {
+  display: flex;
+  flex-direction: column;
+  gap:5px;
+  padding: 10px;
+
+  .audit-log-title {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .audit-log-createdat {
+    color: @grey50-color;
+  }
+
+  .audit-log-comment {
+    color: @grey50-color;
+  }
+
+  .change-list {
+    border-left: 2px solid @grey40-color;
+    padding: 0 12px;
+  }
+}

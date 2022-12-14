@@ -2,21 +2,13 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Subject} from 'rxjs';
-import {
-  AuditLog,
-  AuditLogListFilter,
-  IAuditLog,
-  IAuditLogListModel,
-  RefTypeEnum
-} from "../types/audit-logs";
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {AuditLogService} from "@services/audit-log.service";
 import {MemberService} from "@services/member.service";
 import {IMember, IMemberListModel, MemberFilter} from "@features/safe/iam/types/member";
-import {encodeURIComponentFfc} from "@utils/index";
-import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {SegmentService} from "@services/segment.service";
 import {EnvUserService} from "@services/env-user.service";
+import {AuditLogListFilter, IAuditLog, IAuditLogListModel, RefTypeEnum} from "@core/components/audit-log/types";
 
 @Component({
   selector: 'auditlogs-index',
@@ -28,7 +20,7 @@ export class IndexComponent implements OnInit, OnDestroy {
 
   auditLogs: IAuditLog[] = [];
 
-  groupedAuditLogs: {key: string, items: AuditLog[]}[] = [];
+  groupedAuditLogs: {key: string, items: IAuditLog[]}[] = [];
 
   memberListModel: IMemberListModel = {
     items: [],
@@ -58,11 +50,10 @@ export class IndexComponent implements OnInit, OnDestroy {
           .sort((auditLog) => new Date(auditLog.createdAt).getTime())
           .reduce((acc, cur) => {
             let auditLogsByDate = acc.find((itm) => itm.key === cur.createdDateStr);
-            const auditLog = new AuditLog(cur, this.segmentService, this.envUserService);
             if (auditLogsByDate) {
-              auditLogsByDate.items = [...auditLogsByDate.items, auditLog];
+              auditLogsByDate.items = [...auditLogsByDate.items, cur];
             } else {
-              auditLogsByDate = [auditLog];
+              auditLogsByDate = [cur];
               acc = [...acc, { key: cur.createdDateStr, items: auditLogsByDate }];
             }
 
@@ -145,17 +136,6 @@ export class IndexComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destory$.next();
     this.destory$.complete();
-  }
-
-  goToTargetPage(auditLog: AuditLog) {
-    switch (auditLog.data.refType) {
-      case RefTypeEnum.Flag:
-        this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc((auditLog.targetData as IFeatureFlag).key)}/targeting`);
-        return;
-      default:
-        this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc((auditLog.targetData as IFeatureFlag).key)}/targeting`);
-        return;
-    }
   }
 
   getLocalDate(date: string) {
