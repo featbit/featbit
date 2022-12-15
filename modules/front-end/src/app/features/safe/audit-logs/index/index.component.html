@@ -39,12 +39,9 @@
             <div  class="audit-logs-group">
               <div class="group-title">{{group.key}}</div>
               <div class="group-items">
-                <div *ngFor="let auditLog of group.items" class="audit-log">
-                  <div class="audit-log-title">{{auditLog.titlePrefix}} <a (click)="goToTargetPage(auditLog)">{{auditLog.name}}</a></div>
-                  <div class="audit-log-createdat">{{ auditLog.data.createdAt | date: "YYYY-MM-dd HH:mm"}}</div>
-                  <div class="audit-log-comment">{{auditLog.data.comment}}</div>
-                  <div class="change-list" *ngIf="auditLog.shouldShowChangeList" [innerHtml]="auditLog.htmlDiff | safeHtml"></div>
-                </div>
+                <ng-container *ngFor="let auditLog of group.items" >
+                  <audit-log [auditLog]="auditLog"></audit-log>
+                </ng-container>
               </div>
             </div>
           </nz-timeline-item>

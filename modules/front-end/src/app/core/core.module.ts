@@ -70,6 +70,7 @@ import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-variation-value.pipe";
 import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
 import { SlugifyPipe } from "@core/pipes/slugify";
+import {AuditLogComponent} from "@core/components/audit-log/audit-log.component";
 
 @NgModule({
   declarations: [
@@ -104,7 +105,8 @@ import { SlugifyPipe } from "@core/pipes/slugify";
     FindRuleComponent,
     ServeComponent,
     RuleComponent,
-    GuideComponent
+    GuideComponent,
+    AuditLogComponent
   ],
   imports: [
     CommonModule,
@@ -181,7 +183,8 @@ import { SlugifyPipe } from "@core/pipes/slugify";
     FindRuleComponent,
     ServeComponent,
     RuleComponent,
-    GuideComponent
+    GuideComponent,
+    AuditLogComponent
   ]
 })
 export class CoreModule { }
