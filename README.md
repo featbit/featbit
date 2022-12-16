@@ -4,10 +4,14 @@
 
 <img src="https://user-images.githubusercontent.com/68597908/206148625-43f14f58-f3c0-4042-82a0-9f9421c270fa.png" width="288" > 
 
-<h3 align="center">Feature management, for all teams</h3>
+
+<h3 align="center"><a href="https://medium.com/p/e0cef61572a">Feature management, for all teams</a></h3>
+
 
 <p>
-A scalable and high-performance platform for Feature Flags, A/B testing, Monetization, and more.
+A scalable and high-performance platform for Feature Flags that empowers all teams to 
+<br/>
+deliver, control, experiment with and monetize their software.
 </p>
 
 <!--
