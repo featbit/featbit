@@ -8,6 +8,8 @@ import {lastValueFrom} from "rxjs";
 import featureFlagDiffer from "@utils/diff/feature-flag.differ";
 import {Router} from "@angular/router";
 import {AuditLogOpEnum, IAuditLog, RefTypeEnum} from "@core/components/audit-log/types";
+import {DiffFactoryService} from "@services/diff-factory.service";
+import {IChange} from "@shared/diffv2/types";
 
 @Component({
   selector: 'audit-log',
@@ -21,8 +23,10 @@ export class AuditLogComponent {
   auditLog: IAuditLog;
   htmlDiff: string = '';
 
+  changes: IChange[] = [];
   constructor(
     private router: Router,
+    private diffFactoryService: DiffFactoryService,
     private segmentService: SegmentService,
     private envUserService: EnvUserService
   ) {
@@ -155,6 +159,9 @@ export class AuditLogComponent {
         }
 
         const refs = await Promise.all(promises);
+
+        this.changes = this.diffFactoryService.getDiffer(this.auditLog.refType).diff(this.auditLog.dataChange.previous, this.auditLog.dataChange.current);
+        console.log(this.changes);
         const [ _, diff]  = featureFlagDiffer.generateDiff(previous, current, {targetingUsers: refs[0], segments: refs[1]});
         this.htmlDiff = diff;
         return;

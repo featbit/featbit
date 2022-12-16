@@ -39,7 +39,7 @@
             <div  class="audit-logs-group">
               <div class="group-title">{{group.key}}</div>
               <div class="group-items">
-                <ng-container *ngFor="let auditLog of group.items" >
+                <ng-container *ngFor="let auditLog of group.items">
                   <audit-log [auditLog]="auditLog"></audit-log>
                 </ng-container>
               </div>

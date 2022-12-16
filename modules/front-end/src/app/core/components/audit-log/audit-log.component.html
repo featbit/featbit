@@ -3,4 +3,5 @@
   <div class="audit-log-createdat">{{ auditLog.createdAt | date: "YYYY-MM-dd HH:mm"}}</div>
   <div class="audit-log-comment">{{auditLog.comment}}</div>
   <div class="change-list" *ngIf="shouldShowChangeList" [innerHtml]="htmlDiff | safeHtml"></div>
+  <change-list [changes]="changes"></change-list>
 </div>
