@@ -142,13 +142,13 @@ const normalize = (featureFlag: IFeatureFlag, ref: refType): IFlatFeatureFlag =>
       acc.rule = newRule;
 
       return acc;
-    }, {id: `${flatRule.id}#`} as IFlatRuleCondition)];
+    }, {id: `${flatRule.id}_${flatRule.name}_`} as IFlatRuleCondition)];
     flatRule.variations = [newRule.variations.reduce((acc, cur) => {
       acc.id += `${cur.exptRollout}_${cur.percentage}_${cur.id}`;
       acc.rule = newRule;
 
       return acc;
-    }, {id: `${flatRule.id}#`} as IFlatRuleVariation)];
+    }, {id: `${flatRule.id}_${flatRule.name}_`} as IFlatRuleVariation)];
 
     return flatRule;
   })
