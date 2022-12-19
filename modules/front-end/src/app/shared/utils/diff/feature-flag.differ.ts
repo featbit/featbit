@@ -107,11 +107,11 @@ const normalize = (featureFlag: IFeatureFlag, ref: refType): IFlatFeatureFlag =>
   flatFeatureFlag.rules = featureFlag.rules.map((rule) => {
     const newRule = deepCopy(rule);
     newRule.variations = rule.variations.map((ruleVariation) => ({
+      id: ruleVariation.id,
       percentage: `${getPercentageFromRolloutPercentageArray(ruleVariation.rollout)}`,
       exptRollout: ruleVariation.exptRollout,
       variation: featureFlag.variations.find((v) => v.id === ruleVariation.id)
     }));
-
     newRule.conditions = rule.conditions.map((condition) => {
       let { op, property, value } = condition;
 
@@ -136,20 +136,19 @@ const normalize = (featureFlag: IFeatureFlag, ref: refType): IFlatFeatureFlag =>
     const { includedInExpt, id, name } = rule;
     const flatRule: IFlatRule = { includedInExpt, id, name, rule: newRule } as IFlatRule;
 
-    flatRule.conditions = [rule.conditions.reduce((acc, cur) => {
+    flatRule.conditions = [newRule.conditions.reduce((acc, cur) => {
       const { op, property, value } = cur;
       acc['id'] += `${property}_${op || ''}_${value}`;
       acc.rule = newRule;
 
       return acc;
-    }, {id: `${flatRule.id}#`} as IFlatRuleCondition)];
-
-    flatRule.variations = [rule.variations.reduce((acc, cur) => {
+    }, {id: `${flatRule.id}_${flatRule.name}_`} as IFlatRuleCondition)];
+    flatRule.variations = [newRule.variations.reduce((acc, cur) => {
       acc.id += `${cur.exptRollout}_${cur.percentage}_${cur.id}`;
       acc.rule = newRule;
 
       return acc;
-    }, {id: `${flatRule.id}#`} as IFlatRuleVariation)];
+    }, {id: `${flatRule.id}_${flatRule.name}_`} as IFlatRuleVariation)];
 
     return flatRule;
   })
