@@ -9,9 +9,9 @@
 
 
 <p>
-A scalable and high-performance platform for Feature Flags that empowers all teams to 
+A scalable and high-performance platform for Feature Flags & Experimentations that empowers
 <br/>
-deliver, control, experiment with and monetize their software.
+ all teams to deliver, control, experiment with and monetize their software.
 </p>
 
 <!--
