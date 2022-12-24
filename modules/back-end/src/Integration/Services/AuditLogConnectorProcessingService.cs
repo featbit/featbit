@@ -23,6 +23,7 @@ namespace FeatBit.Integration.Backend.Services
 
         public async Task DoWork(CancellationToken stoppingToken)
         {
+            var lastConnectedCreateAt = DateTime.UtcNow.AddMinutes(-2);
             while (!stoppingToken.IsCancellationRequested)
             {
                 executionCount++;
@@ -31,10 +32,12 @@ namespace FeatBit.Integration.Backend.Services
                     "Scoped Processing Service is working. Count: {Count}", executionCount);
 
                 var auditLogs = await _auditLogService.GetListByCreateAtAsync(
-                    new DateTime(2022, 12, 21, 12, 30, 0, DateTimeKind.Utc),
+                    lastConnectedCreateAt,
                     50);
 
-                await Task.Delay(12000, stoppingToken);
+                lastConnectedCreateAt = auditLogs.Max(x => x.CreatedAt);
+
+                await Task.Delay(5000, stoppingToken);
             }
         }
     }
