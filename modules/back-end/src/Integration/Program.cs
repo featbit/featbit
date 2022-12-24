@@ -1,4 +1,3 @@
-using Application.Services;
 using FeatBit.Integration.Backend.Services;
 using Infrastructure.AuditLogs;
 using Infrastructure.MongoDb;
@@ -17,7 +16,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<MongoDbOptions>(builder.Configuration.GetSection(MongoDbOptions.MongoDb));
 builder.Services.AddSingleton<MongoDbClient>();
 
-builder.Services.AddTransient<IAuditLogService, AuditLogService>();
+builder.Services.AddTransient<IAuditLogConnectorService, AuditLogConnectorService>();
 builder.Services.AddHostedService<ConsumeScopedServiceHostedService>();
 builder.Services.AddScoped<IAuditLogConnectorProcessingService, AuditLogConnectorProcessingService>();
 

@@ -1,5 +1,5 @@
 ﻿using Application.AuditLogs;
-using Application.Services;
+using Infrastructure.AuditLogs;
 
 namespace FeatBit.Integration.Backend.Services
 {
@@ -12,10 +12,10 @@ namespace FeatBit.Integration.Backend.Services
     {
         private int executionCount = 0;
         private readonly ILogger _logger;
-        private readonly IAuditLogService _auditLogService;
+        private readonly IAuditLogConnectorService _auditLogService;
 
         public AuditLogConnectorProcessingService(ILogger<AuditLogConnectorProcessingService> logger,
-            IAuditLogService auditLogService)
+            IAuditLogConnectorService auditLogService)
         {
             _logger = logger;
             _auditLogService = auditLogService;
@@ -30,13 +30,9 @@ namespace FeatBit.Integration.Backend.Services
                 _logger.LogInformation(
                     "Scoped Processing Service is working. Count: {Count}", executionCount);
 
-                var auditLogs = await _auditLogService.GetListAsync(
-                    new Guid("3f3896b7-9870-4e1c-aa62-10d14540bca7"),
-                    new AuditLogFilter
-                    {
-                        PageIndex = 0,
-                        PageSize = 50,
-                    });
+                var auditLogs = await _auditLogService.GetListByCreateAtAsync(
+                    new DateTime(2022, 12, 21, 12, 30, 0, DateTimeKind.Utc),
+                    50);
 
                 await Task.Delay(12000, stoppingToken);
             }
