@@ -10,6 +10,7 @@ export enum OperationEnum {
 }
 
 export interface IChange {
+  label?: string,
   op: OperationEnum,
   path: string[],
   oldValue?: ChangeValue,

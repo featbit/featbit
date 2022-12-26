@@ -1,5 +1,14 @@
-<div>
-  <div *ngFor="let change of changes">
-    <div>{{change.op}}</div>
-  </div>
+<div class="change-list">
+  <ul *ngFor="let change of changes">
+    <ng-container [ngSwitch]="change.op">
+      <li class="change" *ngSwitchCase="'UPDATE'">
+        <span i18n="@@common.diff.set">Set</span>
+        <span>{{change.label}}</span>
+        <span i18n="@@common.diff.from">from</span>
+        <span>{{change.oldValue}}</span>
+        <span i18n="@@common.diff.to">to</span>
+        <span>{{change.value}}</span>
+      </li>
+    </ng-container>
+  </ul>
 </div>

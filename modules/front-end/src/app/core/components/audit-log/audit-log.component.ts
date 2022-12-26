@@ -160,7 +160,7 @@ export class AuditLogComponent {
 
         const refs = await Promise.all(promises);
 
-        this.changes = this.diffFactoryService.getDiffer(this.auditLog.refType).diff(this.auditLog.dataChange.previous, this.auditLog.dataChange.current);
+        this.changes = this.diffFactoryService.getDiffer(this.auditLog.refType).getChangeList(this.auditLog.dataChange.previous, this.auditLog.dataChange.current);
         console.log(this.changes);
         const [ _, diff]  = featureFlagDiffer.generateDiff(previous, current, {targetingUsers: refs[0], segments: refs[1]});
         this.htmlDiff = diff;

@@ -3,13 +3,17 @@ import _ from 'lodash';
 import {IChange, ObjectType, OperationEnum, PrimitiveType} from "@shared/diffv2/types";
 
 export interface IDiffer {
-  diff(obj1Str: string, obj2Str: string): IChange[]
+  getChangeList(obj1Str: string, obj2Str: string): IChange[]
 }
 
 
-export class Differ {
+export abstract class Differ {
 
-  compare(oldObj: Object, newObj: Object, path: string[]) {
+  static getKey(path: string[]): string {
+    return path.length > 0 ? path.slice(-1)[0] : '';
+  }
+
+  static compare(oldObj: Object, newObj: Object, path: string[]) {
     const typeOfOldObj: string | null = this.getTypeOfObj(oldObj);
     const typeOfNewObj: string | null = this.getTypeOfObj(newObj);
 
@@ -47,7 +51,7 @@ export class Differ {
     return changes;
   }
 
-  private comparePrimitives (oldObj: PrimitiveType, newObj: PrimitiveType, path: string[]): IChange[] {
+  private static comparePrimitives (oldObj: PrimitiveType, newObj: PrimitiveType, path: string[]): IChange[] {
     const changes: IChange[] = [];
     if (oldObj !== newObj) {
       changes.push({
@@ -60,7 +64,7 @@ export class Differ {
     return changes;
   }
 
-  private compareArray (oldObj: any[], newObj: any[], path: string[], uniqKey: string = '$index'): IChange[] {
+  private static compareArray (oldObj: any[], newObj: any[], path: string[], uniqKey: string = '$index'): IChange[] {
     const indexedOldObj: ObjectType = this.convertArrayToObj(oldObj, uniqKey);
     const indexedNewObj: ObjectType = this.convertArrayToObj(newObj, uniqKey);
 
@@ -77,7 +81,7 @@ export class Differ {
     }
   }
 
-  private convertArrayToObj (arr: any[], uniqKey: string): ObjectType {
+  private static convertArrayToObj (arr: any[], uniqKey: string): ObjectType {
     if (uniqKey !== '$index') {
       return _.keyBy(arr, uniqKey);
     } else {
@@ -88,7 +92,7 @@ export class Differ {
     }
   };
 
-  private getTypeOfObj (obj: Object): string | null {
+  private static getTypeOfObj (obj: Object): string | null {
     if (typeof obj === 'undefined')
       return 'undefined'
 
