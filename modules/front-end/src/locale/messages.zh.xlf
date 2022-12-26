@@ -6093,7 +6093,7 @@
         <source>Default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">187</context>
+          <context context-type="linenumber">186</context>
         </context-group>
         <target>默认规则</target>
       </trans-unit>
@@ -6101,7 +6101,7 @@
         <source>Set as</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">188</context>
+          <context context-type="linenumber">187</context>
         </context-group>
         <target>设置为</target>
       </trans-unit>
@@ -6109,11 +6109,11 @@
         <source>Add</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">209</context>
+          <context context-type="linenumber">208</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">237</context>
+          <context context-type="linenumber">236</context>
         </context-group>
         <target>添加</target>
       </trans-unit>
@@ -6121,7 +6121,7 @@
         <source>To</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">209</context>
+          <context context-type="linenumber">208</context>
         </context-group>
         <target>到</target>
       </trans-unit>
@@ -6129,7 +6129,7 @@
         <source>Remove</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">212</context>
+          <context context-type="linenumber">211</context>
         </context-group>
         <target>移除</target>
       </trans-unit>
@@ -6137,7 +6137,7 @@
         <source>From</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">212</context>
+          <context context-type="linenumber">211</context>
         </context-group>
         <target>从</target>
       </trans-unit>
@@ -6145,7 +6145,7 @@
         <source>Targeting users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">219</context>
+          <context context-type="linenumber">218</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -6153,7 +6153,7 @@
         <source>Remove</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">242</context>
+          <context context-type="linenumber">241</context>
         </context-group>
         <target>移除规则</target>
       </trans-unit>
@@ -6161,7 +6161,7 @@
         <source>Update</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">262</context>
+          <context context-type="linenumber">261</context>
         </context-group>
         <target>更新</target>
       </trans-unit>
@@ -6169,7 +6169,7 @@
         <source>Rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">268</context>
+          <context context-type="linenumber">267</context>
         </context-group>
         <target>规则</target>
       </trans-unit>
@@ -6177,7 +6177,7 @@
         <source>If</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">311</context>
+          <context context-type="linenumber">310</context>
         </context-group>
         <target>如果</target>
       </trans-unit>
@@ -6185,7 +6185,7 @@
         <source>And</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">322</context>
+          <context context-type="linenumber">321</context>
         </context-group>
         <target>并且</target>
       </trans-unit>
@@ -6193,7 +6193,7 @@
         <source>Serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/utils/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">325</context>
+          <context context-type="linenumber">324</context>
         </context-group>
         <target>返回</target>
       </trans-unit>
