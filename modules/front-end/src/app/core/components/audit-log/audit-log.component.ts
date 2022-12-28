@@ -160,7 +160,6 @@ export class AuditLogComponent {
         const refs = await Promise.all(promises);
 
         this.changeCategories = this.diffFactoryService.getDiffer(this.auditLog.refType).getChangeList(this.auditLog.dataChange.previous, this.auditLog.dataChange.current, {targetingUsers: refs[0], segments: refs[1]});
-        console.log(this.changeCategories);
         return;
       default:
         break;

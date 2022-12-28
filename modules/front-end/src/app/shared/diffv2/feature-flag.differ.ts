@@ -300,7 +300,9 @@ export class FeatureFlagDiffer implements IDiffer {
           }
         }
       }
-    });
+
+      return null;
+    }).filter((change) => change !== null);
 
     const addedRuleChanges = _.differenceBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
       return {
@@ -334,7 +336,7 @@ export class FeatureFlagDiffer implements IDiffer {
       }
     });
 
-    if (addedRuleChanges.length > 0 || removedRuleChanges.length > 0) {
+    if (ruleChanges.length > 0 || addedRuleChanges.length > 0 || removedRuleChanges.length > 0) {
       changes = [
         {
           label:  $localize `:@@differ.rules:Rules:`,
@@ -361,6 +363,8 @@ export class FeatureFlagDiffer implements IDiffer {
         changes: changes
       }];
     }
+
+    return [];
   }
 
   private compareFallthrough(ff1: IFeatureFlag, ff2: IFeatureFlag): ICategory[] {

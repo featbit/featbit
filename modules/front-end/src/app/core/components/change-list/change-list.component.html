@@ -72,7 +72,9 @@
             </div>
             <div class="serve">
               <span i18n="@@core.components.findrule.serve">Serve</span>
-              <span class="serve-value" class="ant-tag" *ngFor="let variation of change.value.variations">{{variation.label}} ({{variation.percentage}})</span>
+              <span class="serve-value" class="ant-tag" *ngFor="let variation of change.value.variations">
+                {{variation.label}} <ng-container *ngIf="change.value.variations.length > 1">({{variation.percentage}})</ng-container>
+              </span>
             </div>
           </li>
         </ng-container>
