@@ -127,23 +127,31 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public void UpdateSetting(string name, bool isEnabled, string disabledVariationId, Guid currentUserId)
+    public DataChange UpdateSetting(string name, bool isEnabled, string disabledVariationId, Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         Name = name;
         IsEnabled = isEnabled;
         DisabledVariationId = disabledVariationId;
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 
-    public void UpdateVariations(string variationType, ICollection<Variation> variations, Guid currentUserId)
+    public DataChange UpdateVariations(string variationType, ICollection<Variation> variations, Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         VariationType = variationType;
         Variations = variations;
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 
     public DataChange UpdateTargeting(
@@ -185,12 +193,16 @@ public class FeatureFlag : FullAuditedEntity
         UpdatorId = currentUserId;
     }
 
-    public void Toggle(Guid currentUserId)
+    public DataChange Toggle(Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         IsEnabled = !IsEnabled;
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 
     public Variation DisabledVariation => GetVariation(DisabledVariationId);
