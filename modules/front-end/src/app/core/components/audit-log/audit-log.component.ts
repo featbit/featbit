@@ -5,11 +5,10 @@ import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {encodeURIComponentFfc, isSegmentCondition} from "@utils/index";
 import {ICondition} from "@shared/rules";
 import {lastValueFrom} from "rxjs";
-import featureFlagDiffer from "@utils/diff/feature-flag.differ";
 import {Router} from "@angular/router";
 import {AuditLogOpEnum, IAuditLog, RefTypeEnum} from "@core/components/audit-log/types";
 import {DiffFactoryService} from "@services/diff-factory.service";
-import {ICategory, IChange} from "@shared/diffv2/types";
+import {ICategory} from "@shared/diffv2/types";
 
 @Component({
   selector: 'audit-log',
