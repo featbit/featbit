@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "npm run start:en",
-    "start:en": "ng serve --configuration=development --port=4100",
+    "start:en": "ng serve --configuration=development --port=4200",
     "start:zh": "ng serve --configuration=development,zh --port=4201",
     "build:dev": "ng build --localize --configuration development",
     "build:prod": "ng build --localize --configuration production",
