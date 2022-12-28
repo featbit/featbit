@@ -232,6 +232,16 @@ export class FeatureFlagDiffer implements IDiffer {
       });
     }
 
+    if (ff1.disabledVariationId !== ff2.disabledVariationId) {
+      specificChanges.push({
+        label: $localize `:@@differ.the-return-value-when-flag-is-disabled:the return value when flag is disabled`,
+        op: OperationEnum.UPDATE,
+        isMultiValue: false,
+        path: ['disabledVariationId'],
+        value: ff2.variations.find((v) => v.id === ff2.disabledVariationId).value,
+        oldValue: ff1.variations.find((v) => v.id === ff1.disabledVariationId).value
+      });
+    }
     // primitive changes
     const primitiveChanges: IChange[] = this.primitiveConfig.flatMap(({label, path}) => {
       return Differ.comparePrimitives(_.get(ff1, path), _.get(ff2, path), path)
