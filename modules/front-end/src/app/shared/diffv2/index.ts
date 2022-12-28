@@ -79,7 +79,7 @@ export abstract class Differ {
       // old and new have different items
       (
         _.differenceBy(oldVariations, newVariations, (v) => v.id).length > 0 ||
-        _.difference(newVariations, oldVariations, (v) => v.id).length > 0
+        _.differenceBy(newVariations, oldVariations, (v) => v.id).length > 0
       ) ||
       // percentage(s) is/are changed
       (
