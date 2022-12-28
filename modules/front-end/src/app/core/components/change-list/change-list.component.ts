@@ -1,5 +1,5 @@
 import {Component, Input} from "@angular/core";
-import {ICategory, IChange} from "@shared/diffv2/types";
+import {ICategory, IChange} from "@shared/diff/types";
 import {ICondition} from "@shared/rules";
 
 @Component({

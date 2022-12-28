@@ -8,7 +8,7 @@ import {lastValueFrom} from "rxjs";
 import {Router} from "@angular/router";
 import {AuditLogOpEnum, IAuditLog, RefTypeEnum} from "@core/components/audit-log/types";
 import {DiffFactoryService} from "@services/diff-factory.service";
-import {ICategory} from "@shared/diffv2/types";
+import {ICategory} from "@shared/diff/types";
 
 @Component({
   selector: 'audit-log',

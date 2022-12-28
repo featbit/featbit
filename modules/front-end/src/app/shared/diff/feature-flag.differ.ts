@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import {Differ, IDiffer} from "@shared/diffv2/index";
+import {Differ, IDiffer} from "@shared/diff/index";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {ICategory, IChange, IDiffVarationUser, IRefType, OperationEnum} from "@shared/diffv2/types";
+import {ICategory, IChange, IDiffVarationUser, IRefType, OperationEnum} from "@shared/diff/types";
 import {getPercentageFromRolloutPercentageArray, isSegmentCondition} from "@utils/index";
 import {IUserType} from "@shared/types";
 import {ICondition} from "@shared/rules";

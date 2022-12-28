@@ -18,7 +18,7 @@ import { SegmentService } from "@services/segment.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import {DiffFactoryService} from "@services/diff-factory.service";
 import {RefTypeEnum} from "@core/components/audit-log/types";
-import {ICategory} from "@shared/diffv2/types";
+import {ICategory} from "@shared/diff/types";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,

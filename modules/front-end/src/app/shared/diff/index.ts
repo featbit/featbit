@@ -8,7 +8,7 @@ import {
   ObjectType,
   OperationEnum,
   PrimitiveType
-} from "@shared/diffv2/types";
+} from "@shared/diff/types";
 import {IRuleVariation, IVariation} from "@shared/rules";
 import {IVariationUser} from "@features/safe/feature-flags/types/details";
 import {IUserType} from "@shared/types";
