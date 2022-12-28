@@ -1,61 +1,31 @@
 import _ from 'lodash';
 
-import {IChange, ObjectType, OperationEnum, PrimitiveType} from "@shared/diffv2/types";
+import {
+  ICategory,
+  IChange,
+  IDiffVarationUser,
+  IRefType,
+  ObjectType,
+  OperationEnum,
+  PrimitiveType
+} from "@shared/diffv2/types";
+import {IRuleVariation, IVariation} from "@shared/rules";
+import {IVariationUser} from "@features/safe/feature-flags/types/details";
+import {IUserType} from "@shared/types";
 
 export interface IDiffer {
-  getChangeList(obj1Str: string, obj2Str: string): IChange[]
+  getChangeList(obj1Str: string, obj2Str: string, ref: IRefType): ICategory[]
 }
 
 
 export abstract class Differ {
 
-  static getKey(path: string[]): string {
-    return path.length > 0 ? path.slice(-1)[0] : '';
-  }
-
-  static compare(oldObj: Object, newObj: Object, path: string[]) {
-    const typeOfOldObj: string | null = this.getTypeOfObj(oldObj);
-    const typeOfNewObj: string | null = this.getTypeOfObj(newObj);
-
-    let changes: IChange[] = [];
-    let diffs: IChange[] = [];
-
-    if (typeOfOldObj !== typeOfNewObj) {
-      changes.push({
-        op: OperationEnum.REMOVE,
-        path: path,
-        value: oldObj
-      });
-      changes.push({
-        op: OperationEnum.ADD,
-        path: path,
-        value: newObj
-      });
-      return changes;
-    }
-
-    switch (typeOfOldObj) {
-      case 'Date':
-        changes = [...changes, ...this.comparePrimitives((oldObj as Date).getTime(), (newObj as Date).getTime(), path)];
-        break;
-      case 'Object':
-        break;
-      case 'Array':
-        //changes = [...changes, ...this.compareArray(oldObj as any[], newObj as any[], path, embededObjKeys, keyPath)];
-        break;
-      case 'Function':
-        break;
-      default:
-        changes = [...changes, ...this.comparePrimitives(oldObj as PrimitiveType, newObj as PrimitiveType, path)];
-    }
-    return changes;
-  }
-
-  private static comparePrimitives (oldObj: PrimitiveType, newObj: PrimitiveType, path: string[]): IChange[] {
+  static comparePrimitives (oldObj: PrimitiveType, newObj: PrimitiveType, path: string[]): IChange[] {
     const changes: IChange[] = [];
     if (oldObj !== newObj) {
       changes.push({
         op: OperationEnum.UPDATE,
+        isMultiValue: false,
         path: path,
         value: newObj,
         oldValue: oldObj
@@ -64,21 +34,88 @@ export abstract class Differ {
     return changes;
   }
 
-  private static compareArray (oldObj: any[], newObj: any[], path: string[], uniqKey: string = '$index'): IChange[] {
-    const indexedOldObj: ObjectType = this.convertArrayToObj(oldObj, uniqKey);
-    const indexedNewObj: ObjectType = this.convertArrayToObj(newObj, uniqKey);
+  static compareTargetUsers(oldVariationUsers: IDiffVarationUser[], newVariationUsers: IDiffVarationUser[], path: string[]): IChange[] {
+    let changes: IChange[] = [];
 
-    const diffs: IChange[] = [];
-    if (diffs.length) {
-      return [
-        {
-          op: OperationEnum.UPDATE,
-          path: path,
-        }
-      ];
-    } else {
-      return [];
+    const oldIndexedObj: ObjectType = this.convertArrayToObj(oldVariationUsers, 'variation');
+
+    newVariationUsers.map((vu) => {
+      const oldUsers = oldIndexedObj[vu.variation];
+
+      // added users
+      const addedUsers = _.differenceBy(vu.users, oldIndexedObj[vu.variation].users ?? [], (user) => user.keyId);
+      if (addedUsers.length > 0) {
+        changes.push({
+          op: OperationEnum.ADD,
+          label: vu.variation,
+          isMultiValue: true,
+          path: [...path, vu.variation],
+          value: addedUsers.map((user) => user.name),
+        })
+      }
+
+      // removed users
+      const removedUsers = _.differenceBy(oldIndexedObj[vu.variation].users ?? [], vu.users, (user) => user.keyId);
+      if (removedUsers.length > 0) {
+        changes.push({
+          op: OperationEnum.REMOVE,
+          label: vu.variation,
+          isMultiValue: true,
+          path: [...path, vu.variation],
+          value: removedUsers.map((user) => user.name)
+        })
+      }
+    });
+
+    return changes;
+  }
+
+  static compareRuleVariations(oldVariations: IRuleVariation[], newVariations: IRuleVariation[], path: string[]): IChange | null {
+    const oldIndexedObj: ObjectType = this.convertArrayToObj(oldVariations, 'id');
+    const newIndexedObj: ObjectType = this.convertArrayToObj(newVariations, 'id');
+
+    if (
+      oldVariations.length !== newVariations.length ||
+      // old and new have different items
+      (
+        _.differenceBy(oldVariations, newVariations, (v) => v.id).length > 0 ||
+        _.difference(newVariations, oldVariations, (v) => v.id).length > 0
+      ) ||
+      // percentage(s) is/are changed
+      (
+        oldVariations.some((v) => v.percentage !== newIndexedObj[v.id]?.percentage) ||
+        newVariations.some((v) => v.percentage !== oldIndexedObj[v.id]?.percentage)
+      )
+    ) {
+
+      return {
+        op: OperationEnum.UPDATE,
+        label: $localize `:@@differ.serve-value:Serve`,
+        isMultiValue: true,
+        path: path,
+        value: newVariations.length > 1 ? newVariations.map((v) => `${v.label} (${v.percentage}%)`) : newVariations.map((v) => v.label),
+        oldValue: oldVariations.length > 1 ? oldVariations.map((v) => `${v.label} (${v.percentage}%)`) : oldVariations.map((v) => v.label)
+      };
     }
+
+    return null;
+  }
+
+  static mapVariationUserToDiffVarationUser(variationUsers: IVariationUser[], variations: IVariation[], users: IUserType[]): IDiffVarationUser[] {
+    return variationUsers.map((tu) => ({
+      variation: variations.find((v) => v.id === tu.variationId)?.value,
+      users: tu.keyIds.map((keyId) => {
+        const user = users.find((user) => user.keyId === keyId);
+        let name = keyId;
+
+        if (user) {
+          name = user.name?.length > 0
+            ? `${user.name} (${user.keyId})`
+            : user.keyId;
+        }
+        return { keyId, name };
+      })
+    }));
   }
 
   private static convertArrayToObj (arr: any[], uniqKey: string): ObjectType {
@@ -90,15 +127,5 @@ export abstract class Differ {
         return acc;
       }, {});
     }
-  };
-
-  private static getTypeOfObj (obj: Object): string | null {
-    if (typeof obj === 'undefined')
-      return 'undefined'
-
-    if (obj === null)
-      return null
-
-    return Object.prototype.toString.call(obj).match(/^\[object\s(.*)\]$/)[1];
   };
 }

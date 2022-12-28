@@ -9,7 +9,7 @@ import featureFlagDiffer from "@utils/diff/feature-flag.differ";
 import {Router} from "@angular/router";
 import {AuditLogOpEnum, IAuditLog, RefTypeEnum} from "@core/components/audit-log/types";
 import {DiffFactoryService} from "@services/diff-factory.service";
-import {IChange} from "@shared/diffv2/types";
+import {ICategory, IChange} from "@shared/diffv2/types";
 
 @Component({
   selector: 'audit-log',
@@ -22,8 +22,7 @@ export class AuditLogComponent {
 
   auditLog: IAuditLog;
   htmlDiff: string = '';
-
-  changes: IChange[] = [];
+  changeCategories: ICategory[] = [];
   constructor(
     private router: Router,
     private diffFactoryService: DiffFactoryService,
@@ -69,7 +68,7 @@ export class AuditLogComponent {
   }
 
   get shouldShowChangeList(): boolean {
-    return this.auditLog.operation === AuditLogOpEnum.Update;
+    return true;//this.auditLog.operation === AuditLogOpEnum.Update;
   }
 
   get name(): string {
@@ -125,21 +124,21 @@ export class AuditLogComponent {
         const previous = this.previous as IFeatureFlag;
         const current = this.current as IFeatureFlag;
         // get all end users
-        const previousTargetUserIdRefs: string[] = previous.targetUsers.flatMap((v) => v.keyIds);
-        const currentTargetUserIdRefs: string[] = current.targetUsers.flatMap((v) => v.keyIds);
+        const previousTargetUserIdRefs: string[] = previous?.targetUsers?.flatMap((v) => v.keyIds) ?? [];
+        const currentTargetUserIdRefs: string[] = current?.targetUsers?.flatMap((v) => v.keyIds) ?? [];
         let targetUserIdRefs: string[] = [...previousTargetUserIdRefs, ...currentTargetUserIdRefs];
         targetUserIdRefs = targetUserIdRefs.filter((id, idx) => targetUserIdRefs.indexOf(id) === idx);
 
         // get all segmentIds from originalData and new Data
-        const previousSegmentIdRefs: string[] = previous.rules.flatMap((rule) => rule.conditions)
+        const previousSegmentIdRefs: string[] = previous?.rules?.flatMap((rule) => rule.conditions)
           .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
           .flatMap((condition: ICondition) => JSON.parse(condition.value))
-          .filter((id) => id !== null && id.length > 0);
+          .filter((id) => id !== null && id.length > 0) ?? [];
 
-        const currentSegmentIdRefs: string[] = current.rules.flatMap((rule) => rule.conditions)
+        const currentSegmentIdRefs: string[] = current?.rules?.flatMap((rule) => rule.conditions)
           .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
           .flatMap((condition: ICondition) => JSON.parse(condition.value))
-          .filter((id) => id !== null && id.length > 0);
+          .filter((id) => id !== null && id.length > 0) ?? [];
 
         let segmentIdRefs: string[] = [...previousSegmentIdRefs, ...currentSegmentIdRefs];
         segmentIdRefs = segmentIdRefs.filter((id, idx) => segmentIdRefs.indexOf(id) === idx); // get unique values
@@ -160,10 +159,8 @@ export class AuditLogComponent {
 
         const refs = await Promise.all(promises);
 
-        this.changes = this.diffFactoryService.getDiffer(this.auditLog.refType).getChangeList(this.auditLog.dataChange.previous, this.auditLog.dataChange.current);
-        console.log(this.changes);
-        const [ _, diff]  = featureFlagDiffer.generateDiff(previous, current, {targetingUsers: refs[0], segments: refs[1]});
-        this.htmlDiff = diff;
+        this.changeCategories = this.diffFactoryService.getDiffer(this.auditLog.refType).getChangeList(this.auditLog.dataChange.previous, this.auditLog.dataChange.current, {targetingUsers: refs[0], segments: refs[1]});
+        console.log(this.changeCategories);
         return;
       default:
         break;

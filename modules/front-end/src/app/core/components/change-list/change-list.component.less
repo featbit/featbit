@@ -1,13 +1,61 @@
 @import "variables";
 
-.change-list {
+.category-list {
   border-left: 2px solid @grey40-color;
   padding: 0 12px;
 
-  .change {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 5px;
+  & > ul {
+    list-style-type: none;
+    padding: 0;
+
+    li .category {
+      display: inline-block;
+      margin-top: 5px;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 19.5px;
+    }
+  }
+
+  .change-list {
+    padding-left: 20px;
+
+    .change {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 5px;
+
+      &.rule {
+        display: block;
+        margin-bottom: 10px;
+
+        .clause, .serve {
+          padding-left: 20px;
+          display: flex;
+          gap: 5px;
+          justify-content: flex-start;
+        }
+
+        .clause, .serve-value {
+          color: #646f7a;
+        }
+      }
+
+      .operation {
+        font-weight: 700;
+      }
+
+      .ant-tag {
+        line-height: 15px;
+        height: 17px;
+        border-radius: 5px;
+        margin-right: 0;
+
+        &.remove-item {
+          text-decoration: line-through;
+        }
+      }
+    }
   }
 }

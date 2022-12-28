@@ -1,14 +1,82 @@
-<div class="change-list">
-  <ul *ngFor="let change of changes">
-    <ng-container [ngSwitch]="change.op">
-      <li class="change" *ngSwitchCase="'UPDATE'">
-        <span i18n="@@common.diff.set">Set</span>
-        <span>{{change.label}}</span>
-        <span i18n="@@common.diff.from">from</span>
-        <span>{{change.oldValue}}</span>
-        <span i18n="@@common.diff.to">to</span>
-        <span>{{change.value}}</span>
-      </li>
-    </ng-container>
+<div class="category-list">
+  <ul>
+    <li *ngFor="let category of categories">
+      <span class="category">{{category.label}}</span>
+      <ul class="change-list">
+        <ng-container *ngFor="let change of category.changes" [ngSwitch]="change.op">
+          <li class="change" *ngSwitchCase="'ENABLE'">
+            <span i18n="@@differ.enabled" class="operation">Enabled</span>
+            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
+          </li>
+          <li class="change" *ngSwitchCase="'DISABLE'">
+            <span i18n="@@differ.enabled" class="operation">Disabled</span>
+            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
+          </li>
+          <li class="change" *ngSwitchCase="'ARCHIVE'">
+            <span i18n="@@differ.archived" class="operation">Archived</span>
+            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
+          </li>
+          <li class="change" *ngSwitchCase="'UNARCHIVED'">
+            <span i18n="@@differ.unarchived" class="operation">Unarchived</span>
+            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
+          </li>
+          <li class="change" *ngSwitchCase="'UPDATE'">
+            <span i18n="@@differ.set" class="operation">Set</span>
+            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
+            <ng-container *ngIf="displayOldValue(change)">
+              <span i18n="@@differ.from">from</span>
+              <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.oldValue}}</span>
+              <ng-container *ngIf="change.isMultiValue">
+                <span class="ant-tag remove-item" *ngFor="let value of change.oldValue">{{value}}</span>
+              </ng-container>
+            </ng-container>
+            <ng-container *ngIf="displayNewValue(change)">
+              <span i18n="@@differ.to">to</span>
+              <span class="ant-tag" *ngIf="!change.isMultiValue">{{change.value}}</span>
+              <ng-container *ngIf="change.isMultiValue">
+                <span class="ant-tag" *ngFor="let value of change.value">{{value}}</span>
+              </ng-container>
+            </ng-container>
+          </li>
+          <li class="change" *ngSwitchCase="'ADD'">
+            <span i18n="@@differ.added" class="operation">Added</span>
+            <span class="ant-tag" *ngIf="!change.isMultiValue">{{change.value}}</span>
+            <ng-container *ngIf="change.isMultiValue">
+              <span class="ant-tag" *ngFor="let value of change.value">{{value}}</span>
+            </ng-container>
+            <span i18n="@@differ.to">to</span>
+            <span>{{change.label}}</span>
+          </li>
+          <li class="change" *ngSwitchCase="'REMOVE'">
+            <span i18n="@@differ.removed" class="operation">Removed</span>
+            <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.value}}</span>
+            <ng-container *ngIf="change.isMultiValue">
+              <span class="ant-tag remove-item" *ngFor="let value of change.value">{{value}}</span>
+            </ng-container>
+            <span i18n="@@differ.from">from</span>
+            <span class="ant-tag">{{change.label}}</span>
+          </li>
+          <li class="change rule" *ngSwitchCase="'RULE'">
+            <div class="operation">{{change.label}}</div>
+            <div class="clause" *ngFor="let condition of change.value.conditions; let idx = index">
+              <span *ngIf="idx !==0 ">And</span>
+              <span>If</span>
+              <span>{{condition.property}}</span>
+              <span *ngIf="condition.op !== null">{{condition.opLabel}}</span>
+              <ng-container *ngIf="displayRuleClauseValue(condition)">
+                <span class="ant-tag" *ngIf="!condition.isMultiValue">{{condition.value}}</span>
+                <ng-container *ngIf="condition.isMultiValue">
+                  <span class="ant-tag" *ngFor="let value of condition.value">{{value}}</span>
+                </ng-container>
+              </ng-container>
+            </div>
+            <div class="serve">
+              <span i18n="@@core.components.findrule.serve">Serve</span>
+              <span class="serve-value" class="ant-tag" *ngFor="let variation of change.value.variations">{{variation.label}} ({{variation.percentage}})</span>
+            </div>
+          </li>
+        </ng-container>
+      </ul>
+    </li>
   </ul>
 </div>
