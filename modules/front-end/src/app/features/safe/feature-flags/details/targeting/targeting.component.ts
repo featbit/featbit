@@ -212,7 +212,6 @@ export class TargetingComponent implements OnInit {
   }
 
   numChanges = 0;
-  changes = '';
   changeCategories: ICategory[] = [];
   reviewModalVisible = false;
   validationErrors: IFlagValidationError[] = [];
