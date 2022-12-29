@@ -102,21 +102,25 @@ export abstract class Differ {
   }
 
   static mapVariationUserToDiffVarationUser(variationUsers: IVariationUser[], variations: IVariation[], users: IUserType[]): IDiffVarationUser[] {
-    return variationUsers.map((tu) => ({
-      variationId: tu.variationId,
-      variation: variations.find((v) => v.id === tu.variationId)?.value,
-      users: tu.keyIds.map((keyId) => {
-        const user = users.find((user) => user.keyId === keyId);
-        let name = keyId;
+    return variations.map((variation) => {
+      const variationUser = variationUsers.find((vu) => vu.variationId === variation.id);
 
-        if (user) {
-          name = user.name?.length > 0
-            ? `${user.name} (${user.keyId})`
-            : user.keyId;
-        }
-        return { keyId, name };
-      })
-    }));
+      return {
+        variationId: variation.id,
+        variation: variation.value,
+        users: variationUser === undefined ? [] : variationUser.keyIds.map((keyId) => {
+          const user = users.find((user) => user.keyId === keyId);
+          let name = keyId;
+
+          if (user) {
+            name = user.name?.length > 0
+              ? `${user.name} (${user.keyId})`
+              : user.keyId;
+          }
+          return { keyId, name };
+        })
+      }
+    });
   }
 
   private static convertArrayToObj (arr: any[], uniqKey: string): ObjectType {
