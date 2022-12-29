@@ -41,6 +41,14 @@ public class AuditLogService : MongoDbService<AuditLog>, IAuditLogService
             filters.Add(creatorFilter);
         }
 
+        // refId filter
+        var refId = userFilter.RefId;
+        if (!string.IsNullOrWhiteSpace(refId))
+        {
+            var refIdFilter = filterBuilder.Eq(x => x.RefId, refId);
+            filters.Add(refIdFilter);
+        }
+
         // refType filter
         var refType = userFilter.RefType;
         if (!string.IsNullOrWhiteSpace(refType))
