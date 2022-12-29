@@ -212,11 +212,15 @@ public class FeatureFlag : FullAuditedEntity
         return Variations.FirstOrDefault(x => x.Id == variationId);
     }
 
-    public void SetTags(ICollection<string> tags, Guid currentUserId)
+    public DataChange SetTags(ICollection<string> tags, Guid currentUserId)
     {
+        var dataChange = new DataChange(this);
+
         Tags = tags ?? Array.Empty<string>();
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
+
+        return dataChange.To(this);
     }
 }
