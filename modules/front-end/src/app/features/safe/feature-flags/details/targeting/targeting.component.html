@@ -138,7 +138,7 @@
             <span>{{numChanges}} </span>
             <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
           </p>
-          <div class="change-list" [innerHtml]="changes | safeHtml"></div>
+          <change-list [categories]="changeCategories"></change-list>
         </div>
       </section>
       <section class="comment">

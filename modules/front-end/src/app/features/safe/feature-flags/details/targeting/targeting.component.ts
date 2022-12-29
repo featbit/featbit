@@ -14,9 +14,11 @@ import { FeatureFlag, IFeatureFlag } from "@features/safe/feature-flags/types/de
 import { ICondition, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
-import featureFlagDiffer from "@utils/diff/feature-flag.differ";
 import { SegmentService } from "@services/segment.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import {DiffFactoryService} from "@services/diff-factory.service";
+import {RefTypeEnum} from "@core/components/audit-log/types";
+import {ICategory} from "@shared/diff/types";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -76,6 +78,7 @@ export class TargetingComponent implements OnInit {
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService,
     private messageQueueService: MessageQueueService,
+    private diffFactoryService: DiffFactoryService,
   ) {
   }
 
@@ -209,8 +212,7 @@ export class TargetingComponent implements OnInit {
   }
 
   numChanges = 0;
-  changes = '';
-
+  changeCategories: ICategory[] = [];
   reviewModalVisible = false;
   validationErrors: IFlagValidationError[] = [];
 
@@ -240,9 +242,8 @@ export class TargetingComponent implements OnInit {
     segmentIdRefs = segmentIdRefs.filter((id, idx) => segmentIdRefs.indexOf(id) === idx); // get unique values
 
     this.segmentService.getByIds(segmentIdRefs).subscribe((segments) => {
-      const [ numChanges, changes]  = featureFlagDiffer.generateDiff(this.featureFlag.originalData, this.featureFlag, {targetingUsers: this.allTargetingUsers, segments});
-      this.numChanges = numChanges;
-      this.changes = changes;
+      this.changeCategories = this.diffFactoryService.getDiffer(RefTypeEnum.Flag).getChangeList(JSON.stringify(this.featureFlag.originalData), JSON.stringify(this.featureFlag), {targetingUsers: this.allTargetingUsers, segments});
+      this.numChanges = this.changeCategories.flatMap((category) => category.changes).length;
     }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
 
     this.reviewForm = this.fb.group({

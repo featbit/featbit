@@ -71,6 +71,7 @@ import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-va
 import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
 import { SlugifyPipe } from "@core/pipes/slugify";
 import {AuditLogComponent} from "@core/components/audit-log/audit-log.component";
+import {ChangeListComponent} from "@core/components/change-list/change-list.component";
 
 @NgModule({
   declarations: [
@@ -106,7 +107,8 @@ import {AuditLogComponent} from "@core/components/audit-log/audit-log.component"
     ServeComponent,
     RuleComponent,
     GuideComponent,
-    AuditLogComponent
+    AuditLogComponent,
+    ChangeListComponent
   ],
   imports: [
     CommonModule,
@@ -184,7 +186,8 @@ import {AuditLogComponent} from "@core/components/audit-log/audit-log.component"
     ServeComponent,
     RuleComponent,
     GuideComponent,
-    AuditLogComponent
+    AuditLogComponent,
+    ChangeListComponent
   ]
 })
 export class CoreModule { }

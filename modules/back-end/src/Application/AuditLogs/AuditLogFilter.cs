@@ -8,6 +8,8 @@ public class AuditLogFilter : PagedRequest
 
     public Guid? CreatorId { get; set; }
 
+    public string RefId { get; set; }
+
     public string RefType { get; set; }
 
     public long? From { get; set; }

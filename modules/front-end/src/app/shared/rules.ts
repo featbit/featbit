@@ -39,6 +39,7 @@ export interface IRuleVariation {
   percentage?: number; // the percentage representation of rolloutPercentage
   exptPercentage?: number;  // the percentage representation of exptRollout
   isInvalid?: boolean
+  label?: string // variation label
 }
 
 export function handleRulesBeforeSave(rules: IRule[]) {

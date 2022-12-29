@@ -1,36 +1,72 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
-import {NzMessageService} from 'ng-zorro-antd/message';
-import {Subject} from 'rxjs';
-import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subject } from 'rxjs';
+import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
+import {FeatureFlagService} from "@services/feature-flag.service";
+import {AuditLogListFilter, IAuditLog, IAuditLogListModel, RefTypeEnum} from "@core/components/audit-log/types";
+import {IMember, IMemberListModel, MemberFilter} from "@features/safe/iam/types/member";
 import {AuditLogService} from "@services/audit-log.service";
 import {MemberService} from "@services/member.service";
-import {IMember, IMemberListModel, MemberFilter} from "@features/safe/iam/types/member";
 import {SegmentService} from "@services/segment.service";
 import {EnvUserService} from "@services/env-user.service";
-import {AuditLogListFilter, IAuditLog, IAuditLogListModel, RefTypeEnum} from "@core/components/audit-log/types";
+import {debounceTime, distinctUntilChanged} from "rxjs/operators";
+import {NzMessageService} from "ng-zorro-antd/message";
 
 @Component({
-  selector: 'auditlogs-index',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+  selector: 'ff-auditlogs',
+  templateUrl: './audit-logs.component.html',
+  styleUrls: ['./audit-logs.component.less']
 })
-export class IndexComponent implements OnInit, OnDestroy {
+export class AuditLogsComponent implements OnInit, OnDestroy {
   private destory$: Subject<void> = new Subject();
-
-  auditLogs: IAuditLog[] = [];
-
-  groupedAuditLogs: {key: string, items: IAuditLog[]}[] = [];
-
+  private $search: Subject<void> = new Subject();
+  private $memberSearch = new Subject<any>();
+  loading: boolean = true;
+  membersLoading: boolean = false;
   memberListModel: IMemberListModel = {
     items: [],
     totalCount: 0
   }
-
-  loading: boolean = true;
-  membersLoading: boolean = false;
-  refTypeFlag: RefTypeEnum = RefTypeEnum.Flag;
+  auditLogs: IAuditLog[] = [];
+  groupedAuditLogs: {key: string, items: IAuditLog[]}[] = [];
+  auditLogFilter: AuditLogListFilter = new AuditLogListFilter();
   totalCount: number = 0;
+
+  constructor(
+    private route: ActivatedRoute,
+    private featureFlagService: FeatureFlagService,
+    private auditLogService: AuditLogService,
+    private memberService: MemberService,
+    private segmentService: SegmentService,
+    private envUserService: EnvUserService,
+    private msg: NzMessageService,
+  ) {
+    this.auditLogFilter.refType = RefTypeEnum.Flag;
+  }
+
+  ngOnInit(): void {
+    this.$memberSearch.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(e => {
+      this.loadMemberList(e);
+    });
+
+    this.$search.pipe(
+      debounceTime(400)
+    ).subscribe(() => {
+      this.loadAuditLogList();
+    });
+
+    this.route.paramMap.subscribe( paramMap => {
+      const key = decodeURIComponent(paramMap.get('key'));
+      this.featureFlagService.getByKey(key).subscribe((result: IFeatureFlag) => {
+        this.auditLogFilter.refType = RefTypeEnum.Flag;
+        this.auditLogFilter.refId = result.id;
+        this.$search.next();
+      });
+    })
+  }
 
   loadAuditLogList() {
     this.loading = true;
@@ -84,11 +120,6 @@ export class IndexComponent implements OnInit, OnDestroy {
     })
   }
 
-  auditLogFilter: AuditLogListFilter = new AuditLogListFilter();
-
-  private $search: Subject<void> = new Subject();
-  private $memberSearch = new Subject<any>();
-
   onSearch(resetPage?: boolean) {
     if (resetPage) {
       this.auditLogFilter.pageIndex = 1;
@@ -106,38 +137,6 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.$search.next();
   }
 
-  constructor(
-    private router: Router,
-    private auditLogService: AuditLogService,
-    private memberService: MemberService,
-    private segmentService: SegmentService,
-    private envUserService: EnvUserService,
-    private msg: NzMessageService,
-  ) {
-  }
-
-  ngOnInit(): void {
-    this.$memberSearch.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(e => {
-      this.loadMemberList(e);
-    });
-
-    this.$search.pipe(
-      debounceTime(400)
-    ).subscribe(() => {
-      this.loadAuditLogList();
-    });
-
-    this.$search.next();
-  }
-
-  ngOnDestroy(): void {
-    this.destory$.next();
-    this.destory$.complete();
-  }
-
   getMemberLabel(member: IMember): string {
     let label = member.email;
 
@@ -146,5 +145,10 @@ export class IndexComponent implements OnInit, OnDestroy {
     }
 
     return label;
+  }
+
+  ngOnDestroy(): void {
+    this.destory$.next();
+    this.destory$.complete();
   }
 }

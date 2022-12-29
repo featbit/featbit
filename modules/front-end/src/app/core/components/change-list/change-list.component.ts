@@ -1,0 +1,32 @@
+import {Component, Input} from "@angular/core";
+import {ICategory, IChange} from "@shared/diff/types";
+import {ICondition} from "@shared/rules";
+import {CURRENT_LANGUAGE} from "@utils/localstorage-keys";
+
+@Component({
+  selector: 'change-list',
+  templateUrl: './change-list.component.html',
+  styleUrls: ['./change-list.component.less']
+})
+export class ChangeListComponent {
+
+  lang: string = localStorage.getItem(CURRENT_LANGUAGE());
+  @Input() categories: ICategory[] = []
+
+  constructor() {
+  }
+
+  displayOldValue(change: IChange): boolean {
+    return change.isMultiValue ? change.oldValue.length > 0 :
+      (change.oldValue !== '' && change.oldValue !== undefined && change.oldValue != null);
+  }
+
+  displayNewValue(change: IChange): boolean {
+    return change.isMultiValue ? change.value.length > 0 :
+      (change.value !== '' && change.value !== undefined && change.value != null);
+  }
+
+  displayRuleClauseValue(condition: ICondition): boolean {
+    return !['IsTrue', 'IsFalse'].includes(condition.op);
+  }
+}

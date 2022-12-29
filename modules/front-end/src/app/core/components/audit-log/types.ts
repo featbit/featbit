@@ -38,6 +38,7 @@ export class AuditLogListFilter {
     public query?: string,
     public creatorId?: string,
     public refType?: RefTypeEnum,
+    public refId?: string,
     public range: Date[] = [],
     public pageIndex: number = 1,
     public pageSize: number = 10

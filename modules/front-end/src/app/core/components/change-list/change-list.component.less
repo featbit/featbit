@@ -1,0 +1,66 @@
+@import "variables";
+
+.category-list {
+  border-left: 2px solid @grey40-color;
+  padding: 0 12px;
+
+  & > ul {
+    list-style-type: none;
+    padding: 0;
+
+    li .category {
+      display: inline-block;
+      margin: 4px 0;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 19.5px;
+    }
+  }
+
+  .change-list {
+    padding-left: 20px;
+
+    .change {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 5px;
+
+      &.rule {
+        display: block;
+        margin-bottom: 10px;
+
+        .clause, .serve {
+          padding-left: 20px;
+          display: flex;
+          gap: 5px;
+          justify-content: flex-start;
+        }
+
+        .clause, .serve-value {
+          color: #646f7a;
+        }
+      }
+
+      .ant-tag {
+        line-height: 17px;
+        height: 19px;
+        border-radius: 5px;
+        margin-right: 0;
+
+        &.remove-item {
+          text-decoration: line-through;
+        }
+      }
+    }
+  }
+
+  &.zh .change-list .change {
+    gap: 0;
+
+    .ant-tag {
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+  }
+}
