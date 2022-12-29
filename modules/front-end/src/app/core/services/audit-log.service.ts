@@ -34,6 +34,7 @@ export class AuditLogService {
       query: filter.query ?? '',
       creatorId: filter.creatorId ?? '',
       refType: filter.refType ?? '',
+      refId: filter.refId ?? '',
       from,
       to,
       pageIndex: filter.pageIndex - 1,

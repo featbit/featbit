@@ -4,6 +4,7 @@ import { DetailsComponent } from './details.component';
 import { TargetingComponent } from './targeting/targeting.component';
 import { SettingComponent } from './setting/setting.component';
 import {InsightsComponent} from "@features/safe/feature-flags/details/insights/insights.component";
+import {AuditLogComponent} from "@core/components/audit-log/audit-log.component";
 
 
 const routes: Routes = [
@@ -34,6 +35,12 @@ const routes: Routes = [
         component: SettingComponent,
         data: {
           breadcrumb: $localize `:@@ff.routing.details.experimentation:Experimentation`
+        }
+      }, {
+        path: 'history',
+        component: AuditLogComponent,
+        data: {
+          breadcrumb: $localize `:@@ff.routing.details.history:History`
         }
       }, {
         path: '',

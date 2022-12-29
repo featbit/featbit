@@ -55,11 +55,15 @@
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">8</context>
         </context-group>
+        <target>激活</target>
+      </trans-unit>
+      <trans-unit id="differ.disabled" datatype="html">
+        <source>Disabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">12</context>
         </context-group>
-        <target>激活</target>
+        <target>关闭</target>
       </trans-unit>
       <trans-unit id="differ.archived" datatype="html">
         <source>Archived</source>
@@ -125,15 +129,11 @@
         </context-group>
         <target>移除</target>
       </trans-unit>
-      <trans-unit id="core.components.findrule.serve" datatype="html">
+      <trans-unit id="differ.serve" datatype="html">
         <source>Serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">74</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/serve/serve.component.html</context>
-          <context context-type="linenumber">3</context>
         </context-group>
         <target>返回</target>
       </trans-unit>
@@ -517,7 +517,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">25</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
@@ -526,6 +526,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
@@ -1288,6 +1292,14 @@
           <context context-type="linenumber">106</context>
         </context-group>
         <target>所有选项数</target>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.serve" datatype="html">
+        <source>serve</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/serve/serve.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+        <target>返回</target>
       </trans-unit>
       <trans-unit id="app.components.findrule.selectvariation" datatype="html">
         <source>variation</source>
@@ -3056,7 +3068,11 @@
         <source>Filter by team member</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">20</context>
         </context-group>
         <target>按团队成员查找</target>
       </trans-unit>
@@ -3064,7 +3080,7 @@
         <source>Filter by type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>按类型查找</target>
       </trans-unit>
@@ -3072,7 +3088,7 @@
         <source>Feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">30</context>
         </context-group>
         <target>开关</target>
       </trans-unit>
@@ -3080,7 +3096,11 @@
         <source>No data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <target>没有数据</target>
       </trans-unit>
@@ -3088,7 +3108,11 @@
         <source>More</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <target>更多</target>
       </trans-unit>
@@ -3097,6 +3121,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.ts</context>
           <context context-type="linenumber">81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.ts</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <target>加载团队成员失败</target>
       </trans-unit>
@@ -3793,11 +3821,19 @@
         </context-group>
         <target>操作</target>
       </trans-unit>
+      <trans-unit id="ff.history.filter-by" datatype="html">
+        <source>Filter by name, comment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <target>按名称或评论查找</target>
+      </trans-unit>
       <trans-unit id="ff.routing.details.targeting" datatype="html">
         <source>Targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details-routing.module.ts</context>
-          <context context-type="linenumber">18</context>
+          <context context-type="linenumber">19</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details.component.html</context>
@@ -3813,7 +3849,7 @@
         <source>Insights</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details-routing.module.ts</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details.component.html</context>
@@ -3825,7 +3861,7 @@
         <source>Triggers</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details-routing.module.ts</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details.component.html</context>
@@ -3837,13 +3873,25 @@
         <source>Experimentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details-routing.module.ts</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details.component.html</context>
           <context context-type="linenumber">19</context>
         </context-group>
         <target>数据实验</target>
+      </trans-unit>
+      <trans-unit id="ff.routing.details.history" datatype="html">
+        <source>History</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details-routing.module.ts</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/details.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <target>历史记录</target>
       </trans-unit>
       <trans-unit id="ff.expt.currently-no-expts" datatype="html">
         <source>You haven&apos;t created any experiments for this feature flag,</source>
@@ -6230,7 +6278,7 @@
         <target>移除规则：</target>
       </trans-unit>
       <trans-unit id="differ.rules" datatype="html">
-        <source>Rules</source>
+        <source>Rules:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
           <context context-type="linenumber">172</context>

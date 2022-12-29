@@ -27,7 +27,6 @@ import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzResultModule } from 'ng-zorro-antd/result';
-import { SafeHtmlPipe } from '@core/pipes/safe-html.pipe';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { TargetingComponent } from './targeting/targeting.component';
@@ -39,6 +38,9 @@ import { NzCodeEditorModule } from 'ng-zorro-antd/code-editor';
 import { NzGridModule } from "ng-zorro-antd/grid";
 import { CoreModule } from "@core/core.module";
 import { NzFormModule } from "ng-zorro-antd/form";
+import {AuditLogsComponent} from "@features/safe/feature-flags/details/audit-logs/audit-logs.component";
+import {NzDatePickerModule} from "ng-zorro-antd/date-picker";
+import {NzTimelineModule} from "ng-zorro-antd/timeline";
 
 @NgModule({
   declarations: [
@@ -48,6 +50,7 @@ import { NzFormModule } from "ng-zorro-antd/form";
     TriggersComponent,
     InsightsComponent,
     ExperimentationComponent,
+    AuditLogsComponent
   ],
   imports: [
     LocalComponentsModule,
@@ -81,7 +84,9 @@ import { NzFormModule } from "ng-zorro-antd/form";
     NzCodeEditorModule,
     DetailsRoutingModule,
     NzGridModule,
-    NzFormModule
+    NzFormModule,
+    NzDatePickerModule,
+    NzTimelineModule
   ],
   providers: []
 })

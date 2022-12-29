@@ -9,7 +9,7 @@
             <span *ngIf="change.label?.length > 0">{{change.label}}</span>
           </li>
           <li class="change" *ngSwitchCase="'DISABLE'">
-            <span i18n="@@differ.enabled">Disabled</span>
+            <span i18n="@@differ.disabled">Disabled</span>
             <span *ngIf="change.label?.length > 0">{{change.label}}</span>
           </li>
           <li class="change" *ngSwitchCase="'ARCHIVE'">
@@ -71,7 +71,7 @@
               </ng-container>
             </div>
             <div class="serve">
-              <span i18n="@@core.components.findrule.serve">Serve</span>
+              <span i18n="@@differ.serve">Serve</span>
               <span class="serve-value" class="ant-tag" *ngFor="let variation of change.value.variations">
                 {{variation.label}} <ng-container *ngIf="change.value.variations.length > 1">({{variation.percentage}})</ng-container>
               </span>
