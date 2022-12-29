@@ -40,10 +40,10 @@ export abstract class Differ {
     const oldIndexedObj: ObjectType = this.convertArrayToObj(oldVariationUsers, 'variationId');
 
     newVariationUsers.map((vu) => {
-      const oldUsers = oldIndexedObj[vu.variationId];
+      const oldUsers = oldIndexedObj[vu.variationId]?.users ?? [];
 
       // added users
-      const addedUsers = _.differenceBy(vu.users, oldIndexedObj[vu.variationId].users ?? [], (user) => user.keyId);
+      const addedUsers = _.differenceBy(vu.users, oldUsers, (user) => user.keyId);
       if (addedUsers.length > 0) {
         changes.push({
           op: OperationEnum.ADD,
@@ -55,7 +55,7 @@ export abstract class Differ {
       }
 
       // removed users
-      const removedUsers = _.differenceBy(oldIndexedObj[vu.variationId].users ?? [], vu.users, (user) => user.keyId);
+      const removedUsers = _.differenceBy(oldUsers, vu.users, (user) => user.keyId);
       if (removedUsers.length > 0) {
         changes.push({
           op: OperationEnum.REMOVE,

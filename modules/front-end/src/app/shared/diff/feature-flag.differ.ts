@@ -1,12 +1,12 @@
 import _ from 'lodash';
-import {Differ, IDiffer} from "@shared/diff/index";
-import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {ICategory, IChange, IDiffVarationUser, IRefType, OperationEnum} from "@shared/diff/types";
-import {getPercentageFromRolloutPercentageArray, isSegmentCondition} from "@utils/index";
-import {IUserType} from "@shared/types";
-import {ICondition} from "@shared/rules";
-import {findIndex, ruleOps} from "@core/components/find-rule/ruleConfig";
-import {ISegment} from "@features/safe/segments/types/segments-index";
+import { Differ, IDiffer } from "@shared/diff/index";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { ICategory, IChange, IDiffVarationUser, IRefType, OperationEnum } from "@shared/diff/types";
+import { getPercentageFromRolloutPercentageArray, isSegmentCondition } from "@utils/index";
+import { IUserType } from "@shared/types";
+import { ICondition } from "@shared/rules";
+import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
+import { ISegment } from "@features/safe/segments/types/segments-index";
 
 export class FeatureFlagDiffer implements IDiffer {
 
@@ -18,8 +18,7 @@ export class FeatureFlagDiffer implements IDiffer {
   }
 
   getChangeList(obj1Str: string, obj2Str: string, ref: IRefType): ICategory[] {
-    const diff = this.diff(obj1Str, obj2Str, ref);
-    return diff;
+    return this.diff(obj1Str, obj2Str, ref);
   }
 
   diff(obj1Str: string, obj2Str: string, ref: IRefType): ICategory[] {
@@ -91,7 +90,6 @@ export class FeatureFlagDiffer implements IDiffer {
 
     const addedTagChanges = _.differenceBy(newObj.tags, oldObj.tags, (tag) => tag).map((tag) => {
       return {
-        label: $localize `:@@differ.tag:tag`,
         op: OperationEnum.ADD,
         isMultiValue: false,
         path: path,
@@ -101,7 +99,6 @@ export class FeatureFlagDiffer implements IDiffer {
 
     const removedTagChanges = _.differenceBy(oldObj.tags, newObj.tags, (tag) => tag).map((tag) => {
       return {
-        label: $localize `:@@differ.tag:tag`,
         op: OperationEnum.REMOVE,
         isMultiValue: false,
         path: path,
@@ -112,7 +109,7 @@ export class FeatureFlagDiffer implements IDiffer {
     if (addedTagChanges.length > 0 || removedTagChanges.length > 0) {
       changes = [
         {
-          label:  $localize `:@@differ.variations:Variations`,
+          label:  $localize `:@@differ.tags:Tags`,
           changes: [
             ...addedTagChanges,
             ...removedTagChanges
