@@ -77,10 +77,122 @@ export class FeatureFlagDiffer implements IDiffer {
 
     return [
       ...changes,
+      ...this.compareVariations(ff1, ff2),
+      ...this.compareTags(ff1, ff2),
       ...this.compareFallthrough(ff1, ff2), // fallthrough
       ...this.compareTargetUsers(ff1, ff2, ref.targetingUsers), // targetUsers
       ...this.compareRules(ff1, ff2, ref.segments) // rules
     ];
+  }
+
+  private compareTags(oldObj: IFeatureFlag, newObj: IFeatureFlag): ICategory[] {
+    const path = ['tags'];
+    let changes: ICategory[] = [];
+
+    const addedTagChanges = _.differenceBy(newObj.tags, oldObj.tags, (tag) => tag).map((tag) => {
+      return {
+        label: $localize `:@@differ.tag:tag`,
+        op: OperationEnum.ADD,
+        isMultiValue: false,
+        path: path,
+        value: tag
+      }
+    });
+
+    const removedTagChanges = _.differenceBy(oldObj.tags, newObj.tags, (tag) => tag).map((tag) => {
+      return {
+        label: $localize `:@@differ.tag:tag`,
+        op: OperationEnum.REMOVE,
+        isMultiValue: false,
+        path: path,
+        value: tag
+      }
+    });
+
+    if (addedTagChanges.length > 0 || removedTagChanges.length > 0) {
+      changes = [
+        {
+          label:  $localize `:@@differ.variations:Variations`,
+          changes: [
+            ...addedTagChanges,
+            ...removedTagChanges
+          ]
+        }
+      ]
+    }
+
+    return changes;
+  }
+
+  private compareVariations(oldObj: IFeatureFlag, newObj: IFeatureFlag): ICategory[] {
+    const path = ['variations'];
+    let changes: ICategory[] = [];
+
+    const variationTypeChanges: IChange[] = [];
+    if (oldObj.variationType !== newObj.variationType) {
+      variationTypeChanges.push({
+        label: $localize `:@@differ.variation-type:variation type`,
+        op: OperationEnum.UPDATE,
+        isMultiValue: false,
+        path: ['variationType'],
+        value: newObj.variationType,
+        oldValue: oldObj.variationType
+      });
+    }
+
+    const variationChanges = _.intersectionBy(newObj.variations, oldObj.variations, (variation) => variation.id).map((variation) => {
+      const oldVariation = oldObj.variations.find((v) => v.id === variation.id);
+      const newVariation = newObj.variations.find((v) => v.id === variation.id);
+
+      if (oldVariation.value !== newVariation.value) {
+        return {
+          label: $localize `:@@differ.variation:variation`,
+          op: OperationEnum.UPDATE,
+          isMultiValue: false,
+          path: path,
+          value: newVariation.value,
+          oldValue: oldVariation.value
+        }
+      }
+
+      return null;
+    }).filter((change) => change !== null);
+
+    const addedVariationChanges = _.differenceBy(newObj.variations, oldObj.variations, (variation) => variation.id).map((variation) => {
+      return {
+        label: `${$localize `:@@differ.variation:variation:`} ${variation.value}`,
+        op: OperationEnum.ADD,
+        isMultiValue: false,
+        path: path,
+        value: variation.value
+      }
+    });
+
+    const removedVariationChanges = _.differenceBy(oldObj.variations, newObj.variations, (variation) => variation.id).map((variation) => {
+      return {
+        label: `${$localize `:@@differ.variation:variation:`} ${variation.value}`,
+        op: OperationEnum.REMOVE,
+        isMultiValue: false,
+        path: path,
+        value: variation.value
+      }
+    });
+
+    if (variationTypeChanges.length > 0 || variationChanges.length > 0 || addedVariationChanges.length > 0 || removedVariationChanges.length > 0) {
+      changes = [
+        {
+          label:  $localize `:@@differ.variations:Variations`,
+          changes: [
+            ...variationTypeChanges,
+            ...variationChanges,
+            ...addedVariationChanges,
+            ...removedVariationChanges
+          ]
+        }
+      ]
+    }
+
+    return changes;
   }
 
   private mapConditionToDiffCondition(condition: ICondition, segments: ISegment[]) {
@@ -169,7 +281,7 @@ export class FeatureFlagDiffer implements IDiffer {
     if (ruleChanges.length > 0 || addedRuleChanges.length > 0 || removedRuleChanges.length > 0) {
       changes = [
         {
-          label:  $localize `:@@differ.rules:Rules:`,
+          label:  $localize `:@@differ.rules:Rules`,
           changes: [
             ...ruleChanges,
             ...addedRuleChanges,

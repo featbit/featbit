@@ -11,6 +11,7 @@ export interface IDiffUser {
 }
 
 export interface IDiffVarationUser {
+  variationId: string,
   variation: string,
   users: IDiffUser[]
 }

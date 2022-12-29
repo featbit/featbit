@@ -37,31 +37,31 @@ export abstract class Differ {
   static compareTargetUsers(oldVariationUsers: IDiffVarationUser[], newVariationUsers: IDiffVarationUser[], path: string[]): IChange[] {
     let changes: IChange[] = [];
 
-    const oldIndexedObj: ObjectType = this.convertArrayToObj(oldVariationUsers, 'variation');
+    const oldIndexedObj: ObjectType = this.convertArrayToObj(oldVariationUsers, 'variationId');
 
     newVariationUsers.map((vu) => {
-      const oldUsers = oldIndexedObj[vu.variation];
+      const oldUsers = oldIndexedObj[vu.variationId];
 
       // added users
-      const addedUsers = _.differenceBy(vu.users, oldIndexedObj[vu.variation].users ?? [], (user) => user.keyId);
+      const addedUsers = _.differenceBy(vu.users, oldIndexedObj[vu.variationId].users ?? [], (user) => user.keyId);
       if (addedUsers.length > 0) {
         changes.push({
           op: OperationEnum.ADD,
           label: vu.variation,
           isMultiValue: true,
-          path: [...path, vu.variation],
+          path: [...path, vu.variationId],
           value: addedUsers.map((user) => user.name),
         })
       }
 
       // removed users
-      const removedUsers = _.differenceBy(oldIndexedObj[vu.variation].users ?? [], vu.users, (user) => user.keyId);
+      const removedUsers = _.differenceBy(oldIndexedObj[vu.variationId].users ?? [], vu.users, (user) => user.keyId);
       if (removedUsers.length > 0) {
         changes.push({
           op: OperationEnum.REMOVE,
           label: vu.variation,
           isMultiValue: true,
-          path: [...path, vu.variation],
+          path: [...path, vu.variationId],
           value: removedUsers.map((user) => user.name)
         })
       }
@@ -103,6 +103,7 @@ export abstract class Differ {
 
   static mapVariationUserToDiffVarationUser(variationUsers: IVariationUser[], variations: IVariation[], users: IUserType[]): IDiffVarationUser[] {
     return variationUsers.map((tu) => ({
+      variationId: tu.variationId,
       variation: variations.find((v) => v.id === tu.variationId)?.value,
       users: tu.keyIds.map((keyId) => {
         const user = users.find((user) => user.keyId === keyId);
