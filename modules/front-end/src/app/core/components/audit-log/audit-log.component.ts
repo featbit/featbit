@@ -67,7 +67,7 @@ export class AuditLogComponent {
   }
 
   get shouldShowChangeList(): boolean {
-    return true;//this.auditLog.operation === AuditLogOpEnum.Update;
+    return this.auditLog.operation === AuditLogOpEnum.Update;
   }
 
   get name(): string {
@@ -88,19 +88,19 @@ export class AuditLogComponent {
 
     switch (this.auditLog.operation) {
       case AuditLogOpEnum.Create:
-        result += ` ${$localize `:@@auditlogs.idx.operation-create:created`}`;
+        result += ` ${$localize `:@@auditlogs.operation-create:created`}`;
         break;
       case AuditLogOpEnum.Update:
-        result += ` ${$localize `:@@auditlogs.idx.operation-update:updated`}`;
+        result += ` ${$localize `:@@auditlogs.operation-update:updated`}`;
         break;
       case AuditLogOpEnum.Archive:
-        result += ` ${$localize `:@@auditlogs.idx.operation-archive:archived`}`;
+        result += ` ${$localize `:@@auditlogs.operation-archive:archived`}`;
         break;
       case AuditLogOpEnum.Restore:
-        result += ` ${$localize `:@@auditlogs.idx.operation-restore:restored`}`;
+        result += ` ${$localize `:@@auditlogs.operation-restore:restored`}`;
         break;
       case AuditLogOpEnum.Remove:
-        result += ` ${$localize `:@@auditlogs.idx.operation-remove:removed`}`;
+        result += ` ${$localize `:@@auditlogs.operation-remove:removed`}`;
         break;
       default:
         result += ` ${this.auditLog.operation}`;
