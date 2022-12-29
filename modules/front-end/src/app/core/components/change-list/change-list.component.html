@@ -45,7 +45,7 @@
               <span class="ant-tag" *ngFor="let value of change.value">{{value}}</span>
             </ng-container>
             <span i18n="@@differ.add-to">to</span>
-            <span>{{change.label}}</span>
+            <span class="ant-tag">{{change.label}}</span>
           </li>
           <li class="change" *ngSwitchCase="'REMOVE'">
             <ng-container *ngIf="lang === 'zh'">
