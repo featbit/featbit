@@ -108,7 +108,7 @@ export class AuditLogComponent {
 
     switch (this.auditLog.refType) {
       case RefTypeEnum.Flag:
-        result += ` ${$localize `:@@auditlogs.idx.reftype-flag:the flag`}`;
+        result += ` ${$localize `:@@auditlogs.reftype-flag:the flag`}`;
         break;
       default:
         break;
