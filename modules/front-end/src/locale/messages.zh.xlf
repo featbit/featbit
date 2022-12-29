@@ -97,7 +97,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
+          <context context-type="linenumber">66</context>
         </context-group>
         <target>从</target>
       </trans-unit>
@@ -106,10 +110,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">34</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">47</context>
         </context-group>
         <target>设置为</target>
       </trans-unit>
@@ -121,11 +121,23 @@
         </context-group>
         <target>添加</target>
       </trans-unit>
+      <trans-unit id="differ.add-to" datatype="html">
+        <source>to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+        <target>到</target>
+      </trans-unit>
       <trans-unit id="differ.removed" datatype="html">
         <source>Removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
+          <context context-type="linenumber">61</context>
         </context-group>
         <target>移除</target>
       </trans-unit>
@@ -133,7 +145,7 @@
         <source>Serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <target>返回</target>
       </trans-unit>
