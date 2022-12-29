@@ -10,11 +10,21 @@ section.body-container {
     width: 250px;
   }
 
+  .table-content-area {
+    height: 100%;
+  }
+
   .audit-logs {
+    height: calc(100% - 85px);
+    overflow: auto;
+    padding: 0 24px;
+    margin-top: 34px;
+
     nz-empty {
       margin-top: 40px;
     }
   }
+
   .audit-logs-group {
     .group-title {
       font-weight: 700;
@@ -33,6 +43,7 @@ section.body-container {
   }
 
   .load-more {
+    margin-top: -15px;
     text-align: center;
   }
 }
