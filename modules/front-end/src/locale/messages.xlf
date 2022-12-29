@@ -5689,46 +5689,90 @@
           <context context-type="linenumber">73</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="differ.tag" datatype="html">
+        <source>tag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="differ.variations" datatype="html">
+        <source>Variations</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">184</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="differ.variation-type" datatype="html">
+        <source>variation type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="differ.variation" datatype="html">
+        <source>variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">149</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">163</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">173</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="differ.updated-rule" datatype="html">
         <source>Updated rule:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">120</context>
+          <context context-type="linenumber">232</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.added-rule" datatype="html">
         <source>Added rule:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">139</context>
+          <context context-type="linenumber">251</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.removed-rule" datatype="html">
         <source>Removed rule:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">267</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.rules" datatype="html">
-        <source>Rules:</source>
+        <source>Rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">172</context>
+          <context context-type="linenumber">284</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.target-users" datatype="html">
         <source>Individual targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">192</context>
+          <context context-type="linenumber">304</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.fallthrough" datatype="html">
         <source>Default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">226</context>
+          <context context-type="linenumber">338</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.serve-value" datatype="html">

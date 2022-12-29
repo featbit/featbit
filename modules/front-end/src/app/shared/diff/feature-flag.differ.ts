@@ -79,9 +79,9 @@ export class FeatureFlagDiffer implements IDiffer {
       ...changes,
       ...this.compareVariations(ff1, ff2),
       ...this.compareTags(ff1, ff2),
-      ...this.compareFallthrough(ff1, ff2), // fallthrough
-      ...this.compareTargetUsers(ff1, ff2, ref.targetingUsers), // targetUsers
-      ...this.compareRules(ff1, ff2, ref.segments) // rules
+      ...this.compareFallthrough(ff1, ff2),
+      ...this.compareTargetUsers(ff1, ff2, ref.targetingUsers),
+      ...this.compareRules(ff1, ff2, ref.segments)
     ];
   }
 
@@ -160,7 +160,7 @@ export class FeatureFlagDiffer implements IDiffer {
 
     const addedVariationChanges = _.differenceBy(newObj.variations, oldObj.variations, (variation) => variation.id).map((variation) => {
       return {
-        label: `${$localize `:@@differ.variation:variation:`} ${variation.value}`,
+        label: $localize `:@@differ.variation:variation`,
         op: OperationEnum.ADD,
         isMultiValue: false,
         path: path,
@@ -170,7 +170,7 @@ export class FeatureFlagDiffer implements IDiffer {
 
     const removedVariationChanges = _.differenceBy(oldObj.variations, newObj.variations, (variation) => variation.id).map((variation) => {
       return {
-        label: `${$localize `:@@differ.variation:variation:`} ${variation.value}`,
+        label: $localize `:@@differ.variation:variation`,
         op: OperationEnum.REMOVE,
         isMultiValue: false,
         path: path,
