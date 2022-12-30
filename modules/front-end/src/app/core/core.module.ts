@@ -72,6 +72,10 @@ import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
 import { SlugifyPipe } from "@core/pipes/slugify";
 import {AuditLogComponent} from "@core/components/audit-log/audit-log.component";
 import {ChangeListComponent} from "@core/components/change-list/change-list.component";
+import {AuditLogsComponent} from "@core/components/audit-logs/audit-logs.component";
+import {NzDatePickerModule} from "ng-zorro-antd/date-picker";
+import {NzEmptyModule} from "ng-zorro-antd/empty";
+import {NzTimelineModule} from "ng-zorro-antd/timeline";
 
 @NgModule({
   declarations: [
@@ -107,6 +111,7 @@ import {ChangeListComponent} from "@core/components/change-list/change-list.comp
     ServeComponent,
     RuleComponent,
     GuideComponent,
+    AuditLogsComponent,
     AuditLogComponent,
     ChangeListComponent
   ],
@@ -148,7 +153,10 @@ import {ChangeListComponent} from "@core/components/change-list/change-list.comp
     NzPopoverModule,
     NzCodeEditorModule,
     NzCardModule,
-    NzTypographyModule
+    NzTypographyModule,
+    NzDatePickerModule,
+    NzEmptyModule,
+    NzTimelineModule
   ],
   exports: [
     CommonModule,
@@ -186,6 +194,7 @@ import {ChangeListComponent} from "@core/components/change-list/change-list.comp
     ServeComponent,
     RuleComponent,
     GuideComponent,
+    AuditLogsComponent,
     AuditLogComponent,
     ChangeListComponent
   ]
