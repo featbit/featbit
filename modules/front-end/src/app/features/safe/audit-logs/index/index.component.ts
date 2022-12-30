@@ -1,5 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
-import {Subject} from 'rxjs';
+import {Component} from '@angular/core';
 import {AuditLogListFilter} from "@core/components/audit-log/types";
 
 @Component({
@@ -7,13 +6,6 @@ import {AuditLogListFilter} from "@core/components/audit-log/types";
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.less']
 })
-export class IndexComponent implements OnDestroy {
-  private destory$: Subject<void> = new Subject();
-
+export class IndexComponent {
   auditLogFilter: AuditLogListFilter = new AuditLogListFilter();
-
-  ngOnDestroy(): void {
-    this.destory$.next();
-    this.destory$.complete();
-  }
 }

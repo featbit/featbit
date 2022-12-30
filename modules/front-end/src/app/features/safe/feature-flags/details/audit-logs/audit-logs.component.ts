@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subject } from 'rxjs';
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {FeatureFlagService} from "@services/feature-flag.service";
 import {AuditLogListFilter, RefTypeEnum} from "@core/components/audit-log/types";
@@ -10,9 +9,7 @@ import {AuditLogListFilter, RefTypeEnum} from "@core/components/audit-log/types"
   templateUrl: './audit-logs.component.html',
   styleUrls: ['./audit-logs.component.less']
 })
-export class AuditLogsComponent implements OnInit, OnDestroy {
-  private destory$: Subject<void> = new Subject();
-
+export class AuditLogsComponent implements OnInit {
   loading: boolean = true;
   auditLogFilter: AuditLogListFilter = new AuditLogListFilter();
 
@@ -20,7 +17,6 @@ export class AuditLogsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
   ) {
-    this.auditLogFilter.refType = RefTypeEnum.Flag;
   }
 
   ngOnInit(): void {
@@ -32,10 +28,5 @@ export class AuditLogsComponent implements OnInit, OnDestroy {
         this.loading = false;
       }, () => this.loading = false);
     })
-  }
-
-  ngOnDestroy(): void {
-    this.destory$.next();
-    this.destory$.complete();
   }
 }
