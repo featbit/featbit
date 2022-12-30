@@ -1,4 +1,5 @@
 using Domain.FeatureFlags;
+using Domain.Segments;
 
 namespace Domain.AuditLogs;
 
@@ -54,6 +55,8 @@ public class AuditLog : Entity
         CreatorId = creatorId;
         CreatedAt = DateTime.UtcNow;
     }
+
+    #region feature flag
 
     public static AuditLog For(
         FeatureFlag flag,
@@ -117,4 +120,57 @@ public class AuditLog : Entity
 
         return auditLog;
     }
+
+    #endregion
+
+    #region segment
+
+    public static AuditLog For(
+        Segment segment,
+        string operation,
+        DataChange dataChange,
+        string comment,
+        Guid creatorId)
+    {
+        var auditLog = new AuditLog(
+            segment.EnvId,
+            segment.Id.ToString(),
+            AuditLogRefTypes.Segment,
+            Keywords.For(segment),
+            operation,
+            dataChange,
+            comment,
+            creatorId
+        );
+
+        return auditLog;
+    }
+
+    public static AuditLog ForCreate(Segment segment, Guid creatorId)
+    {
+        var dataChange = new DataChange(null).To(segment);
+
+        var auditLog = For(segment, Operations.Create, dataChange, string.Empty, creatorId);
+        return auditLog;
+    }
+
+    public static AuditLog ForUpdate(
+        Segment segment,
+        DataChange dataChange,
+        string comment,
+        Guid creatorId)
+    {
+        var auditLog = For(segment, Operations.Update, dataChange, comment, creatorId);
+
+        return auditLog;
+    }
+
+    public static AuditLog ForArchive(Segment segment, DataChange dataChange, Guid operatorId)
+    {
+        var auditLog = For(segment, Operations.Archive, dataChange, string.Empty, operatorId);
+
+        return auditLog;
+    }
+
+    #endregion
 }
