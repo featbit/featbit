@@ -15,10 +15,10 @@ import { ICondition, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormBuilder } from "@angular/forms";
 import {DiffFactoryService} from "@services/diff-factory.service";
 import {RefTypeEnum} from "@core/components/audit-log/types";
-import {ICategory} from "@shared/diff/types";
+import {ISegment} from "@features/safe/segments/types/segments-index";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -41,7 +41,6 @@ export class TargetingComponent implements OnInit {
     return rule.id;
   }
 
-  reviewForm: FormGroup;
   public featureFlag: FeatureFlag = {} as FeatureFlag;
   public userList: IUserType[] = [];
 
@@ -69,16 +68,63 @@ export class TargetingComponent implements OnInit {
     this.exptRulesVisible = false;
   }
 
+  originalData: string = '{}';
+  currentData: string = '{}';
+  refType: RefTypeEnum = RefTypeEnum.Flag;
+  reviewModalVisible: boolean = false;
+  allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
+  segmentIdRefs: ISegment[] = [];
+
+  onReviewChanges(validationErrortpl: TemplateRef<void>) {
+    this.validationErrors = this.validateFeatureFlag();
+
+    if (this.validationErrors.length > 0) {
+      console.log(this.validationErrors);
+      this.msg.create('', validationErrortpl, { nzDuration: 5000 });
+      return false;
+    }
+
+    this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
+
+    this.originalData = JSON.stringify(this.featureFlag.originalData);
+    this.currentData = JSON.stringify(this.featureFlag);
+
+    // get all segmentIds from originalData and new Data
+    const previousSegmentIdRefs: string[] = this.featureFlag.originalData.rules.flatMap((rule) => rule.conditions)
+      .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
+      .flatMap((condition: ICondition) => JSON.parse(condition.value))
+      .filter((id) => id !== null && id.length > 0);
+
+    const currentSegmentIdRefs: string[] = this.featureFlag.rules.flatMap((rule) => rule.conditions)
+      .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
+      .flatMap((condition: ICondition) => JSON.parse(condition.value))
+      .filter((id) => id !== null && id.length > 0);
+
+    let segmentIdRefs: string[] = [...previousSegmentIdRefs, ...currentSegmentIdRefs];
+    segmentIdRefs = segmentIdRefs.filter((id, idx) => segmentIdRefs.indexOf(id) === idx); // get unique values
+
+    if (segmentIdRefs.length > 0) {
+      this.segmentService.getByIds(segmentIdRefs).subscribe((segments) => {
+        this.segmentIdRefs = segments;
+        this.reviewModalVisible = true;
+      }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
+    } else {
+      this.reviewModalVisible = true;
+    }
+  }
+
+  onCloseReviewModal() {
+    this.reviewModalVisible = false;
+  }
+
   constructor(
-    private fb: FormBuilder,
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
     private segmentService: SegmentService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService,
-    private messageQueueService: MessageQueueService,
-    private diffFactoryService: DiffFactoryService,
+    private messageQueueService: MessageQueueService
   ) {
   }
 
@@ -100,7 +146,6 @@ export class TargetingComponent implements OnInit {
   }
 
   public targetingUsersByVariation: { [key: string]: IUserType[] } = {}; // {variationId: users}
-  allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
 
   loadFeatureFlag() {
     return new Promise((resolve) => {
@@ -211,67 +256,15 @@ export class TargetingComponent implements OnInit {
     this.featureFlag.fallthrough.variations = [...value];
   }
 
-  numChanges = 0;
-  changeCategories: ICategory[] = [];
-  reviewModalVisible = false;
   validationErrors: IFlagValidationError[] = [];
 
-  onReviewChanges(validationErrortpl: TemplateRef<void>) {
-    this.validationErrors = this.validateFeatureFlag();
-
-    if (this.validationErrors.length > 0) {
-      console.log(this.validationErrors);
-      this.msg.create('', validationErrortpl, { nzDuration: 5000 });
-      return false;
-    }
-
-    this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
-
-    // get all segmentIds from originalData and new Data
-    const previousSegmentIdRefs: string[] = this.featureFlag.originalData.rules.flatMap((rule) => rule.conditions)
-      .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
-      .flatMap((condition: ICondition) => JSON.parse(condition.value))
-      .filter((id) => id !== null && id.length > 0);
-
-    const currentSegmentIdRefs: string[] = this.featureFlag.rules.flatMap((rule) => rule.conditions)
-      .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
-      .flatMap((condition: ICondition) => JSON.parse(condition.value))
-      .filter((id) => id !== null && id.length > 0);
-
-    let segmentIdRefs: string[] = [...previousSegmentIdRefs, ...currentSegmentIdRefs];
-    segmentIdRefs = segmentIdRefs.filter((id, idx) => segmentIdRefs.indexOf(id) === idx); // get unique values
-
-    this.segmentService.getByIds(segmentIdRefs).subscribe((segments) => {
-      this.changeCategories = this.diffFactoryService.getDiffer(RefTypeEnum.Flag).diff(JSON.stringify(this.featureFlag.originalData), JSON.stringify(this.featureFlag), {targetingUsers: this.allTargetingUsers, segments});
-      this.numChanges = this.changeCategories.flatMap((category) => category.changes).length;
-    }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
-
-    this.reviewForm = this.fb.group({
-      comment: ['', [Validators.required]]
-    });
-
-    this.reviewModalVisible = true;
-  }
-
-  onSave() {
-    if (this.reviewForm.invalid) {
-      Object.values(this.reviewForm.controls).forEach(control => {
-        if (control.invalid) {
-          control.markAsDirty();
-          control.updateValueAndValidity({ onlySelf: true });
-        }
-      });
-
-      return;
-    }
-
+  onSave(data: any) {
     this.isLoading = true;
 
     const { id, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
-    const { comment } = this.reviewForm.value;
     const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
 
-    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment }).subscribe({
+    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment: data.comment }).subscribe({
       next: () => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);

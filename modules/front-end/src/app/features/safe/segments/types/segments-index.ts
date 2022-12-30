@@ -17,6 +17,7 @@ export interface ISegment {
   excluded: string[];
   rules: IRule[];
   isArchived: boolean;
+  comment?: string
 }
 
 export interface ISegmentFlagReference {

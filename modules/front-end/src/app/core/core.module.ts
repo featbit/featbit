@@ -76,6 +76,7 @@ import {AuditLogsComponent} from "@core/components/audit-logs/audit-logs.compone
 import {NzDatePickerModule} from "ng-zorro-antd/date-picker";
 import {NzEmptyModule} from "ng-zorro-antd/empty";
 import {NzTimelineModule} from "ng-zorro-antd/timeline";
+import {ChangeReviewComponent} from "@core/components/change-review/change-review.component";
 
 @NgModule({
   declarations: [
@@ -113,7 +114,8 @@ import {NzTimelineModule} from "ng-zorro-antd/timeline";
     GuideComponent,
     AuditLogsComponent,
     AuditLogComponent,
-    ChangeListComponent
+    ChangeListComponent,
+    ChangeReviewComponent
   ],
   imports: [
     CommonModule,
@@ -196,7 +198,8 @@ import {NzTimelineModule} from "ng-zorro-antd/timeline";
     GuideComponent,
     AuditLogsComponent,
     AuditLogComponent,
-    ChangeListComponent
+    ChangeListComponent,
+    ChangeReviewComponent
   ]
 })
 export class CoreModule { }

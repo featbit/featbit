@@ -19,6 +19,8 @@ public class UpdateSegment : IRequest<Segment>
     public IEnumerable<string> Excluded { get; set; } = Array.Empty<string>();
 
     public ICollection<MatchRule> Rules { get; set; } = Array.Empty<MatchRule>();
+    
+    public string Comment { get; set; }
 }
 
 public class UpdateSegmentValidator : AbstractValidator<UpdateSegment>
@@ -63,7 +65,7 @@ public class UpdateSegmentHandler : IRequestHandler<UpdateSegment, Segment>
         await _service.UpdateAsync(segment);
 
         // write audit log
-        var auditLog = AuditLog.ForUpdate(segment, dataChange, string.Empty, _currentUser.Id);
+        var auditLog = AuditLog.ForUpdate(segment, dataChange, request.Comment, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish segment updated notification

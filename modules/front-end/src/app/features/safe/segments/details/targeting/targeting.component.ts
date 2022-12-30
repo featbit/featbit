@@ -1,18 +1,16 @@
-import {Component, TemplateRef} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { EnvUserService } from '@services/env-user.service';
-import { SegmentService } from '@services/segment.service';
-import { IUserProp, IUserType } from '@shared/types';
+import {Component} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {EnvUserService} from '@services/env-user.service';
+import {SegmentService} from '@services/segment.service';
+import {IUserProp, IUserType} from '@shared/types';
 
-import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments-index';
-import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
-import { EnvUserPropService } from "@services/env-user-prop.service";
-import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import {ISegment, ISegmentFlagReference, Segment} from '../../types/segments-index';
+import {CdkDragDrop, moveItemInArray} from "@angular/cdk/drag-drop";
+import {EnvUserPropService} from "@services/env-user-prop.service";
+import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
 import {ICondition, IRule} from "@shared/rules";
-import {getPathPrefix, isSegmentCondition} from "@utils/index";
-import {ICategory} from "@shared/diff/types";
-import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {getPathPrefix} from "@utils/index";
 import {RefTypeEnum} from "@core/components/audit-log/types";
 import {DiffFactoryService} from "@services/diff-factory.service";
 
@@ -30,32 +28,30 @@ export class TargetingComponent {
   public targetUsersActive = true;
   public flagReferences: ISegmentFlagReference[] = [];
 
-  numChanges = 0;
-  changeCategories: ICategory[] = [];
-  reviewModalVisible = false;
+  originalData: string = '{}';
+  currentData: string = '{}';
+  refType: RefTypeEnum = RefTypeEnum.Segment;
+  reviewModalVisible: boolean = false;
   allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
-  reviewForm: FormGroup;
 
   onReviewChanges() {
-    this.changeCategories = this.diffFactoryService.getDiffer(RefTypeEnum.Segment).diff(JSON.stringify(this.segmentDetail.originalData), JSON.stringify(this.segmentDetail.dataToSave), {targetingUsers: this.allTargetingUsers});
-    this.numChanges = this.changeCategories.flatMap((category) => category.changes).length;
-
-    this.reviewForm = this.fb.group({
-      comment: ['', [Validators.required]]
-    });
+    this.originalData = JSON.stringify(this.segmentDetail.originalData);
+    this.currentData = JSON.stringify(this.segmentDetail.dataToSave);
 
     this.reviewModalVisible = true;
   }
 
+  onCloseReviewModal() {
+    this.reviewModalVisible = false;
+  }
+
   constructor(
-    private fb: FormBuilder,
     private router: Router,
     private route:ActivatedRoute,
     private segmentService: SegmentService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
-    private msg: NzMessageService,
-    private diffFactoryService: DiffFactoryService,
+    private msg: NzMessageService
   ) {
     this.route.paramMap.subscribe( paramMap => {
       this.id = decodeURIComponent(paramMap.get('id'));
@@ -124,21 +120,10 @@ export class TargetingComponent {
     ];
   }
 
-  public onSave() {
-    if (this.reviewForm.invalid) {
-      Object.values(this.reviewForm.controls).forEach(control => {
-        if (control.invalid) {
-          control.markAsDirty();
-          control.updateValueAndValidity({ onlySelf: true });
-        }
-      });
-
-      return;
-    }
-
+  public onSave(data: any) {
     this.isLoading = true;
 
-    this.segmentService.update(this.segmentDetail.dataToSave)
+    this.segmentService.update({...this.segmentDetail.dataToSave, comment: data.comment})
       .subscribe((result) => {
         this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
         this.loadSegment(result);
