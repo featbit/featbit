@@ -49,6 +49,122 @@
         </context-group>
         <target>开关</target>
       </trans-unit>
+      <trans-unit id="ff.history.filter-by" datatype="html">
+        <source>Filter by name, comment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <target>按名称或评论查找</target>
+      </trans-unit>
+      <trans-unit id="auditlogs.idx.filter-by-team-member" datatype="html">
+        <source>Filter by team member</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <target>按团队成员查找</target>
+      </trans-unit>
+      <trans-unit id="common.loading" datatype="html">
+        <source>Loading...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">136,137</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <target>数据加载中...</target>
+      </trans-unit>
+      <trans-unit id="ff.idx.filter-by-type" datatype="html">
+        <source>Filter by type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <target>按类型查找</target>
+      </trans-unit>
+      <trans-unit id="auditlogs.idx.ref-type-flag" datatype="html">
+        <source>Feature flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <target>开关</target>
+      </trans-unit>
+      <trans-unit id="common.no-data" datatype="html">
+        <source>No data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <target>没有数据</target>
+      </trans-unit>
+      <trans-unit id="common.more" datatype="html">
+        <source>More</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <target>更多</target>
+      </trans-unit>
+      <trans-unit id="auditlogs.idx.failed-to-load-members" datatype="html">
+        <source>Failed to load team members</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.ts</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+        <target>加载团队成员失败</target>
+      </trans-unit>
       <trans-unit id="differ.enabled" datatype="html">
         <source>Enabled</source>
         <context-group purpose="location">
@@ -97,11 +213,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">54</context>
+          <context context-type="linenumber">55</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">71</context>
         </context-group>
         <target>从</target>
       </trans-unit>
@@ -133,11 +249,11 @@
         <source>Removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">58</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <target>移除</target>
       </trans-unit>
@@ -145,7 +261,7 @@
         <source>Serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <target>返回</target>
       </trans-unit>
@@ -500,70 +616,6 @@
           <context context-type="linenumber">18</context>
         </context-group>
         <target>选择开关</target>
-      </trans-unit>
-      <trans-unit id="common.loading" datatype="html">
-        <source>Loading...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">36</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">66</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">38</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">55</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">43</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">43</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">60</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">138</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">136,137</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
-          <context context-type="linenumber">38</context>
-        </context-group>
-        <target>数据加载中...</target>
       </trans-unit>
       <trans-unit id="common.baseline-variation" datatype="html">
         <source>Baseline</source>
@@ -3068,78 +3120,6 @@
         </context-group>
         <target>审计日志</target>
       </trans-unit>
-      <trans-unit id="auditlogs.idx.filter-by" datatype="html">
-        <source>Filter by name, key, comment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">6</context>
-        </context-group>
-        <target>按名称，key 或评论查找</target>
-      </trans-unit>
-      <trans-unit id="auditlogs.idx.filter-by-team-member" datatype="html">
-        <source>Filter by team member</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">20</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
-          <context context-type="linenumber">20</context>
-        </context-group>
-        <target>按团队成员查找</target>
-      </trans-unit>
-      <trans-unit id="ff.idx.filter-by-type" datatype="html">
-        <source>Filter by type</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-        <target>按类型查找</target>
-      </trans-unit>
-      <trans-unit id="auditlogs.idx.ref-type-flag" datatype="html">
-        <source>Feature flag</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <target>开关</target>
-      </trans-unit>
-      <trans-unit id="common.no-data" datatype="html">
-        <source>No data</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">37</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
-          <context context-type="linenumber">34</context>
-        </context-group>
-        <target>没有数据</target>
-      </trans-unit>
-      <trans-unit id="common.more" datatype="html">
-        <source>More</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.html</context>
-          <context context-type="linenumber">53</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
-          <context context-type="linenumber">50</context>
-        </context-group>
-        <target>更多</target>
-      </trans-unit>
-      <trans-unit id="auditlogs.idx.failed-to-load-members" datatype="html">
-        <source>Failed to load team members</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/audit-logs/index/index.component.ts</context>
-          <context context-type="linenumber">81</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.ts</context>
-          <context context-type="linenumber">117</context>
-        </context-group>
-        <target>加载团队成员失败</target>
-      </trans-unit>
       <trans-unit id="sync-locally" datatype="html">
         <source>Download/Upload</source>
         <context-group purpose="location">
@@ -3832,14 +3812,6 @@
           <context context-type="linenumber">100</context>
         </context-group>
         <target>操作</target>
-      </trans-unit>
-      <trans-unit id="ff.history.filter-by" datatype="html">
-        <source>Filter by name, comment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/audit-logs/audit-logs.component.html</context>
-          <context context-type="linenumber">6</context>
-        </context-group>
-        <target>按名称或评论查找</target>
       </trans-unit>
       <trans-unit id="ff.routing.details.targeting" datatype="html">
         <source>Targeting</source>
