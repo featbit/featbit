@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {EnvUserService} from '@services/env-user.service';
@@ -12,14 +12,14 @@ import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
 import {ICondition, IRule} from "@shared/rules";
 import {getPathPrefix} from "@utils/index";
 import {RefTypeEnum} from "@core/components/audit-log/types";
-import {DiffFactoryService} from "@services/diff-factory.service";
+import {MessageQueueService} from "@services/message-queue.service";
 
 @Component({
   selector: 'segment-targeting',
   templateUrl: './targeting.component.html',
   styleUrls: ['./targeting.component.less']
 })
-export class TargetingComponent {
+export class TargetingComponent implements OnInit {
   public segmentDetail: Segment;
   public userList: IUserType[] = [];
   public isLoading: boolean = true;
@@ -51,26 +51,34 @@ export class TargetingComponent {
     private segmentService: SegmentService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
+    private messageQueueService: MessageQueueService,
     private msg: NzMessageService
   ) {
-    this.route.paramMap.subscribe( paramMap => {
-      this.id = decodeURIComponent(paramMap.get('id'));
-      return this.segmentService.getSegment(this.id).subscribe((result: ISegment) => {
-        if (result) {
-          this.id = result.id;
-          this.loadSegment(result);
-          this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
-            this.flagReferences = [...flags];
-          });
-        }
-      })
-    })
-
     // user properties
     this.envUserPropService.get().subscribe(properties => {
       this.userProps = properties;
       this.isUserPropsLoading = false;
     }, () => this.isUserPropsLoading = false);
+  }
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe( paramMap => {
+      this.id = decodeURIComponent(paramMap.get('id'));
+      this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.loadData());
+      this.loadData();
+      this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
+        this.flagReferences = [...flags];
+      });
+    })
+  }
+
+  private async loadData() {
+    return this.segmentService.getSegment(this.id).subscribe((result: ISegment) => {
+      if (result) {
+        this.id = result.id;
+        this.loadSegment(result);
+      }
+    })
   }
 
   public openFlagPage(flagKey: string) {
@@ -123,14 +131,17 @@ export class TargetingComponent {
   public onSave(data: any) {
     this.isLoading = true;
 
-    this.segmentService.update({...this.segmentDetail.dataToSave, comment: data.comment})
-      .subscribe((result) => {
+    this.segmentService.update({...this.segmentDetail.dataToSave, comment: data.comment}).subscribe({
+      next: (result) => {
         this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.messageQueueService.emit(this.messageQueueService.topics.SEGMENT_TARGETING_CHANGED(this.id));
         this.loadSegment(result);
         this.isLoading = false;
-    }, _ => {
+      },
+      error: _ => {
       this.msg.error($localize `:@@common.operation-failed:Operation failed`);
       this.isLoading = false;
+      }
     });
 
     this.reviewModalVisible = false;
