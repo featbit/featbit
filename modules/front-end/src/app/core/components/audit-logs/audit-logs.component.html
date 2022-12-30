@@ -27,13 +27,14 @@
           </nz-option>
         </nz-select>
         <nz-select
-          *ngIf="!auditLogFilter?.refType"
+          *ngIf="!auditLogFilter?.refId"
           nzAllowClear
           [(ngModel)]="auditLogFilter.refType"
           (ngModelChange)="onSearch(true)"
           i18n-nzPlaceHolder="@@ff.idx.filter-by-type"
           nzPlaceHolder="Filter by type">
           <nz-option [nzValue]="refTypeFlag" i18n-nzLabel="@@auditlogs.idx.ref-type-flag" nzLabel="Feature flag"></nz-option>
+          <nz-option [nzValue]="refTypeSegment" i18n-nzLabel="@@auditlogs.idx.ref-type-segment" nzLabel="Segment"></nz-option>
         </nz-select>
         <nz-range-picker [(ngModel)]="auditLogFilter.range" (ngModelChange)="onDateRangeChange()"></nz-range-picker>
       </div>

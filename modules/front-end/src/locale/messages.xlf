@@ -138,25 +138,32 @@
           <context context-type="linenumber">36</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="auditlogs.idx.ref-type-segment" datatype="html">
+        <source>Segment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.no-data" datatype="html">
         <source>No data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">44</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.more" datatype="html">
         <source>More</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="linenumber">60</context>
         </context-group>
       </trans-unit>
       <trans-unit id="auditlogs.idx.failed-to-load-members" datatype="html">
         <source>Failed to load team members</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.ts</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">105</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.enabled" datatype="html">
