@@ -39,8 +39,6 @@ import { NzGridModule } from "ng-zorro-antd/grid";
 import { CoreModule } from "@core/core.module";
 import { NzFormModule } from "ng-zorro-antd/form";
 import {AuditLogsComponent} from "@features/safe/feature-flags/details/audit-logs/audit-logs.component";
-import {NzDatePickerModule} from "ng-zorro-antd/date-picker";
-import {NzTimelineModule} from "ng-zorro-antd/timeline";
 
 @NgModule({
   declarations: [
@@ -84,9 +82,7 @@ import {NzTimelineModule} from "ng-zorro-antd/timeline";
     NzCodeEditorModule,
     DetailsRoutingModule,
     NzGridModule,
-    NzFormModule,
-    NzDatePickerModule,
-    NzTimelineModule
+    NzFormModule
   ],
   providers: []
 })

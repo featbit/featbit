@@ -1,0 +1,64 @@
+<section class="body-container">
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <div class="search-inputs">
+        <nz-input-group [nzPrefix]="prefixIconSearch">
+          <input nz-input type="text" placeholder="Filter by name, comment" i18n-placeholder="@@ff.history.filter-by" [(ngModel)]="auditLogFilter.query" (ngModelChange)="onSearch(true)">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+        <nz-select
+          class="member-select"
+          nzShowSearch
+          nzServerSearch
+          nzAllowClear
+          [(ngModel)]="auditLogFilter.creatorId"
+          (nzOnSearch)="onMemberSearch($event)"
+          (ngModelChange)="onSearch(true)"
+          i18n-nzPlaceHolder="@@auditlogs.idx.filter-by-team-member"
+          nzPlaceHolder="Filter by team member">
+          <ng-container *ngFor="let member of memberListModel.items">
+            <nz-option *ngIf="!membersLoading" [nzValue]="member.id" [nzLabel]="getMemberLabel(member)"></nz-option>
+          </ng-container>
+          <nz-option *ngIf="membersLoading" nzDisabled nzCustomContent>
+            <i nz-icon nzType="loading" class="loading-icon"></i>
+            <ng-container i18n="@@common.loading">Loading...</ng-container>
+          </nz-option>
+        </nz-select>
+        <nz-select
+          *ngIf="!auditLogFilter?.refType"
+          nzAllowClear
+          [(ngModel)]="auditLogFilter.refType"
+          (ngModelChange)="onSearch(true)"
+          i18n-nzPlaceHolder="@@ff.idx.filter-by-type"
+          nzPlaceHolder="Filter by type">
+          <nz-option [nzValue]="refTypeFlag" i18n-nzLabel="@@auditlogs.idx.ref-type-flag" nzLabel="Feature flag"></nz-option>
+        </nz-select>
+        <nz-range-picker [(ngModel)]="auditLogFilter.range" (ngModelChange)="onDateRangeChange($event)"></nz-range-picker>
+      </div>
+    </div>
+
+    <div class="audit-logs standard-div">
+      <nz-empty i18n-nzNotFoundContent="@@common.no-data" nzNotFoundContent="No data" *ngIf="!loading && groupedAuditLogs.length === 0"></nz-empty>
+      <nz-timeline>
+        <nz-timeline-item *ngFor="let group of groupedAuditLogs">
+          <div  class="audit-logs-group">
+            <div class="group-title">{{group.key}}</div>
+            <div class="group-items">
+              <ng-container *ngFor="let auditLog of group.items">
+                <audit-log [auditLog]="auditLog"></audit-log>
+              </ng-container>
+            </div>
+          </div>
+        </nz-timeline-item>
+      </nz-timeline>
+      <div *ngIf="auditLogs.length < totalCount" class="load-more">
+        <button nz-button nzType="primary" class="save-btn" (click)="loadMoreAuditLogs()">
+          <i nz-icon nzType="icons:icon-sync"></i>
+          <ng-container i18n="@@common.more">More</ng-container>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
