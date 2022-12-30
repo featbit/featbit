@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { Subject } from 'rxjs';
 import {AuditLogListFilter, IAuditLog, IAuditLogListModel, RefTypeEnum} from "@core/components/audit-log/types";
 import {IMember, IMemberListModel, MemberFilter} from "@features/safe/iam/types/member";
@@ -14,10 +14,9 @@ import {NzMessageService} from "ng-zorro-antd/message";
   templateUrl: './audit-logs.component.html',
   styleUrls: ['./audit-logs.component.less']
 })
-export class AuditLogsComponent implements OnInit, OnDestroy {
+export class AuditLogsComponent implements OnInit {
   @Input() auditLogFilter: AuditLogListFilter;
 
-  private destory$: Subject<void> = new Subject();
   private $search: Subject<void> = new Subject();
   private $memberSearch = new Subject<any>();
   loading: boolean = true;
@@ -120,7 +119,7 @@ export class AuditLogsComponent implements OnInit, OnDestroy {
     this.$memberSearch.next(value);
   }
 
-  onDateRangeChange(result: Date[]): void {
+  onDateRangeChange(): void {
     this.auditLogFilter.pageIndex = 1;
     this.$search.next();
   }
@@ -133,10 +132,5 @@ export class AuditLogsComponent implements OnInit, OnDestroy {
     }
 
     return label;
-  }
-
-  ngOnDestroy(): void {
-    this.destory$.next();
-    this.destory$.complete();
   }
 }

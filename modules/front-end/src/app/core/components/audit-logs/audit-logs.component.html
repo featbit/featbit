@@ -35,7 +35,7 @@
           nzPlaceHolder="Filter by type">
           <nz-option [nzValue]="refTypeFlag" i18n-nzLabel="@@auditlogs.idx.ref-type-flag" nzLabel="Feature flag"></nz-option>
         </nz-select>
-        <nz-range-picker [(ngModel)]="auditLogFilter.range" (ngModelChange)="onDateRangeChange($event)"></nz-range-picker>
+        <nz-range-picker [(ngModel)]="auditLogFilter.range" (ngModelChange)="onDateRangeChange()"></nz-range-picker>
       </div>
     </div>
 
