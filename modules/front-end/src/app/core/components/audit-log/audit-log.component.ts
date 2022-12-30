@@ -188,8 +188,8 @@ export class AuditLogComponent {
   userRefs: IUserType[] = [];
   segmentRefs: ISegment[] = [];
   private async getUserRefs(keyIds: string[]) {
-    const missingIds = keyIds.filter((keyId) => this.userRefs.find((user) => !(user.keyId === keyId)));
-    const users = await lastValueFrom(this.envUserService.getByKeyIds(missingIds));
+    const missingIds = keyIds.filter((keyId) => !this.userRefs.find((user) => user.keyId === keyId));
+    const users = missingIds.length === 0 ? [] : await lastValueFrom(this.envUserService.getByKeyIds(missingIds));
 
     this.userRefs = [
       ...this.userRefs,
@@ -198,8 +198,8 @@ export class AuditLogComponent {
   }
 
   private async getSegmentRefs(segmentIds: string[]) {
-    const missingKeyIds = segmentIds.filter((id) => this.segmentRefs.find((segment) => !(segment.id === id)));
-    const segments = await lastValueFrom(this.segmentService.getByIds(missingKeyIds));
+    const missingKeyIds = segmentIds.filter((id) => !this.segmentRefs.find((segment) => segment.id === id));
+    const segments = missingKeyIds.length === 0 ? [] : await lastValueFrom(this.segmentService.getByIds(missingKeyIds));
 
     this.segmentRefs = [
       ...this.segmentRefs,
