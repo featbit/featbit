@@ -23,7 +23,7 @@ export class SegmentDiffer implements IDiffer {
         label: $localize `:@@differ.segment:segment`,
         op: segment2.isArchived ? OperationEnum.ARCHIVE : OperationEnum.UNARCHIVED,
         isMultiValue: false,
-        path: ['isEnabled'],
+        path: ['isArchived'],
         value: segment2.isArchived,
         oldValue: segment1.isArchived
       });
