@@ -1,6 +1,6 @@
 namespace Domain.Policies;
 
-// taken from infra/mongodb/docker-entrypoint-initdb.d/seed.js
+// see also: infra/mongodb/docker-entrypoint-initdb.d/init.js
 public class BuiltInPolicy
 {
     public static Guid Owner = Guid.Parse("98881f6a-5c6c-4277-bcf7-fda94c538785");
