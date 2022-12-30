@@ -1,7 +1,6 @@
 ﻿import { IUserType } from "@shared/types";
 import {deepCopy, uuidv4} from "@utils/index";
 import {handleRulesBeforeSave, ICondition, IRule} from "@shared/rules";
-import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 
 export interface ISegmentListModel {
   items: ISegment[];
@@ -42,7 +41,7 @@ export class Segment {
   private _includedUsers: IUserType[] = [];
   private _excludedUsers: IUserType[] = [];
 
-  originalData: IFeatureFlag;
+  originalData: ISegment;
 
   constructor(segment: ISegment) {
     this.originalData = deepCopy(segment);

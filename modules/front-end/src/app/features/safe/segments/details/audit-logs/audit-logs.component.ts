@@ -8,7 +8,6 @@ import {AuditLogListFilter, RefTypeEnum} from "@core/components/audit-log/types"
   styleUrls: ['./audit-logs.component.less']
 })
 export class AuditLogsComponent implements OnInit {
-  loading: boolean = false;
   auditLogFilter: AuditLogListFilter = new AuditLogListFilter();
 
   constructor(
