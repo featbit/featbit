@@ -1,25 +1,17 @@
 import _ from 'lodash';
 import { Differ, IDiffer } from "@shared/diff/index";
-import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import {IFeatureFlag, IVariationUser} from "@features/safe/feature-flags/types/details";
 import { ICategory, IChange, IDiffVarationUser, IRefType, OperationEnum } from "@shared/diff/types";
 import { getPercentageFromRolloutPercentageArray, isSegmentCondition } from "@utils/index";
 import { IUserType } from "@shared/types";
-import { ICondition } from "@shared/rules";
+import {ICondition, IVariation} from "@shared/rules";
 import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 
 export class FeatureFlagDiffer implements IDiffer {
-
   private primitiveConfig = [
     { label: $localize `:@@differ.name:name`, path: ['name'] },
   ];
-
-  constructor() {
-  }
-
-  getChangeList(obj1Str: string, obj2Str: string, ref: IRefType): ICategory[] {
-    return this.diff(obj1Str, obj2Str, ref);
-  }
 
   diff(obj1Str: string, obj2Str: string, ref: IRefType): ICategory[] {
     const ff1: IFeatureFlag = JSON.parse(obj1Str) as IFeatureFlag;
@@ -61,6 +53,7 @@ export class FeatureFlagDiffer implements IDiffer {
         oldValue: ff1.variations.find((v) => v.id === ff1.disabledVariationId).value
       });
     }
+
     // primitive changes
     const primitiveChanges: IChange[] = this.primitiveConfig.flatMap(({label, path}) => {
       return Differ.comparePrimitives(_.get(ff1, path), _.get(ff2, path), path)
@@ -192,30 +185,6 @@ export class FeatureFlagDiffer implements IDiffer {
     return changes;
   }
 
-  private mapConditionToDiffCondition(condition: ICondition, segments: ISegment[]) {
-    const isSegment = isSegmentCondition(condition);
-
-    if (!isSegment) {
-      const ruleOpIdx = findIndex(condition.op);
-      const isMultiValue = ruleOps[ruleOpIdx].type === 'multi';
-
-      return {
-        property: condition.property,
-        op: condition.op,
-        opLabel: ruleOps[ruleOpIdx].label,
-        value: isMultiValue ? JSON.parse(condition.value) : condition.value,
-        isMultiValue
-      }
-    } else {
-      return {
-        property: condition.property,
-        op: null,
-        value: JSON.parse(condition.value).map((segmentId) => segments.find((s) => s.id === segmentId)?.name ?? segmentId),
-        isMultiValue: true
-      }
-    }
-  }
-
   private compareRules(oldObj: IFeatureFlag, newObj: IFeatureFlag, segments: ISegment[]): ICategory[] {
     const path = ['rules'];
     let changes: ICategory[] = [];
@@ -231,7 +200,7 @@ export class FeatureFlagDiffer implements IDiffer {
           isMultiValue: false,
           path: path,
           value: {
-            conditions: newRule.conditions.map((condition) => this.mapConditionToDiffCondition(condition, segments)),
+            conditions: newRule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
             variations: newRule.variations.map((rv) => ({
               label: newObj.variations.find((v) => v.id === rv.id)?.value,
               percentage: getPercentageFromRolloutPercentageArray(rv.rollout)
@@ -250,7 +219,7 @@ export class FeatureFlagDiffer implements IDiffer {
         isMultiValue: false,
         path: path,
         value: {
-          conditions: rule.conditions.map((condition) => this.mapConditionToDiffCondition(condition, segments)),
+          conditions: rule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
           variations: rule.variations.map((rv) => ({
             label: newObj.variations.find((v) => v.id === rv.id)?.value,
             percentage: getPercentageFromRolloutPercentageArray(rv.rollout)
@@ -266,7 +235,7 @@ export class FeatureFlagDiffer implements IDiffer {
         isMultiValue: false,
         path: path,
         value: {
-          conditions: rule.conditions.map((condition) => this.mapConditionToDiffCondition(condition, segments)),
+          conditions: rule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
           variations: rule.variations.map((rv) => ({
             label: oldObj.variations.find((v) => v.id === rv.id)?.value,
             percentage: getPercentageFromRolloutPercentageArray(rv.rollout)
@@ -292,8 +261,8 @@ export class FeatureFlagDiffer implements IDiffer {
   }
 
   private compareTargetUsers(oldObj: IFeatureFlag, newObj: IFeatureFlag, users: IUserType[]): ICategory[] {
-    const oldTargetUsers: IDiffVarationUser[] = Differ.mapVariationUserToDiffVarationUser(oldObj.targetUsers, oldObj.variations, users);
-    const newTargetUsers: IDiffVarationUser[] = Differ.mapVariationUserToDiffVarationUser(newObj.targetUsers, newObj.variations, users);
+    const oldTargetUsers: IDiffVarationUser[] = this.mapVariationUserToDiffVarationUser(oldObj.targetUsers, oldObj.variations, users);
+    const newTargetUsers: IDiffVarationUser[] = this.mapVariationUserToDiffVarationUser(newObj.targetUsers, newObj.variations, users);
 
     const changes = Differ.compareTargetUsers(oldTargetUsers, newTargetUsers, ['targetUsers']);
     if (changes.length > 0) {
@@ -338,5 +307,28 @@ export class FeatureFlagDiffer implements IDiffer {
     }
 
     return [];
+  }
+
+  private mapVariationUserToDiffVarationUser(variationUsers: IVariationUser[], variations: IVariation[], users: IUserType[]): IDiffVarationUser[] {
+    return variations.map((variation) => {
+      const variationUser = variationUsers.find((vu) => vu.variationId === variation.id);
+
+      return {
+        variationId: variation.id,
+        variation: variation.value,
+        users: variationUser === undefined ? [] : variationUser.keyIds.map((keyId) => {
+          const user = users.find((user) => user.keyId === keyId);
+          let name = keyId;
+
+          if (user) {
+            name = user.name?.length > 0
+              ? `${user.name} (${user.keyId})`
+              : user.keyId;
+          }
+
+          return { keyId, name };
+        })
+      }
+    });
   }
 }

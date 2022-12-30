@@ -28,12 +28,15 @@ import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { SettingComponent } from './setting/setting.component';
 import {CoreModule} from "@core/core.module";
+import {AuditLogsComponent} from "@features/safe/segments/details/audit-logs/audit-logs.component";
+import {NzFormModule} from "ng-zorro-antd/form";
 
 @NgModule({
   declarations: [
     DetailsComponent,
     SettingComponent,
-    TargetingComponent
+    TargetingComponent,
+    AuditLogsComponent
   ],
   imports: [
     CommonModule,
@@ -62,7 +65,8 @@ import {CoreModule} from "@core/core.module";
     DragDropModule,
     NzToolTipModule,
     NzDescriptionsModule,
-    CoreModule
+    CoreModule,
+    NzFormModule
   ],
   providers: [
   ]

@@ -1,3 +1,4 @@
+using Domain.AuditLogs;
 using Domain.EndUsers;
 using Domain.Targeting;
 
@@ -38,13 +39,15 @@ public class Segment : AuditedEntity
         IsArchived = false;
     }
 
-    public void Update(
+    public DataChange Update(
         string name,
         IEnumerable<string> included,
         IEnumerable<string> excluded,
         ICollection<MatchRule> rules,
         string description)
     {
+        var dataChange = new DataChange(this);
+
         Name = name;
         Included = included ?? Array.Empty<string>();
         Excluded = excluded ?? Array.Empty<string>();
@@ -52,12 +55,18 @@ public class Segment : AuditedEntity
         Description = description ?? string.Empty;
 
         UpdatedAt = DateTime.UtcNow;
+
+        return dataChange.To(this);
     }
 
-    public void Archive()
+    public DataChange Archive()
     {
+        var dataChange = new DataChange(this);
+
         IsArchived = true;
         UpdatedAt = DateTime.UtcNow;
+
+        return dataChange.To(this);
     }
 
     public bool IsMatch(EndUser user)

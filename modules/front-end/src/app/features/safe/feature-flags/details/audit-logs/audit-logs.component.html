@@ -1,1 +1,5 @@
-<audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
+<nz-spin i18n-nzTip="@@common.loading" nzTip="Loading..." [nzSpinning]="loading">
+  <ng-container *ngIf="!loading">
+    <audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
+  </ng-container>
+</nz-spin>

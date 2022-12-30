@@ -29,6 +29,7 @@ export class AuditLogsComponent implements OnInit {
   groupedAuditLogs: {key: string, items: IAuditLog[]}[] = [];
   totalCount: number = 0;
   refTypeFlag: RefTypeEnum = RefTypeEnum.Flag;
+  refTypeSegment: RefTypeEnum = RefTypeEnum.Segment;
   constructor(
     private auditLogService: AuditLogService,
     private memberService: MemberService,

@@ -1,16 +1,18 @@
 import {Component} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { EnvUserService } from '@services/env-user.service';
-import { SegmentService } from '@services/segment.service';
-import { IUserProp, IUserType } from '@shared/types';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {EnvUserService} from '@services/env-user.service';
+import {SegmentService} from '@services/segment.service';
+import {IUserProp, IUserType} from '@shared/types';
 
-import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments-index';
-import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
-import { EnvUserPropService } from "@services/env-user-prop.service";
-import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import {ISegment, ISegmentFlagReference, Segment} from '../../types/segments-index';
+import {CdkDragDrop, moveItemInArray} from "@angular/cdk/drag-drop";
+import {EnvUserPropService} from "@services/env-user-prop.service";
+import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
 import {ICondition, IRule} from "@shared/rules";
 import {getPathPrefix} from "@utils/index";
+import {RefTypeEnum} from "@core/components/audit-log/types";
+import {DiffFactoryService} from "@services/diff-factory.service";
 
 @Component({
   selector: 'segment-targeting',
@@ -24,8 +26,25 @@ export class TargetingComponent {
   public isUserPropsLoading: boolean = true;
   public id: string;
   public targetUsersActive = true;
-
   public flagReferences: ISegmentFlagReference[] = [];
+
+  originalData: string = '{}';
+  currentData: string = '{}';
+  refType: RefTypeEnum = RefTypeEnum.Segment;
+  reviewModalVisible: boolean = false;
+  allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
+
+  onReviewChanges() {
+    this.originalData = JSON.stringify(this.segmentDetail.originalData);
+    this.currentData = JSON.stringify(this.segmentDetail.dataToSave);
+
+    this.reviewModalVisible = true;
+  }
+
+  onCloseReviewModal() {
+    this.reviewModalVisible = false;
+  }
+
   constructor(
     private router: Router,
     private route:ActivatedRoute,
@@ -71,6 +90,10 @@ export class TargetingComponent {
       this.envUserService.getByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
         this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId));
         this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId));
+
+        const targetUsers = [...this.segmentDetail.includedUsers, ...this.segmentDetail.excludedUsers];
+        // filter out unique values
+        this.allTargetingUsers = targetUsers.filter((user, idx) => idx === targetUsers.findIndex((u) => u.keyId === user.keyId));
         this.isLoading = false;
       });
     } else {
@@ -90,11 +113,17 @@ export class TargetingComponent {
     } else {
       this.segmentDetail.excludedUsers = data;
     }
+
+    this.allTargetingUsers = [
+      ...this.allTargetingUsers.filter((u) => !data.find((d) => d.keyId === u.keyId)),
+      ...data
+    ];
   }
 
-  public onSave() {
+  public onSave(data: any) {
     this.isLoading = true;
-    this.segmentService.update(this.segmentDetail.dataToSave)
+
+    this.segmentService.update({...this.segmentDetail.dataToSave, comment: data.comment})
       .subscribe((result) => {
         this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
         this.loadSegment(result);
@@ -102,7 +131,9 @@ export class TargetingComponent {
     }, _ => {
       this.msg.error($localize `:@@common.operation-failed:Operation failed`);
       this.isLoading = false;
-    })
+    });
+
+    this.reviewModalVisible = false;
   }
 
   userProps: IUserProp[] = [];

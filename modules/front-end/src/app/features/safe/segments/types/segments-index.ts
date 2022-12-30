@@ -1,5 +1,5 @@
 ﻿import { IUserType } from "@shared/types";
-import { uuidv4 } from "@utils/index";
+import {deepCopy, uuidv4} from "@utils/index";
 import {handleRulesBeforeSave, ICondition, IRule} from "@shared/rules";
 
 export interface ISegmentListModel {
@@ -16,6 +16,7 @@ export interface ISegment {
   excluded: string[];
   rules: IRule[];
   isArchived: boolean;
+  comment?: string
 }
 
 export interface ISegmentFlagReference {
@@ -40,7 +41,11 @@ export class Segment {
   private _includedUsers: IUserType[] = [];
   private _excludedUsers: IUserType[] = [];
 
+  originalData: ISegment;
+
   constructor(segment: ISegment) {
+    this.originalData = deepCopy(segment);
+
     this.data = {...segment};
 
     this.data.rules = segment.rules ?? [];

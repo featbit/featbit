@@ -17,9 +17,9 @@
           </li>
         </ul>
       </nz-dropdown-menu>
-      <button class="save-btn" nz-button nzType="primary" (click)="onSave()">
+      <button class="save-btn" nz-button nzType="primary" (click)="onReviewChanges()">
         <i nz-icon nzType="icons:icon-save"></i>
-        <ng-container i18n="@@common.save">Save</ng-container>
+        <ng-container i18n="@@common.review-and-save">Review and save</ng-container>
       </button>
     </div>
     <div class="content-container">
@@ -83,5 +83,17 @@
     </div>
   </ng-template>
 </section>
+<change-review
+  *ngIf="!isLoading"
+  [visible]="reviewModalVisible"
+  [refName]="segmentDetail.segment.name"
+  [previous]="originalData"
+  [current]="currentData"
+  [refType]="refType"
+  [refs]="{targetingUsers: this.allTargetingUsers}"
+  (onSave)="onSave($event)"
+  (onCancel)="onCloseReviewModal()"
+>
+</change-review>
 
 

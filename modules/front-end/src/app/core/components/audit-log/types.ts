@@ -7,7 +7,8 @@ export enum AuditLogOpEnum {
 }
 
 export enum RefTypeEnum {
-  Flag = 'FeatureFlag'
+  Flag = 'FeatureFlag',
+  Segment = 'Segment'
 }
 
 export interface IAuditLog {

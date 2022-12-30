@@ -113,52 +113,18 @@
   </ng-template>
 </section>
 
-<nz-modal [nzWidth]='800' nzClassName="review-modal" [(nzVisible)]="reviewModalVisible"
-          i18n-nzTitle="@@common.review-and-save"
-          nzTitle="Review and save"
-          [nzClosable]="false"
-          (nzOnCancel)="reviewModalVisible=false">
-  <ng-container *nzModalContent>
-    <div class="">
-      <section class="context">
-        <div><span>{{featureFlag.name}}</span><span> ({{featureFlag.key}}) </span>
-        </div>
-        <div><span i18n="@@common.environment">Environment</span>: <span>{{currentProjectEnv.envName}}</span></div>
-      </section>
-      <section class="warning-message">
-        <div class="warning">
-          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-          <div class="warning-content" i18n="@@ff.targeting.the-following-changes-may-affect-insights">The following changes may affects the insights data</div>
-        </div>
-      </section>
-      <section class="pending-changes">
-        <div class="section-title" i18n="@@common.changes">Changes</div>
-        <div class="change">
-          <p class="change-count">
-            <span>{{numChanges}} </span>
-            <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
-          </p>
-          <change-list [categories]="changeCategories"></change-list>
-        </div>
-      </section>
-      <section class="comment">
-        <form nz-form [formGroup]="reviewForm" nzLayout="vertical">
-          <nz-form-item>
-            <nz-form-label nzRequired class="section-title" i18n="@@common.comment">Comment</nz-form-label>
-            <nz-form-control i18n-nzErrorTip="@@common.comment-cannot-be-empty" nzErrorTip="Comment cannot be empty">
-              <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
-            </nz-form-control>
-          </nz-form-item>
-        </form>
-      </section>
-    </div>
-  </ng-container>
-  <div *nzModalFooter>
-    <button nz-button nzType="default" (click)="reviewModalVisible=false" i18n="@@common.cancel">Cancel</button>
-    <button [disabled]="numChanges === 0" nz-button nzType="primary"
-            (click)="onSave()" i18n="@@common.save">Save</button>
-  </div>
-</nz-modal>
+<change-review
+  *ngIf="!isLoading"
+  [visible]="reviewModalVisible"
+  [refName]="featureFlag.name"
+  [previous]="originalData"
+  [current]="currentData"
+  [refType]="refType"
+  [refs]="{targetingUsers: this.allTargetingUsers, segments: segmentIdRefs }"
+  (onSave)="onSave($event)"
+  (onCancel)="onCloseReviewModal()"
+>
+</change-review>
 
 <app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
   [featureFlag]="featureFlag"></app-expt-rules-drawer>
