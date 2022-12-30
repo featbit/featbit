@@ -8,7 +8,9 @@ import {lastValueFrom} from "rxjs";
 import {Router} from "@angular/router";
 import {AuditLogOpEnum, IAuditLog, RefTypeEnum} from "@core/components/audit-log/types";
 import {DiffFactoryService} from "@services/diff-factory.service";
-import {ICategory} from "@shared/diff/types";
+import {ICategory, OperationEnum} from "@shared/diff/types";
+import {ISegment} from "@features/safe/segments/types/segments-index";
+import {IUserType} from "@shared/types";
 
 @Component({
   selector: 'audit-log',
@@ -16,11 +18,10 @@ import {ICategory} from "@shared/diff/types";
   styleUrls: ['./audit-log.component.less']
 })
 export class AuditLogComponent {
-  private previous: IFeatureFlag | string;
-  private current: IFeatureFlag | string;
+  private previous: IFeatureFlag | ISegment | string;
+  private current: IFeatureFlag | ISegment | string;
 
   auditLog: IAuditLog;
-  htmlDiff: string = '';
   changeCategories: ICategory[] = [];
   constructor(
     private router: Router,
@@ -55,7 +56,7 @@ export class AuditLogComponent {
     }
   }
 
-  get targetData(): IFeatureFlag | string {
+  get targetData(): IFeatureFlag | ISegment | string {
     switch (this.auditLog.operation) {
       case AuditLogOpEnum.Create:
         return this.current;
@@ -108,7 +109,10 @@ export class AuditLogComponent {
 
     switch (this.auditLog.refType) {
       case RefTypeEnum.Flag:
-        result += ` ${$localize `:@@auditlogs.reftype-flag:the flag`}`;
+        result += ` ${$localize `:@@auditlogs.reftype-flag:flag`}`;
+        break;
+      case RefTypeEnum.Segment:
+        result += ` ${$localize `:@@auditlogs.reftype-segment:segment`}`;
         break;
       default:
         break;
@@ -118,14 +122,19 @@ export class AuditLogComponent {
   }
 
   async calculateHtmlDiff() {
+    let previous: IFeatureFlag | ISegment;
+    let current: IFeatureFlag | ISegment;
+    let targetUserIdRefs: string[];
+
     switch (this.auditLog.refType) {
       case RefTypeEnum.Flag:
-        const previous = this.previous as IFeatureFlag;
-        const current = this.current as IFeatureFlag;
+        previous = this.previous as IFeatureFlag;
+        current = this.current as IFeatureFlag;
+
         // get all end users
         const previousTargetUserIdRefs: string[] = previous?.targetUsers?.flatMap((v) => v.keyIds) ?? [];
         const currentTargetUserIdRefs: string[] = current?.targetUsers?.flatMap((v) => v.keyIds) ?? [];
-        let targetUserIdRefs: string[] = [...previousTargetUserIdRefs, ...currentTargetUserIdRefs];
+        targetUserIdRefs = [...previousTargetUserIdRefs, ...currentTargetUserIdRefs];
         targetUserIdRefs = targetUserIdRefs.filter((id, idx) => targetUserIdRefs.indexOf(id) === idx);
 
         // get all segmentIds from originalData and new Data
@@ -145,34 +154,72 @@ export class AuditLogComponent {
         const promises = [];
 
         if (targetUserIdRefs.length) {
-          promises.push(lastValueFrom(this.envUserService.getByKeyIds(targetUserIdRefs)));
-        } else {
-          promises.push([]);
+          promises.push(this.getUserRefs(targetUserIdRefs));
         }
 
         if (segmentIdRefs.length) {
-          promises.push(lastValueFrom(this.segmentService.getByIds(segmentIdRefs)));
-        } else {
-          promises.push([]);
+          promises.push(this.getSegmentRefs(segmentIdRefs));
         }
 
-        const refs = await Promise.all(promises);
+        await Promise.all(promises);
+        break;
+      case RefTypeEnum.Segment:
+        const previousSegment = this.previous as ISegment;
+        const currentSegment = this.current as ISegment;
 
-        this.changeCategories = this.diffFactoryService.getDiffer(this.auditLog.refType).getChangeList(this.auditLog.dataChange.previous, this.auditLog.dataChange.current, {targetingUsers: refs[0], segments: refs[1]});
-        return;
+        // get all end users
+        const previousIncludeRefs: string[] = previousSegment?.included ?? [];
+        const currentIncludeRefs: string[] = currentSegment?.included ?? [];
+        const previousExcludeRefs: string[] = previousSegment?.excluded ?? [];
+        const currentExcludeRefs: string[] = currentSegment?.excluded ?? [];
+
+        targetUserIdRefs = [...previousIncludeRefs, ...currentIncludeRefs, ...previousExcludeRefs, ...currentExcludeRefs];
+        targetUserIdRefs = targetUserIdRefs.filter((id, idx) => targetUserIdRefs.indexOf(id) === idx);
+
+        await Promise.all([this.getUserRefs(targetUserIdRefs)]);
+        break;
       default:
         break;
     }
+
+    this.changeCategories = this.diffFactoryService.getDiffer(this.auditLog.refType as RefTypeEnum).diff(this.auditLog.dataChange.previous, this.auditLog.dataChange.current, {targetingUsers: this.userRefs, segments: this.segmentRefs});
+  }
+
+  userRefs: IUserType[] = [];
+  segmentRefs: ISegment[] = [];
+  private async getUserRefs(keyIds: string[]) {
+    const missingIds = keyIds.filter((keyId) => this.userRefs.find((user) => !(user.keyId === keyId)));
+    const users = await lastValueFrom(this.envUserService.getByKeyIds(missingIds));
+
+    this.userRefs = [
+      ...this.userRefs,
+      ...users
+    ];
+  }
+
+  private async getSegmentRefs(segmentIds: string[]) {
+    const missingKeyIds = segmentIds.filter((id) => this.segmentRefs.find((segment) => !(segment.id === id)));
+    const segments = await lastValueFrom(this.segmentService.getByIds(missingKeyIds));
+
+    this.segmentRefs = [
+      ...this.segmentRefs,
+      ...segments
+    ];
   }
 
   goToTargetPage() {
-    switch (this.auditLog.refType) {
-      case RefTypeEnum.Flag:
-        this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc((this.targetData as IFeatureFlag).key)}/targeting`);
-        return;
-      default:
-        this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc((this.targetData as IFeatureFlag).key)}/targeting`);
-        return;
+    if (this.auditLog.operation !== AuditLogOpEnum.Remove) {
+      switch (this.auditLog.refType) {
+        case RefTypeEnum.Flag:
+          this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc((this.targetData as IFeatureFlag).key)}/targeting`);
+          return;
+        case RefTypeEnum.Segment:
+          this.router.navigateByUrl(`/segments/details/${encodeURIComponentFfc((this.targetData as ISegment).id)}/targeting`);
+          return;
+        default:
+          this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc((this.targetData as IFeatureFlag).key)}/targeting`);
+          return;
+      }
     }
   }
 }

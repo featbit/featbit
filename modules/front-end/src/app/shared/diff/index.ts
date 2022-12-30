@@ -9,12 +9,13 @@ import {
   OperationEnum,
   PrimitiveType
 } from "@shared/diff/types";
-import {IRuleVariation, IVariation} from "@shared/rules";
-import {IVariationUser} from "@features/safe/feature-flags/types/details";
-import {IUserType} from "@shared/types";
+import {ICondition, IRuleVariation} from "@shared/rules";
+import {ISegment} from "@features/safe/segments/types/segments-index";
+import {isSegmentCondition} from "@utils/index";
+import {findIndex, ruleOps} from "@core/components/find-rule/ruleConfig";
 
 export interface IDiffer {
-  getChangeList(obj1Str: string, obj2Str: string, ref: IRefType): ICategory[]
+  diff(obj1Str: string, obj2Str: string, ref: IRefType): ICategory[]
 }
 
 
@@ -101,26 +102,28 @@ export abstract class Differ {
     return null;
   }
 
-  static mapVariationUserToDiffVarationUser(variationUsers: IVariationUser[], variations: IVariation[], users: IUserType[]): IDiffVarationUser[] {
-    return variations.map((variation) => {
-      const variationUser = variationUsers.find((vu) => vu.variationId === variation.id);
+  static mapConditionToDiffCondition(condition: ICondition, segments: ISegment[] = []) {
+    const isSegment = isSegmentCondition(condition);
+
+    if (!isSegment) {
+      const ruleOpIdx = findIndex(condition.op);
+      const isMultiValue = ruleOps[ruleOpIdx].type === 'multi';
 
       return {
-        variationId: variation.id,
-        variation: variation.value,
-        users: variationUser === undefined ? [] : variationUser.keyIds.map((keyId) => {
-          const user = users.find((user) => user.keyId === keyId);
-          let name = keyId;
-
-          if (user) {
-            name = user.name?.length > 0
-              ? `${user.name} (${user.keyId})`
-              : user.keyId;
-          }
-          return { keyId, name };
-        })
+        property: condition.property,
+        op: condition.op,
+        opLabel: ruleOps[ruleOpIdx].label,
+        value: isMultiValue ? JSON.parse(condition.value) : condition.value,
+        isMultiValue
       }
-    });
+    } else {
+      return {
+        property: condition.property,
+        op: null,
+        value: JSON.parse(condition.value).map((segmentId) => segments.find((s) => s.id === segmentId)?.name ?? segmentId),
+        isMultiValue: true
+      }
+    }
   }
 
   private static convertArrayToObj (arr: any[], uniqKey: string): ObjectType {

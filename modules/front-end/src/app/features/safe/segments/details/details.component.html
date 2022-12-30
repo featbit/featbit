@@ -9,5 +9,11 @@
         <segment-targeting></segment-targeting>
       </ng-template>
     </nz-tab>
+    <nz-tab>
+      <a *nzTabLink nz-tab-link [routerLink]="['./history']" i18n="@@ff.routing.details.history">History</a>
+      <ng-template nz-tab>
+        <segment-auditlogs></segment-auditlogs>
+      </ng-template>
+    </nz-tab>
   </nz-tabset>
 </div>

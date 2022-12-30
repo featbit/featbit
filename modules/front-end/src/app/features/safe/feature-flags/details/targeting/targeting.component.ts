@@ -100,7 +100,7 @@ export class TargetingComponent implements OnInit {
   }
 
   public targetingUsersByVariation: { [key: string]: IUserType[] } = {}; // {variationId: users}
-  public allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
+  allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
 
   loadFeatureFlag() {
     return new Promise((resolve) => {
@@ -242,7 +242,7 @@ export class TargetingComponent implements OnInit {
     segmentIdRefs = segmentIdRefs.filter((id, idx) => segmentIdRefs.indexOf(id) === idx); // get unique values
 
     this.segmentService.getByIds(segmentIdRefs).subscribe((segments) => {
-      this.changeCategories = this.diffFactoryService.getDiffer(RefTypeEnum.Flag).getChangeList(JSON.stringify(this.featureFlag.originalData), JSON.stringify(this.featureFlag), {targetingUsers: this.allTargetingUsers, segments});
+      this.changeCategories = this.diffFactoryService.getDiffer(RefTypeEnum.Flag).diff(JSON.stringify(this.featureFlag.originalData), JSON.stringify(this.featureFlag), {targetingUsers: this.allTargetingUsers, segments});
       this.numChanges = this.changeCategories.flatMap((category) => category.changes).length;
     }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
 
