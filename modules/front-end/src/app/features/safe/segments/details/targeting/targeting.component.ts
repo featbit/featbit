@@ -139,8 +139,8 @@ export class TargetingComponent implements OnInit {
         this.isLoading = false;
       },
       error: _ => {
-      this.msg.error($localize `:@@common.operation-failed:Operation failed`);
-      this.isLoading = false;
+        this.msg.error($localize `:@@common.operation-failed:Operation failed`);
+        this.isLoading = false;
       }
     });
 
