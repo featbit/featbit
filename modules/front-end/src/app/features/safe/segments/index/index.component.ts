@@ -109,6 +109,12 @@ export class IndexComponent implements OnInit, OnDestroy {
   $search: Subject<void> = new Subject();
 
   onSearch(resetPage?: boolean) {
+    this.loading = true;
+    this.segmentListModel = {
+      items: [],
+      totalCount: 0
+    };
+
     if (resetPage) {
       this.segmentFilter.pageIndex = 1;
     }

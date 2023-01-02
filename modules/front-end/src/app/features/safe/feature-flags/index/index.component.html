@@ -55,7 +55,7 @@
         nzShowSizeChanger
         [nzData]="featureFlagListModel.items"
         [nzFrontPagination]="false"
-        [nzLoading]="Loading"
+        [nzLoading]="loading"
         [nzTotal]="featureFlagListModel.totalCount"
         [(nzPageSize)]="featureFlagFilter.pageSize"
         (nzPageSizeChange)="onSearch()"

@@ -196,15 +196,15 @@ export class IndexComponent implements OnInit {
     totalCount: 0
   };
 
-  Loading: boolean = true;
+  loading: boolean = true;
 
   loadFeatureFlagList() {
-    this.Loading = true;
+    this.loading = true;
     this.featureFlagService
       .getList(this.featureFlagFilter)
       .subscribe((featureFlags: IFeatureFlagListModel) => {
         this.featureFlagListModel = featureFlags;
-        this.Loading = false;
+        this.loading = false;
       });
   }
 
@@ -212,6 +212,12 @@ export class IndexComponent implements OnInit {
   $search: Subject<void> = new Subject();
 
   onSearch(resetPage?: boolean) {
+    this.loading = true;
+    this.featureFlagListModel = {
+      items: [],
+      totalCount: 0
+    };
+
     if (resetPage) {
       this.featureFlagFilter.pageIndex = 1;
     }
