@@ -74,6 +74,32 @@ public class SegmentController : ApiControllerBase
         return Ok(success);
     }
 
+    [HttpPut("{id:guid}/restore")]
+    public async Task<ApiResponse<bool>> RestoreAsync(Guid id)
+    {
+        var request = new RestoreSegment
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+    
+    [HttpDelete("{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
+    {
+        var request = new DeleteSegment
+        {
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+    
+    
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid envId, string name)
     {

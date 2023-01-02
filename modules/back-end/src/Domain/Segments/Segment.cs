@@ -68,6 +68,16 @@ public class Segment : AuditedEntity
 
         return dataChange.To(this);
     }
+    
+    public DataChange Restore()
+    {
+        var dataChange = new DataChange(this);
+
+        IsArchived = false;
+        UpdatedAt = DateTime.UtcNow;
+
+        return dataChange.To(this);
+    }
 
     public bool IsMatch(EndUser user)
     {

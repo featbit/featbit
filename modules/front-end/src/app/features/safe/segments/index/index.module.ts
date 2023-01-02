@@ -21,7 +21,8 @@ import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { NzFormModule } from "ng-zorro-antd/form";
 import { NzDividerModule } from "ng-zorro-antd/divider";
 import {CoreModule} from "@core/core.module";
-
+import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 
 @NgModule({
   declarations: [IndexComponent],
@@ -47,7 +48,9 @@ import {CoreModule} from "@core/core.module";
     NzFormModule,
     ReactiveFormsModule,
     CoreModule,
-    NzDividerModule
+    NzDividerModule,
+    NzPopconfirmModule,
+    NzCheckboxModule
   ]
 })
 export class IndexModule { }

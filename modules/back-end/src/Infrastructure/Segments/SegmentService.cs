@@ -19,9 +19,8 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
 
         var filters = new List<FilterDefinition<Segment>>
         {
-            // envId & archived filter
+            // envId
             filterBuilder.Eq(segment => segment.EnvId, envId),
-            filterBuilder.Eq(segment => segment.IsArchived, false)
         };
 
         // name filter
@@ -33,6 +32,9 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
             filters.Add(nameFilter);
         }
 
+        var isArchivedFilter = filterBuilder.Eq(segment => segment.IsArchived, userFilter.IsArchived);
+        filters.Add(isArchivedFilter);
+        
         var filter = filterBuilder.And(filters);
 
         var totalCount = await Collection.CountDocumentsAsync(filter);
@@ -56,6 +58,11 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
         return segments;
     }
 
+    public async Task DeleteAsync(Guid id)
+    {
+        await Collection.DeleteOneAsync(x => x.Id == id);
+    }
+    
     public async Task<IEnumerable<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id)
     {
         var segmentId = id.ToString();

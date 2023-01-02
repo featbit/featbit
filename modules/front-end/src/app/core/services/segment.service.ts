@@ -30,6 +30,7 @@ export class SegmentService {
   public getSegmentList(filter: SegmentListFilter = new SegmentListFilter()): Observable<ISegmentListModel> {
     const queryParam = {
       name: filter.name ?? '',
+      isArchived: filter.isArchived,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };
@@ -90,6 +91,11 @@ export class SegmentService {
     return this.current;
   }
 
+  delete(id: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${id}`;
+
+    return this.http.delete<boolean>(url);
+  }
 
   public update(param: ISegment): Observable<any> {
     return this.http.put(`${this.baseUrl}/${param.id}`, { ...param });
@@ -97,6 +103,11 @@ export class SegmentService {
 
   public archive(id: string): Observable<any> {
     return this.http.put(`${this.baseUrl}/${id}/archive`, {});
+  }
+
+  public restore(id: string): Observable<any> {
+    const url = `${this.baseUrl}/${id}/restore`;
+    return this.http.put(url, {});
   }
 
   public getFeatureFlagReferences(id: string): Observable<ISegmentFlagReference[]> {

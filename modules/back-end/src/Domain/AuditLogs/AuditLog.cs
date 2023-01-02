@@ -172,5 +172,21 @@ public class AuditLog : Entity
         return auditLog;
     }
 
+    public static AuditLog ForRestore(Segment segment, DataChange dataChange, Guid operatorId)
+    {
+        var auditLog = For(segment, Operations.Restore, dataChange, string.Empty, operatorId);
+
+        return auditLog;
+    }
+    
+    public static AuditLog ForRemove(Segment segment, Guid operatorId)
+    {
+        var dataChange = new DataChange(segment).To(null);
+
+        var auditLog = For(segment, Operations.Remove, dataChange, string.Empty, operatorId);
+
+        return auditLog;
+    }
+    
     #endregion
 }
