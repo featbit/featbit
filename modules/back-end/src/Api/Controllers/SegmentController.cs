@@ -85,7 +85,7 @@ public class SegmentController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
+
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
     {
@@ -98,8 +98,7 @@ public class SegmentController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
-    
+
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid envId, string name)
     {
