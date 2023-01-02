@@ -111,27 +111,27 @@
 <nz-modal [(nzVisible)]="deleteArchiveModalVisible"
           [nzTitle]="deleteArchiveModalTitle"
           [nzCentered]="true"
-          [nzContent]="deleteArvhiveModalContent"
+          [nzContent]="deleteArchiveModalContent"
           [nzFooter]="deleteArchiveModalFooter"
           (nzOnCancel)="closeDeleteArchiveModal()">
 
   <ng-template #deleteArchiveModalTitle>
     <span *ngIf="isDelete" style="font-size:18px" i18n="@@segment.remove-segment">Remove segment: {{currentDeletingArchivingSegment.name}}</span>
-    <span *ngIf="!isDelete" style="font-size:18px" i18n="@@segment.remove-segment">Archive segment: {{currentDeletingArchivingSegment.name}}</span>
+    <span *ngIf="!isDelete" style="font-size:18px" i18n="@@segment.archive-segment">Archive segment: {{currentDeletingArchivingSegment.name}}</span>
   </ng-template>
 
-  <ng-template #deleteArvhiveModalContent>
+  <ng-template #deleteArchiveModalContent>
     <div style="font-size:15px">
       <ng-container i18n="@@common.segment">Segment</ng-container>
       <span style="font-weight:800;display:inline-block;margin:0 3px;">{{currentDeletingArchivingSegment.name}}</span>
       <ng-container *ngIf="isDelete" i18n="@@segment.permanent-remove-msg">will be permanently removed, this operation cannot be recovered!</ng-container>
-      <ng-container *ngIf="!isDelete" i18n="@@segment.permanent-remove-msg">will be archived!</ng-container>
+      <ng-container *ngIf="!isDelete" i18n="@@segment.archive-msg">will be archived!</ng-container>
     </div>
     <div *ngIf="currentDeletingArchivingSegmentFlagReferences.length > 0" class="warning-message">
       <div class="warning">
         <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
         <div class="warning-content">
-          <ng-container i18n="@@segment.segment-used-by-flags">This segment is used by {{currentDeletingArchivingSegmentFlagReferences.length}} flags(s), remove all references before the segment can be safely removed!</ng-container>
+          <ng-container i18n="@@segment.segment-used-by-flags">This segment is used by {{currentDeletingArchivingSegmentFlagReferences.length}} flags(s), remove all references before this operation!</ng-container>
         </div>
       </div>
     </div>

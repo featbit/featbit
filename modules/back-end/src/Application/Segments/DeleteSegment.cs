@@ -45,7 +45,7 @@ public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
         var auditLog = AuditLog.ForRemove(segment, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
 
-        // publish on feature flag delete notification
+        // publish on segment delete notification
         await _publisher.Publish(new OnSegmentChange(segment), cancellationToken);
 
         return true;

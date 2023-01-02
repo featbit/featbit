@@ -37,7 +37,7 @@ public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>
         var auditLog = AuditLog.ForRestore(segment, dataChange, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
 
-        // publish on feature flag change notification
+        // publish on segment change notification
         await _publisher.Publish(new OnSegmentChange(segment), cancellationToken);
 
         return true;
