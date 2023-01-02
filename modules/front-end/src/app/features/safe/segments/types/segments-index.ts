@@ -29,10 +29,12 @@ export class SegmentListFilter {
   constructor(
     public name?: string,
     public userKeyId?: string,
+    public isArchived?: boolean,
     public pageIndex: number = 1,
     public pageSize: number = 10
   ) {
     this.name = name ?? '';
+    this.isArchived = !!isArchived;
   }
 }
 

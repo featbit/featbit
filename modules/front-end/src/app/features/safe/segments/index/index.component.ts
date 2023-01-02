@@ -1,8 +1,8 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import {encodeURIComponentFfc, getPathPrefix} from '@shared/utils';
+import { encodeURIComponentFfc, getPathPrefix } from '@shared/utils';
 import { SegmentListFilter, ISegment, ISegmentListModel, ISegmentFlagReference } from "../types/segments-index";
 import { SegmentService } from "@services/segment.service";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
@@ -17,41 +17,71 @@ export class IndexComponent implements OnInit, OnDestroy {
 
   private destory$: Subject<void> = new Subject();
 
-  public createModalVisible: boolean = false;
-  public isIntoing: boolean = false;
+  createModalVisible: boolean = false;
+  isIntoing: boolean = false;
+  isDelete: boolean = false; // to differencing delete and archive
+  deleteArchiveModalVisible: boolean = false;
 
-  public deleteModalVisible: boolean = false;
-  public currentDeletingSegment: ISegment;
-  public currentDeletingSegmentFlagReferences: ISegmentFlagReference[] = [];
+  currentDeletingArchivingSegment: ISegment;
+  currentDeletingArchivingSegmentFlagReferences: ISegmentFlagReference[] = [];
 
-  deleteValidation(segment: ISegment) {
-    this.currentDeletingSegment = segment;
-    this.currentDeletingSegmentFlagReferences = [];
+  deleteArchiveValidation(segment: ISegment, isDelete: boolean) {
+    this.isDelete = isDelete;
+    this.currentDeletingArchivingSegment = segment;
+    this.currentDeletingArchivingSegmentFlagReferences = [];
     this.segmentService.getFeatureFlagReferences(segment.id).subscribe((flags: ISegmentFlagReference[]) => {
-      this.currentDeletingSegmentFlagReferences = [...flags];
-      this.deleteModalVisible = true;
+      this.currentDeletingArchivingSegmentFlagReferences = [...flags];
+      this.deleteArchiveModalVisible = true;
     });
-
-    // TODO remove this line
-    this.deleteModalVisible = true;
   }
 
-  closeDeleteModal() {
-    this.deleteModalVisible = false;
+  restore(segment: ISegment) {
+    this.segmentService.restore(segment.id).subscribe({
+      next: () => {
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.onSearch();
+      },
+      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    });
   }
 
-  deleting: boolean = false;
-  delete(id: string) {
-    this.deleting = true;
-    this.segmentService.archive(id).subscribe(() => {
-      this.segmentListModel.items = this.segmentListModel.items.filter(it => it.id !== id);
-      this.segmentListModel.totalCount--;
-      this.deleting = false;
-      this.closeDeleteModal();
-    }, () => {
-      this.deleting = false;
-      this.closeDeleteModal();
-    });
+  closeDeleteArchiveModal() {
+    this.deleteArchiveModalVisible = false;
+  }
+
+  deletingOrArchiving: boolean = false;
+  deleteArchive(id: string) {
+    this.deletingOrArchiving = true;
+
+    if (this.isDelete) {
+      this.segmentService.delete(id).subscribe({
+        next: () => {
+          this.segmentListModel.items = this.segmentListModel.items.filter(it => it.id !== id);
+          this.segmentListModel.totalCount--;
+          this.deletingOrArchiving = false;
+          this.closeDeleteArchiveModal();
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        },
+        error: () => {
+          this.deletingOrArchiving = false;
+          this.closeDeleteArchiveModal();
+        }
+      });
+    } else { // archiving
+      this.segmentService.archive(id).subscribe({
+        next: () => {
+          this.deletingOrArchiving = false;
+          this.onSearch();
+          this.closeDeleteArchiveModal();
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        },
+        error: () => {
+          this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
+          this.deletingOrArchiving = false;
+          this.closeDeleteArchiveModal();
+        }
+      });
+    }
   }
 
   segmentListModel: ISegmentListModel = {
@@ -76,6 +106,12 @@ export class IndexComponent implements OnInit, OnDestroy {
   $search: Subject<void> = new Subject();
 
   onSearch(resetPage?: boolean) {
+    this.loading = true;
+    this.segmentListModel = {
+      items: [],
+      totalCount: 0
+    };
+
     if (resetPage) {
       this.segmentFilter.pageIndex = 1;
     }
@@ -114,15 +150,17 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.creating = true;
 
     const { name, description } = this.segmentForm.value;
-    this.segmentService.create(name, description)
-      .subscribe((result: ISegment) => {
-        this.segmentService.setCurrent(result);
-        this.toRouter(result.id);
+    this.segmentService.create(name, description).subscribe({
+      next: (segment: ISegment) => {
+        this.segmentService.setCurrent(segment);
+        this.toRouter(segment.id);
         this.creating = false;
-      }, err => {
+      },
+      error: () => {
         this.msg.error($localize `:@@common.operation-failed:Operation failed`);
         this.creating = false;
-      });
+      }
+    });
   }
 
   closeCreateModal() {
@@ -160,7 +198,7 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.destory$.complete();
   }
 
-  public onIntoSegmentDetail(data: ISegment) {
+  onIntoSegmentDetail(data: ISegment) {
     if(this.isIntoing) return;
     this.isIntoing = true;
     this.segmentService.setCurrent(data);
@@ -171,7 +209,7 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl(`/segments/details/${encodeURIComponentFfc(id)}/targeting`);
   }
 
-  public openFlagPage(flagKey: string) {
+  openFlagPage(flagKey: string) {
     const url = this.router.serializeUrl(
       this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flagKey}/targeting`])
     );

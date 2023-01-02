@@ -27,46 +27,4 @@
       </ng-container>
     </div>
   </div>
-  <div class="block" style="margin-top: 20px" *ngIf="!isLoading; else loadingTem;">
-    <div class="delete">
-      <button nz-button nzType="default" (click)="openDeleteModal()">
-        <i nz-icon nzType="icons:icon-delete"></i>
-        <ng-container i18n="@@segment.remove-segment">Remove segment</ng-container>
-      </button>
-    </div>
-  </div>
 </section>
-
-<nz-modal [(nzVisible)]="deleteModalVisible"
-          [nzTitle]="deleteModalTitle"
-          [nzCentered]="true"
-          [nzContent]="deleteModalContent"
-          [nzFooter]="deleteModalFooter"
-          (nzOnCancel)="closeDeleteModal()">
-
-  <ng-template #deleteModalTitle><span style="font-size:18px"><ng-container i18n="@@segment.remove-segment">Remove segment</ng-container></span></ng-template>
-
-  <ng-template #deleteModalContent>
-    <div style="font-size:15px">
-      <ng-container i18n="@@common.segment">Segment</ng-container>
-      <span style="font-weight:800;display:inline-block;margin:0 3px;">{{segmentDetail.name}}</span>
-      <ng-container i18n="@@common.permanent-remove-msg">will be permanently removed, this operation cannot be recovered!</ng-container>
-    </div>
-    <div *ngIf="flagReferences.length > 0" class="warning-message">
-      <div class="warning">
-        <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-        <div class="warning-content">
-          <ng-container i18n="@@segment.segment-used-by-flags">This segment is used by {{flagReferences.length}} flags(s), remove all references before the segment can be safely removed!</ng-container>
-        </div>
-      </div>
-    </div>
-    <div *ngFor="let flag of flagReferences" style="margin-top:5px">
-      <a (click)="openFlagPage(flag.key)">{{flag.name}}</a>
-    </div>
-  </ng-template>
-
-  <ng-template #deleteModalFooter>
-    <button nz-button nzType="default" (click)="closeDeleteModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="deleting" [disabled]="flagReferences.length > 0" (click)="delete()" i18n="@@common.remove">Remove</button>
-  </ng-template>
-</nz-modal>

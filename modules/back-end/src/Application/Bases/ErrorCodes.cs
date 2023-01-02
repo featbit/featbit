@@ -40,6 +40,7 @@ public static class ErrorCodes
 
     // segment
     public const string SegmentCannotReferenceSegmentCondition = nameof(SegmentCannotReferenceSegmentCondition);
+    public const string CannotDeleteUnArchivedSegment = nameof(CannotDeleteUnArchivedSegment);
 
     // feature flag
     public const string CannotDeleteUnArchivedFeatureFlag = nameof(CannotDeleteUnArchivedFeatureFlag);

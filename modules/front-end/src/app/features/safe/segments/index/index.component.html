@@ -1,16 +1,21 @@
 <section class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
-      <nz-input-group [nzPrefix]="prefixIconSearch">
-        <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@segment.idx.filter-by-name" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearch(true)">
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="icons:icon-search"></i>
-      </ng-template>
-      <button nz-button nzType="primary" (click)="addSegment()">
-        <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@common.add">Add</ng-container>
-      </button>
+      <div class="search-inputs">
+        <nz-input-group [nzPrefix]="prefixIconSearch">
+          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@segment.idx.filter-by-name" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearch(true)">
+        </nz-input-group>
+        <label nz-checkbox [(ngModel)]="segmentFilter.isArchived" (ngModelChange)="onSearch(true)" i18n="@@segment.idx.archived">Archived</label>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+      </div>
+      <div class="middle-btn">
+        <button nz-button nzType="primary" (click)="addSegment()">
+          <i nz-icon nzType="icons:icon-add"></i>
+          <ng-container i18n="@@common.add">Add</ng-container>
+        </button>
+      </div>
     </div>
 
     <div class="table-wrapper">
@@ -41,7 +46,22 @@
             <td>
               <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>
               <nz-divider nzType="vertical"></nz-divider>
-              <a style="color: #717D8A" (click)="deleteValidation(item)" i18n="@@common.remove">Remove</a>
+              <ng-container *ngIf="segmentFilter.isArchived;then archivedOps else unarchivedOps"></ng-container>
+              <ng-template #archivedOps>
+                <a style="color: #717D8A"
+                   i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-segment"
+                   nz-popconfirm="Are you sure to restore this segment?"
+                   (nzOnConfirm)="restore(item)">
+                  <ng-container i18n="@@common.restore">Restore</ng-container>
+                </a>
+                <nz-divider nzType="vertical"></nz-divider>
+                <a style="color: #FF513A" (click)="deleteArchiveValidation(item, true)">
+                  <ng-container i18n="@@common.remove">Remove</ng-container>
+                </a>
+              </ng-template>
+              <ng-template #unarchivedOps>
+                <a style="color: #717D8A" i18n="@@common.archive" (click)="deleteArchiveValidation(item, false)">Archive</a>
+              </ng-template>
             </td>
           </tr>
         </tbody>
@@ -85,38 +105,45 @@
   </ng-template>
 </nz-modal>
 
-<nz-modal [(nzVisible)]="deleteModalVisible"
-          [nzTitle]="deleteModalTitle"
+<nz-modal [(nzVisible)]="deleteArchiveModalVisible"
+          [nzTitle]="deleteArchiveModalTitle"
           [nzCentered]="true"
-          [nzContent]="deleteModalContent"
-          [nzFooter]="deleteModalFooter"
-          (nzOnCancel)="closeDeleteModal()">
+          [nzContent]="deleteArchiveModalContent"
+          [nzFooter]="deleteArchiveModalFooter"
+          (nzOnCancel)="closeDeleteArchiveModal()">
 
-  <ng-template #deleteModalTitle><span style="font-size:18px" i18n="@@segment.remove-segment">Remove segment</span></ng-template>
+  <ng-template #deleteArchiveModalTitle>
+    <span *ngIf="isDelete" style="font-size:18px" i18n="@@segment.remove-segment">Remove segment: {{currentDeletingArchivingSegment.name}}</span>
+    <span *ngIf="!isDelete" style="font-size:18px" i18n="@@segment.archive-segment">Archive segment: {{currentDeletingArchivingSegment.name}}</span>
+  </ng-template>
 
-  <ng-template #deleteModalContent>
+  <ng-template #deleteArchiveModalContent>
     <div style="font-size:15px">
       <ng-container i18n="@@common.segment">Segment</ng-container>
-      <span style="font-weight:800;display:inline-block;margin:0 3px;">{{currentDeletingSegment.name}}</span>
-      <ng-container i18n="@@segment.permanent-remove-msg">will be permanently removed, this operation cannot be recovered!</ng-container>
+      <span style="font-weight:800;display:inline-block;margin:0 3px;">{{currentDeletingArchivingSegment.name}}</span>
+      <ng-container *ngIf="isDelete" i18n="@@segment.permanent-remove-msg">will be permanently removed, this operation cannot be recovered!</ng-container>
+      <ng-container *ngIf="!isDelete" i18n="@@segment.archive-msg">will be archived!</ng-container>
     </div>
-    <div *ngIf="currentDeletingSegmentFlagReferences.length > 0" class="warning-message">
+    <div *ngIf="currentDeletingArchivingSegmentFlagReferences.length > 0" class="warning-message">
       <div class="warning">
         <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
         <div class="warning-content">
-          <ng-container i18n="@@segment.segment-used-by-flags">This segment is used by {{currentDeletingSegmentFlagReferences.length}} flags(s), remove all references before the segment can be safely removed!</ng-container>
+          <ng-container i18n="@@segment.segment-used-by-flags">This segment is used by {{currentDeletingArchivingSegmentFlagReferences.length}} flags(s), remove all references before this operation!</ng-container>
         </div>
       </div>
     </div>
-    <div *ngFor="let flag of currentDeletingSegmentFlagReferences" style="margin-top:5px">
+    <div *ngFor="let flag of currentDeletingArchivingSegmentFlagReferences" style="margin-top:5px">
       <a (click)="openFlagPage(flag.key)">{{flag.name}}</a>
     </div>
   </ng-template>
 
-  <ng-template #deleteModalFooter>
-    <button nz-button nzType="default" (click)="this.closeDeleteModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="this.deleting"
-      [disabled]="currentDeletingSegmentFlagReferences.length > 0"
-      (click)="delete(currentDeletingSegment.id)" i18n="@@common.remove">Remove</button>
+  <ng-template #deleteArchiveModalFooter>
+    <button nz-button nzType="default" (click)="this.closeDeleteArchiveModal()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" [nzLoading]="this.deletingOrArchiving"
+            [disabled]="currentDeletingArchivingSegmentFlagReferences.length > 0"
+            (click)="deleteArchive(currentDeletingArchivingSegment.id)" >
+      <ng-container *ngIf="isDelete" i18n="@@common.remove">Remove</ng-container>
+      <ng-container *ngIf="!isDelete" i18n="@@common.archive">Archive</ng-container>
+    </button>
   </ng-template>
 </nz-modal>
