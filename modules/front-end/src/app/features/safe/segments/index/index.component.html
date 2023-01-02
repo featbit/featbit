@@ -55,10 +55,7 @@
                   <ng-container i18n="@@common.restore">Restore</ng-container>
                 </a>
                 <nz-divider nzType="vertical"></nz-divider>
-                <a style="color: #FF513A"
-                   i18n-nz-popconfirm="@@common.remove-confirm"
-                   nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-                   (nzOnConfirm)="deleteArchiveValidation(item, true)">
+                <a style="color: #FF513A" (click)="deleteArchiveValidation(item, true)">
                   <ng-container i18n="@@common.remove">Remove</ng-container>
                 </a>
               </ng-template>

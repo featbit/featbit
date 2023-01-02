@@ -1,13 +1,12 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import {encodeURIComponentFfc, getPathPrefix} from '@shared/utils';
+import { encodeURIComponentFfc, getPathPrefix } from '@shared/utils';
 import { SegmentListFilter, ISegment, ISegmentListModel, ISegmentFlagReference } from "../types/segments-index";
 import { SegmentService } from "@services/segment.service";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 
 @Component({
   selector: 'segments-index',
@@ -34,9 +33,6 @@ export class IndexComponent implements OnInit, OnDestroy {
       this.currentDeletingArchivingSegmentFlagReferences = [...flags];
       this.deleteArchiveModalVisible = true;
     });
-
-    // TODO remove this line
-    this.deleteArchiveModalVisible = true;
   }
 
   restore(segment: ISegment) {
@@ -64,6 +60,7 @@ export class IndexComponent implements OnInit, OnDestroy {
           this.segmentListModel.totalCount--;
           this.deletingOrArchiving = false;
           this.closeDeleteArchiveModal();
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
         },
         error: () => {
           this.deletingOrArchiving = false;
@@ -73,10 +70,10 @@ export class IndexComponent implements OnInit, OnDestroy {
     } else { // archiving
       this.segmentService.archive(id).subscribe({
         next: () => {
-          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
           this.deletingOrArchiving = false;
           this.onSearch();
           this.closeDeleteArchiveModal();
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
         },
         error: () => {
           this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -153,15 +150,17 @@ export class IndexComponent implements OnInit, OnDestroy {
     this.creating = true;
 
     const { name, description } = this.segmentForm.value;
-    this.segmentService.create(name, description)
-      .subscribe((result: ISegment) => {
-        this.segmentService.setCurrent(result);
-        this.toRouter(result.id);
+    this.segmentService.create(name, description).subscribe({
+      next: (segment: ISegment) => {
+        this.segmentService.setCurrent(segment);
+        this.toRouter(segment.id);
         this.creating = false;
-      }, err => {
+      },
+      error: () => {
         this.msg.error($localize `:@@common.operation-failed:Operation failed`);
         this.creating = false;
-      });
+      }
+    });
   }
 
   closeCreateModal() {
