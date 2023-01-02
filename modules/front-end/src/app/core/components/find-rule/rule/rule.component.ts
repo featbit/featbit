@@ -140,14 +140,9 @@ export class RuleComponent  {
 
   public onSearchProperty(value: string = '') {
     const find = this.userProps.find((p) => p.name === value);
-
-    if (find) {
-      this.filteredProps = [find];
-      return;
-    }
-
     const props = this.userProps.filter((p) => p.name.toLowerCase().includes(value.toLowerCase()));
-    if (value?.length > 0) {
+
+    if (!find && value?.length > 0) {
       const newProp: IUserProp = {
         id: uuidv4(),
         name: value,
