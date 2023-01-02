@@ -5,7 +5,6 @@ namespace Application.Segments;
 public class SegmentFilter : PagedRequest
 {
     public string Name { get; set; }
-    
+
     public bool IsArchived { get; set; }
-    
 }
