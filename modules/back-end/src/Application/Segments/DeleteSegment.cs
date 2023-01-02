@@ -15,18 +15,12 @@ public class DeleteSegment : IRequest<bool>
 public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
 {
     private readonly ISegmentService _service;
-    private readonly IPublisher _publisher;
     private readonly ICurrentUser _currentUser;
     private readonly IAuditLogService _auditLogService;
 
-    public DeleteSegmentHandler(
-        ISegmentService service,
-        IPublisher publisher,
-        ICurrentUser currentUser,
-        IAuditLogService auditLogService)
+    public DeleteSegmentHandler(ISegmentService service, ICurrentUser currentUser, IAuditLogService auditLogService)
     {
         _service = service;
-        _publisher = publisher;
         _currentUser = currentUser;
         _auditLogService = auditLogService;
     }
@@ -44,9 +38,6 @@ public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
         // write audit log
         var auditLog = AuditLog.ForRemove(segment, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
-
-        // publish on segment delete notification
-        await _publisher.Publish(new OnSegmentChange(segment), cancellationToken);
 
         return true;
     }
