@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ISegment, ISegmentFlagReference } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import {getPathPrefix} from "@utils/index";
 import {MessageQueueService} from "@services/message-queue.service";
 
 @Component({
@@ -19,7 +18,6 @@ export class SettingComponent implements OnInit {
 
   isEditingTitle = false;
   isEditingDescription = false;
-  deleteModalVisible: boolean = false;
 
   constructor(
     private route:ActivatedRoute,
@@ -81,34 +79,5 @@ export class SettingComponent implements OnInit {
 
   toggleDescriptionEditState(): void {
     this.isEditingDescription = !this.isEditingDescription;
-  }
-
-  openFlagPage(flagKey: string) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flagKey}/targeting`])
-    );
-
-    window.open(url, '_blank');
-  }
-
-  closeDeleteModal() {
-    this.deleteModalVisible = false;
-  }
-
-  openDeleteModal() {
-    this.deleteModalVisible = true;
-  }
-
-  deleting: boolean = false;
-  delete() {
-    this.deleting = true;
-    this.segmentService.archive(this.segmentDetail.id).subscribe(() => {
-      this.deleting = false;
-      this.router.navigateByUrl(`/segments`);
-    }, () => {
-      this.deleting = false;
-      this.msg.error($localize `:@@common.operation-failed:Operation failed`);
-      this.closeDeleteModal();
-    });
   }
 }
