@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import { isSegmentCondition } from '@utils/index';
+import {isSegmentCondition, uuidv4} from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { IRuleOp, ruleOps, findIndex } from '../ruleConfig';
@@ -7,6 +7,7 @@ import { ISegment, ISegmentListModel, SegmentListFilter } from '@features/safe/s
 import { SegmentService } from '@services/segment.service';
 import { IUserProp } from "@shared/types";
 import {ICondition} from "@shared/rules";
+import {NzMessageService} from "ng-zorro-antd/message";
 
 @Component({
   selector: 'app-rule',
@@ -42,7 +43,18 @@ export class RuleComponent  {
   isSegmentRule: boolean = false;
   condition: ICondition;
 
-  @Input() userProps: IUserProp[];
+  selectedProp: IUserProp;
+
+  @Input("userProps")
+  set properties(data: IUserProp[]) {
+    this.userProps = data;
+    this.filteredProps = [...data];
+  }
+
+
+  userProps: IUserProp[] = [];
+  filteredProps: IUserProp[] = [];
+
   get currentUserProp(): IUserProp {
     const userProp = this.userProps.find(prop => prop.name === this.condition.property);
 
@@ -75,13 +87,14 @@ export class RuleComponent  {
     return this.currentUserProp.usePresetValuesOnly ? 'multiple' : 'tags';
   }
 
-  @Output() addRule = new EventEmitter();
+  @Output() addProperty = new EventEmitter();
+  @Output() addRule = new EventEmitter<IUserProp>();
   @Output() deleteRule = new EventEmitter();
   @Output() ruleChange = new EventEmitter<ICondition>();
 
   public ruleValueConfig: IRuleOp[] = [];
 
-  constructor(private segmentService: SegmentService, private cdr: ChangeDetectorRef) {
+  constructor(private segmentService: SegmentService, private msg: NzMessageService, private cdr: ChangeDetectorRef) {
     this.ruleValueConfig = ruleOps;
     this.inputs.pipe(
       debounceTime(500)
@@ -125,7 +138,45 @@ export class RuleComponent  {
     this.cdr.detectChanges();
   }
 
+  public onSearchProperty(value: string = '') {
+    const find = this.userProps.find((p) => p.name === value);
+
+    if (find) {
+      this.filteredProps = [find];
+      return;
+    }
+
+    const props = this.userProps.filter((p) => p.name.toLowerCase().includes(value.toLowerCase()));
+    if (value?.length > 0) {
+      const newProp: IUserProp = {
+        id: uuidv4(),
+        name: value,
+        presetValues: [],
+        isBuiltIn: false,
+        usePresetValuesOnly: false,
+        isDigestField: false,
+        remark: '',
+
+        isNew: true
+      };
+
+      this.filteredProps = [
+        ...props,
+        newProp
+      ];
+    } else {
+      this.filteredProps = [
+        ...props
+      ];
+    }
+  }
+
   public onPropertyChange() {
+    if (this.selectedProp.isNew) {
+      this.addProperty.emit({...this.selectedProp, isNew: false});
+    }
+
+    this.condition.property = this.selectedProp.name;
     this.isSegmentRule = isSegmentCondition(this.condition);
 
     let result = findIndex(this.condition.op);

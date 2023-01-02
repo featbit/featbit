@@ -63,7 +63,7 @@ export class TargetUserComponent implements OnInit {
   @Output() search = new EventEmitter<EnvUserFilter>();
   @Output() onSelectedUserListChange = new EventEmitter<IUserType[]>();
 
-  public selectModel: IUserType;
+  selectModel: IUserType;
 
   getUserDigest(user: IUserType) {
     const digestProps = this.props.filter(x => x.isDigestField);

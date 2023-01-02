@@ -67,6 +67,7 @@
               <find-rule
                 [data]="rule"
                 [userProps]="userProps"
+                (addProperty)="onAddProperty($event)"
                 (deleteRule)="deleteRule(index)"
                 (onConditionChange)="onRuleConditionsChange($event, index)"
                 (updateRuleName)="rule.name = $event">

@@ -4,9 +4,21 @@
     <div class="tip" i18n="@@core.components.findrule.and">and</div>
   </ng-template>
   <div class="select">
-    <nz-select nzShowSearch nzPlaceHolder="Select property" i18n-nzPlaceHolder="@@core.components.findrule.rule.selectuserproperty"
-               [(ngModel)]="condition.property" (ngModelChange)="onPropertyChange()">
-      <nz-option *ngFor="let userProp of userProps" [nzValue]="userProp.name" [nzLabel]="userProp.name"></nz-option>
+    <nz-select
+      nzShowSearch
+      nzServerSearch
+      nzPlaceHolder="Select property"
+      i18n-nzPlaceHolder="@@core.components.findrule.rule.selectuserproperty"
+      (nzOnSearch)="onSearchProperty($event)"
+      [(ngModel)]="selectedProp"
+      (ngModelChange)="onPropertyChange()">
+      <nz-option nzCustomContent *ngFor="let userProp of filteredProps" [nzValue]="userProp" [nzLabel]="userProp.name">
+        <div class="user-selection-item">
+          <div class="title">
+            <ng-container *ngIf="userProp.isNew" i18n="@@core.components.findrule.rule.create-prop">Create property</ng-container> {{ userProp.name }}
+          </div>
+        </div>
+      </nz-option>
     </nz-select>
   </div>
   <div class="select" *ngIf="!isSegmentRule">
