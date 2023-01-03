@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
@@ -28,6 +28,7 @@ export class IndexComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
     private router: Router,
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService,
@@ -42,18 +43,7 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  featureFlagFilter: IFeatureFlagListFilter = new Proxy(new IFeatureFlagListFilter(), {
-    set(target, property, value, _): boolean {
-      Reflect.set(target, property, value);
-
-      if (history.replaceState) {
-        const params = getQueryParamsFromObject(target);
-        history.replaceState(null, '', `feature-flags?${params}`);
-      }
-
-      return true;
-    }
-  });
+  featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
 
   ngOnInit(): void {
     this.route.queryParams
@@ -239,6 +229,11 @@ export class IndexComponent implements OnInit {
   $search: Subject<void> = new Subject();
 
   onSearch(resetPage?: boolean) {
+    // add filter to query params
+    const params = getQueryParamsFromObject(this.featureFlagFilter);
+    history.replaceState(null, '', `feature-flags?${params}`);
+    this.cdr.detectChanges();
+
     this.loading = true;
     this.featureFlagListModel = {
       items: [],
