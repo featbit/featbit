@@ -47,8 +47,8 @@ export class IndexComponent implements OnInit {
       Reflect.set(target, property, value);
 
       if (history.replaceState) {
-        const url = getQueryParamsFromObject(target);
-        history.replaceState(null, '', `feature-flags?${url}`);
+        const params = getQueryParamsFromObject(target);
+        history.replaceState(null, '', `feature-flags?${params}`);
       }
 
       return true;
