@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { encodeURIComponentFfc, slugify } from '@shared/utils';
+import { encodeURIComponentFfc, getQueryParamsFromObject, slugify } from '@shared/utils';
 import {
   IFeatureFlagListCheckItem,
   IFeatureFlagListFilter,
@@ -27,6 +27,8 @@ import { NzModalService } from "ng-zorro-antd/modal";
 export class IndexComponent implements OnInit {
 
   constructor(
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
     private router: Router,
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService,
@@ -41,7 +43,21 @@ export class IndexComponent implements OnInit {
     });
   }
 
+  featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
+
   ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      Object.keys(params).forEach((k) => {
+        if (k === 'tags') {
+          if (params[k].length > 0) {
+            this.featureFlagFilter[k] = params[k].split(',');
+          }
+        } else {
+          this.featureFlagFilter[k] = params[k];
+        }
+      });
+    });
+
     let currentProjectEnv = getCurrentProjectEnv();
 
     this.featureFlagService.envId = currentProjectEnv.envId;
@@ -145,6 +161,7 @@ export class IndexComponent implements OnInit {
   selectTargetEnv(env: IEnvironment) {
     this.targetEnv = env;
   }
+
   openBatchCopyModal() {
     if (this.checkedItemKeys.size === 0) {
       this.msg.warning($localize `:@@ff.idx.select-ff-to-copy:Please select at least one feature flag to copy`);
@@ -208,10 +225,14 @@ export class IndexComponent implements OnInit {
       });
   }
 
-  featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
   $search: Subject<void> = new Subject();
 
   onSearch(resetPage?: boolean) {
+    // add filter to query params
+    const params = getQueryParamsFromObject(this.featureFlagFilter);
+    history.replaceState(null, '', `feature-flags?${params}`);
+    this.cdr.detectChanges();
+
     this.loading = true;
     this.featureFlagListModel = {
       items: [],
