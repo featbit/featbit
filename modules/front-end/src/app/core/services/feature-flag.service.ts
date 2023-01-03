@@ -46,17 +46,14 @@ export class FeatureFlagService {
   }
 
   public getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
-    const queryParam: any = {
+    const queryParam = {
       name: filter.name ?? '',
       tags: filter.tags ?? [],
       isArchived: filter.isArchived,
       pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize
+      pageSize: filter.pageSize,
+      isEnabled: filter.isEnabled ?? ''
     };
-
-    if (filter.isEnabled !== null && filter.isEnabled !== undefined) {
-      queryParam.isEnabled = filter.isEnabled;
-    }
 
     return this.http.get<IFeatureFlagListModel>(
       this.baseUrl,
