@@ -46,18 +46,17 @@ export class IndexComponent implements OnInit {
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
 
   ngOnInit(): void {
-    this.route.queryParams
-      .subscribe((params) => {
-        Object.keys(params).forEach((k) => {
-          if (k === 'tags') {
-            if (params[k].length > 0) {
-              this.featureFlagFilter[k] = params[k].split(',');
-            }
-          } else {
-            this.featureFlagFilter[k] = params[k];
+    this.route.queryParams.subscribe((params) => {
+      Object.keys(params).forEach((k) => {
+        if (k === 'tags') {
+          if (params[k].length > 0) {
+            this.featureFlagFilter[k] = params[k].split(',');
           }
-        });
+        } else {
+          this.featureFlagFilter[k] = params[k];
+        }
       });
+    });
 
     let currentProjectEnv = getCurrentProjectEnv();
 
