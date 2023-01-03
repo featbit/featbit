@@ -117,7 +117,6 @@ export const slugify = str => str
 
 export const getQueryParamsFromObject = (obj: Object): string => {
   return Object.keys(obj)
-    .filter((key) => obj[key] !== undefined)
-    .map((key) => `${key}=${encodeURIComponent(obj[key])}`)
+    .map((key) => `${key}=${encodeURIComponent(obj[key] ?? '')}`)
     .join('&');
 }
