@@ -141,7 +141,7 @@ export class RuleComponent  {
 
   public onSearchProperty(value: string = '') {
     const find = this.userProps.find((p) => p.name === value);
-    const props = this.userProps.filter((p) => p.name.toLowerCase().includes(value.toLowerCase()));
+    const props = this.userProps.filter((p) => p.name.toLowerCase().startsWith(value.toLowerCase()));
 
     if (!find && value?.length > 0) {
       const newProp: IUserProp = {
