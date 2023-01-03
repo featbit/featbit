@@ -88,6 +88,7 @@
                 [data]="rule"
                 [variationOptions]="featureFlag.variations"
                 [userProps]="userProps"
+                (addProperty)="onAddProperty($event)"
                 (deleteRule)="onDeleteRule(rule.id)"
                 (onConditionChange)="onRuleConditionChange($event, rule.id)"
                 (updateRuleName)="rule.name = $event"

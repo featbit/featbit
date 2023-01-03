@@ -209,6 +209,12 @@ export class TargetingComponent implements OnInit {
     })
   }
 
+  onAddProperty(prop: IUserProp) {
+    this.envUserPropService.upsertProp(prop).subscribe(() => {
+      this.userProps = [...this.userProps, prop];
+    });
+  }
+
   public onDeleteRule(ruleId: string) {
     this.featureFlag.rules = this.featureFlag.rules.filter(rule => rule.id !== ruleId);
   }
