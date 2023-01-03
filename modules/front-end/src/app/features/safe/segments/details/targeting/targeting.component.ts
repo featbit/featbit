@@ -157,6 +157,12 @@ export class TargetingComponent implements OnInit {
     this.segmentDetail.newRule();
   }
 
+  onAddProperty(prop: IUserProp) {
+    this.envUserPropService.upsertProp(prop).subscribe(() => {
+      this.userProps = [...this.userProps, prop];
+    });
+  }
+
   deleteRule(index: number) {
     this.segmentDetail.removeRule(index);
   }

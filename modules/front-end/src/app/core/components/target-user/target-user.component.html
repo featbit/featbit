@@ -34,7 +34,8 @@
           [nzHide]="isSelected(item)">
           <div class="user-selection-item">
             <div class="title">
-              <ng-container *ngIf="item.isNew" i18n="@@common.new-user">Create user</ng-container> {{ item.name }}</div>
+              <ng-container *ngIf="item.isNew" i18n="@@common.new-user">Create user</ng-container> {{ item.name }}
+            </div>
             <div class="digest">{{getUserDigest(item)}}</div>
           </div>
         </nz-option>

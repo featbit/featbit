@@ -15,7 +15,7 @@ import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
 export class FindRuleComponent {
 
   @Input() userProps: IUserProp[] = [];
-
+  @Output() addProperty = new EventEmitter<IUserProp>();
   @Output() deleteRule = new EventEmitter<string>();
   @Output() updateRuleName = new EventEmitter<string>();
   @Output() onConditionChange = new EventEmitter<ICondition[]>();
@@ -86,6 +86,10 @@ export class FindRuleComponent {
       value: '',
       multipleValue: []
     } as ICondition)
+  }
+
+  onAddProperty(prop: IUserProp) {
+    this.addProperty.emit(prop);
   }
 
   onDeleteRule() {

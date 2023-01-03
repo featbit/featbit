@@ -78,6 +78,10 @@ export class PropsDrawerComponent {
 
   cancelEditProp(row: IUserProp) {
     row.isEditing = false;
+
+    if (row.isNew) {
+      this.props = this.props.filter(x => x.id !== row.id);
+    }
   }
 
   toggleIsDigestField(row: IUserProp) {
