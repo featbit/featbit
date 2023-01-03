@@ -49,6 +49,7 @@ export class RuleComponent  {
   set properties(data: IUserProp[]) {
     this.userProps = data;
     this.filteredProps = [...data];
+    this.selectedProp = this.userProps.find(prop => prop.name === this.condition.property);
   }
 
 
