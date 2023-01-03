@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import {encodeURIComponentFfc, getQueryParamsFromObject, slugify} from '@shared/utils';
+import { encodeURIComponentFfc, getQueryParamsFromObject, slugify } from '@shared/utils';
 import {
   IFeatureFlagListCheckItem,
   IFeatureFlagListFilter,
@@ -43,7 +43,7 @@ export class IndexComponent implements OnInit {
   }
 
   featureFlagFilter: IFeatureFlagListFilter = new Proxy(new IFeatureFlagListFilter(), {
-    set(target, property, value, receiver): boolean {
+    set(target, property, value, _): boolean {
       Reflect.set(target, property, value);
 
       if (history.replaceState) {
@@ -323,7 +323,7 @@ export class IndexComponent implements OnInit {
 
   public navigateToFlagDetail(data: IFeatureFlag) {
     this.featureFlagService.setCurrentFeatureFlag(data);
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(data.key)}/targeting?referrer=${encodeURIComponent(getQueryParamsFromObject(this.featureFlagFilter))}`);
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(data.key)}/targeting`);
   }
 
   archive(flag: IFeatureFlag) {
