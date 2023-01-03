@@ -7,7 +7,6 @@ import { ISegment, ISegmentListModel, SegmentListFilter } from '@features/safe/s
 import { SegmentService } from '@services/segment.service';
 import { IUserProp } from "@shared/types";
 import {ICondition} from "@shared/rules";
-import {NzMessageService} from "ng-zorro-antd/message";
 
 @Component({
   selector: 'app-rule',
@@ -95,7 +94,7 @@ export class RuleComponent  {
 
   public ruleValueConfig: IRuleOp[] = [];
 
-  constructor(private segmentService: SegmentService, private msg: NzMessageService, private cdr: ChangeDetectorRef) {
+  constructor(private segmentService: SegmentService, private cdr: ChangeDetectorRef) {
     this.ruleValueConfig = ruleOps;
     this.inputs.pipe(
       debounceTime(500)
