@@ -114,3 +114,9 @@ export const slugify = str => str
   .replace(/[^\w\s-]/g, '')
   .replace(/[\s_-]+/g, '-')
   .replace(/^-+|-+$/g, '');
+
+export const getQueryParamsFromObject = (obj: Object): string => {
+  return Object.keys(obj)
+    .map((key) => `${key}=${encodeURIComponent(obj[key])}`)
+    .join('&');
+}
