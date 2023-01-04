@@ -177,7 +177,7 @@
         <source>Failed to load team members</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.ts</context>
-          <context context-type="linenumber">105</context>
+          <context context-type="linenumber">106</context>
         </context-group>
         <target>加载团队成员失败</target>
       </trans-unit>
@@ -345,7 +345,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/details/details.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <target>备注</target>
       </trans-unit>
@@ -549,7 +549,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/details/details.component.html</context>
-          <context context-type="linenumber">17</context>
+          <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
@@ -3204,7 +3204,7 @@
         <source>Download/Upload</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/data-sync.component.html</context>
-          <context context-type="linenumber">3</context>
+          <context context-type="linenumber">2</context>
         </context-group>
         <target>下载/上传</target>
       </trans-unit>
@@ -3212,7 +3212,7 @@
         <source>Sync with server side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/data-sync.component.html</context>
-          <context context-type="linenumber">6</context>
+          <context context-type="linenumber">5</context>
         </context-group>
         <target>与 server side SDK 同步</target>
       </trans-unit>
@@ -3436,7 +3436,7 @@
         <source>Filter by property name or value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/details/details.component.html</context>
-          <context context-type="linenumber">6</context>
+          <context context-type="linenumber">5</context>
         </context-group>
         <target>按属性名或属性值查找</target>
       </trans-unit>
@@ -3444,7 +3444,7 @@
         <source>Value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/details/details.component.html</context>
-          <context context-type="linenumber">18</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <target>属性值</target>
       </trans-unit>
@@ -3532,7 +3532,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/experiments.component.html</context>
-          <context context-type="linenumber">10</context>
+          <context context-type="linenumber">9</context>
         </context-group>
         <target>Metrics</target>
       </trans-unit>
@@ -3540,7 +3540,7 @@
         <source>Overview</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/experiments.component.html</context>
-          <context context-type="linenumber">4</context>
+          <context context-type="linenumber">3</context>
         </context-group>
         <target>概览</target>
       </trans-unit>
@@ -5817,7 +5817,7 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organizations.component.html</context>
-          <context context-type="linenumber">4</context>
+          <context context-type="linenumber">3</context>
         </context-group>
         <target>机构</target>
       </trans-unit>
@@ -5825,7 +5825,7 @@
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organizations.component.html</context>
-          <context context-type="linenumber">11</context>
+          <context context-type="linenumber">10</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -5833,7 +5833,7 @@
         <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organizations.component.html</context>
-          <context context-type="linenumber">18</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <target>个人信息</target>
       </trans-unit>

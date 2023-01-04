@@ -1,16 +1,14 @@
-<div class="experiments-layout">
-    <nz-tabset nzLinkRouter>
-      <nz-tab>
-        <a *nzTabLink nz-tab-link [routerLink]="['.']" i18n="@@expt.overview">Overview</a>
-        <ng-template nz-tab>
-          <experiments-overview></experiments-overview>
-        </ng-template>
-      </nz-tab>
-      <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./metrics']" i18n="@@expt.metrics">Metrics</a>
-      <ng-template nz-tab>
-        <experiments-metrics></experiments-metrics>
-      </ng-template>
-    </nz-tab>
-    </nz-tabset>
-</div>
+<nz-tabset nzLinkRouter>
+  <nz-tab>
+    <a *nzTabLink nz-tab-link [routerLink]="['.']" i18n="@@expt.overview">Overview</a>
+    <ng-template nz-tab>
+      <experiments-overview></experiments-overview>
+    </ng-template>
+  </nz-tab>
+  <nz-tab>
+    <a *nzTabLink nz-tab-link [routerLink]="['./metrics']" i18n="@@expt.metrics">Metrics</a>
+    <ng-template nz-tab>
+      <experiments-metrics></experiments-metrics>
+    </ng-template>
+  </nz-tab>
+</nz-tabset>
