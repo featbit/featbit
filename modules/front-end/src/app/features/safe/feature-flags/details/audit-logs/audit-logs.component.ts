@@ -25,7 +25,7 @@ export class AuditLogsComponent implements OnInit {
       this.featureFlagService.getByKey(key).subscribe((result: IFeatureFlag) => {
         this.auditLogFilter.refType = RefTypeEnum.Flag;
         this.auditLogFilter.refId = result.id;
-        this.loading = true;
+        this.loading = false;
       }, () => this.loading = false);
     })
   }
