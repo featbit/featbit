@@ -4,7 +4,6 @@ import { IndexComponent } from './index.component';
 
 const routes: Routes = [{
   path: '',
-  data: { title: 'segments index' },
   component: IndexComponent
 }];
 

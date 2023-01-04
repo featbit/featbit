@@ -36,7 +36,7 @@ export class IndexComponent implements OnInit {
   }
 
   navigateToDetail(id: string) {
-    this.router.navigateByUrl(`/iam/users/${encodeURIComponentFfc(id)}/groups`);
+    this.router.navigateByUrl(`/iam/team/${encodeURIComponentFfc(id)}/groups`);
   }
 
   isLoading: boolean = true;

@@ -45,7 +45,10 @@ export class BreadcrumbService {
           label: this.getLabel(route.data),
           url: '/' + routeUrl.join('/')
         };
-        breadcrumbs.push(breadcrumb);
+
+        if (!breadcrumbs.find((item) => item.url === breadcrumb.url)) {
+          breadcrumbs.push(breadcrumb);
+        }
       }
 
       // Add another element for the next route part

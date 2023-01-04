@@ -12,9 +12,15 @@ const routes: Routes = [
       {
         path: 'team',
         component: TeamComponent,
+        data: {
+          breadcrumb: $localize `:@@iam.routing.team:Team`
+        },
       }, {
         path: 'policies',
         component: PoliciesComponent,
+        data: {
+          breadcrumb: $localize `:@@iam.routing.policies:Policies`
+        },
       }, {
         path: '',
         redirectTo: '/iam',

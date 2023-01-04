@@ -19,6 +19,9 @@ const routes: Routes = [
       }, {
         path: 'metrics',
         component: MetricsComponent,
+        data: {
+          breadcrumb: $localize `:@@expt.metrics:Metrics`
+        },
       }, {
         path: '',
         redirectTo: '/experiments',

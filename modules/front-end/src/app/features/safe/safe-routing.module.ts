@@ -10,7 +10,10 @@ const routes: Routes = [
     children: [
       {
         path: 'feature-flags',
-        loadChildren: () => import("./feature-flags/feature-flags.module").then(m => m.FeatureFlagsModule)
+        loadChildren: () => import("./feature-flags/feature-flags.module").then(m => m.FeatureFlagsModule),
+        data: {
+          breadcrumb: $localize `:@@feature-flags:Feature flags`
+        },
       },
       {
         path: 'users',

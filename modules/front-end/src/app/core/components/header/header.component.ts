@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnInit, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { IAuthProps, IOrganization, IProject, IEnvironment, IProjectEnv } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { ProjectService } from '@services/project.service';
@@ -8,6 +8,7 @@ import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
+import { Observable } from "rxjs";
 
 @Component({
   selector: 'app-header',
@@ -27,9 +28,8 @@ export class HeaderComponent implements OnInit {
   selectedProject: IProject;
   selectedEnv: IEnvironment;
   envModalVisible: boolean = false;
-  pageTitle = '';
 
-  //breadcrumbs$: Observable<Breadcrumb[]>;
+  breadcrumbs$: Observable<Breadcrumb[]>;
 
   flags = {};
   constructor(
@@ -41,8 +41,7 @@ export class HeaderComponent implements OnInit {
     private permissionsService: PermissionsService,
     private messageQueueService: MessageQueueService,
   ) {
-    breadcrumbService.breadcrumbs$.subscribe((bc: Breadcrumb[]) => this.pageTitle = bc.at(-1)?.label);
-    //this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
+    this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
   }
 
   ngOnInit(): void {

@@ -13,12 +13,21 @@ const routes: Routes = [
       {
         path: 'permission',
         component: PermissionComponent,
+        data: {
+          breadcrumb: $localize `:@@iam.routing.permissions:Permissions`
+        },
       }, {
         path: 'team',
         component: TeamComponent,
+        data: {
+          breadcrumb: $localize `:@@iam.routing.team:Team`
+        },
       }, {
         path: 'groups',
         component: GroupsComponent,
+        data: {
+          breadcrumb: $localize `:@@iam.routing.groups:Groups`
+        },
       }, {
         path: '',
         redirectTo: '/iam',

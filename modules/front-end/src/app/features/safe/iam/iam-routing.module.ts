@@ -8,24 +8,24 @@ const routes: Routes = [
     component: IAMComponent,
     children: [
       {
-        path: 'users',
+        path: 'team',
         loadChildren: () => import("./team/team.module").then(m => m.TeamModule),
         data: {
-          breadcrumb: $localize `:@@ff.routing.team.pageTitle:IAM - Team`
+          breadcrumb: $localize `:@@ff.routing.team:Team`
         },
       },
       {
         path: 'groups',
         loadChildren: () => import("./groups/groups.module").then(m => m.GroupsModule),
         data: {
-          breadcrumb: $localize `:@@ff.routing.groups.pageTitle:IAM - Groups`
+          breadcrumb: $localize `:@@ff.routing.groups:Groups`
         },
       },
       {
         path: 'policies',
         loadChildren: () => import("./policies/policies.module").then(m => m.PoliciesModule),
         data: {
-          breadcrumb: $localize `:@@ff.routing.policies.pageTitle:IAM - Policies`
+          breadcrumb: $localize `:@@ff.routing.policies:Policies`
         },
       },
     ]

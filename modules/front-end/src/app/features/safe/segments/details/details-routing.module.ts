@@ -13,6 +13,9 @@ const routes: Routes = [
       {
         path: 'targeting',
         component: TargetingComponent,
+        data: {
+          breadcrumb: $localize `:@@ff.routing.details.targeting:Targeting`
+        }
       }, {
         path: 'history',
         component: AuditLogComponent,

@@ -16,9 +16,15 @@ const routes: Routes = [
       }, {
         path: 'projects',
         component: ProjectComponent,
+        data: {
+          breadcrumb: $localize `:@@org.routing.projects:Projects`
+        },
       }, {
         path: 'profile',
         component: ProfileComponent,
+        data: {
+          breadcrumb: $localize `:@@org.routing.profile:Profile`
+        },
       }, {
         path: '',
         redirectTo: './org',

@@ -93,7 +93,7 @@ export class TeamComponent implements OnInit {
 
   navigateToMember(userId: string) {
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}iam/users/${encodeURIComponentFfc(userId)}/groups`])
+      this.router.createUrlTree([`/${getPathPrefix()}iam/team/${encodeURIComponentFfc(userId)}/groups`])
     );
 
     window.open(url, '_blank');
