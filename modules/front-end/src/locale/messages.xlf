@@ -1672,70 +1672,70 @@
         <source>Quick Start Guide</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="linenumber">11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.change-environment" datatype="html">
         <source>Change environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">55,57</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7091571651222742304" datatype="html">
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">66,67</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.environments" datatype="html">
         <source>Environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">75,77</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2159130950882492111" datatype="html">
         <source>Cancel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">81,82</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8998179362936748717" datatype="html">
         <source>OK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">82,83</context>
         </context-group>
       </trans-unit>
       <trans-unit id="7371988988136572417" datatype="html">
         <source>You don&apos;t have permissions to read project list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">51</context>
         </context-group>
       </trans-unit>
       <trans-unit id="5850481742796290933" datatype="html">
         <source>You don&apos;t have permissions to read environment list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">52</context>
         </context-group>
       </trans-unit>
       <trans-unit id="1576196702830193597" datatype="html">
         <source>You don&apos;t have permissions to read project and environment list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">52</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.copy-success" datatype="html">
         <source>Copied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">151</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -2978,7 +2978,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
@@ -3028,7 +3028,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="including-all-users-of-current-env" datatype="html">
@@ -3274,18 +3274,22 @@
           <context context-type="linenumber">12</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="expt.metrics" datatype="html">
+        <source>Metrics</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/experiments-routing.module.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/experiments.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="expt.overview" datatype="html">
         <source>Overview</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/experiments.component.html</context>
           <context context-type="linenumber">4</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="expt.metrics" datatype="html">
-        <source>Metrics</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/experiments.component.html</context>
-          <context context-type="linenumber">10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.all" datatype="html">
@@ -3615,6 +3619,10 @@
           <context context-type="linenumber">7</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/details-routing.module.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/details.component.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
@@ -3664,7 +3672,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/details-routing.module.ts</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">23</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/details.component.html</context>
@@ -4363,13 +4371,6 @@
           <context context-type="linenumber">350</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.routing.idx.pageTitle" datatype="html">
-        <source>Feature flags</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index-routing.module.ts</context>
-          <context context-type="linenumber">8</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="ff.idx.filter-by-name-and-key" datatype="html">
         <source>Filter by name or key</source>
         <context-group purpose="location">
@@ -4762,6 +4763,32 @@
           <context context-type="linenumber">68</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="iam.routing.team" datatype="html">
+        <source>Team</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/details-routing.module.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/iam-routing.module.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/details-routing.module.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.routing.policies" datatype="html">
+        <source>Policies</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/details-routing.module.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/iam-routing.module.ts</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.team" datatype="html">
         <source>Team</source>
         <context-group purpose="location">
@@ -4913,25 +4940,26 @@
           <context context-type="linenumber">11</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.routing.team.pageTitle" datatype="html">
-        <source>IAM - Team</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/iam-routing.module.ts</context>
-          <context context-type="linenumber">14</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="ff.routing.groups.pageTitle" datatype="html">
-        <source>IAM - Groups</source>
+      <trans-unit id="iam.routing.groups" datatype="html">
+        <source>Groups</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/iam-routing.module.ts</context>
           <context context-type="linenumber">21</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="ff.routing.policies.pageTitle" datatype="html">
-        <source>IAM - Policies</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/iam-routing.module.ts</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/details-routing.module.ts</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/details-routing.module.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.routing.permissions" datatype="html">
+        <source>Permissions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/details-routing.module.ts</context>
+          <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.groups" datatype="html">
@@ -5002,6 +5030,20 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
           <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.routing.direct-policies" datatype="html">
+        <source>Direct policies</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/details-routing.module.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.routing.inherited-policies" datatype="html">
+        <source>Inherited-policies</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/details-routing.module.ts</context>
+          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.team.details.groups" datatype="html">
@@ -5254,6 +5296,20 @@
           <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="org.routing.projects" datatype="html">
+        <source>Projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organizations-routing.module.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="org.routing.profile" datatype="html">
+        <source>Profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organizations-routing.module.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="org.org.tabtitle" datatype="html">
         <source>Organization</source>
         <context-group purpose="location">
@@ -5447,39 +5503,46 @@
           <context context-type="linenumber">117</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="feature-flags" datatype="html">
+        <source>Feature flags</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="segments" datatype="html">
         <source>Segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">26</context>
+          <context context-type="linenumber">29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="experiments" datatype="html">
         <source>Experiments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="linenumber">36</context>
         </context-group>
       </trans-unit>
       <trans-unit id="data-sync" datatype="html">
         <source>Data sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">43</context>
         </context-group>
       </trans-unit>
       <trans-unit id="organization" datatype="html">
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">50</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam" datatype="html">
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">55</context>
+          <context context-type="linenumber">58</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.FF" datatype="html">
@@ -5683,13 +5746,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
           <context context-type="linenumber">131</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="segments.segments" datatype="html">
-        <source>Segments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/segments-routing.module.ts</context>
-          <context context-type="linenumber">9</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.name" datatype="html">
