@@ -1,5 +1,8 @@
-<nz-spin i18n-nzTip="@@common.loading" nzTip="Loading..." [nzSpinning]="loading">
-  <ng-container *ngIf="!loading">
-    <audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
-  </ng-container>
-</nz-spin>
+<ng-template #loadingTem>
+  <nz-spin i18n-nzTip="@@common.loading" nzTip="Loading..." [nzSpinning]="loading">
+  </nz-spin>
+</ng-template>
+
+<ng-container *ngIf="!loading; else loadingTem;">
+  <audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
+</ng-container>
