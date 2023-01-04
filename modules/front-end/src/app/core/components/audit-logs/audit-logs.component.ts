@@ -16,6 +16,7 @@ import {NzMessageService} from "ng-zorro-antd/message";
 })
 export class AuditLogsComponent implements OnInit {
   @Input() auditLogFilter: AuditLogListFilter;
+  @Input() isEmbedded: boolean = true;
 
   private $search: Subject<void> = new Subject();
   private $memberSearch = new Subject<any>();
