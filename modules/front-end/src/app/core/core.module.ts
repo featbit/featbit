@@ -70,13 +70,13 @@ import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-variation-value.pipe";
 import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
 import { SlugifyPipe } from "@core/pipes/slugify";
-import {AuditLogComponent} from "@core/components/audit-log/audit-log.component";
-import {ChangeListComponent} from "@core/components/change-list/change-list.component";
-import {AuditLogsComponent} from "@core/components/audit-logs/audit-logs.component";
-import {NzDatePickerModule} from "ng-zorro-antd/date-picker";
-import {NzEmptyModule} from "ng-zorro-antd/empty";
-import {NzTimelineModule} from "ng-zorro-antd/timeline";
-import {ChangeReviewComponent} from "@core/components/change-review/change-review.component";
+import { AuditLogComponent } from "@core/components/audit-log/audit-log.component";
+import { ChangeListComponent } from "@core/components/change-list/change-list.component";
+import { AuditLogsComponent } from "@core/components/audit-logs/audit-logs.component";
+import { NzDatePickerModule } from "ng-zorro-antd/date-picker";
+import { NzEmptyModule } from "ng-zorro-antd/empty";
+import { NzTimelineModule } from "ng-zorro-antd/timeline";
+import { ChangeReviewComponent } from "@core/components/change-review/change-review.component";
 import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
 
 @NgModule({
@@ -118,50 +118,50 @@ import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
     ChangeListComponent,
     ChangeReviewComponent
   ],
-    imports: [
-        CommonModule,
-        FormsModule,
-        OverlayModule,
-        ReactiveFormsModule,
-        RouterModule,
-        NzFormModule,
-        NzIconModule,
-        NzMenuModule,
-        NzModalModule,
-        NzInputModule,
-        NzOutletModule,
-        NzButtonModule,
-        NzDrawerModule,
-        NzMessageModule,
-        NzOverlayModule,
-        NzDropDownModule,
-        NzTableModule,
-        NzSelectModule,
-        NzDividerModule,
-        NzSpaceModule,
-        NzSpinModule,
-        NzRadioModule,
-        NzUploadModule,
-        NzTagModule,
-        NzToolTipModule,
-        NzListModule,
-        NzCheckboxModule,
-        NzTabsModule,
-        NzPopconfirmModule,
-        NzStepsModule,
-        NzAlertModule,
-        NzResultModule,
-        NzLayoutModule,
-        NzImageModule,
-        NzPopoverModule,
-        NzCodeEditorModule,
-        NzCardModule,
-        NzTypographyModule,
-        NzDatePickerModule,
-        NzEmptyModule,
-        NzTimelineModule,
-        NzBreadCrumbModule
-    ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    OverlayModule,
+    ReactiveFormsModule,
+    RouterModule,
+    NzFormModule,
+    NzIconModule,
+    NzMenuModule,
+    NzModalModule,
+    NzInputModule,
+    NzOutletModule,
+    NzButtonModule,
+    NzDrawerModule,
+    NzMessageModule,
+    NzOverlayModule,
+    NzDropDownModule,
+    NzTableModule,
+    NzSelectModule,
+    NzDividerModule,
+    NzSpaceModule,
+    NzSpinModule,
+    NzRadioModule,
+    NzUploadModule,
+    NzTagModule,
+    NzToolTipModule,
+    NzListModule,
+    NzCheckboxModule,
+    NzTabsModule,
+    NzPopconfirmModule,
+    NzStepsModule,
+    NzAlertModule,
+    NzResultModule,
+    NzLayoutModule,
+    NzImageModule,
+    NzPopoverModule,
+    NzCodeEditorModule,
+    NzCardModule,
+    NzTypographyModule,
+    NzDatePickerModule,
+    NzEmptyModule,
+    NzTimelineModule,
+    NzBreadCrumbModule
+  ],
   exports: [
     CommonModule,
     ReactiveFormsModule,
