@@ -1781,7 +1781,7 @@
         <source>Quick Start Guide</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">11</context>
+          <context context-type="linenumber">9</context>
         </context-group>
         <target>快速开始引导</target>
       </trans-unit>
@@ -1789,7 +1789,7 @@
         <source>Change environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">55,57</context>
+          <context context-type="linenumber">53,55</context>
         </context-group>
         <target>更改环境</target>
       </trans-unit>
@@ -1797,7 +1797,7 @@
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">66,67</context>
+          <context context-type="linenumber">64,65</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -1805,7 +1805,7 @@
         <source>Environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">75,77</context>
+          <context context-type="linenumber">73,75</context>
         </context-group>
         <target>环境</target>
       </trans-unit>
@@ -1813,7 +1813,7 @@
         <source>Cancel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">81,82</context>
+          <context context-type="linenumber">79,80</context>
         </context-group>
         <target>取消</target>
       </trans-unit>
@@ -1821,7 +1821,7 @@
         <source>OK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">82,83</context>
+          <context context-type="linenumber">80,81</context>
         </context-group>
         <target>OK</target>
       </trans-unit>
@@ -3192,7 +3192,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">65</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
@@ -6072,14 +6072,6 @@
           <context context-type="linenumber">50</context>
         </context-group>
         <target>组织机构</target>
-      </trans-unit>
-      <trans-unit id="iam" datatype="html">
-        <source>IAM</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">58</context>
-        </context-group>
-        <target>权限管理</target>
       </trans-unit>
       <trans-unit id="menu.FF" datatype="html">
         <source>Feature flags</source>

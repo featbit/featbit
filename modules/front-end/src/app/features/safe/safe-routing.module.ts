@@ -54,9 +54,6 @@ const routes: Routes = [
         path: 'iam',
         canActivate: [IAMGuard],
         loadChildren: () => import("./iam/iam.module").then(m => m.IAMModule),
-        data: {
-          breadcrumb: $localize `:@@iam:IAM`
-        },
       },
       {
         path: 'audit-logs',
