@@ -4,9 +4,6 @@ import { IndexComponent } from './index.component';
 
 const routes: Routes = [{
   path: '',
-  data: {
-    breadcrumb: $localize `:@@ff.routing.idx.pageTitle:Feature flags`
-  },
   component: IndexComponent
 }];
 

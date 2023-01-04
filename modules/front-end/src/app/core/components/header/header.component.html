@@ -1,12 +1,9 @@
 <section class="header-body">
-  <div class="page-title">
-    {{pageTitle}}
-    <!-- <ul>
-      <li *ngFor="let breadcrumb of (breadcrumbs$ | async)">
-        <a [href]="breadcrumb.url">{{ breadcrumb.label }}</a>
-      </li>
-    </ul> -->
-  </div>
+  <nz-breadcrumb class="breadcrumb-nav" nzSeparator=">">
+    <nz-breadcrumb-item *ngFor="let breadcrumb of (breadcrumbs$ | async)">
+      <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+    </nz-breadcrumb-item>
+  </nz-breadcrumb>
 
   <div class="header-btns">
     <div class="guide-btn" nz-tooltip="Quick Start Guide" i18n-nz-tooltip="@@common.quick-start-guide" (click)="onQuickStartGuideClick()">

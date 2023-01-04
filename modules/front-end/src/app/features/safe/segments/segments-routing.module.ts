@@ -5,9 +5,6 @@ import { SegmentsComponent } from './segments.component';
 const routes: Routes = [
   {
     path: '',
-    data: {
-      breadcrumb: $localize `:@@segments.segments:Segments`
-    },
     component: SegmentsComponent,
     children: [
       {

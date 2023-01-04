@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { IAuthProps } from '@shared/types';
 import { IMenuItem } from '@core/components/menu/menu';
@@ -91,12 +91,12 @@ export class SafeComponent implements OnInit, OnDestroy {
       {
         title: $localize `:@@menu.iam:IAM`,
         icon: 'icons:icon-user-permission',
-        path: '/iam/users',
+        path: '/iam/team',
         children: [
           {
             title: $localize `:@@menu.iam.team:Team`,
             icon: '',
-            path: '/iam/users'
+            path: '/iam/team'
           },
           {
             title: $localize `:@@menu.iam.group:Groups`,

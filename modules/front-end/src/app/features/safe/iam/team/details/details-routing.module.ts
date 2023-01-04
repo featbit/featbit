@@ -12,13 +12,22 @@ const routes: Routes = [
     children: [
       {
         path: 'groups',
-        component: GroupsComponent
+        component: GroupsComponent,
+        data: {
+          breadcrumb: $localize `:@@iam.routing.groups:Groups`
+        },
       }, {
         path: 'direct-policies',
-        component: DirectPoliciesComponent
+        component: DirectPoliciesComponent,
+        data: {
+          breadcrumb: $localize `:@@iam.routing.direct-policies:Direct policies`
+        },
       }, {
         path: 'inherited-policies',
-        component: InheritedPoliciesComponent
+        component: InheritedPoliciesComponent,
+        data: {
+          breadcrumb: $localize `:@@iam.routing.inherited-policies:Inherited-policies`
+        },
       }, {
         path: '',
         redirectTo: '/iam',
