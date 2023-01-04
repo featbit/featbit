@@ -114,8 +114,8 @@
         <tbody style="width: calc(100% - 200px);">
           <ng-container *ngFor="let user of basicTable.data">
             <tr>
-              <td>
-                <span (click)="navigateToUserDetail(user)">{{ user.name }}</span>
+              <td (click)="navigateToUserDetail(user)">
+                <span>{{ user.name }}</span>
               </td>
               <td>{{ user.keyId }}</td>
               <td *ngFor="let prop of extraColumns">{{getCustomizePropertyValue(user, prop)}}</td>
