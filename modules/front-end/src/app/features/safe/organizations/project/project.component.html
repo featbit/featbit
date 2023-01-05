@@ -32,14 +32,24 @@
                   </div>
                   <div class="env-secret">
                     <div>
-                      <div class="desc-name" i18n="@@org.project.secrets[0].value">Secret</div>
+                      <div class="desc-name">
+                        <span i18n="@@org.project.secrets">Secrets</span>
+                        <i *ngIf="env.secrets.length < 2" class="edit-save" (click)="onCreateSecret()" nz-icon nzType="icons:icon-add-outline"></i>
+                      </div>
                       <div class="desc-content">
-                        <nz-input-group [nzSuffix]="copySuffix">
-                          <input readonly nz-input value="{{ env.secrets[0].value }}">
-                        </nz-input-group>
-                        <ng-template #copySuffix>
-                          <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(env.secrets[0].value)"></i>
-                        </ng-template>
+                        <div *ngFor="let secret of env.secrets" class="secret">
+                          <span>{{secret.name}}</span>
+                          <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
+                          <span>{{secret.type}}</span>
+                          <span>
+                            <button nz-button nzSize="default" nzType="link" (click)="onEditSecret(secret)">
+                              <i nz-icon nzType="edit" nzTheme="outline"></i>
+                            </button>
+                            <button nz-button nzSize="default" nzType="link" (click)="removeSecret(secret)">
+                              <i nz-icon nzType="delete" nzTheme="outline"></i>
+                            </button>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -88,8 +98,43 @@
       </div>
     </div>
   </permission-check>
-
 </div>
+<nz-modal
+  [(nzVisible)]="isSecretModalVisible"
+  [nzTitle]="secretModalTitle"
+  (nzOnCancel)="secrectModalCancel()"
+  (nzOnOk)="upsertSecret()">
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="secretForm" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
+          <input
+            nz-input
+            formControlName="name"
+            placeholder="The name of the secret"
+            i18n-placeholder="@@org.project.secret-name"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label
+          nzRequired
+          i18n="@@org.project.secret-type"
+          i18n-nzTooltipTitle="@@org.project.type-description"
+          nzTooltipTitle="The secret would be used by a client side or server side SDK">
+          Type
+        </nz-form-label>
+        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
+          <nz-select formControlName="type">
+            <nz-option nzValue="client-side" i18n-nzLabel="@@org.project.client-side" nzLabel="Client side"></nz-option>
+            <nz-option nzValue="server-side" i18n-nzLabel="@@org.project.server-side" nzLabel="Server side"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>
 
 <app-project-drawer [visible]="creatEditProjectFormVisible" [currentOrganizationId]="currentOrganizationId" (close)="projectClosed($event)" [project]="project"></app-project-drawer>
 <app-env-drawer [visible]="creatEditEnvFormVisible" [rn]="getEnvRN(project, env)" (close)="envClosed($event)" [env]="env"></app-env-drawer>

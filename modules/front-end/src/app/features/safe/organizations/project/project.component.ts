@@ -1,5 +1,5 @@
 import { Component, OnInit} from '@angular/core';
-import { IProject, IEnvironment, IProjectEnv } from '@shared/types';
+import { IProject, IEnvironment, IProjectEnv, ISecret } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
 import { EnvService } from '@services/env.service';
@@ -8,6 +8,8 @@ import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
 import {MessageQueueService} from "@services/message-queue.service";
+import { uuidv4 } from "@utils/index";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
   selector: 'app-project',
@@ -35,6 +37,7 @@ export class ProjectComponent implements OnInit {
   projects: IProject[] = [];
 
   constructor(
+    private fb: FormBuilder,
     private messageQueueService: MessageQueueService,
     private projectService: ProjectService,
     private accountService: OrganizationService,
@@ -176,4 +179,51 @@ export class ProjectComponent implements OnInit {
       () => this.messageService.success($localize `:@@common.copy-success:Copied`)
     );
   }
+
+  // env secrets
+  isSecretModalVisible: boolean = false;
+  secretForm: FormGroup;
+  secretModalTitle: string;
+  onCreateSecret() {
+    this.secretModalTitle = $localize `:@@org.project.add-secret:Add secret secret`;
+    this.secretForm = this.fb.group({
+      name: [null, Validators.required],
+      type: ['client-side', Validators.required]
+    });
+    this.isSecretModalVisible = true;
+  }
+
+  onEditSecret(secret: ISecret) {
+    this.secretForm = this.fb.group({
+      name: [secret.name, Validators.required],
+      type: [secret.type, Validators.required]
+    });
+
+    this.secretModalTitle = $localize `:@@org.project.edit-secret:Edit secret: ${secret.name}`;
+    this.isSecretModalVisible = true;
+  }
+
+  secrectModalCancel() {
+    this.isSecretModalVisible = false;
+    this.secretForm.reset();
+  }
+
+  removeSecret(secret: ISecret) {
+
+  }
+
+  upsertSecret() {
+    if (this.secretForm.invalid) {
+      for (const i in this.secretForm.controls) {
+        this.secretForm.controls[i].markAsDirty();
+        this.secretForm.controls[i].updateValueAndValidity();
+      }
+      return;
+    }
+
+
+
+    this.isSecretModalVisible = false;
+  }
+
 }

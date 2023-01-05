@@ -50,7 +50,7 @@
       .env {
         display: flex;
         flex-direction: row;
-        padding: 24px;
+        padding: 16px 24px;
         background: @grey5-color;
         border-radius: 10px;
 
@@ -59,9 +59,17 @@
         }
 
         .desc-name {
+          display: flex;
+          justify-content: flex-start;
+          gap: 12px;
+          align-items: center;
           margin-bottom: 8px;
           font-size: 16px;
           color: @grey70-color;
+
+          i {
+            cursor: pointer;
+          }
         }
 
         .desc-content {
@@ -73,20 +81,17 @@
         }
 
         .env-secret {
-          nz-input-group {
-            padding: 8px 12px;
-            min-width: 450px;
+          .secret {
+            display: flex;
+            align-content: flex-start;
+            align-items: center;
+            gap: 10px;
 
-            input {
-              color: @grey50-color;
-            }
-
-            .copy-icon {
-              color: @grey40-color;
-
-              &:hover {
-                color: @primary-color;
-              }
+            .secret-value {
+              cursor: pointer;
+              background-color: white;
+              padding: 5px 10px;
+              border-radius: 20px;
             }
           }
         }
