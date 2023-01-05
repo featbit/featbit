@@ -22,7 +22,8 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 
         RuleFor(x => x.Key)
-            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired)
+            .Matches(@"^(?!-)(\w+-?)+(?<!-)$").WithErrorCode(ErrorCodes.InvalidKeyFormat);
     }
 }
 
