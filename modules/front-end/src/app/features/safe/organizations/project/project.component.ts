@@ -183,8 +183,8 @@ export class ProjectComponent implements OnInit {
   }
 
   // env secrets
-  secretTypeClientSide = SecretTypeEnum.ClientSide;
-  secretTypeServerSide = SecretTypeEnum.ServerSide;
+  secretTypeClient = SecretTypeEnum.Client;
+  secretTypeServer = SecretTypeEnum.Server;
   isSecretModalVisible: boolean = false;
   secretForm: FormGroup;
   secretModalTitle: string;
@@ -206,7 +206,7 @@ export class ProjectComponent implements OnInit {
     this.secretModalTitle = $localize `:@@org.project.add-secret:Add secret`;
     this.secretForm = this.fb.group({
       name: [null, Validators.required],
-      type: [SecretTypeEnum.ClientSide, Validators.required]
+      type: [SecretTypeEnum.Client, Validators.required]
     });
     this.isSecretModalVisible = true;
   }

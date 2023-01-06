@@ -82,8 +82,8 @@ export interface ISecret {
 }
 
 export enum SecretTypeEnum {
-  ClientSide = 'client',
-  ServerSide = 'server'
+  Client = 'client',
+  Server = 'server'
 }
 
 export interface IAccountUser {
