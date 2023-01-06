@@ -1,22 +1,22 @@
 namespace Application.Environments;
 
-public class RemoveSecret : IRequest<bool>
+public class DeleteSecret : IRequest<bool>
 {
     public Guid EnvId { get; set; }
 
     public string SecretId { get; set; }
 }
 
-public class RemoveSecretHandler : IRequestHandler<RemoveSecret, bool>
+public class DeleteSecretHandler : IRequestHandler<DeleteSecret, bool>
 {
     private readonly IEnvironmentService _service;
 
-    public RemoveSecretHandler(IEnvironmentService service)
+    public DeleteSecretHandler(IEnvironmentService service)
     {
         _service = service;
     }
 
-    public async Task<bool> Handle(RemoveSecret request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(DeleteSecret request, CancellationToken cancellationToken)
     {
         var environment = await _service.GetAsync(request.EnvId);
         environment.RemoveSecret(request.SecretId);

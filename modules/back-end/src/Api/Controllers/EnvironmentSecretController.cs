@@ -28,7 +28,7 @@ public class EnvironmentSecretController : ApiControllerBase
     [HttpDelete("{id}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, string id)
     {
-        var request = new RemoveSecret
+        var request = new DeleteSecret
         {
             EnvId = envId,
             SecretId = id
