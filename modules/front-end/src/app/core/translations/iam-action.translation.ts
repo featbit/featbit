@@ -34,5 +34,14 @@ export default {
   },
   'UpdateEnvInfo':{
     zh: '修改环境信息'
+  },
+  'CreateEnvSecret':{
+    zh: '创建环境秘钥'
+  },
+  'UpdateEnvSecret':{
+    zh: '修改环境秘钥'
+  },
+  'DeleteEnvSecret':{
+    zh: '删除环境秘钥'
   }
 }

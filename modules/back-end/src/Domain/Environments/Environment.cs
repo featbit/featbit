@@ -21,7 +21,8 @@ public class Environment : AuditedEntity
         Description = description;
         Secrets = new List<Secret>
         {
-            new(Id, SecretTypes.Default)
+            new(Id, "Server Key", SecretTypes.Server),
+            new(Id, "Client Key", SecretTypes.Client)
         };
         Settings = Array.Empty<Setting>();
     }
@@ -61,5 +62,32 @@ public class Environment : AuditedEntity
         }
 
         Settings.Remove(setting);
+    }
+
+    public void RemoveSecret(string secretId)
+    {
+        var secret = Secrets.FirstOrDefault(x => x.Id == secretId);
+        if (secret == null)
+        {
+            return;
+        }
+
+        Secrets.Remove(secret);
+    }
+
+    public void AddSecret(Secret secret)
+    {
+        Secrets.Add(secret);
+    }
+
+    public void UpdateSecret(string secretId, string name)
+    {
+        var secret = Secrets.FirstOrDefault(x => x.Id == secretId);
+        if (secret == null)
+        {
+            return;
+        }
+
+        secret.Name = name;
     }
 }

@@ -18,6 +18,9 @@ export const permissionActions = {
   CreateEnv: 'CreateEnv',
   DeleteEnv: 'DeleteEnv',
   UpdateEnvInfo: 'UpdateEnvInfo',
+  DeleteEnvSecret: 'DeleteEnvSecret',
+  CreateEnvSecret: 'CreateEnvSecret',
+  UpdateEnvSecret: 'UpdateEnvSecret',
 
   // account
   UpdateOrgName: 'UpdateOrgName',

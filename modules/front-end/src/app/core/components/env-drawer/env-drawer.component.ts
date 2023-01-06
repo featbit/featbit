@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IEnvironment, IEnvKey, EnvKeyNameEnum } from '@shared/types';
+import { IEnvironment } from '@shared/types';
 import { EnvService } from '@services/env.service';
 import { ProjectService } from "@services/project.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
@@ -21,8 +21,6 @@ export class EnvDrawerComponent implements OnInit {
   isEditing: boolean = false;
   title: string;
   isLoading: boolean = false;
-
-  public envKeySecret = EnvKeyNameEnum.Secret;
 
   @Input()
   set env(env: IEnvironment) {
@@ -124,26 +122,6 @@ export class EnvDrawerComponent implements OnInit {
           }
         );
     }
-  }
-
-  onRegenerate(keyName: EnvKeyNameEnum) {
-    this.envService.putUpdateEnvKey(this.env.projectId, this.env.id,
-      {keyName: keyName, keyValue: this.env.secrets[0].value}
-    ).subscribe(
-      (envKey: IEnvKey) => {
-        const curProjectEnv = this.projectSrv.getLocalCurrentProjectEnv();
-        if (curProjectEnv &&
-          this.env.id == curProjectEnv.envId &&
-          this.env.projectId == curProjectEnv.projectId) {
-          // update current project env
-          this.projectSrv.updateCurrentProjectEnvLocally({envSecret: envKey.keyValue});
-        }
-
-        this.close.emit({isEditing: false});
-        this.message.success($localize `:@@org.project.envRegenerateSuccess:Successfully regenerated`);
-      },
-      _ => { }
-    );
   }
 
   @Input() rn = null;

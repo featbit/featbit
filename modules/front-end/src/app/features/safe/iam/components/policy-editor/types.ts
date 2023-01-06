@@ -82,7 +82,7 @@ export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]
       resourceType: ResourceTypeEnum.Project,
       placeholder: {
         name: '{project}',
-        displayName: '项目名称'
+        displayName: $localize`:@@iam.policy.project:Project`
       },
       isAnyChecked: false,
       isInvalid: false
@@ -94,7 +94,7 @@ export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]
       resourceType: 'project',
       placeholder: {
         name: '{project}',
-        displayName: '项目'
+        displayName: $localize`:@@iam.policy.project:Project`
       },
       isAnyChecked: false,
       isInvalid: false
@@ -104,7 +104,7 @@ export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]
       resourceType: 'env',
       placeholder: {
         name: '{env}',
-        displayName: '环境'
+        displayName: $localize`:@@iam.policy.environment:Environment`
       },
       isAnyChecked: false,
       isInvalid: false
@@ -134,7 +134,7 @@ export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
       displayName: 'IAM'
     },
   ],
-  [`${ResourceTypeEnum.General},project`]: [
+  [`${ResourceTypeEnum.General},project`]: [ // for all projects
     {
       id: uuidv4(),
       name: permissionActions.ListProjects,
@@ -180,8 +180,23 @@ export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
       name: permissionActions.UpdateEnvInfo,
       displayName: 'Update environment info'
     },
+    {
+      id: uuidv4(),
+      name: permissionActions.DeleteEnvSecret,
+      displayName: 'Delete environment secret'
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.CreateEnvSecret,
+      displayName: 'Create environment secret'
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.UpdateEnvSecret,
+      displayName: 'Update environment secret'
+    },
   ],
-  [ResourceTypeEnum.Project]: [
+  [ResourceTypeEnum.Project]: [ // for a specific project
     {
       id: uuidv4(),
       name: permissionActions.AccessEnvs,
@@ -206,9 +221,24 @@ export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
       id: uuidv4(),
       name: permissionActions.CreateEnv,
       displayName: 'Create environment'
-    }
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.DeleteEnvSecret,
+      displayName: 'Delete environment secret'
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.CreateEnvSecret,
+      displayName: 'Create environment secret'
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.UpdateEnvSecret,
+      displayName: 'Update environment secret'
+    },
   ],
-  [ResourceTypeEnum.Env]: [
+  [ResourceTypeEnum.Env]: [ // for a specific environment
     {
       id: uuidv4(),
       name: permissionActions.AccessEnvs,
@@ -223,6 +253,21 @@ export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
       id: uuidv4(),
       name: permissionActions.UpdateEnvInfo,
       displayName: 'Update environment info'
-    }
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.DeleteEnvSecret,
+      displayName: 'Delete environment secret'
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.CreateEnvSecret,
+      displayName: 'Create environment secret'
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.UpdateEnvSecret,
+      displayName: 'Update environment secret'
+    },
   ]
 }
