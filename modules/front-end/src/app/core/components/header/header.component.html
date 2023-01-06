@@ -61,7 +61,7 @@
           {{ project.name }}
         </nz-list-item>
         <ng-template #projectHeader>
-          <span class="header" i18n>Projects</span>
+          <span class="header" i18n="@@common.projects">Projects</span>
         </ng-template>
       </nz-list>
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
@@ -76,7 +76,7 @@
     </div>
   </ng-container>
   <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="envModelCancel()" i18n>Cancel</button>
-    <button nz-button nzType="primary" (click)="envModalConfirm()" i18n>OK</button>
+    <button nz-button nzType="default" (click)="envModelCancel()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" (click)="envModalConfirm()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>

@@ -364,6 +364,10 @@
           <context context-type="linenumber">41</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">79,80</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
           <context context-type="linenumber">103</context>
         </context-group>
@@ -414,6 +418,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
           <context context-type="linenumber">32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">80,81</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
@@ -1781,7 +1789,7 @@
         </context-group>
         <target>更改环境</target>
       </trans-unit>
-      <trans-unit id="7091571651222742304" datatype="html">
+      <trans-unit id="common.projects" datatype="html">
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
@@ -1796,22 +1804,6 @@
           <context context-type="linenumber">73,75</context>
         </context-group>
         <target>环境</target>
-      </trans-unit>
-      <trans-unit id="2159130950882492111" datatype="html">
-        <source>Cancel</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">79,80</context>
-        </context-group>
-        <target>取消</target>
-      </trans-unit>
-      <trans-unit id="8998179362936748717" datatype="html">
-        <source>OK</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">80,81</context>
-        </context-group>
-        <target>OK</target>
       </trans-unit>
       <trans-unit id="7371988988136572417" datatype="html">
         <source>You don&apos;t have permissions to read project list, please contact the admin to grant you the necessary permissions</source>
@@ -5199,6 +5191,26 @@
           <context context-type="linenumber">68</context>
         </context-group>
         <target>任意</target>
+      </trans-unit>
+      <trans-unit id="iam.policy.project" datatype="html">
+        <source>Project</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+        <target>项目</target>
+      </trans-unit>
+      <trans-unit id="iam.policy.environment" datatype="html">
+        <source>Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
+          <context context-type="linenumber">107</context>
+        </context-group>
+        <target>环境</target>
       </trans-unit>
       <trans-unit id="iam.routing.team" datatype="html">
         <source>Team</source>

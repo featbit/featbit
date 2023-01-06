@@ -82,7 +82,7 @@ export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]
       resourceType: ResourceTypeEnum.Project,
       placeholder: {
         name: '{project}',
-        displayName: '项目名称'
+        displayName: $localize`:@@iam.policy.project:Project`
       },
       isAnyChecked: false,
       isInvalid: false
@@ -94,7 +94,7 @@ export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]
       resourceType: 'project',
       placeholder: {
         name: '{project}',
-        displayName: '项目'
+        displayName: $localize`:@@iam.policy.project:Project`
       },
       isAnyChecked: false,
       isInvalid: false
@@ -104,7 +104,7 @@ export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]
       resourceType: 'env',
       placeholder: {
         name: '{env}',
-        displayName: '环境'
+        displayName: $localize`:@@iam.policy.environment:Environment`
       },
       isAnyChecked: false,
       isInvalid: false
