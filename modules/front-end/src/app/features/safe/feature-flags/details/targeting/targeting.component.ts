@@ -15,8 +15,6 @@ import { ICondition, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
-import { FormBuilder } from "@angular/forms";
-import {DiffFactoryService} from "@services/diff-factory.service";
 import {RefTypeEnum} from "@core/components/audit-log/types";
 import {ISegment} from "@features/safe/segments/types/segments-index";
 

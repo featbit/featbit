@@ -73,7 +73,21 @@ export class PermissionsService {
           return s.resources.map(r => r.split('/')[0]).includes(resourceType) && s.actions.includes(action);
         }
 
-        return s.resources.find(rsc => this.matchRule(rn, rsc)) !== undefined && s.actions.includes(action)
+        const matchingResource = s.resources.find(rsc => {
+          // check exact match
+          if (this.matchRule(rn, rsc)){
+            return true;
+          }
+
+          // check ancestors matches following bottom up order
+          const rnParts = rn.split(':');
+          return [...rnParts].reverse().some((part, idx) => {
+            rnParts.pop();
+            return this.matchRule(rnParts.join(':'), rsc);
+          });
+        });
+
+        return matchingResource !== undefined && s.actions.includes(action)
     });
 
     if (statements.find(s => s.effect === EffectEnum.Deny) !== undefined) {

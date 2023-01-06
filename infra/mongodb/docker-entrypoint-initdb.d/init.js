@@ -121,7 +121,10 @@ db.Policies.insertOne(
                     "ListEnvs",
                     "CreateEnv",
                     "DeleteEnv",
-                    "UpdateEnvInfo"
+                    "UpdateEnvInfo",
+                    "CreateEnvSecret",
+                    "DeleteEnvSecret",
+                    "UpdateEnvSecret"
                 ],
                 resources: ["project"]
             }

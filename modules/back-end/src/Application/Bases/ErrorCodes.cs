@@ -51,6 +51,7 @@ public static class ErrorCodes
     public const string InvalidIntervalType = nameof(InvalidIntervalType);
     public const string InvalidFrom = nameof(InvalidFrom);
     public const string InvalidTo = nameof(InvalidTo);
+    public const string InvalidSecretType = nameof(InvalidSecretType);
 
     // triggers
     public const string InvalidTriggerType = nameof(InvalidTriggerType);

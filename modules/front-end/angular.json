@@ -89,6 +89,12 @@
               "localize": ["en"]
             },
             "zh": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
               "localize": ["zh"],
               "styles": [
                 "src/styles-zh.less"

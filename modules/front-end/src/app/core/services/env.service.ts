@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IEnvironment, IEnvKey } from '@shared/types';
+import { IEnvironment } from '@shared/types';
 
 @Injectable({
   providedIn: 'root'
@@ -26,11 +26,6 @@ export class EnvService {
   putUpdateEnv(projectId: string, params): Observable<any> {
     const url = `${this.baseUrl.replace(/#projectId/ig, `${projectId}`)}/${params.id}`;
     return this.http.put(url, params);
-  }
-
-  putUpdateEnvKey(projectId: string, envId: string, params: IEnvKey): Observable<IEnvKey> {
-    const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}/key`;
-    return this.http.put<IEnvKey>(url, params);
   }
 
   removeEnv(projectId: string, envId: string): Observable<any> {

@@ -75,16 +75,15 @@ export interface IEnvironment {
 }
 
 export interface ISecret {
-  type: string,
+  id: string,
+  name: string,
+  type: SecretTypeEnum,
   value: string
 }
 
-export interface IAccountUser {
-  userId: string,
-  userName: string,
-  email: string,
-  role: string,
-  initialPassword: string
+export enum SecretTypeEnum {
+  Client = 'client',
+  Server = 'server'
 }
 
 export interface EnvironmentSetting {
@@ -98,13 +97,4 @@ export interface EnvironmentSetting {
 
 export const EnvironmentSettingTypes = {
   SyncUrls: 'sync-urls',
-}
-
-export enum EnvKeyNameEnum {
-  Secret = "Secret"
-}
-
-export interface IEnvKey {
-  keyName: EnvKeyNameEnum,
-  keyValue?: string
 }

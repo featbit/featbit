@@ -11,8 +11,8 @@
     <nz-alert
       *ngIf="isEditing"
       nzType="warning"
-      i18n-nzDescription="@@org.project.permissionMayInvalidAfterOperation"
-      nzDescription="Permission may become invalid after this operation"
+      i18n-nzDescription="@@org.project.permission-will-become-invalid-if-change-name"
+      nzDescription="Permission will become invalid if you change the name"
       nzShowIcon
       nzIconType="icons:icon-warning"
     ></nz-alert>
@@ -31,8 +31,6 @@
         </nz-form-control>
       </nz-form-item>
     </form>
-    <!-- disable env secret regeneration -->
-    <button *ngIf="false" nz-button [nzType]="'primary'" (click)="onRegenerate(envKeySecret)" i18n="@@org.project.regenerateSecret">Regenerate secret</button>
 
     <button [disabled]="!canTakeAction()" class="submit-btn" (click)="doSubmit()" nz-button [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>

@@ -1,5 +1,5 @@
 import { Component, OnInit} from '@angular/core';
-import { IProject, IEnvironment, IProjectEnv } from '@shared/types';
+import { IProject, IEnvironment, IProjectEnv, ISecret, SecretTypeEnum } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
 import { EnvService } from '@services/env.service';
@@ -8,6 +8,8 @@ import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
 import {MessageQueueService} from "@services/message-queue.service";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { EnvSecretService } from "@services/env-secret.service";
 
 @Component({
   selector: 'app-project',
@@ -35,13 +37,15 @@ export class ProjectComponent implements OnInit {
   projects: IProject[] = [];
 
   constructor(
+    private fb: FormBuilder,
     private messageQueueService: MessageQueueService,
     private projectService: ProjectService,
     private accountService: OrganizationService,
     private envService: EnvService,
+    private envSecretService: EnvSecretService,
     private messageService: NzMessageService,
     public permissionsService: PermissionsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
@@ -175,5 +179,129 @@ export class ProjectComponent implements OnInit {
     navigator.clipboard.writeText(text).then(
       () => this.messageService.success($localize `:@@common.copy-success:Copied`)
     );
+  }
+
+  // env secrets
+  secretTypeClient = SecretTypeEnum.Client;
+  secretTypeServer = SecretTypeEnum.Server;
+  isSecretModalVisible: boolean = false;
+  secretForm: FormGroup;
+  secretModalTitle: string;
+  isEditingSecret = false;
+  currentSecretId: string;
+
+  createSecret(project: IProject, env: IEnvironment) {
+    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.CreateEnvSecret);
+    if (!isAllowed) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.project = project;
+    this.env = env;
+    this.isEditingSecret = false;
+
+    this.secretModalTitle = $localize `:@@org.project.add-secret:Add secret`;
+    this.secretForm = this.fb.group({
+      name: [null, Validators.required],
+      type: [SecretTypeEnum.Client, Validators.required]
+    });
+    this.isSecretModalVisible = true;
+  }
+
+  editSecret(project: IProject, env: IEnvironment, secret: ISecret) {
+    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.UpdateEnvSecret);
+    if (!isAllowed) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.project = project;
+    this.env = env;
+    this.currentSecretId = secret.id;
+    this.isEditingSecret = true;
+
+    this.secretForm = this.fb.group({
+      name: [secret.name, Validators.required],
+      type: [secret.type, Validators.required]
+    });
+
+    this.secretModalTitle = $localize `:@@org.project.edit-secret:Edit secret: ${secret.name}`;
+    this.isSecretModalVisible = true;
+  }
+
+  secretModalCancel() {
+    this.project = null;
+    this.env = null;
+    this.isSecretModalVisible = false;
+    this.secretForm.reset();
+  }
+
+  deleteSecret(project: IProject, env: IEnvironment, secretId: string) {
+    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.DeleteEnvSecret);
+    if (!isAllowed) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.envSecretService.delete(env.id, secretId).subscribe({
+      next: () => {
+        env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
+      },
+      error: () => {
+        this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+      }
+    });
+  }
+
+  upsertSecret() {
+    if (this.secretForm.invalid) {
+      for (const i in this.secretForm.controls) {
+        this.secretForm.controls[i].markAsDirty();
+        this.secretForm.controls[i].updateValueAndValidity();
+      }
+      return;
+    }
+
+    const { name, type } = this.secretForm.value;
+    if (this.isEditingSecret) {
+      const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
+      if (!isAllowed) {
+        this.messageService.warning(this.permissionsService.genericDenyMessage);
+        return;
+      }
+
+      this.envSecretService.update(this.env.id, this.currentSecretId, name).subscribe({
+        next: () => {
+          this.env.secrets = this.env.secrets.map((secret) => {
+            if (secret.id === this.currentSecretId) {
+              return { ...secret, name };
+            }
+
+            return secret;
+          });
+          this.isSecretModalVisible = false;
+        },
+        error: () => {
+          this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+        }
+      });
+    } else {
+      const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.CreateEnvSecret);
+      if (!isAllowed) {
+        this.messageService.warning(this.permissionsService.genericDenyMessage);
+        return;
+      }
+
+      this.envSecretService.add(this.env.id, name, type).subscribe({
+        next: (secret: ISecret) => {
+          this.env.secrets = [...this.env.secrets, secret];
+          this.isSecretModalVisible = false;
+        },
+        error: () => {
+          this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+        }
+      });
+    }
   }
 }
