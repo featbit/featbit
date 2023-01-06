@@ -34,7 +34,7 @@
                     <div>
                       <div class="desc-name">
                         <span i18n="@@org.project.secrets">Secrets</span>
-                        <i *ngIf="env.secrets.length < 2" class="edit-save" (click)="onCreateSecret(project, env)" nz-icon nzType="icons:icon-add-outline"></i>
+                        <i *ngIf="env.secrets.length < 20" class="edit-save" (click)="onCreateSecret(project, env)" nz-icon nzType="icons:icon-add-outline"></i>
                       </div>
                       <div class="desc-content">
                         <div *ngFor="let secret of env.secrets" class="secret">
@@ -56,7 +56,7 @@
                               nz-button
                               nzSize="default"
                               nzType="link"
-                              (nzOnConfirm)="removeSecret(project.id, env, secret.id)">
+                              (nzOnConfirm)="removeSecret(project, env, secret.id)">
                               <i nz-icon nzType="delete" nzTheme="outline"></i>
                             </button>
                           </span>

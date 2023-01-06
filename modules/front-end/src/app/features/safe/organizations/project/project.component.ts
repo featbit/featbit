@@ -190,6 +190,13 @@ export class ProjectComponent implements OnInit {
   currentSecretId: string;
 
   onCreateSecret(project: IProject, env: IEnvironment) {
+    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.CreateEnvSecret);
+
+    if (isAllowed === undefined || isAllowed === false) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.project = project;
     this.env = env;
     this.isEditingSecret = false;
@@ -203,6 +210,13 @@ export class ProjectComponent implements OnInit {
   }
 
   onEditSecret(project: IProject, env: IEnvironment, secret: ISecret) {
+    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.UpdateEnvSecret);
+
+    if (isAllowed === undefined || isAllowed === false) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.project = project;
     this.env = env;
     this.currentSecretId = secret.id;
@@ -224,8 +238,15 @@ export class ProjectComponent implements OnInit {
     this.secretForm.reset();
   }
 
-  removeSecret(projectId: string, env: IEnvironment, secretId: string) {
-    this.envService.removeSecret(projectId, env.id, secretId).subscribe({
+  removeSecret(project: IProject, env: IEnvironment, secretId: string) {
+    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.DeleteEnvSecret);
+
+    if (isAllowed === undefined || isAllowed === false) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.envService.removeSecret(project.id, env.id, secretId).subscribe({
       next: () => {
         env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
       },
@@ -247,6 +268,13 @@ export class ProjectComponent implements OnInit {
     const { name, type } = this.secretForm.value;
 
     if (this.isEditingSecret) {
+      const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
+
+      if (isAllowed === undefined || isAllowed === false) {
+        this.messageService.warning(this.permissionsService.genericDenyMessage);
+        return;
+      }
+
       this.envService.updateSecretName(this.project.id, this.env.id, this.currentSecretId, name).subscribe({
         next: () => {
           this.env.secrets = this.env.secrets.map((secret) => {
@@ -263,6 +291,13 @@ export class ProjectComponent implements OnInit {
         }
       });
     } else {
+      const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
+
+      if (isAllowed === undefined || isAllowed === false) {
+        this.messageService.warning(this.permissionsService.genericDenyMessage);
+        return;
+      }
+
       const id = uuidv4();
       const value = uuidv4();
       this.envService.addSecret(this.project.id, this.env.id, { id, type, name, value }).subscribe({
