@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IEnvironment, IEnvKey, ISecret } from '@shared/types';
+import { ISecret } from "@shared/types";
+import { Observable } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -12,18 +12,18 @@ export class EnvSecretService {
 
   constructor(private http: HttpClient) { }
 
-  addSecret(envId: string, secret: ISecret): Observable<any> {
+  add(envId: string, name: string, type: string): Observable<ISecret> {
     const url = this.baseUrl.replace(/#envId/ig, `${envId}`);
-    return this.http.post<ISecret>(url, secret);
+    return this.http.post<ISecret>(url, { name, type });
   }
 
-  removeSecret(envId: string, secretId: string): Observable<any> {
+  delete(envId: string, secretId: string): Observable<boolean> {
     const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `/${secretId}`;
-    return this.http.delete(url);
+    return this.http.delete<boolean>(url);
   }
 
-  updateSecretName(envId: string, secretId: string, secretName: string) {
+  update(envId: string, secretId: string, name: string): Observable<boolean> {
     const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `/${secretId}`;
-    return this.http.put<ISecret>(url, { name: secretName });
+    return this.http.put<boolean>(url, { name });
   }
 }

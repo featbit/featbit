@@ -8,7 +8,6 @@ import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
 import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
 import {MessageQueueService} from "@services/message-queue.service";
-import { uuidv4 } from "@utils/index";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { EnvSecretService } from "@services/env-secret.service";
 
@@ -46,7 +45,7 @@ export class ProjectComponent implements OnInit {
     private envSecretService: EnvSecretService,
     private messageService: NzMessageService,
     public permissionsService: PermissionsService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
@@ -193,8 +192,7 @@ export class ProjectComponent implements OnInit {
 
   onCreateSecret(project: IProject, env: IEnvironment) {
     const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.CreateEnvSecret);
-
-    if (isAllowed === undefined || isAllowed === false) {
+    if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
     }
@@ -213,8 +211,7 @@ export class ProjectComponent implements OnInit {
 
   onEditSecret(project: IProject, env: IEnvironment, secret: ISecret) {
     const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.UpdateEnvSecret);
-
-    if (isAllowed === undefined || isAllowed === false) {
+    if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
     }
@@ -242,13 +239,12 @@ export class ProjectComponent implements OnInit {
 
   removeSecret(project: IProject, env: IEnvironment, secretId: string) {
     const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.DeleteEnvSecret);
-
-    if (isAllowed === undefined || isAllowed === false) {
+    if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
     }
 
-    this.envSecretService.removeSecret(env.id, secretId).subscribe({
+    this.envSecretService.delete(env.id, secretId).subscribe({
       next: () => {
         env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
       },
@@ -267,17 +263,16 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
+    // check permission
+    const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
+    if (!isAllowed) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     const { name, type } = this.secretForm.value;
-
     if (this.isEditingSecret) {
-      const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
-
-      if (isAllowed === undefined || isAllowed === false) {
-        this.messageService.warning(this.permissionsService.genericDenyMessage);
-        return;
-      }
-
-      this.envSecretService.updateSecretName(this.env.id, this.currentSecretId, name).subscribe({
+      this.envSecretService.update(this.env.id, this.currentSecretId, name).subscribe({
         next: () => {
           this.env.secrets = this.env.secrets.map((secret) => {
             if (secret.id === this.currentSecretId) {
@@ -293,16 +288,7 @@ export class ProjectComponent implements OnInit {
         }
       });
     } else {
-      const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
-
-      if (isAllowed === undefined || isAllowed === false) {
-        this.messageService.warning(this.permissionsService.genericDenyMessage);
-        return;
-      }
-
-      const id = uuidv4();
-      const value = uuidv4();
-      this.envSecretService.addSecret(this.env.id, { id, type, name, value }).subscribe({
+      this.envSecretService.add(this.env.id, name, type).subscribe({
         next: (secret: ISecret) => {
           this.env.secrets = [...this.env.secrets, secret];
           this.isSecretModalVisible = false;
