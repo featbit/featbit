@@ -3,15 +3,25 @@ namespace Domain.Environments;
 public class Secret
 {
     public string Id { get; set; }
+
     public string Name { get; set; }
+
     public string Type { get; set; }
 
     public string Value { get; set; }
 
-    public Secret(Guid envId, string type)
+    public Secret(Guid envId, string name, string type)
     {
-        Id = Guid.NewGuid().ToString();
-        Name = type;
+        Id = Guid.NewGuid().ToString("D");
+        Name = name;
+        Type = type;
+        Value = ValueOf(envId);
+    }
+
+    public Secret(Guid envId, string id, string name, string type)
+    {
+        Id = id;
+        Name = name;
         Type = type;
         Value = ValueOf(envId);
     }

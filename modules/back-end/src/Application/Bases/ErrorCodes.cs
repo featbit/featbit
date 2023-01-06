@@ -21,6 +21,7 @@ public static class ErrorCodes
     public const string PasswordTooShort = nameof(PasswordTooShort);
 
     // common
+    public const string IdIsRequired = nameof(IdIsRequired);
     public const string NameIsRequired = nameof(NameIsRequired);
 
     // onboarding
@@ -51,6 +52,7 @@ public static class ErrorCodes
     public const string InvalidIntervalType = nameof(InvalidIntervalType);
     public const string InvalidFrom = nameof(InvalidFrom);
     public const string InvalidTo = nameof(InvalidTo);
+    public const string InvalidSecretType = nameof(InvalidSecretType);
 
     // triggers
     public const string InvalidTriggerType = nameof(InvalidTriggerType);
