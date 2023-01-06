@@ -465,8 +465,8 @@
         </context-group>
         <target>保存</target>
       </trans-unit>
-      <trans-unit id="org.project.permissionMayInvalidAfterOperation" datatype="html">
-        <source>Permission may become invalid after this operation</source>
+      <trans-unit id="org.project.permission-will-become-invalid-if-change-name" datatype="html">
+        <source>Permission will become invalid if you change the name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">15</context>
@@ -475,7 +475,7 @@
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
           <context context-type="linenumber">16</context>
         </context-group>
-        <target>修改环境名称后对其设置的权限可能会失效</target>
+        <target>修改名称后对其设置的权限将会失效</target>
       </trans-unit>
       <trans-unit id="common.name" datatype="html">
         <source>Name</source>
@@ -633,7 +633,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">118</context>
+          <context context-type="linenumber">119</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
@@ -689,7 +689,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>添加环境</target>
       </trans-unit>
@@ -2273,15 +2273,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">231</context>
+          <context context-type="linenumber">233</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">260</context>
+          <context context-type="linenumber">262</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">272</context>
+          <context context-type="linenumber">274</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -2641,11 +2641,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">70</context>
+          <context context-type="linenumber">71</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <target>删除后不可恢复，确定要删除么？</target>
       </trans-unit>
@@ -2725,11 +2725,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">97</context>
+          <context context-type="linenumber">98</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -4881,7 +4881,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">119</context>
+          <context context-type="linenumber">120</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -6033,11 +6033,35 @@
         </context-group>
         <target>点击复制</target>
       </trans-unit>
+      <trans-unit id="org.project.secret-type-client-side-sdk" datatype="html">
+        <source>Client Side SDK</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">137</context>
+        </context-group>
+        <target>客户端 SDK</target>
+      </trans-unit>
+      <trans-unit id="org.project.secret-type-server-side-sdk" datatype="html">
+        <source>Server Side SDK</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+        <target>服务端 SDK</target>
+      </trans-unit>
       <trans-unit id="org.project.remove-secret-confirm" datatype="html">
         <source>This operation cannot be reverted, make sure this secret is removed from all SDKs before removing.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">51</context>
         </context-group>
         <target>删除后不可恢复，删除前请确保已从所有 SDK 中移除该秘钥</target>
       </trans-unit>
@@ -6045,11 +6069,11 @@
         <source>Edit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">67</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <target>编辑</target>
       </trans-unit>
@@ -6057,7 +6081,7 @@
         <source>The name of the secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">124</context>
         </context-group>
         <target>秘钥名称</target>
       </trans-unit>
@@ -6065,7 +6089,7 @@
         <source>The secret would be used by a client side or server side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <target>该秘钥将被用于客户端还是服务端 SDK</target>
       </trans-unit>
@@ -6073,25 +6097,9 @@
         <source>Type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <target>类型</target>
-      </trans-unit>
-      <trans-unit id="org.project.client-side" datatype="html">
-        <source>Client Side SDK</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">136</context>
-        </context-group>
-        <target>客户端 SDK</target>
-      </trans-unit>
-      <trans-unit id="org.project.server-side" datatype="html">
-        <source>Server Side SDK</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">137</context>
-        </context-group>
-        <target>服务端 SDK</target>
       </trans-unit>
       <trans-unit id="org.project.env-remove-success" datatype="html">
         <source>Environment successfully removed</source>
@@ -6113,7 +6121,7 @@
         <source>Add secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">195</context>
+          <context context-type="linenumber">197</context>
         </context-group>
         <target>添加秘钥</target>
       </trans-unit>
@@ -6121,7 +6129,7 @@
         <source>Edit secret: <x id="PH" equiv-text="secret.name"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">214</context>
+          <context context-type="linenumber">216</context>
         </context-group>
         <target>编辑：<x id="PH" equiv-text="secret.name"/></target>
       </trans-unit>

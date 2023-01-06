@@ -1,5 +1,5 @@
 import { Component, OnInit} from '@angular/core';
-import { IProject, IEnvironment, IProjectEnv, ISecret } from '@shared/types';
+import { IProject, IEnvironment, IProjectEnv, ISecret, SecretTypeEnum } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
 import { EnvService } from '@services/env.service';
@@ -181,6 +181,8 @@ export class ProjectComponent implements OnInit {
   }
 
   // env secrets
+  secretTypeClientSide = SecretTypeEnum.ClientSide;
+  secretTypeServerSide = SecretTypeEnum.ServerSide;
   isSecretModalVisible: boolean = false;
   secretForm: FormGroup;
   secretModalTitle: string;

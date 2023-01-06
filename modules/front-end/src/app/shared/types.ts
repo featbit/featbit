@@ -77,8 +77,13 @@ export interface IEnvironment {
 export interface ISecret {
   id: string,
   name: string,
-  type: string,
+  type: SecretTypeEnum,
   value: string
+}
+
+export enum SecretTypeEnum {
+  ClientSide = 'client-side',
+  ServerSide = 'server-side'
 }
 
 export interface IAccountUser {

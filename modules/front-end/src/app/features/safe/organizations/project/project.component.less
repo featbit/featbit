@@ -54,6 +54,14 @@
         background: @grey5-color;
         border-radius: 10px;
 
+        .ant-tag {
+          background: @grey10-color;
+          font-size: 13px;
+          border-radius: 8px;
+          white-space: nowrap;
+          padding: 5px 7px;
+        }
+
         .env-basis {
           width: 230px;
         }
@@ -91,7 +99,12 @@
               cursor: pointer;
               background-color: white;
               padding: 5px 10px;
-              border-radius: 20px;
+              border-radius: 8px;
+
+              &:hover {
+                background-color: @grey60-color;
+                color: @white;
+              }
             }
           }
         }

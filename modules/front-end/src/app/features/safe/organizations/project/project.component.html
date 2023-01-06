@@ -40,7 +40,8 @@
                         <div *ngFor="let secret of env.secrets" class="secret">
                           <span>{{secret.name}}</span>
                           <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
-                          <span>{{secret.type}}</span>
+                          <span class="ant-tag" *ngIf="secret.type == secretTypeClientSide" i18n="@@org.project.secret-type-client-side-sdk">Client Side SDK</span>
+                          <span *ngIf="secret.type === secretTypeServerSide" i18n="@@org.project.secret-type-server-side-sdk">Server Side SDK</span>
                           <span>
                             <button nz-button nzSize="default" nzType="link" (click)="onEditSecret(project, env, secret)">
                               <i nz-icon nzType="edit" nzTheme="outline"></i>
@@ -133,8 +134,8 @@
           nzTooltipTitle="The secret would be used by a client side or server side SDK">Type</nz-form-label>
         <nz-form-control>
           <nz-select [nzDisabled]="isEditingSecret" formControlName="type">
-            <nz-option nzValue="client-side" i18n-nzLabel="@@org.project.client-side" nzLabel="Client Side SDK"></nz-option>
-            <nz-option nzValue="server-side" i18n-nzLabel="@@org.project.server-side" nzLabel="Server Side SDK"></nz-option>
+            <nz-option [nzValue]="secretTypeClientSide" i18n-nzLabel="@@org.project.secret-type-client-side-sdk" nzLabel="Client Side SDK"></nz-option>
+            <nz-option [nzValue]="secretTypeServerSide" i18n-nzLabel="@@org.project.secret-type-server-side-sdk" nzLabel="Server Side SDK"></nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>
