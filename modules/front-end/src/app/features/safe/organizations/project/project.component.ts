@@ -190,7 +190,7 @@ export class ProjectComponent implements OnInit {
   isEditingSecret = false;
   currentSecretId: string;
 
-  onCreateSecret(project: IProject, env: IEnvironment) {
+  createSecret(project: IProject, env: IEnvironment) {
     const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.CreateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -209,7 +209,7 @@ export class ProjectComponent implements OnInit {
     this.isSecretModalVisible = true;
   }
 
-  onEditSecret(project: IProject, env: IEnvironment, secret: ISecret) {
+  editSecret(project: IProject, env: IEnvironment, secret: ISecret) {
     const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.UpdateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -237,7 +237,7 @@ export class ProjectComponent implements OnInit {
     this.secretForm.reset();
   }
 
-  removeSecret(project: IProject, env: IEnvironment, secretId: string) {
+  deleteSecret(project: IProject, env: IEnvironment, secretId: string) {
     const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.DeleteEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);

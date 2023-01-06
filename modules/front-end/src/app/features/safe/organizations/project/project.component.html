@@ -34,7 +34,7 @@
                     <div>
                       <div class="desc-name">
                         <span i18n="@@org.project.secrets">Secrets</span>
-                        <i class="edit-save" (click)="onCreateSecret(project, env)" nz-icon nzType="icons:icon-add-outline"></i>
+                        <i class="edit-save" (click)="createSecret(project, env)" nz-icon nzType="icons:icon-add-outline"></i>
                       </div>
                       <div class="desc-content">
                         <div *ngFor="let secret of env.secrets" class="secret">
@@ -45,7 +45,7 @@
                             <ng-container *ngIf="secret.type === secretTypeServer" i18n="@@org.project.secret-type-server-side-sdk">Server Side SDK</ng-container>
                           </span>
                           <span>
-                            <button nz-button nzSize="default" nzType="link" (click)="onEditSecret(project, env, secret)">
+                            <button nz-button nzSize="default" nzType="link" (click)="editSecret(project, env, secret)">
                               <i nz-icon nzType="edit" nzTheme="outline"></i>
                             </button>
                             <button
@@ -56,7 +56,7 @@
                               nz-button
                               nzSize="default"
                               nzType="link"
-                              (nzOnConfirm)="removeSecret(project, env, secret.id)">
+                              (nzOnConfirm)="deleteSecret(project, env, secret.id)">
                               <i nz-icon nzType="delete" nzTheme="outline"></i>
                             </button>
                           </span>
