@@ -34,7 +34,7 @@
                     <div>
                       <div class="desc-name">
                         <span i18n="@@org.project.secrets">Secrets</span>
-                        <i *ngIf="env.secrets.length < 2" class="edit-save" (click)="onCreateSecret()" nz-icon nzType="icons:icon-add-outline"></i>
+                        <i *ngIf="env.secrets.length < 2" class="edit-save" (click)="onCreateSecret(project, env)" nz-icon nzType="icons:icon-add-outline"></i>
                       </div>
                       <div class="desc-content">
                         <div *ngFor="let secret of env.secrets" class="secret">
@@ -42,10 +42,18 @@
                           <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
                           <span>{{secret.type}}</span>
                           <span>
-                            <button nz-button nzSize="default" nzType="link" (click)="onEditSecret(secret)">
+                            <button nz-button nzSize="default" nzType="link" (click)="onEditSecret(project, env, secret)">
                               <i nz-icon nzType="edit" nzTheme="outline"></i>
                             </button>
-                            <button nz-button nzSize="default" nzType="link" (click)="removeSecret(secret)">
+                            <button
+                              i18n-nz-popconfirm="@@org.project.remove-secret-confirm"
+                              nz-popconfirm="This operation cannot be reverted, make sure this secret is removed from all SDKs before removing."
+                              nzPopconfirmPlacement="bottomRight"
+                              [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                              nz-button
+                              nzSize="default"
+                              nzType="link"
+                              (nzOnConfirm)="removeSecret(project.id, env, secret.id)">
                               <i nz-icon nzType="delete" nzTheme="outline"></i>
                             </button>
                           </span>
@@ -102,7 +110,7 @@
 <nz-modal
   [(nzVisible)]="isSecretModalVisible"
   [nzTitle]="secretModalTitle"
-  (nzOnCancel)="secrectModalCancel()"
+  (nzOnCancel)="secretModalCancel()"
   (nzOnOk)="upsertSecret()">
   <ng-container *nzModalContent>
     <form nz-form [formGroup]="secretForm" nzLayout="vertical">
@@ -125,8 +133,8 @@
           nzTooltipTitle="The secret would be used by a client side or server side SDK">
           Type
         </nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
-          <nz-select formControlName="type">
+        <nz-form-control>
+          <nz-select [nzDisabled]="isEditingSecret" formControlName="type">
             <nz-option nzValue="client-side" i18n-nzLabel="@@org.project.client-side" nzLabel="Client side"></nz-option>
             <nz-option nzValue="server-side" i18n-nzLabel="@@org.project.server-side" nzLabel="Server side"></nz-option>
           </nz-select>

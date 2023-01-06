@@ -184,7 +184,14 @@ export class ProjectComponent implements OnInit {
   isSecretModalVisible: boolean = false;
   secretForm: FormGroup;
   secretModalTitle: string;
-  onCreateSecret() {
+  isEditingSecret = false;
+  currentSecretId: string;
+
+  onCreateSecret(project: IProject, env: IEnvironment) {
+    this.project = project;
+    this.env = env;
+    this.isEditingSecret = false;
+
     this.secretModalTitle = $localize `:@@org.project.add-secret:Add secret secret`;
     this.secretForm = this.fb.group({
       name: [null, Validators.required],
@@ -193,7 +200,12 @@ export class ProjectComponent implements OnInit {
     this.isSecretModalVisible = true;
   }
 
-  onEditSecret(secret: ISecret) {
+  onEditSecret(project: IProject, env: IEnvironment, secret: ISecret) {
+    this.project = project;
+    this.env = env;
+    this.currentSecretId = secret.id;
+    this.isEditingSecret = true;
+
     this.secretForm = this.fb.group({
       name: [secret.name, Validators.required],
       type: [secret.type, Validators.required]
@@ -203,13 +215,22 @@ export class ProjectComponent implements OnInit {
     this.isSecretModalVisible = true;
   }
 
-  secrectModalCancel() {
+  secretModalCancel() {
+    this.project = null;
+    this.env = null;
     this.isSecretModalVisible = false;
     this.secretForm.reset();
   }
 
-  removeSecret(secret: ISecret) {
-
+  removeSecret(projectId: string, env: IEnvironment, secretId: string) {
+    this.envService.removeSecret(projectId, env.id, secretId).subscribe({
+      next: () => {
+        env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
+      },
+      error: () => {
+        this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+      }
+    });
   }
 
   upsertSecret() {
@@ -221,9 +242,36 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
+    const { name, type } = this.secretForm.value;
 
+    if (this.isEditingSecret) {
+      this.envService.updateSecretName(this.project.id, this.env.id, this.currentSecretId, name).subscribe({
+        next: () => {
+          this.env.secrets = this.env.secrets.map((secret) => {
+            if (secret.id === this.currentSecretId) {
+              return { ...secret, name };
+            }
 
-    this.isSecretModalVisible = false;
+            return secret;
+          });
+          this.isSecretModalVisible = false;
+        },
+        error: () => {
+          this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+        }
+      });
+    } else {
+      const id = uuidv4();
+      const value = uuidv4();
+      this.envService.addSecret(this.project.id, this.env.id, { id, type, name, value }).subscribe({
+        next: (secret: ISecret) => {
+          this.env.secrets = [...this.env.secrets, secret];
+          this.isSecretModalVisible = false;
+        },
+        error: () => {
+          this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+        }
+      });
+    }
   }
-
 }
