@@ -18,14 +18,6 @@ public class Secret
         Value = ValueOf(envId);
     }
 
-    public Secret(Guid envId, string id, string name, string type)
-    {
-        Id = id;
-        Name = name;
-        Type = type;
-        Value = ValueOf(envId);
-    }
-
     public static string ValueOf(Guid id)
     {
         var header = GuidHelper.Encode(Guid.NewGuid());

@@ -7,15 +7,13 @@ public class AddSecret : IRequest<Secret>
 {
     public Guid EnvId { get; set; }
 
-    public string Id { get; set; }
-
     public string Name { get; set; }
 
     public string Type { get; set; }
 
     public Secret AsSecret()
     {
-        var secret = new Secret(EnvId, Id, Name, Type);
+        var secret = new Secret(EnvId, Name, Type);
         return secret;
     }
 }
@@ -24,9 +22,6 @@ public class AddSecretValidator : AbstractValidator<AddSecret>
 {
     public AddSecretValidator()
     {
-        RuleFor(x => x.Id)
-            .NotEmpty().WithErrorCode(ErrorCodes.IdIsRequired);
-
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 

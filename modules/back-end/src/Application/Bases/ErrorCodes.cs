@@ -21,7 +21,6 @@ public static class ErrorCodes
     public const string PasswordTooShort = nameof(PasswordTooShort);
 
     // common
-    public const string IdIsRequired = nameof(IdIsRequired);
     public const string NameIsRequired = nameof(NameIsRequired);
 
     // onboarding
