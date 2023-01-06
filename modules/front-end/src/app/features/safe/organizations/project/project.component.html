@@ -39,13 +39,11 @@
                       <div class="desc-content">
                         <div *ngFor="let secret of env.secrets" class="secret">
                           <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{secret.name}}</span>
+                          <nz-tag nzColor="geekblue" *ngIf="secret.type == secretTypeServer" i18n="@@common.server">server</nz-tag>
+                          <nz-tag nzColor="cyan" *ngIf="secret.type == secretTypeClient" i18n="@@common.client">client</nz-tag>
                           <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
-                          <span class="ant-tag" >
-                            <ng-container *ngIf="secret.type == secretTypeClient" i18n="@@org.project.secret-type-client-side-sdk">Client Side SDK</ng-container>
-                            <ng-container *ngIf="secret.type === secretTypeServer" i18n="@@org.project.secret-type-server-side-sdk">Server Side SDK</ng-container>
-                          </span>
                           <span>
-                            <button nz-button nzSize="default" nzType="link" (click)="editSecret(project, env, secret)">
+                            <button nz-button nzSize="small" nzType="link" (click)="editSecret(project, env, secret)">
                               <i nz-icon nzType="edit" nzTheme="outline"></i>
                             </button>
                             <button
@@ -54,8 +52,9 @@
                               nzPopconfirmPlacement="bottomRight"
                               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                               nz-button
-                              nzSize="default"
+                              nzSize="small"
                               nzType="link"
+                              nzDanger
                               (nzOnConfirm)="deleteSecret(project, env, secret.id)">
                               <i nz-icon nzType="delete" nzTheme="outline"></i>
                             </button>
