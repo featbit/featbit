@@ -9,9 +9,9 @@
 
 
 <p>
-A scalable and high-performance platform that empower all teams to 
+A scalable and high-performance platform that empowers all teams to 
 <br/>
-manage Feature Flags, Experimentations, Entitlement, and etc.
+manage Feature Flags, Experimentations, Entitlement, etc.
 </p>
 
 <!--
