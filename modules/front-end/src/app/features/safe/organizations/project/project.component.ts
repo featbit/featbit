@@ -10,6 +10,7 @@ import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/type
 import {MessageQueueService} from "@services/message-queue.service";
 import { uuidv4 } from "@utils/index";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { EnvSecretService } from "@services/env-secret.service";
 
 @Component({
   selector: 'app-project',
@@ -42,6 +43,7 @@ export class ProjectComponent implements OnInit {
     private projectService: ProjectService,
     private accountService: OrganizationService,
     private envService: EnvService,
+    private envSecretService: EnvSecretService,
     private messageService: NzMessageService,
     public permissionsService: PermissionsService
   ) {}
@@ -246,7 +248,7 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
-    this.envService.removeSecret(project.id, env.id, secretId).subscribe({
+    this.envSecretService.removeSecret(env.id, secretId).subscribe({
       next: () => {
         env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
       },
@@ -275,7 +277,7 @@ export class ProjectComponent implements OnInit {
         return;
       }
 
-      this.envService.updateSecretName(this.project.id, this.env.id, this.currentSecretId, name).subscribe({
+      this.envSecretService.updateSecretName(this.env.id, this.currentSecretId, name).subscribe({
         next: () => {
           this.env.secrets = this.env.secrets.map((secret) => {
             if (secret.id === this.currentSecretId) {
@@ -300,7 +302,7 @@ export class ProjectComponent implements OnInit {
 
       const id = uuidv4();
       const value = uuidv4();
-      this.envService.addSecret(this.project.id, this.env.id, { id, type, name, value }).subscribe({
+      this.envSecretService.addSecret(this.env.id, { id, type, name, value }).subscribe({
         next: (secret: ISecret) => {
           this.env.secrets = [...this.env.secrets, secret];
           this.isSecretModalVisible = false;
