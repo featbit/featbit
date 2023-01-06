@@ -37,19 +37,4 @@ export class EnvService {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}`;
     return this.http.delete(url);
   }
-
-  addSecret(projectId: string, envId: string, secret: ISecret): Observable<any> {
-    const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}/secrets`;
-    return this.http.post<ISecret>(url, secret);
-  }
-
-  removeSecret(projectId: string, envId: string, secretId: string): Observable<any> {
-    const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}/secrets/${secretId}`;
-    return this.http.delete(url);
-  }
-
-  updateSecretName(projectId: string, envId: string, secretId: string, secretName: string) {
-    const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}/secrets/${secretId}`;
-    return this.http.put<ISecret>(url, { name: secretName });
-  }
 }
