@@ -18,12 +18,12 @@ export class EnvSecretService {
   }
 
   removeSecret(envId: string, secretId: string): Observable<any> {
-    const url = this.baseUrl.replace(/#envId/ig, `${envId}`);
+    const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `/${secretId}`;
     return this.http.delete(url);
   }
 
   updateSecretName(envId: string, secretId: string, secretName: string) {
-    const url = this.baseUrl.replace(/#envId/ig, `${envId}`);
+    const url = this.baseUrl.replace(/#envId/ig, `${envId}`) + `/${secretId}`;
     return this.http.put<ISecret>(url, { name: secretName });
   }
 }

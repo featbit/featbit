@@ -206,7 +206,7 @@ export class ProjectComponent implements OnInit {
     this.secretModalTitle = $localize `:@@org.project.add-secret:Add secret`;
     this.secretForm = this.fb.group({
       name: [null, Validators.required],
-      type: ['client-side', Validators.required]
+      type: [SecretTypeEnum.ClientSide, Validators.required]
     });
     this.isSecretModalVisible = true;
   }
