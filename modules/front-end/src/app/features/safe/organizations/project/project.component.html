@@ -130,13 +130,11 @@
           nzRequired
           i18n="@@org.project.secret-type"
           i18n-nzTooltipTitle="@@org.project.type-description"
-          nzTooltipTitle="The secret would be used by a client side or server side SDK">
-          Type
-        </nz-form-label>
+          nzTooltipTitle="The secret would be used by a client side or server side SDK">Type</nz-form-label>
         <nz-form-control>
           <nz-select [nzDisabled]="isEditingSecret" formControlName="type">
-            <nz-option nzValue="client-side" i18n-nzLabel="@@org.project.client-side" nzLabel="Client side"></nz-option>
-            <nz-option nzValue="server-side" i18n-nzLabel="@@org.project.server-side" nzLabel="Server side"></nz-option>
+            <nz-option nzValue="client-side" i18n-nzLabel="@@org.project.client-side" nzLabel="Client Side SDK"></nz-option>
+            <nz-option nzValue="server-side" i18n-nzLabel="@@org.project.server-side" nzLabel="Server Side SDK"></nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>
