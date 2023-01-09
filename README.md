@@ -54,11 +54,13 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 
 
-<div align="center">
-<a href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211287699-b1bf0225-12f7-49bd-9c4f-2e1ccb844f8e.png" height="388px"></a> 
-</div>
+
 
 ## Introduction
+
+<div align="left">
+<a href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211287699-b1bf0225-12f7-49bd-9c4f-2e1ccb844f8e.png" height="300"></a> 
+</div>
 
 **FeatBit** provides a holistic framework for Feature Flag-driven development, A/B testing, and experimentation, enabling teams to use flags on a massive scale across various use cases. FeatBit empowers all teams:
 
