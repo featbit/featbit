@@ -43,7 +43,7 @@ public class Insight
                 variationId = variation.Variation.Id,
                 tag_0 = User!.KeyId,
                 tag_1 = variation.Variation.Id,
-                tag_2 = variation.SendToExperiment.ToString().ToLower(),
+                tag_2 = variation.SendToExperiment ? "true" : "false",
                 tag_3 = User!.Name
             };
 
