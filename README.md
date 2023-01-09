@@ -52,12 +52,9 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 </h3>
 </div>
 
-
---------------------------------------------------
-
-![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/205070601-bd35f8e8-6765-49e7-8d85-88364be9934b.gif)
-
---------------------------------------------------
+<div align="center">
+<a href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211286196-cacb47d1-7f42-42d9-8fa1-4ef4e67e6930.png" ></a> 
+</div>
 
 ## Introduction
 
