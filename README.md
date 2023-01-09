@@ -52,8 +52,10 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 </h3>
 </div>
 
+
+
 <div align="center">
-<a href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211286196-cacb47d1-7f42-42d9-8fa1-4ef4e67e6930.png" ></a> 
+<a href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211287699-b1bf0225-12f7-49bd-9c4f-2e1ccb844f8e.png" height="388px"></a> 
 </div>
 
 ## Introduction
