@@ -61,6 +61,8 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 <a border="10" target="_blank" href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211297409-79758550-14cd-4ca4-a1b6-b83cc5dca024.png"></a> 
 </div>
 
+<br/>
+
 **FeatBit** provides a holistic framework for Feature Flag-driven development, A/B testing, and experimentation, enabling teams to use flags on a massive scale across various use cases. FeatBit empowers all teams:
 
 -	Reduce delivery risk by progressively releasing features to targeting users without redeployment.
