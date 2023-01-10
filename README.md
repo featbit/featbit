@@ -12,7 +12,7 @@
 
 ## Getting Started
 
-[FeatBit in 3 minutes (Video)](https://www.youtube.com/watch?v=hfww1FpjHV0) | [Installation & Getting Started](https://featbit.gitbook.io/)
+[**FeatBit in 3 minutes (Video)**](https://www.youtube.com/watch?v=hfww1FpjHV0) | [**Installation & Getting Started (Docs)**](https://featbit.gitbook.io/) | [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) | [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) 
 
 
 ## Introduction
@@ -25,17 +25,13 @@ Feature flags is a modern engineering technology that decouples code deployments
 
 ● Giving Sales, CS, Marketing the ability to fine-tune target audiences and manage customer entitlement.
 
-## Communities
+[Click here to get more information about FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a).
 
-◆ If you want an online support or if you want to contribute, [**Join our slack**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
+## Community & Contribution
 
-◆ If you want to request a new feature, you can post it on our [**Discussion's feature suggestions page**](https://github.com/featbit/featbit/discussions/categories/feature-suggestions)
+● [Discusssion](https://github.com/featbit/featbit/discussions)  - Community forum that you can request new features, ask questions, show-n-tell, etc.
 
-◆ Announcements will be posted on our [**Discusssion announcement page**](https://github.com/featbit/featbit/discussions/categories/announcements). Suach as release, milestones, reward, etc.
-
-◆ Any other requirements (such as Q&A, pool, show-n-tell, general topics), you can join our [**Discussions's page**](https://github.com/featbit/featbit/discussions).
-
-
+● [Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience for everyone in our community.
 
 ## Contribute to FeatBit
 
@@ -43,11 +39,6 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
 
-## Tech Stack
-
-◆  [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) - Architecture of FeatBit.
-
-◆  [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - More detailed reports on FeatBit's benchmark test. 
 
 ## Other useful links
 
