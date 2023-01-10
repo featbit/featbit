@@ -4,7 +4,6 @@ import { isSegmentCondition, trackByFunction } from '@utils/index';
 import { IRuleOp, ruleOps } from './ruleConfig';
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IUserProp } from "@shared/types";
-import {USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT} from "@shared/constants";
 import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
 
 @Component({
@@ -122,17 +121,6 @@ export class FindRuleComponent {
 
   public onRuleNameChange() {
     this.updateRuleName.emit(this.name);
-  }
-
-  canViewTargetedUsers(): boolean {
-    const segmentProperties = [USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT];
-    const segmentRules = this.conditions.filter(x => segmentProperties.includes(x.property));
-    return segmentRules.length === 0;
-  }
-
-  targetedUsersModalVisible: boolean = false;
-  viewTargetedUsers() {
-    this.targetedUsersModalVisible = true;
   }
 
   @Output() onServeChange = new EventEmitter<IRuleVariation[]>();
