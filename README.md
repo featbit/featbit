@@ -17,13 +17,13 @@
 
 ## Introduction
 
-Feature flags is a modern engineering technology that decouples code deployments from feature releases, giving you control over when and which end-users see which features. FeatBit enables teams to use feature flags on a massive scale across various use cases, such as: 
+Feature flag is a modern engineering technology that decouples code deployments from feature releases, giving you control over when and which end-users see which features. FeatBit enables teams to use feature flags on a massive scale across various use cases, such as: 
 
 - Shipping software safer and faster by progressively rolling out features to target users without redeployment.
 
-- Measuring the impact of features’ rollouts and run A/B tests to improve feature quality.
+- Measuring the impact of features’ rollouts and running A/B tests to improve feature quality.
 
-- Giving Sales, CS, Marketing the ability to fine-tune target audiences and manage customer entitlement.
+- Giving Sales, CS, and Marketing the ability to fine-tune target audiences and manage customer entitlement.
 
 [Click here to get more information about FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a).
 
@@ -31,9 +31,9 @@ Feature flags is a modern engineering technology that decouples code deployments
 
 [**Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) - An online support channel that helps you to solve the problem.
 
-[**Discusssion Forum**](https://github.com/featbit/featbit/discussions)  - Community forum that you can request new features, ask questions, show-n-tell, etc.
+[**Discusssion Forum**](https://github.com/featbit/featbit/discussions), where you can request new features, ask questions, show-n-tell, etc.
 
-[Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience for everyone in our community.
+[Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience in our community.
 
 ## Contribute to FeatBit
 
