@@ -37,7 +37,9 @@ Feature flags is a modern engineering technology that decouples code deployments
 
 ## Contribute to FeatBit
 
-Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. Building it together with the community ensures that we make a product that solves real problems for real people. [**Join our slack**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) . 
+Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. Building it together with the community ensures that we make a product that solves real problems for real people. 
+
+[**Join Slack to get our contribution tasks**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) . 
 
 [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
 
