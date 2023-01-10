@@ -7,36 +7,23 @@
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)     
 
-**FeatBit** is a scalable, high-performance, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software, such as:
 
-● Reducing release risk by progressively rolling out features to targeting users without redeployment.
-
-● Measuring the impact of features’ rollouts and run A/B tests to improve feature quality.
-
-● Giving Sales, CS, Marketing the ability to fine-tune target audiences and manage customer entitlement.
-
-
+**FeatBit** is a scalable, high-performance, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
 
 ## Getting Started
 
 [FeatBit in 3 minutes (Video)](https://www.youtube.com/watch?v=hfww1FpjHV0) | [Installation & Getting Started](https://featbit.gitbook.io/)
 
 
-
 ## Introduction
 
-**FeatBit** provides a feature management platform that empowers all team to deliver, control, experiment with, and monetize their software. It enables teams to use feature flags on a massive scale across various use cases, such as:
+Feature flags is a modern engineering technology that decouples code deployments from feature releases, giving you control over when and which end-users see which features. Now adays, feature flags have been using on a massive scale across various use cases, such as: 
 
--	Reduce delivery risk by progressively releasing features to targeting users without redeployment.
+● Ship software safer and faster by progressively rolling out features to targeting users without redeployment.
 
--	Measure the impact of features’ rollouts and run A/B tests to improve feature quality.
+● Measuring the impact of features’ rollouts and run A/B tests to improve feature quality.
 
--	Enable Sales and CS to close more deals with demos and feature trials at the push of a button.
-
--	Give Marketing the ability to fine-tune target audiences, manage customer programs, etc.
-
--	[**And more**](https://featbit.medium.com/introducing-featbit-e0cef61572a)
-
+● Giving Sales, CS, Marketing the ability to fine-tune target audiences and manage customer entitlement.
 
 ## Communities
 
