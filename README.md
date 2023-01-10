@@ -49,12 +49,19 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 ## Getting Started
 
-0.  [Watch the quick overview video](https://featbit.gitbook.io/)
-1.  [Install FeatBit with Docker](https://featbit.gitbook.io/docs/installation)
-2.  [Create two feature flags](https://featbit.gitbook.io/docs/getting-started/2.-create-two-feature-flags)
-3.  [Try interacting with the demo](https://featbit.gitbook.io/docs/getting-started/3.-try-interacting-with-the-demo)
-4.  [Connect an SDK](https://featbit.gitbook.io/docs/getting-started/4.-connect-an-sdk)
-5.  [How-to guides](https://featbit.gitbook.io/docs/getting-started/5.-how-to-guides)
+[[0]  Watch the quick overview video](https://featbit.gitbook.io/) <div align="left">
+<a href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211297409-79758550-14cd-4ca4-a1b6-b83cc5dca024.png" height=200></a> 
+</div>
+
+[[1]  Install FeatBit with Docker](https://featbit.gitbook.io/docs/installation)
+
+[[2]  Create two feature flags](https://featbit.gitbook.io/docs/getting-started/2.-create-two-feature-flags)
+
+[[3]  Try interacting with the demo](https://featbit.gitbook.io/docs/getting-started/3.-try-interacting-with-the-demo)
+
+[[4]  Connect an SDK](https://featbit.gitbook.io/docs/getting-started/4.-connect-an-sdk)
+
+[[5]  How-to guides](https://featbit.gitbook.io/docs/getting-started/5.-how-to-guides)
 
 ## Introduction
 
