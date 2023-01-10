@@ -41,13 +41,6 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
 
-
-## Other useful links
-
-◆  [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
-
-◆  [Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience for everyone in our community.
-
 ## License
 
 FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
