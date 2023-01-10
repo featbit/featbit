@@ -46,22 +46,22 @@ export const resourcesTypes: ResourceType[] = [
   {
     type: ResourceTypeEnum.All,
     pattern: generalResourceRNPattern.all,
-    displayName: 'All'
+    displayName: $localize`:@@iam.rsc-type.all:All`
   },
   {
     type: ResourceTypeEnum.General,
     pattern: generalResourceRNPattern.project,
-    displayName: 'General'
+    displayName: $localize`:@@iam.rsc-type.general:General`
   },
   {
     type: ResourceTypeEnum.Project,
     pattern: 'project/{project}',
-    displayName: 'Project'
+    displayName: $localize`:@@iam.rsc-type.project:Project`
   },
   {
     type: ResourceTypeEnum.Env,
     pattern: 'project/{project}:env/{env}',
-    displayName: 'Environment'
+    displayName: $localize`:@@iam.rsc-type.env:Environment`
   }
 ];
 
@@ -117,157 +117,157 @@ export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
     {
       id: uuidv4(),
       name: permissionActions.All,
-      displayName: 'All'
+      displayName: $localize`:@@iam.action.all:All`
     },
   ],
   [`${ResourceTypeEnum.General},account`]: [
     {
       id: uuidv4(),
       name: permissionActions.UpdateOrgName,
-      displayName: 'Update org name'
+      displayName: $localize`:@@iam.action.update-org-name:Update org name`
     },
   ],
   [`${ResourceTypeEnum.General},iam`]: [
     {
       id: uuidv4(),
       name: permissionActions.CanManageIAM,
-      displayName: 'IAM'
+      displayName: $localize`:@@iam.action.iam:IAM`
     },
   ],
   [`${ResourceTypeEnum.General},project`]: [ // for all projects
     {
       id: uuidv4(),
       name: permissionActions.ListProjects,
-      displayName: 'List projects'
+      displayName: $localize`:@@iam.action.list-projects:List projects`
     },
     {
       id: uuidv4(),
       name: permissionActions.CreateProject,
-      displayName: 'Create projects'
+      displayName: $localize`:@@iam.action.create-projects:Create projects`
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteProject,
-      displayName: 'Delete projects'
+      displayName: $localize`:@@iam.action.delete-projects:Delete projects`
     },
     {
       id: uuidv4(),
-      name: permissionActions.UpdateProjectInfo,
-      displayName: 'Update project info'
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreateEnv,
-      displayName: 'Create environment'
+      name: permissionActions.UpdateProjectSettings,
+      displayName: $localize`:@@iam.action.update-project-settings:Update project settings`
     },
     {
       id: uuidv4(),
       name: permissionActions.ListEnvs,
-      displayName: 'List environments'
+      displayName: $localize`:@@iam.action.list-envs:List environments`
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.CreateEnv,
+      displayName: $localize`:@@iam.action.create-env:Create environment`
     },
     {
       id: uuidv4(),
       name: permissionActions.AccessEnvs,
-      displayName: 'Access environments'
+      displayName: $localize`:@@iam.action.access-envs:Access environments`
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteEnv,
-      displayName: 'Delete environment'
+      displayName: $localize`:@@iam.action.delete-envs:Delete environments`
     },
     {
       id: uuidv4(),
-      name: permissionActions.UpdateEnvInfo,
-      displayName: 'Update environment info'
+      name: permissionActions.UpdateEnvSettings,
+      displayName: $localize`:@@iam.action.update-env-settings:Update environment settings`
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteEnvSecret,
-      displayName: 'Delete environment secret'
+      displayName: $localize`:@@iam.action.delete-env-secret:Delete environment secret`
     },
     {
       id: uuidv4(),
       name: permissionActions.CreateEnvSecret,
-      displayName: 'Create environment secret'
+      displayName: $localize`:@@iam.action.create-env-secret:Create environment secret`
     },
     {
       id: uuidv4(),
       name: permissionActions.UpdateEnvSecret,
-      displayName: 'Update environment secret'
+      displayName: $localize`:@@iam.action.update-env-secret:Update environment secret`
     },
   ],
   [ResourceTypeEnum.Project]: [ // for a specific project
     {
       id: uuidv4(),
       name: permissionActions.AccessEnvs,
-      displayName: 'Access environments'
+      displayName: $localize`:@@iam.action.access-envs:Access environments`
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteProject,
-      displayName: 'Delete projects'
+      displayName: $localize`:@@iam.action.delete-projects:Delete projects`
     },
     {
       id: uuidv4(),
-      name: permissionActions.UpdateProjectInfo,
-      displayName: 'Update project info'
+      name: permissionActions.UpdateProjectSettings,
+      displayName: $localize`:@@iam.action.update-project-settings:Update project settings`
     },
     {
       id: uuidv4(),
       name: permissionActions.ListEnvs,
-      displayName: 'List environments'
+      displayName: $localize`:@@iam.action.list-envs:List environments`
     },
     {
       id: uuidv4(),
       name: permissionActions.CreateEnv,
-      displayName: 'Create environment'
+      displayName: $localize`:@@iam.action.create-env:Create environment`
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteEnvSecret,
-      displayName: 'Delete environment secret'
+      displayName: $localize`:@@iam.action.delete-env-secret:Delete environment secret`
     },
     {
       id: uuidv4(),
       name: permissionActions.CreateEnvSecret,
-      displayName: 'Create environment secret'
+      displayName: $localize`:@@iam.action.create-env-secret:Create environment secret`
     },
     {
       id: uuidv4(),
       name: permissionActions.UpdateEnvSecret,
-      displayName: 'Update environment secret'
+      displayName: $localize`:@@iam.action.update-env-secret:Update environment secret`
     },
   ],
   [ResourceTypeEnum.Env]: [ // for a specific environment
     {
       id: uuidv4(),
       name: permissionActions.AccessEnvs,
-      displayName: 'Access environments'
+      displayName: $localize`:@@iam.action.access-envs:Access environments`
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteEnv,
-      displayName: 'Delete environments'
+      displayName: $localize`:@@iam.action.delete-envs:Delete environments`
     },
     {
       id: uuidv4(),
-      name: permissionActions.UpdateEnvInfo,
-      displayName: 'Update environment info'
+      name: permissionActions.UpdateEnvSettings,
+      displayName: $localize`:@@iam.action.update-env-settings:Update environment settings`
     },
     {
       id: uuidv4(),
       name: permissionActions.DeleteEnvSecret,
-      displayName: 'Delete environment secret'
+      displayName: $localize`:@@iam.action.delete-env-secret:Delete environment secret`
     },
     {
       id: uuidv4(),
       name: permissionActions.CreateEnvSecret,
-      displayName: 'Create environment secret'
+      displayName: $localize`:@@iam.action.create-env-secret:Create environment secret`
     },
     {
       id: uuidv4(),
       name: permissionActions.UpdateEnvSecret,
-      displayName: 'Update environment secret'
+      displayName: $localize`:@@iam.action.update-env-secret:Update environment secret`
     },
   ]
 }

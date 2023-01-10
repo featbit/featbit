@@ -36,7 +36,7 @@
                      [compareWith]="statement.compareResourceType"
                      [(ngModel)]="statement.resourceType"
                      (ngModelChange)="statement.onResourceTypeChange()">
-            <nz-option *ngFor="let rt of resourcesTypes" [nzLabel]="rt.displayName | T: rt.displayName: 'resource-type' " [nzValue]="rt"></nz-option>
+            <nz-option *ngFor="let rt of resourcesTypes" [nzLabel]="rt.displayName" [nzValue]="rt"></nz-option>
           </nz-select>
         </div>
         <div class="input-item">

@@ -8,7 +8,7 @@
   <div class="selected-actions" *ngIf="selectedActions.length">
     <div nz-col class="action" *ngFor="let act of selectedActions">
       <div class="inner-box">
-        {{act.name | T: act.displayName : 'action'}} ({{act.name}})
+        {{act.displayName}} ({{act.name}})
       </div>
       <button nz-button nzType="default" [nzSize]="'large'" (click)="removeAction(act)"><i nz-icon nzType="close"></i></button>
     </div>
@@ -26,10 +26,10 @@
       <nz-option
         nzCustomContent
         [nzValue]="action"
-        [nzLabel]="action.name | T: action.displayName : 'action'"
+        [nzLabel]="action.displayName"
         [nzHide]="isActionSelected(action)">
         <div class="action-selection-item">
-          <div class="title">{{ action.name | T: action.displayName: 'action'}}</div>
+          <div class="title">{{ action.displayName}}</div>
           <div class="digest">{{ getActionDigest(action) }}</div>
         </div>
       </nz-option>

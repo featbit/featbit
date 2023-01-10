@@ -82,7 +82,7 @@ export class ProjectDrawerComponent implements OnInit {
       return this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.CreateProject);
     } else {
       const rn = this.permissionsService.getResourceRN(ResourceTypeEnum.Project, this.project);
-      return this.permissionsService.canTakeAction(rn, permissionActions.UpdateProjectInfo);
+      return this.permissionsService.canTakeAction(rn, permissionActions.UpdateProjectSettings);
     }
   }
 

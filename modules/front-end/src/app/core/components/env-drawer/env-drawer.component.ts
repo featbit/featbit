@@ -134,7 +134,7 @@ export class EnvDrawerComponent implements OnInit {
     if (!this.isEditing) { // creation
       return this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.CreateEnv);
     } else {
-      return this.permissionsService.canTakeAction(this.rn, permissionActions.UpdateEnvInfo);
+      return this.permissionsService.canTakeAction(this.rn, permissionActions.UpdateEnvSettings);
     }
   }
 }

@@ -117,11 +117,11 @@ db.Policies.insertOne(
                     "CreateProject",
                     "DeleteProject",
                     "AccessEnvs",
-                    "UpdateProjectInfo",
+                    "UpdateProjectSettings",
                     "ListEnvs",
                     "CreateEnv",
                     "DeleteEnv",
-                    "UpdateEnvInfo",
+                    "UpdateEnvSettings",
                     "CreateEnvSecret",
                     "DeleteEnvSecret",
                     "UpdateEnvSecret"
