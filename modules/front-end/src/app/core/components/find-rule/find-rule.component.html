@@ -25,9 +25,6 @@
   <ng-template #titleTemplate>
     <div style="display:flex;justify-content: flex-start;">
       <input type="text" class="standard-bordered-input" nz-input style="width: 500px;height: 36px;" [(ngModel)]="name" (ngModelChange)="onRuleNameChange()" />
-      <div class="rule-title" style="margin-left: 16px;" *ngIf="canViewTargetedUsers()">
-        <i i18n-nz-tooltip="@@common.view-matched-users" nz-tooltip="View matched users" nz-icon nzType="icons:icon-targeted-user" (click)="viewTargetedUsers()"></i>
-      </div>
       <div class="rule-title" style="margin-left: 12px;">
         <i nz-icon
           i18n-nz-popconfirm="@@common.remove-rule-confirm"
