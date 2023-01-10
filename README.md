@@ -17,7 +17,7 @@
 
 ## Introduction
 
-Feature flags is a modern engineering technology that decouples code deployments from feature releases, giving you control over when and which end-users see which features. Now adays, feature flags have been using on a massive scale across various use cases, such as: 
+Feature flags is a modern engineering technology that decouples code deployments from feature releases, giving you control over when and which end-users see which features. FeatBit enables teams to use feature flags on a massive scale across various use cases, such as: 
 
 ● Ship software safer and faster by progressively rolling out features to targeting users without redeployment.
 
