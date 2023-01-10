@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>SdkWebSocket Client Test</title>
+</head>
+
+<body>
+    <h2>Step 1: Generate Token</h2>
+    <div>
+        <label for="servers">Choose A Server:</label>
+        <select id="servers">
+            <option value="ws://localhost:5100">ws://localhost:5100</option>
+        </select>
+        <p></p>
+        <label for="envSecret">Chose A EnvSecret: </label>
+        <select id="envSecret">
+            <option value="Fill your own secret">Your secret name</option>
+        </select>
+        <p></p>
+        <label for="sdkType">SdkType: </label>
+        <input type="text" id="sdkType" value="server" placeholder="client or server" />
+        <p></p>
+        <label for="version">Version: </label>
+        <input type="text" id="version" value="2" placeholder="1 or 2" />
+        <p></p>
+        <label for="enableDebug">Enable Debug: </label>
+        <input type="checkbox" id="enableDebug">
+        <p></p>
+        <div>
+            <button style="display: inline-block" id="generateToken" onclick="generateToken()">Generate Token</button>
+            <button style="display: inline-block" id="generateTokenThirtySecondsAgo"
+                onclick="generateTokenThirtySecondsAgo()">Generate Token Thirty Seconds Ago</button>
+        </div>
+        <p id="generateTokenLogs" style="display: none"></p>
+    </div>
+
+    <h2>Step 2: Connect To Server</h2>
+    <div>
+        <label for="websocketUrl">Server URL:</label>
+        <input id="websocketUrl" style="width: 700px;" value="server-addr/streaming?version=type=&token=" />
+        <button id="connect" onclick="connect()" type="submit">Connect</button>
+        <button id="close" onclick="disconnect()" disabled>Close</button>
+    </div>
+
+    <p>Connection Id: <span id="connectionId">N/a</span></p>
+    <p>Connection Status: <span id="status">Disconnected</span></p>
+    <p id="closeCode" style="display: none"></p>
+
+    <h2>Step 3: Send Message</h2>
+    <div>
+        <label for="message">Message:</label>
+        <input id="message" disabled />
+        <button id="send" type="submit" disabled>Send</button>
+        <button type="submit" onclick="loadDataSyncMessageTemplate()">Load DataSync Message Template</button>
+        <button type="submit" onclick="loadPingMessageTemplate()">Load Ping Message Template</button>
+        <button type="submit" onclick="loadEchoMessageTemplate()">Load Echo Message Template</button>
+        <button id="clean" type="submit" onclick="cleanMessages()">Clean Message</button>
+        <div id="last-sent-message"></div>
+    </div>
+
+    <h2>Messages</h2>
+    <table style="width: 900px">
+        <thead>
+            <tr>
+                <td style="width: 150px">From</td>
+                <td style="width: 150px">To</td>
+                <td>Content</td>
+            </tr>
+        </thead>
+        <tbody id="messages">
+        </tbody>
+    </table>
+
+    <div id="test"></div>
+</body>
+<script type="text/javascript" src="renderjson.js"></script>
+<script>
+
+    renderjson.set_show_to_level(1);
+
+    let ws;
+
+    const connectBtn = document.getElementById('connect');
+    const closeBtn = document.getElementById('close');
+    const sendBtn = document.getElementById('send');
+    const messageInput = document.getElementById('message');
+    const statusElement = document.getElementById('status');
+    const connectionIdElement = document.getElementById('connectionId');
+    const messagesElement = document.getElementById('messages');
+    const websocketUrlInput = document.getElementById('websocketUrl');
+    const lastSentMessageElement = document.getElementById('last-sent-message');
+
+    const generateTokenLogs = document.getElementById('generateTokenLogs');
+
+    function generateToken() {
+        const timestamp = Date.now();
+        generateTokenCore(timestamp);
+    }
+
+    function generateTokenThirtySecondsAgo() {
+        const timestamp = Date.now() - 30 * 1000;
+        generateTokenCore(timestamp);
+    }
+
+    function generateTokenCore(timestamp) {
+        let logs = "";
+        let step = 0;
+        const sdkType = document.getElementById('sdkType').value;
+        logs += `step ${step++} get sdk type: ${sdkType} <br/>`;
+
+        const version = document.getElementById('version').value;
+        logs += `step ${step++} get version: ${version} <br/>`;
+
+        const envSecret = document.getElementById('envSecret').value;
+        logs += `step ${step++} get envSecret: ${envSecret} <br/>`;
+
+        const trimedEnvSecret = envSecret.replace(/=*$/, '');
+        logs += `step ${step++} trim envSecret: ${trimedEnvSecret} <br/>`;
+
+        logs += `step ${step++} get utc timestamp in ms: ${timestamp} <br/>`;
+
+        const start = Math.floor(Math.random() * envSecret.length);
+        logs += `step ${step++} get a random insert position: ${start} <br/>`;
+
+        const token =
+            encodeNumber(start, 3) +
+            encodeNumber(15, 2) +
+            trimedEnvSecret.slice(0, start) +
+            encodeNumber(timestamp, 15) +
+            trimedEnvSecret.slice(start);
+
+        logs += `step ${step++} get final token: ${token} <br/>`;
+
+        generateTokenLogs.innerHTML = logs;
+
+        generateTokenLogs.style.display = 'block';
+
+        const server = document.getElementById('servers').value;
+        const enableDebug = document.getElementById('enableDebug').checked;
+        websocketUrlInput.value = `${server}/streaming?version=${version}&type=${sdkType}&token=${token}${enableDebug ? '&debug=true' : ''}`;
+    }
+
+    function connect() {
+
+        connectBtn.disabled = true;
+
+        const websocketUrl = websocketUrlInput.value;
+        ws = new WebSocket(websocketUrl);
+
+        ws.onopen = function (event) {
+            updateState('onopen', event);
+        };
+        ws.onclose = function (event) {
+            console.log(event);
+            updateState('onclose', event);
+        };
+        ws.onerror = function (error) {
+            updateState('onerror', error);
+        };
+
+        ws.onmessage = function (event) {
+            const message = event.data;
+
+            const jsonMessage = JSON.parse(message);
+            if (jsonMessage.messageType === 'connectionId') {
+                connectionIdElement.innerText = jsonMessage.data;
+            }
+
+            appendServerMessage(message);
+        };
+    }
+
+    function disconnect() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.close(3001, 'client specified.');
+            connectionIdElement.innerText = 'N/a';
+        }
+    }
+
+    function send(message) {
+        if (!message) {
+            return;
+        }
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(message);
+        } else {
+            alert('WebSocket is not open');
+        }
+
+        lastSentMessageElement.appendChild(formatJson(message));
+        appendClientMessage(message);
+    }
+
+    function updateState(operation, arg) {
+        switch (operation) {
+            case "onopen":
+                connected(arg);
+                break;
+            case "onclose":
+                disconnected(arg);
+                break;
+            case "onerror":
+                error(arg);
+                break;
+        }
+
+        function connected(event) {
+            connectBtn.disabled = true;
+            closeBtn.disabled = false;
+            sendBtn.disabled = false;
+            messageInput.disabled = false;
+
+            const closeCode = document.getElementById('closeCode');
+            closeCode.style.display = 'none';
+
+            sendBtn.onclick = function () {
+                send(messageInput.value);
+            };
+
+            statusElement.innerHTML = 'Connected';
+        }
+
+        function disconnected(event) {
+            connectBtn.disabled = false;
+            closeBtn.disabled = true;
+            sendBtn.disabled = true;
+            messageInput.disabled = true;
+            messageInput.value = '';
+
+            const closeCode = document.getElementById('closeCode');
+            closeCode.style.display = 'block';
+            closeCode.innerText = `Close Status: ${event.code} ${event.reason}`;
+
+            statusElement.innerHTML = 'Disconnected';
+        }
+
+        function error(error) {
+            disconnected();
+            statusElement.innerHTML = `WebSocket Error: ${error}`;
+        }
+    }
+
+    function appendClientMessage(content) {
+        appendMessage('Client', 'Server', content);
+    }
+
+    function appendServerMessage(content) {
+        appendMessage('Server', 'Client', content);
+    }
+
+    function appendMessage(from, to, content) {
+
+        const row = messagesElement.insertRow(-1);
+
+        row.insertCell(0).innerText = from;
+        row.insertCell(1).innerText = to;
+
+        row.appendChild(formatJson(content));
+    }
+
+    function cleanMessages() {
+        while (messagesElement.lastElementChild) {
+            messagesElement.removeChild(messagesElement.lastElementChild);
+        }
+
+        console.log('messages cleaned');
+    }
+
+    function loadDataSyncMessageTemplate() {
+        let message;
+
+        const sdkType = document.getElementById('sdkType').value;
+        if (sdkType === 'client') {
+            const user = {
+                keyId: "prod-bot-id",
+				name: "prod-bot",
+				customizedProperties: [
+					{
+						"name": "email",
+						"value": "prod-bot@featbit.com"
+					}
+				],
+            };
+
+            message = {
+                messageType: 'data-sync',
+                data: {
+                    user: user,
+                    timestamp: 0
+                }
+            };
+        }
+
+        if (sdkType === 'server') {
+            message = {
+                messageType: 'data-sync',
+                data: {
+                    timestamp: 0
+                }
+            };
+        }
+
+        messageInput.value = JSON.stringify(message);
+    }
+
+    function loadPingMessageTemplate() {
+        var message = {
+            messageType: 'ping',
+            data: {}
+        };
+
+        messageInput.value = JSON.stringify(message);
+    }
+
+    function loadEchoMessageTemplate() {
+        var message = {
+            messageType: 'echo',
+            data: {
+                value: "helloworld"
+            }
+        };
+
+        messageInput.value = JSON.stringify(message);
+    }
+
+    const alphabet = {
+        "0": "Q",
+        "1": "B",
+        "2": "W",
+        "3": "S",
+        "4": "P",
+        "5": "H",
+        "6": "D",
+        "7": "X",
+        "8": "Z",
+        "9": "U",
+    }
+
+    function encodeNumber(param, length) {
+        const str = "000000000000" + param;
+        const numberWithLeadingZeros = str.slice(str.length - length);
+        return numberWithLeadingZeros.split('').map(n => alphabet[n]).join('');
+    }
+
+    function formatJson(json) {
+        const jsonObj = JSON.parse(json);
+        return renderjson(jsonObj)
+    }
+</script>
+
+</html>
