@@ -12,7 +12,7 @@
 
 ## Getting Started
 
-[**FeatBit in 3 minutes (Video)**](https://www.youtube.com/watch?v=hfww1FpjHV0) | [**Installation & Getting Started (Docs)**](https://featbit.gitbook.io/) |  [Online Support](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) | [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) | [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark)
+[**FeatBit in 3 minutes (Video)**](https://www.youtube.com/watch?v=hfww1FpjHV0) | [**Installation (Docs)**](https://featbit.gitbook.io/docs/installation) | [**Getting Started (Docs)**](https://featbit.gitbook.io/) | [Online Support](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) | [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) | [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark)
 
 
 ## Introduction
