@@ -9,15 +9,11 @@
 
 **FeatBit** is an 100% open-source feature flags management platform that empowers all team to use feature flags on a massive scale across various use cases, such as: 
 
-● Reduce release risk by progressively releasing features to targeting users without redeployment, 
+● Reducing release risk by progressively rolling out features to targeting users without redeployment.
 
-● Measure the impact of features’ rollouts and run A/B tests to improve feature quality.
+● Measuring the impact of features’ rollouts and run A/B tests to improve feature quality.
 
-● Enable Sales and CS to close more deals with demos and feature trials at the push of a button.
-
-● Give Marketing the ability to fine-tune target audiences, manage customer entitlement, etc.
-
-● Empower finance teams quickly get entitlement and related billing report of each customer.
+● Giving Sales, CS, Marketing the ability to fine-tune target audiences and manage customer entitlement.
 
 
 <div align="left">
