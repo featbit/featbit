@@ -7,7 +7,7 @@
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)     
 
-**FeatBit** is an 100% open-source feature flags management platform that empowers all team to use feature flags on a massive scale across various use cases, such as: 
+**FeatBit** is a scalable, high-performance, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software, such as:
 
 ● Reducing release risk by progressively rolling out features to targeting users without redeployment.
 
@@ -16,17 +16,14 @@
 ● Giving Sales, CS, Marketing the ability to fine-tune target audiences and manage customer entitlement.
 
 
-<div align="left">
-
-<h3 align="center">
-  <a href="https://featbit.gitbook.io/">Getting Started (Docs)</a>
-  <span> · </span>
-  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support</a>
-</h3>
-</div>
-
 
 ## Getting Started
+
+● Install FeatBit
+
+● Getting Started
+
+Click on me to getting Installing FeatBit, then try it. by following the steps of getting started.
 
 [[0]  Watch the quick overview video](https://featbit.gitbook.io/) <div align="left">
 <a href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211297409-79758550-14cd-4ca4-a1b6-b83cc5dca024.png" height=200></a> 
