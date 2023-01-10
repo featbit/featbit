@@ -40,24 +40,23 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 
 <h3 align="center">
-  <a href="https://featbit.gitbook.io/">Getting Started</a>
+  <a href="https://featbit.gitbook.io/">Getting Started (Docs)</a>
   <span> · </span>
   <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support</a>
-  <span> · </span>
-  <a href="https://featbit.gitbook.io/">How to contribute</a>  
 </h3>
 </div>
 
 
+## Getting Started
 
-
+0.  [Watch the quick overview video](https://featbit.gitbook.io/)
+1.  [Install FeatBit with Docker](https://featbit.gitbook.io/docs/installation)
+2.  [Create two feature flags](https://featbit.gitbook.io/docs/getting-started/2.-create-two-feature-flags)
+3.  [Try interacting with the demo](https://featbit.gitbook.io/docs/getting-started/3.-try-interacting-with-the-demo)
+4.  [Connect an SDK](https://featbit.gitbook.io/docs/getting-started/4.-connect-an-sdk)
+5.  [How-to guides](https://featbit.gitbook.io/docs/getting-started/5.-how-to-guides)
 
 ## Introduction
-<div align="left">
-<a href="https://www.youtube.com/watch?v=hfww1FpjHV0"><img src="https://user-images.githubusercontent.com/68597908/211297409-79758550-14cd-4ca4-a1b6-b83cc5dca024.png"></a> 
-</div>
-
-<br/>
 
 **FeatBit** provides a feature management platform that empowers all team to deliver, control, experiment with, and monetize their software. It enables teams to use feature flags on a massive scale across various use cases, such as:
 
@@ -69,57 +68,26 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 -	Give Marketing the ability to fine-tune target audiences, manage customer programs, etc.
 
--	Etc.
+-	[**And more**](https://featbit.medium.com/introducing-featbit-e0cef61572a)
 
 
-[**Click here to get more use cases about FeatBit and why FeatBit.**](https://featbit.medium.com/introducing-featbit-e0cef61572a)
+## Communities
 
-
-
-
-
-
-
-## Getting Started
-
-You can launch all the docker containers by docker compose, all the images are available on [docker hub](https://hub.docker.com/u/featbit).
-
-Before launching FeatBit, make sure you have git and docker installed. Then do the following steps:
-
-Clone the repository to your server or local machine and boot up the services.
-```
-git clone https://github.com/featbit/featbit
-cd featbit
-docker compose up -d
-```
-Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and use the default credentials to log in.
-- username: **test@featbit.com**
-- password: **123456**
-
-**Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [the doc](https://featbit.gitbook.io/docs/installation#attention) to make it accessible publicly.
-
-## Documentation & Communities
-
-◆ To learn how to use FeatBit, you can visit [**FeatBit's documentation page**](https://featbit.gitbook.io/docs/)
-
-◆ If you met issues, you can report it to our [**Issues page**](https://github.com/featbit/featbit/issues)
+◆ If you want an online support or if you want to contribute, [**Join our slack**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
 
 ◆ If you want to request a new feature, you can post it on our [**Discussion's feature suggestions page**](https://github.com/featbit/featbit/discussions/categories/feature-suggestions)
 
-◆ All important announcements will be posted on our [**Discusssion announcement page**](https://github.com/featbit/featbit/discussions/categories/announcements). It includes information like release, milestones, roadmap, thanks, reward, etc.
+◆ Announcements will be posted on our [**Discusssion announcement page**](https://github.com/featbit/featbit/discussions/categories/announcements). Suach as release, milestones, reward, etc.
 
-◆ Any other requirements (such as Q&A, pool, show-n-tell, general topics), you can join our [**Discussions's page**](https://github.com/featbit/featbit/discussions) .
-
-◆ If you have further questions and want to contact us, you can join [**FeatBit Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) .  
-
-◆ All approved stories and tasks will be displayed and managed in [**GitHub's project page**](https://github.com/orgs/featbit/projects).
+◆ Any other requirements (such as Q&A, pool, show-n-tell, general topics), you can join our [**Discussions's page**](https://github.com/featbit/featbit/discussions).
 
 
-## Other useful links
 
-◆  [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
+## Contribute to FeatBit
 
-◆  [Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience for everyone in our community.
+Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. Building it together with the community ensures that we make a product that solves real problems for real people. [**Join our slack**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) . 
+
+[![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
 
 ## Tech Stack
 
@@ -127,15 +95,14 @@ Once all containers have started, go to FeatBit's portal [http://localhost:8081]
 
 ◆  [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - More detailed reports on FeatBit's benchmark test. 
 
+## Other useful links
 
-## Contribute to FeatBit
+◆  [Release Notes](https://github.com/featbit/featbit/releases) - Find out what changes we are making and how we are improving FeatBit.
 
-Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. Building it together with the community ensures that we make a product that solves real problems for real people. 
-
-We'd love to have your help too. Feel free to open issues, providing pull requests, and become a contributor.
-
-[![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
+◆  [Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience for everyone in our community.
 
 ## License
 
 FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
+
+
