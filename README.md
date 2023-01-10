@@ -40,15 +40,11 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 
 <h3 align="center">
-  <a href="https://featbit.gitbook.io/docs/installation">Installation</a>
-  <span> · </span>
   <a href="https://featbit.gitbook.io/">Getting Started</a>
   <span> · </span>
   <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support</a>
   <span> · </span>
-  <a href="https://featbit.gitbook.io/">Documentation</a>  
-  <span> · </span>
-  <a href="https://github.com/featbit/featbit/discussions/categories/announcements">Milestones</a>
+  <a href="https://featbit.gitbook.io/">How to contribute</a>  
 </h3>
 </div>
 
@@ -63,7 +59,7 @@ See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
 
 <br/>
 
-**FeatBit** provides a holistic framework for Feature Flag-driven development, A/B testing, and experimentation, enabling teams to use flags on a massive scale across various use cases. FeatBit empowers all teams:
+**FeatBit** provides a feature management platform that empowers all team to deliver, control, experiment with, and monetize their software. It enables teams to use feature flags on a massive scale across various use cases, such as:
 
 -	Reduce delivery risk by progressively releasing features to targeting users without redeployment.
 
