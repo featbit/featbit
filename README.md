@@ -12,7 +12,7 @@
 
 ## Getting Started
 
-[**FeatBit in 3 minutes (Video)**](https://www.youtube.com/watch?v=hfww1FpjHV0) | [**Installation & Getting Started (Docs)**](https://featbit.gitbook.io/) | [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) | [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) 
+[**FeatBit in 3 minutes (Video)**](https://www.youtube.com/watch?v=hfww1FpjHV0) | [**Installation & Getting Started (Docs)**](https://featbit.gitbook.io/) |  [Online Support](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) | [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) | [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark)
 
 
 ## Introduction
@@ -32,6 +32,8 @@ Feature flags is a modern engineering technology that decouples code deployments
 ● [Discusssion](https://github.com/featbit/featbit/discussions)  - Community forum that you can request new features, ask questions, show-n-tell, etc.
 
 ● [Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience for everyone in our community.
+
+● [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) - An online support channel that helps you to solve the problem.
 
 ## Contribute to FeatBit
 
