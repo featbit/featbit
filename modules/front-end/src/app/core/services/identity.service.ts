@@ -64,13 +64,16 @@ export class IdentityService {
     });
   }
 
-  async doLogoutUser() {
+  async doLogoutUser(keepOrgProject: boolean = true) {
     const storageToKeep = {
-      // restore account and project, so when user login, he would always see the same project & env
-      [CURRENT_ORGANIZATION()]: localStorage.getItem(CURRENT_ORGANIZATION()),
-      [CURRENT_PROJECT()]: localStorage.getItem(CURRENT_PROJECT()),
       [CURRENT_LANGUAGE()]: localStorage.getItem(CURRENT_LANGUAGE()),
     };
+
+    if (keepOrgProject) {
+      // restore account and project, so when user login, he would always see the same project & env
+      storageToKeep[CURRENT_ORGANIZATION()] = localStorage.getItem(CURRENT_ORGANIZATION());
+      storageToKeep[CURRENT_PROJECT()] = localStorage.getItem(CURRENT_PROJECT());
+    }
 
     localStorage.clear();
     Object.keys(storageToKeep).forEach(k => localStorage.setItem(k, storageToKeep[k]))
