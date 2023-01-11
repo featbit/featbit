@@ -12,6 +12,19 @@
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
+---------------------------------------------------------------------------
+
+<h3 align="left">
+  <a href="https://www.youtube.com/watch?v=hfww1FpjHV0" >Quick overview (Video)</a>
+  <span> · </span>
+  <a href="https://featbit.gitbook.io/">Documentation</a>
+  <span> · </span>
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support (Slack)</a>
+  <span> · </span>
+  <a href="https://github.com/featbit/featbit/discussions">Community Forum</a>  
+</h3>
+
+
 ## Introduction
 
 Feature flag is a modern engineering technology that decouples code deployments from feature releases, giving you control over when and which end-users see which features. FeatBit enables teams to use feature flags on a massive scale across various use cases, such as: 
@@ -42,23 +55,16 @@ git clone https://github.com/featbit/featbit
 cd featbit
 docker compose up -d
 ```
-Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and use the default credentials to log in.
+Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and log in with default credentials.
+
 - username: **test@featbit.com**
 - password: **123456**
 
 
-|| **Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [the doc](https://featbit.gitbook.io/docs/installation#attention) to make it accessible publicly.
+**Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [Installation Doc](https://featbit.gitbook.io/docs/installation#attention) to make it accessible publicly.
 
-After you established your own FeatBit platform, try FeatBit with an easy [**Getting Started (Docs)**](https://featbit.gitbook.io/docs/installation) guidance
+Once FeatBit is installed, following the [**Getting Started (Docs)**](https://featbit.gitbook.io/docs/installation) to start your journey.
 
-## Docs & Community
-
-- [Quick overview (Video)](https://www.youtube.com/watch?v=hfww1FpjHV0)
-- [Documentation](https://featbit.gitbook.io/docs/installation)
-- [Online Support (Slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) 
-- [Community Forum](https://github.com/featbit/featbit/discussions/34)
-- [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture)
-- [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark)
 
 <!-- - - An online support channel that helps you to quickly solve the problem. -->
 
