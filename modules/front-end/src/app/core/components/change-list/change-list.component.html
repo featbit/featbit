@@ -1,4 +1,4 @@
-<div class="category-list" [class]="lang">
+<div class="category-list">
   <ul>
     <li *ngFor="let category of categories">
       <span class="category">{{category.label}}</span>
@@ -50,27 +50,14 @@
             </ng-container>
           </li>
           <li class="change" *ngSwitchCase="'REMOVE'">
-            <ng-container *ngIf="lang === 'zh'">
-              <ng-container *ngIf="change.label">
-                <span i18n="@@differ.from"> from </span>
-                <span class="item">{{change.label}}</span>
-              </ng-container>
-              <span i18n="@@differ.removed">Removed </span>
-              <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.value}}</span>
-              <ng-container *ngIf="change.isMultiValue">
-                <span class="ant-tag remove-item" *ngFor="let value of change.value">{{value}}</span>
-              </ng-container>
+            <ng-container *ngIf="change.label">
+              <span i18n="@@differ.add-from">From </span>
+              <span class="item">{{change.label}}</span>
             </ng-container>
-            <ng-container *ngIf="lang !== 'zh'">
-              <span i18n="@@differ.removed">Removed </span>
-              <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.value}}</span>
-              <ng-container *ngIf="change.isMultiValue">
-                <span class="ant-tag remove-item" *ngFor="let value of change.value">{{value}}</span>
-              </ng-container>
-              <ng-container *ngIf="change.label">
-                <span i18n="@@differ.from"> from </span>
-                <span class="item">{{change.label}}</span>
-              </ng-container>
+            <span i18n="@@differ.add-removed"> removed </span>
+            <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.value}}</span>
+            <ng-container *ngIf="change.isMultiValue">
+              <span class="ant-tag remove-item" *ngFor="let value of change.value">{{value}}</span>
             </ng-container>
           </li>
           <li class="change rule" *ngSwitchCase="'RULE'">
