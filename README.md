@@ -12,7 +12,7 @@
 
 ## Getting Started
 
-[**FeatBit in 3 minutes**](https://www.youtube.com/watch?v=hfww1FpjHV0) - give you a quick overview of FeatBit.
+[**Quick overview (Video)**](https://www.youtube.com/watch?v=hfww1FpjHV0) - give you a quick overview of FeatBit.
 
 [**Installation (Docs)**](https://featbit.gitbook.io/docs/installation) - show you how to install/update FeatBit with Docker.
 
