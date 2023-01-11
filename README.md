@@ -62,11 +62,16 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 [**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) . 
 
-## Why FeatBit
+## Features
 
-The top 1% of companies spend thousands of hours building their own feature management platforms in-house. The other 99% are left paying for expensive 3rd party SaaS tools or hacking together unmaintained open source libraries.
-
-We want to give all companies the flexibility and power of a fully-featured in-house feature management platform without needing to build it themselves.
+- [x] Feature flag list
+- [x] Segment
+- [x] IAM
+- [x] AB test
+- [x] xxxx
+- [x] xxxx
+- [x] Websocket xxxx xxx
+- [ ] Entitlement based on attribute
 
 ## License
 
