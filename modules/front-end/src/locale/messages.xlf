@@ -167,14 +167,14 @@
         </context-group>
       </trans-unit>
       <trans-unit id="differ.enabled" datatype="html">
-        <source>Enabled</source>
+        <source>Enabled </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">8</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.disabled" datatype="html">
-        <source>Disabled</source>
+        <source>Disabled </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">12</context>
@@ -188,71 +188,66 @@
         </context-group>
       </trans-unit>
       <trans-unit id="differ.unarchived" datatype="html">
-        <source>Unarchived</source>
+        <source>Unarchived </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">20</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.set" datatype="html">
-        <source>Set</source>
+        <source>Set </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">24</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.from" datatype="html">
-        <source>from</source>
+        <source> from </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">27</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">55</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">71</context>
-        </context-group>
       </trans-unit>
       <trans-unit id="differ.to" datatype="html">
-        <source>to</source>
+        <source> to </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.added" datatype="html">
-        <source>Added</source>
+        <source>Added </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.add-to" datatype="html">
-        <source>to</source>
+        <source> to </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
           <context context-type="linenumber">48</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="differ.removed" datatype="html">
-        <source>Removed</source>
+      <trans-unit id="differ.add-from" datatype="html">
+        <source>From </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">54</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="differ.add-removed" datatype="html">
+        <source> removed </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">65</context>
+          <context context-type="linenumber">57</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.serve" datatype="html">
         <source>Serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">78</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.review-and-save" datatype="html">

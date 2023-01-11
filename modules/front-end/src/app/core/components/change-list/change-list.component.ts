@@ -1,7 +1,6 @@
 import {Component, Input} from "@angular/core";
 import {ICategory, IChange} from "@shared/diff/types";
 import {ICondition} from "@shared/rules";
-import {CURRENT_LANGUAGE} from "@utils/localstorage-keys";
 
 @Component({
   selector: 'change-list',
@@ -10,7 +9,6 @@ import {CURRENT_LANGUAGE} from "@utils/localstorage-keys";
 })
 export class ChangeListComponent {
 
-  lang: string = localStorage.getItem(CURRENT_LANGUAGE());
   @Input() categories: ICategory[] = []
 
   constructor() {

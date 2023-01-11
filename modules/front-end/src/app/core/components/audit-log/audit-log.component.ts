@@ -1,16 +1,16 @@
-import {Component, Input} from "@angular/core";
-import {SegmentService} from "@services/segment.service";
-import {EnvUserService} from "@services/env-user.service";
-import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {encodeURIComponentFfc, isSegmentCondition} from "@utils/index";
-import {ICondition} from "@shared/rules";
-import {lastValueFrom} from "rxjs";
-import {Router} from "@angular/router";
-import {AuditLogOpEnum, IAuditLog, RefTypeEnum} from "@core/components/audit-log/types";
-import {DiffFactoryService} from "@services/diff-factory.service";
-import {ICategory, OperationEnum} from "@shared/diff/types";
-import {ISegment} from "@features/safe/segments/types/segments-index";
-import {IUserType} from "@shared/types";
+import { Component, Input } from "@angular/core";
+import { SegmentService } from "@services/segment.service";
+import { EnvUserService } from "@services/env-user.service";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { encodeURIComponentFfc, isSegmentCondition } from "@utils/index";
+import { ICondition } from "@shared/rules";
+import { lastValueFrom } from "rxjs";
+import { Router } from "@angular/router";
+import { AuditLogOpEnum, IAuditLog, RefTypeEnum } from "@core/components/audit-log/types";
+import { DiffFactoryService } from "@services/diff-factory.service";
+import { ICategory } from "@shared/diff/types";
+import { ISegment } from "@features/safe/segments/types/segments-index";
+import { IUserType } from "@shared/types";
 
 @Component({
   selector: 'audit-log',
