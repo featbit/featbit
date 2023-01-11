@@ -12,9 +12,20 @@
 
 ## Getting Started
 
-[**FeatBit in 3 minutes (Video)**](https://www.youtube.com/watch?v=hfww1FpjHV0) | [**Installation (Docs)**](https://featbit.gitbook.io/docs/installation) | [**Getting Started (Docs)**](https://featbit.gitbook.io/) | [Online Support](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) | [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture)
+[**FeatBit in 3 minutes**](https://www.youtube.com/watch?v=hfww1FpjHV0) - give you a quick overview of FeatBit.
 
-![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
+[**Installation (Docs)**](https://featbit.gitbook.io/docs/installation) - show you how to install/update FeatBit with Docker.
+
+[**Getting Started (Docs)**](https://featbit.gitbook.io/docs/installation) - try FeatBit with an easy "getting started" guidance.
+
+[**Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) - An online support channel that helps you to quickly solve the problem.
+
+[Community Forum](https://github.com/featbit/featbit/discussions/34) - where you can request new features, ask questions, show-n-tell, etc.
+
+[Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) - an architecture overview of FeatBit system.
+
+[Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - the performance report of FeatBit running in non-cluster mode.
+
 
 
 ## Introduction
@@ -29,13 +40,9 @@ Feature flag is a modern engineering technology that decouples code deployments 
 
 [Click here to get more information about FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a).
 
-## Community
 
-[**Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) - An online support channel that helps you to solve the problem.
+![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
-[**Discusssion Forum**](https://github.com/featbit/featbit/discussions), where you can request new features, ask questions, show-n-tell, etc.
-
-[Code of conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) - How we promote and maintain a harassment-free experience in our community.
 
 ## Contribute to FeatBit
 
@@ -43,7 +50,7 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 [**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) . 
 
-[![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
+<!-- [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit) -->
 
 ## Why FeatBit
 
