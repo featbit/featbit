@@ -32,6 +32,7 @@ Feature flag is a modern engineering technology that decouples code deployments 
 - xxxxx xxads asasdfasdf asf asdf asdf asd
 - Websocket xxxx xxx fdasfafd asdf asf 
 - Entitlement based on attributesadf 
+- **SDK**, xxxx xxx fdasfafd asdf asf 
 
 ## Getting Started
 
