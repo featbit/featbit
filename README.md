@@ -67,7 +67,7 @@ Once all containers have started, go to FeatBit's portal [http://localhost:8081]
 
 [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - the performance report of FeatBit running in non-cluster mode. -->
 
-## Contribute to FeatBit
+## Contribution
 
 Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. 
 
