@@ -22,16 +22,16 @@ Feature flag is a modern engineering technology that decouples code deployments 
 
 [Click here to get more information about FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a).
 
-### Features
+## Features
 
-- [x] Feature flag list
-- [x] Segment
-- [x] IAM
-- [x] AB test
-- [x] xxxx
-- [x] xxxx
-- [x] Websocket xxxx xxx
-- [ ] Entitlement based on attribute
+- Feature flag list
+- Segment
+- IAM
+- AB test
+- xxxx
+- xxxx
+- Websocket xxxx xxx
+- Entitlement based on attribute
 
 ## Getting Started
 
