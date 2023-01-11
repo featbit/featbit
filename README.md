@@ -24,14 +24,14 @@ Feature flag is a modern engineering technology that decouples code deployments 
 
 ## Features
 
-- Feature flag list
-- Segment
-- IAM
-- AB test
-- xxxx
-- xxxx
-- Websocket xxxx xxx
-- Entitlement based on attribute
+- Feature flag list and faster by progressively rofeatures
+- Segment engineering technology that decouples code deployments
+- IAM engineering technology that decouples code deployments
+- AB test modern engineering technology
+- xxxx list and faster by progressixx
+- xxxxx xxads asasdfasdf asf asdf asdf asd
+- Websocket xxxx xxx fdasfafd asdf asf 
+- Entitlement based on attributesadf 
 
 ## Getting Started
 
