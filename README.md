@@ -37,15 +37,18 @@ Feature flag is a modern engineering technology that decouples code deployments 
 
 ## Features
 
-- Feature flag list and faster by progressively rofeatures
-- Segment engineering technology that decouples code deployments
-- IAM engineering technology that decouples code deployments
-- AB test modern engineering technology
-- xxxx list and faster by progressixx
-- xxxxx xxads asasdfasdf asf asdf asdf asd
-- Websocket xxxx xxx fdasfafd asdf asf 
-- Entitlement based on attributesadf 
-- **SDK**, xxxx xxx fdasfafd asdf asf 
+- **Feature flag list**, create, manage, and filter feature flags.
+- **Individual targets**, assign individual users to particular flag variation.
+- **Targeting users by attribute**, target segments of users by constructing rules.
+- **Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
+- **Insights**, check out feature usage during the rollout.
+- **Flag triggers**, automate changes to your feature flags from external tools.
+- **Custom permission & groups**, define access levels to projects, environment, or teams to enforce your policies.
+- **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
+- **Audit Log**, logs for feature flag & segment changes.
+- **Access to all SDKs**, use WebSocket to get update of flags return variation in real-time.
+- **Web API**, automate your workflow with Web APIs.
+- **Platform level**, create and manage unlimited projects and the environments of project in an orgnization.
 
 ## Getting Started
 
