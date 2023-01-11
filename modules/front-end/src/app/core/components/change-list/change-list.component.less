@@ -18,14 +18,10 @@
   }
 
   .change-list {
+    list-style: none;
     padding-left: 20px;
 
     .change {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 5px;
-
       &.rule {
         display: block;
         margin-bottom: 10px;
@@ -46,7 +42,12 @@
         line-height: 17px;
         height: 19px;
         border-radius: 5px;
-        margin-right: 0;
+        margin-left: 2px;
+        margin-right: 2px;
+      }
+
+      .item {
+        font-weight: 600;
 
         &.remove-item {
           text-decoration: line-through;
@@ -56,11 +57,9 @@
   }
 
   &.zh .change-list .change {
-    gap: 0;
-
-    .ant-tag {
-      margin-left: 5px;
-      margin-right: 5px;
+    .item {
+      margin: 0 2px;
+      margin: 0 2px;
     }
   }
 }

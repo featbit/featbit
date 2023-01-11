@@ -5,11 +5,11 @@
       <ul class="change-list">
         <ng-container *ngFor="let change of category.changes" [ngSwitch]="change.op">
           <li class="change" *ngSwitchCase="'ENABLE'">
-            <span i18n="@@differ.enabled">Enabled</span>
+            <span i18n="@@differ.enabled">Enabled </span>
             <span *ngIf="change.label?.length > 0">{{change.label}}</span>
           </li>
           <li class="change" *ngSwitchCase="'DISABLE'">
-            <span i18n="@@differ.disabled">Disabled</span>
+            <span i18n="@@differ.disabled">Disabled </span>
             <span *ngIf="change.label?.length > 0">{{change.label}}</span>
           </li>
           <li class="change" *ngSwitchCase="'ARCHIVE'">
@@ -17,59 +17,59 @@
             <span *ngIf="change.label?.length > 0">{{change.label}}</span>
           </li>
           <li class="change" *ngSwitchCase="'UNARCHIVED'">
-            <span i18n="@@differ.unarchived">Unarchived</span>
+            <span i18n="@@differ.unarchived">Unarchived </span>
             <span *ngIf="change.label?.length > 0">{{change.label}}</span>
           </li>
           <li class="change" *ngSwitchCase="'UPDATE'">
-            <span i18n="@@differ.set">Set</span>
+            <span i18n="@@differ.set">Set </span>
             <span *ngIf="change.label?.length > 0">{{change.label}}</span>
             <ng-container *ngIf="displayOldValue(change)">
-              <span i18n="@@differ.from">from</span>
-              <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.oldValue}}</span>
+              <span i18n="@@differ.from"> from </span>
+              <span class="item remove-item" *ngIf="!change.isMultiValue">{{change.oldValue}}</span>
               <ng-container *ngIf="change.isMultiValue">
                 <span class="ant-tag remove-item" *ngFor="let value of change.oldValue">{{value}}</span>
               </ng-container>
             </ng-container>
             <ng-container *ngIf="displayNewValue(change)">
-              <span i18n="@@differ.to">to</span>
-              <span class="ant-tag" *ngIf="!change.isMultiValue">{{change.value}}</span>
+              <span i18n="@@differ.to"> to </span>
+              <span class="item" *ngIf="!change.isMultiValue">{{change.value}}</span>
               <ng-container *ngIf="change.isMultiValue">
                 <span class="ant-tag" *ngFor="let value of change.value">{{value}}</span>
               </ng-container>
             </ng-container>
           </li>
           <li class="change" *ngSwitchCase="'ADD'">
-            <span i18n="@@differ.added">Added</span>
+            <span i18n="@@differ.added">Added </span>
             <span class="ant-tag" *ngIf="!change.isMultiValue">{{change.value}}</span>
             <ng-container *ngIf="change.isMultiValue">
               <span class="ant-tag" *ngFor="let value of change.value">{{value}}</span>
             </ng-container>
             <ng-container *ngIf="change.label">
-              <span i18n="@@differ.add-to">to</span>
-              <span class="ant-tag">{{change.label}}</span>
+              <span i18n="@@differ.add-to"> to </span>
+              <span class="item">{{change.label}}</span>
             </ng-container>
           </li>
           <li class="change" *ngSwitchCase="'REMOVE'">
             <ng-container *ngIf="lang === 'zh'">
               <ng-container *ngIf="change.label">
-                <span i18n="@@differ.from">from</span>
-                <span class="ant-tag">{{change.label}}</span>
+                <span i18n="@@differ.from"> from </span>
+                <span class="item">{{change.label}}</span>
               </ng-container>
-              <span i18n="@@differ.removed">Removed</span>
+              <span i18n="@@differ.removed">Removed </span>
               <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.value}}</span>
               <ng-container *ngIf="change.isMultiValue">
                 <span class="ant-tag remove-item" *ngFor="let value of change.value">{{value}}</span>
               </ng-container>
             </ng-container>
             <ng-container *ngIf="lang !== 'zh'">
-              <span i18n="@@differ.removed">Removed</span>
+              <span i18n="@@differ.removed">Removed </span>
               <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.value}}</span>
               <ng-container *ngIf="change.isMultiValue">
                 <span class="ant-tag remove-item" *ngFor="let value of change.value">{{value}}</span>
               </ng-container>
               <ng-container *ngIf="change.label">
-                <span i18n="@@differ.from">from</span>
-                <span class="ant-tag">{{change.label}}</span>
+                <span i18n="@@differ.from"> from </span>
+                <span class="item">{{change.label}}</span>
               </ng-container>
             </ng-container>
           </li>
