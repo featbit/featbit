@@ -46,7 +46,7 @@ Feature flag is a modern engineering technology that decouples code deployments 
 - **Custom permission**, define access levels to projects, environment, or teams to enforce your policies.
 - **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 - **Audit Log**, logs for feature flag & segment changes.
-- **Access to all SDKs**, use WebSocket to get update of flags return variation in real-time.
+- **SDKs for front&back-end**, use WebSocket to get update of flags return variation in real-time.
 - **Web API**, automate your workflow with Web APIs.
 - **Platform level**, manage your flags in multiple projects and environments.
 
