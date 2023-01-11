@@ -68,7 +68,7 @@ After you established your own FeatBit platform, try FeatBit with an easy [**Get
 
 [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - the performance report of FeatBit running in non-cluster mode. -->
 
-## Contribution
+## Contribute
 
 Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. 
 
