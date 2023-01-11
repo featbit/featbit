@@ -41,7 +41,7 @@ Feature flag is a modern engineering technology that decouples code deployments 
 [Click here to get more information about FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a).
 
 
-<!-- ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif) -->
+![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
 
 ## Contribute to FeatBit
