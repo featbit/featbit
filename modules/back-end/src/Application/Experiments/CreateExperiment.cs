@@ -36,7 +36,7 @@ public class CreateExperimentHandler : IRequestHandler<CreateExperiment, Experim
     {
         var experiment = request.AsExperiment();
         var existingExperiment = await _service.FindOneAsync(expt =>
-            expt.FeatureFlagId == experiment.FeatureFlagId && expt.MetricId == experiment.MetricId);
+            expt.FeatureFlagId == experiment.FeatureFlagId && expt.MetricId == experiment.MetricId && !expt.IsArchived);
 
         if (existingExperiment == null)
         {
