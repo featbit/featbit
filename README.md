@@ -22,6 +22,17 @@ Feature flag is a modern engineering technology that decouples code deployments 
 
 [Click here to get more information about FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a).
 
+### Features
+
+- [x] Feature flag list
+- [x] Segment
+- [x] IAM
+- [x] AB test
+- [x] xxxx
+- [x] xxxx
+- [x] Websocket xxxx xxx
+- [ ] Entitlement based on attribute
+
 ## Getting Started
 
 Clone the repository to your server or local machine and boot up the services.
@@ -62,16 +73,7 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 [**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) . 
 
-## Features
 
-- [x] Feature flag list
-- [x] Segment
-- [x] IAM
-- [x] AB test
-- [x] xxxx
-- [x] xxxx
-- [x] Websocket xxxx xxx
-- [ ] Entitlement based on attribute
 
 ## License
 
