@@ -45,6 +45,12 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 [![Design](https://contribute.design/api/shield/featbit/featbit)](https://contribute.design/featbit/featbit)
 
+## Why FeatBit
+
+The top 1% of companies spend thousands of hours building their own feature management platforms in-house. The other 99% are left paying for expensive 3rd party SaaS tools or hacking together unmaintained open source libraries.
+
+We want to give all companies the flexibility and power of a fully-featured in-house feature management platform without needing to build it themselves.
+
 ## License
 
 FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
