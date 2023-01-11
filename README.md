@@ -10,10 +10,7 @@
 
 **FeatBit** is a scalable, high-performance, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
 
-
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
-
-
 
 ## Introduction
 
@@ -45,15 +42,19 @@ Once all containers have started, go to FeatBit's portal [http://localhost:8081]
 
 ## Docs & Community
 
-[**Documentation**](https://featbit.gitbook.io/docs/installation) - show you how to install/update FeatBit with Docker.
+- [Documentation](https://featbit.gitbook.io/docs/installation)
+- [Online Support (Slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) 
+- [Community Forum](https://github.com/featbit/featbit/discussions/34)
+- [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture)
+- [Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark)
 
-[**Slack Channel**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) - An online support channel that helps you to quickly solve the problem.
+<!-- - - An online support channel that helps you to quickly solve the problem. -->
 
-[Community Forum](https://github.com/featbit/featbit/discussions/34) - where you can request new features, ask questions, show-n-tell, etc.
+<!-- [Community Forum](https://github.com/featbit/featbit/discussions/34) - where you can request new features, ask questions, show-n-tell, etc.
 
 [Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) - an architecture overview of FeatBit system.
 
-[Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - the performance report of FeatBit running in non-cluster mode.
+[Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - the performance report of FeatBit running in non-cluster mode. -->
 
 ## Contribute to FeatBit
 
