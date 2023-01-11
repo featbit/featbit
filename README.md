@@ -45,14 +45,14 @@ Once all containers have started, go to FeatBit's portal [http://localhost:8081]
 - username: **test@featbit.com**
 - password: **123456**
 
-**Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [the doc](https://featbit.gitbook.io/docs/installation#attention) to make it accessible publicly.
 
-[**Quick overview (Video)**](https://www.youtube.com/watch?v=hfww1FpjHV0) - give you a quick overview of FeatBit.
+|| **Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [the doc](https://featbit.gitbook.io/docs/installation#attention) to make it accessible publicly.
 
-[**Getting Started (Docs)**](https://featbit.gitbook.io/docs/installation) - try FeatBit with an easy "getting started" guidance.
+After you established your own FeatBit platform, try FeatBit with an easy [**Getting Started (Docs)**](https://featbit.gitbook.io/docs/installation) guidance
 
 ## Docs & Community
 
+- [Quick overview (Video)](https://www.youtube.com/watch?v=hfww1FpjHV0)
 - [Documentation](https://featbit.gitbook.io/docs/installation)
 - [Online Support (Slack)](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) 
 - [Community Forum](https://github.com/featbit/featbit/discussions/34)
