@@ -2,7 +2,8 @@ using System.Net;
 
 namespace Application.IntegrationTests;
 
-public class SmokeTests : IClassFixture<TestApp>
+[Collection(nameof(TestApp))]
+public class SmokeTests
 {
     private readonly TestApp _app;
 

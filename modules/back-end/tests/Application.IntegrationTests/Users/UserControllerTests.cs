@@ -7,12 +7,13 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Application.IntegrationTests.Users;
 
+[Collection(nameof(TestApp))]
 [UsesVerify]
-public class UserControllerTests : IClassFixture<UserApp>
+public class UserControllerTests
 {
-    private readonly UserApp _app;
+    private readonly TestApp _app;
 
-    public UserControllerTests(UserApp app)
+    public UserControllerTests(TestApp app)
     {
         _app = app;
     }
