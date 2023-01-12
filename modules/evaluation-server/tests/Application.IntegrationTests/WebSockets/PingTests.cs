@@ -4,7 +4,8 @@ using Domain.WebSockets;
 
 namespace Application.IntegrationTests.WebSockets;
 
-public class PingTests : IClassFixture<TestApp>
+[Collection(nameof(TestApp))]
+public class PingTests
 {
     private readonly TestApp _app;
 

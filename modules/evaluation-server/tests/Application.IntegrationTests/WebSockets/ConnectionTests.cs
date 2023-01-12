@@ -2,7 +2,8 @@
 
 namespace Application.IntegrationTests.WebSockets;
 
-public class ConnectionTests : IClassFixture<TestApp>
+[Collection(nameof(TestApp))]
+public class ConnectionTests
 {
     private readonly TestApp _app;
 

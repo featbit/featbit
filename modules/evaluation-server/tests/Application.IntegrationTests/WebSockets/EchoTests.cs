@@ -3,7 +3,8 @@ using System.Text;
 
 namespace Application.IntegrationTests.WebSockets;
 
-public class EchoTests : IClassFixture<TestApp>
+[Collection(nameof(TestApp))]
+public class EchoTests
 {
     private readonly TestApp _app;
 
