@@ -45,12 +45,12 @@ Feature flag is a modern engineering technology that decouples code deployments 
 - **Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
 - **Insights**, check out feature usage during the rollout.
 - **Flag triggers**, automate changes to your feature flags from external tools.
-- **Custom permission**, define access levels to projects, environment, or teams to enforce your policies.
+- **IAM**, define access levels to projects, environment, or teams to enforce your policies.
 - **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 - **Audit Log**, logs for feature flag & segment changes.
-- **SDKs for front&back-end**, use WebSocket to get update of flags return variation in real-time.
+- **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
 - **Web API**, automate your workflow with Web APIs.
-- **Platform level**, manage your flags in multiple projects and environments.
+- **Platform-level**, manage your flags in multiple projects and environments.
 
 ## Getting Started
 
@@ -68,7 +68,7 @@ Once all containers have started, go to FeatBit's portal [http://localhost:8081]
 
 **Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [**Installation Doc**](https://featbit.gitbook.io/docs/installation#attention) to make it accessible publicly.
 
-Once FeatBit is installed, following the [**Getting Started (Docs)**](https://featbit.gitbook.io/docs/installation) to start your journey.
+You can following the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey.
 
 
 <!-- - - An online support channel that helps you to quickly solve the problem. -->
