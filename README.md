@@ -7,13 +7,6 @@
 [![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)   [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)]([https://angular.io/](https://twitter.com/RealFeatBit))     
 
 
-
-**FeatBit** is a scalable, high-performance, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
-
-![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
-
----------------------------------------------------------------------------
-
 <h3 align="left">
   <a href="https://www.youtube.com/watch?v=hfww1FpjHV0" >Quick overview (Video)</a>
   <span> · </span>
@@ -23,6 +16,15 @@
   <span> · </span>
   <a href="https://github.com/featbit/featbit/discussions">Community Forum</a>  
 </h3>
+
+
+**FeatBit** is a scalable, high-performance, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
+
+![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
+
+---------------------------------------------------------------------------
+
+
 
 
 ## Introduction
