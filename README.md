@@ -32,9 +32,7 @@
 Feature flag is a modern engineering technology that decouples code deployments from feature releases, giving you control over when and which end-users see which features. FeatBit enables teams to use feature flags on a massive scale across various use cases, such as: 
 
 - Shipping software safer and faster by progressively rolling out features to target users without redeployment.
-
 - Measuring the impact of features’ rollouts and running A/B tests to improve feature quality.
-
 - Giving Sales, CS, and Marketing the ability to fine-tune target audiences and manage customer entitlement.
 
 [Click here to get more information about FeatBit](https://featbit.medium.com/introducing-featbit-e0cef61572a).
