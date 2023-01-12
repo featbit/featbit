@@ -1,51 +1,30 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
 
 namespace Infrastructure.Caches;
 
 public class RedisPopulatingHostedService : IHostedService
 {
-    private const string IsPopulatedKey = "redis-is-populated";
-    private const string PopulateLockKey = "populate-redis";
-    private static readonly string PopulateLockValue = Environment.MachineName;
-
-    private readonly IDatabase _redis;
     private readonly IPopulatingService _populatingService;
     private readonly ILogger<RedisPopulatingHostedService> _logger;
 
     public RedisPopulatingHostedService(
         IPopulatingService populatingService,
-        IConnectionMultiplexer multiplexer,
         ILogger<RedisPopulatingHostedService> logger)
     {
         _populatingService = populatingService;
         _logger = logger;
-        _redis = multiplexer.GetDatabase();
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var isPopulated = await _redis.StringGetAsync(IsPopulatedKey) == "true";
-        if (isPopulated)
+        try
         {
-            _logger.LogInformation("Redis has been populated before, ignore run again");
-            return;
+            await _populatingService.PopulateAsync();
         }
-
-        if (await _redis.LockTakeAsync(PopulateLockKey, PopulateLockValue, TimeSpan.FromSeconds(5)))
+        catch (Exception ex)
         {
-            try
-            {
-                var success = await _populatingService.PopulateAsync();
-
-                // mark redis as populated
-                await _redis.StringSetAsync(IsPopulatedKey, success ? "true" : "false");
-            }
-            finally
-            {
-                await _redis.LockReleaseAsync(PopulateLockKey, PopulateLockValue);
-            }
+            _logger.LogError(ex, "Exception occured when populating redis.");
         }
     }
 

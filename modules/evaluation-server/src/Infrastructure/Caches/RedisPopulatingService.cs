@@ -10,6 +10,10 @@ public class RedisPopulatingService : IPopulatingService
     private readonly MongoDbClient _mongoDb;
     private readonly ILogger<RedisPopulatingService> _logger;
 
+    private const string IsPopulatedKey = "redis-is-populated";
+    private const string PopulateLockKey = "populate-redis";
+    private static readonly string PopulateLockValue = Environment.MachineName;
+
     public RedisPopulatingService(
         IConnectionMultiplexer multiplexer,
         MongoDbClient mongoDb,
@@ -20,12 +24,30 @@ public class RedisPopulatingService : IPopulatingService
         _logger = logger;
     }
 
-    public async Task<bool> PopulateAsync()
+    public async Task PopulateAsync()
     {
-        var populateFlags = await PopulateFlagsAsync();
-        var populateSegments = await PopulateSegmentAsync();
+        var isPopulated = await _redis.StringGetAsync(IsPopulatedKey) == "true";
+        if (isPopulated)
+        {
+            _logger.LogInformation("Redis has been populated before, ignore run again");
+            return;
+        }
 
-        return populateFlags && populateSegments;
+        if (await _redis.LockTakeAsync(PopulateLockKey, PopulateLockValue, TimeSpan.FromSeconds(5)))
+        {
+            try
+            {
+                var flagPopulated = await PopulateFlagsAsync();
+                var segmentPopulated = await PopulateSegmentAsync();
+
+                // mark redis as populated
+                await _redis.StringSetAsync(IsPopulatedKey, flagPopulated && segmentPopulated ? "true" : "false");
+            }
+            finally
+            {
+                await _redis.LockReleaseAsync(PopulateLockKey, PopulateLockValue);
+            }
+        }
     }
 
     public async Task<bool> PopulateFlagsAsync()
