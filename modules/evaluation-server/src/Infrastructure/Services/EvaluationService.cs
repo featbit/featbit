@@ -41,7 +41,7 @@ public class EvaluationService
             }
         }
 
-        var splittingKey = $"{flag.GetProperty("key")}{user.KeyId}";
+        var splittingKey = flag.GetProperty("key").GetString() + user.KeyId;
         // if user is rule matched
         var rules = flag.GetProperty("rules").EnumerateArray();
         foreach (var rule in rules)
