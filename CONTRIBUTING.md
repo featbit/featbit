@@ -1,16 +1,52 @@
-# How to contribute
+# Contributions
 
-One of the easiest ways to contribute is to participate in discussions on GitHub issues. You can also contribute by submitting pull requests with code changes.
+Welcome to the Featbit software development documentation.
+
+Here you will find all the resources you need to start developing your Featbit project.
+
+This document will guide you through the stages of setting up your development environment, connecting to our code base and finally submitting code to the project!
+
+# Setting up the environment
+
+Featbit consists of mulple services, to understand the architecture, please read this [document](https://featbit.gitbook.io/docs/tech-stack/architecture).
+
+![Architecture](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2Fn8WleMePXy4BW6b0qQq2%2Fimage.png?alt=media&token=27fd5b0e-e704-4e01-b084-b8f5399f2565)
 
 
-## Other discussions
+However, to make contributions, you don't need to manually launch each service manually. Most of the contribution work would focus on UI and API, you just need to launch those two services and all the other services could be launched by docker compose.
 
-Our team members also monitor several other discussion forums:
+## Launch docker compose
+Open [docker-compose.yml](./docker-compose.yml) and comment out **UI** and **api-server** under services, they are the first two services. Then do
+```bash
+docker compose up -d
+```
+Wait until all services are successfully launched, then you will be ready to set up UI and API
 
-:snail: TODO
+## Setting up API locally
 
-### Resources to help you get started
+## Setting up UI locally
 
-Here are some resources to help you get started on how to contribute code or new content.
+The UI is built uppon [Angular](https://angular.io/) and [NG-ZORRO](https://ng.ant.design/docs/introduce/en), please refer to their docs for more details.
 
-:snail: TODO
+Navigate to **modules/front-end** folder and do the following commands:
+
+```bash
+npm install
+npm run start
+```
+
+The UI is available at [http://localhost:4200](http://localhost:4200). 
+
+The above process would launch the UI in English language.
+
+As **ng serve** only supports one single locale, during development, the locale-switcher compoent doesn't work. If you want to check a different language,
+run the app with one of the following
+```
+npm run start:en // English, available at localhost:4200
+npm run start:zh // Chinese, available at localhost:4201
+```
+
+#### Internationalization
+
+
+
