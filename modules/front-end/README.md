@@ -79,7 +79,7 @@ Then go to http://localhost:8081
 When you put http://localhost:8081 in your browser, by default, the UI will redirect to the language defined by **accept-language** of the request headers,
 you can manually switch the language with the language switcher in the UI.
 
-As **ng serve** only support one single locale, during development, the locale-switcher compoent doesn't work. If you want to check different language,
+As **ng serve** only support one single locale, during development, the locale-switcher component doesn't work. If you want to check different language,
 run the app with one of the following
 ```
 npm run start:en // English, available at localhost:4200

@@ -8,19 +8,20 @@ This document will guide you through the stages of setting up your development e
 
 # Setting up the environment
 
-Featbit consists of mulple services, to understand the architecture, please read this [document](https://featbit.gitbook.io/docs/tech-stack/architecture).
+Featbit consists of multiple services, to understand the architecture, please read this [document](https://featbit.gitbook.io/docs/tech-stack/architecture).
 
 ![Architecture](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2Fn8WleMePXy4BW6b0qQq2%2Fimage.png?alt=media&token=27fd5b0e-e704-4e01-b084-b8f5399f2565)
 
-
-However, to make contributions, you don't need to manually launch each service manually. Most of the contribution work would focus on UI and API, you just need to launch those two services and all the other services could be launched by docker compose.
+However, to make contributions, you don't need to launch each service manually. Most of the contribution work would focus on UI and API, you just need to launch those two services and all the other services could be launched by docker compose.
 
 ## Launch docker compose
 Open [docker-compose.yml](./docker-compose.yml) and comment out **UI** and **api-server** under services, they are the first two services. Then do
+
 ```bash
 docker compose up -d
 ```
-Wait until all services are successfully launched, then you will be ready to set up UI and API
+
+Wait until all services are successfully launched, then you will be ready to set up API and UI.
 
 ## Setting up API locally
 
@@ -35,14 +36,14 @@ npm install
 npm run start
 ```
 
-The UI is available at [http://localhost:4200](http://localhost:4200). 
+The UI would be available at [http://localhost:4200](http://localhost:4200). 
 
 The above process would launch the UI in English language.
 
-As **ng serve** only supports one single locale, during development, the locale-switcher compoent doesn't work. If you want to check a different language,
+As **ng serve** only supports one single locale, during development, the locale-switcher component doesn't work. If you want to check a different language,
 run the app with one of the following
 ```
-npm run start:en // English, available at localhost:4200
+npm run start // English, available at localhost:4200
 npm run start:zh // Chinese, available at localhost:4201
 ```
 
@@ -55,9 +56,11 @@ Featbit UI uses offical [@angular/localize
 
 Currently only English and Chinese are available, we would be very grateful to have contributors for other languages too.
 
-Whenever you put a text in the UI, you need to put its translations into the corresponding resource file. This work is very tedius, we created a [library](https://github.com/featbit/angular-locales-generator) to faciliate the job, you just need to run the command 
+Whenever you put a text in the UI, you need to put its translations into the corresponding resource file. This work is very tedius, we created a [library](https://github.com/featbit/angular-locales-generator) to faciliate the job, you just need to run the command
+
 ```bash
 npm run i18n
 ```
-English would be generated automatically in messages.xlf, you just need to put the translations into message.xx.xlf. A small astruce is to search this text **<target></target>** in the file and put the translation between **target** tag.
+
+English would be generated automatically in messages.xlf, you just need to put the translations into message.xx.xlf. A small astruce is to search this text ```<target></target>``` in the file and put the translation between **target** tag.
 
