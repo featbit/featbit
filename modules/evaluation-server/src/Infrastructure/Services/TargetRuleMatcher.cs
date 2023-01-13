@@ -1,17 +1,17 @@
 using System.Text.Json;
 using Domain.Core;
 using Domain.EndUsers;
-using Infrastructure.Redis;
+using Infrastructure.Caches;
 
 namespace Infrastructure.Services;
 
 public class TargetRuleMatcher
 {
-    private readonly RedisService _redisService;
+    private readonly ICacheService _cacheService;
 
-    public TargetRuleMatcher(RedisService redisService)
+    public TargetRuleMatcher(ICacheService cacheService)
     {
-        _redisService = redisService;
+        _cacheService = cacheService;
     }
 
     public async ValueTask<bool> IsMatchAsync(JsonElement targetRule, EndUser user)
@@ -59,7 +59,7 @@ public class TargetRuleMatcher
 
         foreach (var segmentId in segmentIds)
         {
-            var segment = await _redisService.GetSegmentAsync(segmentId);
+            var segment = await _cacheService.GetSegmentAsync(segmentId);
             if (RuleMatcher.IsMatchSegment(segment, user))
             {
                 return true;

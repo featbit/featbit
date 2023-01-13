@@ -64,7 +64,7 @@ public static class ServicesRegister
         );
         services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
         services.AddHostedService<CachePopulatingHostedService>();
-        services.AddSingleton<RedisService>();
+        services.AddSingleton<ICacheService, RedisService>();
         services.AddSingleton<EvaluationService>();
         services.AddSingleton<TargetRuleMatcher>();
 

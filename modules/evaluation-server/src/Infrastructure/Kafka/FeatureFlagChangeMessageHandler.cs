@@ -4,7 +4,7 @@ using Domain.Core;
 using Domain.Protocol;
 using Domain.Services;
 using Domain.WebSockets;
-using Infrastructure.Redis;
+using Infrastructure.Caches;
 
 namespace Infrastructure.Kafka;
 
@@ -12,16 +12,16 @@ public class FeatureFlagChangeMessageHandler : IKafkaMessageHandler
 {
     public string Topic => Topics.FeatureFlagChange;
 
-    private readonly RedisService _redisService;
+    private readonly ICacheService _cacheService;
     private readonly IConnectionManager _connectionManager;
     private readonly IDataSyncService _dataSyncService;
 
     public FeatureFlagChangeMessageHandler(
-        RedisService redisService,
+        ICacheService cacheService,
         IConnectionManager connectionManager,
         IDataSyncService dataSyncService)
     {
-        _redisService = redisService;
+        _cacheService = cacheService;
         _connectionManager = connectionManager;
         _dataSyncService = dataSyncService;
     }
@@ -33,7 +33,7 @@ public class FeatureFlagChangeMessageHandler : IKafkaMessageHandler
         // upsert redis
         using var document = JsonDocument.Parse(message);
         var flag = document.RootElement;
-        await _redisService.UpsertFlagAsync(flag);
+        await _cacheService.UpsertFlagAsync(flag);
 
         // push change message to sdk
         var envId = flag.GetProperty("envId").GetGuid();

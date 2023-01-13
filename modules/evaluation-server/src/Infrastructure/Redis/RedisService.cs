@@ -1,10 +1,11 @@
 using System.Text.Json;
+using Infrastructure.Caches;
 using MongoDB.Bson;
 using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
 
-public class RedisService
+public class RedisService : ICacheService
 {
     private readonly IDatabase _redis;
 
