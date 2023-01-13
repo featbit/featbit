@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Domain.Core;
 using Domain.EndUsers;
-using Infrastructure.Caches;
+using Infrastructure.Redis;
 
 namespace Infrastructure.Services;
 

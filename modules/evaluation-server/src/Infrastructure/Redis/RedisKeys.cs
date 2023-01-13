@@ -1,6 +1,6 @@
 using StackExchange.Redis;
 
-namespace Infrastructure.Caches;
+namespace Infrastructure.Redis;
 
 public class RedisKeyPrefixes
 {

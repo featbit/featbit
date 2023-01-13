@@ -5,7 +5,7 @@ using Domain.EndUsers;
 using Domain.Protocol;
 using Domain.Services;
 using Domain.WebSockets;
-using Infrastructure.Caches;
+using Infrastructure.Redis;
 
 namespace Infrastructure.Services;
 

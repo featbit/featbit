@@ -1,8 +1,9 @@
+using Infrastructure.Caches;
 using StackExchange.Redis;
 using Microsoft.Extensions.Logging;
 using Infrastructure.MongoDb;
 
-namespace Infrastructure.Caches;
+namespace Infrastructure.Redis;
 
 public class RedisPopulatingService : IPopulatingService
 {

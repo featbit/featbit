@@ -4,6 +4,7 @@ using Domain.WebSockets;
 using Infrastructure.Caches;
 using Infrastructure.Kafka;
 using Infrastructure.MongoDb;
+using Infrastructure.Redis;
 using Infrastructure.Services;
 using Infrastructure.WsMessageHandlers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -62,7 +63,7 @@ public static class ServicesRegister
             _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
         );
         services.AddTransient<IPopulatingService, RedisPopulatingService>();
-        services.AddHostedService<RedisPopulatingHostedService>();
+        services.AddHostedService<PopulatingHostedService>();
         services.AddSingleton<RedisService>();
         services.AddSingleton<EvaluationService>();
         services.AddSingleton<TargetRuleMatcher>();

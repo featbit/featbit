@@ -2,7 +2,7 @@ using System.Text.Json;
 using MongoDB.Bson;
 using StackExchange.Redis;
 
-namespace Infrastructure.Caches;
+namespace Infrastructure.Redis;
 
 public class RedisService
 {
