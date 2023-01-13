@@ -45,7 +45,7 @@ public sealed class RolloutUserVariation : UserVariation
 
     public RolloutUserVariation(
         JsonElement rolloutVariations,
-        string userKeyId,
+        string splittingKey,
         Variation[] allVariations,
         bool exptIncludeAllTargets,
         bool thisRuleIncludeInExpt,
@@ -58,7 +58,7 @@ public sealed class RolloutUserVariation : UserVariation
         foreach (var rolloutVariation in rolloutVariations.EnumerateArray())
         {
             var rollouts = rolloutVariation.GetProperty("rollout").Deserialize<double[]>()!;
-            if (SplittingAlgorithm.IsInRollout(userKeyId, rollouts))
+            if (SplittingAlgorithm.IsInRollout(splittingKey, rollouts))
             {
                 var variationId = rolloutVariation.GetProperty("id").GetString()!;
                 Variation = allVariations.FirstOrDefault(x => x.Id == variationId)!;
@@ -78,7 +78,8 @@ public sealed class RolloutUserVariation : UserVariation
         }
         else
         {
-            var sendToExptKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(userKeyId));
+            // create a new key to calculate the splitting percentage
+            var sendToExptKey = splittingKey + splittingKey;
             if (exptRollout == 0.0 || splittingRollout == 0.0)
             {
                 SendToExperiment = false;

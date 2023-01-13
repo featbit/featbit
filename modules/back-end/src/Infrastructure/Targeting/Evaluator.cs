@@ -31,12 +31,13 @@ public class Evaluator : IEvaluator
             return new UserVariation(flag.GetVariation(targetUser.VariationId), "targeted");
         }
 
+        var splittingKey = $"{flag.Key}{user.KeyId}";
         // if user is rule matched
         foreach (var rule in flag.Rules)
         {
             if (await IsMatchAsync(rule, user))
             {
-                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(user.KeyId))!;
+                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(splittingKey))!;
 
                 return new UserVariation(flag.GetVariation(rolloutVariation.Id), rule.Name);
             }
@@ -44,7 +45,7 @@ public class Evaluator : IEvaluator
 
         // match default rule
         var defaultVariation =
-            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(user.KeyId))!;
+            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(splittingKey))!;
 
         return new UserVariation(flag.GetVariation(defaultVariation.Id), "default");
     }

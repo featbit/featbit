@@ -41,6 +41,7 @@ public class EvaluationService
             }
         }
 
+        var splittingKey = $"{flag.GetProperty("key")}{user.KeyId}";
         // if user is rule matched
         var rules = flag.GetProperty("rules").EnumerateArray();
         foreach (var rule in rules)
@@ -49,7 +50,7 @@ public class EvaluationService
             {
                 return new RolloutUserVariation(
                     rule.GetProperty("variations"),
-                    user.KeyId,
+                    splittingKey,
                     scope.Variations,
                     exptIncludeAllTargets,
                     rule.GetProperty("includedInExpt").GetBoolean(),
@@ -62,7 +63,7 @@ public class EvaluationService
         var fallthrough = flag.GetProperty("fallthrough");
         return new RolloutUserVariation(
             fallthrough.GetProperty("variations"),
-            user.KeyId,
+            splittingKey,
             scope.Variations,
             exptIncludeAllTargets,
             fallthrough.GetProperty("includedInExpt").GetBoolean(),
