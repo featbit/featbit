@@ -56,11 +56,11 @@ Featbit UI uses offical [@angular/localize
 
 Currently only English and Chinese are available, we would be very grateful to have contributors for other languages too.
 
-Whenever you put a text in the UI, you need to put its translations into the corresponding resource file. This work is very tedius, we created a [library](https://github.com/featbit/angular-locales-generator) to faciliate the job, you just need to run the command
+If you put a text in the UI, at the end of the developing work, you need to put its translations into the corresponding resource file. This work could be very tedius, we created a [library](https://github.com/featbit/angular-locales-generator) to faciliate the job, you need to run the command
 
 ```bash
 npm run i18n
 ```
 
-English would be generated automatically in messages.xlf, you just need to put the translations into message.xx.xlf. A small astruce is to search this text ```<target></target>``` in the file and put the translation between **target** tag.
+English would be generated automatically in messages.xlf, you just need to put the translations into message.xx.xlf. A small trick is to search this text ```<target></target>``` in the file and put the translation between **target** tag.
 
