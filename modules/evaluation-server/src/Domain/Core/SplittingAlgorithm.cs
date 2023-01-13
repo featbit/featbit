@@ -30,7 +30,7 @@ public static class SplittingAlgorithm
 
     public static double RolloutOfKey(string key)
     {
-        var hashedKey = Hasher.ComputeHash(Encoding.ASCII.GetBytes(key));
+        var hashedKey = Hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
         var magicNumber = BitConverter.ToInt32(hashedKey, 0);
         var percentage = Math.Abs((double)magicNumber / int.MinValue);
 
