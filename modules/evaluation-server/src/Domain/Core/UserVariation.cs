@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 
 namespace Domain.Core;
@@ -78,7 +77,7 @@ public sealed class RolloutUserVariation : UserVariation
         }
         else
         {
-            // create a new key to calculate the splitting percentage
+            // create a new key to calculate the experiment splitting percentage
             var sendToExptKey = splittingKey + splittingKey;
             if (exptRollout == 0.0 || splittingRollout == 0.0)
             {
