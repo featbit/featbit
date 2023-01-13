@@ -3,14 +3,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Caches;
 
-public class RedisPopulatingHostedService : IHostedService
+public class PopulatingHostedService : IHostedService
 {
     private readonly IPopulatingService _populatingService;
-    private readonly ILogger<RedisPopulatingHostedService> _logger;
+    private readonly ILogger<PopulatingHostedService> _logger;
 
-    public RedisPopulatingHostedService(
+    public PopulatingHostedService(
         IPopulatingService populatingService,
-        ILogger<RedisPopulatingHostedService> logger)
+        ILogger<PopulatingHostedService> logger)
     {
         _populatingService = populatingService;
         _logger = logger;
