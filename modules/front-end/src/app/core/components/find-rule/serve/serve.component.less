@@ -78,12 +78,21 @@ section.rule-item {
 
             .hundred-percent {
               display: inline-block;
-              background-color: red;
+              background-color: @red50-color;
+              color: @white;
               border-radius: 4px;
               padding: 0 8px;
               margin: 0 4px;
             }
           }
+        }
+
+        .splitting-key {
+          width: 250px;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          gap: 16px;
         }
       }
     }

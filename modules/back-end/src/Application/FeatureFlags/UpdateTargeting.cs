@@ -42,9 +42,14 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
     public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
         var flag = await _flagService.GetAsync(request.Id);
+
         var dataChange = flag.UpdateTargeting(
             request.TargetUsers,
-            request.Rules,
+            request.Rules.Select(rule =>
+            {
+                rule.SplittingKey ??= "keyId";
+                return rule;
+            }).ToList(),
             request.Fallthrough,
             request.ExptIncludeAllTargets,
             _currentUser.Id

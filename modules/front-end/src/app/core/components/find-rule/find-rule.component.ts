@@ -3,7 +3,7 @@ import { SegmentService } from '@services/segment.service';
 import { isSegmentCondition, trackByFunction } from '@utils/index';
 import { IRuleOp, ruleOps } from './ruleConfig';
 import { ISegment } from "@features/safe/segments/types/segments-index";
-import { IUserProp } from "@shared/types";
+import { IRuleIdSplittingKey, IUserProp } from "@shared/types";
 import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
 
 @Component({
@@ -18,6 +18,7 @@ export class FindRuleComponent {
   @Output() deleteRule = new EventEmitter<string>();
   @Output() updateRuleName = new EventEmitter<string>();
   @Output() onConditionChange = new EventEmitter<ICondition[]>();
+  @Output() onSplittingKeyChange = new EventEmitter<IRuleIdSplittingKey>();
 
   public conditions: ICondition[] = [];
   public name: string = "";
@@ -117,6 +118,10 @@ export class FindRuleComponent {
 
     this.conditions = this.conditions.map((item, idx) => idx === index ? rule : item);
     this.onConditionChange.next(this.conditions);
+  }
+
+  splittingKeyChange(splittingKey: string) {
+    this.onSplittingKeyChange.emit({ ruleId: this.id, splittingKey });
   }
 
   public onRuleNameChange() {

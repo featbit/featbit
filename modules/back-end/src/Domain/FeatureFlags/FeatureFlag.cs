@@ -60,6 +60,7 @@ public class FeatureFlag : FullAuditedEntity
         Fallthrough = new Fallthrough
         {
             IncludedInExpt = true,
+            SplittingKey = "keyId",
             Variations = new List<RolloutVariation>
             {
                 new()

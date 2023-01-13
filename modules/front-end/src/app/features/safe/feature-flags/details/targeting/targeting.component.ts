@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IOrganization, IProjectEnv } from '@shared/types';
+import { IOrganization, IProjectEnv, IRuleIdSplittingKey } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { EnvUserService } from '@services/env-user.service';
@@ -256,8 +256,22 @@ export class TargetingComponent implements OnInit {
     ];
   }
 
-  public onFallthroughChange(value: IRuleVariation[]) {
+  onFallthroughChange(value: IRuleVariation[]) {
     this.featureFlag.fallthrough.variations = [...value];
+  }
+
+  onFallthroughSplittingKeyChangeChange(key: string) {
+    this.featureFlag.fallthrough.splittingKey = key;
+  }
+
+  onRuleSplittingKeyChange(ruleSplittingKey: IRuleIdSplittingKey) {
+    this.featureFlag.rules = this.featureFlag.rules.map(rule => {
+      if (rule.id === ruleSplittingKey.ruleId) {
+        rule.splittingKey = ruleSplittingKey.splittingKey;
+      }
+
+      return rule;
+    })
   }
 
   validationErrors: IFlagValidationError[] = [];

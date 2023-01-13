@@ -28,6 +28,19 @@
             {{ rule.id | RVV: availableVariations }}
           </div>
         </div>
+        <div class="splitting-key">
+          <div i18n="@@core.components.findrule.by">By</div>
+          <div class="select">
+            <nz-select
+              nzShowSearch
+              nzPlaceHolder="Select property"
+              i18n-nzPlaceHolder="@@core.components.findrule.serve.selectuserproperty"
+              [(ngModel)]="splittingKey"
+              (ngModelChange)="splittingKeyChange()">
+              <nz-option *ngFor="let key of filteredSplittingKeys" [nzValue]="key" [nzLabel]="key"></nz-option>
+            </nz-select>
+          </div>
+        </div>
         <div class="total-percentage" *ngIf="percentageToBeAssigned !== 0">
           <nz-divider style="margin: 15px 0"></nz-divider>
           <div class="rest-to-assign">
@@ -35,7 +48,6 @@
             <ng-container i18n="@@core.components.findrule.percentage-to-be-assigned">need to be assigned to a variation</ng-container>
           </div>
         </div>
-
       </div>
     </div>
   </div>

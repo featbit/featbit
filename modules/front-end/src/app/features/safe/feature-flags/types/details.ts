@@ -76,6 +76,7 @@ export interface IFeatureFlagTargeting {
 export interface IFallthrough {
   includedInExpt: boolean,
   variations: IRuleVariation[],
+  splittingKey: string,
 
   // UI only
   isNotPercentageRollout: boolean

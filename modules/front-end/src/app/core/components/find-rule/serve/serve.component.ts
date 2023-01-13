@@ -1,6 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { getPercentageFromRolloutPercentageArray } from '@utils/index';
 import { IRuleVariation, isNotPercentageRollout, IVariation} from "@shared/rules";
+import { IUserProp } from "@shared/types";
+import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
 
 interface IRuleVariationValue extends IRuleVariation {
   percentageValue: number;
@@ -22,7 +24,19 @@ export class ServeComponent implements OnInit {
 
     this.ngOnInit();
   }
+  @Input() splittingKey: string;
 
+  splittingKeys: string[] = [];
+  filteredSplittingKeys: string[] = [];
+  @Input("userProps")
+  set properties(data: IUserProp[]) {
+    this.splittingKeys = data.filter((userProperty) => ![USER_IS_IN_SEGMENT_USER_PROP.name, USER_IS_NOT_IN_SEGMENT_USER_PROP.name].includes(userProperty.name))
+      .map((d) => d.name);
+    this.filteredSplittingKeys = [...this.splittingKeys];
+    this.splittingKey = this.splittingKeys.find((key) => key === this.splittingKey) ?? 'keyId';
+  }
+
+  @Output() onSplittingKeyChange = new EventEmitter<string>();
   @Output() onPercentageChange = new EventEmitter<IRuleVariation[]>();
 
   selectedVariationId: string = '-1';
@@ -90,6 +104,10 @@ export class ServeComponent implements OnInit {
     }
 
     this.onOutputPercentage();
+  }
+
+  splittingKeyChange() {
+    this.onSplittingKeyChange.next(this.splittingKey);
   }
 
   private getPercentageToBeAssigned(): number {

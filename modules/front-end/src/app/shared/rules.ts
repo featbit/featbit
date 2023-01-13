@@ -2,6 +2,7 @@ export interface IRule {
   id: string,
   name: string,
   conditions: ICondition[],
+  splittingKey: string;
 
   // for feature flag
   variations?: IRuleVariation[],

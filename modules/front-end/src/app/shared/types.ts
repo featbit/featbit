@@ -4,6 +4,11 @@ export interface IResponse {
   data: any
 }
 
+export interface IRuleIdSplittingKey {
+  ruleId: string,
+  splittingKey: string
+}
+
 export interface IUserType {
   id: string;
   name: string;

@@ -33,6 +33,8 @@
         </div>
         <div class="find-rule">
           <app-serve
+            [userProps]="userProps"
+            (onSplittingKeyChange)="onFallthroughSplittingKeyChangeChange($event)"
             [variationOptions]="featureFlag.variations"
             [ruleVariations]="featureFlag.fallthrough.variations"
             (onPercentageChange)="onFallthroughChange($event)">
@@ -88,6 +90,7 @@
                 [data]="rule"
                 [variationOptions]="featureFlag.variations"
                 [userProps]="userProps"
+                (onSplittingKeyChange)="onRuleSplittingKeyChange($event)"
                 (addProperty)="onAddProperty($event)"
                 (deleteRule)="onDeleteRule(rule.id)"
                 (onConditionChange)="onRuleConditionChange($event, rule.id)"
