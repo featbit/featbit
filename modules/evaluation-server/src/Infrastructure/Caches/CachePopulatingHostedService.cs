@@ -3,14 +3,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Caches;
 
-public class PopulatingHostedService : IHostedService
+public class CachePopulatingHostedService : IHostedService
 {
-    private readonly IPopulatingService _populatingService;
-    private readonly ILogger<PopulatingHostedService> _logger;
+    private readonly ICachePopulatingService _populatingService;
+    private readonly ILogger<CachePopulatingHostedService> _logger;
 
-    public PopulatingHostedService(
-        IPopulatingService populatingService,
-        ILogger<PopulatingHostedService> logger)
+    public CachePopulatingHostedService(
+        ICachePopulatingService populatingService,
+        ILogger<CachePopulatingHostedService> logger)
     {
         _populatingService = populatingService;
         _logger = logger;

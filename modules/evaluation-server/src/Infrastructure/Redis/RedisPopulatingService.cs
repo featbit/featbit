@@ -5,7 +5,7 @@ using Infrastructure.MongoDb;
 
 namespace Infrastructure.Redis;
 
-public class RedisPopulatingService : IPopulatingService
+public class RedisPopulatingService : ICachePopulatingService
 {
     private readonly IDatabase _redis;
     private readonly MongoDbClient _mongoDb;

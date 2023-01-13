@@ -1,6 +1,6 @@
 namespace Infrastructure.Caches;
 
-public interface IPopulatingService
+public interface ICachePopulatingService
 {
     Task PopulateAsync();
 }

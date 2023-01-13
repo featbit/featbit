@@ -62,8 +62,8 @@ public static class ServicesRegister
         services.AddSingleton<IConnectionMultiplexer>(
             _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
         );
-        services.AddTransient<IPopulatingService, RedisPopulatingService>();
-        services.AddHostedService<PopulatingHostedService>();
+        services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
+        services.AddHostedService<CachePopulatingHostedService>();
         services.AddSingleton<RedisService>();
         services.AddSingleton<EvaluationService>();
         services.AddSingleton<TargetRuleMatcher>();
