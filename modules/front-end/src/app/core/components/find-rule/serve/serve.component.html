@@ -17,7 +17,7 @@
         <div class="item" *ngFor="let rule of ruleVariationValues; let i = index">
           <div class="percentage-number">
             <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
-              <input type="number" nz-input [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"/>
+              <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="3" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"></nz-input-number>
             </nz-input-group>
             <ng-template #suffixTemplateInfo>
               <button nz-button nzType="default" nzSearch style="border-left: none;border-top-right-radius: 8px;border-bottom-right-radius: 8px;height: 36px">%</button>
@@ -28,10 +28,14 @@
             {{ rule.id | RVV: availableVariations }}
           </div>
         </div>
-        <div class="total-percentage">
+        <div class="total-percentage" *ngIf="percentageToBeAssigned !== 0">
           <nz-divider style="margin: 15px 0"></nz-divider>
-          <div class="hundred-percent">100%</div>
+          <div class="rest-to-assign">
+            <span class="hundred-percent">{{percentageToBeAssigned}}%</span>
+            <ng-container i18n="@@core.components.findrule.percentage-to-be-assigned">need to be assigned to a variation</ng-container>
+          </div>
         </div>
+
       </div>
     </div>
   </div>

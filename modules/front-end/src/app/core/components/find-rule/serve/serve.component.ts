@@ -56,13 +56,17 @@ export class ServeComponent implements OnInit {
         }
         return result;
       });
+
+      this.percentageToBeAssigned = this.getPercentageToBeAssigned();
     }
   }
 
+  percentageToBeAssigned: number = 0;
   public modelChange() {
     // -1 means percentage rollout
     if(this.selectedVariationId === '-1') {
       let currentRollout = [0, 0];
+
       this.result = this.ruleVariationValues.map(r => {
         currentRollout = [currentRollout[1], currentRollout[1] + r.percentageValue * 0.01]
         return {
@@ -71,6 +75,8 @@ export class ServeComponent implements OnInit {
           exptRollout: r.exptRollout
         };
       });
+
+      this.percentageToBeAssigned = this.getPercentageToBeAssigned();
     } else {
       const variation = this.availableVariations.find(x => x.id === this.selectedVariationId);
       const rule = this.ruleVariations.find(x => x.id === variation.id);
@@ -84,6 +90,10 @@ export class ServeComponent implements OnInit {
     }
 
     this.onOutputPercentage();
+  }
+
+  private getPercentageToBeAssigned(): number {
+    return Number((100 - this.ruleVariationValues.reduce((acc, cur) => acc + cur.percentageValue, 0)).toFixed(3));
   }
 
   private onOutputPercentage() {

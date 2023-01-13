@@ -53,7 +53,7 @@ section.rule-item {
               border: none;
               padding: 0;
 
-              input {
+              .ant-input-number {
                 text-align: left;
                 height: 36px;
                 width: 100px;
@@ -69,12 +69,20 @@ section.rule-item {
           }
         }
 
-        .total-percentage{
-          width: 175px;
+        .total-percentage {
+          width: 250px;
           align-self: flex-end;
 
-          .hundred-percent{
-            text-align: right;
+          .rest-to-assign {
+            text-align: center;
+
+            .hundred-percent {
+              display: inline-block;
+              background-color: red;
+              border-radius: 4px;
+              padding: 0 8px;
+              margin: 0 4px;
+            }
           }
         }
       }
