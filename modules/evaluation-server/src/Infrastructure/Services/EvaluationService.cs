@@ -47,9 +47,9 @@ public class EvaluationService
         {
             if (await _ruleMatcher.IsMatchAsync(rule, user))
             {
-                var userProperty = user.ValueOf(rule.GetProperty("splittingKey").GetString());
-                userProperty = string.IsNullOrWhiteSpace(userProperty) ? "keyId" : userProperty;
-                var ruleSplittingKey = $"{userProperty}{flag.GetProperty("key")}";
+                var userPropertyValue = user.ValueOf(rule.GetProperty("splittingKey").GetString());
+                userPropertyValue = string.IsNullOrWhiteSpace(userPropertyValue) ? "keyId" : userPropertyValue;
+                var ruleSplittingKey = $"{userPropertyValue}{flag.GetProperty("key")}";
                 return new RolloutUserVariation(
                     rule.GetProperty("variations"),
                     ruleSplittingKey,
@@ -63,9 +63,9 @@ public class EvaluationService
 
         // match default rule
         var fallthrough = flag.GetProperty("fallthrough");
-        var property = user.ValueOf(fallthrough.GetProperty("splittingKey").GetString());
-        property = string.IsNullOrWhiteSpace(property) ? "keyId" : property;
-        var fallthroughSplittingKey = $"{property}{flag.GetProperty("key")}";
+        var propertyValue = user.ValueOf(fallthrough.GetProperty("splittingKey").GetString());
+        propertyValue = string.IsNullOrWhiteSpace(propertyValue) ? "keyId" : propertyValue;
+        var fallthroughSplittingKey = $"{propertyValue}{flag.GetProperty("key")}";
         return new RolloutUserVariation(
             fallthrough.GetProperty("variations"),
             fallthroughSplittingKey,

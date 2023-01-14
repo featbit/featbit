@@ -37,15 +37,21 @@ public class Evaluator : IEvaluator
         {
             if (await IsMatchAsync(rule, user))
             {
-                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(splittingKey))!;
+                var userPropertyValue = user.ValueOf(rule.SplittingKey);
+                userPropertyValue = string.IsNullOrWhiteSpace(userPropertyValue) ? "keyId" : userPropertyValue;
+                var ruleSplittingKey = $"{userPropertyValue}{flag.Key}";
+                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(ruleSplittingKey))!;
 
                 return new UserVariation(flag.GetVariation(rolloutVariation.Id), rule.Name);
             }
         }
 
         // match default rule
+        var propertyValue = user.ValueOf(flag.Fallthrough.SplittingKey);
+        propertyValue = string.IsNullOrWhiteSpace(propertyValue) ? "keyId" : propertyValue;
+        var fallthroughSplittingKey = $"{propertyValue}{flag.Key}";
         var defaultVariation =
-            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(splittingKey))!;
+            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(fallthroughSplittingKey))!;
 
         return new UserVariation(flag.GetVariation(defaultVariation.Id), "default");
     }

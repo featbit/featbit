@@ -47,7 +47,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
             request.TargetUsers,
             request.Rules.Select(rule =>
             {
-                rule.SplittingKey ??= "keyId";
+                rule.SplittingKey = string.IsNullOrWhiteSpace(rule.SplittingKey) ? "keyId" : rule.SplittingKey;
                 return rule;
             }).ToList(),
             request.Fallthrough,
