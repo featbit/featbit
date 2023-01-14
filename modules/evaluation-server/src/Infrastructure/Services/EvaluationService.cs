@@ -41,15 +41,16 @@ public class EvaluationService
             }
         }
         
+        var splittingKeyName = string.Empty;
         // if user is rule matched
         var rules = flag.GetProperty("rules").EnumerateArray();
         foreach (var rule in rules)
         {
             if (await _ruleMatcher.IsMatchAsync(rule, user))
             {
-                var userPropertyValue = user.ValueOf(rule.GetProperty("splittingKey").GetString());
-                userPropertyValue = string.IsNullOrWhiteSpace(userPropertyValue) ? "keyId" : userPropertyValue;
-                var ruleSplittingKey = $"{userPropertyValue}{flag.GetProperty("key")}";
+                splittingKeyName = rule.GetProperty("splittingKey").GetString();
+                splittingKeyName = string.IsNullOrWhiteSpace(splittingKeyName) ? "keyId" : splittingKeyName;
+                var ruleSplittingKey = $"{user.ValueOf(splittingKeyName)}{flag.GetProperty("key")}";
                 return new RolloutUserVariation(
                     rule.GetProperty("variations"),
                     ruleSplittingKey,
@@ -63,9 +64,9 @@ public class EvaluationService
 
         // match default rule
         var fallthrough = flag.GetProperty("fallthrough");
-        var propertyValue = user.ValueOf(fallthrough.GetProperty("splittingKey").GetString());
-        propertyValue = string.IsNullOrWhiteSpace(propertyValue) ? "keyId" : propertyValue;
-        var fallthroughSplittingKey = $"{propertyValue}{flag.GetProperty("key")}";
+        splittingKeyName = fallthrough.GetProperty("splittingKey").GetString();
+        splittingKeyName = string.IsNullOrWhiteSpace(splittingKeyName) ? "keyId" : splittingKeyName;
+        var fallthroughSplittingKey = $"{user.ValueOf(splittingKeyName)}{flag.GetProperty("key")}";
         return new RolloutUserVariation(
             fallthrough.GetProperty("variations"),
             fallthroughSplittingKey,
