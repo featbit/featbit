@@ -70,11 +70,11 @@ section.rule-item {
         }
 
         .total-percentage {
-          width: 250px;
+          width: 350px;
           align-self: flex-end;
 
           .rest-to-assign {
-            text-align: center;
+            text-align: left;
 
             .hundred-percent {
               display: inline-block;
@@ -88,11 +88,17 @@ section.rule-item {
         }
 
         .splitting-key {
-          width: 300px;
+          width: 350px;
           display: flex;
           justify-content: flex-start;
           align-items: center;
           gap: 16px;
+
+          .tooltip {
+            cursor: pointer;
+            font-size: 20px;
+            color: @grey50-color;
+          }
         }
       }
     }

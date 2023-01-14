@@ -40,6 +40,11 @@
               <nz-option *ngFor="let key of filteredSplittingKeys" [nzValue]="key" [nzLabel]="key"></nz-option>
             </nz-select>
           </div>
+          <i class="tooltip" [nz-tooltip]="defaultTooltip" nz-icon nzType="icons:icon-info-outline">
+            <ng-template #defaultTooltip>
+              <ng-container i18n="@@core.components.findrule.serve.dispatch-by-tooltip">Use a custom attribute for percentage rollouts.</ng-container>
+            </ng-template>
+          </i>
         </div>
         <div class="total-percentage" *ngIf="percentageToBeAssigned !== 0">
           <nz-divider style="margin: 15px 0"></nz-divider>
