@@ -40,17 +40,19 @@ public class EvaluationService
                 }
             }
         }
-
-        var splittingKey = flag.GetProperty("key").GetString() + user.KeyId;
+        
         // if user is rule matched
         var rules = flag.GetProperty("rules").EnumerateArray();
         foreach (var rule in rules)
         {
             if (await _ruleMatcher.IsMatchAsync(rule, user))
             {
+                var userProperty = user.ValueOf(rule.GetProperty("splittingKey").GetString());
+                userProperty = string.IsNullOrWhiteSpace(userProperty) ? "keyId" : userProperty;
+                var ruleSplittingKey = $"{userProperty}{flag.GetProperty("key")}";
                 return new RolloutUserVariation(
                     rule.GetProperty("variations"),
-                    splittingKey,
+                    ruleSplittingKey,
                     scope.Variations,
                     exptIncludeAllTargets,
                     rule.GetProperty("includedInExpt").GetBoolean(),
@@ -61,9 +63,12 @@ public class EvaluationService
 
         // match default rule
         var fallthrough = flag.GetProperty("fallthrough");
+        var property = user.ValueOf(fallthrough.GetProperty("splittingKey").GetString());
+        property = string.IsNullOrWhiteSpace(property) ? "keyId" : property;
+        var fallthroughSplittingKey = $"{property}{flag.GetProperty("key")}";
         return new RolloutUserVariation(
             fallthrough.GetProperty("variations"),
-            splittingKey,
+            fallthroughSplittingKey,
             scope.Variations,
             exptIncludeAllTargets,
             fallthrough.GetProperty("includedInExpt").GetBoolean(),
