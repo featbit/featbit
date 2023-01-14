@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import { Differ, IDiffer } from "@shared/diff/index";
-import {IFeatureFlag, IVariationUser} from "@features/safe/feature-flags/types/details";
+import { IFeatureFlag, IVariationUser } from "@features/safe/feature-flags/types/details";
 import { ICategory, IChange, IDiffVarationUser, IRefType, OperationEnum } from "@shared/diff/types";
-import { getPercentageFromRolloutPercentageArray, isSegmentCondition } from "@utils/index";
+import { getPercentageFromRolloutPercentageArray } from "@utils/index";
 import { IUserType } from "@shared/types";
-import {ICondition, IVariation} from "@shared/rules";
-import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
+import { IVariation } from "@shared/rules";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 
 export class FeatureFlagDiffer implements IDiffer {
@@ -200,6 +199,7 @@ export class FeatureFlagDiffer implements IDiffer {
           isMultiValue: false,
           path: path,
           value: {
+            splittingKey: newRule.splittingKey,
             conditions: newRule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
             variations: newRule.variations.map((rv) => ({
               label: newObj.variations.find((v) => v.id === rv.id)?.value,
@@ -219,6 +219,7 @@ export class FeatureFlagDiffer implements IDiffer {
         isMultiValue: false,
         path: path,
         value: {
+          splittingKey: rule.splittingKey,
           conditions: rule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
           variations: rule.variations.map((rv) => ({
             label: newObj.variations.find((v) => v.id === rv.id)?.value,
@@ -235,6 +236,7 @@ export class FeatureFlagDiffer implements IDiffer {
         isMultiValue: false,
         path: path,
         value: {
+          splittingKey: rule.splittingKey,
           conditions: rule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
           variations: rule.variations.map((rv) => ({
             label: oldObj.variations.find((v) => v.id === rv.id)?.value,
@@ -276,7 +278,9 @@ export class FeatureFlagDiffer implements IDiffer {
   }
 
   private compareFallthrough(ff1: IFeatureFlag, ff2: IFeatureFlag): ICategory[] {
-    const fallthroughPrimitivePaths = [{ label: 'includedInExpt', path: ['fallthrough', 'includedInExpt']}];
+    const fallthroughPrimitivePaths = [
+      { label: $localize `:@@differ.fallthrough-included-in-expt:Send to experiment`, path: ['fallthrough', 'includedInExpt']},
+      { label: $localize `:@@differ.distribute-by:Distribute by`, path: ['fallthrough', 'splittingKey']}];
 
     const changes: IChange[] = fallthroughPrimitivePaths.flatMap(({label, path}) =>
       Differ.comparePrimitives(_.get(ff1, path), _.get(ff2, path), path)

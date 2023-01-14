@@ -33,6 +33,7 @@
         </div>
         <div class="find-rule">
           <app-serve
+            [splittingKey]="featureFlag.fallthrough.splittingKey"
             [userProps]="userProps"
             (onSplittingKeyChange)="onFallthroughSplittingKeyChangeChange($event)"
             [variationOptions]="featureFlag.variations"

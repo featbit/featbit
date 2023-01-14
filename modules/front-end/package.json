@@ -7,7 +7,7 @@
     "start:zh": "ng serve --configuration=development,zh --port=4201",
     "build:dev": "ng build --localize --configuration development",
     "build:prod": "ng build --localize --configuration production",
-    "i18n": "ng extract-i18n --output-path src/locale && locales-generator --l zh --bp ./src/locale",
+    "i18n": "ng extract-i18n --output-path src/locale && locales-generator --l zh --bp ./src/locale && bash ./change_validations.sh",
     "test": "ng test",
     "test-coverage": "ng test --code-coverage"
   },

@@ -22,7 +22,7 @@
           </li>
           <li class="change" *ngSwitchCase="'UPDATE'">
             <span i18n="@@differ.set">Set </span>
-            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
+            <span class="item" *ngIf="change.label?.length > 0">{{change.label}}</span>
             <ng-container *ngIf="displayOldValue(change)">
               <span i18n="@@differ.from"> from </span>
               <span class="item remove-item" *ngIf="!change.isMultiValue">{{change.oldValue}}</span>
@@ -74,12 +74,18 @@
                 </ng-container>
               </ng-container>
             </div>
-            <div class="serve" *ngIf="change.value.variations?.length > 0">
-              <span i18n="@@differ.serve">Serve</span>
-              <span class="serve-value ant-tag" *ngFor="let variation of change.value.variations">
-                {{variation.label}} <ng-container *ngIf="change.value.variations.length > 1">({{variation.percentage}}%)</ng-container>
-              </span>
-            </div>
+            <ng-container *ngIf="change.value.variations?.length > 0">
+              <div class="serve">
+                <span i18n="@@differ.serve">Serve</span>
+                <span class="serve-value ant-tag" *ngFor="let variation of change.value.variations">
+                  {{variation.label}} <ng-container *ngIf="change.value.variations.length > 1">({{variation.percentage}}%)</ng-container>
+                </span>
+              </div>
+              <div class="distribute-by">
+                <span i18n="@@differ.distribute-by">Distribute by</span>
+                <span class="item">{{change.value.splittingKey}}</span>
+              </div>
+            </ng-container>
           </li>
         </ng-container>
       </ul>

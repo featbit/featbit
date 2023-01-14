@@ -91,7 +91,7 @@ export abstract class Differ {
 
       return {
         op: OperationEnum.UPDATE,
-        label: $localize `:@@differ.serve-value:Serve`,
+        label: $localize `:@@differ.serve-value:serve value`,
         isMultiValue: true,
         path: path,
         value: newVariations.length > 1 ? newVariations.map((v) => `${v.label} (${v.percentage}%)`) : newVariations.map((v) => v.label),

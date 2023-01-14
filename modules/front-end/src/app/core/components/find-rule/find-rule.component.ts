@@ -20,9 +20,10 @@ export class FindRuleComponent {
   @Output() onConditionChange = new EventEmitter<ICondition[]>();
   @Output() onSplittingKeyChange = new EventEmitter<IRuleIdSplittingKey>();
 
-  public conditions: ICondition[] = [];
-  public name: string = "";
-  public id: string = "";
+  conditions: ICondition[] = [];
+  name: string = "";
+  id: string = "";
+  splittingKey: string = "";
   variations: IRuleVariation[] = [];
   trackByFunction = trackByFunction;
 
@@ -36,6 +37,7 @@ export class FindRuleComponent {
   set data(value: IRule) {
     this.id = value.id;
     this.name = value.name;
+    this.splittingKey = value.splittingKey;
     this.variations = value.variations || [];
     this.conditions = [];
 
@@ -96,7 +98,7 @@ export class FindRuleComponent {
     this.deleteRule.emit(this.id);
   }
 
-  public onDeleteRuleItem(index: number) {
+  onDeleteRuleItem(index: number) {
     if(this.conditions.length === 1) {
       this.conditions[0] = {
         property: '',
@@ -110,7 +112,7 @@ export class FindRuleComponent {
     this.onConditionChange.next(this.conditions);
   }
 
-  public onRuleChange(value: ICondition, index: number) {
+  onRuleChange(value: ICondition, index: number) {
     const rule = { ...value, ...{multipleValue: [...value.multipleValue]} };
     if (isSegmentCondition(rule)) {
       rule.op = null;
@@ -124,7 +126,7 @@ export class FindRuleComponent {
     this.onSplittingKeyChange.emit({ ruleId: this.id, splittingKey });
   }
 
-  public onRuleNameChange() {
+  onRuleNameChange() {
     this.updateRuleName.emit(this.name);
   }
 
