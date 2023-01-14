@@ -4,12 +4,14 @@
     height: 100%;
 
     .warning-message {
-        font-size: 15px;
-        font-weight: 500;
-        padding: 10px;
-        border: 1px solid #d2d2d2;
-        margin-bottom: 15px;
-        border-left: 3px solid #ff912b;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 10px;
+      border: 1px solid #d2d2d2;
+      margin-bottom: 15px;
+      border-left: 3px solid #ff912b;
+      border-radius: 10px;
+
         .warning {
           display: flex;
 
@@ -38,14 +40,22 @@
           }
 
           .ant-input-group-wrapper {
-            width: 150px;
-            input {
-              height: 36px;
-              border-color: #d9d9d9;
-              &:hover {
-                border-right: none;
+            border: none;
+            padding: 0;
+
+            ::ng-deep .ant-input-number {
+              border: none;
+              border-radius: 8px;
+              input {
+                text-align: left;
+                height: 36px;
+                width: 100px;
+                padding-right:0;
+                border-top-left-radius: 8px;
+                border-bottom-left-radius: 8px;
               }
             }
+
             button.ant-input-search-button {
               border-left: none;
               border-top-right-radius: 8px;
@@ -53,7 +63,6 @@
               height: 36px;
             }
           }
-
         }
       }
       .expt-pencentage {
