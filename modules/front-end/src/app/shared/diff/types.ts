@@ -47,3 +47,5 @@ export interface IChange {
   oldValue?: ChangeValue,
   value?: ChangeValue,
 }
+
+export const DefaultSplittingKey = 'keyId';

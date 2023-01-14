@@ -17,6 +17,7 @@ import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
 import {RefTypeEnum} from "@core/components/audit-log/types";
 import {ISegment} from "@features/safe/segments/types/segments-index";
+import { DefaultSplittingKey } from "@shared/diff/types";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -279,8 +280,10 @@ export class TargetingComponent implements OnInit {
   onSave(data: any) {
     this.isLoading = true;
 
-    const { id, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
+    let { id, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
     const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
+    fallthrough.splittingKey = fallthrough.splittingKey || DefaultSplittingKey;
+    rules = rules.map((rule) => ({...rule, splittingKey: rule.splittingKey || DefaultSplittingKey}));
 
     this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment: data.comment }).subscribe({
       next: () => {

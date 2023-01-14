@@ -3,6 +3,7 @@ import { getPercentageFromRolloutPercentageArray } from '@utils/index';
 import { IRuleVariation, isNotPercentageRollout, IVariation} from "@shared/rules";
 import { IUserProp } from "@shared/types";
 import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
+import { DefaultSplittingKey } from "@shared/diff/types";
 
 interface IRuleVariationValue extends IRuleVariation {
   percentageValue: number;
@@ -33,7 +34,7 @@ export class ServeComponent implements OnInit {
     this.splittingKeys = data.filter((userProperty) => ![USER_IS_IN_SEGMENT_USER_PROP.name, USER_IS_NOT_IN_SEGMENT_USER_PROP.name].includes(userProperty.name))
       .map((d) => d.name);
     this.filteredSplittingKeys = [...this.splittingKeys];
-    this.splittingKey = this.splittingKeys.find((key) => key === this.splittingKey) ?? 'keyId';
+    this.splittingKey = this.splittingKeys.find((key) => key === this.splittingKey) ?? DefaultSplittingKey;
   }
 
   @Output() onSplittingKeyChange = new EventEmitter<string>();
