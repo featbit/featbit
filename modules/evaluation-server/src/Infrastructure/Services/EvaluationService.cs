@@ -40,20 +40,25 @@ public class EvaluationService
                 }
             }
         }
-        
-        var splittingKeyName = string.Empty;
+
+        var flagKey = flag.GetProperty("key").GetString();
+        // splittingKey = {flagKey}{userValue}
+        string splittingKey;
+
         // if user is rule matched
         var rules = flag.GetProperty("rules").EnumerateArray();
         foreach (var rule in rules)
         {
             if (await _ruleMatcher.IsMatchAsync(rule, user))
             {
-                splittingKeyName = rule.GetProperty("splittingKey").GetString();
-                splittingKeyName = string.IsNullOrWhiteSpace(splittingKeyName) ? "keyId" : splittingKeyName;
-                var ruleSplittingKey = $"{user.ValueOf(splittingKeyName)}{flag.GetProperty("key")}";
+                var ruleSplittingKey = rule.GetProperty("splittingKey").GetString();
+                splittingKey = string.IsNullOrWhiteSpace(ruleSplittingKey)
+                    ? $"{flagKey}{user.KeyId}"
+                    : $"{flagKey}{user.ValueOf(ruleSplittingKey)}";
+
                 return new RolloutUserVariation(
                     rule.GetProperty("variations"),
-                    ruleSplittingKey,
+                    splittingKey,
                     scope.Variations,
                     exptIncludeAllTargets,
                     rule.GetProperty("includedInExpt").GetBoolean(),
@@ -64,12 +69,15 @@ public class EvaluationService
 
         // match default rule
         var fallthrough = flag.GetProperty("fallthrough");
-        splittingKeyName = fallthrough.GetProperty("splittingKey").GetString();
-        splittingKeyName = string.IsNullOrWhiteSpace(splittingKeyName) ? "keyId" : splittingKeyName;
-        var fallthroughSplittingKey = $"{user.ValueOf(splittingKeyName)}{flag.GetProperty("key")}";
+
+        var fallthroughSplittingKey = fallthrough.GetProperty("splittingKey").GetString();
+        splittingKey = string.IsNullOrWhiteSpace(fallthroughSplittingKey)
+            ? $"{flagKey}{user.KeyId}"
+            : $"{flagKey}{user.ValueOf(fallthroughSplittingKey)}";
+
         return new RolloutUserVariation(
             fallthrough.GetProperty("variations"),
-            fallthroughSplittingKey,
+            splittingKey,
             scope.Variations,
             exptIncludeAllTargets,
             fallthrough.GetProperty("includedInExpt").GetBoolean(),
