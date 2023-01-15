@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IOrganization, IProjectEnv, IRuleIdSplittingKey } from '@shared/types';
+import { IOrganization, IProjectEnv, IRuleIdDispatchKey } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { EnvUserService } from '@services/env-user.service';
@@ -17,7 +17,7 @@ import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
 import {RefTypeEnum} from "@core/components/audit-log/types";
 import {ISegment} from "@features/safe/segments/types/segments-index";
-import { DefaultSplittingKey } from "@shared/diff/types";
+import { DefaultDispatchKey } from "@shared/diff/types";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -222,6 +222,7 @@ export class TargetingComponent implements OnInit {
     this.featureFlag.rules.push({
       id: uuidv4(),
       name: ($localize `:@@common.rule:Rule`) + ' ' + (this.featureFlag.rules.length + 1),
+      dispatchKey: DefaultDispatchKey,
       conditions: [],
       variations: [],
     } as IRule);
@@ -261,14 +262,14 @@ export class TargetingComponent implements OnInit {
     this.featureFlag.fallthrough.variations = [...value];
   }
 
-  onFallthroughSplittingKeyChangeChange(key: string) {
-    this.featureFlag.fallthrough.splittingKey = key;
+  onFallthroughDispatchKeyChangeChange(key: string) {
+    this.featureFlag.fallthrough.dispatchKey = key;
   }
 
-  onRuleSplittingKeyChange(ruleSplittingKey: IRuleIdSplittingKey) {
+  onRuleDispatchKeyChange(ruleDispatchKey: IRuleIdDispatchKey) {
     this.featureFlag.rules = this.featureFlag.rules.map(rule => {
-      if (rule.id === ruleSplittingKey.ruleId) {
-        rule.splittingKey = ruleSplittingKey.splittingKey;
+      if (rule.id === ruleDispatchKey.ruleId) {
+        rule.dispatchKey = ruleDispatchKey.dispatchKey;
       }
 
       return rule;

@@ -4,9 +4,9 @@ export interface IResponse {
   data: any
 }
 
-export interface IRuleIdSplittingKey {
+export interface IRuleIdDispatchKey {
   ruleId: string,
-  splittingKey: string
+  dispatchKey: string
 }
 
 export interface IUserType {

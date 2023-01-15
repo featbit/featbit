@@ -3,7 +3,7 @@ import { SegmentService } from '@services/segment.service';
 import { isSegmentCondition, trackByFunction } from '@utils/index';
 import { IRuleOp, ruleOps } from './ruleConfig';
 import { ISegment } from "@features/safe/segments/types/segments-index";
-import { IRuleIdSplittingKey, IUserProp } from "@shared/types";
+import { IRuleIdDispatchKey, IUserProp } from "@shared/types";
 import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
 
 @Component({
@@ -18,12 +18,12 @@ export class FindRuleComponent {
   @Output() deleteRule = new EventEmitter<string>();
   @Output() updateRuleName = new EventEmitter<string>();
   @Output() onConditionChange = new EventEmitter<ICondition[]>();
-  @Output() onSplittingKeyChange = new EventEmitter<IRuleIdSplittingKey>();
+  @Output() onDispatchKeyChange = new EventEmitter<IRuleIdDispatchKey>();
 
   conditions: ICondition[] = [];
   name: string = "";
   id: string = "";
-  splittingKey: string = "";
+  dispatchKey: string = "";
   variations: IRuleVariation[] = [];
   trackByFunction = trackByFunction;
 
@@ -37,7 +37,7 @@ export class FindRuleComponent {
   set data(value: IRule) {
     this.id = value.id;
     this.name = value.name;
-    this.splittingKey = value.splittingKey;
+    this.dispatchKey = value.dispatchKey;
     this.variations = value.variations || [];
     this.conditions = [];
 
@@ -122,8 +122,8 @@ export class FindRuleComponent {
     this.onConditionChange.next(this.conditions);
   }
 
-  splittingKeyChange(splittingKey: string) {
-    this.onSplittingKeyChange.emit({ ruleId: this.id, splittingKey });
+  dispatchKeyChange(dispatchKey: string) {
+    this.onDispatchKeyChange.emit({ ruleId: this.id, dispatchKey: dispatchKey });
   }
 
   onRuleNameChange() {

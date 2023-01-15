@@ -199,7 +199,7 @@ export class FeatureFlagDiffer implements IDiffer {
           isMultiValue: false,
           path: path,
           value: {
-            splittingKey: newRule.splittingKey,
+            dispatchKey: newRule.dispatchKey,
             conditions: newRule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
             variations: newRule.variations.map((rv) => ({
               label: newObj.variations.find((v) => v.id === rv.id)?.value,
@@ -219,7 +219,7 @@ export class FeatureFlagDiffer implements IDiffer {
         isMultiValue: false,
         path: path,
         value: {
-          splittingKey: rule.splittingKey,
+          dispatchKey: rule.dispatchKey,
           conditions: rule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
           variations: rule.variations.map((rv) => ({
             label: newObj.variations.find((v) => v.id === rv.id)?.value,
@@ -236,7 +236,7 @@ export class FeatureFlagDiffer implements IDiffer {
         isMultiValue: false,
         path: path,
         value: {
-          splittingKey: rule.splittingKey,
+          dispatchKey: rule.dispatchKey,
           conditions: rule.conditions.map((condition) => Differ.mapConditionToDiffCondition(condition, segments)),
           variations: rule.variations.map((rv) => ({
             label: oldObj.variations.find((v) => v.id === rv.id)?.value,
@@ -280,7 +280,7 @@ export class FeatureFlagDiffer implements IDiffer {
   private compareFallthrough(ff1: IFeatureFlag, ff2: IFeatureFlag): ICategory[] {
     const fallthroughPrimitivePaths = [
       { label: $localize `:@@differ.fallthrough-included-in-expt:Send to experiment`, path: ['fallthrough', 'includedInExpt']},
-      { label: $localize `:@@differ.dispatch-by:Dispatch by`, path: ['fallthrough', 'splittingKey']}];
+      { label: $localize `:@@differ.dispatch-by:Dispatch by`, path: ['fallthrough', 'dispatchKey']}];
 
     const changes: IChange[] = fallthroughPrimitivePaths.flatMap(({label, path}) =>
       Differ.comparePrimitives(_.get(ff1, path), _.get(ff2, path), path)

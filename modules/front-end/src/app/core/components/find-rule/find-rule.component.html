@@ -15,9 +15,9 @@
     </ng-container>
     <ng-container *ngIf="variationOptions.length > 0">
       <app-serve
-        [splittingKey]="splittingKey"
+        [dispatchKey]="dispatchKey"
         [userProps]="userProps"
-        (onSplittingKeyChange)="splittingKeyChange($event)"
+        (onDispatchKeyChange)="dispatchKeyChange($event)"
         [variationOptions]="variationOptions"
         [ruleVariations]="variations"
         (onPercentageChange)="onServeChange.next($event)">

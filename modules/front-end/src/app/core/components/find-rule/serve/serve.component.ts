@@ -3,7 +3,7 @@ import { getPercentageFromRolloutPercentageArray } from '@utils/index';
 import { IRuleVariation, isNotPercentageRollout, IVariation} from "@shared/rules";
 import { IUserProp } from "@shared/types";
 import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
-import { DefaultSplittingKey } from "@shared/diff/types";
+import { DefaultDispatchKey } from "@shared/diff/types";
 
 interface IRuleVariationValue extends IRuleVariation {
   percentageValue: number;
@@ -25,19 +25,19 @@ export class ServeComponent implements OnInit {
 
     this.ngOnInit();
   }
-  @Input() splittingKey: string;
+  @Input() dispatchKey: string;
 
-  splittingKeys: string[] = [];
-  filteredSplittingKeys: string[] = [];
+  dispatchKeys: string[] = [];
+  filteredDispatchKeys: string[] = [];
   @Input("userProps")
   set properties(data: IUserProp[]) {
-    this.splittingKeys = data.filter((userProperty) => ![USER_IS_IN_SEGMENT_USER_PROP.name, USER_IS_NOT_IN_SEGMENT_USER_PROP.name].includes(userProperty.name))
+    this.dispatchKeys = data.filter((userProperty) => ![USER_IS_IN_SEGMENT_USER_PROP.name, USER_IS_NOT_IN_SEGMENT_USER_PROP.name].includes(userProperty.name))
       .map((d) => d.name);
-    this.filteredSplittingKeys = [...this.splittingKeys];
-    this.splittingKey = this.splittingKeys.find((key) => key === this.splittingKey) ?? DefaultSplittingKey;
+    this.filteredDispatchKeys = [...this.dispatchKeys];
+    this.dispatchKey = this.dispatchKeys.find((key) => key === this.dispatchKey) ?? DefaultDispatchKey;
   }
 
-  @Output() onSplittingKeyChange = new EventEmitter<string>();
+  @Output() onDispatchKeyChange = new EventEmitter<string>();
   @Output() onPercentageChange = new EventEmitter<IRuleVariation[]>();
 
   selectedVariationId: string = '-1';
@@ -107,8 +107,8 @@ export class ServeComponent implements OnInit {
     this.onOutputPercentage();
   }
 
-  splittingKeyChange() {
-    this.onSplittingKeyChange.next(this.splittingKey);
+  dispatchKeyChange() {
+    this.onDispatchKeyChange.next(this.dispatchKey);
   }
 
   private getPercentageToBeAssigned(): number {

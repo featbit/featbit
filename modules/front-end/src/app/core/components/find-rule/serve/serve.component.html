@@ -28,16 +28,16 @@
             {{ rule.id | RVV: availableVariations }}
           </div>
         </div>
-        <div class="splitting-key">
+        <div class="dispatch-key">
           <div i18n="@@core.components.findrule.dispatch-by">Dispatch By</div>
           <div class="select">
             <nz-select
               nzShowSearch
               nzPlaceHolder="Select property"
               i18n-nzPlaceHolder="@@core.components.findrule.serve.selectuserproperty"
-              [(ngModel)]="splittingKey"
-              (ngModelChange)="splittingKeyChange()">
-              <nz-option *ngFor="let key of filteredSplittingKeys" [nzValue]="key" [nzLabel]="key"></nz-option>
+              [(ngModel)]="dispatchKey"
+              (ngModelChange)="dispatchKeyChange()">
+              <nz-option *ngFor="let key of filteredDispatchKeys" [nzValue]="key" [nzLabel]="key"></nz-option>
             </nz-select>
           </div>
           <i class="tooltip" [nz-tooltip]="defaultTooltip" nz-icon nzType="icons:icon-info-outline">

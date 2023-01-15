@@ -8,7 +8,7 @@ public class TargetRule
 
     public string Name { get; set; }
 
-    public string SplittingKey { get; set; }
+    public string DispatchKey { get; set; }
 
     public bool IncludedInExpt { get; set; }
 

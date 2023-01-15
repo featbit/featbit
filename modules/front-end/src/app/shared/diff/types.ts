@@ -48,4 +48,4 @@ export interface IChange {
   value?: ChangeValue,
 }
 
-export const DefaultSplittingKey = 'keyId';
+export const DefaultDispatchKey = 'keyId';

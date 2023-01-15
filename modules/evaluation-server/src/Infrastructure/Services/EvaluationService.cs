@@ -42,8 +42,7 @@ public class EvaluationService
         }
 
         var flagKey = flag.GetProperty("key").GetString();
-        // splittingKey = {flagKey}{userValue}
-        string splittingKey;
+        string dispatchKey;
 
         // if user is rule matched
         var rules = flag.GetProperty("rules").EnumerateArray();
@@ -51,14 +50,14 @@ public class EvaluationService
         {
             if (await _ruleMatcher.IsMatchAsync(rule, user))
             {
-                var ruleSplittingKey = rule.GetProperty("splittingKey").GetString();
-                splittingKey = string.IsNullOrWhiteSpace(ruleSplittingKey)
+                var ruleDispatchKey = rule.GetProperty("dispatchKey").GetString();
+                dispatchKey = string.IsNullOrWhiteSpace(ruleDispatchKey)
                     ? $"{flagKey}{user.KeyId}"
-                    : $"{flagKey}{user.ValueOf(ruleSplittingKey)}";
+                    : $"{flagKey}{user.ValueOf(ruleDispatchKey)}";
 
                 return new RolloutUserVariation(
                     rule.GetProperty("variations"),
-                    splittingKey,
+                    dispatchKey,
                     scope.Variations,
                     exptIncludeAllTargets,
                     rule.GetProperty("includedInExpt").GetBoolean(),
@@ -70,14 +69,14 @@ public class EvaluationService
         // match default rule
         var fallthrough = flag.GetProperty("fallthrough");
 
-        var fallthroughSplittingKey = fallthrough.GetProperty("splittingKey").GetString();
-        splittingKey = string.IsNullOrWhiteSpace(fallthroughSplittingKey)
+        var fallthroughDispatchKey = fallthrough.GetProperty("dispatchKey").GetString();
+        dispatchKey = string.IsNullOrWhiteSpace(fallthroughDispatchKey)
             ? $"{flagKey}{user.KeyId}"
-            : $"{flagKey}{user.ValueOf(fallthroughSplittingKey)}";
+            : $"{flagKey}{user.ValueOf(fallthroughDispatchKey)}";
 
         return new RolloutUserVariation(
             fallthrough.GetProperty("variations"),
-            splittingKey,
+            dispatchKey,
             scope.Variations,
             exptIncludeAllTargets,
             fallthrough.GetProperty("includedInExpt").GetBoolean(),

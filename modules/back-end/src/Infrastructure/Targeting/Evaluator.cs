@@ -32,32 +32,31 @@ public class Evaluator : IEvaluator
         }
 
         var flagKey = flag.Key;
-        // splittingKey = {flagKey}{userValue}
-        string splittingKey;
+        string dispatchKey;
 
         // if user is rule matched
         foreach (var rule in flag.Rules)
         {
             if (await IsMatchAsync(rule, user))
             {
-                var ruleSplittingKey = rule.SplittingKey;
-                splittingKey = string.IsNullOrWhiteSpace(ruleSplittingKey)
+                var ruleDispatchKey = rule.DispatchKey;
+                dispatchKey = string.IsNullOrWhiteSpace(ruleDispatchKey)
                     ? $"{flagKey}{user.KeyId}"
-                    : $"{flagKey}{user.ValueOf(ruleSplittingKey)}";
+                    : $"{flagKey}{user.ValueOf(ruleDispatchKey)}";
 
-                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(splittingKey))!;
+                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(dispatchKey))!;
                 return new UserVariation(flag.GetVariation(rolloutVariation.Id), rule.Name);
             }
         }
 
         // match default rule
-        var fallthroughSplittingKey = flag.Fallthrough.SplittingKey;
-        splittingKey = string.IsNullOrWhiteSpace(fallthroughSplittingKey)
+        var fallthroughDispatchKey = flag.Fallthrough.DispatchKey;
+        dispatchKey = string.IsNullOrWhiteSpace(fallthroughDispatchKey)
             ? $"{flagKey}{user.KeyId}"
-            : $"{flagKey}{user.ValueOf(fallthroughSplittingKey)}";
+            : $"{flagKey}{user.ValueOf(fallthroughDispatchKey)}";
 
         var defaultVariation =
-            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(splittingKey))!;
+            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(dispatchKey))!;
         return new UserVariation(flag.GetVariation(defaultVariation.Id), "default");
     }
 
