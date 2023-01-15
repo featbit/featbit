@@ -285,7 +285,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">283</context>
+          <context context-type="linenumber">293</context>
         </context-group>
         <target>基于属性</target>
       </trans-unit>
@@ -6805,7 +6805,7 @@
         <source>Default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">308</context>
+          <context context-type="linenumber">318</context>
         </context-group>
         <target>默认规则</target>
       </trans-unit>

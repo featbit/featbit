@@ -279,13 +279,23 @@ export class FeatureFlagDiffer implements IDiffer {
 
   private compareFallthrough(ff1: IFeatureFlag, ff2: IFeatureFlag): ICategory[] {
     const fallthroughPrimitivePaths = [
-      { label: $localize `:@@differ.fallthrough-included-in-expt:Send to experiment`, path: ['fallthrough', 'includedInExpt']},
-      { label: $localize `:@@differ.dispatch-by:Dispatch by`, path: ['fallthrough', 'dispatchKey']}];
+      { label: $localize `:@@differ.fallthrough-included-in-expt:Send to experiment`, path: ['fallthrough', 'includedInExpt']}
+    ];
 
     const changes: IChange[] = fallthroughPrimitivePaths.flatMap(({label, path}) =>
       Differ.comparePrimitives(_.get(ff1, path), _.get(ff2, path), path)
         .map((change) => ({...change, label}))
     );
+
+    const dispatchKeyPath = ['fallthrough', 'dispatchKey'];
+    if (_.get(ff2, dispatchKeyPath) !== null) {
+      const dispatchKeyChange = Differ.comparePrimitives(_.get(ff1, dispatchKeyPath), _.get(ff2, dispatchKeyPath), dispatchKeyPath)
+        .map((change) => ({...change, label: $localize `:@@differ.dispatch-by:Dispatch by`}));
+
+      if(dispatchKeyChange.length > 0) {
+        changes.push(dispatchKeyChange[0]);
+      }
+    }
 
     const oldVariations = ff1.fallthrough.variations.map((rv) => ({
       ...rv,
