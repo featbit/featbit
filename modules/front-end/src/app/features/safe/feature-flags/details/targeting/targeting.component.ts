@@ -222,7 +222,7 @@ export class TargetingComponent implements OnInit {
     this.featureFlag.rules.push({
       id: uuidv4(),
       name: ($localize `:@@common.rule:Rule`) + ' ' + (this.featureFlag.rules.length + 1),
-      dispatchKey: DefaultDispatchKey,
+      dispatchKey: null,
       conditions: [],
       variations: [],
     } as IRule);

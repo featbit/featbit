@@ -73,6 +73,7 @@ export class ServeComponent implements OnInit {
       });
 
       this.percentageToBeAssigned = this.getPercentageToBeAssigned();
+      this.dispatchKey = this.dispatchKey ?? DefaultDispatchKey;
     }
   }
 
@@ -92,6 +93,8 @@ export class ServeComponent implements OnInit {
       });
 
       this.percentageToBeAssigned = this.getPercentageToBeAssigned();
+      this.dispatchKey = this.dispatchKey ?? DefaultDispatchKey;
+      this.dispatchKeyChange();
     } else {
       const variation = this.availableVariations.find(x => x.id === this.selectedVariationId);
       const rule = this.ruleVariations.find(x => x.id === variation.id);
@@ -102,6 +105,9 @@ export class ServeComponent implements OnInit {
           exptRollout: rule?.exptRollout ?? 1
         }
       ];
+
+      this.dispatchKey = null;
+      this.dispatchKeyChange();
     }
 
     this.onOutputPercentage();
