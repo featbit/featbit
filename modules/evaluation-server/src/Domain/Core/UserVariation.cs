@@ -78,7 +78,8 @@ public sealed class RolloutUserVariation : UserVariation
         else
         {
             // create a new key to calculate the experiment splitting percentage
-            var sendToExptKey = splittingKey + splittingKey;
+            const string exptSplittingKeyPrefix = "expt";
+            var sendToExptKey = $"{exptSplittingKeyPrefix}{splittingKey}";
             if (exptRollout == 0.0 || splittingRollout == 0.0)
             {
                 SendToExperiment = false;
