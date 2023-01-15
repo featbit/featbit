@@ -30,27 +30,34 @@ public class Evaluator : IEvaluator
         {
             return new UserVariation(flag.GetVariation(targetUser.VariationId), "targeted");
         }
-        
-        var splittingKeyName = string.Empty;
+
+        var flagKey = flag.Key;
+        // splittingKey = {flagKey}{userValue}
+        string splittingKey;
+
         // if user is rule matched
         foreach (var rule in flag.Rules)
         {
             if (await IsMatchAsync(rule, user))
             {
-                splittingKeyName = string.IsNullOrWhiteSpace(rule.SplittingKey) ? EndUserConsts.KeyId : rule.SplittingKey;
-                var ruleSplittingKey = $"{user.ValueOf(splittingKeyName)}{flag.Key}";
-                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(ruleSplittingKey))!;
+                var ruleSplittingKey = rule.SplittingKey;
+                splittingKey = string.IsNullOrWhiteSpace(ruleSplittingKey)
+                    ? $"{flagKey}{user.KeyId}"
+                    : $"{flagKey}{user.ValueOf(ruleSplittingKey)}";
 
+                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(splittingKey))!;
                 return new UserVariation(flag.GetVariation(rolloutVariation.Id), rule.Name);
             }
         }
 
         // match default rule
-        splittingKeyName = string.IsNullOrWhiteSpace(flag.Fallthrough.SplittingKey) ? EndUserConsts.KeyId : flag.Fallthrough.SplittingKey;
-        var fallthroughSplittingKey = $"{user.ValueOf(splittingKeyName)}{flag.Key}";
-        var defaultVariation =
-            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(fallthroughSplittingKey))!;
+        var fallthroughSplittingKey = flag.Fallthrough.SplittingKey;
+        splittingKey = string.IsNullOrWhiteSpace(fallthroughSplittingKey)
+            ? $"{flagKey}{user.KeyId}"
+            : $"{flagKey}{user.ValueOf(fallthroughSplittingKey)}";
 
+        var defaultVariation =
+            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(splittingKey))!;
         return new UserVariation(flag.GetVariation(defaultVariation.Id), "default");
     }
 
