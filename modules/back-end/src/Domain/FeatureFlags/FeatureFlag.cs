@@ -1,4 +1,5 @@
 using Domain.AuditLogs;
+using Domain.EndUsers;
 using Domain.Targeting;
 
 namespace Domain.FeatureFlags;
@@ -60,7 +61,7 @@ public class FeatureFlag : FullAuditedEntity
         Fallthrough = new Fallthrough
         {
             IncludedInExpt = true,
-            SplittingKey = "keyId",
+            SplittingKey = EndUserConsts.KeyId,
             Variations = new List<RolloutVariation>
             {
                 new()

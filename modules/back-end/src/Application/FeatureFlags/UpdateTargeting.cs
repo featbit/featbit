@@ -1,5 +1,6 @@
 using Application.Users;
 using Domain.AuditLogs;
+using Domain.EndUsers;
 using Domain.FeatureFlags;
 using Domain.Targeting;
 
@@ -47,7 +48,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
             request.TargetUsers,
             request.Rules.Select(rule =>
             {
-                rule.SplittingKey = string.IsNullOrWhiteSpace(rule.SplittingKey) ? "keyId" : rule.SplittingKey;
+                rule.SplittingKey = string.IsNullOrWhiteSpace(rule.SplittingKey) ? EndUserConsts.KeyId : rule.SplittingKey;
                 return rule;
             }).ToList(),
             request.Fallthrough,

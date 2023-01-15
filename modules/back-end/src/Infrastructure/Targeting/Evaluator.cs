@@ -37,7 +37,7 @@ public class Evaluator : IEvaluator
         {
             if (await IsMatchAsync(rule, user))
             {
-                splittingKeyName = string.IsNullOrWhiteSpace(rule.SplittingKey) ? "keyId" : rule.SplittingKey;
+                splittingKeyName = string.IsNullOrWhiteSpace(rule.SplittingKey) ? EndUserConsts.KeyId : rule.SplittingKey;
                 var ruleSplittingKey = $"{user.ValueOf(splittingKeyName)}{flag.Key}";
                 var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(ruleSplittingKey))!;
 
@@ -46,7 +46,7 @@ public class Evaluator : IEvaluator
         }
 
         // match default rule
-        splittingKeyName = string.IsNullOrWhiteSpace(flag.Fallthrough.SplittingKey) ? "keyId" : flag.Fallthrough.SplittingKey;
+        splittingKeyName = string.IsNullOrWhiteSpace(flag.Fallthrough.SplittingKey) ? EndUserConsts.KeyId : flag.Fallthrough.SplittingKey;
         var fallthroughSplittingKey = $"{user.ValueOf(splittingKeyName)}{flag.Key}";
         var defaultVariation =
             flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(fallthroughSplittingKey))!;
