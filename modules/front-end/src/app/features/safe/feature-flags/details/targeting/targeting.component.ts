@@ -280,10 +280,8 @@ export class TargetingComponent implements OnInit {
   onSave(data: any) {
     this.isLoading = true;
 
-    let { id, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
+    const { id, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
     const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
-    fallthrough.splittingKey = fallthrough.splittingKey || DefaultSplittingKey;
-    rules = rules.map((rule) => ({...rule, splittingKey: rule.splittingKey || DefaultSplittingKey}));
 
     this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment: data.comment }).subscribe({
       next: () => {
