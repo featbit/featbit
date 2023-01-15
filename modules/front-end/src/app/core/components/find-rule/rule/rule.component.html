@@ -53,9 +53,8 @@
     </ng-container>
     <ng-container *ngSwitchCase="'number'">
       <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <input class="standard-bordered-input" nz-input type="number" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()"
-               placeholder="input a number"
-               i18n-placeholder="@@core.components.findrule.rule.inputnumber"/>
+        <nz-input-number class="standard-bordered-input" type="number" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" nzPlaceHolder="input a number"
+                         i18n-nzPlaceHolder="@@core.components.findrule.rule.inputnumber"></nz-input-number>
       </div>
     </ng-container>
     <ng-container *ngSwitchCase="'regex'">
