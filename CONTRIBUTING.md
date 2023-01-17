@@ -64,7 +64,7 @@ we need to update the **src/Api/appsettings.Development.json** file to this:
 }
 ```
 
-Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, swagger would be available
+Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, then the swagger would be available
 at [http://localhost:5000/swagger](http://localhost:5000/swagger).
 
 ## Setting up UI locally
