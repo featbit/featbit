@@ -4,6 +4,11 @@ export interface IResponse {
   data: any
 }
 
+export interface IRuleIdDispatchKey {
+  ruleId: string,
+  dispatchKey: string
+}
+
 export interface IUserType {
   id: string;
   name: string;

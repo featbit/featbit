@@ -31,21 +31,32 @@ public class Evaluator : IEvaluator
             return new UserVariation(flag.GetVariation(targetUser.VariationId), "targeted");
         }
 
+        var flagKey = flag.Key;
+        string dispatchKey;
+
         // if user is rule matched
         foreach (var rule in flag.Rules)
         {
             if (await IsMatchAsync(rule, user))
             {
-                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(user.KeyId))!;
+                var ruleDispatchKey = rule.DispatchKey;
+                dispatchKey = string.IsNullOrWhiteSpace(ruleDispatchKey)
+                    ? $"{flagKey}{user.KeyId}"
+                    : $"{flagKey}{user.ValueOf(ruleDispatchKey)}";
 
+                var rolloutVariation = rule.Variations.FirstOrDefault(x => x.IsInRollout(dispatchKey))!;
                 return new UserVariation(flag.GetVariation(rolloutVariation.Id), rule.Name);
             }
         }
 
         // match default rule
-        var defaultVariation =
-            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(user.KeyId))!;
+        var fallthroughDispatchKey = flag.Fallthrough.DispatchKey;
+        dispatchKey = string.IsNullOrWhiteSpace(fallthroughDispatchKey)
+            ? $"{flagKey}{user.KeyId}"
+            : $"{flagKey}{user.ValueOf(fallthroughDispatchKey)}";
 
+        var defaultVariation =
+            flag.Fallthrough.Variations.FirstOrDefault(x => x.IsInRollout(dispatchKey))!;
         return new UserVariation(flag.GetVariation(defaultVariation.Id), "default");
     }
 

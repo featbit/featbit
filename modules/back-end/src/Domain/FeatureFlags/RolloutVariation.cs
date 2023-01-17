@@ -15,5 +15,5 @@ public class RolloutVariation
         return Rollout[1] - Rollout[0] == 0;
     }
 
-    public bool IsInRollout(string key) => SplittingAlgorithm.IsInRollout(key, Rollout);
+    public bool IsInRollout(string key) => DispatchAlgorithm.IsInRollout(key, Rollout);
 }

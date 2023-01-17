@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Domain.Core;
 
-public static class SplittingAlgorithm
+public static class DispatchAlgorithm
 {
     private static readonly MD5 Hasher = MD5.Create();
 

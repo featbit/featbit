@@ -33,6 +33,9 @@
         </div>
         <div class="find-rule">
           <app-serve
+            [dispatchKey]="featureFlag.fallthrough.dispatchKey"
+            [userProps]="userProps"
+            (onDispatchKeyChange)="onFallthroughDispatchKeyChangeChange($event)"
             [variationOptions]="featureFlag.variations"
             [ruleVariations]="featureFlag.fallthrough.variations"
             (onPercentageChange)="onFallthroughChange($event)">
@@ -88,6 +91,7 @@
                 [data]="rule"
                 [variationOptions]="featureFlag.variations"
                 [userProps]="userProps"
+                (onDispatchKeyChange)="onRuleDispatchKeyChange($event)"
                 (addProperty)="onAddProperty($event)"
                 (deleteRule)="onDeleteRule(rule.id)"
                 (onConditionChange)="onRuleConditionChange($event, rule.id)"

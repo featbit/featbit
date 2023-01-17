@@ -53,7 +53,7 @@ section.rule-item {
               border: none;
               padding: 0;
 
-              input {
+              .ant-input-number {
                 text-align: left;
                 height: 36px;
                 width: 100px;
@@ -69,12 +69,35 @@ section.rule-item {
           }
         }
 
-        .total-percentage{
-          width: 175px;
+        .total-percentage {
+          width: 350px;
           align-self: flex-end;
 
-          .hundred-percent{
-            text-align: right;
+          .rest-to-assign {
+            text-align: left;
+
+            .hundred-percent {
+              display: inline-block;
+              background-color: @red50-color;
+              color: @white;
+              border-radius: 4px;
+              padding: 0 8px;
+              margin: 0 4px;
+            }
+          }
+        }
+
+        .dispatch-key {
+          width: 350px;
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          gap: 16px;
+
+          .tooltip {
+            cursor: pointer;
+            font-size: 20px;
+            color: @grey50-color;
           }
         }
       }

@@ -78,6 +78,7 @@ import { NzEmptyModule } from "ng-zorro-antd/empty";
 import { NzTimelineModule } from "ng-zorro-antd/timeline";
 import { ChangeReviewComponent } from "@core/components/change-review/change-review.component";
 import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
+import { NzInputNumberModule } from "ng-zorro-antd/input-number";
 
 @NgModule({
   declarations: [
@@ -87,9 +88,7 @@ import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
     PolicyTypePipe,
     TranslationPipe,
     RuleVariationValuePipe,
-
     PermissionCheckDirective,
-
     LocaleSwitcherComponent,
     MemberDrawerComponent,
     MessageComponent,
@@ -160,7 +159,8 @@ import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
     NzDatePickerModule,
     NzEmptyModule,
     NzTimelineModule,
-    NzBreadCrumbModule
+    NzBreadCrumbModule,
+    NzInputNumberModule
   ],
   exports: [
     CommonModule,
@@ -172,9 +172,7 @@ import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
     PolicyTypePipe,
     TranslationPipe,
     RuleVariationValuePipe,
-
     PermissionCheckDirective,
-
     LocaleSwitcherComponent,
     MemberDrawerComponent,
     MessageComponent,

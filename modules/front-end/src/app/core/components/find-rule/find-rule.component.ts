@@ -3,7 +3,7 @@ import { SegmentService } from '@services/segment.service';
 import { isSegmentCondition, trackByFunction } from '@utils/index';
 import { IRuleOp, ruleOps } from './ruleConfig';
 import { ISegment } from "@features/safe/segments/types/segments-index";
-import { IUserProp } from "@shared/types";
+import { IRuleIdDispatchKey, IUserProp } from "@shared/types";
 import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
 
 @Component({
@@ -18,10 +18,12 @@ export class FindRuleComponent {
   @Output() deleteRule = new EventEmitter<string>();
   @Output() updateRuleName = new EventEmitter<string>();
   @Output() onConditionChange = new EventEmitter<ICondition[]>();
+  @Output() onDispatchKeyChange = new EventEmitter<IRuleIdDispatchKey>();
 
-  public conditions: ICondition[] = [];
-  public name: string = "";
-  public id: string = "";
+  conditions: ICondition[] = [];
+  name: string = "";
+  id: string = "";
+  dispatchKey: string = "";
   variations: IRuleVariation[] = [];
   trackByFunction = trackByFunction;
 
@@ -35,6 +37,7 @@ export class FindRuleComponent {
   set data(value: IRule) {
     this.id = value.id;
     this.name = value.name;
+    this.dispatchKey = value.dispatchKey;
     this.variations = value.variations || [];
     this.conditions = [];
 
@@ -95,7 +98,7 @@ export class FindRuleComponent {
     this.deleteRule.emit(this.id);
   }
 
-  public onDeleteRuleItem(index: number) {
+  onDeleteRuleItem(index: number) {
     if(this.conditions.length === 1) {
       this.conditions[0] = {
         property: '',
@@ -109,7 +112,7 @@ export class FindRuleComponent {
     this.onConditionChange.next(this.conditions);
   }
 
-  public onRuleChange(value: ICondition, index: number) {
+  onRuleChange(value: ICondition, index: number) {
     const rule = { ...value, ...{multipleValue: [...value.multipleValue]} };
     if (isSegmentCondition(rule)) {
       rule.op = null;
@@ -119,7 +122,11 @@ export class FindRuleComponent {
     this.onConditionChange.next(this.conditions);
   }
 
-  public onRuleNameChange() {
+  dispatchKeyChange(dispatchKey: string) {
+    this.onDispatchKeyChange.emit({ ruleId: this.id, dispatchKey: dispatchKey });
+  }
+
+  onRuleNameChange() {
     this.updateRuleName.emit(this.name);
   }
 

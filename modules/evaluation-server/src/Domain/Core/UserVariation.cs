@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 
 namespace Domain.Core;
@@ -45,24 +44,24 @@ public sealed class RolloutUserVariation : UserVariation
 
     public RolloutUserVariation(
         JsonElement rolloutVariations,
-        string userKeyId,
+        string dispatchKey,
         Variation[] allVariations,
         bool exptIncludeAllTargets,
         bool thisRuleIncludeInExpt,
         string matchReason)
         : base(Variation.Empty, matchReason)
     {
-        var splittingRollout = 0.0;
+        var dispatchRollout = 0.0;
         var exptRollout = 0.0;
 
         foreach (var rolloutVariation in rolloutVariations.EnumerateArray())
         {
             var rollouts = rolloutVariation.GetProperty("rollout").Deserialize<double[]>()!;
-            if (SplittingAlgorithm.IsInRollout(userKeyId, rollouts))
+            if (DispatchAlgorithm.IsInRollout(dispatchKey, rollouts))
             {
                 var variationId = rolloutVariation.GetProperty("id").GetString()!;
                 Variation = allVariations.FirstOrDefault(x => x.Id == variationId)!;
-                splittingRollout = rollouts[1] - rollouts[0];
+                dispatchRollout = rollouts[1] - rollouts[0];
                 exptRollout = rolloutVariation.GetProperty("exptRollout").GetDouble();
                 break;
             }
@@ -78,20 +77,22 @@ public sealed class RolloutUserVariation : UserVariation
         }
         else
         {
-            var sendToExptKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(userKeyId));
-            if (exptRollout == 0.0 || splittingRollout == 0.0)
+            // create a new key to calculate the experiment dispatch percentage
+            const string exptDispatchKeyPrefix = "expt";
+            var sendToExptKey = $"{exptDispatchKeyPrefix}{dispatchKey}";
+            if (exptRollout == 0.0 || dispatchRollout == 0.0)
             {
                 SendToExperiment = false;
                 return;
             }
 
-            var upperBound = exptRollout / splittingRollout;
+            var upperBound = exptRollout / dispatchRollout;
             if (upperBound > 1.0)
             {
                 upperBound = 1.0;
             }
 
-            SendToExperiment = SplittingAlgorithm.IsInRollout(sendToExptKey, new[] { 0.0, upperBound });
+            SendToExperiment = DispatchAlgorithm.IsInRollout(sendToExptKey, new[] { 0.0, upperBound });
         }
     }
 }
