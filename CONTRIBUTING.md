@@ -31,11 +31,11 @@ Wait until all services are successfully launched, then you will be ready to set
 
 ## Setting up API locally
 
-The API project is built with [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), make sure you have .NET
-6.0 SDK installed before you start.
+The API project is built with [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), make sure you have the
+latest .NET 6.0 SDK installed before you start.
 
-To connect with its dependencies(mongodb, kafka, da-server), we need to update our **appsettings.Development.json** file
-to this:
+The API solution is located at **modules/back-end** folder. To connect its dependencies(mongodb, kafka, da-server),
+we need to update the **src/Api/appsettings.Development.json** file to this:
 
 ```json
 {
