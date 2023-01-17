@@ -1,5 +1,4 @@
 using Domain.AuditLogs;
-using Domain.EndUsers;
 using Domain.Targeting;
 
 namespace Domain.FeatureFlags;
