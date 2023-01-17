@@ -1,8 +1,8 @@
-using Domain.Targeting;
+using Domain.Core;
 
-namespace Domain.UnitTests.Targeting;
+namespace Domain.UnitTests.Core;
 
-public class SplittingAlgorithmTests
+public class DispatchAlgorithmTest
 {
     [Theory]
     [InlineData("test-value", 0.14653629204258323)]
@@ -10,6 +10,6 @@ public class SplittingAlgorithmTests
     [InlineData("3eacb184-2d79-49df-9ea7-edd4f10e4c6f", 0.08994403155520558)]
     public void ReturnSameResultForAnGivenKey(string key, double value)
     {
-        Assert.Equal(value, SplittingAlgorithm.RolloutOfKey(key));
+        Assert.Equal(value, DispatchAlgorithm.RolloutOfKey(key));
     }
 }
