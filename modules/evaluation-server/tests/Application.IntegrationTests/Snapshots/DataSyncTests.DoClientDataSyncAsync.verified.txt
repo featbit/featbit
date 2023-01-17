@@ -1,0 +1,27 @@
+﻿{
+  messageType: data-sync,
+  data: {
+    eventType: full,
+    userKeyId: Guid_1,
+    featureFlags: [
+      {
+        id: returns-true,
+        variation: true,
+        variationType: boolean,
+        matchReason: default,
+        variationOptions: [
+          {
+            id: Guid_2,
+            value: true
+          },
+          {
+            id: Guid_3,
+            value: false
+          }
+        ],
+        sendToExperiment: true,
+        timestamp: 1673837784215.0
+      }
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using Domain.WebSockets;
 
 namespace Application.IntegrationTests.WebSockets;
 
@@ -15,9 +16,25 @@ public class DataSyncTests
         _app = app;
     }
 
-    [Theory]
-    [InlineData("server", "{'messageType':'data-sync','data':{'timestamp': 0}}")]
-    public async Task DoServerDataSyncAsync(string type, string jsonMessage)
+    [Fact]
+    public async Task DoServerDataSyncAsync()
+    {
+        const string request =
+            "{'messageType':'data-sync','data':{'timestamp':0}}";
+
+        await DoDataSyncAndVerifyAsync(ConnectionType.Server, request);
+    }
+
+    [Fact]
+    public async Task DoClientDataSyncAsync()
+    {
+        const string request =
+            "{'messageType':'data-sync', 'data':{'timestamp': 0, 'user': {'keyId':'3db19c81-e149-4b97-8a0d-79d34531fe59','name':'tester'}}}";
+
+        await DoDataSyncAndVerifyAsync(ConnectionType.Client, request);
+    }
+
+    private async Task DoDataSyncAndVerifyAsync(string type, string jsonMessage)
     {
         var ws = await _app.ConnectWithTokenAsync(type);
         var dataSync = Encoding.UTF8.GetBytes(jsonMessage.Replace("'", "\""));
