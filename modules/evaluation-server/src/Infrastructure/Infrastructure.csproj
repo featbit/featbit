@@ -18,4 +18,9 @@
       <PackageReference Include="StackExchange.Redis" Version="2.6.70" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Fakes\flags.json" CopyToOutputDirectory="PreserveNewest" />
+      <None Update="Fakes\segments.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
 </Project>

@@ -2,6 +2,7 @@ using Domain.Core;
 using Domain.Services;
 using Domain.WebSockets;
 using Infrastructure.Caches;
+using Infrastructure.Fakes;
 using Infrastructure.Kafka;
 using Infrastructure.MongoDb;
 using Infrastructure.Redis;
@@ -48,37 +49,43 @@ public static class ServicesRegister
         // websocket message handlers
         services.AddTransient<IMessageHandler, PingMessageHandler>();
         services.AddTransient<IMessageHandler, EchoMessageHandler>();
-
-        // for integration tests, ignore below services 
-        if (builder.Environment.IsEnvironment("IntegrationTests"))
-        {
-            return builder;
-        }
-
-        // data-sync message handler
         services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
-        // redis
-        services.AddSingleton<IConnectionMultiplexer>(
-            _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
-        );
-        services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
+        // cache populating service
         services.AddHostedService<CachePopulatingHostedService>();
-        services.AddSingleton<ICacheService, RedisService>();
-        services.AddSingleton<EvaluationService>();
+
+        // evaluation related services
         services.AddSingleton<TargetRuleMatcher>();
+        services.AddSingleton<EvaluationService>();
 
-        // mongodb
-        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
-        services.AddSingleton<MongoDbClient>();
+        // for integration tests, use faked services 
+        if (builder.Environment.IsEnvironment("IntegrationTests"))
+        {
+            services.AddTransient<ICachePopulatingService, FakeCachePopulatingService>();
+            services.AddTransient<ICacheService, FakeCacheService>();
+            services.AddSingleton<IMessageProducer, FakeMessageProducer>();
+        }
+        else
+        {
+            // mongodb (used to populating redis data)
+            services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
+            services.AddSingleton<MongoDbClient>();
 
-        // kafka message producer & consumer
-        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
-        services.AddHostedService<KafkaMessageConsumer>();
+            // redis
+            services.AddSingleton<IConnectionMultiplexer>(
+                _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
+            );
+            services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
+            services.AddSingleton<ICacheService, RedisService>();
 
-        // kafka message handlers
-        services.AddSingleton<IKafkaMessageHandler, FeatureFlagChangeMessageHandler>();
-        services.AddSingleton<IKafkaMessageHandler, SegmentChangeMessageHandler>();
+            // kafka message producer & consumer
+            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+            services.AddHostedService<KafkaMessageConsumer>();
+
+            // kafka message handlers
+            services.AddSingleton<IKafkaMessageHandler, FeatureFlagChangeMessageHandler>();
+            services.AddSingleton<IKafkaMessageHandler, SegmentChangeMessageHandler>();
+        }
 
         return builder;
     }
