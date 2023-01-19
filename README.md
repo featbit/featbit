@@ -29,7 +29,7 @@
 
 ## Introduction
 
-Feature flag is a modern engineering technology that decouples code deployments from feature releases, giving you control over when and which end-users see which features. 
+Feature flag is a modern engineering technology that decouples code deployments from feature releases, giving you control over who sees which features when. 
 
 **FeatBit** provides a holistic framework for managing feature flags that enables teams to use flags on a massive scale across various use cases, such as: 
 
