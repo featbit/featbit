@@ -1,8 +1,5 @@
 # How to contribute
 
-One of the easiest ways to contribute is to participate in discussions on GitHub issues. You can also contribute by submitting pull requests with code changes.
-
-
 ## New contributor guide
 
 To get an overview of the project, read the [README](README.md). Here are some resources to help you get started with open source contributions:
@@ -14,5 +11,24 @@ To get an overview of the project, read the [README](README.md). Here are some r
 
 ## Getting started
 
-If you discovered a bug and you want to fix them.
-Uf you're interested in our contribution tasks, and you want to contribute.
+### What you can contribute in this repo? :punch:
+
+- You found a bug and you want to fix it 🐛
+- Some feature suggestions (new feature, enhancement, etc), and you want to contribute it (design/code/etc) ✨
+- You found that our code/product is ugly, unsafe or just "not good", contribute your solution 🚀
+- You're looking for an open-source to contribute your energy 🔥
+- You're looking for an open-source to learn programming skills 👩‍🎓
+
+### Let's Contribute :+1:
+
+- **Step 0** - Create a issue for bug or create feature suggestion in Discussion then Join our Slack community.
+- **Step 1** - Fork this repository.
+- **Step 2** - Clone the repository to your local machine.
+- **Step 3** - Resolve the bugs, mentions provided in the Issues section of the repository. _Also add a description of what changes you have done_.
+- **Step 4** - Add the changes to your repository.
+- **Step 5** - Create a PULL Request. And that's all.
+- **NOTE** - Please start the filename with the platform name on which the problem was solved. For eg if you are submitting graph problem from codechef then mention filename as **(CODECHEF) chefandgraph.cpp**.
+
+
+##### Let's Contribute :smiley:
+
