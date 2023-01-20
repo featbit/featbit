@@ -1,40 +1,37 @@
-# Contributions
+# Introduction
 
 Welcome to the FeatBit development documentation.
-
-Here you will find all the resources you need to start developing your FeatBit project.
 
 This document will guide you through the stages of setting up your development environment, connecting to our code base
 and finally submitting code to the project!
 
-# Setting up the environment
+# Get Started
 
 FeatBit consists of multiple services, to understand the architecture, please read
-this [document](https://featbit.gitbook.io/docs/tech-stack/architecture).
+our [document](https://featbit.gitbook.io/docs/tech-stack/architecture).
 
 ![Architecture](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2Fn8WleMePXy4BW6b0qQq2%2Fimage.png?alt=media&token=27fd5b0e-e704-4e01-b084-b8f5399f2565)
 
-However, to make contributions, you don't need to launch each service manually. Most of the contribution work would
-focus on UI and API, you just need to launch those two services and all the other services could be launched by docker
-compose.
+Most of the contribution work will focus on UI and API, we just need to set up their dependencies via docker compose and
+launch these two services from the code.
 
-## Launch docker compose
+## Setup dependencies
 
-Open [docker-compose.yml](./docker-compose.yml) and comment out **UI** and **api-server** under services, they are the
+Open [docker-compose.yml](./docker-compose.yml) and **comment out UI and api-server service**, they are the
 first two services. Then do
 
 ```bash
 docker compose up -d
 ```
 
-Wait until all services are successfully launched, then you will be ready to set up API and UI.
+Wait until all services are successfully launched, and we're ready to run API and UI locally.
 
-## Setting up API locally
+## Run API
 
 The API project is built with [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), make sure you have the
 latest .NET 6.0 SDK installed before you start.
 
-The API solution is located at **modules/back-end** folder. To connect its dependencies(mongodb, kafka, da-server),
+The API solution is located at **modules/back-end** folder. To connect to its dependencies(mongodb, kafka, da-server),
 we need to update the **src/Api/appsettings.Development.json** file to this:
 
 ```json
@@ -67,7 +64,7 @@ we need to update the **src/Api/appsettings.Development.json** file to this:
 Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, then the swagger would be available
 at [http://localhost:5000/swagger](http://localhost:5000/swagger).
 
-## Setting up UI locally
+## Run UI
 
 The UI is built with [Angular](https://angular.io/) and [NG-ZORRO](https://ng.ant.design/docs/introduce/en), please
 refer to their docs for more details.
