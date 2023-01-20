@@ -29,6 +29,18 @@ To get an overview of the project, read the [README](README.md). Here are some r
 
 ### Let's Contribute :+1:
 
+#### Issues
+
+- If you spot a problem with the FeatBit, search if an [issue](https://github.com/featbit/featbit/issues) already exists. If a related issue doesn't exist, you can open a new issue.
+- Scan through our existing [issues](https://github.com/featbit/featbit/issues) to find one that interests you. To avoid the conflict of contribution between contributors, check if the issue is assigned to someone else.
+- You can join to our Slack
+
+
+
+#### If you have some feature suggestions (new feature or enhancement)
+
+You can create a new thread in [Discussion](https://github.com/featbit/featbit/discussions/categories/feature-suggestions). 
+
 - **Step 0** - Create a issue for bug or create feature suggestion in Discussion then Join our Slack community.
 - **Step 1** - Fork this repository.
 - **Step 2** - Clone the repository to your local machine.
