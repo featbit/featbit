@@ -21,23 +21,39 @@ To get an overview of the project, read the [README](README.md). Here are some r
 
 ### What you can contribute in this repo? :punch:
 
-- You found a bug, and you want to fix it 🐛
-- Some feature suggestions (new feature, enhancement, etc.), and you want to contribute it (design/code/etc.) ✨
-- You found that our code/product is ugly, unsafe, or "not good”, and you want to contribute your solution 🚀
-- You're looking for an open-source project to contribute your energy 🔥
-- You're looking for an open-source project to learn and practice programming skills 👩‍🎓
+- You found a new bug, and you want to fix it 🐛
+- You want to fix an existing issue 🐛
+- You've some feature suggestions (new feature, UI/UX enhancement, etc.), and you want to contribute 🚀
+- You're looking for an open-source project to 
 
-### Let's Contribute :+1:
-
-#### Issues
-
-- If you spot a problem with the FeatBit, search if an [issue](https://github.com/featbit/featbit/issues) already exists. If a related issue doesn't exist, you can open a new issue.
-- Scan through our existing [issues](https://github.com/featbit/featbit/issues) to find one that interests you. To avoid the conflict of contribution between contributors, check if the issue is assigned to someone else.
-- You can join to our Slack
+  - Contribute your energy 🔥
+  - Learn and practice programming skills ✨
 
 
+### If you found a bug, and you want to fix it :+1:
 
-#### If you have some feature suggestions (new feature or enhancement)
+If you spot a problem with the FeatBit, search if an [issue](https://github.com/featbit/featbit/issues) already exists. If a related issue doesn't exist, you can open a new issue.
+
+You can join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us that you want to fix the issue you create. We will assign the issue to you that no one else will work on it at the same time. 
+
+### If you want to fix an existing issue
+
+1. Scan through our existing [issues](https://github.com/featbit/featbit/issues) to find one that interests you. 
+2. Join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us which issue you want to fix. 
+3. We will assign the issue to you so that no one else will work on it simultaneously. 
+
+But of course, you can fix the issue without telling us.
+
+### If you have some feature suggestions, and you want to contribute
+
+1. Create a new thread in [Discussion](https://github.com/featbit/featbit/discussions/categories/feature-suggestions) with the detail of your suggestion.
+2. Join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us you want to contribute to the thread you created.
+3. We will discuss this with you and schedule the tasks for the feature suggestions. We will also give our best support on it.
+
+But of course, you can finish your contribution and create a PR without notifying us in advance.
+
+
+## How to PR your code
 
 You can create a new thread in [Discussion](https://github.com/featbit/featbit/discussions/categories/feature-suggestions). 
 
@@ -49,5 +65,5 @@ You can create a new thread in [Discussion](https://github.com/featbit/featbit/d
 - **Step 5** - Create a PULL Request. And that's all.
 
 
-##### Let's Contribute :smiley:
+Let's Contribute !!! :smiley: 
 
