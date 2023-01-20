@@ -21,11 +21,11 @@ To get an overview of the project, read the [README](README.md). Here are some r
 
 ### What you can contribute in this repo? :punch:
 
-- You found a bug and you want to fix it 🐛
-- Some feature suggestions (new feature, enhancement, etc), and you want to contribute it (design/code/etc) ✨
-- You found that our code/product is ugly, unsafe or just "not good", contribute your solution 🚀
-- You're looking for an open-source to contribute your energy 🔥
-- You're looking for an open-source to learn programming skills 👩‍🎓
+- You found a bug, and you want to fix it 🐛
+- Some feature suggestions (new feature, enhancement, etc.), and you want to contribute it (design/code/etc.) ✨
+- You found that our code/product is ugly, unsafe, or "not good”, and you want to contribute your solution 🚀
+- You're looking for an open-source project to contribute your energy 🔥
+- You're looking for an open-source project to learn and practice programming skills 👩‍🎓
 
 ### Let's Contribute :+1:
 
@@ -35,7 +35,6 @@ To get an overview of the project, read the [README](README.md). Here are some r
 - **Step 3** - Resolve the bugs, mentions provided in the Issues section of the repository. _Also add a description of what changes you have done_.
 - **Step 4** - Add the changes to your repository.
 - **Step 5** - Create a PULL Request. And that's all.
-- **NOTE** - Please start the filename with the platform name on which the problem was solved. For eg if you are submitting graph problem from codechef then mention filename as **(CODECHEF) chefandgraph.cpp**.
 
 
 ##### Let's Contribute :smiley:
