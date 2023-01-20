@@ -64,13 +64,18 @@ But of course, you can finish your contribution and create a PR without notifyin
 
 ### Commit your update and PR your contribution to main project
 
-- **Step 0** - Create a issue for bug or create feature suggestion in Discussion then Join our Slack community.
-- **Step 1** - Fork this repository.
+- **Step 1** - [Fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks) this repository.
 - **Step 2** - Clone the repository to your local machine.
-- **Step 3** - Resolve the bugs, mentions provided in the Issues section of the repository. _Also add a description of what changes you have done_.
-- **Step 4** - Add the changes to your repository.
-- **Step 5** - Create a PULL Request. And that's all.
+- **Step 3** - Add the changes to your repository.
+- **Step 4** - Create a PULL Request. We may ask for changes to be made before a PR can be merge.
+- **Step 5** - Congratulations 🎉🎉 Your PR is approved and Merged !!! 
+- **Step 6** - FeatBit team thanks you. You becomes one of the contributor of FeatBit 🎉🎉 .
 
 
-Let's Contribute !!! :smiley: 
+----------------------------------------------------
+
+**LET'S CONTRIBUTE !!!** :smiley: 
+
+----------------------------------------------------
+
 
