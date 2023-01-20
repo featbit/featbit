@@ -6,7 +6,7 @@ Read our [Code of Conduct](https://github.com/featbit/featbit/blob/main/code_of_
 
 In this guide you will get an overview of the contribution workflow from opening an issue, creating a PR, reviewing, and merging the PR.
 
-Use the table of contents icon  on the top left corner of this document to get to a specific section of this guide quickly.
+Use the `table of contents` icon on the top left corner of this document to get to a specific section of this guide quickly.
 
 ## New contributor guide
 
@@ -28,34 +28,41 @@ To get an overview of the project, read the [README](README.md). Here are some r
 
   - Contribute your energy 🔥
   - Learn and practice programming skills ✨
+  - etc.
 
 
-### If you found a bug, and you want to fix it :+1:
+#### If you found a bug, and you want to fix it :+1:
 
-If you spot a problem with the FeatBit, search if an [issue](https://github.com/featbit/featbit/issues) already exists. If a related issue doesn't exist, you can open a new issue.
-
-You can join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us that you want to fix the issue you create. We will assign the issue to you that no one else will work on it at the same time. 
-
-### If you want to fix an existing issue
-
-1. Scan through our existing [issues](https://github.com/featbit/featbit/issues) to find one that interests you. 
-2. Join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us which issue you want to fix. 
-3. We will assign the issue to you so that no one else will work on it simultaneously. 
+1. If you spot a problem with the FeatBit, search if an [issue](https://github.com/featbit/featbit/issues) already exists. If a related issue doesn't exist, you can open a new issue.
+2. Join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us that you want to fix the issue you create. 
+3. We will assign the issue to you so that no one else will work on it simultaneously. We will provide you with maximum support.
 
 But of course, you can fix the issue without telling us.
 
-### If you have some feature suggestions, and you want to contribute
+#### If you want to fix an existing issue
+
+1. Scan through our existing [issues](https://github.com/featbit/featbit/issues) to find one that interests you. 
+2. Join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us which issue you want to fix. 
+3. We will assign the issue to you so that no one else will work on it simultaneously. We will provide you with maximum support.
+
+But of course, you can fix the issue without telling us.
+
+#### If you have some feature suggestions, and you want to contribute
 
 1. Create a new thread in [Discussion](https://github.com/featbit/featbit/discussions/categories/feature-suggestions) with the detail of your suggestion.
 2. Join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us you want to contribute to the thread you created.
-3. We will discuss this with you and schedule the tasks for the feature suggestions. We will also give our best support on it.
+3. We will discuss this with you and schedule the tasks for the feature suggestions. We will provide you with maximum support.
 
 But of course, you can finish your contribution and create a PR without notifying us in advance.
 
 
-## How to PR your code
+#### If you're looking for an open-source project to contribute
 
-You can create a new thread in [Discussion](https://github.com/featbit/featbit/discussions/categories/feature-suggestions). 
+1. Join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ). We will provide you the contribution task list that you can contribute.
+2. Scan through the task list to find one that interests you. 
+3. Start your contribution. We will provide you with maximum support.
+
+### Commit your update and PR your contribution to main project
 
 - **Step 0** - Create a issue for bug or create feature suggestion in Discussion then Join our Slack community.
 - **Step 1** - Fork this repository.
