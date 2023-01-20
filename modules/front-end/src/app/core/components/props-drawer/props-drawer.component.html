@@ -151,7 +151,7 @@
           <nz-list class="preset-values">
             <nz-list-item *ngFor="let presetValue of currentUserPropRow.presetValues" class="preset-value">
               <div>
-                <div class="value-item"><div>Key</div>: &nbsp; <span nz-tooltip="{{ presetValue.value }}" nzTooltipPlacement="right">{{ presetValue.value }}</span></div>
+                <div class="value-item"><div>Key</div>: &nbsp;<span nz-tooltip="{{ presetValue.value }}" nzTooltipPlacement="right">{{ presetValue.value }}</span></div>
                 <div class="value-item"><div i18n="@@common.description">Description</div>: &nbsp;<span nz-tooltip="{{ presetValue.description }}" nzTooltipPlacement="right">{{ presetValue.description }}</span></div>
               </div>
               <button nz-button nzType="default" [nzSize]="'large'" (click)="removePropPresetValue(presetValue)"><i nz-icon nzType="close"></i></button>
