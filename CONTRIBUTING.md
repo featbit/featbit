@@ -1,6 +1,6 @@
 # How to contribute
 
-Thank you for investing your time in contributing to our project! Any contribution you make will be reflected on our [release history](https://github.com/featbit/featbit/releases) ✨.
+Thank you for investing your time in contributing to our project! Any contribution you make will be reflected on our [release history](https://github.com/featbit/featbit/releases).
 
 Read our [Code of Conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) to keep our community approachable and respectable.
 
@@ -19,19 +19,19 @@ To get an overview of the project, read the [README](README.md). Here are some r
 
 ## Getting started
 
-### What you can contribute in this repo? :punch:
+### What you can contribute in this repo?
 
-- You found a new bug, and you want to fix it 🐛
-- You want to fix an existing issue 🐛
-- You've some feature suggestions (new feature, UI/UX enhancement, etc.), and you want to contribute 🚀
+- You found a new bug, and you want to fix it
+- You want to fix an existing issue
+- You've some feature suggestions (new feature, UI/UX enhancement, etc.), and you want to contribute
 - You're looking for an open-source project to 
 
-  - Contribute your energy 🔥
-  - Learn and practice programming skills ✨
+  - Contribute your energy
+  - Learn and practice programming skills
   - etc.
 
 
-#### If you found a bug, and you want to fix it :+1:
+#### If you found a bug, and you want to fix it
 
 1. If you spot a problem with the FeatBit, search if an [issue](https://github.com/featbit/featbit/issues) already exists. If a related issue doesn't exist, you can open a new issue.
 2. Join our [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) and tell us that you want to fix the issue you create. 
@@ -76,7 +76,7 @@ If the steps above isn't very clear, you can search ["GitHub Forks and Pull Requ
 
 ----------------------------------------------------
 
-**LET'S CONTRIBUTE !!!** :smiley: 
+**LET'S CONTRIBUTE !!!**
 
 ----------------------------------------------------
 
