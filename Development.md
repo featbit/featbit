@@ -12,16 +12,21 @@ our [document](https://featbit.gitbook.io/docs/tech-stack/architecture).
 
 ![Architecture](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2Fn8WleMePXy4BW6b0qQq2%2Fimage.png?alt=media&token=27fd5b0e-e704-4e01-b084-b8f5399f2565)
 
+To get started, we need to clone FeatBit's repository first.
+```bash
+git clone https://github.com/featbit/featbit
+```
+
 Most of the contribution work will focus on UI and API, we just need to set up their dependencies via docker compose and
 launch these two services from the code.
 
 ## Setup dependencies
 
-Open [docker-compose.yml](./docker-compose.yml) and **comment out UI and api-server service**, they are the
+Open [docker-compose-dev.yml](./docker-compose-dev.yml) and **comment out ui and api-server service**, they are the
 first two services. Then do
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose-dev.yml up -d
 ```
 
 Wait until all services are successfully launched, and we're ready to run API and UI locally.
