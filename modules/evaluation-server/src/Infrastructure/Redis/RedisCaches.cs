@@ -4,7 +4,7 @@ using Infrastructure.MongoDb;
 using MongoDB.Bson;
 using StackExchange.Redis;
 
-namespace Infrastructure.Caches;
+namespace Infrastructure.Redis;
 
 public static class RedisCaches
 {

@@ -1,0 +1,58 @@
+[
+  {
+    "envId": "226b9bf8-4af3-4ffa-9b01-162270e4cd40",
+    "name": "sample",
+    "description": "- 10 users in individual targeting return true, 5 returns false\n- Cover types of attribute: Number, String, List, Boolean",
+    "included": [
+      "true-6",
+      "true-5",
+      "true-4",
+      "true-3",
+      "true-1",
+      "true-2",
+      "true-7",
+      "true-8",
+      "true-9",
+      "true-10"
+    ],
+    "excluded": [
+      "false-1",
+      "false-2",
+      "false-3",
+      "false-4",
+      "false-5"
+    ],
+    "rules": [
+      {
+        "id": "19a77402-3ee7-4ea0-83bc-3e019b982d1b",
+        "name": "Rule 1",
+        "conditions": [
+          {
+            "property": "number",
+            "op": "LessEqualThan",
+            "value": "100"
+          },
+          {
+            "property": "age",
+            "op": "IsOneOf",
+            "value": "[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"10\"]"
+          },
+          {
+            "property": "name",
+            "op": "NotEqual",
+            "value": "bob"
+          },
+          {
+            "property": "isMember",
+            "op": "IsTrue",
+            "value": "IsTrue"
+          }
+        ]
+      }
+    ],
+    "isArchived": false,
+    "createdAt": "2023-01-16T04:01:56.63Z",
+    "updatedAt": "2023-01-16T04:12:44.5261122Z",
+    "id": "0779d76b-afc6-4886-ab65-af8c004273ad"
+  }
+]

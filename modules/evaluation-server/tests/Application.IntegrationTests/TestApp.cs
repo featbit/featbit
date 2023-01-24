@@ -34,11 +34,11 @@ public class TestApp : WebApplicationFactory<Program>
         return ws;
     }
 
-    public async Task<WebSocket> ConnectWithTokenAsync()
+    public async Task<WebSocket> ConnectWithTokenAsync(string type = "client")
     {
         const string token = "QWSBHgpnOV3wI3kKAO9q9viC0wQWQQBDDDQBZWPXDQSdKZrVAf2U6gAnxl4lSH3w";
         const long tokenCreatedAt = 1666018247603;
 
-        return await ConnectAsync(tokenCreatedAt, $"?type=client&version=2&token={token}");
+        return await ConnectAsync(tokenCreatedAt, $"?type={type}&version=2&token={token}");
     }
 }

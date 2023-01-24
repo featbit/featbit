@@ -1,0 +1,113 @@
+﻿{
+  messageType: data-sync,
+  data: {
+    eventType: full,
+    featureFlags: [
+      {
+        envId: Guid_1,
+        name: returns true,
+        key: returns-true,
+        variationType: boolean,
+        variations: [
+          {
+            id: Guid_2,
+            value: true
+          },
+          {
+            id: Guid_3,
+            value: false
+          }
+        ],
+        targetUsers: [],
+        rules: [],
+        isEnabled: true,
+        disabledVariationId: Guid_3,
+        fallthrough: {
+          includedInExpt: true,
+          variations: [
+            {
+              id: Guid_2,
+              rollout: [
+                0.0,
+                1.0
+              ],
+              exptRollout: 1.0
+            }
+          ]
+        },
+        exptIncludeAllTargets: true,
+        tags: [],
+        isArchived: false,
+        disabledVariation: {
+          id: Guid_3,
+          value: false
+        },
+        creatorId: Guid_4,
+        updatorId: Guid_4,
+        createdAt: DateTimeOffset_1,
+        updatedAt: DateTimeOffset_2,
+        id: Guid_5
+      }
+    ],
+    segments: [
+      {
+        envId: Guid_1,
+        name: sample,
+        description:
+- 10 users in individual targeting return true, 5 returns false
+- Cover types of attribute: Number, String, List, Boolean,
+        included: [
+          true-6,
+          true-5,
+          true-4,
+          true-3,
+          true-1,
+          true-2,
+          true-7,
+          true-8,
+          true-9,
+          true-10
+        ],
+        excluded: [
+          false-1,
+          false-2,
+          false-3,
+          false-4,
+          false-5
+        ],
+        rules: [
+          {
+            id: Guid_6,
+            name: Rule 1,
+            conditions: [
+              {
+                property: number,
+                op: LessEqualThan,
+                value: 100
+              },
+              {
+                property: age,
+                op: IsOneOf,
+                value: ["1","2","3","4","5","6","7","8","9","10"]
+              },
+              {
+                property: name,
+                op: NotEqual,
+                value: bob
+              },
+              {
+                property: isMember,
+                op: IsTrue,
+                value: IsTrue
+              }
+            ]
+          }
+        ],
+        isArchived: false,
+        createdAt: DateTimeOffset_3,
+        updatedAt: DateTimeOffset_4,
+        id: Guid_7
+      }
+    ]
+  }
+}

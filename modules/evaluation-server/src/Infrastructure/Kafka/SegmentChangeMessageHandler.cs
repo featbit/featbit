@@ -12,16 +12,16 @@ public class SegmentChangeMessageHandler : IKafkaMessageHandler
 {
     public string Topic => Topics.SegmentChange;
 
-    private readonly RedisService _redisService;
+    private readonly ICacheService _cacheService;
     private readonly IConnectionManager _connectionManager;
     private readonly IDataSyncService _dataSyncService;
 
     public SegmentChangeMessageHandler(
-        RedisService redisService,
+        ICacheService cacheService,
         IConnectionManager connectionManager,
         IDataSyncService dataSyncService)
     {
-        _redisService = redisService;
+        _cacheService = cacheService;
         _connectionManager = connectionManager;
         _dataSyncService = dataSyncService;
     }
@@ -39,7 +39,7 @@ public class SegmentChangeMessageHandler : IKafkaMessageHandler
         }
 
         // upsert redis
-        await _redisService.UpsertSegmentAsync(segment);
+        await _cacheService.UpsertSegmentAsync(segment);
 
         // push change message to sdk
         var envId = segment.GetProperty("envId").GetGuid();

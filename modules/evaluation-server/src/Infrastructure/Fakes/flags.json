@@ -1,0 +1,47 @@
+[
+  {
+    "envId": "226b9bf8-4af3-4ffa-9b01-162270e4cd40",
+    "name": "returns true",
+    "key": "returns-true",
+    "variationType": "boolean",
+    "variations": [
+      {
+        "id": "3da96792-debf-4878-905a-c9b5f9178cd0",
+        "value": "true"
+      },
+      {
+        "id": "19cf9fb6-b790-4877-ab96-b5c5e73e0b46",
+        "value": "false"
+      }
+    ],
+    "targetUsers": [],
+    "rules": [],
+    "isEnabled": true,
+    "disabledVariationId": "19cf9fb6-b790-4877-ab96-b5c5e73e0b46",
+    "fallthrough": {
+      "includedInExpt": true,
+      "variations": [
+        {
+          "id": "3da96792-debf-4878-905a-c9b5f9178cd0",
+          "rollout": [
+            0,
+            1
+          ],
+          "exptRollout": 1
+        }
+      ]
+    },
+    "exptIncludeAllTargets": true,
+    "tags": [],
+    "isArchived": false,
+    "disabledVariation": {
+      "id": "19cf9fb6-b790-4877-ab96-b5c5e73e0b46",
+      "value": "false"
+    },
+    "creatorId": "197dea2a-1044-497d-8f1e-f01d2e15a756",
+    "updatorId": "197dea2a-1044-497d-8f1e-f01d2e15a756",
+    "createdAt": "2023-01-16T02:56:19.531Z",
+    "updatedAt": "2023-01-16T02:56:24.2152401Z",
+    "id": "174c7138-426d-4434-8a91-af8c00306de3"
+  }
+]
