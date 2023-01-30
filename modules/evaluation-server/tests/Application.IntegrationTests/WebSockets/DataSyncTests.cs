@@ -1,6 +1,5 @@
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
 using Domain.WebSockets;
 
 namespace Application.IntegrationTests.WebSockets;
@@ -36,18 +35,21 @@ public class DataSyncTests
 
     private async Task DoDataSyncAndVerifyAsync(string type, string jsonMessage)
     {
+        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        var cancellationToken = cts.Token;
+
         var ws = await _app.ConnectWithTokenAsync(type);
         var dataSync = Encoding.UTF8.GetBytes(jsonMessage.Replace("'", "\""));
 
-        await ws.SendAsync(dataSync, WebSocketMessageType.Text, true, CancellationToken.None);
+        await ws.SendAsync(dataSync, WebSocketMessageType.Text, true, cancellationToken);
 
-        var buffer = new byte[4 * 1024];
-        var result = await ws.ReceiveAsync(buffer, CancellationToken.None);
+        var buffer = new byte[8 * 1024];
+        var result = await ws.ReceiveAsync(buffer, cancellationToken);
 
         Assert.True(result.EndOfMessage);
         Assert.Equal(WebSocketMessageType.Text, result.MessageType);
 
-        using var response = JsonDocument.Parse(buffer.AsMemory()[..result.Count]);
-        await Verify(response);
+        var jsonString = Encoding.UTF8.GetString(buffer[..result.Count]);
+        await VerifyJson(jsonString);
     }
 }

@@ -1,7 +1,10 @@
 [
   {
+    "id": "0779d76b-afc6-4886-ab65-af8c004273ad",
+    "createdAt": "2023-01-16T04:01:56.63Z",
+    "updatedAt": "2023-01-28T05:54:43.583Z",
     "envId": "226b9bf8-4af3-4ffa-9b01-162270e4cd40",
-    "name": "sample",
+    "name": "segment-01",
     "description": "- 10 users in individual targeting return true, 5 returns false\n- Cover types of attribute: Number, String, List, Boolean",
     "included": [
       "true-6",
@@ -28,14 +31,14 @@
         "name": "Rule 1",
         "conditions": [
           {
-            "property": "number",
+            "property": "age",
             "op": "LessEqualThan",
-            "value": "100"
+            "value": "22"
           },
           {
-            "property": "age",
+            "property": "country",
             "op": "IsOneOf",
-            "value": "[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\",\"9\",\"10\"]"
+            "value": "[\"cn\",\"us\",\"es\"]"
           },
           {
             "property": "name",
@@ -50,9 +53,41 @@
         ]
       }
     ],
-    "isArchived": false,
-    "createdAt": "2023-01-16T04:01:56.63Z",
-    "updatedAt": "2023-01-16T04:12:44.5261122Z",
-    "id": "0779d76b-afc6-4886-ab65-af8c004273ad"
+    "isArchived": false
+  },
+  {
+    "id": "556c11b2-f08a-4e10-b0b7-af8e008125b3",
+    "createdAt": "2023-01-18T07:50:12.646Z",
+    "updatedAt": "2023-01-28T05:56:21.306Z",
+    "envId": "226b9bf8-4af3-4ffa-9b01-162270e4cd40",
+    "name": "segment-02",
+    "description": "has two rules",
+    "included": [],
+    "excluded": [],
+    "rules": [
+      {
+        "id": "7adfaef2-0d30-410e-ae90-ced5a1a877d2",
+        "name": "Rule 1",
+        "conditions": [
+          {
+            "property": "age",
+            "op": "BiggerThan",
+            "value": "20"
+          }
+        ]
+      },
+      {
+        "id": "e57e80ee-30d8-49bd-9b15-c7b9e4d8bb3b",
+        "name": "Rule 2",
+        "conditions": [
+          {
+            "property": "age",
+            "op": "BiggerThan",
+            "value": "30"
+          }
+        ]
+      }
+    ],
+    "isArchived": false
   }
 ]

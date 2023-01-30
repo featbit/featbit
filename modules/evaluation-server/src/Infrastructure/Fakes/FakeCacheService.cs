@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using Infrastructure.Caches;
 using MongoDB.Bson;
@@ -8,7 +9,7 @@ public class FakeCacheService : ICacheService
 {
     public Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {
-        return Task.FromResult(FakeCache.Flags);
+        return Task.FromResult(FakeCache.FlagsBytes);
     }
 
     public Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
@@ -28,12 +29,14 @@ public class FakeCacheService : ICacheService
 
     public Task<byte[]> GetSegmentAsync(string id)
     {
-        throw new NotImplementedException();
+        var segment = FakeCache.Segments.Single(x => x!["id"]!.ToString() == id);
+        var bytes = Encoding.UTF8.GetBytes(segment!.ToJsonString());
+        return Task.FromResult(bytes);
     }
 
     public Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
     {
-        return Task.FromResult(FakeCache.Segments);
+        return Task.FromResult(FakeCache.SegmentsBytes);
     }
 
     public Task UpsertSegmentAsync(BsonDocument segment)
