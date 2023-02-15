@@ -2,13 +2,13 @@ import { check } from "k6";
 import exec from 'k6/execution';
 import { WebSocket } from 'k6/experimental/websockets';
 import { Counter, Trend } from "k6/metrics";
-import { setTimeout, clearTimeout } from 'k6/experimental/timers';
+import { setTimeout } from 'k6/experimental/timers';
 import { generateConnectionToken, sendPingMessage } from "./utils.js";
 
 const secret = "qJHQTVfsZUOu1Q54RLMuIQ-JtrIvNK-k-bARYicOTNQA";
 const urlBase = "ws://localhost:5000"
 const url = `${urlBase}/streaming?type=client&token=${generateConnectionToken(secret)}`;
-const sessionDuration = 82 * 1000;
+const sessionDuration = 92 * 1000;
 
 // metrics
 const latency = new Trend("latency");
@@ -22,10 +22,10 @@ export const options = {
             executor: "ramping-vus",
             startVus: 0,
             stages: [
-                { duration: "20s", target: 60 },
-                { duration: "60s", target: 60 },
+                { duration: "30s", target: 4096 },
+                { duration: "60s", target: 4096 },
             ],
-            gracefulStop: '40s'
+            gracefulStop: '60s'
         },
     },
 };
