@@ -8,12 +8,13 @@ import { generateConnectionToken, sendPingMessage } from "./utils.js";
 const secret = "qJHQTVfsZUOu1Q54RLMuIQ-JtrIvNK-k-bARYicOTNQA";
 const urlBase = "ws://localhost:5000"
 const url = `${urlBase}/streaming?type=client&token=${generateConnectionToken(secret)}`;
-const sessionDuration = 71 * 1000;
+const sessionDuration = 82 * 1000;
 
 // metrics
-const dataSyncTrend = new Trend("data-sync-time");
+const latency = new Trend("latency");
 const pingCounter = new Counter("ping-sent");
 const pongCounter = new Counter("pong-received");
+const errorCounter = new Counter("error-occurred");
 
 export const options = {
     scenarios: {
@@ -21,10 +22,10 @@ export const options = {
             executor: "ramping-vus",
             startVus: 0,
             stages: [
-                { duration: "10s", target: 60 },
+                { duration: "20s", target: 60 },
                 { duration: "60s", target: 60 },
             ],
-            gracefulStop: '30s'
+            gracefulStop: '40s'
         },
     },
 };
@@ -52,7 +53,7 @@ export default function () {
         ws.addEventListener('message', (e) => {
             const message = JSON.parse(e.data);
             if (message.messageType === 'data-sync' && message.data.eventType === "full" && message.data.userKeyId === user) {
-                dataSyncTrend.add(Date.now() - dataSyncSendTime);
+                latency.add(Date.now() - dataSyncSendTime);
             }
 
             if (message.messageType === "pong") {
@@ -65,10 +66,7 @@ export default function () {
                 return;
             }
 
-            console.log(err);
-            check(err, {
-                "connection error": (err) => err.error() !== "websocket: close sent",
-            });
+            errorCounter.add(1);
         });
 
         ws.addEventListener("close", function (code) {
