@@ -8,8 +8,8 @@ public class FakeCachePopulatingService : ICachePopulatingService
 {
     public Task PopulateAsync()
     {
-        var flags = ReadAsDictionary(@"Fakes\flags.json");
-        var segments = ReadAsDictionary(@"Fakes\segments.json");
+        var flags = ReadAsDictionary(@"Fakes/flags.json");
+        var segments = ReadAsDictionary(@"Fakes/segments.json");
 
         FakeCache.Populate(flags, segments);
 
