@@ -6,7 +6,7 @@ import { setTimeout } from 'k6/experimental/timers';
 import { generateConnectionToken, sendPingMessage } from "./utils.js";
 
 const secret = "qJHQTVfsZUOu1Q54RLMuIQ-JtrIvNK-k-bARYicOTNQA";
-const urlBase = "ws://localhost:5100"
+const urlBase = "ws://localhost:5000"
 const url = `${urlBase}/streaming?type=client&token=${generateConnectionToken(secret)}`;
 const sessionDuration = 82 * 1000;
 
@@ -24,6 +24,7 @@ const phase2Duration = 60;
 const target = throughput * phase1Duration;
 
 export const options = {
+    summaryTrendStats: ["avg","min","med","max","p(90)","p(95)","p(99)","p(99.9)","p(99.99)"],
     scenarios: {
         load_testing: {
             executor: "ramping-vus",
