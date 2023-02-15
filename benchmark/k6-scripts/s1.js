@@ -16,14 +16,16 @@ const pingCounter = new Counter("ping-sent");
 const pongCounter = new Counter("pong-received");
 const errorCounter = new Counter("error-occurred");
 
+const throughput = parseInt(__ENV.THROUGHPUT);
+
 export const options = {
     scenarios: {
         load_testing: {
             executor: "ramping-vus",
             startVus: 0,
             stages: [
-                { duration: "30s", target: 4096 },
-                { duration: "60s", target: 4096 },
+                { duration: "30s", target: throughput },
+                { duration: "60s", target: throughput },
             ],
             gracefulStop: '60s'
         },
