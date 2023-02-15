@@ -8,7 +8,7 @@ import { generateConnectionToken, sendPingMessage } from "./utils.js";
 const secret = "qJHQTVfsZUOu1Q54RLMuIQ-JtrIvNK-k-bARYicOTNQA";
 const urlBase = "ws://localhost:5000"
 const url = `${urlBase}/streaming?type=client&token=${generateConnectionToken(secret)}`;
-const sessionDuration = 31 * 1000;
+const sessionDuration = 71 * 1000;
 
 // metrics
 const dataSyncTrend = new Trend("data-sync-time");
@@ -21,8 +21,8 @@ export const options = {
             executor: "ramping-vus",
             startVus: 0,
             stages: [
-                { duration: "10s", target: 30 },
-                { duration: "20s", target: 30 },
+                { duration: "10s", target: 60 },
+                { duration: "60s", target: 60 },
             ],
             gracefulStop: '30s'
         },
