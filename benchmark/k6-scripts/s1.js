@@ -77,7 +77,7 @@ export default function () {
             });
         });
 
-        //sendPingMessage(ws, pingCounter);
+        sendPingMessage(ws, pingCounter);
         // after a sessionDuration close the connection
         setTimeout(function () {
             ///console.log('Closed');
