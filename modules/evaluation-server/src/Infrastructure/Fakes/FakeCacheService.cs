@@ -29,7 +29,7 @@ public class FakeCacheService : ICacheService
 
     public Task<byte[]> GetSegmentAsync(string id)
     {
-        var segment = FakeCache.Segments.Single(x => x!["id"]!.ToString() == id);
+        var segment = FakeCache.Segments.FirstOrDefault(x => x!["id"]!.ToString() == id);
         var bytes = Encoding.UTF8.GetBytes(segment!.ToJsonString());
         return Task.FromResult(bytes);
     }

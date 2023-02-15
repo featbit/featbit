@@ -18,7 +18,7 @@ public static class FakeCache
         Flags = flags;
         Segments = segments;
 
-        FlagsBytes = flags.Select(x => Encoding.UTF8.GetBytes(x!.ToJsonString()));
-        SegmentsBytes = segments.Select(x => Encoding.UTF8.GetBytes(x!.ToJsonString()));
+        FlagsBytes = flags.Select(x => Encoding.UTF8.GetBytes(x!.ToJsonString())).ToArray();
+        SegmentsBytes = segments.Select(x => Encoding.UTF8.GetBytes(x!.ToJsonString())).ToArray();
     }
 }

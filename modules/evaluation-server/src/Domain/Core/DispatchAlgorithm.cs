@@ -30,7 +30,8 @@ public static class DispatchAlgorithm
 
     public static double RolloutOfKey(string key)
     {
-        var hashedKey = Hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
+        var _hasher = MD5.Create();
+        var hashedKey = _hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
         var magicNumber = BitConverter.ToInt32(hashedKey, 0);
         var percentage = Math.Abs((double)magicNumber / int.MinValue);
 
