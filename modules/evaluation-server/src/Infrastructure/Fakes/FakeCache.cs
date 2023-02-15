@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json.Nodes;
 
@@ -9,16 +10,18 @@ public static class FakeCache
 
     public static IEnumerable<byte[]> SegmentsBytes { get; private set; } = Array.Empty<byte[]>();
 
-    public static JsonArray Flags { get; private set; } = null!;
+    public static ImmutableDictionary<string, JsonObject> Flags { get; private set; } = null!;
 
-    public static JsonArray Segments { get; private set; } = null!;
+    public static ImmutableDictionary<string, JsonObject> Segments { get; private set; } = null!;
 
-    public static void Populate(JsonArray flags, JsonArray segments)
+    public static void Populate(
+        ImmutableDictionary<string, JsonObject> flags,
+        ImmutableDictionary<string, JsonObject> segments)
     {
         Flags = flags;
         Segments = segments;
 
-        FlagsBytes = flags.Select(x => Encoding.UTF8.GetBytes(x!.ToJsonString())).ToArray();
-        SegmentsBytes = segments.Select(x => Encoding.UTF8.GetBytes(x!.ToJsonString())).ToArray();
+        FlagsBytes = flags.Values.Select(x => Encoding.UTF8.GetBytes(x.ToJsonString())).ToArray();
+        SegmentsBytes = segments.Values.Select(x => Encoding.UTF8.GetBytes(x.ToJsonString())).ToArray();
     }
 }
