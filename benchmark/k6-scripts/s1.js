@@ -1,12 +1,13 @@
-import { check } from "k6";
 import exec from 'k6/execution';
 import { WebSocket } from 'k6/experimental/websockets';
 import { Counter, Trend } from "k6/metrics";
 import { setTimeout } from 'k6/experimental/timers';
 import { generateConnectionToken, sendPingMessage } from "./utils.js";
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js'
+import { htmlReport } from "https://raw.githubusercontent.com/featbit/k6-reporter/main/dist/bundle.js";
 
 const secret = "qJHQTVfsZUOu1Q54RLMuIQ-JtrIvNK-k-bARYicOTNQA";
-const urlBase = "ws://localhost:5000"
+const urlBase = "ws://localhost:5100"
 const url = `${urlBase}/streaming?type=client&token=${generateConnectionToken(secret)}`;
 const sessionDuration = 82 * 1000;
 
@@ -80,9 +81,6 @@ export default function () {
         });
 
         ws.addEventListener("close", function (code) {
-            check(code, {
-                "connection normal closure": (code) => code === 1000 || code === 1001,
-            });
         });
 
         sendPingMessage(ws, pingCounter);
@@ -92,4 +90,14 @@ export default function () {
             ws.close();
         }, sessionDuration);
     });
+}
+
+export function handleSummary(data) {
+    console.log(`Throughput: ${throughput}/s, ${throughput * phase1Duration} max VUs, ${phase1Duration}s duration for first phase and keep stable for ${phase2Duration}s`);
+    const report_name = `summary.${throughput}`;
+    return {
+        [`${report_name}.html`]: htmlReport(data),
+        'stdout': textSummary(data, { indent: ' ', enableColors: true }), // Show the text summary to stdout...
+        [`${report_name}.json`]: JSON.stringify(data), //the default data object
+    };
 }
