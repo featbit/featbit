@@ -1,4 +1,4 @@
-name: featbit-service-only
+name: featbit-partial
 version: "3.9"
 
 services:
@@ -18,10 +18,10 @@ services:
   api-server:
     image: featbit/featbit-api-server:latest
     environment:
-        - MongoDb__ConnectionString=mongodb://admin:password@192.168.56.1:27017
+        - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
         - MongoDb__Database=featbit
-        - Kafka__BootstrapServers=192.168.56.1:29092
-        - OLAP__ServiceHost=http://192.168.56.1:8200
+        - Kafka__BootstrapServers=kafka:9092
+        - OLAP__ServiceHost=http://da-server
     ports:
       - "5000:5000"
     networks:
@@ -30,10 +30,10 @@ services:
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
     environment:
-        - MongoDb__ConnectionString=mongodb://admin:password@192.168.56.1:27017
+        - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
         - MongoDb__Database=featbit
-        - Kafka__BootstrapServers=192.168.56.1:29092
-        - Redis__ConnectionString=192.168.56.1:6379
+        - Kafka__BootstrapServers=kafka:9092
+        - Redis__ConnectionString=redis:6379
     ports:
       - "5100:5100"
     networks:
@@ -46,13 +46,13 @@ services:
     networks:
       - featbit-network-service
     environment:
-      KAFKA_HOSTS: 192.168.56.1:9092
-      REDIS_HOST: 192.168.56.1
+      KAFKA_HOSTS: kafka:9092
+      REDIS_HOST: redis
       REDIS_PORT: 6379
-      CLICKHOUSE_HOST: 192.168.56.1
-      CLICKHOUSE_KAFKA_HOSTS: 192.168.56.1:9092
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
 
 networks:
   featbit-network-service:
-    name: featbit-network-service
-    driver: bridge
+    name: featbit-network
+    external: true
