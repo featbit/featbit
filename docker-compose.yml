@@ -16,6 +16,11 @@ services:
 
   api-server:
     image: featbit/featbit-api-server:latest
+    environment:
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
+      - MongoDb__Database=featbit
+      - Kafka__BootstrapServers=kafka:9092
+      - OLAP__ServiceHost=http://da-server
     depends_on:
       - mongodb
       - kafka
@@ -27,6 +32,11 @@ services:
 
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
+    environment:
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
+      - MongoDb__Database=featbit
+      - Kafka__BootstrapServers=kafka:9092
+      - Redis__ConnectionString=redis:6379
     depends_on:
       - mongodb
       - kafka
