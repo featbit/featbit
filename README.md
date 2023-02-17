@@ -1,6 +1,6 @@
 
 
-# FeatBit    <a href="https://twitter.com/intent/tweet?text=A%20scalable%2C%20high-performance%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" height=23></a>
+# [FeatBit](https://featbit.co)    <a href="https://twitter.com/intent/tweet?text=A%20scalable%2C%20high-performance%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" height=23></a>
 
 [![License](https://img.shields.io/static/v1?style=for-the-badge&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=for-the-badge&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -14,7 +14,11 @@
   <span> · </span>
   <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support (Slack)</a>
   <span> · </span>
-  <a href="https://github.com/featbit/featbit/discussions">Community Forum</a>  
+  <a href="https://github.com/featbit/featbit/discussions">Community Forum</a>
+  <span> · </span>
+  <a href="https://featbit.co">Official Website</a>
+  
+  
 </h3>
 
 
