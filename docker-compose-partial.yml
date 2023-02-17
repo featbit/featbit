@@ -3,25 +3,25 @@ version: "3.9"
 
 services:
   ui:
-      image: featbit/featbit-ui:latest
-      environment:
-        - API_URL=http://192.168.56.1:5000
-        - DEMO_URL=https://featbit-samples.vercel.app
-        - EVALUATION_URL=http://192.168.56.1:5100
-      depends_on:
-        - api-server
-      ports:
-        - "8081:80"
-      networks:
-        - featbit-network-service
+    image: featbit/featbit-ui:latest
+    environment:
+      - API_URL=http://192.168.56.1:5000
+      - DEMO_URL=https://featbit-samples.vercel.app
+      - EVALUATION_URL=http://192.168.56.1:5100
+    depends_on:
+      - api-server
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network-service
 
   api-server:
     image: featbit/featbit-api-server:latest
     environment:
-        - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-        - MongoDb__Database=featbit
-        - Kafka__BootstrapServers=kafka:9092
-        - OLAP__ServiceHost=http://da-server
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
+      - MongoDb__Database=featbit
+      - Kafka__BootstrapServers=kafka:9092
+      - OLAP__ServiceHost=http://da-server
     ports:
       - "5000:5000"
     networks:
@@ -30,10 +30,10 @@ services:
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
     environment:
-        - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-        - MongoDb__Database=featbit
-        - Kafka__BootstrapServers=kafka:9092
-        - Redis__ConnectionString=redis:6379
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
+      - MongoDb__Database=featbit
+      - Kafka__BootstrapServers=kafka:9092
+      - Redis__ConnectionString=redis:6379
     ports:
       - "5100:5100"
     networks:
