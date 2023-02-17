@@ -15,10 +15,6 @@
   <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support (Slack)</a>
   <span> · </span>
   <a href="https://github.com/featbit/featbit/discussions">Community Forum</a>
-  <span> · </span>
-  <a href="https://featbit.co">Official Website</a>
-  
-  
 </h3>
 
 
