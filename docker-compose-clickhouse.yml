@@ -27,8 +27,4 @@ networks:
         - subnet: 172.10.0.0/16
 
 volumes:
-  mongodb:
-  redis:
-  kafka:
   clickhouse-server:
-  zookeeper:
