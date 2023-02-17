@@ -1,68 +1,6 @@
-name: featbit-full
+name: featbit-infra
 version: "3.9"
 services:
-  ui:
-    image: featbit/featbit-ui:latest
-    environment:
-      - API_URL=http://localhost:5000
-      - DEMO_URL=https://featbit-samples.vercel.app
-      - EVALUATION_URL=http://localhost:5100
-    depends_on:
-      - api-server
-    ports:
-      - "8081:80"
-    networks:
-      - featbit-network
-
-  api-server:
-    image: featbit/featbit-api-server:latest
-    environment:
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
-      - OLAP__ServiceHost=http://da-server
-    depends_on:
-      - mongodb
-      - kafka
-      - da-server
-    ports:
-      - "5000:5000"
-    networks:
-      - featbit-network
-
-  evaluation-server:
-    image: featbit/featbit-evaluation-server:latest
-    environment:
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
-      - Redis__ConnectionString=redis:6379
-    depends_on:
-      - mongodb
-      - kafka
-      - redis
-    ports:
-      - "5100:5100"
-    networks:
-      - featbit-network
-
-  da-server:
-    image: featbit/featbit-data-analytics-server:latest
-    depends_on:
-      - zookeeper
-      - kafka
-      - clickhouse-server
-    ports:
-      - "8200:80"
-    networks:
-      - featbit-network
-    environment:
-      KAFKA_HOSTS: kafka:9092
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
-
   mongodb:
     image: mongo:5.0.14
     restart: on-failure
