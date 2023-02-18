@@ -12,7 +12,7 @@ services:
     ports:
       - "8081:80"
     networks:
-      - featbit-network
+      - featbit-network-full
 
   api-server:
     image: featbit/featbit-api-server:latest
@@ -28,7 +28,7 @@ services:
     ports:
       - "5000:5000"
     networks:
-      - featbit-network
+      - featbit-network-full
 
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
@@ -44,7 +44,7 @@ services:
     ports:
       - "5100:5100"
     networks:
-      - featbit-network
+      - featbit-network-full
 
   da-server:
     image: featbit/featbit-data-analytics-server:latest
@@ -55,7 +55,7 @@ services:
     ports:
       - "8200:80"
     networks:
-      - featbit-network
+      - featbit-network-full
     environment:
       KAFKA_HOSTS: kafka:9092
       REDIS_HOST: redis
@@ -76,7 +76,7 @@ services:
       - mongodb:/data/db
       - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
-      - featbit-network
+      - featbit-network-full
 
   redis:
     image: bitnami/redis:6.2.7
@@ -84,7 +84,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
-      - featbit-network
+      - featbit-network-full
     ports:
       - "6379:6379"
     volumes:
@@ -100,7 +100,7 @@ services:
     environment:
       ALLOW_ANONYMOUS_LOGIN: 'true'
     networks:
-      - featbit-network
+      - featbit-network-full
 
   kafka:
     image: bitnami/kafka:3.2.3
@@ -120,10 +120,10 @@ services:
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
       ALLOW_PLAINTEXT_LISTENER: 'true'
     networks:
-      - featbit-network
+      - featbit-network-full
     volumes:
       - kafka:/bitnami/kafka
-
+      
   clickhouse-server:
     image: clickhouse/clickhouse-server:22.3
     restart: on-failure
@@ -137,15 +137,15 @@ services:
       - "9009:9009"
       - "9440:9440"
     networks:
-      - featbit-network
+      - featbit-network-full
     volumes:
       - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
       - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-server:/var/lib/clickhouse
 
 networks:
-  featbit-network:
-    name: featbit-network
+  featbit-network-full:
+    name: featbit-network-full
     driver: bridge
     ipam:
       config:
