@@ -4,10 +4,10 @@ import { Counter, Trend } from "k6/metrics";
 import { setTimeout } from 'k6/experimental/timers';
 import { generateConnectionToken, sendPingMessage } from "./utils.js";
 import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js'
-import { htmlReport } from "https://raw.githubusercontent.com/featbit/k6-reporter/main/dist/bundle.js";
+import { htmlReport } from "./k6-reporter.js";
 
 const secret = "qJHQTVfsZUOu1Q54RLMuIQ-JtrIvNK-k-bARYicOTNQA";
-const urlBase = "ws://localhost:5100"
+const urlBase = "ws://EVALUATION-SERVER-HOST:5000"
 const url = `${urlBase}/streaming?type=client&token=${generateConnectionToken(secret)}`;
 const sessionDuration = 82 * 1000;
 
@@ -23,6 +23,18 @@ const throughput = parseInt(__ENV.THROUGHPUT);
 const phase1Duration = 20;
 const phase2Duration = 60;
 const target = throughput * phase1Duration;
+
+const readState = (path) => {
+    try {
+        return parseInt(open(path));
+    } catch (e) {
+        return 0;
+    }
+}
+
+const stateFile = `${throughput}_state.txt`;
+let iteration = readState(stateFile);
+iteration++;
 
 export const options = {
     summaryTrendStats: ["avg","min","med","max","p(90)","p(95)","p(99)","p(99.9)","p(99.99)"],
@@ -93,11 +105,12 @@ export default function () {
 }
 
 export function handleSummary(data) {
-    console.log(`Throughput: ${throughput}/s, ${throughput * phase1Duration} max VUs, ${phase1Duration}s duration for first phase and keep stable for ${phase2Duration}s`);
+    console.log(`Iteration: ${iteration}, Throughput: ${throughput}/s, ${throughput * phase1Duration} max VUs, ${phase1Duration}s duration for first phase and keep stable for ${phase2Duration}s`);
     const report_name = `summary.${throughput}`;
     return {
-        [`${report_name}.html`]: htmlReport(data),
+        [stateFile]: `${iteration}`,
+        [`${report_name}_${iteration}.html`]: htmlReport(data),
         'stdout': textSummary(data, { indent: ' ', enableColors: true }), // Show the text summary to stdout...
-        [`${report_name}.json`]: JSON.stringify(data), //the default data object
+        [`${report_name}_${iteration}.json`]: JSON.stringify(data), //the default data object
     };
 }
