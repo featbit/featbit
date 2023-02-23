@@ -7,7 +7,7 @@ import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js'
 import { htmlReport } from "./k6-reporter.js";
 
 const secret = "qJHQTVfsZUOu1Q54RLMuIQ-JtrIvNK-k-bARYicOTNQA";
-const urlBase = "ws://EVALUATION-SERVER-HOST:5000"
+const urlBase = "ws://localhost:5100"
 const url = `${urlBase}/streaming?type=client&token=${generateConnectionToken(secret)}`;
 const sessionDuration = 82 * 1000;
 
