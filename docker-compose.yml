@@ -1,5 +1,5 @@
 name: featbit-full
-version: "3.9"
+version: "3"
 services:
   ui:
     image: featbit/featbit-ui:latest
