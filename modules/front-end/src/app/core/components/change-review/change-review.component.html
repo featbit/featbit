@@ -28,8 +28,8 @@
       <section class="comment">
         <form nz-form [formGroup]="reviewForm" nzLayout="vertical">
           <nz-form-item>
-            <nz-form-label nzRequired class="section-title" i18n="@@common.comment">Comment</nz-form-label>
-            <nz-form-control i18n-nzErrorTip="@@common.comment-cannot-be-empty" nzErrorTip="Comment cannot be empty">
+            <nz-form-label class="section-title" i18n="@@common.comment">Comment</nz-form-label>
+            <nz-form-control>
               <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
             </nz-form-control>
           </nz-form-item>
