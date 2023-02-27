@@ -19,6 +19,7 @@
     "isEnabled": true,
     "disabledVariationId": "19cf9fb6-b790-4877-ab96-b5c5e73e0b46",
     "fallthrough": {
+      "dispatchKey": null,
       "includedInExpt": true,
       "variations": [
         {
