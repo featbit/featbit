@@ -1,6 +1,5 @@
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
 using Domain.WebSockets;
 
 namespace Application.IntegrationTests.WebSockets;
@@ -47,7 +46,7 @@ public class DataSyncTests
         Assert.True(result.EndOfMessage);
         Assert.Equal(WebSocketMessageType.Text, result.MessageType);
 
-        using var response = JsonDocument.Parse(buffer.AsMemory()[..result.Count]);
-        await Verify(response);
+        var json = Encoding.UTF8.GetString(buffer.AsMemory()[..result.Count].Span);
+        VerifyJson(json);
     }
 }

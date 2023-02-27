@@ -12,7 +12,5 @@ public static class Initialization
             typeName: type.Name,
             methodName: method.Name)
         );
-
-        VerifySystemJson.Enable();
     }
 }
