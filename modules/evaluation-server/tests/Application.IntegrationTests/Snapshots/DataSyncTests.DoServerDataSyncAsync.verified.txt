@@ -18,25 +18,23 @@
             value: false
           }
         ],
-        targetUsers: [],
-        rules: [],
         isEnabled: true,
         disabledVariationId: Guid_3,
         fallthrough: {
+          dispatchKey: null,
           includedInExpt: true,
           variations: [
             {
               id: Guid_2,
               rollout: [
-                0.0,
-                1.0
+                0,
+                1
               ],
-              exptRollout: 1.0
+              exptRollout: 1
             }
           ]
         },
         exptIncludeAllTargets: true,
-        tags: [],
         isArchived: false,
         disabledVariation: {
           id: Guid_3,

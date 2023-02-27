@@ -47,6 +47,6 @@ public class DataSyncTests
         Assert.Equal(WebSocketMessageType.Text, result.MessageType);
 
         var json = Encoding.UTF8.GetString(buffer.AsMemory()[..result.Count].Span);
-        VerifyJson(json);
+        await VerifyJson(json);
     }
 }

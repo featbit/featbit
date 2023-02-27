@@ -20,7 +20,7 @@
           }
         ],
         sendToExperiment: true,
-        timestamp: 1673837784215.0
+        timestamp: 1673837784215
       }
     ]
   }
