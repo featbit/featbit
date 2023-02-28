@@ -6,22 +6,37 @@ namespace Infrastructure.Fakes;
 
 public static class FakeCache
 {
-    public static IEnumerable<byte[]> FlagsBytes { get; private set; } = Array.Empty<byte[]>();
+    public static IEnumerable<byte[]> AllFlags { get; private set; } = Array.Empty<byte[]>();
 
-    public static IEnumerable<byte[]> SegmentsBytes { get; private set; } = Array.Empty<byte[]>();
+    public static IEnumerable<byte[]> AllSegments { get; private set; } = Array.Empty<byte[]>();
 
-    public static ImmutableDictionary<string, JsonObject> Flags { get; private set; } = null!;
+    public static ImmutableDictionary<string, byte[]> FlagsMap { get; private set; } = null!;
 
-    public static ImmutableDictionary<string, JsonObject> Segments { get; private set; } = null!;
+    public static ImmutableDictionary<string, byte[]> SegmentsMap { get; private set; } = null!;
 
     public static void Populate(
-        ImmutableDictionary<string, JsonObject> flags,
-        ImmutableDictionary<string, JsonObject> segments)
+        JsonArray flags,
+        JsonArray segments)
     {
-        Flags = flags;
-        Segments = segments;
+        AllFlags = flags.Select(JsonObjectToUtf8Bytes());
+        AllSegments = segments.Select(JsonObjectToUtf8Bytes());
 
-        FlagsBytes = flags.Values.Select(x => Encoding.UTF8.GetBytes(x.ToJsonString())).ToArray();
-        SegmentsBytes = segments.Values.Select(x => Encoding.UTF8.GetBytes(x.ToJsonString())).ToArray();
+        FlagsMap = JsonArrayToMap(flags);
+        SegmentsMap = JsonArrayToMap(segments);
+    }
+
+    private static ImmutableDictionary<string, byte[]> JsonArrayToMap(JsonArray jArray)
+    {
+        var dictionary = jArray.ToImmutableDictionary(
+            x => x!["id"]!.ToString(),
+            JsonObjectToUtf8Bytes()
+        );
+
+        return dictionary;
+    }
+
+    private static Func<JsonNode?, byte[]> JsonObjectToUtf8Bytes()
+    {
+        return x => Encoding.UTF8.GetBytes(x!.AsObject().ToJsonString());
     }
 }
