@@ -1,0 +1,38 @@
+name: Contribution log
+on: 
+  workflow_dispatch:
+  push:
+    branches: 
+      - main
+
+jobs:
+  Contribution:
+    name: Contribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 8BitJonny/gh-get-current-pr@2.2.0
+        id: PR
+
+      - name: Extract points from labels
+        if: steps.PR.outputs.number != ''
+        env:
+          PR: ${{steps.PR.outputs.pr}}
+        run: |
+          contributor="${{fromJson(steps.PR.outputs.pr).head.user.login}}"
+          points=$(echo $PR | jq '.labels[]|select(.name|startswith("points"))' | jq '.name' | tr -d '"' | cut -d ':' -f 2)
+          echo "points=$points" >> $GITHUB_ENV
+          echo "now=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+          echo "contributor=$contributor" >> $GITHUB_ENV
+      - name: Update contributors worksheet
+        if: ${{steps.PR.outputs.number != '' && env.points > 0}}
+        uses: jroehl/gsheet.action@v1.0.0 # you can specify '@release' to always have the latest changes
+        with:
+          spreadsheetId: 1ukyXgi_jRPeXj7EAST0IrnPfLOQ6xDBkcyAJY9N-Yb4
+          commands: | # list of commands, specified as a valid JSON string
+            [
+              { "command": "appendData", "args": { "worksheetTitle": "data", "data": [["${{env.contributor}}", "${{ github.event.repository.name }}", ${{env.points}}, "${{env.now}}"]], "minCol": 1 } }
+            ]
+        env:
+          GSHEET_CLIENT_EMAIL: ${{ secrets.GSHEET_CLIENT_EMAIL }}
+          GSHEET_PRIVATE_KEY: ${{ secrets.GSHEET_PRIVATE_KEY }}
+        
