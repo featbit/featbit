@@ -79,7 +79,7 @@ services:
       - featbit-network-full
 
   redis:
-    image: bitnami/redis:6.2.7
+    image: bitnami/redis:6.2.10
     restart: on-failure
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
@@ -91,7 +91,7 @@ services:
       - redis:/data
 
   zookeeper:
-    image: bitnami/zookeeper:3.8.0
+    image: bitnami/zookeeper:3.8.1
     restart: on-failure
     ports:
       - '2181:2181'
@@ -123,7 +123,7 @@ services:
       - featbit-network-full
     volumes:
       - kafka:/bitnami/kafka
-      
+
   clickhouse-server:
     image: clickhouse/clickhouse-server:22.3
     restart: on-failure

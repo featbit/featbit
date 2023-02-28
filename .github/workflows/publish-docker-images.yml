@@ -8,11 +8,11 @@ name: Publish Docker Images
 
 on:
   release:
-    types: [created]
+    types: [ created ]
   workflow_dispatch:
     inputs:
       version:
-        description: 'Dockerhub image version'
+        description: "Dockerhub image version"
         required: true
 
 env:
@@ -28,12 +28,16 @@ jobs:
   build-publish:
     name: build and publish image to docker hub
     runs-on: ubuntu-latest
-    environment : Production
+    environment: Production
     steps:
-      
       - name: Checkout
         uses: actions/checkout@v3
-        
+
+      - # Add support for more platforms with QEMU
+        # https://github.com/docker/setup-qemu-action
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -48,6 +52,7 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/front-end"
           file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
@@ -60,6 +65,7 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/back-end"
           file: ./deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
@@ -72,6 +78,7 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/data-analytics"
           file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.VERSION_TAG }}
@@ -84,12 +91,13 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/evaluation-server"
           file: ./deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.VERSION_TAG }}
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.LATEST_TAG }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max        
+          cache-to: type=gha,mode=max
 
       - name: Inspect image
         run: |
