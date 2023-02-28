@@ -35,18 +35,21 @@ public class DataSyncTests
 
     private async Task DoDataSyncAndVerifyAsync(string type, string jsonMessage)
     {
+        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+        var cancellationToken = cts.Token;
+
         var ws = await _app.ConnectWithTokenAsync(type);
         var dataSync = Encoding.UTF8.GetBytes(jsonMessage.Replace("'", "\""));
 
-        await ws.SendAsync(dataSync, WebSocketMessageType.Text, true, CancellationToken.None);
+        await ws.SendAsync(dataSync, WebSocketMessageType.Text, true, cancellationToken);
 
-        var buffer = new byte[4 * 1024];
-        var result = await ws.ReceiveAsync(buffer, CancellationToken.None);
+        var buffer = new byte[8 * 1024];
+        var result = await ws.ReceiveAsync(buffer, cancellationToken);
 
         Assert.True(result.EndOfMessage);
         Assert.Equal(WebSocketMessageType.Text, result.MessageType);
 
-        var json = Encoding.UTF8.GetString(buffer.AsMemory()[..result.Count].Span);
-        await VerifyJson(json);
+        var jsonString = Encoding.UTF8.GetString(buffer[..result.Count]);
+        await VerifyJson(jsonString);
     }
 }

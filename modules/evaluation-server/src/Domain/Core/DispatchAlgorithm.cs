@@ -5,8 +5,6 @@ namespace Domain.Core;
 
 public static class DispatchAlgorithm
 {
-    private static readonly MD5 Hasher = MD5.Create();
-
     public static bool IsInRollout(string key, double[] rollouts)
     {
         var min = rollouts[0];
@@ -30,7 +28,7 @@ public static class DispatchAlgorithm
 
     public static double RolloutOfKey(string key)
     {
-        var hashedKey = Hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
+        var hashedKey = MD5.HashData(Encoding.UTF8.GetBytes(key));
         var magicNumber = BitConverter.ToInt32(hashedKey, 0);
         var percentage = Math.Abs((double)magicNumber / int.MinValue);
 

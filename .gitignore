@@ -3,3 +3,5 @@
 **/.DS_Store
 /infra/mongodb/data/db/
 /infra/redis/data/
+
+benchmark/k6-scripts/test-results/

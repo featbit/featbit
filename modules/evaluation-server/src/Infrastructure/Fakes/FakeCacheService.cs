@@ -8,7 +8,7 @@ public class FakeCacheService : ICacheService
 {
     public Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {
-        return Task.FromResult(FakeCache.Flags);
+        return Task.FromResult(FakeCache.AllFlags);
     }
 
     public Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
@@ -28,12 +28,13 @@ public class FakeCacheService : ICacheService
 
     public Task<byte[]> GetSegmentAsync(string id)
     {
-        throw new NotImplementedException();
+        var bytes = FakeCache.SegmentsMap[id];
+        return Task.FromResult(bytes);
     }
 
     public Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
     {
-        return Task.FromResult(FakeCache.Segments);
+        return Task.FromResult(FakeCache.AllSegments);
     }
 
     public Task UpsertSegmentAsync(BsonDocument segment)

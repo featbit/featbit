@@ -19,8 +19,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Fakes\flags.json" CopyToOutputDirectory="PreserveNewest" />
-      <None Update="Fakes\segments.json" CopyToOutputDirectory="PreserveNewest" />
+      <None Update="Fakes\flags.json" CopyToOutputDirectory="Always" />
+      <None Update="Fakes\segments.json" CopyToOutputDirectory="Always" />
     </ItemGroup>
 
 </Project>

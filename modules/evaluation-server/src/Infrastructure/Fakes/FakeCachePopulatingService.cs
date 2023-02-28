@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json.Nodes;
 using Infrastructure.Caches;
@@ -8,22 +9,19 @@ public class FakeCachePopulatingService : ICachePopulatingService
 {
     public Task PopulateAsync()
     {
-        var flags = ReadJsonArrayAsStringArray("flags.json");
-        var segments = ReadJsonArrayAsStringArray("segments.json");
+        var flags = ReadJsonArray("flags.json");
+        var segments = ReadJsonArray("segments.json");
 
-        FakeCache.Populate(
-            flags.Select(x => Encoding.UTF8.GetBytes(x)),
-            segments.Select(x => Encoding.UTF8.GetBytes(x))
-        );
+        FakeCache.Populate(flags, segments);
 
         return Task.CompletedTask;
     }
 
-    private static IEnumerable<string> ReadJsonArrayAsStringArray(string path)
+    private static JsonArray ReadJsonArray(string path)
     {
-        var json = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Fakes", path));
-        var jArray = JsonNode.Parse(json)!.AsArray();
+        var jString = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Fakes", path));
+        var jArray = JsonNode.Parse(jString)!.AsArray();
 
-        return jArray.Select(x => x!.ToJsonString());
+        return jArray;
     }
 }

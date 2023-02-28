@@ -20,7 +20,79 @@
           }
         ],
         sendToExperiment: true,
-        timestamp: 1673837784215
+        timestamp: 1674871495616
+      },
+      {
+        id: return-10p-true,
+        variation: false,
+        variationType: boolean,
+        matchReason: default,
+        variationOptions: [
+          {
+            id: Guid_4,
+            value: true
+          },
+          {
+            id: Guid_5,
+            value: false
+          }
+        ],
+        sendToExperiment: true,
+        timestamp: 1674871694804
+      },
+      {
+        id: individual-targeting,
+        variation: true,
+        variationType: boolean,
+        matchReason: default,
+        variationOptions: [
+          {
+            id: Guid_6,
+            value: true
+          },
+          {
+            id: Guid_7,
+            value: false
+          }
+        ],
+        sendToExperiment: true,
+        timestamp: 1674872452102
+      },
+      {
+        id: two-custom-rules,
+        variation: true,
+        variationType: boolean,
+        matchReason: default,
+        variationOptions: [
+          {
+            id: Guid_8,
+            value: true
+          },
+          {
+            id: Guid_9,
+            value: false
+          }
+        ],
+        sendToExperiment: true,
+        timestamp: 1674884975885
+      },
+      {
+        id: custom-rule-with-segment,
+        variation: true,
+        variationType: boolean,
+        matchReason: default,
+        variationOptions: [
+          {
+            id: Guid_10,
+            value: true
+          },
+          {
+            id: Guid_11,
+            value: false
+          }
+        ],
+        sendToExperiment: true,
+        timestamp: 1674885485421
       }
     ]
   }
