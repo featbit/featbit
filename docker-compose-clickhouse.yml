@@ -1,0 +1,30 @@
+name: featbit-clickhouse
+version: "3"
+services:
+
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:22.3
+    restart: on-failure
+    ports:
+      - "8123:8123"
+      - "8443:8443"
+      - "9000:9000"
+      - "9009:9009"
+      - "9440:9440"
+    networks:
+      - featbit-network
+    volumes:
+      - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
+      - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse-server:/var/lib/clickhouse
+
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.10.0.0/16
+
+volumes:
+  clickhouse-server:

@@ -1,0 +1,58 @@
+name: featbit
+version: "3"
+
+services:
+  ui:
+    image: featbit/featbit-ui:latest
+    environment:
+      - API_URL=http://192.168.56.1:5000
+      - DEMO_URL=https://featbit-samples.vercel.app
+      - EVALUATION_URL=http://192.168.56.1:5100
+    depends_on:
+      - api-server
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network-service
+
+  api-server:
+    image: featbit/featbit-api-server:latest
+    environment:
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
+      - MongoDb__Database=featbit
+      - Kafka__BootstrapServers=kafka:9092
+      - OLAP__ServiceHost=http://da-server
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network-service
+
+  evaluation-server:
+    image: featbit/featbit-evaluation-server:latest
+    environment:
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
+      - MongoDb__Database=featbit
+      - Kafka__BootstrapServers=kafka:9092
+      - Redis__ConnectionString=redis:6379
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network-service
+
+  da-server:
+    image: featbit/featbit-data-analytics-server:latest
+    ports:
+      - "8200:80"
+    networks:
+      - featbit-network-service
+    environment:
+      KAFKA_HOSTS: kafka:9092
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+
+networks:
+  featbit-network-service:
+    name: featbit-network
+    external: true

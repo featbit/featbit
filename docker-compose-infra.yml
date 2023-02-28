@@ -1,68 +1,6 @@
-name: featbit-full
+name: featbit-infra
 version: "3"
 services:
-  ui:
-    image: featbit/featbit-ui:latest
-    environment:
-      - API_URL=http://localhost:5000
-      - DEMO_URL=https://featbit-samples.vercel.app
-      - EVALUATION_URL=http://localhost:5100
-    depends_on:
-      - api-server
-    ports:
-      - "8081:80"
-    networks:
-      - featbit-network-full
-
-  api-server:
-    image: featbit/featbit-api-server:latest
-    environment:
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
-      - OLAP__ServiceHost=http://da-server
-    depends_on:
-      - mongodb
-      - kafka
-      - da-server
-    ports:
-      - "5000:5000"
-    networks:
-      - featbit-network-full
-
-  evaluation-server:
-    image: featbit/featbit-evaluation-server:latest
-    environment:
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
-      - Redis__ConnectionString=redis:6379
-    depends_on:
-      - mongodb
-      - kafka
-      - redis
-    ports:
-      - "5100:5100"
-    networks:
-      - featbit-network-full
-
-  da-server:
-    image: featbit/featbit-data-analytics-server:latest
-    depends_on:
-      - zookeeper
-      - kafka
-      - clickhouse-server
-    ports:
-      - "8200:80"
-    networks:
-      - featbit-network-full
-    environment:
-      KAFKA_HOSTS: kafka:9092
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
-
   mongodb:
     image: mongo:5.0.14
     restart: on-failure
@@ -76,7 +14,7 @@ services:
       - mongodb:/data/db
       - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
-      - featbit-network-full
+      - featbit-network
 
   redis:
     image: bitnami/redis:6.2.7
@@ -84,7 +22,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
-      - featbit-network-full
+      - featbit-network
     ports:
       - "6379:6379"
     volumes:
@@ -100,7 +38,7 @@ services:
     environment:
       ALLOW_ANONYMOUS_LOGIN: 'true'
     networks:
-      - featbit-network-full
+      - featbit-network
 
   kafka:
     image: bitnami/kafka:3.2.3
@@ -120,10 +58,10 @@ services:
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
       ALLOW_PLAINTEXT_LISTENER: 'true'
     networks:
-      - featbit-network-full
+      - featbit-network
     volumes:
       - kafka:/bitnami/kafka
-      
+
   clickhouse-server:
     image: clickhouse/clickhouse-server:22.3
     restart: on-failure
@@ -137,15 +75,15 @@ services:
       - "9009:9009"
       - "9440:9440"
     networks:
-      - featbit-network-full
+      - featbit-network
     volumes:
       - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
       - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-server:/var/lib/clickhouse
 
 networks:
-  featbit-network-full:
-    name: featbit-network-full
+  featbit-network:
+    name: featbit-network
     driver: bridge
     ipam:
       config:

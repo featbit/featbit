@@ -35,7 +35,7 @@ export class ChangeReviewComponent implements OnChanges {
       this.numChanges = this.changeCategories.flatMap((category) => category.changes).length;
 
       this.reviewForm = this.fb.group({
-        comment: ['', [Validators.required]]
+        comment: ['', []]
       });
     }
   }
