@@ -98,7 +98,6 @@ export default function () {
         sendPingMessage(ws, pingCounter);
         // after a sessionDuration close the connection
         setTimeout(function () {
-            ///console.log('Closed');
             ws.close();
         }, sessionDuration);
     });
