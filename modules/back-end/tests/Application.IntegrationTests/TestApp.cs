@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Application.IntegrationTests;
 
@@ -36,6 +37,11 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(passwordHasher);
             collection.Replace(currentUser);
         });
+
+        // filtering ExceptionHandlerMiddleware logs 
+        builder.ConfigureLogging(
+            logging => logging.AddFilter("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LogLevel.None)
+        );
     }
 
     public async Task<HttpResponseMessage> GetAsync(string uri, bool authenticated = true)
