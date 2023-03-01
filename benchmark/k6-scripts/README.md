@@ -1,11 +1,13 @@
-# Load tests
-To better masure the performance of FeatBit, we have done and will continue to do a series of tests，we currently have conducted a load test against Evaluation Server as it is the bottleneck of the whole system. You will find following how to run the load test in AWS EC2 instances.
+# Load Tests
+
+In order to better measure the performance of FeatBit, we have carried out and will continue to carry out a series of tests，we have currently carried out a load test against the evaluation server, as it is the bottleneck of the whole system. Below is how to run the load test on AWS EC2 instances.
 
 
 # Run Evaluation Server
-To better mesure the capacity of Evaluation Server, we have refactored the code to be able to run it as a standalone service, all other services like Kafka, Redis etc are mocked. The service is running on the following EC2 instance:
 
-- Type: t2.micro 1 vCPU + 1 G (x86)
+To better measure the capacity of the evaluation server, we have refactored the code to run as a standalone service. All other services like Kafka, Redis etc. are mocked. The service runs on the following EC2 instance:
+
+- Type: AWS t2.micro 1 vCPU + 1 G (x86)
 - Unbuntu: 20.04
 
 ## Intall Evaluation Server on EC2 instance
@@ -19,12 +21,13 @@ sudo dpkg -i packages-microsoft-prod.deb
 rm packages-microsoft-prod.deb
 ```
 
-The .NET SDK allows you to develop apps with .NET. If you install the .NET SDK, you don't need to install the corresponding runtime. To install the .NET SDK, run the following commands:
+The .NET SDK allows you to develop apps with .NET. If you install the .NET 6.0 SDK, you don't need to install the corresponding runtime. To install the .NET SDK, run the following commands:
 ```bash
 sudo apt-get update && sudo apt-get install -y dotnet-sdk-6.0
 ```
 
 ### Publish Evaluation Server with local machine
+
 Go to Api folder **modules\evaluation-server\src\Api**
 
 - To publish to win64 platform:
@@ -38,12 +41,13 @@ Go to Api folder **modules\evaluation-server\src\Api**
     ```
 
 ### Run Evaluation Server on EC2 instance
-- Copy the output from previous step to ec2 instance
-- On ec2 instancem cd into the folder and run: 
+
+- Copy the output of the previous step to the EC2 instance
+- On the EC2 instance, cd into the folder and run: 
     ```bash
     dotnet Api.dll --environment IntegrationTests --urls "http://*:5000"
     ```
-- Check the healthness with
+- Check the health with
     ```bash
     curl http://localhost:5100/health/liveness
     ```
@@ -51,12 +55,14 @@ Go to Api folder **modules\evaluation-server\src\Api**
 
 
 # Run K6 tests
-To minimize the network impact to the results, the K6 tests are run another EC2 instance in the same VPC.
-- Type: c6i.8xlarge 32 CPU + 64G Memory
+
+To minimise the network impact on the results, the K6 tests are run on another EC2 instance in the same VPC.
+
+- Type: c6i.8xlarge 32 CPU + 64G memory
 - Unbuntu: 20.04
 
 SSH into the instance and do the following to run the tests
-- Open **plan.js** and replace of value of **urlBase** with
+- Open **plan.js** and replace the value of **urlBase** with
 ```javascript
 const urlBase = "ws://EVALUATION_SERVER_EC2_INSTANCE_PUBLISH_URL:5000"
 ```
@@ -66,9 +72,11 @@ const urlBase = "ws://EVALUATION_SERVER_EC2_INSTANCE_PUBLISH_URL:5000"
     ```bash
     run -e THROUGHPUT=1000 plan.js
     ```
-- When the tests are finished, the following files would be generated: summary.[throughtput]_[iteration].html and summary.[throughtput]_[iteration].json, they are representing the same results with different format.
-- Do multiple tests and copy the output to local machine under the folder **bechmark/k6-scripts/test-results/results**
-- Run result_extractor.js with **node run result_extractor.js**, it would extract all the results to a csv file with name **summary.csv**.
+
+- When the tests are finished, the following files would be generated: summary.[throughtput]_[iteration].html and summary.[throughtput]_[iteration].json, representing the same results in a different format.
+- Run several tests and copy the output to the **bechmark/k6-scripts/test-results/results** folder on your local machine.
+- Run result_extractor.js with **node run result_extractor.js**, it would extract all results into a csv file named **summary.csv**.
 
 # NB
-On your EC2 instance running Evluation Server, make sure the port 5000 is visible to the K6 instance
+
+On your EC2 instance running Evaluation Server, make sure that port 5000 is visible to the K6 instance.
