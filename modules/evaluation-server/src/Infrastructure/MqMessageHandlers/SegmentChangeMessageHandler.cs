@@ -1,14 +1,13 @@
 using System.Text.Json;
-using Confluent.Kafka;
 using Domain.Core;
 using Domain.Protocol;
 using Domain.Services;
 using Domain.WebSockets;
 using Infrastructure.Caches;
 
-namespace Infrastructure.Kafka;
+namespace Infrastructure.MqMessageHandlers;
 
-public class SegmentChangeMessageHandler : IKafkaMessageHandler
+public class SegmentChangeMessageHandler : IMqMessageHandler
 {
     public string Topic => Topics.SegmentChange;
 
@@ -26,10 +25,8 @@ public class SegmentChangeMessageHandler : IKafkaMessageHandler
         _dataSyncService = dataSyncService;
     }
 
-    public async Task HandleAsync(ConsumeResult<Null, string> consumeResult, CancellationToken cancellationToken)
+    public async Task HandleAsync(string message, CancellationToken cancellationToken)
     {
-        var message = consumeResult.Message.Value;
-
         using var document = JsonDocument.Parse(message);
         var root = document.RootElement;
         if (!root.TryGetProperty("segment", out var segment) ||

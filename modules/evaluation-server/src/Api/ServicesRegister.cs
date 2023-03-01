@@ -5,6 +5,7 @@ using Infrastructure.Caches;
 using Infrastructure.Fakes;
 using Infrastructure.Kafka;
 using Infrastructure.MongoDb;
+using Infrastructure.MqMessageHandlers;
 using Infrastructure.Redis;
 using Infrastructure.Services;
 using Infrastructure.WsMessageHandlers;
@@ -82,9 +83,9 @@ public static class ServicesRegister
             services.AddSingleton<IMqMessageProducer, KafkaMessageProducer>();
             services.AddHostedService<KafkaMessageConsumer>();
 
-            // kafka message handlers
-            services.AddSingleton<IKafkaMessageHandler, FeatureFlagChangeMessageHandler>();
-            services.AddSingleton<IKafkaMessageHandler, SegmentChangeMessageHandler>();
+            // message handlers
+            services.AddSingleton<IMqMessageHandler, FeatureFlagChangeMessageHandler>();
+            services.AddSingleton<IMqMessageHandler, SegmentChangeMessageHandler>();
         }
 
         return builder;

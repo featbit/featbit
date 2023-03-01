@@ -10,12 +10,12 @@ public partial class KafkaMessageConsumer : BackgroundService
 {
     private readonly ILogger<KafkaMessageConsumer> _logger;
     private readonly IConsumer<Null, string> _consumer;
-    private readonly IEnumerable<IKafkaMessageHandler> _messageHandlers;
+    private readonly IEnumerable<IMqMessageHandler> _messageHandlers;
 
     public KafkaMessageConsumer(
         IConfiguration configuration,
         ILogger<KafkaMessageConsumer> logger,
-        IEnumerable<IKafkaMessageHandler> messageHandlers)
+        IEnumerable<IMqMessageHandler> messageHandlers)
     {
         _logger = logger;
         _messageHandlers = messageHandlers;
@@ -54,6 +54,7 @@ public partial class KafkaMessageConsumer : BackgroundService
         _consumer.Subscribe(topics);
 
         var consumeResult = new ConsumeResult<Null, string>();
+        var message = string.Empty;
         while (!cancellationToken.IsCancellationRequested)
         {
             try
@@ -72,7 +73,8 @@ public partial class KafkaMessageConsumer : BackgroundService
                     continue;
                 }
 
-                await handler.HandleAsync(consumeResult, cancellationToken);
+                message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
+                await handler.HandleAsync(message, cancellationToken);
             }
             catch (ConsumeException ex)
             {
@@ -85,7 +87,6 @@ public partial class KafkaMessageConsumer : BackgroundService
                     continue;
                 }
 
-                var message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
                 Log.FailedConsumeMessage(_logger, message, error);
 
                 if (ex.Error.IsFatal)
@@ -100,7 +101,6 @@ public partial class KafkaMessageConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                var message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
                 Log.ErrorConsumeMessage(_logger, message, ex);
             }
             finally
