@@ -18,9 +18,11 @@ jobs:
         env:
           PR: ${{steps.PR.outputs.pr}}
         run: |
-          contributor="${{fromJson(steps.PR.outputs.pr).head.user.login}}"
+          contributor="${{fromJson(steps.PR.outputs.pr).user.login}}"
+          contributor_profile="${{fromJson(steps.PR.outputs.pr).user.html_url}}"
           pr_url="${{fromJson(steps.PR.outputs.pr).html_url}}"
           points=$(echo $PR | jq '.labels[]|select(.name|startswith("points"))' | jq '.name' | tr -d '"' | cut -d ':' -f 2)
+          echo "contributor_profile=$contributor_profile" >> $GITHUB_ENV
           echo "pr_url=$pr_url" >> $GITHUB_ENV
           echo "points=$points" >> $GITHUB_ENV
           echo "now=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
@@ -33,7 +35,7 @@ jobs:
           spreadsheetId: 1ukyXgi_jRPeXj7EAST0IrnPfLOQ6xDBkcyAJY9N-Yb4
           commands: | # list of commands, specified as a valid JSON string
             [
-              { "command": "appendData", "args": { "worksheetTitle": "data", "data": [["${{env.contributor}}", "${{ github.event.repository.name }}", ${{env.points}}, "${{env.now}}", "${{env.pr_url}}"]], "minCol": 1 } }
+              { "command": "appendData", "args": { "worksheetTitle": "data", "data": [["${{env.contributor}}", "${{env.contributor_profile}}", "${{ github.event.repository.name }}", ${{env.points}}, "${{env.now}}", "${{env.pr_url}}"]], "minCol": 1 } }
             ]
         env:
           GSHEET_CLIENT_EMAIL: ${{ secrets.GSHEET_CLIENT_EMAIL }}
