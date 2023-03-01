@@ -7,7 +7,7 @@ system. Below is how we run the load test on AWS EC2 instances.
 # Prerequisite
 
 To better measure the capacity of the evaluation server, we have refactored the code to run as a standalone service. All
-it's dependencies like Kafka, Redis etc. are mocked. The service runs on the following EC2 instance.
+its dependencies like Kafka, Redis etc. are mocked. The service runs on the following EC2 instance.
 
 - Type: AWS t2.micro 1 vCPU + 1 G (x86)
 - Ubuntu: 20.04
@@ -38,7 +38,7 @@ sudo apt-get update && sudo apt-get install -y dotnet-sdk-6.0
 
 ## Run Evaluation Server
 
-Go to the Api folder **modules\evaluation-server\src\Api**
+Go to the Api folder **modules/evaluation-server/src/Api**
 
 - Publish
 
@@ -70,15 +70,15 @@ To minimise the network impact on the results, the K6 tests are run on another E
 
 SSH into the instance and do the following to run the tests
 
+- Install k6 with `sudo snap install k6`
 - Open **plan.js** and update the value of **urlBase** with
 
 ```javascript
 const urlBase = "ws://evaluation-server-ec2-instance-public-address>:5000"
 ```
 
-- Install k6 with `sudo snap install k6`
-- Copy utils.js, k6-reporter.js and plan.js (you can find them in the current folder) to the instance
-- Run k6 tests，you can change the value of **THROUGHPUT** to get the limit of the instance
+- Go to the k6 scripts folder `cd benchmark/k6-scripts`
+- Run k6 tests, you can change the value of **THROUGHPUT** to get the limit of the instance
 
 ```bash
 k6 run -e THROUGHPUT=1000 plan.js
