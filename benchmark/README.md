@@ -71,7 +71,8 @@ To minimise the network impact on the results, the K6 tests are run on another E
 SSH into the instance and do the following to run the tests
 
 - Clone featbit repo `git clone https://github.com/featbit/featbit` to this EC2 instance
-- Install k6 with `sudo snap install k6`
+- Install k6 `sudo snap install k6`
+- Install nodejs `sudo apt install nodejs`
 - Open **benchmark/k6-scripts/plan.js** and update the value of **urlBase** with
 
 ```javascript
