@@ -7,9 +7,9 @@ namespace Api.Public;
 
 public class InsightController : PublicApiControllerBase
 {
-    private readonly IMessageProducer _producer;
+    private readonly IMqMessageProducer _producer;
 
-    public InsightController(IMessageProducer producer)
+    public InsightController(IMqMessageProducer producer)
     {
         _producer = producer;
     }

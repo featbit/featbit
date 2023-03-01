@@ -11,10 +11,10 @@ public class DataSyncMessageHandler : IMessageHandler
 {
     public string Type => MessageTypes.DataSync;
 
-    private readonly IMessageProducer _producer;
+    private readonly IMqMessageProducer _producer;
     private readonly IDataSyncService _service;
 
-    public DataSyncMessageHandler(IMessageProducer producer, IDataSyncService service)
+    public DataSyncMessageHandler(IMqMessageProducer producer, IDataSyncService service)
     {
         _producer = producer;
         _service = service;
