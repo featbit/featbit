@@ -63,7 +63,7 @@ public static class ServicesRegister
         {
             services.AddTransient<ICachePopulatingService, FakeCachePopulatingService>();
             services.AddTransient<ICacheService, FakeCacheService>();
-            services.AddSingleton<IMessageProducer, FakeMessageProducer>();
+            services.AddSingleton<IMqMessageProducer, FakeMessageProducer>();
         }
         else
         {
@@ -79,7 +79,7 @@ public static class ServicesRegister
             services.AddSingleton<ICacheService, RedisService>();
 
             // kafka message producer & consumer
-            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+            services.AddSingleton<IMqMessageProducer, KafkaMessageProducer>();
             services.AddHostedService<KafkaMessageConsumer>();
 
             // kafka message handlers
