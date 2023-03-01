@@ -53,13 +53,15 @@ public partial class KafkaMessageConsumer : BackgroundService
 
         _consumer.Subscribe(topics);
 
+        var consumeResult = new ConsumeResult<Null, string>();
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                var consumeResult = _consumer.Consume(cancellationToken);
+                consumeResult = _consumer.Consume(cancellationToken);
                 if (consumeResult.IsPartitionEOF)
                 {
+                    // reached end of topic
                     continue;
                 }
 
@@ -71,9 +73,6 @@ public partial class KafkaMessageConsumer : BackgroundService
                 }
 
                 await handler.HandleAsync(consumeResult, cancellationToken);
-
-                // store offset manually
-                _consumer.StoreOffset(consumeResult);
             }
             catch (ConsumeException ex)
             {
@@ -86,7 +85,8 @@ public partial class KafkaMessageConsumer : BackgroundService
                     continue;
                 }
 
-                Log.FailedConsumeMessage(_logger, error);
+                var message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
+                Log.FailedConsumeMessage(_logger, message, error);
 
                 if (ex.Error.IsFatal)
                 {
@@ -100,7 +100,20 @@ public partial class KafkaMessageConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                Log.ErrorConsumeMessage(_logger, ex);
+                var message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
+                Log.ErrorConsumeMessage(_logger, message, ex);
+            }
+            finally
+            {
+                try
+                {
+                    // store offset manually
+                    _consumer.StoreOffset(consumeResult);
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorStoreOffset(_logger, ex);
+                }
             }
         }
     }
