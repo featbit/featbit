@@ -72,7 +72,7 @@ SSH into the instance and do the following to run the tests
 
 - Clone featbit repo `git clone https://github.com/featbit/featbit` to this EC2 instance
 - Install k6 with `sudo snap install k6`
-- Open **plan.js** and update the value of **urlBase** with
+- Open **benchmark/k6-scripts/plan.js** and update the value of **urlBase** with
 
 ```javascript
 const urlBase = "ws://evaluation-server-ec2-instance-public-address:5000"
@@ -87,7 +87,7 @@ k6 run -e THROUGHPUT=1000 plan.js
 
 - When the tests are finished, the following files would be generated: summary.{throughput}\_{iteration}.html and
   summary.{throughtput}\_{iteration}.json, representing the same results in a different format.
-- Run several tests and copy the output to the **bechmark/k6-scripts/test-results/results** folder.
+- Run several tests and copy the output to the **benchmark/k6-scripts/test-results/results** folder.
 - Run `node run result_extractor.js`, it would extract all results into a csv file named **summary.csv**.
 
 # Note
