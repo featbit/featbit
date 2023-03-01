@@ -7,7 +7,7 @@ system. Below is how we run the load test on AWS EC2 instances.
 # Prerequisite
 
 To better measure the capacity of the evaluation server, we have refactored the code to run as a standalone service. All
-other services like Kafka, Redis etc. are mocked. The service runs on the following EC2 instance.
+it's dependencies like Kafka, Redis etc. are mocked. The service runs on the following EC2 instance.
 
 - Type: AWS t2.micro 1 vCPU + 1 G (x86)
 - Ubuntu: 20.04
