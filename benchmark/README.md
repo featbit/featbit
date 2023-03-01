@@ -12,8 +12,8 @@ its dependencies like Kafka, Redis etc. are mocked. The service runs on the foll
 - Type: AWS t2.micro 1 vCPU + 1 G (x86)
 - Ubuntu: 20.04
 
-After the EC2 instance is successfully started and running, clone
-the [featbit repo](https://github.com/featbit/featbit):
+After the EC2 instance is successfully started and running, clone the [featbit repo](https://github.com/featbit/featbit)
+to this EC2 instance:
 
 ```bash
 git clone https://github.com/featbit/featbit
@@ -70,11 +70,12 @@ To minimise the network impact on the results, the K6 tests are run on another E
 
 SSH into the instance and do the following to run the tests
 
+- Clone featbit repo `git clone https://github.com/featbit/featbit` to this EC2 instance
 - Install k6 with `sudo snap install k6`
 - Open **plan.js** and update the value of **urlBase** with
 
 ```javascript
-const urlBase = "ws://evaluation-server-ec2-instance-public-address>:5000"
+const urlBase = "ws://evaluation-server-ec2-instance-public-address:5000"
 ```
 
 - Go to the k6 scripts folder `cd benchmark/k6-scripts`
