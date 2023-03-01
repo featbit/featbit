@@ -10,6 +10,9 @@ on:
   pull_request:
     branches: 
       - main
+    paths:
+      - 'modules/front-end/**'
+      - '.github/workflows/ui-change-validations.yml'
 
 jobs:
   build:
