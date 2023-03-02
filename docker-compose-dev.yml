@@ -28,9 +28,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
-      - mongodb
-      - kafka
-      - da-server
+      mongodb:
+        condition: service_started
+      init-kafka-topics:
+        condition: service_completed_successfully
+      da-server:
+        condition: service_started
     ports:
       - "5000:5000"
     networks:
@@ -45,9 +48,12 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
-      - mongodb
-      - kafka
-      - redis
+      mongodb:
+        condition: service_started
+      init-kafka-topics:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
     ports:
       - "5100:5100"
     networks:
