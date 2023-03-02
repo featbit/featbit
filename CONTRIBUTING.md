@@ -1,6 +1,8 @@
 # How to contribute
 
-Thank you for investing your time in contributing to our project! Any contribution you make will be reflected on our [release history](https://github.com/featbit/featbit/releases).
+Thank you for investing your time in contributing to our project! Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. Each contribution counts a certain number of points, depending on its difficulty. Contributors earn the appropriate points when the work is merged. Contribution points are used to describe the contributions that contributors have made. They can also be used to receive rewards for community events. You can view the current community submissions on a public [google sheet](https://docs.google.com/spreadsheets/d/1ukyXgi_jRPeXj7EAST0IrnPfLOQ6xDBkcyAJY9N-Yb4/edit#gid=0).
+
+Any contribution you make will also be reflected on our [release history](https://github.com/featbit/featbit/releases).
 
 Read our [Code of Conduct](https://github.com/featbit/featbit/blob/main/code_of_conduct.md) to keep our community approachable and respectable.
 
