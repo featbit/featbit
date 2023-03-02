@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { MessageQueueService } from '@services/message-queue.service';
 import { IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from '@utils/localstorage-keys';
-import { getPathPrefix, isNumeric, tryParseJSONObject, uuidv4 } from "@utils/index";
+import { getPathPrefix, isNumeric, tryParseJSONObject, uuidv4, copyToClipboard } from "@utils/index";
 import { editor } from "monaco-editor";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import {
@@ -38,7 +38,7 @@ export class SettingComponent {
   }
 
   copyText(text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }

@@ -9,6 +9,7 @@ import { generalResourceRNPattern, permissionActions } from "@shared/permissions
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
+import { copyToClipboard } from '@utils/index';
 
 @Component({
   selector: 'app-header',
@@ -146,8 +147,8 @@ export class HeaderComponent implements OnInit {
 
   // copy environment key
   copyText(event, text: string) {
-    navigator.clipboard.writeText(text).then(
-      () => this.message.success($localize`:@@common.copy-success:Copied`)
+    copyToClipboard(text).then(
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }
 }

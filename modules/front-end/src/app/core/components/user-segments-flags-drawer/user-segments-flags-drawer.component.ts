@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IUserType } from "@shared/types";
-import { encodeURIComponentFfc, getPathPrefix } from "@utils/index";
+import { encodeURIComponentFfc, getPathPrefix, copyToClipboard } from "@utils/index";
 import { Router } from "@angular/router";
 import { editor } from "monaco-editor";
 import {
@@ -56,7 +56,7 @@ export class UserSegmentsFlagsDrawerComponent implements OnInit {
 
   // copy keyName
   copyText(event, text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.message.success($localize`:@@common.copy-success:Copied`)
     );
   }
