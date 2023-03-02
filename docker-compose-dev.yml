@@ -139,6 +139,26 @@ services:
     volumes:
       - kafka:/bitnami/kafka
 
+  init-kafka-topics:
+    image: bitnami/kafka:3.2.3
+    depends_on:
+      kafka:
+        condition: service_started
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo "Waiting for Kafka to be ready..."
+        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092; do sleep 5; done;
+        echo "Kafka is ready now, start creating topics."
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic api-feature-flag-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic api-segment-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic evaluation-server-endusers;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic ch_events_json;
+        echo "Seed kafka topic finished." 
+    networks:
+      - featbit-network
+
   kafka-ui:
     image: provectuslabs/kafka-ui:5f232a3966cda70eac34aa2b32ec4a610404d1c6
     container_name: kafka-ui-dev
