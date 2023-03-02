@@ -2,7 +2,7 @@ name: featbit-dev
 version: "3"
 services:
   ui:
-    image: featbit/ui
+    image: featbit/ui:dev
     container_name: ui-dev
     build:
       context: ./modules/front-end
@@ -20,7 +20,7 @@ services:
       - featbit-network
 
   api-server:
-    image: featbit/api
+    image: featbit/api:dev
     container_name: api-dev
     build:
       context: ./modules/back-end
@@ -37,7 +37,7 @@ services:
       - featbit-network
   
   evaluation-server:
-    image: featbit/evaluation-server
+    image: featbit/evaluation-server:dev
     container_name: evaluation-server-dev
     build:
       context: ./modules/evaluation-server
@@ -54,7 +54,7 @@ services:
       - featbit-network
 
   da-server:
-    image: featbit/data-analytics-server
+    image: featbit/data-analytics-server:dev
     container_name: data-analytics-server-dev
     build:
       context: ./modules/data-analytics
