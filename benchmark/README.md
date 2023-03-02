@@ -94,3 +94,7 @@ k6 run -e THROUGHPUT=1000 plan.js
 # Note
 
 On the EC2 instance running Evaluation Server, make sure that port 5000 is available to the K6 EC2 instance.
+
+Data set used for the tests can be found in [documentation benchmark page](https://featbit.gitbook.io/docs/tech-stack/benchmark):
+- [Flags.json](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2F56B83i8cKlA8Nj7OF8vW%2Fflags.json?alt=media&token=039bbbbd-cb75-468c-9883-cb8905b8abb1)
+- [Segments.json](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2F9lM48PWiEd7joQvjd89l%2Fsegments.json?alt=media&token=c3955fb3-0acc-4645-b8bd-92fa4aece0ce)
