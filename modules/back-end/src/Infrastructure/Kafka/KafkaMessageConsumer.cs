@@ -7,18 +7,18 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.HostedServices;
+namespace Infrastructure.Kafka;
 
-public partial class KafkaConsumerService : BackgroundService
+public partial class KafkaMessageConsumer : BackgroundService
 {
     private readonly IConsumer<Null, string> _consumer;
     private readonly IEndUserService _service;
-    private readonly ILogger<KafkaConsumerService> _logger;
+    private readonly ILogger<KafkaMessageConsumer> _logger;
 
-    public KafkaConsumerService(
+    public KafkaMessageConsumer(
         IEndUserService service,
         IConfiguration configuration,
-        ILogger<KafkaConsumerService> logger)
+        ILogger<KafkaMessageConsumer> logger)
     {
         _service = service;
         _logger = logger;
@@ -54,43 +54,40 @@ public partial class KafkaConsumerService : BackgroundService
     {
         _consumer.Subscribe(Topics.EndUser);
 
+        var consumeResult = new ConsumeResult<Null, string>();
+        var message = string.Empty;
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                var consumeResult = _consumer.Consume(cancellationToken);
+                consumeResult = _consumer.Consume(cancellationToken);
                 if (consumeResult.IsPartitionEOF)
                 {
                     continue;
                 }
 
-                var value = consumeResult.Message.Value;
-                if (string.IsNullOrWhiteSpace(value))
+                message = consumeResult.Message.Value;
+                if (string.IsNullOrWhiteSpace(message))
                 {
                     continue;
                 }
 
-                var message = JsonSerializer.Deserialize<EndUserMessage>(value, ReusableJsonSerializerOptions.Web);
-                if (message == null)
+                var endUserMessage =
+                    JsonSerializer.Deserialize<EndUserMessage>(message, ReusableJsonSerializerOptions.Web);
+                if (endUserMessage == null)
                 {
                     continue;
                 }
 
                 // upsert endUser and it's properties
-                var endUser = message.AsEndUser();
+                var endUser = endUserMessage.AsEndUser();
                 await _service.UpsertAsync(endUser);
                 await _service.AddNewPropertiesAsync(endUser);
-
-                // store offset manually
-                _consumer.StoreOffset(consumeResult);
-
-                // wait 150ms
-                await Task.Delay(150, cancellationToken);
             }
             catch (ConsumeException ex)
             {
                 var error = ex.Error.ToString();
-                Log.FailedConsumeMessage(_logger, error);
+                Log.FailedConsumeMessage(_logger, message, error);
 
                 if (ex.Error.IsFatal)
                 {
@@ -104,7 +101,19 @@ public partial class KafkaConsumerService : BackgroundService
             }
             catch (Exception ex)
             {
-                Log.ErrorConsumeMessage(_logger, ex);
+                Log.ErrorConsumeMessage(_logger, message, ex);
+            }
+            finally
+            {
+                try
+                {
+                    // store offset manually
+                    _consumer.StoreOffset(consumeResult);
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorStoreOffset(_logger, ex);
+                }
             }
         }
     }
