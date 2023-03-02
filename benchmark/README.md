@@ -95,7 +95,7 @@ k6 run -e THROUGHPUT=1000 plan.js
 
 On the EC2 instance running Evaluation Server, make sure that port 5000 is available to the K6 EC2 instance.
 
-In the tests above, we used 5 feature flags and 2 segments. The dataset used for the tests:
+In the tests above, we used 5 feature flags and 2 segments. You can find them here:
 
 - [flags.json](https://github.com/featbit/featbit/tree/main/modules/evaluation-server/src/Infrastructure/Fakes/flags.json) 
 - [segments.json](https://github.com/featbit/featbit/tree/main/modules/evaluation-server/src/Infrastructure/Fakes/segments.json) 
