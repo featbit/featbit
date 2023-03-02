@@ -166,7 +166,7 @@ services:
       - featbit-network
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:5f232a3966cda70eac34aa2b32ec4a610404d1c6
+    image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui-dev
     ports:
       - "8080:8080"
