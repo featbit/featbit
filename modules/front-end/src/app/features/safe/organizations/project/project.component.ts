@@ -10,6 +10,7 @@ import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/type
 import {MessageQueueService} from "@services/message-queue.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { EnvSecretService } from "@services/env-secret.service";
+import { copyToClipboard } from '@utils/index';
 
 @Component({
   selector: 'app-project',
@@ -176,7 +177,7 @@ export class ProjectComponent implements OnInit {
   }
 
   copyText(text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.messageService.success($localize `:@@common.copy-success:Copied`)
     );
   }

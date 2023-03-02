@@ -18,6 +18,7 @@ import { NzNotificationService } from "ng-zorro-antd/notification";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { NzModalService } from "ng-zorro-antd/modal";
+import { copyToClipboard } from '@utils/index';
 
 @Component({
   selector: 'index',
@@ -367,7 +368,7 @@ export class IndexComponent implements OnInit {
   }
 
   copyText(event, text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
   }
