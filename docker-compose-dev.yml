@@ -2,7 +2,7 @@ name: featbit-dev
 version: "3"
 services:
   ui:
-    image: featbit/ui
+    image: featbit/ui:dev
     container_name: ui-dev
     build:
       context: ./modules/front-end
@@ -20,7 +20,7 @@ services:
       - featbit-network
 
   api-server:
-    image: featbit/api
+    image: featbit/api:dev
     container_name: api-dev
     build:
       context: ./modules/back-end
@@ -28,16 +28,19 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
-      - mongodb
-      - kafka
-      - da-server
+      mongodb:
+        condition: service_started
+      init-kafka-topics:
+        condition: service_completed_successfully
+      da-server:
+        condition: service_started
     ports:
       - "5000:5000"
     networks:
       - featbit-network
   
   evaluation-server:
-    image: featbit/evaluation-server
+    image: featbit/evaluation-server:dev
     container_name: evaluation-server-dev
     build:
       context: ./modules/evaluation-server
@@ -45,16 +48,19 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
-      - mongodb
-      - kafka
-      - redis
+      mongodb:
+        condition: service_started
+      init-kafka-topics:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
     ports:
       - "5100:5100"
     networks:
       - featbit-network
 
   da-server:
-    image: featbit/data-analytics-server
+    image: featbit/data-analytics-server:dev
     container_name: data-analytics-server-dev
     build:
       context: ./modules/data-analytics
@@ -139,8 +145,28 @@ services:
     volumes:
       - kafka:/bitnami/kafka
 
+  init-kafka-topics:
+    image: bitnami/kafka:3.2.3
+    depends_on:
+      kafka:
+        condition: service_started
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo "Waiting for Kafka to be ready..."
+        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092; do sleep 5; done;
+        echo "Kafka is ready now, start creating topics."
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic api-feature-flag-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic api-segment-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic evaluation-server-endusers;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic ch_events_json;
+        echo "Seed kafka topic finished." 
+    networks:
+      - featbit-network
+
   kafka-ui:
-    image: provectuslabs/kafka-ui:5f232a3966cda70eac34aa2b32ec4a610404d1c6
+    image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui-dev
     ports:
       - "8080:8080"

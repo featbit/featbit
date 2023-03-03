@@ -5,6 +5,7 @@ using System.Text.Json;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
+using Infrastructure.Kafka;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -36,6 +37,14 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(userStore);
             collection.Replace(passwordHasher);
             collection.Replace(currentUser);
+
+            // remove the kafka consumer from the test application because it is not needed
+            var kafkaConsumerService =
+                collection.FirstOrDefault(x => x.ImplementationType == typeof(KafkaMessageConsumer));
+            if (kafkaConsumerService != null)
+            {
+                collection.Remove(kafkaConsumerService);
+            }
         });
 
         // filtering ExceptionHandlerMiddleware logs 
