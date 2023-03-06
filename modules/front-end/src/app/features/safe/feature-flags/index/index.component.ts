@@ -40,7 +40,8 @@ export class IndexComponent implements OnInit {
   ) {
     this.featureFlagForm = this.fb.group({
       name: ['', Validators.required],
-      key: ['', Validators.required, this.flagKeyAsyncValidator]
+      key: ['', Validators.required, this.flagKeyAsyncValidator],
+      description:['',Validators.maxLength(512)]
     });
   }
 
@@ -278,7 +279,7 @@ export class IndexComponent implements OnInit {
 
   create() {
     this.creating = true;
-
+   
     this.featureFlagService.create(this.featureFlagForm.value).subscribe({
       next: (result: IFeatureFlag) => {
         this.navigateToFlagDetail(result);
@@ -288,7 +289,7 @@ export class IndexComponent implements OnInit {
         this.msg.error(err.error);
         this.creating = false;
       }
-    });
+    }); 
   }
 
   closeCreateModal() {

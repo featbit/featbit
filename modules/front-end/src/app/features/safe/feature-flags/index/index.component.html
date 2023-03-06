@@ -209,6 +209,13 @@
           </ng-template>
         </nz-form-control>
       </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@common.description">Description</nz-form-label>
+        <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@ff.description.cannot-exceed-512-characters">
+          <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
     </form>
   </ng-template>
 
