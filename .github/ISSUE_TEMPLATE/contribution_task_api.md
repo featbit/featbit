@@ -11,7 +11,16 @@
 3.
 4.
 
-etc
+
+# Setup dev environment
+If the PR is only related to the API, you can do the following to set up your environment:
+
+- Launch the whole APP with docker compose
+- Open the UI in browser and follow the guid to initialize the APP
+- Stop the API docker container
+- Edit the file [appsettings.json](modules\back-end\src\Api\appsettings.json) as following
+![API settings](api-settings.png)
+- Launch the API locally, the UI will automatically connect to your local API.
 
 # Contribution points
 
