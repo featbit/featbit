@@ -10,7 +10,7 @@
 2.
 3.
 4.
-5. npm run i18n
+5. `npm run i18n`
 
 # Internationlization (i18n)
 FeatBit supports i18n and uses the official [@angular/localize](https://www.npmjs.com/package/@angular/localize) package. See the [doc](https://angular.io/guide/i18n-overview) for more information. 
