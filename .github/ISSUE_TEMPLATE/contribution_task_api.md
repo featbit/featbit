@@ -31,6 +31,10 @@ public [google sheet](https://docs.google.com/spreadsheets/d/1ukyXgi_jRPeXj7EAST
 
 Points: x
 
+# Deadline
+
+We usually give 2 weeks to issue, that means you have 2 weeks to implement the feature starting from the day the issue is assigned to you. If you have any difficulty, please contact us in Slack.
+
 # How to claim to solve the issue
 
 If you want to implement this function, please leave a comment in this issue like:
