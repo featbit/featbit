@@ -4,14 +4,24 @@
 
 # Screenshot
 
+# Setup dev environment
+
+Please read the [doc](../../Development.md) to set up your development environment.
+
+# Deadline
+
+We usually give 2 weeks to issue, that means you have 2 weeks to implement the feature starting from the day the issue is assigned to you. If you have any difficulty, please contact us in Slack.
+
 # How to implement
 
 1.
 2.
 3.
-4.
+4. 
 
-etc
+If the feature is UI related, make sure to run  `npm run i18n` at the end of the work and commit the following files:
+- [messages.xlf](../../modules/front-end/src/locale/messages.xlf)
+- [messages.zh.xlf](../../modules/front-end/src/locale/messages.zh.xlf)
 
 # Contribution points
 
