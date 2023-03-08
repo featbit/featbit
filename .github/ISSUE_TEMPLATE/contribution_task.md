@@ -10,7 +10,7 @@ Please read the [doc](../../Development.md) to set up your development environme
 
 # Deadline
 
-We usually give 2 weeks to issue, that means you have 2 weeks to implement the feature starting from the day the issue is assigned to you. If you have any difficulty, please contact us in Slack.
+We usually give 2 weeks for a feature request, which means you have 2 weeks to implement the feature starting from the day it is assigned to you. If you have any difficulties, please contact us in [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
 
 # How to implement
 

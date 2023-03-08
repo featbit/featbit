@@ -86,7 +86,7 @@ You can following the [**Getting Started (Docs)**](https://featbit.gitbook.io/) 
 
 Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. 
 
-[**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) . 
+[**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ). 
 
 
 
