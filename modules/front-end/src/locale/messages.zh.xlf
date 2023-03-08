@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+<?xml version="1.0" encoding="UTF-8"?><xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="zh" datatype="plaintext" original="ng2.template">
     <body>
       <trans-unit id="auditlogs.operation-create" datatype="html">
@@ -4944,7 +4943,7 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">214</context>
         </context-group>
-        <target></target>
+        <target>不能超过512个字符</target>
       </trans-unit>
       <trans-unit id="common.bulk-copy" datatype="html">
         <source>Bulk copy</source>
