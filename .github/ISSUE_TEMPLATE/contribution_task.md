@@ -4,14 +4,24 @@
 
 # Screenshot
 
+# Setup dev environment
+
+Please read the [doc](../../Development.md) to set up your development environment.
+
+# Deadline
+
+We usually give 2 weeks for a feature request, which means you have 2 weeks to implement the feature starting from the day it is assigned to you. If you have any difficulties, please contact us in [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
+
 # How to implement
 
 1.
 2.
 3.
-4.
+4. 
 
-etc
+If the feature is UI related, make sure to run  `npm run i18n` at the end of the work and commit the following files:
+- [messages.xlf](../../modules/front-end/src/locale/messages.xlf)
+- [messages.zh.xlf](../../modules/front-end/src/locale/messages.zh.xlf)
 
 # Contribution points
 
