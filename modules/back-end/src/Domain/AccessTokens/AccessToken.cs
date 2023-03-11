@@ -12,12 +12,12 @@ public class AccessToken : AuditedEntity
 
     public ICollection<Policy> Policies { get; set; }
 
-    public AccessToken(Guid organizationId, string name, string type)
+    public AccessToken(Guid organizationId, string name, string type, IEnumerable<Policy> policies)
     {
         OrganizationId = organizationId;
         Name = name;
 
         Type = AccessTokenTypes.Personal;
-        Policies = Array.Empty<Policy>();
+        Policies = policies.ToArray();
     }
 }

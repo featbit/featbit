@@ -40,7 +40,7 @@ export class AccessTokenDrawerComponent implements OnInit {
     ).subscribe(query => this.searchPolicies(query));
   }
 
-  displayPolicies: boolean = false
+  isServiceAccessToken: boolean = false
 
   @ViewChild("policyNodeSelector", { static: false }) policySelectNode: NzSelectComponent;
   selectedPolicyList: IAccessTokenPolicy[] = [];
@@ -50,7 +50,7 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', [Validators.required], [this.nameAsyncValidator], 'change'],
       type: [AccessTokenTypeEnum.Personal, [Validators.required]],
-      policy: [null, []],
+      policy: [null, []]
     });
   }
 
@@ -61,7 +61,7 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   onTypeChange() {
     const { type } = this.form.value;
-    this.displayPolicies = type !== AccessTokenTypeEnum.Personal;
+    this.isServiceAccessToken = type === AccessTokenTypeEnum.Service;
   }
 
   onPolicySelectChange() {
@@ -78,10 +78,12 @@ export class AccessTokenDrawerComponent implements OnInit {
       isSelected: this.selectedPolicyList.some((sp => sp.id === p.id))
     }));
     this.policySelectNode.writeValue(undefined);
+    this.validatePoliciesControl();
   }
 
   removePolicy(policy: IAccessTokenPolicy) {
     this.selectedPolicyList = this.selectedPolicyList.filter((p) => p.id !== policy.id);
+    this.validatePoliciesControl();
   }
 
   isLoadingPolicies = true;
@@ -115,27 +117,54 @@ export class AccessTokenDrawerComponent implements OnInit {
   );
 
   isLoading: boolean = false;
+  isPolicyIdsValid = true;
+
+  validatePoliciesControl() {
+    const policyControl = this.form.get('policy');
+    if (this.isServiceAccessToken && this.selectedPolicyList.length === 0) {
+      policyControl.setValidators(Validators.required);
+      policyControl.setErrors({required: true});
+      this.isPolicyIdsValid = false;
+    } else {
+      policyControl.clearValidators();
+      policyControl.markAsPristine();
+      this.isPolicyIdsValid = true;
+    }
+  }
   doSubmit() {
+    // we validate name and type only here
     if (this.form.invalid) {
       for (const i in this.form.controls) {
         this.form.controls[i].markAsDirty();
         this.form.controls[i].updateValueAndValidity();
       }
+    }
+
+    // validate policies
+    this.validatePoliciesControl();
+
+    if (this.form.invalid || !this.isPolicyIdsValid) {
       return;
     }
 
     this.isLoading = true;
-    const {name, description} = this.form.value;
-    this.policyService.create(name, description).subscribe(
-      () => {
-        this.isLoading = false;
-        this.close.emit(true);
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-        this.form.reset();
-      },
-      _ => {
-        this.isLoading = false;
-      }
+    const { name, type } = this.form.value;
+    const policies = this.isServiceAccessToken ? this.selectedPolicyList.map(p => p.id) : [];
+
+    this.accessTokenService.create(name, type, policies).subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.close.emit(true);
+          this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+          this.form.reset();
+        },
+        error: (e) => {
+          this.isLoading = false;
+          if (e.errors[0] === 'ServiceAccessTokenMustDefinePolicies') {
+            this.message.error($localize `:@@integrations.access-token.service-access-token-must-define-policies:Policies are mandatory for service type access tokens`);
+          }
+        }
+    }
     )
   }
 

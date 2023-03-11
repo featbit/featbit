@@ -17,4 +17,13 @@ public class AccessTokenController : ApiControllerBase
         var isNameUsed = await Mediator.Send(request);
         return Ok(isNameUsed);
     }
+    
+    [HttpPost]
+    public async Task<ApiResponse<AccessTokenVm>> CreateAsync(Guid organizationId, CreateAccessToken request)
+    {
+        request.OrganizationId = organizationId;
+
+        var policy = await Mediator.Send(request);
+        return Ok(policy);
+    }
 }

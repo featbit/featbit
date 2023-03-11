@@ -40,9 +40,9 @@
       </nz-form-item>
 
       <!-- Policies -->
-      <nz-form-item *ngIf="displayPolicies">
+      <nz-form-item *ngIf="isServiceAccessToken">
         <nz-form-label nzRequired i18n="@@common.policies">Policies</nz-form-label>
-        <nz-form-control nzErrorTip="Policies is mandatory" i18n-nzErrorTip="@@integrations.access-token.policies-mandatory">
+        <nz-form-control>
           <nz-select #policyNodeSelector
             formControlName="policy"
             i18n-nzPlaceHolder="@@integrations.access-token.select-policies"
@@ -77,6 +77,9 @@
             <button nz-button nzType="default" [nzSize]="'large'" (click)="removePolicy(policy)"><i nz-icon nzType="close"></i></button>
           </div>
         </div>
+
+        <div class="error-message" *ngIf="!isPolicyIdsValid" i18n="@@integrations.access-token.service-access-token-must-define-policies">Policies are mandatory for service type access tokens</div>
+
       </nz-form-item>
     </form>
   </ng-container>
