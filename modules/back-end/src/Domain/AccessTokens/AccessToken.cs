@@ -32,4 +32,10 @@ public class AccessToken : AuditedEntity
     {
         LastUsedAt = DateTime.UtcNow;
     }
+    
+    public void ToggleStatus()
+    {
+        Status = Status == AccessTokenStatus.Active ? AccessTokenStatus.Inactive : AccessTokenStatus.Active;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

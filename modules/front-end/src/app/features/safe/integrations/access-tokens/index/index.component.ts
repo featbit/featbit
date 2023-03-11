@@ -89,10 +89,6 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  resourceName(policy: IPolicy) {
-    return policyRn(policy);
-  }
-
   doSearch(resetPage?: boolean) {
     if (resetPage) {
       this.filter.pageIndex = 1;
@@ -105,7 +101,7 @@ export class IndexComponent implements OnInit {
   openAccessTokenDrawer(){
     this.accessTokenDrawerVisible = true;
   }
-  policyDrawerClosed(created: any) {
+  accessTokenDrawerClosed(created: any) {
     this.accessTokenDrawerVisible = false;
 
     if (created) {
@@ -114,16 +110,23 @@ export class IndexComponent implements OnInit {
   }
 
   delete(accessToken: IAccessToken) {
-    this.accessTokenService.delete(accessToken.id).subscribe(() => {
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.accessTokens.items = this.accessTokens.items.filter(it => it.id !== accessToken.id);
-      this.accessTokens.totalCount--;
-    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
+    this.accessTokenService.delete(accessToken.id).subscribe({
+      next:() => {
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.accessTokens.items = this.accessTokens.items.filter(it => it.id !== accessToken.id);
+        this.accessTokens.totalCount--;
+      },
+      error: () => this.message.error($localize `:@@common.operation-failed:Operation failed`)
+    })
   }
 
-  copyText(text: string) {
-    copyToClipboard(text).then(
-      () => this.message.success($localize `:@@common.copy-success:Copied`)
-    );
+  toggleStatus(accessToken: IAccessToken) {
+    this.accessTokenService.toggleStatus(accessToken.id).subscribe({
+      next:() => {
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        accessToken.status = accessToken.status === this.AccessTokenStatusActive ? this.AccessTokenStatusInactive :  this.AccessTokenStatusActive;
+      },
+      error: () => this.message.error($localize `:@@common.operation-failed:Operation failed`)
+    })
   }
 }

@@ -76,12 +76,12 @@
 
           <ng-container *ngIf="item.status === AccessTokenStatusInactive">
             <nz-divider nzType="vertical"></nz-divider>
-            <a class="primary-link-btn" i18n="@@common.activate">Activate</a>
+            <a (click)="toggleStatus(item)" class="primary-link-btn" i18n="@@common.activate">Activate</a>
           </ng-container>
 
           <ng-container *ngIf="item.status === AccessTokenStatusActive">
             <nz-divider nzType="vertical"></nz-divider>
-            <a style="color: #717D8A" i18n="@@common.Deactivate">Deactivate</a>
+            <a (click)="toggleStatus(item)" style="color: #717D8A" i18n="@@common.Deactivate">Deactivate</a>
           </ng-container>
 
           <nz-divider nzType="vertical"></nz-divider>
@@ -101,5 +101,5 @@
   </div>
 </div>
 
-<access-token-drawer [visible]="accessTokenDrawerVisible" (close)="policyDrawerClosed($event)"></access-token-drawer>
+<access-token-drawer [visible]="accessTokenDrawerVisible" (close)="accessTokenDrawerClosed($event)"></access-token-drawer>
 

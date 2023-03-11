@@ -1,12 +1,6 @@
 using Application.AccessTokens;
 using Application.Bases.Models;
-using Application.Policies;
 using Domain.AccessTokens;
-using Domain.Groups;
-using Domain.Members;
-using Domain.Organizations;
-using Domain.Policies;
-using Domain.Users;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -49,5 +43,10 @@ public class AccessTokenService : MongoDbService<AccessToken>, IAccessTokenServi
             .ToListAsync();
 
         return new PagedResult<AccessToken>(totalCount, items);
+    }
+    
+    public async Task DeleteAsync(Guid id)
+    {
+        await MongoDb.CollectionOf<AccessToken>().DeleteOneAsync(x => x.Id == id);
     }
 }

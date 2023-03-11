@@ -1,5 +1,6 @@
 using Application.Bases;
 using Application.Policies;
+using Application.Users;
 using Domain.AccessTokens;
 using Domain.Policies;
 
@@ -12,8 +13,6 @@ public class CreateAccessToken : IRequest<AccessTokenVm>
     public string Name { get; set; }
 
     public string Type { get; set; }
-
-    public Guid CreatorId { get; set; }
 
     public IEnumerable<Guid> PolicyIds { get; set; }
 }
@@ -38,12 +37,14 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
 public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, AccessTokenVm>
 {
     private readonly IPolicyService _policyService;
+    private readonly ICurrentUser _currentUser;
     private readonly IAccessTokenService _service;
     private readonly IMapper _mapper;
 
-    public CreateAccessTokenHandler(IAccessTokenService service, IPolicyService policyService, IMapper mapper)
+    public CreateAccessTokenHandler(IAccessTokenService service, IPolicyService policyService, ICurrentUser currentUser, IMapper mapper)
     {
         _service = service;
+        _currentUser = currentUser;
         _policyService = policyService;
         _mapper = mapper;
     }
@@ -56,7 +57,7 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
             policies = await _policyService.FindManyAsync((x) => request.PolicyIds.Contains(x.Id));
         }
         
-        var accessToken = new AccessToken(request.OrganizationId, request.CreatorId, request.Name, request.Type, policies);
+        var accessToken = new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, policies);
 
         await _service.AddOneAsync(accessToken);
 

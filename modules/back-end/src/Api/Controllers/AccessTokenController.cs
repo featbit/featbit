@@ -1,5 +1,7 @@
 using Application.AccessTokens;
 using Application.Bases.Models;
+using Application.FeatureFlags;
+using Application.Policies;
 
 namespace Api.Controllers;
 
@@ -38,9 +40,32 @@ public class AccessTokenController : ApiControllerBase
     public async Task<ApiResponse<AccessTokenVm>> CreateAsync(Guid organizationId, CreateAccessToken request)
     {
         request.OrganizationId = organizationId;
-        request.CreatorId = CurrentUser.Id;
 
         var accessToken = await Mediator.Send(request);
         return Ok(accessToken);
+    }
+    
+    [HttpPut("{id:guid}/toggle")]
+    public async Task<ApiResponse<bool>> ToggleAsync(Guid id)
+    {
+        var request = new ToggleAccessTokenStatus
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+    
+    [HttpDelete("{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
+    {
+        var request = new DeleteAccessToken()
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
     }
 }

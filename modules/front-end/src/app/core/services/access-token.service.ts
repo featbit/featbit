@@ -49,4 +49,8 @@ export class AccessTokenService {
   delete(id: string): Observable<boolean> {
     return this.http.delete<boolean>(`${this.baseUrl}/${id}`);
   }
+
+  toggleStatus(id: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}/toggle`, {});
+  }
 }
