@@ -7,6 +7,7 @@ import { AccessTokenTypeEnum, IAccessTokenPolicy } from "@features/safe/integrat
 import { PolicyFilter } from "@features/safe/iam/types/policy";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { Subject } from "rxjs";
+import { AccessTokenService } from "@services/access-token.service";
 
 @Component({
   selector: 'access-token-drawer',
@@ -30,6 +31,7 @@ export class AccessTokenDrawerComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private policyService: PolicyService,
+    private accessTokenService: AccessTokenService,
     private message: NzMessageService
   ) {
     this.policyDebouncer.pipe(
@@ -98,7 +100,7 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
-    switchMap(value => this.policyService.isNameUsed(value as string)),
+    switchMap(value => this.accessTokenService.isNameUsed(value as string)),
     map(isNameUsed => {
       switch (isNameUsed) {
         case true:
