@@ -6,7 +6,7 @@
     <ng-template #prefixIconSearch>
       <i nz-icon nzType="icons:icon-search"></i>
     </ng-template>
-    <button nz-button nzType="primary" (click)="showPolicyDrawer()">
+    <button nz-button nzType="primary" (click)="openAccessTokenDrawer()">
       <i nz-icon nzType="icons:icon-add"></i>
       <ng-container i18n="@@common.add">Add</ng-container>
     </button>
@@ -64,5 +64,5 @@
   </div>
 </div>
 
-<policy-drawer [visible]="policyDrawerVisible" (close)="policyDrawerClosed($event)"></policy-drawer>
+<access-token-drawer [visible]="accessTokenDrawerVisible" (close)="policyDrawerClosed($event)"></access-token-drawer>
 

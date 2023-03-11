@@ -79,6 +79,7 @@ import { NzTimelineModule } from "ng-zorro-antd/timeline";
 import { ChangeReviewComponent } from "@core/components/change-review/change-review.component";
 import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
 import { NzInputNumberModule } from "ng-zorro-antd/input-number";
+import { AccessTokenDrawerComponent } from "@core/components/access-token-drawer/access-token-drawer.component";
 
 @NgModule({
   declarations: [
@@ -115,7 +116,8 @@ import { NzInputNumberModule } from "ng-zorro-antd/input-number";
     AuditLogsComponent,
     AuditLogComponent,
     ChangeListComponent,
-    ChangeReviewComponent
+    ChangeReviewComponent,
+    AccessTokenDrawerComponent
   ],
   imports: [
     CommonModule,
@@ -199,7 +201,8 @@ import { NzInputNumberModule } from "ng-zorro-antd/input-number";
     AuditLogsComponent,
     AuditLogComponent,
     ChangeListComponent,
-    ChangeReviewComponent
+    ChangeReviewComponent,
+    AccessTokenDrawerComponent
   ]
 })
 export class CoreModule { }

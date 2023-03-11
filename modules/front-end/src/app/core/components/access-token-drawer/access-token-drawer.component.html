@@ -1,0 +1,92 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right"
+  i18n-nzTitle="@@integrations.access-token.access-token-drawer.title"
+  nzTitle="Add access token"
+  [nzWidth]="500"
+  (nzOnClose)="onClose()"
+  [nzFooter]="footer">
+  <ng-container *nzDrawerContent>
+    <form nz-form [formGroup]="form" (ngSubmit)="doSubmit()" nzLayout="vertical">
+      <!-- name -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control nzHasFeedback nzValidatingTip="Validating..." i18n-nzValidatingTip="@@common.validating" [nzErrorTip]="errorTpl">
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+        </nz-form-control>
+        <ng-template #errorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')" i18n="@@integrations.access-token.access-token-drawer.name-cannot-be-empty">Access token name cannot be empty</ng-container>
+          <ng-container *ngIf="control.hasError('duplicated')" i18n="@@integrations.access-token.access-token-drawer.name-unavailable">This access token name is not available</ng-container>
+        </ng-template>
+      </nz-form-item>
+
+      <!-- type -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.type">Type</nz-form-label>
+        <nz-form-control>
+          <nz-select
+            (ngModelChange)="onTypeChange()"
+            formControlName="type">
+            <ng-container *ngFor="let at of actionTokenTypes">
+              <nz-option
+                [nzValue]="at"
+                [nzLabel]="actionTokenTypeLabel[at]">
+              </nz-option>
+            </ng-container>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Policies -->
+      <nz-form-item *ngIf="displayPolicies">
+        <nz-form-label nzRequired i18n="@@common.policies">Policies</nz-form-label>
+        <nz-form-control nzErrorTip="Policies is mandatory" i18n-nzErrorTip="@@integrations.access-token.policies-mandatory">
+          <nz-select #policyNodeSelector
+            formControlName="policy"
+            i18n-nzPlaceHolder="@@integrations.access-token.select-policies"
+            nzPlaceHolder="Select policies"
+            nzShowSearch
+            nzServerSearch
+            [compareWith]="policyCompareWith"
+            (ngModelChange)="onPolicySelectChange()"
+            (nzOnSearch)="policyDebouncer.next($event)">
+            <ng-container *ngFor="let policy of policySearchResultList">
+              <nz-option nzCustomContent *ngIf="!isLoadingPolicies" [nzLabel]="policy.name" [nzValue]="policy">
+                <span style="display: flex;justify-content: space-between;align-items: center">
+                  <span>
+                  <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+                    {{ policy.name }}
+                  </span>
+                  <i *ngIf="policy.isSelected" nz-icon nzType="close"></i>
+                </span>
+              </nz-option>
+            </ng-container>
+            <nz-option *ngIf="isLoadingPolicies" nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          </nz-select>
+        </nz-form-control>
+        <div class="selected-policies" nz-row *ngIf="selectedPolicyList.length">
+          <div nz-col class="policy" *ngFor="let policy of selectedPolicyList">
+            <div class="inner-box">
+              <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+              {{ policy.name }}
+            </div>
+            <button nz-button nzType="default" [nzSize]="'large'" (click)="removePolicy(policy)"><i nz-icon nzType="close"></i></button>
+          </div>
+        </div>
+      </nz-form-item>
+    </form>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+  <ng-template #footer>
+    <div class="drawer-footer-btn">
+      <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
+    </div>
+  </ng-template>
+</nz-drawer>
+

@@ -59,12 +59,12 @@ export class IndexComponent implements OnInit {
     this.search$.next(null);
   }
 
-  policyDrawerVisible: boolean = false;
-  showPolicyDrawer(){
-    this.policyDrawerVisible = true;
+  accessTokenDrawerVisible: boolean = false;
+  openAccessTokenDrawer(){
+    this.accessTokenDrawerVisible = true;
   }
   policyDrawerClosed(created: any) {
-    this.policyDrawerVisible = false;
+    this.accessTokenDrawerVisible = false;
 
     if (created) {
       this.getPolicies();

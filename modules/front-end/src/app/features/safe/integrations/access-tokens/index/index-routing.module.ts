@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import {IndexComponent} from "@features/safe/iam/policies/index/index.component";
+import {IndexComponent} from "@features/safe/integrations/access-tokens/index/index.component";
 
 
 const routes: Routes = [
