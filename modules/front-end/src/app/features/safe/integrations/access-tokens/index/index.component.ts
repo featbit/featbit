@@ -1,30 +1,69 @@
 import { Component, OnInit } from '@angular/core';
 import { copyToClipboard, encodeURIComponentFfc } from '@utils/index';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { IPagedPolicy, IPolicy, PolicyFilter, policyRn } from "@features/safe/iam/types/policy";
 import { PolicyService } from "@services/policy.service";
+import {
+  AccessTokenFilter, AccessTokenStatusEnum,
+  IAccessToken,
+  IPagedAccessToken
+} from "@features/safe/integrations/access-tokens/types/access-token";
+import { AccessTokenService } from "@services/access-token.service";
+import { IOrganization } from "@shared/types";
+import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
+import { TeamService } from "@services/team.service";
 
 @Component({
-  selector: 'iam-users',
+  selector: 'access-tokens',
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.less']
 })
 export class IndexComponent implements OnInit {
 
+  AccessTokenStatusActive = AccessTokenStatusEnum.Active;
+  AccessTokenStatusInactive = AccessTokenStatusEnum.Inactive;
+
   constructor(
     private router: Router,
     private message: NzMessageService,
-    private policyService: PolicyService
-  ) { }
+    private teamService: TeamService,
+    private accessTokenService: AccessTokenService
+  ) {
+    const currentAccount: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
+
+    this.creatorSearchChange$.pipe(
+      debounceTime(500)
+    ).subscribe(searchText => {
+      this.teamService.searchMembers(currentAccount.id, searchText).subscribe({
+        next:(result) => {
+          this.creatorList = result.items;
+          this.isCreatorsLoading = false;
+        },
+        error: _ => {
+          this.isCreatorsLoading = false;
+        }
+      });
+    });
+  }
 
   private search$ = new Subject();
 
+  creatorSearchChange$ = new BehaviorSubject('');
+  isCreatorsLoading = false;
+  creatorList: any[];
+  onSearchCreators(value: string) {
+    if (value.length > 0) {
+      this.isCreatorsLoading = true;
+      this.creatorSearchChange$.next(value);
+    }
+  }
+
   isLoading: boolean = true;
-  filter: PolicyFilter = new PolicyFilter();
-  policies: IPagedPolicy = {
+  filter: AccessTokenFilter = new AccessTokenFilter();
+  accessTokens: IPagedAccessToken = {
     items: [],
     totalCount: 0
   };
@@ -33,18 +72,21 @@ export class IndexComponent implements OnInit {
     this.search$.pipe(
       debounceTime(300)
     ).subscribe(() => {
-      this.getPolicies();
+      this.getAccessTokens();
     });
 
     this.search$.next(null);
   }
 
-  getPolicies() {
+  getAccessTokens() {
     this.isLoading = true;
-    this.policyService.getList(this.filter).subscribe(policies => {
-      this.policies = policies;
-      this.isLoading = false;
-    }, () => this.isLoading = false);
+    this.accessTokenService.getList(this.filter).subscribe({
+      next: (accessTokens) => {
+        this.accessTokens = accessTokens;
+        this.isLoading = false;
+      },
+      error:() => this.isLoading = false
+    });
   }
 
   resourceName(policy: IPolicy) {
@@ -67,19 +109,15 @@ export class IndexComponent implements OnInit {
     this.accessTokenDrawerVisible = false;
 
     if (created) {
-      this.getPolicies();
+      this.getAccessTokens();
     }
   }
 
-  navigateToDetail(id: string) {
-    this.router.navigateByUrl(`/iam/policies/${encodeURIComponentFfc(id)}/permission`);
-  }
-
-  delete(policy: IPolicy) {
-    this.policyService.delete(policy.id).subscribe(() => {
+  delete(accessToken: IAccessToken) {
+    this.accessTokenService.delete(accessToken.id).subscribe(() => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.policies.items = this.policies.items.filter(it => it.id !== policy.id);
-      this.policies.totalCount--;
+      this.accessTokens.items = this.accessTokens.items.filter(it => it.id !== accessToken.id);
+      this.accessTokens.totalCount--;
     }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
   }
 

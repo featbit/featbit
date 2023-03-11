@@ -8,6 +8,7 @@ namespace Application.Services;
 public interface IMemberService
 {
     Task<Member> GetAsync(Guid organizationId, Guid memberId);
+    Task<IEnumerable<Member>> GetListByIds(IEnumerable<Guid> ids);
 
     Task DeleteAsync(Guid organizationId, Guid memberId);
 

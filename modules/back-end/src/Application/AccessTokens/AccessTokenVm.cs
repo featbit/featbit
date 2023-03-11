@@ -1,14 +1,20 @@
+using Application.Members;
 using Domain.Policies;
 
 namespace Application.AccessTokens;
 
 public class AccessTokenVm
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 
     public string Name { get; set; }
         
     public string Type { get; set; }
+    
+    public string Status { get; set; }
+    public MemberVm Creator { get; set; }
 
-    public IEnumerable<Guid> PolicyIds { get; set; }
+    public IEnumerable<Policy> Policies { get; set; }
+    
+    public DateTime? LastUsedAt { get; set; }
 }

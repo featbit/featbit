@@ -168,11 +168,6 @@ export class AccessTokenDrawerComponent implements OnInit {
     )
   }
 
-  actionTokenTypeLabel = {
-    [AccessTokenTypeEnum.Personal]: $localize `:@@integrations.access-token.personal:Personal`,
-    [AccessTokenTypeEnum.Service]: $localize `:@@integrations.access-token.personal:Service`
-  }
-
   actionTokenTypes = [
     AccessTokenTypeEnum.Personal,
     AccessTokenTypeEnum.Service

@@ -32,7 +32,7 @@
             <ng-container *ngFor="let at of actionTokenTypes">
               <nz-option
                 [nzValue]="at"
-                [nzLabel]="actionTokenTypeLabel[at]">
+                [nzLabel]="at | accessTokenType">
               </nz-option>
             </ng-container>
           </nz-select>

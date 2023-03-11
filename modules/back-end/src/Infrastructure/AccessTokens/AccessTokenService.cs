@@ -1,3 +1,4 @@
+using Application.AccessTokens;
 using Application.Bases.Models;
 using Application.Policies;
 using Domain.AccessTokens;
@@ -15,5 +16,38 @@ public class AccessTokenService : MongoDbService<AccessToken>, IAccessTokenServi
 {
     public AccessTokenService(MongoDbClient mongoDb) : base(mongoDb)
     {
+    }
+    
+    public async Task<PagedResult<AccessToken>> GetListAsync(Guid organizationId, AccessTokenFilter filter)
+    {
+        var query = MongoDb.QueryableOf<AccessToken>()
+            .Where(x => x.OrganizationId == organizationId);
+
+        var name = filter.Name;
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+        }
+        
+        var type = filter.Type;
+        if (!string.IsNullOrWhiteSpace(type))
+        {
+            query = query.Where(x => x.Type == type);
+        }
+        
+        var creatorId = filter.CreatorId;
+        if (!string.IsNullOrWhiteSpace(type))
+        {
+            query = query.Where(x => x.CreatorId == creatorId);
+        }
+
+        var totalCount = await query.CountAsync();
+        var items = await query
+            .Skip(filter.PageIndex * filter.PageSize)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<AccessToken>(totalCount, items);
     }
 }

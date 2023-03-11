@@ -80,6 +80,8 @@ import { ChangeReviewComponent } from "@core/components/change-review/change-rev
 import { NzBreadCrumbModule } from "ng-zorro-antd/breadcrumb";
 import { NzInputNumberModule } from "ng-zorro-antd/input-number";
 import { AccessTokenDrawerComponent } from "@core/components/access-token-drawer/access-token-drawer.component";
+import { AccessTokenTypePipe } from "@core/pipes/access-token-type.pipe";
+import { AccessTokenStatusPipe } from "@core/pipes/access-token-status.pipe";
 
 @NgModule({
   declarations: [
@@ -87,6 +89,8 @@ import { AccessTokenDrawerComponent } from "@core/components/access-token-drawer
     PercentagePipe,
     SafeHtmlPipe,
     PolicyTypePipe,
+    AccessTokenTypePipe,
+    AccessTokenStatusPipe,
     TranslationPipe,
     RuleVariationValuePipe,
     PermissionCheckDirective,
@@ -172,6 +176,8 @@ import { AccessTokenDrawerComponent } from "@core/components/access-token-drawer
     PercentagePipe,
     SafeHtmlPipe,
     PolicyTypePipe,
+    AccessTokenTypePipe,
+    AccessTokenStatusPipe,
     TranslationPipe,
     RuleVariationValuePipe,
     PermissionCheckDirective,

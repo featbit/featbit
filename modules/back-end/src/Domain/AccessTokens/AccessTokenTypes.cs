@@ -1,4 +1,4 @@
-namespace Domain.Policies;
+namespace Domain.AccessTokens;
 
 public class AccessTokenTypes
 {

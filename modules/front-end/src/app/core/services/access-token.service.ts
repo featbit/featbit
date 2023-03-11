@@ -1,11 +1,14 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentOrganization } from "@utils/project-env";
 import { environment } from "src/environments/environment";
 import { Observable, of } from "rxjs";
 import { catchError } from "rxjs/operators";
-import { IPolicy } from "@features/safe/iam/types/policy";
-import { IAccessToken } from "@features/safe/integrations/access-tokens/types/access-token";
+import {
+  AccessTokenFilter,
+  IAccessToken,
+  IPagedAccessToken
+} from "@features/safe/integrations/access-tokens/types/access-token";
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +21,21 @@ export class AccessTokenService {
     return `${environment.url}/api/v1/organizations/${organizationId}/access-tokens`;
   }
 
+  getList(filter: AccessTokenFilter = new AccessTokenFilter()): Observable<IPagedAccessToken> {
+    const queryParam = {
+      name: filter.name ?? '',
+      type: filter.type ?? '',
+      creatorId: filter.creatorId ?? '',
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    return this.http.get<IPagedAccessToken>(
+      this.baseUrl,
+      {params: new HttpParams({fromObject: queryParam})}
+    );
+  }
+
   isNameUsed(name: string) {
     const url = `${this.baseUrl}/is-name-used?name=${name}`;
 
@@ -26,5 +44,9 @@ export class AccessTokenService {
 
   create(name: string, type: string, policyIds: string[] = []): Observable<IAccessToken> {
     return this.http.post<IAccessToken>(this.baseUrl, { name, type, policyIds });
+  }
+
+  delete(id: string): Observable<boolean> {
+    return this.http.delete<boolean>(`${this.baseUrl}/${id}`);
   }
 }

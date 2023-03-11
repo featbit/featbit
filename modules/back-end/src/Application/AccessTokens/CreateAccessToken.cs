@@ -12,7 +12,9 @@ public class CreateAccessToken : IRequest<AccessTokenVm>
     public string Name { get; set; }
 
     public string Type { get; set; }
-    
+
+    public Guid CreatorId { get; set; }
+
     public IEnumerable<Guid> PolicyIds { get; set; }
 }
 
@@ -54,7 +56,7 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
             policies = await _policyService.FindManyAsync((x) => request.PolicyIds.Contains(x.Id));
         }
         
-        var accessToken = new AccessToken(request.OrganizationId, request.Name, request.Type, policies);
+        var accessToken = new AccessToken(request.OrganizationId, request.CreatorId, request.Name, request.Type, policies);
 
         await _service.AddOneAsync(accessToken);
 
