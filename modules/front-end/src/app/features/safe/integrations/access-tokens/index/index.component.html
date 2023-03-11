@@ -1,36 +1,39 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <nz-input-group [nzPrefix]="prefixIconSearch">
-      <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" i18n-placeholder="@@integrations.access-tokens.searchNamePlaceholder">
-    </nz-input-group>
-    <ng-template #prefixIconSearch>
-      <i nz-icon nzType="icons:icon-search"></i>
-    </ng-template>
-    <nz-select
-      i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-creator"
-      nzPlaceHolder="Select creator"
-      nzAllowClear
-      nzShowSearch
-      nzServerSearch
-      (ngModelChange)="doSearch(true)"
-      [(ngModel)]="filter.creatorId"
-      (nzOnSearch)="onSearchCreators($event)">
-      <ng-container *ngFor="let o of creatorList">
-        <nz-option
-          *ngIf="!isCreatorsLoading"
-          [nzValue]="o.id"
-          [nzLabel]="o.name || o.email">
+    <div class="search-inputs">
+      <nz-input-group [nzPrefix]="prefixIconSearch">
+        <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" i18n-placeholder="@@integrations.access-tokens.searchNamePlaceholder">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+      <nz-select
+        i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-creator"
+        nzPlaceHolder="Select creator"
+        nzAllowClear
+        nzShowSearch
+        nzServerSearch
+        (ngModelChange)="doSearch(true)"
+        [(ngModel)]="filter.creatorId"
+        (nzOnSearch)="onSearchCreators($event)">
+        <ng-container *ngFor="let o of creatorList">
+          <nz-option
+            *ngIf="!isCreatorsLoading"
+            [nzValue]="o.id"
+            [nzLabel]="o.name || o.email">
+          </nz-option>
+        </ng-container>
+        <nz-option *ngIf="isCreatorsLoading" nzDisabled nzCustomContent>
+          <i nz-icon nzType="loading" class="loading-icon"></i>
+          <ng-container i18n="@@common.loading">Loading...</ng-container>
         </nz-option>
-      </ng-container>
-      <nz-option *ngIf="isCreatorsLoading" nzDisabled nzCustomContent>
-        <i nz-icon nzType="loading" class="loading-icon"></i>
-        <ng-container i18n="@@common.loading">Loading...</ng-container>
-      </nz-option>
-    </nz-select>
-    <nz-select nzAllowClear [(ngModel)]="filter.type" (ngModelChange)="doSearch(true)" i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-type" nzPlaceHolder="Filter by type">
-      <nz-option [nzValue]="AccessTokenStatusActive" [nzLabel]="AccessTokenStatusActive | accessTokenStatus"></nz-option>
-      <nz-option [nzValue]="AccessTokenStatusInactive" [nzLabel]="AccessTokenStatusInactive | accessTokenStatus"></nz-option>
-    </nz-select>
+      </nz-select>
+      <nz-select nzAllowClear [(ngModel)]="filter.type" (ngModelChange)="doSearch(true)" i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-type" nzPlaceHolder="Filter by type">
+        <nz-option [nzValue]="AccessTokenStatusActive" [nzLabel]="AccessTokenStatusActive | accessTokenStatus"></nz-option>
+        <nz-option [nzValue]="AccessTokenStatusInactive" [nzLabel]="AccessTokenStatusInactive | accessTokenStatus"></nz-option>
+      </nz-select>
+    </div>
+
     <button nz-button nzType="primary" (click)="openAccessTokenDrawer()">
       <i nz-icon nzType="icons:icon-add"></i>
       <ng-container i18n="@@common.add">Add</ng-container>
