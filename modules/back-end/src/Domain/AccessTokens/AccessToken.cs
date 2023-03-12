@@ -24,7 +24,7 @@ public class AccessToken : AuditedEntity
         Name = name;
         
         Status = AccessTokenStatus.Active;
-        Type = AccessTokenTypes.Personal;
+        Type = type;
         Policies = policies.ToArray();
     }
     

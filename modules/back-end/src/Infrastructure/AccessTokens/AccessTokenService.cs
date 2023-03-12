@@ -30,9 +30,9 @@ public class AccessTokenService : MongoDbService<AccessToken>, IAccessTokenServi
         }
         
         var creatorId = filter.CreatorId;
-        if (!string.IsNullOrWhiteSpace(type))
+        if (creatorId.HasValue)
         {
-            query = query.Where(x => x.CreatorId == creatorId);
+            query = query.Where(x => x.CreatorId == creatorId.Value);
         }
 
         var totalCount = await query.CountAsync();

@@ -15,6 +15,8 @@ import { AccessTokenService } from "@services/access-token.service";
 import { IOrganization } from "@shared/types";
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 import { TeamService } from "@services/team.service";
+import { PermissionsService } from "@services/permissions.service";
+import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
 
 @Component({
   selector: 'access-tokens',
@@ -26,10 +28,16 @@ export class IndexComponent implements OnInit {
   AccessTokenStatusActive = AccessTokenStatusEnum.Active;
   AccessTokenStatusInactive = AccessTokenStatusEnum.Inactive;
 
+  AccessTokenTypePersonal = AccessTokenTypeEnum.Personal;
+  AccessTokenTypeService = AccessTokenTypeEnum.Service;
+
+  canTakeActionOnPersonalAccessToken = false;
+  canTakeActionOnServiceAccessToken = false;
   constructor(
     private router: Router,
     private message: NzMessageService,
     private teamService: TeamService,
+    private permissionsService: PermissionsService,
     private accessTokenService: AccessTokenService
   ) {
     const currentAccount: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
@@ -47,6 +55,9 @@ export class IndexComponent implements OnInit {
         }
       });
     });
+
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.CreatePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.CreateServiceAccessTokens);
   }
 
   private search$ = new Subject();

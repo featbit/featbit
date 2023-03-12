@@ -12,6 +12,8 @@ import { NzSelectComponent } from "ng-zorro-antd/select";
 import { Subject } from "rxjs";
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
+import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
+import { PolicyFilter } from "@features/safe/iam/types/policy";
 
 @Component({
   selector: 'access-token-drawer',
@@ -49,6 +51,8 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   policyDebouncer = new Subject<string>();
 
+  canTakeActionOnPersonalAccessToken = false;
+  canTakeActionOnServiceAccessToken = false;
   constructor(
     private fb: FormBuilder,
     private policyService: PolicyService,
@@ -59,6 +63,9 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.policyDebouncer.pipe(
       debounceTime(100),
     ).subscribe(query => this.searchPolicies(query));
+
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.CreatePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.CreateServiceAccessTokens);
   }
 
   isServiceAccessToken: boolean = false
@@ -128,15 +135,34 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.validatePoliciesControl();
   }
 
+  isLoadingPolicies = false;
   searchPolicies(query: string = '') {
-    const regex = new RegExp(query,'ig')
-    this.policySearchResultList = this.permissionsService.policies
-      .filter((policy) => query === '' || policy.name.match(regex))
-      .map((policy) => ({
-          ...policy,
-          isSelected: this.selectedPolicyList.some((sp => sp.id === policy.id))
-        })
-      );
+    const hasOwnerPolicy = this.permissionsService.policies.some((policy) => policy.name === 'Owner' && policy.type === 'SysManaged');
+
+    if (hasOwnerPolicy) {
+      this.isLoadingPolicies = true;
+
+      this.policyService.getList(new PolicyFilter(query, 1, 50)).subscribe({
+        next: policies => {
+          this.policySearchResultList = policies.items.map(p => ({
+            ...p,
+            isSelected: this.selectedPolicyList.some((sp => sp.id === p.id))
+          }));
+
+          this.isLoadingPolicies = false;
+        }, error: () => this.isLoadingPolicies = false
+      });
+    } else {
+      const regex = new RegExp(query,'ig');
+      this.policySearchResultList = this.permissionsService.policies
+        .filter((policy) => query === '' || policy.name.match(regex))
+        .map((policy) => ({
+            ...policy,
+            isSelected: this.selectedPolicyList.some((sp => sp.id === policy.id))
+          })
+        );
+    }
+
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -187,9 +213,14 @@ export class AccessTokenDrawerComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
     const {name, type} = this.form.value;
 
+    if ((type === AccessTokenTypeEnum.Personal && !this.canTakeActionOnPersonalAccessToken) || (type === AccessTokenTypeEnum.Service && !this.canTakeActionOnServiceAccessToken)) {
+      this.message.warning($localize `:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
+      return;
+    }
+
+    this.isLoading = true;
     if (this.isEditing) {
       this.accessTokenService.update(this.accessToken.id, name).subscribe({
           next: res => {
