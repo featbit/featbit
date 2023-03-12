@@ -1,4 +1,4 @@
-namespace Application.Policies;
+namespace Application.AccessTokens;
 
 public class DeleteAccessToken : IRequest<bool>
 {

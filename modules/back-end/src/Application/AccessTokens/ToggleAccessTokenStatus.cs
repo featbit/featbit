@@ -1,7 +1,7 @@
 using Application.Users;
 using Domain.AuditLogs;
 
-namespace Application.FeatureFlags;
+namespace Application.AccessTokens;
 
 public class ToggleAccessTokenStatus : IRequest<bool>
 {

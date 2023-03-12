@@ -12,6 +12,7 @@ public class AccessTokenVm
     public string Type { get; set; }
     
     public string Status { get; set; }
+    
     public MemberVm Creator { get; set; }
 
     public IEnumerable<Policy> Policies { get; set; }
