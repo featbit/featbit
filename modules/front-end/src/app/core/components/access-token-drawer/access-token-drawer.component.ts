@@ -99,6 +99,12 @@ export class AccessTokenDrawerComponent implements OnInit {
     });
   }
 
+  resetPolicy() {
+    this.form.patchValue({
+      policy: {},
+    });
+  }
+
   onClose() {
     this.reset();
     this.close.emit();
@@ -111,6 +117,8 @@ export class AccessTokenDrawerComponent implements OnInit {
   onTypeChange() {
     const {type} = this.form.value;
     this.isServiceAccessToken = type === AccessTokenTypeEnum.Service;
+    this.selectedPolicyList = [];
+    this.resetPolicy();
   }
 
   onPolicySelectChange() {
