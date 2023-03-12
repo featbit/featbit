@@ -168,6 +168,7 @@ db.Policies.insertOne(
                 resourceType: "general",
                 effect: "allow",
                 actions: [
+                    "CreateServiceAccessTokens",
                     "CreatePersonalAccessTokens",
                     "ListAccessTokens"
                 ],
