@@ -113,6 +113,17 @@ db.Policies.insertOne(
                 resourceType: "general",
                 effect: "allow",
                 actions: [
+                    "CreateServiceAccessTokens",
+                    "CreatePersonalAccessTokens",
+                    "ListAccessTokens"
+                ],
+                resources: ["account"]
+            },
+            {
+                _id: getUUIDString(),
+                resourceType: "general",
+                effect: "allow",
+                actions: [
                     "ListProjects",
                     "CreateProject",
                     "DeleteProject",
@@ -151,6 +162,16 @@ db.Policies.insertOne(
                     "ListEnvs"
                 ],
                 resources: ["project"]
+            },
+            {
+                _id: getUUIDString(),
+                resourceType: "general",
+                effect: "allow",
+                actions: [
+                    "CreatePersonalAccessTokens",
+                    "ListAccessTokens"
+                ],
+                resources: ["account"]
             }
         ],
         createdAt: new Date(),

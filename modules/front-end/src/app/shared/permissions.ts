@@ -26,5 +26,10 @@ export const permissionActions = {
   UpdateOrgName: 'UpdateOrgName',
 
   // iam
-  CanManageIAM: 'CanManageIAM'
+  CanManageIAM: 'CanManageIAM',
+
+  // access tokens
+  ListAccessTokens: 'ListAccessTokens',
+  CreateServiceAccessTokens: 'CreateServiceAccessTokens',
+  CreatePersonalAccessTokens: 'CreatePersonalAccessTokens',
 }

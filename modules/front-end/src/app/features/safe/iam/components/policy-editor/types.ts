@@ -126,6 +126,21 @@ export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
       name: permissionActions.UpdateOrgName,
       displayName: $localize`:@@iam.action.update-org-name:Update org name`
     },
+    {
+      id: uuidv4(),
+      name: permissionActions.ListAccessTokens,
+      displayName: $localize`:@@iam.action.list-access-tokens:List access tokens`
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.CreateServiceAccessTokens,
+      displayName: $localize`:@@iam.action.create-service-access-tokens:Create service access tokens`
+    },
+    {
+      id: uuidv4(),
+      name: permissionActions.CreatePersonalAccessTokens,
+      displayName: $localize`:@@iam.action.create-personal-access-tokens:Create personal access tokens`
+    },
   ],
   [`${ResourceTypeEnum.General},iam`]: [
     {
