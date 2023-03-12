@@ -68,4 +68,14 @@ public class AccessTokenController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
+    
+    [HttpPut("{id:guid}")]
+    public async Task<ApiResponse<AccessTokenVm>> UpdateAsync(Guid id, UpdateAccessToken request)
+    {
+        request.Id = id;
+
+        var metricVm = await Mediator.Send(request);
+
+        return Ok(metricVm);
+    }
 }

@@ -9,6 +9,7 @@ import {
   IAccessToken,
   IPagedAccessToken
 } from "@features/safe/integrations/access-tokens/types/access-token";
+import { IMetric } from "@features/safe/experiments/types";
 
 @Injectable({
   providedIn: 'root'
@@ -52,5 +53,10 @@ export class AccessTokenService {
 
   toggleStatus(id: string): Observable<any> {
     return this.http.put(`${this.baseUrl}/${id}/toggle`, {});
+  }
+
+  update(id: string, name: string): Observable<any> {
+    const url = this.baseUrl;
+    return this.http.put(url + `/${id}`, { name });
   }
 }

@@ -28,6 +28,7 @@
         <nz-form-control>
           <nz-select
             (ngModelChange)="onTypeChange()"
+            [nzDisabled]="isEditing"
             formControlName="type">
             <ng-container *ngFor="let at of actionTokenTypes">
               <nz-option
@@ -43,7 +44,7 @@
       <nz-form-item *ngIf="isServiceAccessToken">
         <nz-form-label nzRequired i18n="@@common.policies">Policies</nz-form-label>
         <nz-form-control>
-          <nz-select #policyNodeSelector
+          <nz-select #policyNodeSelector [nzDisabled]="isEditing"
             formControlName="policy"
             i18n-nzPlaceHolder="@@integrations.access-token.select-policies"
             nzPlaceHolder="Select policies"
@@ -74,7 +75,7 @@
               <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
               {{ policy.name }}
             </div>
-            <button nz-button nzType="default" [nzSize]="'large'" (click)="removePolicy(policy)"><i nz-icon nzType="close"></i></button>
+            <button [disabled]="isEditing" nz-button nzType="default" [nzSize]="'large'" (click)="removePolicy(policy)"><i nz-icon nzType="close"></i></button>
           </div>
         </div>
 

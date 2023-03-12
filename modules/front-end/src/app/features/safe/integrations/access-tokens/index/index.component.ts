@@ -7,7 +7,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { IPagedPolicy, IPolicy, PolicyFilter, policyRn } from "@features/safe/iam/types/policy";
 import { PolicyService } from "@services/policy.service";
 import {
-  AccessTokenFilter, AccessTokenStatusEnum,
+  AccessTokenFilter, AccessTokenStatusEnum, AccessTokenTypeEnum,
   IAccessToken,
   IPagedAccessToken
 } from "@features/safe/integrations/access-tokens/types/access-token";
@@ -98,15 +98,34 @@ export class IndexComponent implements OnInit {
   }
 
   accessTokenDrawerVisible: boolean = false;
-  openAccessTokenDrawer(){
+  private openAccessTokenDrawer(){
     this.accessTokenDrawerVisible = true;
   }
-  accessTokenDrawerClosed(created: any) {
+
+  accessTokenDrawerClosed(data: any) { //{ isEditing: boolean, id: string, name: string }
     this.accessTokenDrawerVisible = false;
 
-    if (created) {
-      this.getAccessTokens();
+    if (!data) {
+      return;
     }
+
+    if (!data.isEditing) {
+      this.getAccessTokens();
+    } else {
+      this.accessTokens.items = this.accessTokens.items.map((ac) => {
+        if (ac.id === data.id) {
+          return { ...ac, name: data.name };
+        }
+
+        return ac;
+      })
+    }
+  }
+
+  currentAccessToken: IAccessToken;
+  creatOrEdit(accessToken: IAccessToken = { name: null, type: AccessTokenTypeEnum.Personal, policies: []}) {
+    this.currentAccessToken = accessToken;
+    this.openAccessTokenDrawer();
   }
 
   delete(accessToken: IAccessToken) {

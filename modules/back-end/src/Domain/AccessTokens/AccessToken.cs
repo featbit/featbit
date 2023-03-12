@@ -38,4 +38,10 @@ public class AccessToken : AuditedEntity
         Status = Status == AccessTokenStatus.Active ? AccessTokenStatus.Inactive : AccessTokenStatus.Active;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void UpdateName(string name)
+    {
+        Name = name;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

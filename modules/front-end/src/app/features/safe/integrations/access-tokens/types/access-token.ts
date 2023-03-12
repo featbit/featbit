@@ -2,13 +2,13 @@ import { IPolicy } from "@features/safe/iam/types/policy";
 import { IMember } from "@features/safe/iam/types/member";
 
 export interface IAccessToken {
-  id: string;
+  id?: string;
   type: string;
-  creator: IMember;
-  status: string;
+  creator?: IMember;
+  status?: string;
   name: string;
-  policies: IPolicy[],
-  lastUsedAt: string
+  policies?: IPolicy[],
+  lastUsedAt?: string
 }
 
 export enum AccessTokenTypeEnum {
