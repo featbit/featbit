@@ -6,6 +6,7 @@ export interface IAccessToken {
   type: string;
   creator?: IMember;
   status?: string;
+  token?: string;
   name: string;
   policies?: IPolicy[],
   lastUsedAt?: string

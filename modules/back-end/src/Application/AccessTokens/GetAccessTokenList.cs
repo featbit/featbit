@@ -33,6 +33,7 @@ public class GetAccessTokenListHandler : IRequestHandler<GetAccessTokenList, Pag
         {
             var accessTokenVm = accessTokenVms.Items.First(x => x.Id == accessTokenItem.Id);
             accessTokenVm.Creator = _mapper.Map<MemberVm>(creators.First(x => x.Id == accessTokenItem.CreatorId));
+            accessTokenVm.Token = accessTokenVm.Token[..15] + "**************";
         }
 
         return accessTokenVms;

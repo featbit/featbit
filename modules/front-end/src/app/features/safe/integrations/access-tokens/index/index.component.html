@@ -56,9 +56,10 @@
       <tr>
         <th nzWidth="20%" i18n="@@common.name">Name</th>
         <th nzWidth="10%" i18n="@@common.type">Type</th>
-        <th nzWidth="15%" i18n="@@common.creator">Creator</th>
+        <th nzWidth="15%" i18n="@@common.created-by">Created by</th>
         <th nzWidth="10%" i18n="@@common.status">Status</th>
         <th nzWidth="20%" i18n="@@common.last-used">Last used</th>
+        <th nzWidth="20%" i18n="@@common.access-token">Access token</th>
         <th i18n="@@common.actions">Actions</th>
       </tr>
       </thead>
@@ -82,33 +83,47 @@
           {{ item.status | accessTokenStatus }}
         </td>
         <td>{{ item.lastUsedAt | date: 'YYYY-MM-dd HH:mm'}}</td>
-        <td>
+        <td>{{ item.token }}</td>
+        <td style="text-align: center">
           <ng-container *ngIf="(item.type === AccessTokenTypePersonal && canTakeActionOnPersonalAccessToken) || (item.type === AccessTokenTypeService && canTakeActionOnServiceAccessToken)">
-            <a (click)="creatOrEdit(item)" class="primary-link-btn" i18n="@@common.edit">Edit</a>
-
-            <ng-container *ngIf="item.status === AccessTokenStatusInactive">
-              <nz-divider nzType="vertical"></nz-divider>
-              <a (click)="toggleStatus(item)" class="primary-link-btn" i18n="@@common.activate">Activate</a>
-            </ng-container>
-
-            <ng-container *ngIf="item.status === AccessTokenStatusActive">
-              <nz-divider nzType="vertical"></nz-divider>
-              <a (click)="toggleStatus(item)" style="color: #717D8A" i18n="@@common.Deactivate">Deactivate</a>
-            </ng-container>
-
-            <nz-divider nzType="vertical"></nz-divider>
-            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-               nzPopconfirmPlacement="bottomRight"
-               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-               (nzOnConfirm)="delete(item)" [nzIcon]="iconTplIamUser">
-              <ng-container i18n="@@common.remove">Remove</ng-container>
-            </a>
+            <i class="options" nzPlacement="bottomCenter" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold;" nzType="ellipsis" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
           </ng-container>
+          <nz-dropdown-menu #options="nzDropdownMenu">
+            <ul nz-menu nzSelectable style="min-width: 120px;">
+              <li nz-menu-item (click)="creatOrEdit(item)">
+                <ng-container i18n="@@common.edit">Edit</ng-container>
+              </li>
+              <li nz-menu-item (click)="toggleStatus(item)" *ngIf="item.status === AccessTokenStatusInactive">
+                <ng-container i18n="@@common.activate">Activate</ng-container>
+              </li>
+              <li nz-menu-item
+                  nz-popconfirm
+                  i18n-nzPopconfirmTitle="@@integrations.access-tokens.deactivate-access-token-confirm"
+                  nzPopconfirmTitle="Deactivate this access token? You can't use an inactive access token to make API calls but you can activate it again later."
+                  nzPopconfirmPlacement="bottomRight"
+                  [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                  (nzOnConfirm)="toggleStatus(item)"
+                  [nzIcon]="iconTplAccessToken">
+                <ng-container i18n="@@common.Deactivate">Deactivate</ng-container>
+              </li>
+              <li nz-menu-item
+                  *ngIf="item.status === AccessTokenStatusActive"
+                  nz-popconfirm
+                  i18n-nzPopconfirmTitle="@@integrations.access-tokens.deactivate-access-token-confirm"
+                  nzPopconfirmTitle="Deactivate this access token? You can't use an inactive access token to make API calls but you can activate it again later."
+                  nzPopconfirmPlacement="bottomRight"
+                  [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                  (nzOnConfirm)="delete(item)"
+                  [nzIcon]="iconTplAccessToken">
+                <ng-container i18n="@@common.remove">Remove</ng-container>
+              </li>
+            </ul>
+          </nz-dropdown-menu>
         </td>
       </tr>
       </tbody>
     </nz-table>
-    <ng-template #iconTplIamUser>
+    <ng-template #iconTplAccessToken>
       <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
     </ng-template>
   </div>

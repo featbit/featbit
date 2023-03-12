@@ -38,8 +38,8 @@
                 </div>
                 <div class="trigger-description">{{trigger.description}}</div>
                 <div class="trigger-url">
-                  <span *ngIf="!trigger.canCopyToken">{{getTriggerUrl(trigger.token)}}</span>
-                  <span *ngIf="trigger.canCopyToken" nz-typography nzCopyable nzCopyText="{{ getTriggerUrl(trigger.token) }}">{{getTriggerUrl(trigger.token)}}</span>
+                  <span>{{getTriggerUrl(trigger.token)}}</span>
+                  <i *ngIf="trigger.canCopyToken" (click)="copyText($event, getTriggerUrl(trigger.token))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
                 </div>
                 <div class="warning" *ngIf="trigger.canCopyToken">
                   <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>

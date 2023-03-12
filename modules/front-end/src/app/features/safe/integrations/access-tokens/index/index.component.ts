@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { copyToClipboard, encodeURIComponentFfc } from '@utils/index';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { IPagedPolicy, IPolicy, PolicyFilter, policyRn } from "@features/safe/iam/types/policy";
-import { PolicyService } from "@services/policy.service";
 import {
   AccessTokenFilter, AccessTokenStatusEnum, AccessTokenTypeEnum,
   IAccessToken,
@@ -94,6 +91,7 @@ export class IndexComponent implements OnInit {
     this.accessTokenService.getList(this.filter).subscribe({
       next: (accessTokens) => {
         this.accessTokens = accessTokens;
+
         this.isLoading = false;
       },
       error:() => this.isLoading = false

@@ -4,6 +4,7 @@ import { FlagTriggerService } from '@services/flag-trigger.service';
 import { FlagTriggerActionEnum, FlagTriggerTypeEnum, IFlagTrigger } from '../../types/flag-triggers';
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {FeatureFlagService} from "@services/feature-flag.service";
+import { copyToClipboard } from "@utils/index";
 
 @Component({
   selector: 'flag-triggers',
@@ -102,6 +103,12 @@ export class FlagTriggersComponent implements OnInit {
 
   getTriggerUrl(token: string): string {
     return this.flagTriggerService.getTriggerUrl(token);
+  }
+
+  copyText(event, text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
+    );
   }
 
   flagTriggerTypeLabel = {

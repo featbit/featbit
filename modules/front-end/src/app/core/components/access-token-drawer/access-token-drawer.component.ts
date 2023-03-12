@@ -14,6 +14,9 @@ import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
 import { PolicyFilter } from "@features/safe/iam/types/policy";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { NzModalService } from "ng-zorro-antd/modal";
+import { copyToClipboard } from "@utils/index";
 
 @Component({
   selector: 'access-token-drawer',
@@ -58,6 +61,7 @@ export class AccessTokenDrawerComponent implements OnInit {
     private policyService: PolicyService,
     private permissionsService: PermissionsService,
     private accessTokenService: AccessTokenService,
+    private modal: NzModalService,
     private message: NzMessageService
   ) {
     this.policyDebouncer.pipe(
@@ -205,6 +209,9 @@ export class AccessTokenDrawerComponent implements OnInit {
     }
   }
 
+  tokenName = '';
+  tokenValue = '';
+  isCreationConfirmModalVisible = false;
   doSubmit() {
     // we validate name and type only here
     if (this.form.invalid) {
@@ -227,13 +234,12 @@ export class AccessTokenDrawerComponent implements OnInit {
       this.message.warning($localize `:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
       return;
     }
-
     this.isLoading = true;
     if (this.isEditing) {
       this.accessTokenService.update(this.accessToken.id, name).subscribe({
           next: res => {
             this.isLoading = false;
-            this.close.emit({ isEditing: true, id: this.accessToken.id, name: name});
+            this.close.emit({ isEditing: true, id: this.accessToken.id, name: name });
             this.message.success($localize`:@@common.operation-success:Operation succeeded`);
           },
           error: _ => {
@@ -246,11 +252,14 @@ export class AccessTokenDrawerComponent implements OnInit {
       const policies = this.isServiceAccessToken ? this.selectedPolicyList.map(p => p.id) : [];
 
       this.accessTokenService.create(name, type, policies).subscribe({
-          next: () => {
+          next: ({id, name, token}) => {
             this.isLoading = false;
             this.close.emit({ isEditing: false });
             this.message.success($localize`:@@common.operation-success:Operation succeeded`);
             this.reset();
+            this.tokenName = name;
+            this.tokenValue = token;
+            this.isCreationConfirmModalVisible = true;
           },
           error: (e) => {
             this.isLoading = false;
@@ -261,6 +270,12 @@ export class AccessTokenDrawerComponent implements OnInit {
         }
       )
     }
+  }
+
+  copyText(event, text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
+    );
   }
 
   actionTokenTypes = [

@@ -58,7 +58,7 @@
                         <ng-container i18n="@@ff.expt.refresh">Refresh</ng-container>
                       </button>
                     </div>
-                    <i class="options" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold; margin-left: 20px" nzType="ellipsis" [nzRotate]="90" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
+                    <i class="options" nzPlacement="bottomCenter" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold; margin-left: 20px" nzType="ellipsis" [nzRotate]="90" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
 
                     <nz-dropdown-menu #options="nzDropdownMenu">
                       <ul nz-menu nzSelectable style="min-width: 150px;">
@@ -68,7 +68,6 @@
                             nzPopconfirmTitle="This would remove all data of this experiment, it cannot be reverted, are you sure to remove it?"
                             nzPopconfirmPlacement="bottomRight"
                             [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                            style="width: 100%;display: flex;justify-content: center;"
                             (nzOnConfirm)="onDeleteExptDataClick(experiment)">
                           <ng-container i18n="@@ff.expt.remove-data">Remove data</ng-container>
                         </li>
@@ -78,7 +77,6 @@
                             nzPopconfirmTitle="This would remove the experiment and all data, it cannot be reverted, are you sure to remove it?"
                             nzPopconfirmPlacement="bottomRight"
                             [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                            style="width: 100%;display: flex;justify-content: center;"
                             (nzOnConfirm)="onDeleteExptClick(experiment)">
                           <ng-container i18n="@@ff.expt.remove-experiment">Remove experiment</ng-container>
                         </li>
