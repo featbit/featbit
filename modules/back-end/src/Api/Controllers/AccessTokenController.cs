@@ -74,8 +74,8 @@ public class AccessTokenController : ApiControllerBase
     {
         request.Id = id;
 
-        var metricVm = await Mediator.Send(request);
+        var accessTokenVm = await Mediator.Send(request);
 
-        return Ok(metricVm);
+        return Ok(accessTokenVm);
     }
 }
