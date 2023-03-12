@@ -26,6 +26,7 @@ export class AccessTokensGuard implements CanActivate {
 
     if (!canListAccessTokens) {
       this.message.warning(this.permissionsService.genericDenyMessage);
+      return this.router.parseUrl('/');
     }
 
     return canListAccessTokens;

@@ -26,6 +26,7 @@ export class IAMGuard implements CanActivate {
 
     if (!canManageIAM) {
       this.message.warning(this.permissionsService.genericDenyMessage);
+      return this.router.parseUrl('/');
     }
 
     return canManageIAM;
