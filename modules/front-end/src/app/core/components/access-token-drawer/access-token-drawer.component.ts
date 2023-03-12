@@ -1,19 +1,17 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { debounceTime, distinctUntilChanged, first, map, switchMap } from "rxjs/operators";
+import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { PolicyService } from "@services/policy.service";
 import {
   AccessTokenTypeEnum,
   IAccessToken,
   IAccessTokenPolicy
 } from "@features/safe/integrations/access-tokens/types/access-token";
-import { PolicyFilter } from "@features/safe/iam/types/policy";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { Subject } from "rxjs";
 import { AccessTokenService } from "@services/access-token.service";
-import { CustomEventSuccessCriteria, CustomEventTrackOption, IMetric } from "@features/safe/experiments/types";
-import { uuidv4 } from "@utils/index";
+import { PermissionsService } from "@services/permissions.service";
 
 @Component({
   selector: 'access-token-drawer',
@@ -54,12 +52,12 @@ export class AccessTokenDrawerComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private policyService: PolicyService,
+    private permissionsService: PermissionsService,
     private accessTokenService: AccessTokenService,
     private message: NzMessageService
   ) {
     this.policyDebouncer.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
+      debounceTime(100),
     ).subscribe(query => this.searchPolicies(query));
   }
 
@@ -130,19 +128,15 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.validatePoliciesControl();
   }
 
-  isLoadingPolicies = true;
-
   searchPolicies(query: string = '') {
-    this.isLoadingPolicies = true;
-
-    this.policyService.getList(new PolicyFilter(query, 1, 50)).subscribe(policies => {
-      this.policySearchResultList = policies.items.map(p => ({
-        ...p,
-        isSelected: this.selectedPolicyList.some((sp => sp.id === p.id))
-      }));
-
-      this.isLoadingPolicies = false;
-    }, () => this.isLoadingPolicies = false);
+    const regex = new RegExp(query,'ig')
+    this.policySearchResultList = this.permissionsService.policies
+      .filter((policy) => query === '' || policy.name.match(regex))
+      .map((policy) => ({
+          ...policy,
+          isSelected: this.selectedPolicyList.some((sp => sp.id === policy.id))
+        })
+      );
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(

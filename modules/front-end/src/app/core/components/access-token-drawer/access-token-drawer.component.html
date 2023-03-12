@@ -54,7 +54,7 @@
             (ngModelChange)="onPolicySelectChange()"
             (nzOnSearch)="policyDebouncer.next($event)">
             <ng-container *ngFor="let policy of policySearchResultList">
-              <nz-option nzCustomContent *ngIf="!isLoadingPolicies" [nzLabel]="policy.name" [nzValue]="policy">
+              <nz-option nzCustomContent [nzLabel]="policy.name" [nzValue]="policy">
                 <span style="display: flex;justify-content: space-between;align-items: center">
                   <span>
                   <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
@@ -64,9 +64,6 @@
                 </span>
               </nz-option>
             </ng-container>
-            <nz-option *ngIf="isLoadingPolicies" nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
           </nz-select>
         </nz-form-control>
         <div class="selected-policies" nz-row *ngIf="selectedPolicyList.length">

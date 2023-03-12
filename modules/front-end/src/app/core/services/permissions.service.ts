@@ -8,6 +8,7 @@ import {EffectEnum, ResourceTypeEnum} from "@features/safe/iam/components/policy
   providedIn: 'root'
 })
 export class PermissionsService {
+  policies: IPolicy[];
   private permissions: IPolicyStatement[];
 
   genericDenyMessage: string = $localize `:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`;
@@ -17,6 +18,7 @@ export class PermissionsService {
 
   async fetchPolicies(memberId: string) {
     const policies = await lastValueFrom<IPolicy[]>(this.memberSvc.getAllPolicies(memberId));
+    this.policies = [...policies];
     this.permissions = policies.flatMap(p => p.statements);
   }
 
