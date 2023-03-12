@@ -64,7 +64,6 @@ const routes: Routes = [
       },
       {
         path: 'integrations',
-        canActivate: [IAMGuard],
         loadChildren: () => import("./integrations/integrations.module").then(m => m.IntegrationsModule),
       },
       {

@@ -7,7 +7,7 @@ import { AccessTokenTypeEnum } from "@features/safe/integrations/access-tokens/t
 export class AccessTokenTypePipe implements PipeTransform {
   typeDict = {
     [AccessTokenTypeEnum.Personal]: $localize `:@@integrations.access-token.personal:Personal`,
-    [AccessTokenTypeEnum.Service]: $localize `:@@integrations.access-token.personal:Service`
+    [AccessTokenTypeEnum.Service]: $localize `:@@integrations.access-token.service:Service`
   }
 
   transform(value: string): string {

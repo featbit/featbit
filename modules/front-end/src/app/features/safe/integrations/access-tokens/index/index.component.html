@@ -72,7 +72,15 @@
           <ng-container *ngIf="item.creator.name">{{ item.creator.name }} ({{ item.creator.email }})</ng-container>
           <ng-container *ngIf="!item.creator.name">{{ item.creator.email }}</ng-container>
         </td>
-        <td>{{ item.status | accessTokenStatus }}</td>
+        <td class="status status-{{item.status}}">
+          <ng-container *ngIf="item.status === AccessTokenStatusActive">
+            <i nz-icon [nzType]="'check-circle'"></i>
+          </ng-container>
+          <ng-container *ngIf="item.status === AccessTokenStatusInactive">
+            <i nz-icon [nzType]="'close-circle'"></i>
+          </ng-container>
+          {{ item.status | accessTokenStatus }}
+        </td>
         <td>{{ item.lastUsedAt | date: 'YYYY-MM-dd HH:mm'}}</td>
         <td>
           <a (click)="creatOrEdit(item)" class="primary-link-btn" i18n="@@common.edit">Edit</a>
