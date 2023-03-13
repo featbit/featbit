@@ -6,11 +6,11 @@ import { EnvService } from '@services/env.service';
 import { NzMessageService } from "ng-zorro-antd/message";
 import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
-import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
 import {MessageQueueService} from "@services/message-queue.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { EnvSecretService } from "@services/env-secret.service";
 import { copyToClipboard } from '@utils/index';
+import { ResourceTypeEnum } from "@shared/policy";
 
 @Component({
   selector: 'app-project',

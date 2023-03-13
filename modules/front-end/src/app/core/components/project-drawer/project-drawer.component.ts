@@ -5,7 +5,7 @@ import {IProject} from '@shared/types';
 import {ProjectService} from '@services/project.service';
 import {PermissionsService} from "@services/permissions.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
-import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
+import {ResourceTypeEnum} from "@shared/policy";
 
 @Component({
   selector: 'app-project-drawer',

@@ -7,7 +7,7 @@ import {
   resourcesTypes,
   ResourceType,
   ResourceTypeEnum
-} from "@features/safe/iam/components/policy-editor/types";
+} from "@shared/policy";
 import {deepCopy, encodeURIComponentFfc, uuidv4} from "@utils/index";
 import {IPolicy, IPolicyStatement} from "@features/safe/iam/types/policy";
 import {NzMessageService} from "ng-zorro-antd/message";

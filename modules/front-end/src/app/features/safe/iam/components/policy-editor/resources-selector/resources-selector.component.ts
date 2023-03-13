@@ -7,10 +7,9 @@ import {
   ResourceTypeEnum,
   RNViewModel,
   rscParamsDict
-} from "@features/safe/iam/components/policy-editor/types";
+} from "@shared/policy";
 import {ResourceService} from "@services/resource.service";
 import {deepCopy} from "@utils/index";
-
 @Component({
   selector: 'resources-selector',
   templateUrl: './resources-selector.component.html',

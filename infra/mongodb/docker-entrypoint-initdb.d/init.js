@@ -105,14 +105,8 @@ db.Policies.insertOne(
                 _id: getUUIDString(),
                 resourceType: "general",
                 effect: "allow",
-                actions: ["UpdateOrgName"],
-                resources: ["account"]
-            },
-            {
-                _id: getUUIDString(),
-                resourceType: "general",
-                effect: "allow",
                 actions: [
+                    "UpdateOrgName",
                     "CreateServiceAccessTokens",
                     "CreatePersonalAccessTokens",
                     "ListAccessTokens"
