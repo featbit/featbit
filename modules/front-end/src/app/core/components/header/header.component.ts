@@ -10,6 +10,8 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
 import { copyToClipboard } from '@utils/index';
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FeedbackService } from "@services/feedback.service";
 
 @Component({
   selector: 'app-header',
@@ -38,11 +40,18 @@ export class HeaderComponent implements OnInit {
     private organizationService: OrganizationService,
     private projectService: ProjectService,
     private message: NzMessageService,
+    private fb: FormBuilder,
+    private feedbackService: FeedbackService,
     private readonly breadcrumbService: BreadcrumbService,
     private permissionsService: PermissionsService,
     private messageQueueService: MessageQueueService,
   ) {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
+
+    this.feedbackForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      feedback:['',[Validators.required]]
+    });
   }
 
   ngOnInit(): void {
@@ -150,5 +159,34 @@ export class HeaderComponent implements OnInit {
     copyToClipboard(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
+  }
+
+  //beedback
+  feedbackModalVisible = false;
+  sendingFeedback = false;
+  feedbackForm: FormGroup;
+
+  openFeedbackModal() {
+    this.feedbackModalVisible = true;
+    this.feedbackForm.reset();
+  }
+  sendFeedback() {
+    if (this.feedbackForm.invalid) {
+      for (const i in this.feedbackForm.controls) {
+        this.feedbackForm.controls[i].markAsDirty();
+        this.feedbackForm.controls[i].updateValueAndValidity();
+      }
+    }
+
+    const { email, feedback } = this.feedbackForm.value;
+
+    this.feedbackService.sendFeedback(email, feedback).subscribe({
+      next: () => {
+        this.message.success($localize `:@@common.feedback-success-message:Thank you for sending us your feedback, we'll get back to you very soon!`);
+      },
+      error: () => {
+        this.message.error($localize `:@@common.feedback-failure-message:We were not able to send your feedback, Please try again!`);
+      }
+    });
   }
 }
