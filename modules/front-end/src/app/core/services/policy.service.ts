@@ -8,12 +8,12 @@ import {
   IPagedPolicyGroup,
   IPagedPolicyMember,
   IPolicy,
-  IPolicyStatement,
   PolicyFilter,
   PolicyGroupFilter,
   PolicyMemberFilter
 } from "@features/safe/iam/types/policy";
 import { catchError } from "rxjs/operators";
+import { IPolicyStatement } from "@shared/policy";
 
 @Injectable({
   providedIn: 'root'

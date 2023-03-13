@@ -1,5 +1,12 @@
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
-import {uuidv4} from "@utils/index";
+
+export interface IPolicyStatement {
+  id: string;
+  resourceType: string;
+  effect: string;
+  actions: string[];
+  resources: string[];
+}
 
 export interface Resource {
   id: string;

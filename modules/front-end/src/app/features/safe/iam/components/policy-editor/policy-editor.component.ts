@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {
   EffectEnum,
-  IamPolicyAction,
+  IamPolicyAction, IPolicyStatement,
   Resource,
   resourceActionsDict,
   resourcesTypes,
@@ -9,7 +9,7 @@ import {
   ResourceTypeEnum
 } from "@shared/policy";
 import {deepCopy, encodeURIComponentFfc, uuidv4} from "@utils/index";
-import {IPolicy, IPolicyStatement} from "@features/safe/iam/types/policy";
+import {IPolicy} from "@features/safe/iam/types/policy";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {PolicyService} from "@services/policy.service";
 import {Router} from "@angular/router";
