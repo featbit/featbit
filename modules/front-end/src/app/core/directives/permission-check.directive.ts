@@ -1,6 +1,7 @@
 import {Directive, EventEmitter, HostListener, Input, Output} from "@angular/core";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {PermissionsService} from "@services/permissions.service";
+import { IamPolicyAction } from "@shared/policy";
 
 @Directive({
   selector: '[permission-check]'
@@ -8,7 +9,7 @@ import {PermissionsService} from "@services/permissions.service";
 export class PermissionCheckDirective  {
 
   @Input() rn: string;
-  @Input() action: string;
+  @Input() action: IamPolicyAction;
   @Input() messageIfDeny: string = this.permissionsService.genericDenyMessage;
 
   @Output() actionIfAllow = new EventEmitter();

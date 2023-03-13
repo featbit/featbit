@@ -5440,258 +5440,6 @@
         </context-group>
         <target>任意</target>
       </trans-unit>
-      <trans-unit id="iam.rsc-type.all" datatype="html">
-        <source>All</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-        <target>全部</target>
-      </trans-unit>
-      <trans-unit id="iam.rsc-type.general" datatype="html">
-        <source>General</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">54</context>
-        </context-group>
-        <target>通用</target>
-      </trans-unit>
-      <trans-unit id="iam.rsc-type.project" datatype="html">
-        <source>Project</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
-        <target>项目</target>
-      </trans-unit>
-      <trans-unit id="iam.rsc-type.env" datatype="html">
-        <source>Environment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">64</context>
-        </context-group>
-        <target>环境</target>
-      </trans-unit>
-      <trans-unit id="iam.policy.project" datatype="html">
-        <source>Project</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">85</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">97</context>
-        </context-group>
-        <target>项目</target>
-      </trans-unit>
-      <trans-unit id="iam.policy.environment" datatype="html">
-        <source>Environment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">107</context>
-        </context-group>
-        <target>环境</target>
-      </trans-unit>
-      <trans-unit id="iam.action.all" datatype="html">
-        <source>All</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">120</context>
-        </context-group>
-        <target>全部操作</target>
-      </trans-unit>
-      <trans-unit id="iam.action.update-org-name" datatype="html">
-        <source>Update org name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">127</context>
-        </context-group>
-        <target>修改机构名称</target>
-      </trans-unit>
-      <trans-unit id="iam.action.list-access-tokens" datatype="html">
-        <source>List access tokens</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">132</context>
-        </context-group>
-        <target>查看访问策略列表</target>
-      </trans-unit>
-      <trans-unit id="iam.action.create-service-access-tokens" datatype="html">
-        <source>Create service access tokens</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">137</context>
-        </context-group>
-        <target>创建 Service 访问策略</target>
-      </trans-unit>
-      <trans-unit id="iam.action.create-personal-access-tokens" datatype="html">
-        <source>Create personal access tokens</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">142</context>
-        </context-group>
-        <target>创建 Personal 访问策略</target>
-      </trans-unit>
-      <trans-unit id="iam.action.iam" datatype="html">
-        <source>IAM</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">149</context>
-        </context-group>
-        <target>权限管理</target>
-      </trans-unit>
-      <trans-unit id="iam.action.list-projects" datatype="html">
-        <source>List projects</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">156</context>
-        </context-group>
-        <target>查看项目列表</target>
-      </trans-unit>
-      <trans-unit id="iam.action.create-projects" datatype="html">
-        <source>Create projects</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">161</context>
-        </context-group>
-        <target>创建项目</target>
-      </trans-unit>
-      <trans-unit id="iam.action.delete-projects" datatype="html">
-        <source>Delete projects</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">166</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">223</context>
-        </context-group>
-        <target>删除项目</target>
-      </trans-unit>
-      <trans-unit id="iam.action.update-project-settings" datatype="html">
-        <source>Update project settings</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">171</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">228</context>
-        </context-group>
-        <target>修改项目设置</target>
-      </trans-unit>
-      <trans-unit id="iam.action.list-envs" datatype="html">
-        <source>List environments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">176</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">233</context>
-        </context-group>
-        <target>查看环境列表</target>
-      </trans-unit>
-      <trans-unit id="iam.action.create-env" datatype="html">
-        <source>Create environment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">181</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">238</context>
-        </context-group>
-        <target>创建环境</target>
-      </trans-unit>
-      <trans-unit id="iam.action.access-envs" datatype="html">
-        <source>Access environments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">186</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">218</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">260</context>
-        </context-group>
-        <target>进入环境</target>
-      </trans-unit>
-      <trans-unit id="iam.action.delete-envs" datatype="html">
-        <source>Delete environments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">191</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">265</context>
-        </context-group>
-        <target>删除环境</target>
-      </trans-unit>
-      <trans-unit id="iam.action.update-env-settings" datatype="html">
-        <source>Update environment settings</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">196</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">270</context>
-        </context-group>
-        <target>修改环境设置</target>
-      </trans-unit>
-      <trans-unit id="iam.action.delete-env-secret" datatype="html">
-        <source>Delete environment secret</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">201</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">243</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">275</context>
-        </context-group>
-        <target>删除环境秘钥</target>
-      </trans-unit>
-      <trans-unit id="iam.action.create-env-secret" datatype="html">
-        <source>Create environment secret</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">206</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">248</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">280</context>
-        </context-group>
-        <target>创建环境秘钥</target>
-      </trans-unit>
-      <trans-unit id="iam.action.update-env-secret" datatype="html">
-        <source>Update environment secret</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">211</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">253</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">285</context>
-        </context-group>
-        <target>修改环境秘钥</target>
-      </trans-unit>
       <trans-unit id="iam.routing.team" datatype="html">
         <source>Team</source>
         <context-group purpose="location">
@@ -7180,6 +6928,274 @@
           <context context-type="linenumber">76</context>
         </context-group>
         <target>不包含用户</target>
+      </trans-unit>
+      <trans-unit id="iam.action.all" datatype="html">
+        <source>All</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <target>全部操作</target>
+      </trans-unit>
+      <trans-unit id="iam.action.list-projects" datatype="html">
+        <source>List projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <target>查看项目列表</target>
+      </trans-unit>
+      <trans-unit id="iam.action.create-projects" datatype="html">
+        <source>Create projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <target>创建项目</target>
+      </trans-unit>
+      <trans-unit id="iam.action.delete-projects" datatype="html">
+        <source>Delete projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <target>删除项目</target>
+      </trans-unit>
+      <trans-unit id="iam.action.access-envs" datatype="html">
+        <source>Access environments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+        <target>进入环境</target>
+      </trans-unit>
+      <trans-unit id="iam.action.update-project-settings" datatype="html">
+        <source>Update project settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+        <target>修改项目设置</target>
+      </trans-unit>
+      <trans-unit id="iam.action.list-envs" datatype="html">
+        <source>List environments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <target>查看环境列表</target>
+      </trans-unit>
+      <trans-unit id="iam.action.create-env" datatype="html">
+        <source>Create environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <target>创建环境</target>
+      </trans-unit>
+      <trans-unit id="iam.action.delete-envs" datatype="html">
+        <source>Delete environments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <target>删除环境</target>
+      </trans-unit>
+      <trans-unit id="iam.action.update-env-settings" datatype="html">
+        <source>Update environment settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <target>修改环境设置</target>
+      </trans-unit>
+      <trans-unit id="iam.action.delete-env-secret" datatype="html">
+        <source>Delete environment secret</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+        <target>删除环境秘钥</target>
+      </trans-unit>
+      <trans-unit id="iam.action.create-env-secret" datatype="html">
+        <source>Create environment secret</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+        <target>创建环境秘钥</target>
+      </trans-unit>
+      <trans-unit id="iam.action.update-env-secret" datatype="html">
+        <source>Update environment secret</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">101</context>
+        </context-group>
+        <target>修改环境秘钥</target>
+      </trans-unit>
+      <trans-unit id="iam.action.update-org-name" datatype="html">
+        <source>Update org name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">109</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+        <target>修改机构名称</target>
+      </trans-unit>
+      <trans-unit id="iam.action.iam" datatype="html">
+        <source>IAM</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">118</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">119</context>
+        </context-group>
+        <target>权限管理</target>
+      </trans-unit>
+      <trans-unit id="iam.action.list-access-tokens" datatype="html">
+        <source>List access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">127</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">128</context>
+        </context-group>
+        <target>查看访问策略列表</target>
+      </trans-unit>
+      <trans-unit id="iam.action.manage-service-access-tokens" datatype="html">
+        <source>Manage service access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">135</context>
+        </context-group>
+        <target>管理 Service 访问策略</target>
+      </trans-unit>
+      <trans-unit id="iam.action.manage-personal-access-tokens" datatype="html">
+        <source>Manage personal access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">141</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">142</context>
+        </context-group>
+        <target>管理 Personal 访问策略</target>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.all" datatype="html">
+        <source>All</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <target>全部</target>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.general" datatype="html">
+        <source>General</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <target>通用</target>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.project" datatype="html">
+        <source>Project</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <target>项目</target>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.env" datatype="html">
+        <source>Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <target>环境</target>
+      </trans-unit>
+      <trans-unit id="iam.policy.project" datatype="html">
+        <source>Project</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">99</context>
+        </context-group>
+        <target>项目</target>
+      </trans-unit>
+      <trans-unit id="iam.policy.environment" datatype="html">
+        <source>Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">109</context>
+        </context-group>
+        <target>环境</target>
       </trans-unit>
     </body>
   </file>

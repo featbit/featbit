@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {lastValueFrom} from "rxjs";
 import {IPolicy, IPolicyStatement} from "@features/safe/iam/types/policy";
 import {MemberService} from "@services/member.service";
-import {EffectEnum, ResourceTypeEnum} from "@shared/policy";
+import { EffectEnum, IamPolicyAction, ResourceTypeEnum } from "@shared/policy";
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +63,7 @@ export class PermissionsService {
   }
 
   // if return undefined, that means zero permission is defined on that resource
-  canTakeAction(rn: string, action: string): boolean | undefined | any {
+  canTakeAction(rn: string, action: IamPolicyAction): boolean | undefined | any {
     const [resourceType, _] = rn.split('/');
 
     const statements = this.permissions.filter(s => {
@@ -72,7 +72,7 @@ export class PermissionsService {
         }
 
         if (s.resourceType === ResourceTypeEnum.General) {
-          return s.resources.map(r => r.split('/')[0]).includes(resourceType) && s.actions.includes(action);
+          return s.resources.map(r => r.split('/')[0]).includes(resourceType) && s.actions.includes(action.name);
         }
 
         const matchingResource = s.resources.find(rsc => {
@@ -89,13 +89,13 @@ export class PermissionsService {
           });
         });
 
-        return matchingResource !== undefined && s.actions.includes(action)
+        return matchingResource !== undefined && s.actions.includes(action.name)
     });
 
     if (statements.find(s => s.effect === EffectEnum.Deny) !== undefined) {
       return false;
     }
 
-    return statements.find(s => s.effect !== EffectEnum.Deny && (s.actions.find(act => act === '*') || s.actions.includes(action)));
+    return statements.find(s => s.effect !== EffectEnum.Deny && (s.actions.find(act => act === '*') || s.actions.includes(action.name)));
   }
 }

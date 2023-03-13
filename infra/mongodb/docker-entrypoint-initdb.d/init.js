@@ -107,8 +107,8 @@ db.Policies.insertOne(
                 effect: "allow",
                 actions: [
                     "UpdateOrgName",
-                    "CreateServiceAccessTokens",
-                    "CreatePersonalAccessTokens",
+                    "ManageServiceAccessTokens",
+                    "ManagePersonalAccessTokens",
                     "ListAccessTokens"
                 ],
                 resources: ["account"]
@@ -162,8 +162,8 @@ db.Policies.insertOne(
                 resourceType: "general",
                 effect: "allow",
                 actions: [
-                    "CreateServiceAccessTokens",
-                    "CreatePersonalAccessTokens",
+                    "ManageServiceAccessTokens",
+                    "ManagePersonalAccessTokens",
                     "ListAccessTokens"
                 ],
                 resources: ["account"]

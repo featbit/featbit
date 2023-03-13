@@ -116,239 +116,47 @@ export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]
 
 export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
   [ResourceTypeEnum.All]: [
-    {
-      id: uuidv4(),
-      name: permissionActions.All,
-      displayName: $localize`:@@iam.action.all:All`,
-      description: $localize`:@@iam.action.all:All`,
-      isOpenAPIApplicable: false
-    },
+    permissionActions.All,
   ],
   [`${ResourceTypeEnum.General},account`]: [
-    {
-      id: uuidv4(),
-      name: permissionActions.UpdateOrgName,
-      displayName: $localize`:@@iam.action.update-org-name:Update org name`,
-      description: $localize`:@@iam.action.update-org-name:Update org name`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.ListAccessTokens,
-      displayName: $localize`:@@iam.action.list-access-tokens:List access tokens`,
-      description: $localize`:@@iam.action.list-access-tokens:List access tokens`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreateServiceAccessTokens,
-      displayName: $localize`:@@iam.action.create-service-access-tokens:Create service access tokens`,
-      description: $localize`:@@iam.action.create-service-access-tokens:Create service access tokens`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreatePersonalAccessTokens,
-      displayName: $localize`:@@iam.action.create-personal-access-tokens:Create personal access tokens`,
-      description: $localize`:@@iam.action.create-personal-access-tokens:Create personal access tokens`,
-      isOpenAPIApplicable: true
-    },
+    permissionActions.UpdateOrgName,
+    permissionActions.ListAccessTokens,
+    permissionActions.CreateServiceAccessTokens,
+    permissionActions.CreatePersonalAccessTokens,
   ],
   [`${ResourceTypeEnum.General},iam`]: [
-    {
-      id: uuidv4(),
-      name: permissionActions.CanManageIAM,
-      displayName: $localize`:@@iam.action.iam:IAM`,
-      description: $localize`:@@iam.action.iam:IAM`,
-      isOpenAPIApplicable: true
-    },
+    permissionActions.CanManageIAM,
   ],
   [`${ResourceTypeEnum.General},project`]: [ // for all projects
-    {
-      id: uuidv4(),
-      name: permissionActions.ListProjects,
-      displayName: $localize`:@@iam.action.list-projects:List projects`,
-      description: $localize`:@@iam.action.list-projects:List projects`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreateProject,
-      displayName: $localize`:@@iam.action.create-projects:Create projects`,
-      description: $localize`:@@iam.action.create-projects:Create projects`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.DeleteProject,
-      displayName: $localize`:@@iam.action.delete-projects:Delete projects`,
-      description: $localize`:@@iam.action.delete-projects:Delete projects`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.UpdateProjectSettings,
-      displayName: $localize`:@@iam.action.update-project-settings:Update project settings`,
-      description: $localize`:@@iam.action.update-project-settings:Update project settings`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.ListEnvs,
-      displayName: $localize`:@@iam.action.list-envs:List environments`,
-      description: $localize`:@@iam.action.list-envs:List environments`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreateEnv,
-      displayName: $localize`:@@iam.action.create-env:Create environment`,
-      description: $localize`:@@iam.action.create-env:Create environment`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.AccessEnvs,
-      displayName: $localize`:@@iam.action.access-envs:Access environments`,
-      description: $localize`:@@iam.action.access-envs:Access environments`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.DeleteEnv,
-      displayName: $localize`:@@iam.action.delete-envs:Delete environments`,
-      description: $localize`:@@iam.action.delete-envs:Delete environments`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.UpdateEnvSettings,
-      displayName: $localize`:@@iam.action.update-env-settings:Update environment settings`,
-      description: $localize`:@@iam.action.update-env-settings:Update environment settings`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.DeleteEnvSecret,
-      displayName: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
-      description: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreateEnvSecret,
-      displayName: $localize`:@@iam.action.create-env-secret:Create environment secret`,
-      description: $localize`:@@iam.action.create-env-secret:Create environment secret`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.UpdateEnvSecret,
-      displayName: $localize`:@@iam.action.update-env-secret:Update environment secret`,
-      description: $localize`:@@iam.action.update-env-secret:Update environment secret`,
-      isOpenAPIApplicable: true
-    },
+    permissionActions.ListProjects,
+    permissionActions.CreateProject,
+    permissionActions.DeleteProject,
+    permissionActions.UpdateProjectSettings,
+    permissionActions.ListEnvs,
+    permissionActions.CreateEnv,
+    permissionActions.AccessEnvs,
+    permissionActions.DeleteEnv,
+    permissionActions.UpdateEnvSettings,
+    permissionActions.DeleteEnvSecret,
+    permissionActions.CreateEnvSecret,
+    permissionActions.UpdateEnvSecret,
   ],
   [ResourceTypeEnum.Project]: [ // for a specific project
-    {
-      id: uuidv4(),
-      name: permissionActions.AccessEnvs,
-      displayName: $localize`:@@iam.action.access-envs:Access environments`,
-      description: $localize`:@@iam.action.access-envs:Access environments`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.DeleteProject,
-      displayName: $localize`:@@iam.action.delete-projects:Delete projects`,
-      description: $localize`:@@iam.action.delete-projects:Delete projects`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.UpdateProjectSettings,
-      displayName: $localize`:@@iam.action.update-project-settings:Update project settings`,
-      description: $localize`:@@iam.action.update-project-settings:Update project settings`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.ListEnvs,
-      displayName: $localize`:@@iam.action.list-envs:List environments`,
-      description: $localize`:@@iam.action.list-envs:List environments`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreateEnv,
-      displayName: $localize`:@@iam.action.create-env:Create environment`,
-      description: $localize`:@@iam.action.create-env:Create environment`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.DeleteEnvSecret,
-      displayName: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
-      description: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreateEnvSecret,
-      displayName: $localize`:@@iam.action.create-env-secret:Create environment secret`,
-      description: $localize`:@@iam.action.create-env-secret:Create environment secret`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.UpdateEnvSecret,
-      displayName: $localize`:@@iam.action.update-env-secret:Update environment secret`,
-      description: $localize`:@@iam.action.update-env-secret:Update environment secret`,
-      isOpenAPIApplicable: true
-    },
+    permissionActions.AccessEnvs,
+    permissionActions.DeleteProject,
+    permissionActions.UpdateProjectSettings,
+    permissionActions.ListEnvs,
+    permissionActions.CreateEnv,
+    permissionActions.DeleteEnvSecret,
+    permissionActions.CreateEnvSecret,
+    permissionActions.UpdateEnvSecret,
   ],
   [ResourceTypeEnum.Env]: [ // for a specific environment
-    {
-      id: uuidv4(),
-      name: permissionActions.AccessEnvs,
-      displayName: $localize`:@@iam.action.access-envs:Access environments`,
-      description: $localize`:@@iam.action.access-envs:Access environments`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.DeleteEnv,
-      displayName: $localize`:@@iam.action.delete-envs:Delete environments`,
-      description: $localize`:@@iam.action.delete-envs:Delete environments`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.UpdateEnvSettings,
-      displayName: $localize`:@@iam.action.update-env-settings:Update environment settings`,
-      description: $localize`:@@iam.action.update-env-settings:Update environment settings`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.DeleteEnvSecret,
-      displayName: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
-      description: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.CreateEnvSecret,
-      displayName: $localize`:@@iam.action.create-env-secret:Create environment secret`,
-      description: $localize`:@@iam.action.create-env-secret:Create environment secret`,
-      isOpenAPIApplicable: true
-    },
-    {
-      id: uuidv4(),
-      name: permissionActions.UpdateEnvSecret,
-      displayName: $localize`:@@iam.action.update-env-secret:Update environment secret`,
-      description: $localize`:@@iam.action.update-env-secret:Update environment secret`,
-      isOpenAPIApplicable: true
-    },
+    permissionActions.AccessEnvs,
+    permissionActions.DeleteEnv,
+    permissionActions.UpdateEnvSettings,
+    permissionActions.DeleteEnvSecret,
+    permissionActions.CreateEnvSecret,
+    permissionActions.UpdateEnvSecret,
   ]
 }
