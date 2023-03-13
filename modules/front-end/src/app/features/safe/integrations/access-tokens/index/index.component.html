@@ -96,7 +96,8 @@
               <li nz-menu-item (click)="toggleStatus(item)" *ngIf="item.status === AccessTokenStatusInactive">
                 <ng-container i18n="@@common.activate">Activate</ng-container>
               </li>
-              <li nz-menu-item
+              <li *ngIf="item.status === AccessTokenStatusActive"
+                  nz-menu-item
                   nz-popconfirm
                   i18n-nzPopconfirmTitle="@@integrations.access-tokens.deactivate-access-token-confirm"
                   nzPopconfirmTitle="Deactivate this access token? You can't use an inactive access token to make API calls but you can activate it again later."
@@ -107,7 +108,6 @@
                 <ng-container i18n="@@common.Deactivate">Deactivate</ng-container>
               </li>
               <li nz-menu-item
-                  *ngIf="item.status === AccessTokenStatusActive"
                   nz-popconfirm
                   i18n-nzPopconfirmTitle="@@integrations.access-tokens.deactivate-access-token-confirm"
                   nzPopconfirmTitle="Deactivate this access token? You can't use an inactive access token to make API calls but you can activate it again later."
