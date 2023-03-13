@@ -98,6 +98,7 @@
   [(nzVisible)]="isCreationConfirmModalVisible"
   i18n-nzTitle="@@integrations.access-tokens.access-token-created"
   nzTitle="Access token created"
+  (nzOnCancel)="isCreationConfirmModalVisible = false"
   [nzFooter]="confirmFooter"
   (nzOnOk)="isCreationConfirmModalVisible = false">
   <ng-container *nzModalContent>
