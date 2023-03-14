@@ -6,9 +6,7 @@
   </nz-breadcrumb>
 
   <div class="header-btns">
-    <div class="header-btn feedback" (click)="openFeedbackModal()">
-      Feedback
-    </div>
+    <div class="header-btn feedback" (click)="openFeedbackModal()" i18n="@@common.feedback">Feedback</div>
     <div class="header-btn" nzTooltipPlacement="bottom" nz-tooltip="Quick Start Guide" i18n-nz-tooltip="@@common.quick-start-guide" (click)="onQuickStartGuideClick()">
       <span nz-icon nzType="read" nzTheme="outline"></span>
     </div>
@@ -99,9 +97,9 @@
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.feedback">Feedback</nz-form-label>
-        <nz-form-control nzHasFeedback nzErrorTip="Feedback is mandatory" i18n-nzErrorTip="@@common.feedback-mandatory">
-          <textarea nz-input formControlName="feedback" i18n-placeholder="@@common.feedback-placeholder" placeholder="Have you any feedback for us?">
+        <nz-form-label nzRequired i18n="@@common.message">Message</nz-form-label>
+        <nz-form-control nzHasFeedback nzErrorTip="Message is mandatory" i18n-nzErrorTip="@@common.message-mandatory">
+          <textarea nz-input formControlName="message" i18n-placeholder="@@common.message-placeholder" placeholder="Have you any feedback for us?">
           </textarea>
         </nz-form-control>
       </nz-form-item>

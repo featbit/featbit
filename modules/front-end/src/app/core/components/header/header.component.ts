@@ -50,7 +50,7 @@ export class HeaderComponent implements OnInit {
 
     this.feedbackForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      feedback:['',[Validators.required]]
+      message:['',[Validators.required]]
     });
   }
 
@@ -178,14 +178,19 @@ export class HeaderComponent implements OnInit {
       }
     }
 
-    const { email, feedback } = this.feedbackForm.value;
+    this.sendingFeedback = true;
+    const { email, message } = this.feedbackForm.value;
 
-    this.feedbackService.sendFeedback(email, feedback).subscribe({
+    this.feedbackService.sendFeedback(email, message).subscribe({
       next: () => {
         this.message.success($localize `:@@common.feedback-success-message:Thank you for sending us your feedback, we'll get back to you very soon!`);
       },
       error: () => {
         this.message.error($localize `:@@common.feedback-failure-message:We were not able to send your feedback, Please try again!`);
+      },
+      complete: () => {
+        this.sendingFeedback = false;
+        this.feedbackModalVisible = false;
       }
     });
   }
