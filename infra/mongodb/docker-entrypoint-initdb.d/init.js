@@ -96,42 +96,56 @@ db.Policies.insertOne(
         statements: [
             {
                 _id: getUUIDString(),
-                resourceType: "general",
+                resourceType: "account",
                 effect: "allow",
-                actions: ["CanManageIAM"],
-                resources: ["iam"]
+                actions: ["UpdateOrgName"],
+                resources: ["account/*"]
             },
             {
                 _id: getUUIDString(),
-                resourceType: "general",
+                resourceType: "iam",
+                effect: "allow",
+                actions: ["CanManageIAM"],
+                resources: ["iam/*"]
+            },
+            {
+                _id: getUUIDString(),
+                resourceType: "access-token",
                 effect: "allow",
                 actions: [
-                    "UpdateOrgName",
                     "ManageServiceAccessTokens",
                     "ManagePersonalAccessTokens",
                     "ListAccessTokens"
                 ],
-                resources: ["account"]
+                resources: ["access-token/*"]
             },
             {
                 _id: getUUIDString(),
-                resourceType: "general",
+                resourceType: "project",
                 effect: "allow",
                 actions: [
                     "ListProjects",
                     "CreateProject",
                     "DeleteProject",
-                    "AccessEnvs",
                     "UpdateProjectSettings",
                     "ListEnvs",
-                    "CreateEnv",
+                    "CreateEnv"
+                ],
+                resources: ["project/*"]
+            },
+            {
+                _id: getUUIDString(),
+                resourceType: "env",
+                effect: "allow",
+                actions: [
+                    "AccessEnvs",
                     "DeleteEnv",
                     "UpdateEnvSettings",
                     "CreateEnvSecret",
                     "DeleteEnvSecret",
                     "UpdateEnvSecret"
                 ],
-                resources: ["project"]
+                resources: ["project/*:env/*"]
             }
         ],
         createdAt: new Date(),
@@ -148,25 +162,33 @@ db.Policies.insertOne(
         statements: [
             {
                 _id: getUUIDString(),
-                resourceType: "general",
-                effect: "allow",
-                actions: [
-                    "AccessEnvs",
-                    "ListProjects",
-                    "ListEnvs"
-                ],
-                resources: ["project"]
-            },
-            {
-                _id: getUUIDString(),
-                resourceType: "general",
+                resourceType: "access-token",
                 effect: "allow",
                 actions: [
                     "ManageServiceAccessTokens",
                     "ManagePersonalAccessTokens",
                     "ListAccessTokens"
                 ],
-                resources: ["account"]
+                resources: ["access-token/*"]
+            },
+            {
+                _id: getUUIDString(),
+                resourceType: "project",
+                effect: "allow",
+                actions: [
+                    "ListProjects",
+                    "ListEnvs"
+                ],
+                resources: ["project/*"]
+            },
+            {
+                _id: getUUIDString(),
+                resourceType: "env",
+                effect: "allow",
+                actions: [
+                    "AccessEnvs"
+                ],
+                resources: ["project/*:env/*"]
             }
         ],
         createdAt: new Date(),

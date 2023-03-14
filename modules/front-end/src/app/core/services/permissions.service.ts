@@ -1,15 +1,15 @@
 import {Injectable} from "@angular/core";
 import {lastValueFrom} from "rxjs";
-import {IPolicy, IPolicyStatement} from "@features/safe/iam/types/policy";
+import {IPolicy} from "@features/safe/iam/types/policy";
 import {MemberService} from "@services/member.service";
-import { EffectEnum, IamPolicyAction, ResourceTypeEnum } from "@shared/policy";
+import { EffectEnum, IamPolicyAction, IPolicyStatement, ResourceTypeEnum } from "@shared/policy";
 
 @Injectable({
   providedIn: 'root'
 })
 export class PermissionsService {
   policies: IPolicy[];
-  private permissions: IPolicyStatement[];
+  permissions: IPolicyStatement[];
 
   genericDenyMessage: string = $localize `:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`;
 
@@ -64,15 +64,9 @@ export class PermissionsService {
 
   // if return undefined, that means zero permission is defined on that resource
   canTakeAction(rn: string, action: IamPolicyAction): boolean | undefined | any {
-    const [resourceType, _] = rn.split('/');
-
     const statements = this.permissions.filter(s => {
         if (s.resourceType === ResourceTypeEnum.All) {
           return s.effect === EffectEnum.Allow;
-        }
-
-        if (s.resourceType === ResourceTypeEnum.General) {
-          return s.resources.map(r => r.split('/')[0]).includes(resourceType) && s.actions.includes(action.name);
         }
 
         const matchingResource = s.resources.find(rsc => {

@@ -7,4 +7,6 @@ public class ResourceVm
     public string Name { get; set; }
 
     public string Rn { get; set; }
+    
+    public string Type { get; set; }
 }
