@@ -93,31 +93,26 @@
   .flag-key {
     margin-top: 16px;
 
+    .title {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 12px;
+    }
+
+    i {
+      cursor: pointer;
+      font-size: 16px;
+    }
+
     .key-container {
       display: flex;
       align-items: center;
-
-      nz-input-group {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px 12px;
-        height: 36px;
-        background: #FFFFFF;
-        border: 1px solid @grey20-color;
-        border-radius: 8px;
-        font-weight: 400;
-        font-size: 12px;
-        line-height: 150%;
-        color: @grey50-color;
-      }
+      justify-content: flex-start;
+      gap: 8px;
 
       i {
-        cursor: pointer;
-        font-size: 20px;
-
-        &:last-child {
-          margin-left: 8px;
-        }
+        font-size: 13px;
       }
     }
   }
