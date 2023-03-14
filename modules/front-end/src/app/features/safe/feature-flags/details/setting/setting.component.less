@@ -97,7 +97,7 @@
       padding: 8px 12px;
       height: 36px;
       background: #FFFFFF;
-      border: 1px solid @grey200-color;
+      border: 1px solid @grey20-color;
       border-radius: 8px;
       font-weight: 400;
       font-size: 12px;
@@ -114,6 +114,25 @@
 
       &:last-child {
         margin-left: 8px;
+      }
+    }
+  }
+
+  .flag-description {
+    margin-top: 16px;
+
+    .description-container {
+      color: @grey50-color;
+      border: 1px solid @grey20-color;
+      border-radius: 8px;
+      padding: 5px;
+
+      &.editing {
+        border: none;
+
+        textarea {
+          border-radius: 8px;
+        }
       }
     }
   }
@@ -243,7 +262,7 @@
         width: 85%;
         height: 36px;
         border-radius: 8px;
-        border: 1px solid @grey200-color;
+        border: 1px solid @grey20-color;
       }
 
       .delete-icon-wrapper {

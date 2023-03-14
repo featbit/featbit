@@ -43,16 +43,17 @@ export class SettingComponent {
     );
   }
 
-  public lastSavedVariations: IVariation[];
+  lastSavedVariations: IVariation[];
   setLastSavedVariations() {
     this.lastSavedVariations = JSON.parse(JSON.stringify(this.featureFlag.variations));
   }
 
-  public featureFlag: FeatureFlag = {} as FeatureFlag;
-  public isLoading = true;
-  public isEditingTitle = false;
-  public isEditingVariations = false;
-  public key: string = null;
+  featureFlag: FeatureFlag = {} as FeatureFlag;
+  isLoading = true;
+  isEditingTitle = false;
+  isEditingDescription = false;
+  isEditingVariations = false;
+  key: string = null;
   currentProjectEnv: IProjectEnv = null;
 
   allTags: string[] = [];
@@ -149,7 +150,11 @@ export class SettingComponent {
     }, () => this.isLoading = false)
   }
 
-  public onChangeStatus() {
+  onSaveDescription() {
+    this.onSaveSettings();
+  }
+
+  onChangeStatus() {
     this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
     this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
   }
@@ -160,6 +165,10 @@ export class SettingComponent {
 
   toggleTitleEditState(): void {
     this.isEditingTitle = !this.isEditingTitle;
+  }
+
+  toggleDescriptionEditState(): void {
+    this.isEditingDescription = !this.isEditingDescription;
   }
 
   toggleVariationEditState(resetVariations: boolean = false): void {
@@ -306,10 +315,11 @@ export class SettingComponent {
   }
 
   onSaveSettings(cb?: Function) {
-    const { id, name, isEnabled, variationType, disabledVariationId, variations } = this.featureFlag;
+    const { id, name, description, isEnabled, variationType, disabledVariationId, variations } = this.featureFlag;
     const payload: ISettingPayload = {
       id,
       name,
+      description,
       isEnabled,
       variationType: variationType || VariationTypeEnum.string,
       disabledVariationId,
@@ -321,6 +331,7 @@ export class SettingComponent {
         this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
+        this.isEditingDescription = false;
         cb && cb();
       },
       error: err => this.message.error(err.error)
