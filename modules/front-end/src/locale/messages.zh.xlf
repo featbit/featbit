@@ -457,7 +457,7 @@
         <source>Copy and save this token now, the token value will be masked once you leave the page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">109</context>
         </context-group>
         <target>请复制并保存 Token，一旦离开该页面后，该 Token 将会被隐藏。</target>
       </trans-unit>
@@ -465,7 +465,7 @@
         <source>OK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">124</context>
         </context-group>
         <target>OK</target>
       </trans-unit>
@@ -621,7 +621,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/permission/permission.component.ts</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">41</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
@@ -797,7 +797,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">140</context>
+          <context context-type="linenumber">130</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
@@ -1489,11 +1489,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -1529,7 +1529,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/permission/permission.component.ts</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">42</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
@@ -5316,7 +5316,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">142</context>
         </context-group>
         <target>系统托管策略不允许被修改。 如确有需要，可以复制以后再根据需求进行修改。</target>
       </trans-unit>
@@ -5364,7 +5364,7 @@
         <source>Make sure resource and operation are set for all permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">158</context>
+          <context context-type="linenumber">148</context>
         </context-group>
         <target>请确保已设置所有权限的资源和操作</target>
       </trans-unit>
@@ -5964,7 +5964,7 @@
         <source>Deactivate this access token? You can&apos;t use an inactive access token to make API calls but you can activate it again later.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">103</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
@@ -5976,7 +5976,7 @@
         <source>Deactivate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">108</context>
         </context-group>
         <target>停用</target>
       </trans-unit>
@@ -6933,11 +6933,11 @@
         <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">15</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <target>全部操作</target>
       </trans-unit>
@@ -6945,11 +6945,11 @@
         <source>List projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">23</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <target>查看项目列表</target>
       </trans-unit>
@@ -6957,11 +6957,11 @@
         <source>Create projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <target>创建项目</target>
       </trans-unit>
@@ -6969,11 +6969,11 @@
         <source>Delete projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">37</context>
+          <context context-type="linenumber">41</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">42</context>
         </context-group>
         <target>删除项目</target>
       </trans-unit>
@@ -6981,11 +6981,11 @@
         <source>Access environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">45</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <target>进入环境</target>
       </trans-unit>
@@ -6993,28 +6993,16 @@
         <source>Update project settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">58</context>
         </context-group>
         <target>修改项目设置</target>
       </trans-unit>
       <trans-unit id="iam.action.list-envs" datatype="html">
         <source>List environments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">58</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
-        <target>查看环境列表</target>
-      </trans-unit>
-      <trans-unit id="iam.action.create-env" datatype="html">
-        <source>Create environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
           <context context-type="linenumber">65</context>
@@ -7023,17 +7011,29 @@
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
           <context context-type="linenumber">66</context>
         </context-group>
+        <target>查看环境列表</target>
+      </trans-unit>
+      <trans-unit id="iam.action.create-env" datatype="html">
+        <source>Create environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
         <target>创建环境</target>
       </trans-unit>
       <trans-unit id="iam.action.delete-envs" datatype="html">
         <source>Delete environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">81</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">82</context>
         </context-group>
         <target>删除环境</target>
       </trans-unit>
@@ -7041,11 +7041,11 @@
         <source>Update environment settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">79</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <target>修改环境设置</target>
       </trans-unit>
@@ -7053,11 +7053,11 @@
         <source>Delete environment secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">98</context>
         </context-group>
         <target>删除环境秘钥</target>
       </trans-unit>
@@ -7065,11 +7065,11 @@
         <source>Create environment secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">105</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">106</context>
         </context-group>
         <target>创建环境秘钥</target>
       </trans-unit>
@@ -7077,11 +7077,11 @@
         <source>Update environment secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="linenumber">113</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">114</context>
         </context-group>
         <target>修改环境秘钥</target>
       </trans-unit>
@@ -7089,11 +7089,11 @@
         <source>Update org name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">123</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">124</context>
         </context-group>
         <target>修改机构名称</target>
       </trans-unit>
@@ -7101,11 +7101,11 @@
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">118</context>
+          <context context-type="linenumber">133</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">119</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <target>权限管理</target>
       </trans-unit>
@@ -7113,11 +7113,11 @@
         <source>List access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <target>查看访问策略列表</target>
       </trans-unit>
@@ -7125,11 +7125,11 @@
         <source>Manage service access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">135</context>
+          <context context-type="linenumber">152</context>
         </context-group>
         <target>管理 Service 访问策略</target>
       </trans-unit>
@@ -7137,11 +7137,11 @@
         <source>Manage personal access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">159</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/permissions.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <target>管理 Personal 访问策略</target>
       </trans-unit>
@@ -7149,23 +7149,39 @@
         <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <target>全部</target>
       </trans-unit>
-      <trans-unit id="iam.rsc-type.general" datatype="html">
-        <source>General</source>
+      <trans-unit id="iam.rsc-type.account" datatype="html">
+        <source>Account</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">67</context>
         </context-group>
-        <target>通用</target>
+        <target>账户管理</target>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.iam" datatype="html">
+        <source>IAM</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+        <target>权限管理</target>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.access-token" datatype="html">
+        <source>Access token</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <target>访问策略</target>
       </trans-unit>
       <trans-unit id="iam.rsc-type.project" datatype="html">
         <source>Project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">82</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -7173,7 +7189,7 @@
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>环境</target>
       </trans-unit>
@@ -7181,11 +7197,11 @@
         <source>Project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">122</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -7193,7 +7209,7 @@
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <target>环境</target>
       </trans-unit>

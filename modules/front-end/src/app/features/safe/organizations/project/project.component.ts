@@ -80,7 +80,7 @@ export class ProjectComponent implements OnInit {
     this.creatEditProjectFormVisible = true;
   }
 
-  getEnvRN(project: IProject, env: IEnvironment): string {
+  getEnvRN(project: IProject, env: Partial<IEnvironment>): string {
     if (!project || !env) {
       return '';
     }

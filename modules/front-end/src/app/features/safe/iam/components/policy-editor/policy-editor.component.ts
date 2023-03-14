@@ -1,12 +1,13 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {
   EffectEnum,
-  IamPolicyAction, IPolicyStatement,
+  IamPolicyAction,
+  IPolicyStatement,
+  isResourceGeneral,
   Resource,
   resourceActionsDict,
   resourcesTypes,
-  ResourceType,
-  ResourceTypeEnum
+  ResourceType
 } from "@shared/policy";
 import {deepCopy, encodeURIComponentFfc, uuidv4} from "@utils/index";
 import {IPolicy} from "@features/safe/iam/types/policy";
@@ -37,30 +38,24 @@ class PolicyStatementViewModel {
         return find || act as unknown as IamPolicyAction;
       });
 
-      this.selectedResources = statement.resources.map(rsc => ({id: uuidv4(), name: rsc, rn: rsc}));
+      this.selectedResources = statement.resources.map(rsc => ({id: uuidv4(), name: rsc, rn: rsc, type: this.resourceType.type}));
+
+      // All the resources here are the same type, and if it's general type, resources only contains one element
+      const isGeneralResource = isResourceGeneral(this.resourceType?.type, statement.resources[0]);
+      this.availableActions = resourceActionsDict[this.resourceType?.type].filter((rs) => isGeneralResource || rs.isSpecificApplicable);
     } else {
       this.id = uuidv4();
       this.effect = EffectEnum.Allow;
       this.selectedActions = [];
       this.selectedResources = [];
+      this.availableActions =[];
     }
-
-    const actionKey = this.resourceType?.type === ResourceTypeEnum.General ?
-      `${ResourceTypeEnum.General},${this.selectedResources[0]?.rn}` :
-      this.resourceType?.type;
-
-    this.availableActions = resourceActionsDict[actionKey];
   }
 
   onResourceTypeChange(){
     this.selectedActions = [];
     this.selectedResources = [];
-
-    const actionKey = this.resourceType?.type === ResourceTypeEnum.General ?
-      `${ResourceTypeEnum.General},${this.selectedResources[0]?.rn}` :
-      this.resourceType?.type;
-
-    this.availableActions = resourceActionsDict[actionKey];
+    this.availableActions = [];
   }
 
   selectedActions: IamPolicyAction[] = [];
@@ -71,14 +66,10 @@ class PolicyStatementViewModel {
   selectedResources: Resource[] = [];
   onSelectedResourcesChange(resources: Resource[]) {
     this.selectedResources = [...resources];
+    // All the resources here are the same type, and if it's general type, resources only contains one element
+    const isGeneralResource = isResourceGeneral(resources[0].type, resources[0].rn);
 
-    let actionKey: string = this.resourceType?.type;
-    if (this.resourceType?.type === ResourceTypeEnum.General) {
-      this.selectedActions = [];
-      actionKey = `${ResourceTypeEnum.General},${this.selectedResources[0]?.rn}`;
-    }
-
-    this.availableActions = resourceActionsDict[actionKey];
+    this.availableActions = resourceActionsDict[this.resourceType?.type].filter((rs) => isGeneralResource || rs.isSpecificApplicable);
   }
 
   getOutput(): IPolicyStatement {
