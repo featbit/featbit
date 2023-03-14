@@ -91,49 +91,57 @@
   }
 
   .flag-key {
-    nz-input-group {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 12px;
-      height: 36px;
-      background: #FFFFFF;
-      border: 1px solid @grey20-color;
-      border-radius: 8px;
-      font-weight: 400;
-      font-size: 12px;
-      line-height: 150%;
-      color: @grey50-color;
-    }
     margin-top: 16px;
-    display: flex;
-    align-items: center;
 
-    i {
-      cursor: pointer;
-      font-size: 20px;
+    .key-container {
+      display: flex;
+      align-items: center;
 
-      &:last-child {
-        margin-left: 8px;
+      nz-input-group {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 12px;
+        height: 36px;
+        background: #FFFFFF;
+        border: 1px solid @grey20-color;
+        border-radius: 8px;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 150%;
+        color: @grey50-color;
+      }
+
+      i {
+        cursor: pointer;
+        font-size: 20px;
+
+        &:last-child {
+          margin-left: 8px;
+        }
       }
     }
   }
 
   .flag-description {
     margin-top: 16px;
+    color: @grey50-color;
+    border: 1px solid @grey20-color;
+    border-radius: 8px;
+    padding: 5px;
 
-    .description-container {
-      color: @grey50-color;
-      border: 1px solid @grey20-color;
+    &.editing {
+      border: none;
+      padding: 0;
+    }
+
+    .edit-save {
+      width: 100%;
+      text-align: right;
+      padding-right:14px;
+    }
+
+    textarea {
       border-radius: 8px;
-      padding: 5px;
-
-      &.editing {
-        border: none;
-
-        textarea {
-          border-radius: 8px;
-        }
-      }
     }
   }
 
