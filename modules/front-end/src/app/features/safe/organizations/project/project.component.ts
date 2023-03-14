@@ -110,7 +110,7 @@ export class ProjectComponent implements OnInit {
   }
 
   onDeleteProjectClick(project: IProject) {
-    const canDelete = this.permissionsService.canTakeAction(this.getEnvRN(project, { name: '*' }), permissionActions.DeleteProject);
+    const canDelete = this.permissionsService.canTakeAction(this.permissionsService.getResourceRN(ResourceTypeEnum.Project, project), permissionActions.DeleteProject);
     if (!canDelete) {
      this.messageService.warning(this.permissionsService.genericDenyMessage);
      return;
