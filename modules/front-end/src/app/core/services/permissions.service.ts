@@ -64,15 +64,9 @@ export class PermissionsService {
 
   // if return undefined, that means zero permission is defined on that resource
   canTakeAction(rn: string, action: IamPolicyAction): boolean | undefined | any {
-    const [resourceType, _] = rn.split('/');
-
     const statements = this.permissions.filter(s => {
         if (s.resourceType === ResourceTypeEnum.All) {
           return s.effect === EffectEnum.Allow;
-        }
-
-        if (s.resourceType === ResourceTypeEnum.General) {
-          return s.resources.map(r => r.split('/')[0]).includes(resourceType) && s.actions.includes(action.name);
         }
 
         const matchingResource = s.resources.find(rsc => {
