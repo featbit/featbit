@@ -368,6 +368,10 @@
           <context context-type="linenumber">79,80</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">110,111</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
           <context context-type="linenumber">103</context>
         </context-group>
@@ -1809,11 +1813,19 @@
         </context-group>
         <target>关闭</target>
       </trans-unit>
+      <trans-unit id="common.feedback" datatype="html">
+        <source>Feedback</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">9,10</context>
+        </context-group>
+        <target>反馈</target>
+      </trans-unit>
       <trans-unit id="common.quick-start-guide" datatype="html">
         <source>Quick Start Guide</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">9</context>
+          <context context-type="linenumber">10</context>
         </context-group>
         <target>快速开始引导</target>
       </trans-unit>
@@ -1841,11 +1853,87 @@
         </context-group>
         <target>环境</target>
       </trans-unit>
+      <trans-unit id="common.send-feedback" datatype="html">
+        <source>Send feedback</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">90,91</context>
+        </context-group>
+        <target>发送反馈</target>
+      </trans-unit>
+      <trans-unit id="common.email" datatype="html">
+        <source>Email</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">94,95</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <target>邮箱</target>
+      </trans-unit>
+      <trans-unit id="common.email-cannot-be-empty" datatype="html">
+        <source>Email cannot be empty</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">95,96</context>
+        </context-group>
+        <target>邮箱不能为空</target>
+      </trans-unit>
+      <trans-unit id="common.message" datatype="html">
+        <source>Message</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">100,101</context>
+        </context-group>
+        <target>信息</target>
+      </trans-unit>
+      <trans-unit id="common.message-mandatory" datatype="html">
+        <source>Message is mandatory</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">101</context>
+        </context-group>
+        <target>信息不能为空</target>
+      </trans-unit>
+      <trans-unit id="common.message-placeholder" datatype="html">
+        <source>Have you any feedback for us?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">102,104</context>
+        </context-group>
+        <target>反馈信息</target>
+      </trans-unit>
+      <trans-unit id="common.send" datatype="html">
+        <source>Send</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">111,112</context>
+        </context-group>
+        <target>发送</target>
+      </trans-unit>
       <trans-unit id="7371988988136572417" datatype="html">
         <source>You don&apos;t have permissions to read project list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">61</context>
         </context-group>
         <target>您没有查看项目列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -1853,7 +1941,7 @@
         <source>You don&apos;t have permissions to read environment list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <target>您没有查看该环境列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -1861,7 +1949,7 @@
         <source>You don&apos;t have permissions to read project and environment list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <target>您没有查看项目环境列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -1869,7 +1957,7 @@
         <source>Copied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">151</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -1920,6 +2008,22 @@
           <context context-type="linenumber">181</context>
         </context-group>
         <target>复制成功</target>
+      </trans-unit>
+      <trans-unit id="common.feedback-success-message" datatype="html">
+        <source>Thank you for sending us your feedback, we&apos;ll get back to you very soon!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
+          <context context-type="linenumber">186</context>
+        </context-group>
+        <target>感谢您给我们发送反馈，我们会尽快和您联系！</target>
+      </trans-unit>
+      <trans-unit id="common.feedback-failure-message" datatype="html">
+        <source>We were not able to send your feedback, Please try again!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
+          <context context-type="linenumber">189</context>
+        </context-group>
+        <target>反馈发送失败，请稍后重试！</target>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.title" datatype="html">
         <source>Add team member</source>
@@ -3131,30 +3235,6 @@
           <context context-type="linenumber">39,40</context>
         </context-group>
         <target>登录</target>
-      </trans-unit>
-      <trans-unit id="common.email" datatype="html">
-        <source>Email</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">7,8</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
-          <context context-type="linenumber">28</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <target>邮箱</target>
       </trans-unit>
       <trans-unit id="8056544210376488" datatype="html">
         <source>username is mandatory</source>
