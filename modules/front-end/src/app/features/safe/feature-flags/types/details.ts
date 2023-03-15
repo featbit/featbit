@@ -41,6 +41,7 @@ export class FeatureFlag implements IFeatureFlag {
   updatorId: string;
   variationType: VariationTypeEnum;
   variations: IVariation[];
+  description: string;
 }
 
 export interface IFeatureFlag {
@@ -62,6 +63,7 @@ export interface IFeatureFlag {
   updatorId: string,
   createdAt: Date,
   updatedAt: Date,
+  description: string
 }
 
 export interface IFeatureFlagTargeting {
@@ -97,6 +99,7 @@ export enum VariationTypeEnum {
 export interface ISettingPayload {
   id: string,
   name: string;
+  description: string;
   isEnabled: boolean;
   variationType: VariationTypeEnum;
   disabledVariationId: string;

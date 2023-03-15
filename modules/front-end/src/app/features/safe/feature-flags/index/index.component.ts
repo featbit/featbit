@@ -273,13 +273,13 @@ export class IndexComponent implements OnInit {
 
   nameChange(name: string) {
     let keyControl = this.featureFlagForm.get('key')!;
-    keyControl.setValue(slugify(name));
+    keyControl.setValue(slugify(name ?? ''));
     keyControl.markAsDirty();
   }
 
   create() {
     this.creating = true;
-   
+
     this.featureFlagService.create(this.featureFlagForm.value).subscribe({
       next: (result: IFeatureFlag) => {
         this.navigateToFlagDetail(result);
@@ -289,7 +289,7 @@ export class IndexComponent implements OnInit {
         this.msg.error(err.error);
         this.creating = false;
       }
-    }); 
+    });
   }
 
   closeCreateModal() {
