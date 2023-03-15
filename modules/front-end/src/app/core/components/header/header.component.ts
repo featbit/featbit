@@ -161,7 +161,7 @@ export class HeaderComponent implements OnInit {
     );
   }
 
-  //beedback
+  // feedback
   feedbackModalVisible = false;
   sendingFeedback = false;
   feedbackForm: FormGroup;
