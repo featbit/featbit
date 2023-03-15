@@ -14,7 +14,7 @@
   <span> · </span>
   <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support (Slack)</a>
   <span> · </span>
-  <a href="https://github.com/featbit/featbit/discussions">Community Forum</a>
+  <a href="https://www.featbit.co//blogs?tag=Best+Practice&term=">Best Practice</a>
 </h3>
 
 
@@ -38,22 +38,7 @@ Feature flag is a modern engineering technology that decouples code deployments 
 - Giving Sales, CS, and Marketing the ability to fine-tune target audiences and manage customer entitlement.
 - etc.
 
-[**Click here to get more information about FeatBit**](https://featbit.medium.com/introducing-featbit-e0cef61572a).
-
-## Features
-
-- **Feature flag list**, create, manage, and filter feature flags.
-- **Individual targets**, assign individual users to particular flag variation.
-- **Targeting users by attribute**, target segments of users by constructing rules.
-- **Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
-- **Insights**, check out feature usage during the rollout.
-- **Flag triggers**, automate changes to your feature flags from external tools.
-- **IAM**, define access levels to projects, environment, or teams to enforce your policies.
-- **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
-- **Audit Log**, logs for feature flag & segment changes.
-- **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
-- **Web API**, automate your workflow with Web APIs.
-- **Platform-level**, manage your flags in multiple projects and environments.
+[**Click here to get more information about FeatBit**](https://www.featbit.co/).
 
 ## Getting Started
 
@@ -72,6 +57,23 @@ Once all containers have started, go to FeatBit's portal [http://localhost:8081]
 **Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [**Installation Doc**](https://featbit.gitbook.io/docs/installation#attention) to make it accessible publicly.
 
 You can following the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey.
+
+
+## Features
+
+- **Feature flag list**, create, manage, and filter feature flags.
+- **Individual targets**, assign individual users to particular flag variation.
+- **Targeting users by attribute**, target segments of users by constructing rules.
+- **Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
+- **Insights**, check out feature usage during the rollout.
+- **Flag triggers**, automate changes to your feature flags from external tools.
+- **IAM**, define access levels to projects, environment, or teams to enforce your policies.
+- **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
+- **Audit Log**, logs for feature flag & segment changes.
+- **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
+- **Web API**, automate your workflow with Web APIs.
+- **Platform-level**, manage your flags in multiple projects and environments.
+
 
 
 <!-- - - An online support channel that helps you to quickly solve the problem. -->
