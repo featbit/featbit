@@ -38,7 +38,7 @@
 
   .edit-save {
     cursor: pointer;
-    margin-left: 12px;
+    margin-left: 8px;
   }
 
   .title {
@@ -91,30 +91,52 @@
   }
 
   .flag-key {
-    nz-input-group {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 12px;
-      height: 36px;
-      background: #FFFFFF;
-      border: 1px solid @grey200-color;
-      border-radius: 8px;
-      font-weight: 400;
-      font-size: 12px;
-      line-height: 150%;
-      color: @grey50-color;
-    }
     margin-top: 16px;
-    display: flex;
-    align-items: center;
+
+    .title {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 8px;
+    }
 
     i {
       cursor: pointer;
-      font-size: 20px;
+      font-size: 16px;
+    }
 
-      &:last-child {
-        margin-left: 8px;
+    .key-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+
+      i {
+        font-size: 13px;
       }
+    }
+  }
+
+  .flag-description {
+    margin-top: 4px;
+    color: @grey50-color;
+    border: 1px solid @grey20-color;
+    border-radius: 8px;
+    padding: 5px;
+
+    &.editing {
+      border: none;
+      padding: 0;
+    }
+
+    .edit-save {
+      width: 100%;
+      text-align: right;
+      padding-right:14px;
+    }
+
+    textarea {
+      border-radius: 8px;
     }
   }
 
@@ -243,7 +265,7 @@
         width: 85%;
         height: 36px;
         border-radius: 8px;
-        border: 1px solid @grey200-color;
+        border: 1px solid @grey20-color;
       }
 
       .delete-icon-wrapper {
