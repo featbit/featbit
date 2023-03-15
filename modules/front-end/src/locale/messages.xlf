@@ -2,6 +2,816 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en" datatype="plaintext" original="ng2.template">
     <body>
+      <trans-unit id="integrations.access-token.access-token-drawer.title" datatype="html">
+        <source>Add access token</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.name" datatype="html">
+        <source>Name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
+          <context context-type="linenumber">85,86</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/details/details.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">185</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">120</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.validating" datatype="html">
+        <source>Validating...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">203</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-token.access-token-drawer.name-cannot-be-empty" datatype="html">
+        <source>Access token name cannot be empty</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-token.access-token-drawer.name-unavailable" datatype="html">
+        <source>This access token name is not available</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.type" datatype="html">
+        <source>Type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.policies" datatype="html">
+        <source>Policies</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/details.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-token.select-policies" datatype="html">
+        <source>Select policies</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.loading" datatype="html">
+        <source>Loading...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
+          <context context-type="linenumber">136</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">146,147</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-token.service-access-token-must-define-policies" datatype="html">
+        <source>Policies are mandatory for service type access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
+          <context context-type="linenumber">267</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.save" datatype="html">
+        <source>Save</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.html</context>
+          <context context-type="linenumber">202</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">80,81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
+          <context context-type="linenumber">121</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">174,176</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">224</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-tokens.access-token-created" datatype="html">
+        <source>Access token created</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-token.copy-token-warning" datatype="html">
+        <source>Copy and save this token now, the token value will be masked once you leave the page.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">109</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.ok" datatype="html">
+        <source>OK</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
+          <context context-type="linenumber">124</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="permissions.need-permissions-to-operate" datatype="html">
+        <source>You don&apos;t have permissions to take this action, please contact the admin to grant you the necessary permissions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
+          <context context-type="linenumber">234</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/permissions.service.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.operation-success" datatype="html">
+        <source>Operation succeeded</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
+          <context context-type="linenumber">243</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
+          <context context-type="linenumber">258</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
+          <context context-type="linenumber">193</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.ts</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.ts</context>
+          <context context-type="linenumber">121</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
+          <context context-type="linenumber">241</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
+          <context context-type="linenumber">258</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.ts</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
+          <context context-type="linenumber">78</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">199</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">332</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">344</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">352</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">336</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">349</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">359</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">69</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.ts</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.ts</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.ts</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.ts</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/permission/permission.component.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.ts</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.ts</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.ts</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.ts</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
+          <context context-type="linenumber">143</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
+          <context context-type="linenumber">154</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">136</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.operation-failed-try-again" datatype="html">
+        <source>Operation failed, please try again</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
+          <context context-type="linenumber">246</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
+          <context context-type="linenumber">244</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
+          <context context-type="linenumber">127</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
+          <context context-type="linenumber">159</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">213</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">229</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">296</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">309</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">283</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">109</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">339</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
+          <context context-type="linenumber">253</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
+          <context context-type="linenumber">287</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
+          <context context-type="linenumber">303</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.copy-success" datatype="html">
+        <source>Copied</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
+          <context context-type="linenumber">277</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
+          <context context-type="linenumber">160</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">204</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">373</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
+          <context context-type="linenumber">131</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.ts</context>
+          <context context-type="linenumber">78</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.ts</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
+          <context context-type="linenumber">181</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="auditlogs.operation-create" datatype="html">
         <source>created</source>
         <context-group purpose="location">
@@ -63,65 +873,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
           <context context-type="linenumber">20</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.loading" datatype="html">
-        <source>Loading...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/audit-logs/audit-logs.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">36</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">66</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">38</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">55</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">43</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">44</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">60</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">138</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">146,147</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
-          <context context-type="linenumber">38</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.filter-by-type" datatype="html">
@@ -291,7 +1042,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">160</context>
+          <context context-type="linenumber">158</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.number-of-changes-to-submit" datatype="html">
@@ -367,81 +1118,6 @@
           <context context-type="linenumber">141</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.save" datatype="html">
-        <source>Save</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">43</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">35</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">91</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.html</context>
-          <context context-type="linenumber">202</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
-          <context context-type="linenumber">32</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">80,81</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">61</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">121</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">32</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
-          <context context-type="linenumber">90</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">69</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">174,176</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">224</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
-          <context context-type="linenumber">9</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
-          <context context-type="linenumber">76</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">104</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="org.project.permission-will-become-invalid-if-change-name" datatype="html">
         <source>Permission will become invalid if you change the name</source>
         <context-group purpose="location">
@@ -451,177 +1127,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
           <context context-type="linenumber">16</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.name" datatype="html">
-        <source>Name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">22</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">24</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
-          <context context-type="linenumber">14</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">12</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">14</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">13</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">14</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">23</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
-          <context context-type="linenumber">39</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
-          <context context-type="linenumber">74</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
-          <context context-type="linenumber">37,38</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
-          <context context-type="linenumber">85,86</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/details/details.component.html</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
-          <context context-type="linenumber">56</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">70</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">185</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
-          <context context-type="linenumber">17</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
-          <context context-type="linenumber">27</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.html</context>
-          <context context-type="linenumber">27</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
-          <context context-type="linenumber">17</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.html</context>
-          <context context-type="linenumber">28</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.html</context>
-          <context context-type="linenumber">27</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
-          <context context-type="linenumber">23</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">4</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.html</context>
-          <context context-type="linenumber">7</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">120</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">35</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">82</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.envNameMandatory" datatype="html">
@@ -733,23 +1238,23 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">79</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">100</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt-drawer.configure-data-sent-to-expt" datatype="html">
@@ -880,205 +1385,6 @@
           <context context-type="linenumber">172</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.operation-success" datatype="html">
-        <source>Operation succeeded</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
-          <context context-type="linenumber">193</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.ts</context>
-          <context context-type="linenumber">68</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.ts</context>
-          <context context-type="linenumber">121</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">241</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">258</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.ts</context>
-          <context context-type="linenumber">68</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
-          <context context-type="linenumber">93</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
-          <context context-type="linenumber">116</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
-          <context context-type="linenumber">134</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
-          <context context-type="linenumber">85</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">77</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">86</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
-          <context context-type="linenumber">97</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">85</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">96</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">199</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">332</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">344</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">352</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">336</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">349</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">359</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
-          <context context-type="linenumber">74</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
-          <context context-type="linenumber">88</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">69</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.ts</context>
-          <context context-type="linenumber">73</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.ts</context>
-          <context context-type="linenumber">87</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.ts</context>
-          <context context-type="linenumber">84</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.ts</context>
-          <context context-type="linenumber">76</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.ts</context>
-          <context context-type="linenumber">90</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/permission/permission.component.ts</context>
-          <context context-type="linenumber">40</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">46</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">53</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.ts</context>
-          <context context-type="linenumber">76</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/team/team.component.ts</context>
-          <context context-type="linenumber">90</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.ts</context>
-          <context context-type="linenumber">80</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.ts</context>
-          <context context-type="linenumber">75</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.ts</context>
-          <context context-type="linenumber">89</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.ts</context>
-          <context context-type="linenumber">81</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/groups/groups.component.ts</context>
-          <context context-type="linenumber">95</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">51</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
-          <context context-type="linenumber">72</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">60</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">136</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">41</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">63</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">76</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="common.operation-failed" datatype="html">
         <source>Operation failed</source>
         <context-group purpose="location">
@@ -1111,11 +1417,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">133</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">136</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -1151,7 +1457,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/permission/permission.component.ts</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">42</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
@@ -1196,6 +1502,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
           <context context-type="linenumber">75</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
+          <context context-type="linenumber">147</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
+          <context context-type="linenumber">157</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
@@ -1457,25 +1771,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
           <context context-type="linenumber">7</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.validating" datatype="html">
-        <source>Validating...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">203</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">83</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.groups.group-drawer.group-name-cannot-be-empty" datatype="html">
@@ -1823,61 +2118,6 @@
           <context context-type="linenumber">62</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.copy-success" datatype="html">
-        <source>Copied</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">160</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
-          <context context-type="linenumber">60</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">204</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">373</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">140</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">80</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.ts</context>
-          <context context-type="linenumber">78</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">80</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.ts</context>
-          <context context-type="linenumber">88</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">58</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
-          <context context-type="linenumber">92</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">181</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="common.feedback-success-message" datatype="html">
         <source>Thank you for sending us your feedback, we&apos;ll get back to you very soon!</source>
         <context-group purpose="location">
@@ -2069,7 +2309,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">153</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
@@ -2175,69 +2415,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
           <context context-type="linenumber">116</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.operation-failed-try-again" datatype="html">
-        <source>Operation failed, please try again</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">244</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
-          <context context-type="linenumber">127</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
-          <context context-type="linenumber">159</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">213</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">229</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">296</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">309</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">283</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">109</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">339</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
-          <context context-type="linenumber">63</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">253</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">287</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">303</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">79</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.org.createOrg" datatype="html">
@@ -2390,6 +2567,10 @@
           <context context-type="linenumber">54</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
           <context context-type="linenumber">29</context>
         </context-group>
@@ -2493,6 +2674,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
           <context context-type="linenumber">34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">63</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -2653,6 +2838,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
           <context context-type="linenumber">72</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">118</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -2877,7 +3066,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">150</context>
+          <context context-type="linenumber">148</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
@@ -2984,6 +3173,34 @@
           <context context-type="linenumber">168,170</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="integrations.access-token.active" datatype="html">
+        <source>Active</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/pipes/access-token-status.pipe.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-token.inactive" datatype="html">
+        <source>Inactive</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/pipes/access-token-status.pipe.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-token.personal" datatype="html">
+        <source>Personal</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/pipes/access-token-type.pipe.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-token.service" datatype="html">
+        <source>Service</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/pipes/access-token-type.pipe.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="permission.sys-managed" datatype="html">
         <source>System Managed</source>
         <context-group purpose="location">
@@ -2996,13 +3213,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/pipes/policy-type.pipe.ts</context>
           <context context-type="linenumber">9</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="permissions.need-permissions-to-operate" datatype="html">
-        <source>You don&apos;t have permissions to take this action, please contact the admin to grant you the necessary permissions</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/services/permissions.service.ts</context>
-          <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
       <trans-unit id="2454050363478003966" datatype="html">
@@ -3073,7 +3283,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
@@ -3209,29 +3419,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
           <context context-type="linenumber">51</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.type" datatype="html">
-        <source>Type</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
-          <context context-type="linenumber">33</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
-          <context context-type="linenumber">25</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.url" datatype="html">
@@ -3450,6 +3637,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
           <context context-type="linenumber">72</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.loading-failed-try-again" datatype="html">
@@ -3827,91 +4018,91 @@
         <source>Remove data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">72</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.remove-expt-and-data-confirm" datatype="html">
         <source>This would remove the experiment and all data, it cannot be reverted, are you sure to remove it?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">77</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.remove-experiment" datatype="html">
         <source>Remove experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">81</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.restart-experiment" datatype="html">
         <source>Restart</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.pause-experiment" datatype="html">
         <source>Pause</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="linenumber">98</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.period" datatype="html">
         <source>Period</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">105</context>
+          <context context-type="linenumber">103</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.need-more-data-to-confirm-expt" datatype="html">
         <source>Need more data to confirm the results of the experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">119</context>
+          <context context-type="linenumber">117</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.result-not-significant" datatype="html">
         <source>The difference is not significant compared to the baseline</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">121</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.winner" datatype="html">
         <source>Winner</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">125</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.start" datatype="html">
         <source>Start</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">135</context>
+          <context context-type="linenumber">133</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.conversion-num-user" datatype="html">
         <source>Conversion / Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">150</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.totoal-events" datatype="html">
         <source>Total events</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">156</context>
+          <context context-type="linenumber">154</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.average" datatype="html">
         <source>Average</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">157</context>
+          <context context-type="linenumber">155</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
@@ -3926,67 +4117,67 @@
         <source>Confidence interval</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">159</context>
+          <context context-type="linenumber">157</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.p-value" datatype="html">
         <source>P-Value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">160</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.p-significant-if-less-than-alpha" datatype="html">
         <source>The result is significant if P value is less than α(0.05)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">166</context>
+          <context context-type="linenumber">164</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.no-expt-data" datatype="html">
         <source>Data is not available yet</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">179</context>
+          <context context-type="linenumber">177</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.baseline" datatype="html">
         <source>Baseline</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">187</context>
+          <context context-type="linenumber">185</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">217</context>
+          <context context-type="linenumber">215</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.winner" datatype="html">
         <source>Winner</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">195</context>
+          <context context-type="linenumber">193</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.not-significant-compared-to-baseline" datatype="html">
         <source>It&apos;s not significant compared to baseline</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">198</context>
+          <context context-type="linenumber">196</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.hide-chart" datatype="html">
         <source>Hide chart</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">273</context>
+          <context context-type="linenumber">271</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.show-chart" datatype="html">
         <source>Show chart</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">274</context>
+          <context context-type="linenumber">272</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.time" datatype="html">
@@ -4525,6 +4716,10 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">75</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="common.tags" datatype="html">
         <source>Tags</source>
@@ -4778,7 +4973,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">143</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.copy" datatype="html">
@@ -4821,7 +5016,7 @@
         <source>Make sure resource and operation are set for all permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">158</context>
+          <context context-type="linenumber">149</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.policies.details.resource" datatype="html">
@@ -4887,213 +5082,6 @@
           <context context-type="linenumber">68</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.rsc-type.all" datatype="html">
-        <source>All</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.rsc-type.general" datatype="html">
-        <source>General</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">54</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.rsc-type.project" datatype="html">
-        <source>Project</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.rsc-type.env" datatype="html">
-        <source>Environment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">64</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.policy.project" datatype="html">
-        <source>Project</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">85</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">97</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.policy.environment" datatype="html">
-        <source>Environment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">107</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.all" datatype="html">
-        <source>All</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">120</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.update-org-name" datatype="html">
-        <source>Update org name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">127</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.iam" datatype="html">
-        <source>IAM</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">134</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.list-projects" datatype="html">
-        <source>List projects</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">141</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.create-projects" datatype="html">
-        <source>Create projects</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">146</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.delete-projects" datatype="html">
-        <source>Delete projects</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">151</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">208</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.update-project-settings" datatype="html">
-        <source>Update project settings</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">156</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">213</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.list-envs" datatype="html">
-        <source>List environments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">161</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">218</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.create-env" datatype="html">
-        <source>Create environment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">166</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">223</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.access-envs" datatype="html">
-        <source>Access environments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">171</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">203</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">245</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.delete-envs" datatype="html">
-        <source>Delete environments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">176</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">250</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.update-env-settings" datatype="html">
-        <source>Update environment settings</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">181</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">255</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.delete-env-secret" datatype="html">
-        <source>Delete environment secret</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">186</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">228</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">260</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.create-env-secret" datatype="html">
-        <source>Create environment secret</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">191</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">233</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">265</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.update-env-secret" datatype="html">
-        <source>Update environment secret</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">196</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">238</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/types.ts</context>
-          <context context-type="linenumber">270</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="iam.routing.team" datatype="html">
         <source>Team</source>
         <context-group purpose="location">
@@ -5128,13 +5116,6 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/details.component.html</context>
-          <context context-type="linenumber">13</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.policies" datatype="html">
-        <source>Policies</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/details.component.html</context>
           <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
@@ -5512,6 +5493,80 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
           <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-tokens.searchNamePlaceholder" datatype="html">
+        <source>Filter by name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-tokens.filter-by-creator" datatype="html">
+        <source>Select creator</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-tokens.filter-by-type" datatype="html">
+        <source>Filter by type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.created-by" datatype="html">
+        <source>Created by</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.last-used" datatype="html">
+        <source>Last used</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.access-token" datatype="html">
+        <source>Access token</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.activate" datatype="html">
+        <source>Activate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.access-tokens.deactivate-access-token-confirm" datatype="html">
+        <source>Deactivate this access token? You can&apos;t use an inactive access token to make API calls but you can activate it again later.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.Deactivate" datatype="html">
+        <source>Deactivate</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
+          <context context-type="linenumber">108</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.routing.access-tokens" datatype="html">
+        <source>Access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/integrations-routing.module.ts</context>
+          <context context-type="linenumber">16</context>
         </context-group>
       </trans-unit>
       <trans-unit id="onboarding.complete.title" datatype="html">
@@ -5936,7 +5991,7 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">57</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.FF" datatype="html">
@@ -6007,6 +6062,20 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
           <context context-type="linenumber">107,106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="menu.integrations" datatype="html">
+        <source>Integrations</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">114,113</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="menu.integrations.access-tokens" datatype="html">
+        <source>Access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">119,118</context>
         </context-group>
       </trans-unit>
       <trans-unit id="segment.details.segment-not-used" datatype="html">
@@ -6320,6 +6389,264 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
           <context context-type="linenumber">76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.all" datatype="html">
+        <source>All</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.list-projects" datatype="html">
+        <source>List projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.create-projects" datatype="html">
+        <source>Create projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.delete-projects" datatype="html">
+        <source>Delete projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.access-envs" datatype="html">
+        <source>Access environments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.update-project-settings" datatype="html">
+        <source>Update project settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.list-envs" datatype="html">
+        <source>List environments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.create-env" datatype="html">
+        <source>Create environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.delete-envs" datatype="html">
+        <source>Delete environments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.update-env-settings" datatype="html">
+        <source>Update environment settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">89</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.delete-env-secret" datatype="html">
+        <source>Delete environment secret</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.create-env-secret" datatype="html">
+        <source>Create environment secret</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.update-env-secret" datatype="html">
+        <source>Update environment secret</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">113</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">114</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.update-org-name" datatype="html">
+        <source>Update org name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">123</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">124</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.iam" datatype="html">
+        <source>IAM</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">133</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.list-access-tokens" datatype="html">
+        <source>List access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">143</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">144</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.manage-service-access-tokens" datatype="html">
+        <source>Manage service access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">151</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">152</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.manage-personal-access-tokens" datatype="html">
+        <source>Manage personal access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">159</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/permissions.ts</context>
+          <context context-type="linenumber">160</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.all" datatype="html">
+        <source>All</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.account" datatype="html">
+        <source>Account</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">67</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.iam" datatype="html">
+        <source>IAM</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.access-token" datatype="html">
+        <source>Access token</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.project" datatype="html">
+        <source>Project</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.rsc-type.env" datatype="html">
+        <source>Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.policy.project" datatype="html">
+        <source>Project</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">122</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.policy.environment" datatype="html">
+        <source>Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">132</context>
         </context-group>
       </trans-unit>
     </body>
