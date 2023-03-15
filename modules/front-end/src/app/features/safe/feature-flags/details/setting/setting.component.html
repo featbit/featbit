@@ -32,14 +32,24 @@
         <i class="edit-save" (click)="onSaveSettings()" nz-icon nzType="icons:icon-save"></i>
       </ng-container>
     </div>
+    <div class="flag-description" [class]="{editing: isEditingDescription}">
+      <ng-container *ngIf="!isEditingDescription">
+        <span>{{featureFlag.description}}</span>
+        <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
+      </ng-container>
+      <ng-container *ngIf="isEditingDescription">
+        <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="featureFlag.description" [nzAutosize]="{ minRows: 3 }"></textarea>
+        <i class="edit-save" (click)="onSaveDescription()" nz-icon nzType="icons:icon-save"></i>
+      </ng-container>
+    </div>
     <div class="flag-key">
-      <nz-input-group [nzSuffix]="copySuffix">
-        <input readonly nz-input value="{{featureFlag.key}}" nz-tooltip="{{featureFlag.key}}">
-      </nz-input-group>
-      <ng-template #copySuffix>
-        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(featureFlag.key)"></i>
-      </ng-template>
-      <i nz-icon i18n-nz-tooltip="@@ff.key-description" nz-tooltip="Use key (case-sensitive) in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
+      <div class="title">
+        <span class="text" i18n="@@common.key">Key</span> <i nz-icon i18n-nz-tooltip="@@ff.key-description" nz-tooltip="Use key (case-sensitive) in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
+      </div>
+      <div class="key-container">
+        {{featureFlag.key}}
+        <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(featureFlag.key)"></i>
+      </div>
     </div>
     <div class="status-switcher" >
       <div class="switcher">
