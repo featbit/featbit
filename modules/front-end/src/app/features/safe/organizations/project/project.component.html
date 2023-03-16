@@ -22,7 +22,10 @@
                 <div class="env">
                   <div class="env-basis">
                     <div>
-                      <div class="desc-name" i18n="@@org.project.envName">Environment name</div>
+                      <div class="desc-name">
+                        <span i18n="@@org.project.envName">Environment name</span>
+                        <nz-tag nzColor="green" *ngIf="isCurrentEnv(env)" i18n="@@common.current">Current</nz-tag>
+                      </div>
                       <div class="desc-content">{{env.name}}</div>
                     </div>
                     <div>
@@ -71,7 +74,7 @@
                     <a permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvSettings" (actionIfAllow)="onEditEnvClick(project, env)">
                       <span style="color: #23AD7F;" i18n="@@org.project.edit">Edit</span>
                     </a>
-                    <ng-container *ngIf="isEnvDeleteBtnVisible(env)">
+                    <ng-container *ngIf="!isCurrentEnv(env)">
                       <nz-divider nzType="vertical"></nz-divider>
                       <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                          nzPopconfirmPlacement="bottomRight"
@@ -89,6 +92,7 @@
           </permission-check>
         </nz-card>
         <ng-template #extraTemplate>
+          <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
           <button class="action-btn" nz-button nzType="default" nzSize="small" permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.UpdateProjectSettings" (actionIfAllow)="onEditProjectClick(project)">
             <i nz-icon nzType="icons:icon-edit"></i>
             <ng-container i18n="@@org.project.edit">Edit</ng-container>

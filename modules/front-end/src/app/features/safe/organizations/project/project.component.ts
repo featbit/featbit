@@ -60,8 +60,12 @@ export class ProjectComponent implements OnInit {
     }
   }
 
-  isEnvDeleteBtnVisible(env: IEnvironment): boolean {
-    return this.currentProjectEnv?.envId !== env.id;
+  isCurrentProject(project: IProject): boolean {
+    return this.currentProjectEnv?.projectId === project.id;
+  }
+
+  isCurrentEnv(env: IEnvironment): boolean {
+    return this.currentProjectEnv?.envId === env.id;
   }
 
   onCreateProjectClick() {

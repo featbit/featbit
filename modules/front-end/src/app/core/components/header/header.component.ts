@@ -73,6 +73,14 @@ export class HeaderComponent implements OnInit {
     });
   }
 
+  isCurrentProject(project: IProject): boolean {
+    return this.currentProjectEnv?.projectId === project.id;
+  }
+
+  isCurrentEnv(env: IEnvironment): boolean {
+    return this.currentProjectEnv?.envId === env.id;
+  }
+
   canListProjects = false;
   get availableProjects() {
     return this.canListProjects ? this.allProjects : [];
