@@ -41,6 +41,47 @@ public class DataSyncService : IDataSyncService
         return payload;
     }
 
+    public async Task<ClientSdkPayload> GetClientSdkPayloadAsync(Guid envId, EndUser user, long timestamp)
+    {
+        var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
+        var flagsBytes = await _cacheService.GetFlagsAsync(envId, timestamp);
+
+        var clientSdkFlags = new List<ClientSdkFlag>();
+        foreach (var flagBytes in flagsBytes)
+        {
+            using var document = JsonDocument.Parse(flagBytes);
+            var flag = document.RootElement;
+
+            clientSdkFlags.Add(await GetClientSdkFlagAsync(flag, user));
+        }
+
+        return new ClientSdkPayload(eventType, user.KeyId, clientSdkFlags);
+    }
+
+    public async Task<ServerSdkPayload> GetServerSdkPayloadAsync(Guid envId, long timestamp)
+    {
+        var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
+        var featureFlags = new List<JsonObject>();
+        var segments = new List<JsonObject>();
+
+        var flagsBytes = await _cacheService.GetFlagsAsync(envId, timestamp);
+        foreach (var flag in flagsBytes)
+        {
+            var jsonObject = JsonNode.Parse(flag)!.AsObject();
+            jsonObject.Remove("");
+            featureFlags.Add(jsonObject);
+        }
+
+        var segmentsBytes = await _cacheService.GetSegmentsAsync(envId, timestamp);
+        foreach (var segment in segmentsBytes)
+        {
+            var jsonObject = JsonNode.Parse(segment)!.AsObject();
+            segments.Add(jsonObject);
+        }
+
+        return new ServerSdkPayload(eventType, featureFlags, segments);
+    }
+
     public async Task<object> GetFlagChangePayloadAsync(Connection connection, JsonElement flag)
     {
         if (connection.Type == ConnectionType.Client && connection.User == null)
@@ -118,23 +159,6 @@ public class DataSyncService : IDataSyncService
         return new ClientSdkFlag(flag, userVariation, variations);
     }
 
-    private async Task<ClientSdkPayload> GetClientSdkPayloadAsync(Guid envId, EndUser user, long timestamp)
-    {
-        var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
-        var flagsBytes = await _cacheService.GetFlagsAsync(envId, timestamp);
-
-        var clientSdkFlags = new List<ClientSdkFlag>();
-        foreach (var flagBytes in flagsBytes)
-        {
-            using var document = JsonDocument.Parse(flagBytes);
-            var flag = document.RootElement;
-
-            clientSdkFlags.Add(await GetClientSdkFlagAsync(flag, user));
-        }
-
-        return new ClientSdkPayload(eventType, user.KeyId, clientSdkFlags);
-    }
-
     #endregion
 
     #region get server sdk payload
@@ -155,29 +179,6 @@ public class DataSyncService : IDataSyncService
             Array.Empty<JsonObject>(),
             new[] { JsonObject.Create(segment)! }
         );
-    }
-
-    private async Task<ServerSdkPayload> GetServerSdkPayloadAsync(Guid envId, long timestamp)
-    {
-        var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
-        var featureFlags = new List<JsonObject>();
-        var segments = new List<JsonObject>();
-
-        var flagsBytes = await _cacheService.GetFlagsAsync(envId, timestamp);
-        foreach (var flag in flagsBytes)
-        {
-            var jsonObject = JsonNode.Parse(flag)!.AsObject();
-            featureFlags.Add(jsonObject);
-        }
-
-        var segmentsBytes = await _cacheService.GetSegmentsAsync(envId, timestamp);
-        foreach (var segment in segmentsBytes)
-        {
-            var jsonObject = JsonNode.Parse(segment)!.AsObject();
-            segments.Add(jsonObject);
-        }
-
-        return new ServerSdkPayload(eventType, featureFlags, segments);
     }
 
     #endregion
