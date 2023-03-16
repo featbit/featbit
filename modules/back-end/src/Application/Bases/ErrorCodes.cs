@@ -22,7 +22,8 @@ public static class ErrorCodes
 
     // common
     public const string NameIsRequired = nameof(NameIsRequired);
-
+    public const string KeyIsRequired = nameof(KeyIsRequired);
+    
     // onboarding
     public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
     public const string ProjectNameRequired = nameof(ProjectNameRequired);
@@ -47,7 +48,6 @@ public static class ErrorCodes
     public const string InvalidVariationType = nameof(InvalidVariationType);
     public const string FeatureFlagIdIsRequired = nameof(FeatureFlagIdIsRequired);
     public const string FeatureFlagVariationIdIsRequired = nameof(FeatureFlagVariationIdIsRequired);
-    public const string FeatureFlagKeyIsRequired = nameof(FeatureFlagKeyIsRequired);
     public const string InvalidIntervalType = nameof(InvalidIntervalType);
     public const string InvalidFrom = nameof(InvalidFrom);
     public const string InvalidTo = nameof(InvalidTo);

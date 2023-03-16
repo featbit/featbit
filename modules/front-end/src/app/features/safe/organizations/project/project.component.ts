@@ -1,16 +1,16 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IProject, IEnvironment, IProjectEnv, ISecret, SecretTypeEnum } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
 import { EnvService } from '@services/env.service';
 import { NzMessageService } from "ng-zorro-antd/message";
-import {PermissionsService} from "@services/permissions.service";
+import { PermissionsService } from "@services/permissions.service";
+import { MessageQueueService } from "@services/message-queue.service";
 import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
-import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
-import {MessageQueueService} from "@services/message-queue.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { EnvSecretService } from "@services/env-secret.service";
 import { copyToClipboard } from '@utils/index';
+import { ResourceTypeEnum } from "@features/safe/iam/components/policy-editor/types";
 
 @Component({
   selector: 'app-project',

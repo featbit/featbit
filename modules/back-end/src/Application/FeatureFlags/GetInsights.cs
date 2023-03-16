@@ -14,7 +14,7 @@ public class GetInsightsValidator : AbstractValidator<GetInsights>
     public GetInsightsValidator()
     {
         RuleFor(x => x.Filter.FeatureFlagKey)
-            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
 
         RuleFor(x => x.Filter.IntervalType)
             .Must(IntervalType.IsDefined).WithErrorCode(ErrorCodes.InvalidIntervalType);

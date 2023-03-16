@@ -50,19 +50,6 @@ export class ProjectService {
     this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
   }
 
-  // update current project env by partial object
-  updateCurrentProjectEnvLocally(partialUpdated: Partial<IProjectEnv>) {
-    const projectEnvJson = localStorage.getItem(CURRENT_PROJECT());
-    if (!projectEnvJson) {
-      return;
-    }
-
-    const projectEnv = JSON.parse(projectEnvJson);
-    const updatedProject = Object.assign(projectEnv, partialUpdated);
-
-    this.upsertCurrentProjectEnvLocally(updatedProject);
-  }
-
   // get local project env
   getLocalCurrentProjectEnv(): IProjectEnv {
     const projectEnvJson = localStorage.getItem(CURRENT_PROJECT());
@@ -85,6 +72,7 @@ export class ProjectService {
             projectId: firstProject.id,
             projectName: firstProject.name,
             envId: firstProjectEnv.id,
+            envKey: firstProjectEnv.key,
             envName: firstProjectEnv.name,
             envSecret: firstProjectEnv.secrets[0].value
           };

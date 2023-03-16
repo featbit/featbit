@@ -104,6 +104,7 @@ export class HeaderComponent implements OnInit {
       projectId: this.selectedProject.id,
       projectName: this.selectedProject.name,
       envId: this.selectedEnv.id,
+      envKey: this.selectedEnv.key,
       envName: this.selectedEnv.name,
       envSecret: this.selectedEnv.secrets[0].value
     };

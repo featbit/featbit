@@ -24,7 +24,7 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 
         RuleFor(x => x.Key)
-            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired)
+            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired)
             .Matches(FeatureFlag.KeyFormat).WithErrorCode(ErrorCodes.InvalidFlagKeyFormat);
     }
 }

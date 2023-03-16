@@ -5,6 +5,8 @@ public class Environment : AuditedEntity
     public Guid ProjectId { get; set; }
 
     public string Name { get; set; }
+    
+    public string Key { get; set; }
 
     public string Description { get; set; }
 
@@ -12,12 +14,13 @@ public class Environment : AuditedEntity
 
     public ICollection<Setting> Settings { get; set; }
 
-    public Environment(Guid projectId, string name, string description = "")
+    public Environment(Guid projectId, string name, string key, string description = "")
     {
         Id = Guid.NewGuid();
 
         ProjectId = projectId;
         Name = name;
+        Key = key;
         Description = description;
         Secrets = new List<Secret>
         {

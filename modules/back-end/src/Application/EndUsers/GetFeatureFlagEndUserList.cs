@@ -16,7 +16,7 @@ public class GetFeatureFlagEndUserListValidator : AbstractValidator<GetFeatureFl
     public GetFeatureFlagEndUserListValidator()
     {
         RuleFor(x => x.Filter.FeatureFlagKey)
-            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
 
         RuleFor(x => x.Filter.From)
             .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidFrom);

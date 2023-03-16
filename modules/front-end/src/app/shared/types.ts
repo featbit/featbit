@@ -61,6 +61,7 @@ export interface IProjectEnv {
   projectId: string,
   projectName: string,
   envId: string,
+  envKey: string,
   envName: string,
   envSecret: string
 }
@@ -75,6 +76,7 @@ export interface IEnvironment {
   id: string,
   projectId: string,
   name: string,
+  key: string,
   description: string,
   secrets: ISecret[]
 }

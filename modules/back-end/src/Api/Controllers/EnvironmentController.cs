@@ -1,4 +1,5 @@
 using Application.Environments;
+using Application.Experiments;
 
 namespace Api.Controllers;
 
@@ -33,5 +34,18 @@ public class EnvironmentController : ApiControllerBase
 
         var success = await Mediator.Send(request);
         return Ok(success);
+    }
+    
+    [HttpGet("is-key-used")]
+    public async Task<ApiResponse<bool>> IsKeyUsedAsync(Guid projectId, string key)
+    {
+        var request = new IsKeyUsed
+        {
+            ProjectId = projectId,
+            Key = key
+        };
+
+        var isUsed = await Mediator.Send(request);
+        return Ok(isUsed);
     }
 }
