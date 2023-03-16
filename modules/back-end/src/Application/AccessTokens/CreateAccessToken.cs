@@ -52,7 +52,7 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
 
     public async Task<AccessTokenVm> Handle(CreateAccessToken request, CancellationToken cancellationToken)
     {
-        var permissions = request.Permissions;
+        IEnumerable<PolicyStatement> permissions = new List<PolicyStatement>();
         if (request.Type == AccessTokenTypes.Service)
         {
             var authorizedPolices = await _memberService.GetPoliciesAsync(request.OrganizationId, _currentUser.Id);
