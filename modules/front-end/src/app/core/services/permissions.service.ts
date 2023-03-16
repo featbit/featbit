@@ -28,7 +28,7 @@ export class PermissionsService {
   // "*b" => everything that ends with "b"
   // "*a*" => everything that has an "a" in it
   // "*a*b*"=> everything that has an "a" in it, followed by anything, followed by a "b", followed by anything
-  private matchRule(str, rule) {
+  private matchRule(str: string, rule: string): boolean {
     var escapeRegex = (s) => s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
     return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(str);
   }

@@ -5,6 +5,7 @@ public static class ErrorCodes
     // general
     public const string InternalServerError = nameof(InternalServerError);
     public const string Unauthorized = nameof(Unauthorized);
+    public const string Forbidden = nameof(Forbidden);
 
     // application
     public const string ResourceNotFound = nameof(ResourceNotFound);

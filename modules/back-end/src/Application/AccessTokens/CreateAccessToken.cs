@@ -1,5 +1,6 @@
+using System.Text.RegularExpressions;
 using Application.Bases;
-using Application.Policies;
+using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AccessTokens;
 using Domain.Policies;
@@ -36,16 +37,16 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
 
 public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, AccessTokenVm>
 {
-    private readonly IPolicyService _policyService;
+    private readonly IMemberService _memberService;
     private readonly ICurrentUser _currentUser;
     private readonly IAccessTokenService _service;
     private readonly IMapper _mapper;
 
-    public CreateAccessTokenHandler(IAccessTokenService service, IPolicyService policyService, ICurrentUser currentUser, IMapper mapper)
+    public CreateAccessTokenHandler(IAccessTokenService service, IMemberService memberService, ICurrentUser currentUser, IMapper mapper)
     {
         _service = service;
         _currentUser = currentUser;
-        _policyService = policyService;
+        _memberService = memberService;
         _mapper = mapper;
     }
 
@@ -54,7 +55,30 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
         var permissions = request.Permissions;
         if (request.Type == AccessTokenTypes.Service)
         {
-            // TODO check currentUser has all the permissions
+            var authorizedPolices = await _memberService.GetPoliciesAsync(request.OrganizationId, _currentUser.Id);
+            var ownerPolicy = authorizedPolices.FirstOrDefault((x) => x.Name == "Owner");
+            if (ownerPolicy != null)
+            {
+                permissions = request.Permissions;
+            }
+            else
+            {
+                var haveUnauthorizedPermissions = request.Permissions.Any(x =>
+                {
+                    var matchedPolicy = authorizedPolices.FirstOrDefault(policy =>
+                        policy.Statements.Any(statement =>
+                            statement.ResourceType == x.ResourceType && statement.Effect == "allow" &&
+                            x.Resources.All(rsc => statement.Resources.Any(resource => MatchRule(rsc, resource))) &&
+                            x.Actions.All(act => statement.Actions.Any(action => MatchRule(act, action)))));
+                    
+                    return matchedPolicy == null;
+                });
+
+                if (haveUnauthorizedPermissions)
+                {
+                    throw new BusinessException(ErrorCodes.Forbidden);
+                }
+            }
         }
         
         var accessToken = new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, permissions);
@@ -62,5 +86,17 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
         await _service.AddOneAsync(accessToken);
 
         return _mapper.Map<AccessTokenVm>(accessToken);
+    }
+
+    // use "*" (star) as a wildcard for example:
+    // "a*b" => everything that starts with "a" and ends with "b"
+    // "a*" => everything that starts with "a"
+    // "*b" => everything that ends with "b"
+    // "*a*" => everything that has an "a" in it
+    // "*a*b*"=> everything that has an "a" in it, followed by anything, followed by a "b", followed by anything
+    private bool MatchRule(string str, string rule)
+    {
+        Func<string, string> escapeRegex = (s) => Regex.Replace(s, "([.*+?^=!:${}()|\\[\\]\\\\/])", "\\$1");
+        return new Regex("^" + rule.Split('*').Select(escapeRegex).Aggregate((x, y) => x + ".*" + y) + "$").IsMatch(str);
     }
 }
