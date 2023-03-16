@@ -25,7 +25,7 @@
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label nzRequired>Key</nz-form-label>
+        <nz-form-label nzRequired>Key <i nz-icon i18n-nz-tooltip="@@org.project.env-key-description" nz-tooltip="We use the key to give you friendly URLs. Keys should only contain letters, numbers, ., _ or -." nzType="icons:icon-info-outline"></i></nz-form-label>
         <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
           <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name" />
           <ng-template #keyErrorTpl let-control>
