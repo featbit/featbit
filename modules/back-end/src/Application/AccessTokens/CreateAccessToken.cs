@@ -80,7 +80,14 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
                 }
             }
         }
-        
+
+        var existingAt = await _service.FindOneAsync(at => string.Equals(at.Name, request.Name, StringComparison.OrdinalIgnoreCase));
+
+        if (existingAt != null)
+        {
+            throw new BusinessException(ErrorCodes.EntityExistsAlready);
+        }
+
         var accessToken = new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, permissions);
 
         await _service.AddOneAsync(accessToken);

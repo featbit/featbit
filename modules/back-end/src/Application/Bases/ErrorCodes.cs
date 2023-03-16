@@ -10,6 +10,7 @@ public static class ErrorCodes
     // application
     public const string ResourceNotFound = nameof(ResourceNotFound);
     public const string InvalidJson = nameof(InvalidJson);
+    public const string EntityExistsAlready = nameof(EntityExistsAlready);
 
     // identity error codes
     public const string MethodIsRequired = nameof(MethodIsRequired);

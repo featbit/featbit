@@ -19,7 +19,7 @@ public class IsAccessTokenNameUsedHandler : IRequestHandler<IsAccessTokenNameUse
     public async Task<bool> Handle(IsAccessTokenNameUsed request, CancellationToken cancellationToken)
     {
         var isNameUsed =
-            await _service.AnyAsync(x => x.OrganizationId == request.OrganizationId && x.Name == request.Name);
+            await _service.AnyAsync(x => x.OrganizationId == request.OrganizationId && string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase));
 
         return isNameUsed;
     }
