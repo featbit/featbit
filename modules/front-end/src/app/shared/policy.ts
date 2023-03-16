@@ -55,37 +55,48 @@ export interface RNViewModel {
   isInvalid?: boolean
 }
 
+export const ResourceTypeAll: ResourceType = {
+  type: ResourceTypeEnum.All,
+  pattern: generalResourceRNPattern.all,
+  displayName: $localize`:@@iam.rsc-type.all:All`
+};
+
+export const ResourceTypeAccount: ResourceType = {
+  type: ResourceTypeEnum.Account,
+  pattern: generalResourceRNPattern.account,
+  displayName: $localize`:@@iam.rsc-type.account:Account`
+};
+
+export const ResourceTypeIAM: ResourceType = {
+  type: ResourceTypeEnum.IAM,
+  pattern: generalResourceRNPattern.iam,
+  displayName: $localize`:@@iam.rsc-type.iam:IAM`
+};
+
+export const ResourceTypeAccessToken: ResourceType = {
+  type: ResourceTypeEnum.AccessToken,
+  pattern: generalResourceRNPattern.accessToken,
+  displayName: $localize`:@@iam.rsc-type.access-token:Access token`
+};
+export const ResourceTypeProject: ResourceType = {
+  type: ResourceTypeEnum.Project,
+  pattern: 'project/{project}',
+  displayName: $localize`:@@iam.rsc-type.project:Project`
+};
+
+export const ResourceTypeEnv = {
+  type: ResourceTypeEnum.Env,
+  pattern: 'project/{project}:env/{env}',
+  displayName: $localize`:@@iam.rsc-type.env:Environment`
+};
+
 export const resourcesTypes: ResourceType[] = [
-  {
-    type: ResourceTypeEnum.All,
-    pattern: generalResourceRNPattern.all,
-    displayName: $localize`:@@iam.rsc-type.all:All`
-  },
-  {
-    type: ResourceTypeEnum.Account,
-    pattern: generalResourceRNPattern.account,
-    displayName: $localize`:@@iam.rsc-type.account:Account`
-  },
-  {
-    type: ResourceTypeEnum.IAM,
-    pattern: generalResourceRNPattern.iam,
-    displayName: $localize`:@@iam.rsc-type.iam:IAM`
-  },
-  {
-    type: ResourceTypeEnum.AccessToken,
-    pattern: generalResourceRNPattern.accessToken,
-    displayName: $localize`:@@iam.rsc-type.access-token:Access token`
-  },
-  {
-    type: ResourceTypeEnum.Project,
-    pattern: 'project/{project}',
-    displayName: $localize`:@@iam.rsc-type.project:Project`
-  },
-  {
-    type: ResourceTypeEnum.Env,
-    pattern: 'project/{project}:env/{env}',
-    displayName: $localize`:@@iam.rsc-type.env:Environment`
-  }
+  ResourceTypeAll,
+  ResourceTypeAccount,
+  ResourceTypeIAM,
+  ResourceTypeAccessToken,
+  ResourceTypeProject,
+  ResourceTypeEnv
 ];
 
 export interface ResourceParamViewModel {
@@ -149,8 +160,8 @@ export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
   ],
   [ResourceTypeEnum.AccessToken]: [
     permissionActions.ListAccessTokens,
-    permissionActions.CreateServiceAccessTokens,
-    permissionActions.CreatePersonalAccessTokens,
+    permissionActions.ManageServiceAccessTokens,
+    permissionActions.ManagePersonalAccessTokens,
   ],
   [ResourceTypeEnum.Project]: [
     permissionActions.ListProjects,

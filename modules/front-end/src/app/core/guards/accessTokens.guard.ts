@@ -22,7 +22,7 @@ export class AccessTokensGuard implements CanActivate {
   }
 
   async checkPermission(url: string): Promise<boolean | UrlTree> {
-    const canListAccessTokens = !!this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.ListAccessTokens);
+    const canListAccessTokens = !!this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ListAccessTokens);
 
     if (!canListAccessTokens) {
       this.message.warning(this.permissionsService.genericDenyMessage);

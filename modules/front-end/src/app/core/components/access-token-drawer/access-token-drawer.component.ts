@@ -9,50 +9,54 @@ import {
   IAccessTokenPolicy
 } from "@features/safe/integrations/access-tokens/types/access-token";
 import { NzSelectComponent } from "ng-zorro-antd/select";
-import { Subject } from "rxjs";
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
 import { PolicyFilter } from "@features/safe/iam/types/policy";
-import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from "@utils/index";
+import {
+  preProcessPermissions,
+  IPermissionStatementGroup, postProcessPermissions
+} from "@features/safe/integrations/access-tokens/types/permission-helper";
+import {
+  IPolicyStatement,
+  ResourceType, ResourceTypeAccessToken,
+  ResourceTypeEnv,
+  ResourceTypeProject
+} from "@shared/policy";
 
 @Component({
   selector: 'access-token-drawer',
   templateUrl: './access-token-drawer.component.html',
   styleUrls: ['./access-token-drawer.component.less']
 })
-export class AccessTokenDrawerComponent implements OnInit {
-
-  public policyCompareWith: (obj1: IAccessTokenPolicy, obj2: IAccessTokenPolicy) => boolean = (obj1: IAccessTokenPolicy, obj2: IAccessTokenPolicy) => {
-    if (obj1 && obj2) {
-      return obj1.id === obj2.id;
-    } else {
-      return false;
-    }
-  };
-
+export class AccessTokenDrawerComponent {
   private _accessToken: IAccessToken;
   isEditing: boolean = false;
 
+  resourceTypes: ResourceType[] = [ResourceTypeAccessToken, ResourceTypeProject, ResourceTypeEnv]; // TODO replace with real open API resource types
+  authorizedResourceTypes: ResourceType[] = [];
+  permissions: { [key: string]: IPermissionStatementGroup };
   @Input()
   set accessToken(accessToken: IAccessToken) {
     this.isEditing = accessToken && !!accessToken.id;
-    if (accessToken) {
-      this.selectedPolicyList = accessToken.policies.map((p) => ({...p, isSelected: true}));
-      this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
-      this.patchForm(accessToken);
+    if (this.isEditing) {
+      this.permissions = preProcessPermissions(accessToken.permissions);
+      this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
     } else {
-      this.resetForm();
+      accessToken = { name: null, type: AccessTokenTypeEnum.Personal};
+      this.setAuthorizedPermissions();
     }
+
+    this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
+    this.patchForm(accessToken);
     this._accessToken = accessToken;
+
   }
 
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
-
-  policyDebouncer = new Subject<string>();
 
   canTakeActionOnPersonalAccessToken = false;
   canTakeActionOnServiceAccessToken = false;
@@ -64,28 +68,19 @@ export class AccessTokenDrawerComponent implements OnInit {
     private modal: NzModalService,
     private message: NzMessageService
   ) {
-    this.policyDebouncer.pipe(
-      debounceTime(100),
-    ).subscribe(query => this.searchPolicies(query));
+    this.form = this.fb.group({
+      name: ['', [Validators.required], [this.nameAsyncValidator], 'change'],
+      type: [AccessTokenTypeEnum.Personal, [Validators.required]]
+    });
 
-    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.CreatePersonalAccessTokens);
-    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.CreateServiceAccessTokens);
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   isServiceAccessToken: boolean = false
 
   @ViewChild("policyNodeSelector", {static: false}) policySelectNode: NzSelectComponent;
-  selectedPolicyList: IAccessTokenPolicy[] = [];
-  policySearchResultList: IAccessTokenPolicy[] = [];
   form: FormGroup;
-
-  ngOnInit(): void {
-    this.form = this.fb.group({
-      name: ['', [Validators.required], [this.nameAsyncValidator], 'change'],
-      type: [AccessTokenTypeEnum.Personal, [Validators.required]],
-      policy: [null, []]
-    });
-  }
 
   get accessToken() {
     return this._accessToken;
@@ -121,60 +116,22 @@ export class AccessTokenDrawerComponent implements OnInit {
   onTypeChange() {
     const {type} = this.form.value;
     this.isServiceAccessToken = type === AccessTokenTypeEnum.Service;
-    this.selectedPolicyList = [];
     this.resetPolicy();
   }
 
-  onPolicySelectChange() {
-    const {policy} = this.form.value;
-
-    if (this.selectedPolicyList.some((sp) => sp.id === policy.id)) {
-      this.selectedPolicyList = this.selectedPolicyList.filter((sp) => sp.id !== policy.id);
-    } else {
-      this.selectedPolicyList = [...this.selectedPolicyList, {...policy}];
-    }
-
-    this.policySearchResultList = this.policySearchResultList.map((p) => ({
-      ...p,
-      isSelected: this.selectedPolicyList.some((sp => sp.id === p.id))
-    }));
-    this.policySelectNode.writeValue(undefined);
-    this.validatePoliciesControl();
-  }
-
-  removePolicy(policy: IAccessTokenPolicy) {
-    this.selectedPolicyList = this.selectedPolicyList.filter((p) => p.id !== policy.id);
-    this.validatePoliciesControl();
-  }
-
-  isLoadingPolicies = false;
-  searchPolicies(query: string = '') {
+  setAuthorizedPermissions() {
     const hasOwnerPolicy = this.permissionsService.policies.some((policy) => policy.name === 'Owner' && policy.type === 'SysManaged');
 
     if (hasOwnerPolicy) {
-      this.isLoadingPolicies = true;
-
-      this.policyService.getList(new PolicyFilter(query, 1, 50)).subscribe({
+      this.policyService.getList(new PolicyFilter('', 1, 100)).subscribe({
         next: policies => {
-          this.policySearchResultList = policies.items.map(p => ({
-            ...p,
-            isSelected: this.selectedPolicyList.some((sp => sp.id === p.id))
-          }));
-
-          this.isLoadingPolicies = false;
-        }, error: () => this.isLoadingPolicies = false
+          this.permissions = preProcessPermissions(policies.items.flatMap(p => p.statements));
+          this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
+        }
       });
     } else {
-      const regex = new RegExp(query,'ig');
-      this.policySearchResultList = this.permissionsService.policies
-        .filter((policy) => query === '' || policy.name.match(regex))
-        .map((policy) => ({
-            ...policy,
-            isSelected: this.selectedPolicyList.some((sp => sp.id === policy.id))
-          })
-        );
+      this.permissions = preProcessPermissions(this.permissionsService.permissions);
     }
-
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -193,38 +150,45 @@ export class AccessTokenDrawerComponent implements OnInit {
     first()
   );
 
-  isLoading: boolean = false;
-  isPolicyIdsValid = true;
-
-  validatePoliciesControl() {
-    const policyControl = this.form.get('policy');
-    if (this.isServiceAccessToken && this.selectedPolicyList.length === 0) {
-      policyControl.setValidators(Validators.required);
-      policyControl.setErrors({required: true});
-      this.isPolicyIdsValid = false;
+  updatePermissionsAllChecked(statementGroup: IPermissionStatementGroup) {
+    statementGroup.indeterminate = false;
+    if (statementGroup.allChecked) {
+      statementGroup.statements = statementGroup.statements.map(item => ({
+        ...item,
+        checked: true
+      }));
     } else {
-      policyControl.clearValidators();
-      policyControl.markAsPristine();
-      this.isPolicyIdsValid = true;
+      statementGroup.statements = statementGroup.statements.map(item => ({
+        ...item,
+        checked: false
+      }));
     }
   }
+
+  updatePermissionSingleChecked(statementGroup: IPermissionStatementGroup){
+    if (statementGroup.statements.every(item => !item.checked)) {
+      statementGroup.allChecked = false;
+      statementGroup.indeterminate = false;
+    } else if (statementGroup.statements.every(item => item.checked)) {
+      statementGroup.allChecked = true;
+      statementGroup.indeterminate = false;
+    } else {
+      statementGroup.indeterminate = true;
+    }
+  }
+
+  isLoading: boolean = false;
 
   tokenName = '';
   tokenValue = '';
   isCreationConfirmModalVisible = false;
   doSubmit() {
-    // we validate name and type only here
     if (this.form.invalid) {
       for (const i in this.form.controls) {
         this.form.controls[i].markAsDirty();
         this.form.controls[i].updateValueAndValidity();
       }
-    }
 
-    // validate policies
-    this.validatePoliciesControl();
-
-    if (this.form.invalid || !this.isPolicyIdsValid) {
       return;
     }
 
@@ -234,6 +198,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       this.message.warning($localize `:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
       return;
     }
+
     this.isLoading = true;
     if (this.isEditing) {
       this.accessTokenService.update(this.accessToken.id, name).subscribe({
@@ -249,7 +214,7 @@ export class AccessTokenDrawerComponent implements OnInit {
         }
       );
     } else {
-      const policies = this.isServiceAccessToken ? this.selectedPolicyList.map(p => p.id) : [];
+      const policies = this.isServiceAccessToken ? postProcessPermissions(this.permissions) : [];
 
       this.accessTokenService.create(name, type, policies).subscribe({
           next: ({id, name, token}) => {

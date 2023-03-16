@@ -145,7 +145,7 @@ export const permissionActions: {[key: string]: IamPolicyAction} = {
     isOpenAPIApplicable: true,
     isSpecificApplicable: false
   },
-  CreateServiceAccessTokens: {
+  ManageServiceAccessTokens: {
     id: uuidv4(),
     name: 'ManageServiceAccessTokens',
     displayName: $localize`:@@iam.action.manage-service-access-tokens:Manage service access tokens`,
@@ -153,7 +153,7 @@ export const permissionActions: {[key: string]: IamPolicyAction} = {
     isOpenAPIApplicable: true,
     isSpecificApplicable: false
   },
-  CreatePersonalAccessTokens: {
+  ManagePersonalAccessTokens: {
     id: uuidv4(),
     name: 'ManagePersonalAccessTokens',
     displayName: $localize`:@@iam.action.manage-personal-access-tokens:Manage personal access tokens`,

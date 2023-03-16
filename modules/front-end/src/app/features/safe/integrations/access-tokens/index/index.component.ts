@@ -30,6 +30,7 @@ export class IndexComponent implements OnInit {
 
   canTakeActionOnPersonalAccessToken = false;
   canTakeActionOnServiceAccessToken = false;
+
   constructor(
     private router: Router,
     private message: NzMessageService,
@@ -53,8 +54,8 @@ export class IndexComponent implements OnInit {
       });
     });
 
-    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.CreatePersonalAccessTokens);
-    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.account, permissionActions.CreateServiceAccessTokens);
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   private search$ = new Subject();
@@ -107,9 +108,6 @@ export class IndexComponent implements OnInit {
   }
 
   accessTokenDrawerVisible: boolean = false;
-  private openAccessTokenDrawer(){
-    this.accessTokenDrawerVisible = true;
-  }
 
   accessTokenDrawerClosed(data: any) { //{ isEditing: boolean, id: string, name: string }
     this.accessTokenDrawerVisible = false;
@@ -131,10 +129,10 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  currentAccessToken: IAccessToken;
-  creatOrEdit(accessToken: IAccessToken = { name: null, type: AccessTokenTypeEnum.Personal, policies: []}) {
+  currentAccessToken: IAccessToken = { name: null, type: AccessTokenTypeEnum.Personal, permissions: []};
+  creatOrEdit(accessToken: IAccessToken = { name: null, type: AccessTokenTypeEnum.Personal, permissions: []}) {
     this.currentAccessToken = accessToken;
-    this.openAccessTokenDrawer();
+    this.accessTokenDrawerVisible = true;
   }
 
   delete(accessToken: IAccessToken) {

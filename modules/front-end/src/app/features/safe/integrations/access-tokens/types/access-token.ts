@@ -1,5 +1,6 @@
 import { IPolicy } from "@features/safe/iam/types/policy";
 import { IMember } from "@features/safe/iam/types/member";
+import { IPolicyStatement } from "@shared/policy";
 
 export interface IAccessToken {
   id?: string;
@@ -9,6 +10,7 @@ export interface IAccessToken {
   token?: string;
   name: string;
   policies?: IPolicy[],
+  permissions?: IPolicyStatement[],
   lastUsedAt?: string
 }
 

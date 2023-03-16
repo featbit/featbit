@@ -5,7 +5,7 @@
   nzPlacement="right"
   i18n-nzTitle="@@integrations.access-token.access-token-drawer.title"
   nzTitle="Add access token"
-  [nzWidth]="500"
+  [nzWidth]="700"
   (nzOnClose)="onClose()"
   [nzFooter]="footer">
   <ng-container *nzDrawerContent>
@@ -39,50 +39,43 @@
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-
-      <!-- Policies -->
-      <nz-form-item *ngIf="isServiceAccessToken">
-        <nz-form-label nzRequired i18n="@@common.policies">Policies</nz-form-label>
-        <nz-form-control>
-          <nz-select #policyNodeSelector [nzDisabled]="isEditing"
-            formControlName="policy"
-            i18n-nzPlaceHolder="@@integrations.access-token.select-policies"
-            nzPlaceHolder="Select policies"
-            nzShowSearch
-            nzServerSearch
-            [compareWith]="policyCompareWith"
-            (ngModelChange)="onPolicySelectChange()"
-            (nzOnSearch)="policyDebouncer.next($event)">
-            <ng-container *ngFor="let policy of policySearchResultList">
-              <nz-option nzCustomContent *ngIf="!isLoadingPolicies" [nzLabel]="policy.name" [nzValue]="policy">
-                <span style="display: flex;justify-content: space-between;align-items: center">
-                  <span>
-                  <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
-                    {{ policy.name }}
-                  </span>
-                  <i *ngIf="policy.isSelected" nz-icon nzType="close"></i>
-                </span>
-              </nz-option>
-            </ng-container>
-            <nz-option *ngIf="isLoadingPolicies" nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
-          </nz-select>
-        </nz-form-control>
-        <div class="selected-policies" nz-row *ngIf="selectedPolicyList.length">
-          <div nz-col class="policy" *ngFor="let policy of selectedPolicyList">
-            <div class="inner-box">
-              <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
-              {{ policy.name }}
-            </div>
-            <button [disabled]="isEditing" nz-button nzType="default" [nzSize]="'large'" (click)="removePolicy(policy)"><i nz-icon nzType="close"></i></button>
-          </div>
-        </div>
-
-        <div class="error-message" *ngIf="!isPolicyIdsValid" i18n="@@integrations.access-token.service-access-token-must-define-policies">Policies are mandatory for service type access tokens</div>
-
-      </nz-form-item>
     </form>
+    <!-- Permissions -->
+    <div *ngIf="isServiceAccessToken" class="permissions">
+      <nz-form-label nzRequired i18n="@@common.permissions">Permissions</nz-form-label>
+      <div class="">
+        <nz-collapse nzExpandIconPosition="right">
+          <nz-collapse-panel class="resource-type"
+                             *ngFor="let rt of authorizedResourceTypes; let first=first;"
+                             [nzHeader]="rt.displayName"
+                             [nzActive]="first"
+          >
+            <div class="permissions">
+              <label *ngIf="!isEditing"
+                nz-checkbox
+                [(ngModel)]="permissions[rt.type].allChecked"
+                (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
+                [nzIndeterminate]="permissions[rt.type].indeterminate"
+                i18n="@@common.all"
+              >All</label>
+              <div *ngFor="let permission of permissions[rt.type].statements" class="permission">
+                <div class="permission-header">
+                  <label *ngIf="isEditing">{{permission.action.displayName}} ({{permission.action.name}})</label>
+                  <label *ngIf="!isEditing" nz-checkbox [(ngModel)]="permission.checked" (ngModelChange)="updatePermissionSingleChecked(permissions[rt.type])">{{permission.action.displayName}} ({{permission.action.name}})</label>
+                  <i nz-icon [nz-tooltip]="permission.action.description" nzType="icons:icon-info-outline"></i>
+                </div>
+
+                <div class="permission-resources">
+                  <div *ngFor="let resource of permission['resources']" class="permission-resource">
+                    {{resource}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </nz-collapse-panel>
+        </nz-collapse>
+      </div>
+    </div>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>

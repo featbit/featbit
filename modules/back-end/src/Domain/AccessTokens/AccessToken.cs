@@ -14,7 +14,7 @@ public class AccessToken : AuditedEntity
     public string Token { get; set; }
     public Guid CreatorId { get; set; }
 
-    public ICollection<Policy> Policies { get; set; }
+    public IEnumerable<PolicyStatement> Permissions { get; set; }
     
     public DateTime? LastUsedAt { get; set; }
 
@@ -34,7 +34,7 @@ public class AccessToken : AuditedEntity
         return $"api-{header}{guid}";
     }
     
-    public AccessToken(Guid organizationId, Guid creatorId, string name, string type, IEnumerable<Policy> policies)
+    public AccessToken(Guid organizationId, Guid creatorId, string name, string type, IEnumerable<PolicyStatement> permissions)
     {
         OrganizationId = organizationId;
         CreatorId = creatorId;
@@ -42,7 +42,7 @@ public class AccessToken : AuditedEntity
         
         Status = AccessTokenStatus.Active;
         Type = type;
-        Policies = policies.ToArray();
+        Permissions = permissions;
 
         Token = NewToken();
     }

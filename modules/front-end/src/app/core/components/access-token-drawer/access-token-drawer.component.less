@@ -23,48 +23,78 @@
   font-size: 15px;
 }
 
-.selected-policies {
-  border: 1px solid @grey20-color;
-  background-color: #ffffff;
-  padding: 5px 0 1px 6px;
-  box-sizing: border-box;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  margin-top: 12px;
-
-  .policy {
-    display: flex;
-    margin-bottom: 4px;
-    margin-right: 10px;
-
-    .inner-box {
-      width: 182px;
-      border-top-left-radius: 4px;
-      border-bottom-left-radius: 4px;
-      padding: 4px 7px 6px 7px;
-      background: @grey20-color;
-      height: 23px;
-      line-height: 15px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    button {
+.resource-type {
+    .permissions {
       display: flex;
-      background: @grey20-color;
-      border-top-right-radius: 4px;
-      border-bottom-right-radius: 4px;
-      height: 23px;
-      width: 15px;
-      border: 0;
+      flex-direction: column;
+      gap: 8px;
 
-      i {
-        width:10px;
-        height: 10px;
-        font-size: 10px;
+      .permission {
+        display: flex;
+        flex-direction: column;
+
+        .permission-header {
+          display: flex;
+          justify-content: flex-start;
+          gap: 8px;
+          align-items: center;
+        }
+
+        .permission-resources {
+          border-top: 1px solid @grey40-color;
+          display: flex;
+          flex-direction: column;
+
+          .permission-resource {
+            padding: 0 8px;
+          }
+        }
       }
     }
-  }
 }
+
+//.selected-policies {
+//  border: 1px solid @grey20-color;
+//  background-color: #ffffff;
+//  padding: 5px 0 1px 6px;
+//  box-sizing: border-box;
+//  border-radius: 8px;
+//  margin-bottom: 12px;
+//  margin-top: 12px;
+//
+//  .policy {
+//    display: flex;
+//    margin-bottom: 4px;
+//    margin-right: 10px;
+//
+//    .inner-box {
+//      width: 182px;
+//      border-top-left-radius: 4px;
+//      border-bottom-left-radius: 4px;
+//      padding: 4px 7px 6px 7px;
+//      background: @grey20-color;
+//      height: 23px;
+//      line-height: 15px;
+//      overflow: hidden;
+//      text-overflow: ellipsis;
+//      cursor: pointer;
+//      white-space: nowrap;
+//    }
+//
+//    button {
+//      display: flex;
+//      background: @grey20-color;
+//      border-top-right-radius: 4px;
+//      border-bottom-right-radius: 4px;
+//      height: 23px;
+//      width: 15px;
+//      border: 0;
+//
+//      i {
+//        width:10px;
+//        height: 10px;
+//        font-size: 10px;
+//      }
+//    }
+//  }
+//}

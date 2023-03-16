@@ -15,7 +15,7 @@ public class AccessTokenVm
     public string Token { get; set; }
     public MemberVm Creator { get; set; }
 
-    public IEnumerable<Policy> Policies { get; set; }
+    public IEnumerable<PolicyStatement> Permissions { get; set; }
     
     public DateTime? LastUsedAt { get; set; }
 }

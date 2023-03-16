@@ -10,6 +10,7 @@ import {
   IPagedAccessToken
 } from "@features/safe/integrations/access-tokens/types/access-token";
 import { IMetric } from "@features/safe/experiments/types";
+import { IPolicyStatement } from "@shared/policy";
 
 @Injectable({
   providedIn: 'root'
@@ -43,8 +44,8 @@ export class AccessTokenService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  create(name: string, type: string, policyIds: string[] = []): Observable<IAccessToken> {
-    return this.http.post<IAccessToken>(this.baseUrl, { name, type, policyIds });
+  create(name: string, type: string, permissions: IPolicyStatement[] = []): Observable<IAccessToken> {
+    return this.http.post<IAccessToken>(this.baseUrl, { name, type, permissions });
   }
 
   delete(id: string): Observable<boolean> {

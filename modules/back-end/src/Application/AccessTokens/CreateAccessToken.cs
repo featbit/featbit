@@ -14,7 +14,7 @@ public class CreateAccessToken : IRequest<AccessTokenVm>
 
     public string Type { get; set; }
 
-    public IEnumerable<Guid> PolicyIds { get; set; }
+    public IEnumerable<PolicyStatement> Permissions { get; set; }
 }
 
 public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
@@ -27,8 +27,8 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
         RuleFor(x => x.Type)
             .Must(AccessTokenTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidAccessTokenType);
         
-        RuleFor(x => x.PolicyIds)
-            .Must(PolicyIds => PolicyIds.Any())
+        RuleFor(x => x.Permissions)
+            .Must(Permissions => Permissions.Any())
             .Unless(x => x.Type == AccessTokenTypes.Personal)
             .WithErrorCode(ErrorCodes.ServiceAccessTokenMustDefinePolicies);
     }
@@ -51,13 +51,13 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
 
     public async Task<AccessTokenVm> Handle(CreateAccessToken request, CancellationToken cancellationToken)
     {
-        var policies = Enumerable.Empty<Policy>();
+        var permissions = request.Permissions;
         if (request.Type == AccessTokenTypes.Service)
         {
-            policies = await _policyService.FindManyAsync((x) => request.PolicyIds.Contains(x.Id));
+            // TODO check currentUser has all the permissions
         }
         
-        var accessToken = new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, policies);
+        var accessToken = new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, permissions);
 
         await _service.AddOneAsync(accessToken);
 
