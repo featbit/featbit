@@ -13,7 +13,7 @@ import { IOrganization } from "@shared/types";
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 import { TeamService } from "@services/team.service";
 import { PermissionsService } from "@services/permissions.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 
 @Component({
   selector: 'access-tokens',

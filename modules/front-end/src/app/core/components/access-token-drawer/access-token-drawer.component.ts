@@ -6,21 +6,19 @@ import { PolicyService } from "@services/policy.service";
 import {
   AccessTokenTypeEnum,
   IAccessToken,
-  IAccessTokenPolicy
 } from "@features/safe/integrations/access-tokens/types/access-token";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
+import { EffectEnum, generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PolicyFilter } from "@features/safe/iam/types/policy";
 import { NzModalService } from "ng-zorro-antd/modal";
-import { copyToClipboard } from "@utils/index";
+import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
   preProcessPermissions,
   IPermissionStatementGroup, postProcessPermissions
 } from "@features/safe/integrations/access-tokens/types/permission-helper";
 import {
-  IPolicyStatement,
   ResourceType, ResourceTypeAccessToken,
   ResourceTypeEnv,
   ResourceTypeProject
@@ -43,7 +41,6 @@ export class AccessTokenDrawerComponent {
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
       this.permissions = preProcessPermissions(accessToken.permissions);
-      this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
     } else {
       accessToken = { name: null, type: AccessTokenTypeEnum.Personal};
       this.setAuthorizedPermissions();
@@ -52,7 +49,7 @@ export class AccessTokenDrawerComponent {
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
     this.patchForm(accessToken);
     this._accessToken = accessToken;
-
+    this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
   }
 
   @Input() visible: boolean = false;
@@ -123,12 +120,19 @@ export class AccessTokenDrawerComponent {
     const hasOwnerPolicy = this.permissionsService.policies.some((policy) => policy.name === 'Owner' && policy.type === 'SysManaged');
 
     if (hasOwnerPolicy) {
-      this.policyService.getList(new PolicyFilter('', 1, 100)).subscribe({
-        next: policies => {
-          this.permissions = preProcessPermissions(policies.items.flatMap(p => p.statements));
-          this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
-        }
-      });
+      const permissions = Object.keys(permissionActions)
+        .filter((property) => permissionActions[property].isOpenAPIApplicable)
+        .map((property) => {
+          const { resourceType, name } = permissionActions[property];
+          return {
+            id: uuidv4(),
+            resourceType,
+            effect: EffectEnum.Allow,
+            actions: [name],
+            resources: [generalResourceRNPattern[resourceType]]
+          }
+        });
+      this.permissions = preProcessPermissions(permissions);
     } else {
       this.permissions = preProcessPermissions(this.permissionsService.permissions);
     }

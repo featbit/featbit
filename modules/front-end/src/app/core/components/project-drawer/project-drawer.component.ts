@@ -4,8 +4,7 @@ import {NzMessageService} from 'ng-zorro-antd/message';
 import {IProject} from '@shared/types';
 import {ProjectService} from '@services/project.service';
 import {PermissionsService} from "@services/permissions.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
-import {ResourceTypeEnum} from "@shared/policy";
+import {ResourceTypeEnum, generalResourceRNPattern, permissionActions} from "@shared/policy";
 
 @Component({
   selector: 'app-project-drawer',

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import {PermissionsService} from "@services/permissions.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
+import {generalResourceRNPattern, permissionActions} from "@shared/policy";
 import {NzMessageService} from "ng-zorro-antd/message";
 
 @Injectable({
