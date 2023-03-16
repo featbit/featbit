@@ -3,9 +3,8 @@ import {
   EffectEnum,
   IamPolicyAction,
   IPolicyStatement,
-  isResourceGeneral,
+  isResourceGeneral, permissionActions,
   Resource,
-  resourceActionsDict,
   resourcesTypes,
   ResourceType
 } from "@shared/policy";
@@ -32,7 +31,7 @@ class PolicyStatementViewModel {
       this.resourceType = resourcesTypes.find(rt => rt.type === statement.resourceType) || null;
       this.effect = statement.effect === 'allow' ? EffectEnum.Allow : EffectEnum.Deny;
 
-      const allActions = Object.keys(resourceActionsDict).flatMap(p => resourceActionsDict[p]);
+      const allActions = [...Object.values(permissionActions)];
       this.selectedActions = statement.actions.map(act => {
         const find = allActions.find(a => act === a.name);
         return find || act as unknown as IamPolicyAction;
@@ -42,7 +41,7 @@ class PolicyStatementViewModel {
 
       // All the resources here are the same type, and if it's general type, resources only contains one element
       const isGeneralResource = isResourceGeneral(this.resourceType?.type, statement.resources[0]);
-      this.availableActions = resourceActionsDict[this.resourceType?.type].filter((rs) => isGeneralResource || rs.isSpecificApplicable);
+      this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
     } else {
       this.id = uuidv4();
       this.effect = EffectEnum.Allow;
@@ -69,7 +68,7 @@ class PolicyStatementViewModel {
     // All the resources here are the same type, and if it's general type, resources only contains one element
     const isGeneralResource = isResourceGeneral(resources[0].type, resources[0].rn);
 
-    this.availableActions = resourceActionsDict[this.resourceType?.type].filter((rs) => isGeneralResource || rs.isSpecificApplicable);
+    this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
   }
 
   getOutput(): IPolicyStatement {

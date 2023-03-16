@@ -329,39 +329,6 @@ export const permissionActions: {[key: string]: IamPolicyAction} = {
   },
 }
 
-export const resourceActionsDict: {[key: string]: IamPolicyAction[]} = {
-  [ResourceTypeEnum.All]: [
-    permissionActions.All,
-  ],
-  [ResourceTypeEnum.Account]: [
-    permissionActions.UpdateOrgName
-  ],
-  [ResourceTypeEnum.IAM]: [
-    permissionActions.CanManageIAM,
-  ],
-  [ResourceTypeEnum.AccessToken]: [
-    permissionActions.ListAccessTokens,
-    permissionActions.ManageServiceAccessTokens,
-    permissionActions.ManagePersonalAccessTokens,
-  ],
-  [ResourceTypeEnum.Project]: [
-    permissionActions.ListProjects,
-    permissionActions.CreateProject,
-    permissionActions.DeleteProject,
-    permissionActions.UpdateProjectSettings,
-    permissionActions.ListEnvs,
-    permissionActions.CreateEnv,
-  ],
-  [ResourceTypeEnum.Env]: [
-    permissionActions.AccessEnvs,
-    permissionActions.DeleteEnv,
-    permissionActions.UpdateEnvSettings,
-    permissionActions.DeleteEnvSecret,
-    permissionActions.CreateEnvSecret,
-    permissionActions.UpdateEnvSecret,
-  ]
-}
-
 // check if the resource is a general resource
 // if returns false, that means the actions which cannot be applied to a specific resource should be hidden
 // ex: ListProjects should not be avaible for a specific project: project/abc

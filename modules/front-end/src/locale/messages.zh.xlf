@@ -737,7 +737,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">131</context>
+          <context context-type="linenumber">130</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
@@ -1497,11 +1497,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -5428,7 +5428,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">143</context>
+          <context context-type="linenumber">142</context>
         </context-group>
         <target>系统托管策略不允许被修改。 如确有需要，可以复制以后再根据需求进行修改。</target>
       </trans-unit>
@@ -5464,7 +5464,7 @@
         <source>Make sure resource and operation are set for all permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">149</context>
+          <context context-type="linenumber">148</context>
         </context-group>
         <target>请确保已设置所有权限的资源和操作</target>
       </trans-unit>
