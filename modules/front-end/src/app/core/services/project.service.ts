@@ -1,17 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
-import {MessageQueueService} from "@services/message-queue.service";
+import { MessageQueueService } from "@services/message-queue.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
   baseUrl = `${environment.url}/api/v1/organizations/#organizationId/projects`;
-
 
   constructor(private http: HttpClient, private messageQueueService: MessageQueueService,) { }
 
