@@ -177,7 +177,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
@@ -1281,7 +1281,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <target>添加环境</target>
       </trans-unit>
@@ -2060,6 +2060,10 @@
           <context context-type="linenumber">26</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
           <context context-type="linenumber">25</context>
         </context-group>
@@ -2229,7 +2233,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">99</context>
         </context-group>
         <target>当前选项</target>
       </trans-unit>
@@ -3045,7 +3053,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">107</context>
         </context-group>
         <target>删除后不可恢复，确定要删除么？</target>
       </trans-unit>
@@ -3133,7 +3141,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -5293,7 +5301,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">133</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -6461,21 +6469,13 @@
         </context-group>
         <target>按名称查找</target>
       </trans-unit>
-      <trans-unit id="org.project.envName" datatype="html">
-        <source>Environment name</source>
+      <trans-unit id="commoname" datatype="html">
+        <source>Name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
           <context context-type="linenumber">26</context>
         </context-group>
-        <target>环境名称</target>
-      </trans-unit>
-      <trans-unit id="org.project.description" datatype="html">
-        <source>Description</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">36</context>
-        </context-group>
-        <target>描述</target>
+        <target>名称</target>
       </trans-unit>
       <trans-unit id="org.project.secrets" datatype="html">
         <source>Secrets</source>
@@ -6517,7 +6517,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <target>编辑</target>
       </trans-unit>
@@ -6525,7 +6525,7 @@
         <source>The name of the secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">137</context>
         </context-group>
         <target>秘钥名称</target>
       </trans-unit>
@@ -6533,7 +6533,7 @@
         <source>The secret would be used by a client side or server side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">143</context>
+          <context context-type="linenumber">147</context>
         </context-group>
         <target>该秘钥将被用于客户端还是服务端 SDK</target>
       </trans-unit>
@@ -6541,7 +6541,7 @@
         <source>Type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">143</context>
+          <context context-type="linenumber">147</context>
         </context-group>
         <target>类型</target>
       </trans-unit>
@@ -6549,7 +6549,7 @@
         <source>Client Side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <target>客户端 SDK</target>
       </trans-unit>
@@ -6557,7 +6557,7 @@
         <source>Server Side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">147</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <target>服务端 SDK</target>
       </trans-unit>

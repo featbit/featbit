@@ -552,10 +552,18 @@ app-root {
 
 // custom card style
 .ant-descriptions-title {
+  display:flex;
+  align-items: center;
+  gap: 8px;
   color: @grey70-color;
   font-weight: 700;
   font-size: 18px;
   line-height: 150%;
+
+  .ant-tag {
+    margin-top: 4px;
+    font-weight: 500;
+  }
 }
 
 .ant-descriptions-extra {
