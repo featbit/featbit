@@ -99,7 +99,7 @@
           </ng-template>
           <ng-template #emailValidateTemplate let-control>
             <ng-container *ngIf="control.hasError('required')" i18n="@@common.email-cannot-be-empty">Email cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('invalid')" i18n="common.email-invalid">Invalid Email</ng-container>
+            <ng-container *ngIf="control.hasError('invalid')" i18n="@@common.email-invalid">Invalid Email</ng-container>
           </ng-template>
         </nz-form-control>
       </nz-form-item>
