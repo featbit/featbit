@@ -1,5 +1,4 @@
 ﻿using Application.Resources;
-using Application.Services;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Resources;
@@ -24,79 +23,14 @@ public class ResourceService : IResourceService
 
         return filter.Type switch
         {
-            ResourceType.All => GetAll(name),
-            ResourceType.Account => GetGeneral(ResourceType.Account, name),
-            ResourceType.IAM => GetGeneral(ResourceType.IAM, name),
-            ResourceType.AccessToken => GetGeneral(ResourceType.AccessToken, name),
+            ResourceType.All => new[] { Resource.All },
+            ResourceType.Account => new[] { Resource.AllAccount },
+            ResourceType.IAM => new[] { Resource.AllIam },
+            ResourceType.AccessToken => new[] { Resource.AllAccessToken },
             ResourceType.Env => await GetEnvsAsync(organizationId, name),
             ResourceType.Project => await GetProjectsAsync(organizationId, name),
             _ => Array.Empty<Resource>()
         };
-    }
-
-    private IEnumerable<Resource> GetAll(string name)
-    {
-        var resources = new List<Resource>
-        {
-            new()
-            {
-                Id = new Guid("2bdcb290-2e1b-40d7-bdd1-697fb2193292"),
-                Name = "All",
-                Rn = "*",
-                Type = ResourceType.All
-            }
-        };
-
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            resources = resources.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
-
-        return resources;
-    }
-
-    private IEnumerable<Resource> GetGeneral(string resourceType, string name)
-    {
-        
-        var resource = resourceType switch
-        {
-           
-            ResourceType.Account => new Resource
-            {
-                Id = new Guid("e394832e-bd98-43de-b174-e0c98e03d19d"),
-                Name = "Account",
-                Rn = "account/*",
-                Type = ResourceType.Account
-            },
-            ResourceType.IAM => new Resource
-            {
-                Id = new Guid("d8791bd2-ca85-4629-a439-1dce20764211"),
-                Name = "IAM",
-                Rn = "iam/*",
-                Type = ResourceType.IAM
-            },
-            ResourceType.AccessToken => new Resource
-            {
-                Id = new Guid("150083da-e20f-4670-948c-b842cf8a91a4"),
-                Name = "Access token",
-                Rn = "access-token/*",
-                Type = ResourceType.AccessToken
-            },
-            _ => null
-        };
-
-        if (resource == null)
-        {
-            return new List<Resource>();
-        }
-
-        var resources =  new List<Resource> { resource };
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            resources = resources.Where(x => x.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
-
-        return resources.ToList();
     }
 
     public async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)
@@ -123,15 +57,8 @@ public class ResourceService : IResourceService
             Rn = x.Rn,
             Type = ResourceType.Project
         }).ToList();
-        
-        resources.Insert(0, new Resource
-        {
-            Id = new Guid("e77679a2-e79b-43e5-aa9f-fd6c980239be"),
-            Name = "project",
-            Rn = "project/*",
-            Type = ResourceType.Project
-        });
 
+        resources.Insert(0, Resource.AllProject);
         return resources;
     }
 
@@ -167,16 +94,8 @@ public class ResourceService : IResourceService
             Rn = x.Rn,
             Type = ResourceType.Env
         }).ToList();
-        
-        resources.Insert(0, new Resource
-        {
-            Id = new Guid("c62ed37a-74a9-4987-8ef4-b5a16127f307"),
-            Name = "env",
-            Rn = "project/*:env/*",
-            Type = ResourceType.Env
-        });
-        
-        
+
+        resources.Insert(0, Resource.AllProjectEnv);
         return resources;
     }
 }
