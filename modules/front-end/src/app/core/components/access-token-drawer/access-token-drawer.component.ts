@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
@@ -7,11 +7,9 @@ import {
   AccessTokenTypeEnum,
   IAccessToken,
 } from "@features/safe/integrations/access-tokens/types/access-token";
-import { NzSelectComponent } from "ng-zorro-antd/select";
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
 import { EffectEnum, generalResourceRNPattern, permissionActions } from "@shared/policy";
-import { PolicyFilter } from "@features/safe/iam/types/policy";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
@@ -41,9 +39,11 @@ export class AccessTokenDrawerComponent {
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
       this.permissions = preProcessPermissions(accessToken.permissions);
+      this.title = $localize`:@@integrations.access-token.access-token-drawer.edit-title:Edit Access Token`;
     } else {
-      accessToken = { name: null, type: AccessTokenTypeEnum.Personal};
+      accessToken = { name: null, type: AccessTokenTypeEnum.Personal };
       this.setAuthorizedPermissions();
+      this.title = $localize`:@@integrations.access-token.access-token-drawer.add-title:Add Access Token`;
     }
 
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
@@ -54,6 +54,7 @@ export class AccessTokenDrawerComponent {
 
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
+  title: string = '';
 
   canTakeActionOnPersonalAccessToken = false;
   canTakeActionOnServiceAccessToken = false;
@@ -76,44 +77,26 @@ export class AccessTokenDrawerComponent {
 
   isServiceAccessToken: boolean = false
 
-  @ViewChild("policyNodeSelector", {static: false}) policySelectNode: NzSelectComponent;
   form: FormGroup;
 
   get accessToken() {
     return this._accessToken;
   }
 
-  resetForm() {
-    this.form && this.form.reset();
-  }
-
   patchForm(accessToken: Partial<IAccessToken>) {
     this.form.patchValue({
       name: accessToken.name,
       type: accessToken.type,
-      policy: {},
-    });
-  }
-
-  resetPolicy() {
-    this.form.patchValue({
-      policy: {},
     });
   }
 
   onClose() {
-    this.reset();
     this.close.emit();
-  }
-
-  private reset() {
-    this.form.reset();
   }
 
   onTypeChange() {
     const {type} = this.form.value;
     this.isServiceAccessToken = type === AccessTokenTypeEnum.Service;
-    this.resetPolicy();
   }
 
   setAuthorizedPermissions() {
@@ -206,7 +189,7 @@ export class AccessTokenDrawerComponent {
     this.isLoading = true;
     if (this.isEditing) {
       this.accessTokenService.update(this.accessToken.id, name).subscribe({
-          next: res => {
+          next: _ => {
             this.isLoading = false;
             this.close.emit({ isEditing: true, id: this.accessToken.id, name: name });
             this.message.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -221,11 +204,11 @@ export class AccessTokenDrawerComponent {
       const policies = this.isServiceAccessToken ? postProcessPermissions(this.permissions) : [];
 
       this.accessTokenService.create(name, type, policies).subscribe({
-          next: ({id, name, token}) => {
+          next: ({name, token}) => {
             this.isLoading = false;
             this.close.emit({ isEditing: false });
             this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-            this.reset();
+            this.form.reset();
             this.tokenName = name;
             this.tokenValue = token;
             this.isCreationConfirmModalVisible = true;

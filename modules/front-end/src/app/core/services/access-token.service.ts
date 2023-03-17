@@ -9,7 +9,6 @@ import {
   IAccessToken,
   IPagedAccessToken
 } from "@features/safe/integrations/access-tokens/types/access-token";
-import { IMetric } from "@features/safe/experiments/types";
 import { IPolicyStatement } from "@shared/policy";
 
 @Injectable({
@@ -56,8 +55,8 @@ export class AccessTokenService {
     return this.http.put(`${this.baseUrl}/${id}/toggle`, {});
   }
 
-  update(id: string, name: string): Observable<any> {
+  update(id: string, name: string): Observable<boolean> {
     const url = this.baseUrl;
-    return this.http.put(url + `/${id}`, { name });
+    return this.http.put<boolean>(url + `/${id}`, { name });
   }
 }
