@@ -11,24 +11,23 @@ public class AccessTokenService : MongoDbService<AccessToken>, IAccessTokenServi
     public AccessTokenService(MongoDbClient mongoDb) : base(mongoDb)
     {
     }
-    
+
     public async Task<PagedResult<AccessToken>> GetListAsync(Guid organizationId, AccessTokenFilter filter)
     {
-        var query = MongoDb.QueryableOf<AccessToken>()
-            .Where(x => x.OrganizationId == organizationId);
+        var query = Queryable.Where(x => x.OrganizationId == organizationId);
 
         var name = filter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
             query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
         }
-        
+
         var type = filter.Type;
         if (!string.IsNullOrWhiteSpace(type))
         {
             query = query.Where(x => x.Type == type);
         }
-        
+
         var creatorId = filter.CreatorId;
         if (creatorId.HasValue)
         {
@@ -44,9 +43,9 @@ public class AccessTokenService : MongoDbService<AccessToken>, IAccessTokenServi
 
         return new PagedResult<AccessToken>(totalCount, items);
     }
-    
+
     public async Task DeleteAsync(Guid id)
     {
-        await MongoDb.CollectionOf<AccessToken>().DeleteOneAsync(x => x.Id == id);
+        await Collection.DeleteOneAsync(x => x.Id == id);
     }
 }

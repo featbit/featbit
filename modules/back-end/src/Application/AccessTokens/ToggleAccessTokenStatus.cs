@@ -1,6 +1,3 @@
-using Application.Users;
-using Domain.AuditLogs;
-
 namespace Application.AccessTokens;
 
 public class ToggleAccessTokenStatus : IRequest<bool>
@@ -21,7 +18,9 @@ public class ToggleAccessTokenStatusHandler : IRequestHandler<ToggleAccessTokenS
     {
         var accessToken = await _service.GetAsync(request.Id);
         accessToken.ToggleStatus();
+
         await _service.UpdateAsync(accessToken);
+
         return true;
     }
 }

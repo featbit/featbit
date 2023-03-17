@@ -66,19 +66,6 @@ public class MemberService : IMemberService
             .DeleteManyAsync(x => x.OrganizationId == organizationId && x.MemberId == memberId);
     }
 
-    public async Task<IEnumerable<Member>> GetListByIds(IEnumerable<Guid> ids)
-    {
-        var query = _mongoDb.QueryableOf<User>()
-            .Where(x => ids.Contains(x.Id));
-        
-        return await query.Select(x => new Member
-        {
-            Id = x.Id,
-            Email = x.Email,
-            Name = x.Name,
-        }).ToListAsync();;
-    }
-
     public async Task<PagedResult<Member>> GetListAsync(Guid organizationId, MemberFilter filter)
     {
         var users = _mongoDb.QueryableOf<User>();

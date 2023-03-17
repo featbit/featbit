@@ -1,7 +1,5 @@
 using Application.AccessTokens;
 using Application.Bases.Models;
-using Application.FeatureFlags;
-using Application.Policies;
 
 namespace Api.Controllers;
 
@@ -18,15 +16,15 @@ public class AccessTokenController : ApiControllerBase
             OrganizationId = organizationId,
             Filter = filter
         };
-    
+
         var accessTokens = await Mediator.Send(request);
         return Ok(accessTokens);
     }
-    
+
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid organizationId, string name)
     {
-        var request = new IsAccessTokenNameUsed
+        var request = new IsNameUsed
         {
             OrganizationId = organizationId,
             Name = name
@@ -35,7 +33,7 @@ public class AccessTokenController : ApiControllerBase
         var isNameUsed = await Mediator.Send(request);
         return Ok(isNameUsed);
     }
-    
+
     [HttpPost]
     public async Task<ApiResponse<AccessTokenVm>> CreateAsync(Guid organizationId, CreateAccessToken request)
     {
@@ -44,7 +42,7 @@ public class AccessTokenController : ApiControllerBase
         var accessToken = await Mediator.Send(request);
         return Ok(accessToken);
     }
-    
+
     [HttpPut("{id:guid}/toggle")]
     public async Task<ApiResponse<bool>> ToggleAsync(Guid id)
     {
@@ -56,11 +54,11 @@ public class AccessTokenController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
+
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
-        var request = new DeleteAccessToken()
+        var request = new DeleteAccessToken
         {
             Id = id
         };
@@ -68,9 +66,9 @@ public class AccessTokenController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
+
     [HttpPut("{id:guid}")]
-    public async Task<ApiResponse<AccessTokenVm>> UpdateAsync(Guid id, UpdateAccessToken request)
+    public async Task<ApiResponse<bool>> UpdateAsync(Guid id, UpdateAccessToken request)
     {
         request.Id = id;
 

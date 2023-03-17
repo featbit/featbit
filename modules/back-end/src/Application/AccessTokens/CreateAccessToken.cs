@@ -24,12 +24,12 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
-        
+
         RuleFor(x => x.Type)
             .Must(AccessTokenTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidAccessTokenType);
-        
+
         RuleFor(x => x.Permissions)
-            .Must(Permissions => Permissions.Any())
+            .Must(permissions => permissions.Any())
             .Unless(x => x.Type == AccessTokenTypes.Personal)
             .WithErrorCode(ErrorCodes.ServiceAccessTokenMustDefinePolicies);
     }
@@ -42,7 +42,11 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
     private readonly IAccessTokenService _service;
     private readonly IMapper _mapper;
 
-    public CreateAccessTokenHandler(IAccessTokenService service, IMemberService memberService, ICurrentUser currentUser, IMapper mapper)
+    public CreateAccessTokenHandler(
+        IAccessTokenService service,
+        IMemberService memberService,
+        ICurrentUser currentUser,
+        IMapper mapper)
     {
         _service = service;
         _currentUser = currentUser;
@@ -52,43 +56,39 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
 
     public async Task<AccessTokenVm> Handle(CreateAccessToken request, CancellationToken cancellationToken)
     {
-        IEnumerable<PolicyStatement> permissions = new List<PolicyStatement>();
         if (request.Type == AccessTokenTypes.Service)
         {
-            var authorizedPolices = await _memberService.GetPoliciesAsync(request.OrganizationId, _currentUser.Id);
-            var ownerPolicy = authorizedPolices.FirstOrDefault((x) => x.Name == "Owner");
-            if (ownerPolicy != null)
-            {
-                permissions = request.Permissions;
-            }
-            else
-            {
-                var haveUnauthorizedPermissions = request.Permissions.Any(x =>
-                {
-                    var matchedPolicy = authorizedPolices.FirstOrDefault(policy =>
-                        policy.Statements.Any(statement =>
-                            statement.ResourceType == x.ResourceType && statement.Effect == "allow" &&
-                            x.Resources.All(rsc => statement.Resources.Any(resource => MatchRule(rsc, resource))) &&
-                            x.Actions.All(act => statement.Actions.Any(action => MatchRule(act, action)))));
-                    
-                    return matchedPolicy == null;
-                });
+            var authorizedPolices =
+                await _memberService.GetPoliciesAsync(request.OrganizationId, _currentUser.Id);
 
-                if (haveUnauthorizedPermissions)
-                {
-                    throw new BusinessException(ErrorCodes.Forbidden);
-                }
+            var haveUnauthorizedPermissions = request.Permissions.Any(x =>
+            {
+                var matchedPolicy = authorizedPolices.FirstOrDefault(policy =>
+                    policy.Statements.Any(statement =>
+                        (statement.ResourceType == x.ResourceType || statement.ResourceType == "*") &&
+                        statement.Effect == "allow" &&
+                        x.Resources.All(rsc => statement.Resources.Any(resource => MatchRule(rsc, resource))) &&
+                        x.Actions.All(act => statement.Actions.Any(action => MatchRule(act, action))))
+                );
+
+                return matchedPolicy == null;
+            });
+
+            if (haveUnauthorizedPermissions)
+            {
+                throw new BusinessException(ErrorCodes.Forbidden);
             }
         }
 
-        var existingAt = await _service.FindOneAsync(at => string.Equals(at.Name, request.Name, StringComparison.OrdinalIgnoreCase));
-
-        if (existingAt != null)
+        var existed =
+            await _service.FindOneAsync(at => string.Equals(at.Name, request.Name, StringComparison.OrdinalIgnoreCase));
+        if (existed != null)
         {
             throw new BusinessException(ErrorCodes.EntityExistsAlready);
         }
 
-        var accessToken = new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, permissions);
+        var accessToken =
+            new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, request.Permissions);
 
         await _service.AddOneAsync(accessToken);
 
@@ -101,9 +101,16 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
     // "*b" => everything that ends with "b"
     // "*a*" => everything that has an "a" in it
     // "*a*b*"=> everything that has an "a" in it, followed by anything, followed by a "b", followed by anything
-    private bool MatchRule(string str, string rule)
+    private static bool MatchRule(string str, string rule)
     {
-        Func<string, string> escapeRegex = (s) => Regex.Replace(s, "([.*+?^=!:${}()|\\[\\]\\\\/])", "\\$1");
-        return new Regex("^" + rule.Split('*').Select(escapeRegex).Aggregate((x, y) => x + ".*" + y) + "$").IsMatch(str);
+        string EscapeRegex(string s) => Regex.Replace(s, "([.*+?^=!:${}()|\\[\\]\\\\/])", "\\$1");
+
+        var matchPattern = rule
+            .Split('*')
+            .Select(EscapeRegex)
+            .Aggregate((x, y) => $"{x}.*{y}");
+
+        var regex = new Regex($"^{matchPattern}$");
+        return regex.IsMatch(str);
     }
 }
