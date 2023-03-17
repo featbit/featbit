@@ -24,7 +24,7 @@ public class AccessTokenController : ApiControllerBase
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid organizationId, string name)
     {
-        var request = new IsNameUsed
+        var request = new IsAccessTokenNameUsed
         {
             OrganizationId = organizationId,
             Name = name
