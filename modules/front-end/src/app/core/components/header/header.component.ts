@@ -12,7 +12,6 @@ import { Observable } from "rxjs";
 import { copyToClipboard } from '@utils/index';
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FeedbackService } from "@services/feedback.service";
-import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 
 @Component({
   selector: 'app-header',
