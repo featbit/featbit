@@ -9,7 +9,13 @@ import {
 } from "@features/safe/integrations/access-tokens/types/access-token";
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
-import { EffectEnum, generalResourceRNPattern, permissionActions } from "@shared/policy";
+import {
+  EffectEnum,
+  generalResourceRNPattern,
+  permissionActions,
+  ResourceTypeAccount,
+  ResourceTypeIAM
+} from "@shared/policy";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
@@ -31,9 +37,19 @@ export class AccessTokenDrawerComponent {
   private _accessToken: IAccessToken;
   isEditing: boolean = false;
 
-  resourceTypes: ResourceType[] = [ResourceTypeAccessToken, ResourceTypeProject, ResourceTypeEnv]; // TODO replace with real open API resource types
+  // This property is used to define the order of displaying the resource types, it also defines the resource types applicable to OPEN API
+  // TODO replace with real open API resource types
+  resourceTypes: ResourceType[] = [
+    ResourceTypeAccount,
+    ResourceTypeIAM,
+    ResourceTypeAccessToken,
+    ResourceTypeProject,
+    ResourceTypeEnv
+  ];
+
   authorizedResourceTypes: ResourceType[] = [];
   permissions: { [key: string]: IPermissionStatementGroup };
+
   @Input()
   set accessToken(accessToken: IAccessToken) {
     this.isEditing = accessToken && !!accessToken.id;
@@ -41,7 +57,7 @@ export class AccessTokenDrawerComponent {
       this.permissions = preProcessPermissions(accessToken.permissions);
       this.title = $localize`:@@integrations.access-token.access-token-drawer.edit-title:Edit Access Token`;
     } else {
-      accessToken = { name: null, type: AccessTokenTypeEnum.Personal };
+      accessToken = {name: null, type: AccessTokenTypeEnum.Personal};
       this.setAuthorizedPermissions();
       this.title = $localize`:@@integrations.access-token.access-token-drawer.add-title:Add Access Token`;
     }
@@ -58,6 +74,7 @@ export class AccessTokenDrawerComponent {
 
   canTakeActionOnPersonalAccessToken = false;
   canTakeActionOnServiceAccessToken = false;
+
   constructor(
     private fb: FormBuilder,
     private policyService: PolicyService,
@@ -102,11 +119,11 @@ export class AccessTokenDrawerComponent {
   setAuthorizedPermissions() {
     const hasOwnerPolicy = this.permissionsService.policies.some((policy) => policy.name === 'Owner' && policy.type === 'SysManaged');
 
+    let permissions = [];
     if (hasOwnerPolicy) {
-      const permissions = Object.keys(permissionActions)
-        .filter((property) => permissionActions[property].isOpenAPIApplicable)
+      permissions = Object.keys(permissionActions)
         .map((property) => {
-          const { resourceType, name } = permissionActions[property];
+          const {resourceType, name} = permissionActions[property];
           return {
             id: uuidv4(),
             resourceType,
@@ -114,11 +131,13 @@ export class AccessTokenDrawerComponent {
             actions: [name],
             resources: [generalResourceRNPattern[resourceType]]
           }
-        });
-      this.permissions = preProcessPermissions(permissions);
+        })
     } else {
-      this.permissions = preProcessPermissions(this.permissionsService.permissions);
+      permissions = this.permissionsService.permissions;
     }
+
+    permissions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
+    this.permissions = preProcessPermissions(permissions);
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -152,7 +171,7 @@ export class AccessTokenDrawerComponent {
     }
   }
 
-  updatePermissionSingleChecked(statementGroup: IPermissionStatementGroup){
+  updatePermissionSingleChecked(statementGroup: IPermissionStatementGroup) {
     if (statementGroup.statements.every(item => !item.checked)) {
       statementGroup.allChecked = false;
       statementGroup.indeterminate = false;
@@ -169,6 +188,7 @@ export class AccessTokenDrawerComponent {
   tokenName = '';
   tokenValue = '';
   isCreationConfirmModalVisible = false;
+
   doSubmit() {
     if (this.form.invalid) {
       for (const i in this.form.controls) {
@@ -182,7 +202,7 @@ export class AccessTokenDrawerComponent {
     const {name, type} = this.form.value;
 
     if ((type === AccessTokenTypeEnum.Personal && !this.canTakeActionOnPersonalAccessToken) || (type === AccessTokenTypeEnum.Service && !this.canTakeActionOnServiceAccessToken)) {
-      this.message.warning($localize `:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
+      this.message.warning($localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
       return;
     }
 
@@ -191,7 +211,7 @@ export class AccessTokenDrawerComponent {
       this.accessTokenService.update(this.accessToken.id, name).subscribe({
           next: _ => {
             this.isLoading = false;
-            this.close.emit({ isEditing: true, id: this.accessToken.id, name: name });
+            this.close.emit({isEditing: true, id: this.accessToken.id, name: name});
             this.message.success($localize`:@@common.operation-success:Operation succeeded`);
           },
           error: _ => {
@@ -206,7 +226,7 @@ export class AccessTokenDrawerComponent {
       this.accessTokenService.create(name, type, policies).subscribe({
           next: ({name, token}) => {
             this.isLoading = false;
-            this.close.emit({ isEditing: false });
+            this.close.emit({isEditing: false});
             this.message.success($localize`:@@common.operation-success:Operation succeeded`);
             this.form.reset();
             this.tokenName = name;
@@ -226,7 +246,7 @@ export class AccessTokenDrawerComponent {
 
   copyText(event, text: string) {
     copyToClipboard(text).then(
-      () => this.message.success($localize `:@@common.copy-success:Copied`)
+      () => this.message.success($localize`:@@common.copy-success:Copied`)
     );
   }
 

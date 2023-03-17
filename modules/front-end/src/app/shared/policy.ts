@@ -61,6 +61,7 @@ export const generalResourceRNPattern = {
   account: 'account/*',
   iam: 'iam/*',
   accessToken: 'access-token/*',
+  "access-token": 'access-token/*', // this duplicated property is necessary for resource types consisting of multiple words because of access-token-drawer.component.ts line 132
   project: 'project/*',
   env: 'project/*:env/*'
 };
@@ -117,7 +118,7 @@ export interface ResourceParamViewModel {
   isInvalid: boolean
 }
 
-export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]} = {
+export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[] } = {
   [ResourceTypeEnum.All]: [],
   [ResourceTypeEnum.Account]: [],
   [ResourceTypeEnum.IAM]: [],
@@ -158,7 +159,7 @@ export const rscParamsDict: {[key in ResourceTypeEnum]: ResourceParamViewModel[]
   ],
 };
 
-export const permissionActions: {[key: string]: IamPolicyAction} = {
+export const permissionActions: { [key: string]: IamPolicyAction } = {
   All: {
     id: uuidv4(),
     name: '*',
@@ -213,7 +214,7 @@ export const permissionActions: {[key: string]: IamPolicyAction} = {
     isOpenAPIApplicable: true,
     isSpecificApplicable: true
   },
-  CreateEnv:  {
+  CreateEnv: {
     id: uuidv4(),
     name: 'CreateEnv',
     resourceType: ResourceTypeEnum.Project,
