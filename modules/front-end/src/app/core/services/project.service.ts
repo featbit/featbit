@@ -1,17 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
-import {MessageQueueService} from "@services/message-queue.service";
+import { MessageQueueService } from "@services/message-queue.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProjectService {
   baseUrl = `${environment.url}/api/v1/organizations/#organizationId/projects`;
-
 
   constructor(private http: HttpClient, private messageQueueService: MessageQueueService,) { }
 
@@ -50,19 +49,6 @@ export class ProjectService {
     this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
   }
 
-  // update current project env by partial object
-  updateCurrentProjectEnvLocally(partialUpdated: Partial<IProjectEnv>) {
-    const projectEnvJson = localStorage.getItem(CURRENT_PROJECT());
-    if (!projectEnvJson) {
-      return;
-    }
-
-    const projectEnv = JSON.parse(projectEnvJson);
-    const updatedProject = Object.assign(projectEnv, partialUpdated);
-
-    this.upsertCurrentProjectEnvLocally(updatedProject);
-  }
-
   // get local project env
   getLocalCurrentProjectEnv(): IProjectEnv {
     const projectEnvJson = localStorage.getItem(CURRENT_PROJECT());
@@ -85,6 +71,7 @@ export class ProjectService {
             projectId: firstProject.id,
             projectName: firstProject.name,
             envId: firstProjectEnv.id,
+            envKey: firstProjectEnv.key,
             envName: firstProjectEnv.name,
             envSecret: firstProjectEnv.secrets[0].value
           };

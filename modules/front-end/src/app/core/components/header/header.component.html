@@ -58,7 +58,7 @@
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
         <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"
           *ngFor="let project of availableProjects" (click)="onSelectProject(project)">
-          {{ project.name }}
+          {{ project.name }} <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
         </nz-list-item>
         <ng-template #projectHeader>
           <span class="header" i18n="@@common.projects">Projects</span>
@@ -67,7 +67,7 @@
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
         <nz-list-item [ngClass]="{'item-selected': selectedEnv?.id === env.id}" *ngFor="let env of availableEnvs"
           (click)="onSelectEnv(env)">
-          {{ env.name }}
+          {{ env.name }} <nz-tag nzColor="green" *ngIf="isCurrentEnv(env)" i18n="@@common.current">Current</nz-tag>
         </nz-list-item>
         <ng-template #envHeader>
           <span class="header" i18n="@@common.environments">Environments</span>

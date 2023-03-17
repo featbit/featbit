@@ -1,18 +1,20 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IEnvironment } from '@shared/types';
 import { EnvService } from '@services/env.service';
 import { ProjectService } from "@services/project.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
+import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { slugify } from "@utils/index";
 
 @Component({
   selector: 'app-env-drawer',
   templateUrl: './env-drawer.component.html',
   styleUrls: ['./env-drawer.component.less']
 })
-export class EnvDrawerComponent implements OnInit {
+export class EnvDrawerComponent {
 
   private _env: IEnvironment;
 
@@ -27,9 +29,11 @@ export class EnvDrawerComponent implements OnInit {
     this.isEditing = env && !!env.id;
     if (this.isEditing) {
       this.title = $localize `:@@org.project.editEnv:Edit environment`;
+      this.initForm(true);
       this.patchForm(env);
     } else {
       this.title = $localize `:@@org.project.addEnv:Add environment`;
+      this.initForm(false);
       this.resetForm();
     }
     this._env = env;
@@ -50,22 +54,45 @@ export class EnvDrawerComponent implements OnInit {
     private message: NzMessageService,
     private projectSrv: ProjectService,
     private permissionsService: PermissionsService
-  ) { }
-
-  ngOnInit(): void {
-    this.initForm();
+  ) {
   }
 
-  initForm() {
+  initForm(isKeyDisabled: boolean) {
     this.envForm = this.fb.group({
       name: [null, [Validators.required]],
+      key: [{ disabled: isKeyDisabled, value: null }, Validators.required, this.keyAsyncValidator],
       description: [null],
     });
   }
 
+  nameChange(name: string) {
+    if (this.isEditing) return;
+
+    let keyControl = this.envForm.get('key')!;
+    keyControl.setValue(slugify(name ?? ''));
+    keyControl.markAsDirty();
+  }
+
+  keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+    debounceTime(300),
+    switchMap(value => this.envService.isKeyUsed(this.env.projectId, value as string)),
+    map(isKeyUsed => {
+      switch (isKeyUsed) {
+        case true:
+          return { error: true, duplicated: true };
+        case undefined:
+          return { error: true, unknown: true };
+        default:
+          return null;
+      }
+    }),
+    first()
+  );
+
   patchForm(env: Partial<IEnvironment>) {
     this.envForm.patchValue({
       name: env.name,
+      key: env.key,
       description: env.description,
     });
   }
@@ -89,7 +116,7 @@ export class EnvDrawerComponent implements OnInit {
 
     this.isLoading = true;
 
-    const { name, description } = this.envForm.value;
+    const { name, key, description } = this.envForm.value;
     const projectId = this.env.projectId;
 
     if (this.isEditing) {
@@ -101,7 +128,7 @@ export class EnvDrawerComponent implements OnInit {
         .subscribe(
           ({id, name, description, secrets}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: true, env: { name, description, id, projectId, secrets }});
+            this.close.emit({isEditing: true, env: { name, description, id, key, projectId, secrets }});
             this.message.success($localize `:@@org.project.envUpdateSuccess:Environment successfully updated`);
           },
           () => {
@@ -109,12 +136,12 @@ export class EnvDrawerComponent implements OnInit {
           }
         );
     } else {
-      this.envService.postCreateEnv(this.env.projectId, { name, description, projectId })
+      this.envService.postCreateEnv(this.env.projectId, { name, key, description, projectId })
         .pipe()
         .subscribe(
           ({id, name, description, secrets}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: false, env: { name, description, id, projectId, secrets }});
+            this.close.emit({isEditing: false, env: { name, description, id, key, projectId, secrets }});
             this.message.success($localize `:@@org.project.envCreateSuccess:Environment successfully created`);
           },
           () => {

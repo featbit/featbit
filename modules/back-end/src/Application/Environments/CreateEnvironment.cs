@@ -9,6 +9,8 @@ public class CreateEnvironment : IRequest<EnvironmentVm>
 
     public string Name { get; set; }
 
+    public string Key { get; set; }
+
     public string Description { get; set; }
 }
 
@@ -18,6 +20,9 @@ public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+
+        RuleFor(x => x.Key)
+            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
     }
 }
 
@@ -36,7 +41,7 @@ public class CreateEnvironmentHandler : IRequestHandler<CreateEnvironment, Envir
 
     public async Task<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
     {
-        var env = new Environment(request.ProjectId, request.Name, request.Description);
+        var env = new Environment(request.ProjectId, request.Name, request.Key, request.Description);
         await _service.AddOneAsync(env);
 
         // add env built-in end-user properties

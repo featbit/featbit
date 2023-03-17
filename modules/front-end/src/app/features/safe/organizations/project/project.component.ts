@@ -1,4 +1,4 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IProject, IEnvironment, IProjectEnv, ISecret, SecretTypeEnum } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
@@ -59,8 +59,12 @@ export class ProjectComponent implements OnInit {
     }
   }
 
-  isEnvDeleteBtnVisible(env: IEnvironment): boolean {
-    return this.currentProjectEnv?.envId !== env.id;
+  isCurrentProject(project: IProject): boolean {
+    return this.currentProjectEnv?.projectId === project.id;
+  }
+
+  isCurrentEnv(env: IEnvironment): boolean {
+    return this.currentProjectEnv?.envId === env.id;
   }
 
   onCreateProjectClick() {

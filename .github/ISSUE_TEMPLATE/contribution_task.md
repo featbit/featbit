@@ -28,7 +28,7 @@ If the feature is UI related, make sure to run  `npm run i18n` at the end of the
 Each contribution counts a certain number of points, depending on its difficulty. Contributors earn the appropriate
 points when the work is merged. Contribution points are used to describe the contributions that contributors have made.
 They can also be used to receive rewards for community events. You can view the current community submissions on a
-public [google sheet](https://docs.google.com/spreadsheets/d/1ukyXgi_jRPeXj7EAST0IrnPfLOQ6xDBkcyAJY9N-Yb4/edit#gid=0).
+public [google sheet](https://docs.google.com/spreadsheets/d/1ukyXgi_jRPeXj7EAST0IrnPfLOQ6xDBkcyAJY9N-Yb4/edit#gid=1117970540).
 
 Points: x
 
