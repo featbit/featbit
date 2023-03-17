@@ -92,12 +92,8 @@
     <form nz-form [formGroup]="feedbackForm" nzLayout="vertical">
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.email">Email</nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.email-cannot-be-empty" [nzErrorTip]="emailValidateTemplate">
+        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.email-invalid" nzErrorTip="Invalid Email">
           <input nz-input formControlName="email" />
-          <ng-template #emailValidateTemplate let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.email-cannot-be-empty">Email cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('invalid')" i18n="@@common.email-invalid">Invalid Email</ng-container>
-          </ng-template>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>

@@ -50,7 +50,7 @@ export class HeaderComponent implements OnInit {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
 
     this.feedbackForm = this.fb.group({
-      email: ['', [Validators.required, phoneNumberOrEmailValidator]],
+      email: ['', [Validators.required, Validators.email]],
       message:['',[Validators.required]]
     });
   }
