@@ -12,6 +12,7 @@ import { Observable } from "rxjs";
 import { copyToClipboard } from '@utils/index';
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FeedbackService } from "@services/feedback.service";
+import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 
 @Component({
   selector: 'app-header',
@@ -49,7 +50,7 @@ export class HeaderComponent implements OnInit {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
 
     this.feedbackForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: ['', [Validators.required, phoneNumberOrEmailValidator]],
       message:['',[Validators.required]]
     });
   }
