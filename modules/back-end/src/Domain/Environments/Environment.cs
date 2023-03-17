@@ -5,7 +5,7 @@ public class Environment : AuditedEntity
     public Guid ProjectId { get; set; }
 
     public string Name { get; set; }
-    
+
     public string Key { get; set; }
 
     public string Description { get; set; }

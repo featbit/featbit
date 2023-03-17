@@ -1,4 +1,4 @@
-namespace Application.Experiments;
+namespace Application.Environments;
 
 public class IsKeyUsed : IRequest<bool>
 {
@@ -7,17 +7,20 @@ public class IsKeyUsed : IRequest<bool>
     public string Key { get; set; }
 }
 
-public class IsFeatureFlagKeyUsedHandler : IRequestHandler<IsKeyUsed, bool>
+public class IsKeyUsedHandler : IRequestHandler<IsKeyUsed, bool>
 {
     private readonly IEnvironmentService _service;
 
-    public IsFeatureFlagKeyUsedHandler(IEnvironmentService service)
+    public IsKeyUsedHandler(IEnvironmentService service)
     {
         _service = service;
     }
 
     public async Task<bool> Handle(IsKeyUsed request, CancellationToken cancellationToken)
     {
-        return await _service.AnyAsync(x => x.ProjectId == request.ProjectId && string.Equals(x.Key, request.Key, StringComparison.OrdinalIgnoreCase));
+        return await _service.AnyAsync(x =>
+            x.ProjectId == request.ProjectId &&
+            string.Equals(x.Key, request.Key, StringComparison.OrdinalIgnoreCase)
+        );
     }
 }

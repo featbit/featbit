@@ -8,7 +8,7 @@ public class CreateEnvironment : IRequest<EnvironmentVm>
     public Guid ProjectId { get; set; }
 
     public string Name { get; set; }
-    
+
     public string Key { get; set; }
 
     public string Description { get; set; }
@@ -20,7 +20,7 @@ public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
-        
+
         RuleFor(x => x.Key)
             .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
     }
