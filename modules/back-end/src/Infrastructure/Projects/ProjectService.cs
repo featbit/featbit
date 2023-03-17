@@ -57,7 +57,7 @@ public class ProjectService : MongoDbService<Project>, IProjectService
     {
         await MongoDb.CollectionOf<Project>().InsertOneAsync(project);
 
-        var envs = envNames.Select(envName => new Environment(project.Id, envName)).ToList();
+        var envs = envNames.Select(envName => new Environment(project.Id, envName, envName.ToLower())).ToList();
         await MongoDb.CollectionOf<Environment>().InsertManyAsync(envs);
 
         // add env built-in end-user properties

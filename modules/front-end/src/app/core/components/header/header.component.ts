@@ -73,6 +73,14 @@ export class HeaderComponent implements OnInit {
     });
   }
 
+  isCurrentProject(project: IProject): boolean {
+    return this.currentProjectEnv?.projectId === project.id;
+  }
+
+  isCurrentEnv(env: IEnvironment): boolean {
+    return this.currentProjectEnv?.envId === env.id;
+  }
+
   canListProjects = false;
   get availableProjects() {
     return this.canListProjects ? this.allProjects : [];
@@ -104,6 +112,7 @@ export class HeaderComponent implements OnInit {
       projectId: this.selectedProject.id,
       projectName: this.selectedProject.name,
       envId: this.selectedEnv.id,
+      envKey: this.selectedEnv.key,
       envName: this.selectedEnv.name,
       envSecret: this.selectedEnv.secrets[0].value
     };
