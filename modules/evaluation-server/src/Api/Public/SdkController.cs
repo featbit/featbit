@@ -25,7 +25,7 @@ public class SdkController : PublicApiControllerBase
         return new JsonResult(payload);
     }
 
-    [HttpPost("client/latest-all")]
+    [HttpGet("client/latest-all")]
     public async Task<IActionResult> GetClientSdkPayloadAsync([FromQuery] EndUser endUser)
     {
         if (!Authenticated)
