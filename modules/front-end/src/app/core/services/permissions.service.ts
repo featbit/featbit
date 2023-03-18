@@ -1,14 +1,15 @@
 import {Injectable} from "@angular/core";
 import {lastValueFrom} from "rxjs";
-import {IPolicy, IPolicyStatement} from "@features/safe/iam/types/policy";
+import {IPolicy} from "@features/safe/iam/types/policy";
 import {MemberService} from "@services/member.service";
-import {EffectEnum, ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
+import { EffectEnum, IamPolicyAction, IPolicyStatement, ResourceTypeEnum } from "@shared/policy";
 
 @Injectable({
   providedIn: 'root'
 })
 export class PermissionsService {
-  private permissions: IPolicyStatement[];
+  policies: IPolicy[];
+  permissions: IPolicyStatement[];
 
   genericDenyMessage: string = $localize `:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`;
 
@@ -17,6 +18,7 @@ export class PermissionsService {
 
   async fetchPolicies(memberId: string) {
     const policies = await lastValueFrom<IPolicy[]>(this.memberSvc.getAllPolicies(memberId));
+    this.policies = [...policies];
     this.permissions = policies.flatMap(p => p.statements);
   }
 
@@ -26,7 +28,7 @@ export class PermissionsService {
   // "*b" => everything that ends with "b"
   // "*a*" => everything that has an "a" in it
   // "*a*b*"=> everything that has an "a" in it, followed by anything, followed by a "b", followed by anything
-  private matchRule(str, rule) {
+  private matchRule(str: string, rule: string): boolean {
     var escapeRegex = (s) => s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
     return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(str);
   }
@@ -61,16 +63,10 @@ export class PermissionsService {
   }
 
   // if return undefined, that means zero permission is defined on that resource
-  canTakeAction(rn: string, action: string): boolean | undefined | any {
-    const [resourceType, _] = rn.split('/');
-
+  canTakeAction(rn: string, action: IamPolicyAction): boolean | undefined | any {
     const statements = this.permissions.filter(s => {
         if (s.resourceType === ResourceTypeEnum.All) {
           return s.effect === EffectEnum.Allow;
-        }
-
-        if (s.resourceType === ResourceTypeEnum.General) {
-          return s.resources.map(r => r.split('/')[0]).includes(resourceType) && s.actions.includes(action);
         }
 
         const matchingResource = s.resources.find(rsc => {
@@ -87,13 +83,13 @@ export class PermissionsService {
           });
         });
 
-        return matchingResource !== undefined && s.actions.includes(action)
+        return matchingResource !== undefined && s.actions.includes(action.name)
     });
 
     if (statements.find(s => s.effect === EffectEnum.Deny) !== undefined) {
       return false;
     }
 
-    return statements.find(s => s.effect !== EffectEnum.Deny && (s.actions.find(act => act === '*') || s.actions.includes(action)));
+    return statements.find(s => s.effect !== EffectEnum.Deny && (s.actions.find(act => act === '*') || s.actions.includes(action.name)));
   }
 }

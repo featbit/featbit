@@ -109,6 +109,18 @@ export class SafeComponent implements OnInit, OnDestroy {
             path: '/iam/policies'
           }
         ]
+      },
+      {
+        title: $localize `:@@menu.integrations:Integrations`,
+        icon: 'block',
+        path: '/integrations/access-tokens',
+        children: [
+          {
+            title: $localize `:@@menu.integrations.access-tokens:Access tokens`,
+            icon: '',
+            path: '/integrations/access-tokens'
+          }
+        ]
       }
     ];
   }

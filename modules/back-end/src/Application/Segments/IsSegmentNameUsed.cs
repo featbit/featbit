@@ -18,6 +18,6 @@ public class IsSegmentNameUsedHandler : IRequestHandler<IsSegmentNameUsed, bool>
 
     public async Task<bool> Handle(IsSegmentNameUsed request, CancellationToken cancellationToken)
     {
-        return await _service.AnyAsync(x => !x.IsArchived && x.EnvId == request.EnvId && x.Name == request.Name);
+        return await _service.AnyAsync(x => !x.IsArchived && x.EnvId == request.EnvId && string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase));
     }
 }

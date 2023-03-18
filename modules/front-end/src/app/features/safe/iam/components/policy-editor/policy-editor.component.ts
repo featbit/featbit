@@ -2,14 +2,14 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {
   EffectEnum,
   IamPolicyAction,
+  IPolicyStatement,
+  isResourceGeneral, permissionActions,
   Resource,
-  resourceActionsDict,
   resourcesTypes,
-  ResourceType,
-  ResourceTypeEnum
-} from "@features/safe/iam/components/policy-editor/types";
+  ResourceType
+} from "@shared/policy";
 import {deepCopy, encodeURIComponentFfc, uuidv4} from "@utils/index";
-import {IPolicy, IPolicyStatement} from "@features/safe/iam/types/policy";
+import {IPolicy} from "@features/safe/iam/types/policy";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {PolicyService} from "@services/policy.service";
 import {Router} from "@angular/router";
@@ -31,36 +31,30 @@ class PolicyStatementViewModel {
       this.resourceType = resourcesTypes.find(rt => rt.type === statement.resourceType) || null;
       this.effect = statement.effect === 'allow' ? EffectEnum.Allow : EffectEnum.Deny;
 
-      const allActions = Object.keys(resourceActionsDict).flatMap(p => resourceActionsDict[p]);
+      const allActions = [...Object.values(permissionActions)];
       this.selectedActions = statement.actions.map(act => {
         const find = allActions.find(a => act === a.name);
         return find || act as unknown as IamPolicyAction;
       });
 
-      this.selectedResources = statement.resources.map(rsc => ({id: uuidv4(), name: rsc, rn: rsc}));
+      this.selectedResources = statement.resources.map(rsc => ({id: uuidv4(), name: rsc, rn: rsc, type: this.resourceType.type}));
+
+      // All the resources here are the same type, and if it's general type, resources only contains one element
+      const isGeneralResource = isResourceGeneral(this.resourceType?.type, statement.resources[0]);
+      this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
     } else {
       this.id = uuidv4();
       this.effect = EffectEnum.Allow;
       this.selectedActions = [];
       this.selectedResources = [];
+      this.availableActions =[];
     }
-
-    const actionKey = this.resourceType?.type === ResourceTypeEnum.General ?
-      `${ResourceTypeEnum.General},${this.selectedResources[0]?.rn}` :
-      this.resourceType?.type;
-
-    this.availableActions = resourceActionsDict[actionKey];
   }
 
   onResourceTypeChange(){
     this.selectedActions = [];
     this.selectedResources = [];
-
-    const actionKey = this.resourceType?.type === ResourceTypeEnum.General ?
-      `${ResourceTypeEnum.General},${this.selectedResources[0]?.rn}` :
-      this.resourceType?.type;
-
-    this.availableActions = resourceActionsDict[actionKey];
+    this.availableActions = [];
   }
 
   selectedActions: IamPolicyAction[] = [];
@@ -71,14 +65,10 @@ class PolicyStatementViewModel {
   selectedResources: Resource[] = [];
   onSelectedResourcesChange(resources: Resource[]) {
     this.selectedResources = [...resources];
+    // All the resources here are the same type, and if it's general type, resources only contains one element
+    const isGeneralResource = isResourceGeneral(resources[0].type, resources[0].rn);
 
-    let actionKey: string = this.resourceType?.type;
-    if (this.resourceType?.type === ResourceTypeEnum.General) {
-      this.selectedActions = [];
-      actionKey = `${ResourceTypeEnum.General},${this.selectedResources[0]?.rn}`;
-    }
-
-    this.availableActions = resourceActionsDict[actionKey];
+    this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
   }
 
   getOutput(): IPolicyStatement {

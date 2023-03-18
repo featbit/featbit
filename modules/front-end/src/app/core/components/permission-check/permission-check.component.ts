@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from "@angular/core";
 import {PermissionsService} from "@services/permissions.service";
+import { IamPolicyAction } from "@shared/policy";
 
 @Component({
   selector: 'permission-check',
@@ -9,7 +10,7 @@ import {PermissionsService} from "@services/permissions.service";
 export class PermissionCheckComponent implements OnInit {
 
   @Input() rn: string;
-  @Input() action: string;
+  @Input() action: IamPolicyAction;
   @Input() messageIfDeny: string = this.permissionsService.genericDenyMessage;
 
   canTakeAction: boolean = false;

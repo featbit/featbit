@@ -5,7 +5,7 @@ import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
 import { PermissionsService } from "@services/permissions.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";

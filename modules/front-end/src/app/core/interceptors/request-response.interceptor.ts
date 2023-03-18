@@ -48,7 +48,7 @@ export class RequestResponseInterceptor implements HttpInterceptor {
           }
 
           this.showErrorMsg(errorResponse);
-          throw errorResponse;
+          throw errorResponse.error;
         })
       );
   }

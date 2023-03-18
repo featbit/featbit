@@ -5,10 +5,12 @@ public static class ErrorCodes
     // general
     public const string InternalServerError = nameof(InternalServerError);
     public const string Unauthorized = nameof(Unauthorized);
+    public const string Forbidden = nameof(Forbidden);
 
     // application
     public const string ResourceNotFound = nameof(ResourceNotFound);
     public const string InvalidJson = nameof(InvalidJson);
+    public const string EntityExistsAlready = nameof(EntityExistsAlready);
 
     // identity error codes
     public const string MethodIsRequired = nameof(MethodIsRequired);
@@ -65,4 +67,8 @@ public static class ErrorCodes
     public const string EventTypeIsRequired = nameof(EventTypeIsRequired);
     public const string EventNameIsRequired = nameof(EventNameIsRequired);
     public const string MetricIsBeingUsedByExperiment = nameof(MetricIsBeingUsedByExperiment);
+    
+    // access tokens
+    public const string InvalidAccessTokenType = nameof(InvalidAccessTokenType);
+    public const string ServiceAccessTokenMustDefinePolicies = nameof(ServiceAccessTokenMustDefinePolicies);
 }

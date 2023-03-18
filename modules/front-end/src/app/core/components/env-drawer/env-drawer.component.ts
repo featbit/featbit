@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { IEnvironment } from '@shared/types';
 import { EnvService } from '@services/env.service';
 import { ProjectService } from "@services/project.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { slugify } from "@utils/index";

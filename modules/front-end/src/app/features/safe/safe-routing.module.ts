@@ -44,6 +44,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'audit-logs',
+        loadChildren: () => import("./audit-logs/audit-logs.module").then(m => m.AuditLogsModule),
+        data: {
+          breadcrumb: $localize `:@@auditlogs.audit-logs:Audit logs`
+        },
+      },
+      {
         path: 'organizations',
         loadChildren: () => import("./organizations/organizations.module").then(m => m.OrganizationsModule),
         data: {
@@ -56,11 +63,8 @@ const routes: Routes = [
         loadChildren: () => import("./iam/iam.module").then(m => m.IAMModule),
       },
       {
-        path: 'audit-logs',
-        loadChildren: () => import("./audit-logs/audit-logs.module").then(m => m.AuditLogsModule),
-        data: {
-          breadcrumb: $localize `:@@auditlogs.audit-logs:Audit logs`
-        },
+        path: 'integrations',
+        loadChildren: () => import("./integrations/integrations.module").then(m => m.IntegrationsModule),
       },
       {
         path: '',

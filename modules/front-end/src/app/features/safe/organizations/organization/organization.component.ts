@@ -6,7 +6,7 @@ import { IOrganization } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { getCurrentOrganization } from "@utils/project-env";
 import {PermissionsService} from "@services/permissions.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
+import {generalResourceRNPattern, permissionActions} from "@shared/policy";
 import { MessageQueueService } from '@core/services/message-queue.service';
 
 @Component({

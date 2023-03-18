@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {NzSelectComponent} from "ng-zorro-antd/select";
-import {IamPolicyAction} from "@features//safe/iam/components/policy-editor/types";
+import {IamPolicyAction} from "@shared/policy";
 
 @Component({
   selector: 'actions-selector',

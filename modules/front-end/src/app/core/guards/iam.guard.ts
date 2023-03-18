@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import {PermissionsService} from "@services/permissions.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
+import {generalResourceRNPattern, permissionActions} from "@shared/policy";
 import {NzMessageService} from "ng-zorro-antd/message";
 
 @Injectable({
@@ -26,6 +26,7 @@ export class IAMGuard implements CanActivate {
 
     if (!canManageIAM) {
       this.message.warning(this.permissionsService.genericDenyMessage);
+      return this.router.parseUrl('/');
     }
 
     return canManageIAM;
