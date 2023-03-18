@@ -10,25 +10,28 @@ namespace Api.Filters;
 public class PermissionActionFilterAttribute : ActionFilterAttribute
 {
     private readonly string _permissionActionName;
-    
-    public PermissionActionFilterAttribute(string permissionActionName) =>
+
+    public PermissionActionFilterAttribute(string permissionActionName)
+    {
         _permissionActionName = permissionActionName;
-    
+    }
+
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         var permissions = new List<PolicyStatement>
         {
-            new PolicyStatement
+            new()
             {
                 ResourceType = ResourceType.AccessToken,
                 Effect = EffectType.Allow,
-                Actions = new List<string> { PermissionActionName.ListAccessTokens, PermissionActionName.ManageServiceAccessTokens },
+                Actions = new List<string>
+                    { PermissionActionName.ListAccessTokens, PermissionActionName.ManageServiceAccessTokens },
                 Resources = new List<string> { "access-token/*" }
             }
         }; // Use real one
-        
+
         var permissionAction = PermissionActions.GetPermissionActionByName(_permissionActionName);
-        
+
         if (!CanTakeAction(permissionAction.GetResourceName(), permissionAction, permissions))
         {
             var response = ApiResponse<object>.Error(ErrorCodes.Forbidden);
@@ -43,18 +46,12 @@ public class PermissionActionFilterAttribute : ActionFilterAttribute
     {
         var matchingPermissions = permissions.Where(permission =>
         {
-            if (permission.ResourceType == ResourceType.All)
-            {
-                return permission.Effect == EffectType.Allow;
-            }
+            if (permission.ResourceType == ResourceType.All) return permission.Effect == EffectType.Allow;
 
             var matchingResource = permission.Resources.FirstOrDefault(resource =>
             {
                 // check exact match
-                if (MatchRule(resourceName, resource))
-                {
-                    return true;
-                }
+                if (MatchRule(resourceName, resource)) return true;
 
                 // check ancestors matches following bottom up order
                 var resourceNameParts = resourceName.Split(':');
@@ -71,23 +68,23 @@ public class PermissionActionFilterAttribute : ActionFilterAttribute
         });
 
         if (matchingPermissions.FirstOrDefault(permission => permission.Effect == EffectType.Deny) != null)
-        {
             return false;
-        }
 
         var matchingAction = matchingPermissions.FirstOrDefault(permission =>
         {
             return permission.Effect != EffectType.Deny &&
                    permission.Actions.FirstOrDefault(act => act == "*" || act == action.Name) != null;
-
         });
 
         return matchingAction != null;
     }
-    
+
     private static bool MatchRule(string str, string rule)
     {
-        string EscapeRegex(string s) => Regex.Replace(s, "([.*+?^=!:${}()|\\[\\]\\\\/])", "\\$1");
+        string EscapeRegex(string s)
+        {
+            return Regex.Replace(s, "([.*+?^=!:${}()|\\[\\]\\\\/])", "\\$1");
+        }
 
         var matchPattern = rule
             .Split('*')
