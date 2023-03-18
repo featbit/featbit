@@ -13,4 +13,6 @@ public class ResourceType
     public const string Project = "project";
 
     public const string Env = "env";
+
+    public const string FeatureFlag = "feature-flag";
 }

@@ -8,6 +8,7 @@ namespace Api.Controllers;
 public class FeatureFlagController : ApiControllerBase
 {
     [HttpGet]
+    //[PermissionActionFilter([Domain.Resources.ResourceType.FeatureFlag], "creation")]
     public async Task<ApiResponse<PagedResult<FeatureFlagVm>>> GetListAsync(
         Guid envId,
         [FromQuery] FeatureFlagFilter filter)
