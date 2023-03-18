@@ -54,7 +54,7 @@ public partial class KafkaMessageConsumer : BackgroundService
     {
         _consumer.Subscribe(Topics.EndUser);
 
-        var consumeResult = new ConsumeResult<Null, string>();
+        ConsumeResult<Null, string>? consumeResult = null;
         var message = string.Empty;
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -107,8 +107,11 @@ public partial class KafkaMessageConsumer : BackgroundService
             {
                 try
                 {
-                    // store offset manually
-                    _consumer.StoreOffset(consumeResult);
+                    if (consumeResult != null)
+                    {
+                        // store offset manually
+                        _consumer.StoreOffset(consumeResult);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -120,7 +123,7 @@ public partial class KafkaMessageConsumer : BackgroundService
 
     public override void Dispose()
     {
-        _consumer.Unsubscribe();
+        // Commit offsets and leave the group cleanly.
         _consumer.Close();
         _consumer.Dispose();
 

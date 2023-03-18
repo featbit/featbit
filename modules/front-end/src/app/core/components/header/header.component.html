@@ -92,7 +92,7 @@
     <form nz-form [formGroup]="feedbackForm" nzLayout="vertical">
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.email">Email</nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.email-cannot-be-empty" nzErrorTip="Email cannot be empty">
+        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.email-invalid" nzErrorTip="Invalid Email">
           <input nz-input formControlName="email" />
         </nz-form-control>
       </nz-form-item>
