@@ -95,3 +95,8 @@ export interface IPagedPolicyMember {
 export function policyRn(policy: IPolicy) {
   return `policy/${policy.name}`;
 }
+
+export enum PolicyTypeEnum {
+  SysManaged = 'SysManaged',
+  CustomerManaged = 'CustomerManaged'
+}
