@@ -29,11 +29,13 @@ export class SettingComponent implements OnInit {
   }
 
   isLoading = true;
+  isEditable = true;
   policy: IPolicy;
   private getPolicy(policyId: string) {
     this.policyService.get(policyId).subscribe(policy => {
       this.policy = policy;
       this.isLoading = false;
+      if (policy.type == "SysManaged") this.isEditable = false;
     }, () => this.isLoading = false);
   }
 
