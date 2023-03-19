@@ -51,6 +51,7 @@ export class SettingComponent {
   public featureFlag: FeatureFlag = {} as FeatureFlag;
   public isLoading = true;
   public isEditingTitle = false;
+  public isEditingDescription = false;
   public isEditingVariations = false;
   public key: string = null;
   currentProjectEnv: IProjectEnv = null;
@@ -168,6 +169,15 @@ export class SettingComponent {
     if (resetVariations) {
       this.featureFlag.variations = JSON.parse(JSON.stringify(this.lastSavedVariations));
     }
+  }  
+  
+  toggleDescriptionEditState(): void {
+    this.isEditingDescription = !this.isEditingDescription;
+  }
+
+  saveDescription() {
+    this.toggleDescriptionEditState();
+    // this.saveSettings();
   }
 
   saveVariations() {

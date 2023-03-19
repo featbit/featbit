@@ -41,6 +41,17 @@
       </ng-template>
       <i nz-icon i18n-nz-tooltip="@@ff.key-description" nz-tooltip="Use key (case-sensitive) in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
     </div>
+
+    <div class="item description" [class]="{editing: isEditingDescription}">
+      <ng-container *ngIf="!isEditingDescription">
+        <span>{{policy?.description}}</span>
+        <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
+      </ng-container>
+      <ng-container *ngIf="isEditingDescription">
+        <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="policy.description" [nzAutosize]="{ minRows: 3 }"></textarea>
+        <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
+      </ng-container>
+    </div>
     <div class="status-switcher" >
       <div class="switcher">
         <nz-switch *ngIf="featureFlag.isEnabled" i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off" nz-popconfirm="Are you sure to turn it off? The variation set below would be returned." nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}" (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
