@@ -1,5 +1,10 @@
+using System.Text;
+using Api.Authentication;
+using Domain.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Api.Setup;
@@ -48,6 +53,44 @@ public static class ServicesRegister
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
         builder.Services.AddApplicationServices();
+
+        // authentication
+        var jwtOption = builder.Configuration.GetSection(JwtOptions.Jwt);
+        builder.Services.Configure<JwtOptions>(jwtOption);
+        builder.Services
+            .AddAuthentication(options =>
+            {
+                options.DefaultScheme = Schemes.SchemeSelector;
+                options.DefaultChallengeScheme = Schemes.SchemeSelector;
+            })
+            .AddPolicyScheme(Schemes.SchemeSelector, Schemes.SchemeSelector, options =>
+            {
+                options.ForwardDefaultSelector = context =>
+                {
+                    string authorization = context.Request.Headers[HeaderNames.Authorization];
+                    if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
+                    {
+                        return Schemes.JwtBearer;
+                    }
+
+                    return Schemes.OpenApi;
+                };
+            })
+            .AddJwtBearer(Schemes.JwtBearer, options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtOption["Issuer"],
+
+                    ValidateAudience = true,
+                    ValidAudience = jwtOption["Audience"],
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]))
+                };
+            })
+            .AddOpenApi(Schemes.OpenApi);
 
         // replace default authorization result handler
         var authorizationResultHandler =
