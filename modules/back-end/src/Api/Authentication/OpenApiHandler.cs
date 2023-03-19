@@ -43,7 +43,7 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
                 return AuthenticateResult.Fail("invalid-access-token");
             }
 
-            var identity = new ClaimsIdentity(Array.Empty<Claim>());
+            var identity = new ClaimsIdentity(Schemes.OpenApi);
             var claimsPrincipal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
 
