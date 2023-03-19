@@ -153,7 +153,7 @@ export class EnvDrawerComponent {
 
   @Input() rn = null;
 
-  canTakeAction() {
+  isGranted() {
     if (this.rn === null) {
       return true;
     }

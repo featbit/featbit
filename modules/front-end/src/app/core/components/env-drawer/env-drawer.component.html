@@ -6,7 +6,7 @@
   [nzWidth]="500"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
-    <message *ngIf="!canTakeAction()" [type]="'warning'" [content]="permissionDenyMsg"></message>
+    <message *ngIf="!isGranted()" [type]="'warning'" [content]="permissionDenyMsg"></message>
 
     <nz-alert
       *ngIf="isEditing"
@@ -21,7 +21,8 @@
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
         <nz-form-control nzErrorTip="Environment name is mandatory!" i18n-nzErrorTip="@@org.project.envNameMandatory">
-          <input type="text" nz-input (ngModelChange)="nameChange($event)" formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+          <input type="text" nz-input (ngModelChange)="nameChange($event)" formControlName="name" placeholder="Name"
+                 i18n-placeholder="@@common.name"/>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
@@ -31,24 +32,34 @@
           nzTooltipTitle="We use the key to give you friendly URLs. Keys should only contain letters, numbers, ., _ or -.">
           Key
         </nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
-          <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name" />
+        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..."
+                         [nzErrorTip]="keyErrorTpl">
+          <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name"
+                 placeholder="Key can be auto-generated from name"/>
           <ng-template #keyErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty
+            </ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been
+              used
+            </ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation
+              failed
+            </ng-container>
           </ng-template>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
         <nz-form-label i18n="@@org.project.envDescription">Description</nz-form-label>
         <nz-form-control>
-          <input type="text" nz-input formControlName="description" placeholder="Description" i18n="@@org.project.envDescriptionPlaceholder"/>
+          <input type="text" nz-input formControlName="description" placeholder="Description"
+                 i18n="@@org.project.envDescriptionPlaceholder"/>
         </nz-form-control>
       </nz-form-item>
     </form>
 
-    <button [disabled]="!canTakeAction()" class="submit-btn" (click)="doSubmit()" nz-button [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
+    <button [disabled]="!isGranted()" class="submit-btn" (click)="doSubmit()" nz-button [nzType]="'primary'"
+            [nzLoading]="isLoading" i18n="@@common.save">Save
+    </button>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>

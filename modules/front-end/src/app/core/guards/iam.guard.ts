@@ -23,13 +23,13 @@ export class IAMGuard implements CanActivate {
   }
 
   async checkPermission(url: string): Promise<boolean | UrlTree> {
-    const canManageIAM = this.permissionsService.isGranted(generalResourceRNPattern.iam, permissionActions.CanManageIAM);
+    const isGranted = this.permissionsService.isGranted(generalResourceRNPattern.iam, permissionActions.CanManageIAM);
 
-    if (!canManageIAM) {
+    if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return this.router.parseUrl('/');
     }
 
-    return canManageIAM;
+    return isGranted;
   }
 }

@@ -23,13 +23,13 @@ export class AccessTokensGuard implements CanActivate {
   }
 
   async checkPermission(url: string): Promise<boolean | UrlTree> {
-    const canListAccessTokens = !!this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ListAccessTokens);
+    const isGranted = !!this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ListAccessTokens);
 
-    if (!canListAccessTokens) {
+    if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return this.router.parseUrl('/');
     }
 
-    return canListAccessTokens;
+    return isGranted;
   }
 }
