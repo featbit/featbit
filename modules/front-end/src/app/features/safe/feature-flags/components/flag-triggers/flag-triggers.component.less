@@ -171,7 +171,6 @@
               }
             }
 
-
             .trigger-description {
               color: rgba(0, 0, 0, 0.45);
               margin-bottom: 8px;
@@ -179,6 +178,23 @@
 
             .trigger-url{
               color: rgba(0, 0, 0, 0.85);
+
+
+              .copy-icon {
+                font-size: 13px;
+
+                &:hover {
+                  color: @green60-color;
+                }
+              }
+              display: flex;
+              align-items: center;
+
+              i {
+                margin-left: 8px;
+                cursor: pointer;
+                color: @grey50-color;
+              }
             }
 
             .warning {
@@ -188,7 +204,7 @@
               margin-top: 5px;
 
               .warning-icon {
-                color: #ff912b;
+                color: @yellow5-color;
               }
             }
           }

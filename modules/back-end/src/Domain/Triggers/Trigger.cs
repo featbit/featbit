@@ -1,4 +1,3 @@
-using System.Text;
 using Domain.FeatureFlags;
 
 namespace Domain.Triggers;
@@ -28,7 +27,7 @@ public class Trigger : AuditedEntity
         TargetId = targetId;
         Type = type;
         Action = action;
-        Token = NewToken();
+        Token = TokenHelper.New(Id);
         Description = description ?? string.Empty;
         IsEnabled = true;
 
@@ -38,25 +37,9 @@ public class Trigger : AuditedEntity
 
     public void ResetToken()
     {
-        Token = NewToken();
+        Token = TokenHelper.New(Id);
 
         UpdatedAt = DateTime.UtcNow;
-    }
-
-    private string NewToken()
-    {
-        // timestamp in millis, length is 13
-        var reversedTimestamp =
-            new string(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Reverse().ToArray());
-
-        // header length is (13 + 2) * 4/3 = 20, we trim '=' character, so got 18 chars
-        var header = Convert.ToBase64String(Encoding.UTF8.GetBytes(reversedTimestamp)).TrimEnd('=');
-
-        // 22 chars
-        var guid = GuidHelper.Encode(Id);
-
-        // 18 + 22 = 40 chars
-        return $"{header}{guid}";
     }
 
     public static bool TryParseToken(string token, out Guid id)

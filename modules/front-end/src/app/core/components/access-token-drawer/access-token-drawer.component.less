@@ -1,0 +1,58 @@
+@import "variables";
+
+.error-message {
+  color: @red60-color;
+}
+
+i {
+  cursor: pointer;
+}
+
+#confirm-modal-ok {
+  color: @white;
+
+  &:hover, &:focus {
+    color: @white;
+    border-color: #61d4aa;
+    background: #61d4aa;
+  }
+}
+
+.token-wrapper {
+  margin: 32px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.resource-type {
+  .permissions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .permission {
+      display: flex;
+      flex-direction: column;
+
+      .permission-header {
+        display: flex;
+        justify-content: flex-start;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .permission-resources {
+        border-top: 1px solid @grey40-color;
+        display: flex;
+        flex-direction: column;
+
+        .permission-resource {
+          padding: 0 8px;
+        }
+      }
+    }
+  }
+}

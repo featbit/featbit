@@ -13,7 +13,7 @@ const results = fs.readdirSync('./t2.micro')
     .map(filename => {
         const [throughput, iteration] = filename.split('.')[1].split('_');
 
-        const content = JSON.parse(fs.readFileSync(`./t2.micro/${filename}`, {encoding:'utf8', flag:'r'}));
+        const content = JSON.parse(fs.readFileSync(`./results/${filename}`, {encoding:'utf8', flag:'r'}));
         const csvStr = columns.map(col => content['metrics']['latency']['values'][col]).join(',');
 
         return [throughput, iteration, csvStr];

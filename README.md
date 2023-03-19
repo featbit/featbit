@@ -1,6 +1,6 @@
 
 
-# [FeatBit](https://featbit.co)    <a href="https://twitter.com/intent/tweet?text=A%20scalable%2C%20high-performance%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" height=23></a>
+# [FeatBit](https://featbit.co)    <a href="https://twitter.com/intent/tweet?text=A%20scalable%2C%20fast%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" height=23></a>
 
 [![License](https://img.shields.io/static/v1?style=for-the-badge&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=for-the-badge&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
@@ -14,11 +14,11 @@
   <span> · </span>
   <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support (Slack)</a>
   <span> · </span>
-  <a href="https://github.com/featbit/featbit/discussions">Community Forum</a>
+  <a href="https://www.featbit.co//blogs?tag=Best+Practice&term=">Best Practice</a>
 </h3>
 
 
-**FeatBit** is a scalable, high-performance, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
+**FeatBit** is a scalable, fast, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
@@ -38,22 +38,7 @@ Feature flag is a modern engineering technology that decouples code deployments 
 - Giving Sales, CS, and Marketing the ability to fine-tune target audiences and manage customer entitlement.
 - etc.
 
-[**Click here to get more information about FeatBit**](https://featbit.medium.com/introducing-featbit-e0cef61572a).
-
-## Features
-
-- **Feature flag list**, create, manage, and filter feature flags.
-- **Individual targets**, assign individual users to particular flag variation.
-- **Targeting users by attribute**, target segments of users by constructing rules.
-- **Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
-- **Insights**, check out feature usage during the rollout.
-- **Flag triggers**, automate changes to your feature flags from external tools.
-- **IAM**, define access levels to projects, environment, or teams to enforce your policies.
-- **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
-- **Audit Log**, logs for feature flag & segment changes.
-- **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
-- **Web API**, automate your workflow with Web APIs.
-- **Platform-level**, manage your flags in multiple projects and environments.
+[**Click here to get more information about FeatBit**](https://www.featbit.co/).
 
 ## Getting Started
 
@@ -74,6 +59,23 @@ Once all containers have started, go to FeatBit's portal [http://localhost:8081]
 You can following the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey.
 
 
+## Features
+
+- **Feature flag list**, create, manage, and filter feature flags.
+- **Individual targets**, assign individual users to particular flag variation.
+- **Targeting users by attribute**, target segments of users by constructing rules.
+- **Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
+- **Insights**, check out feature usage during the rollout.
+- **Flag triggers**, automate changes to your feature flags from external tools.
+- **IAM**, define access levels to projects, environment, or teams to enforce your policies.
+- **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
+- **Audit Log**, logs for feature flag & segment changes.
+- **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
+- **Web API**, automate your workflow with Web APIs.
+- **Platform-level**, manage your flags in multiple projects and environments.
+
+
+
 <!-- - - An online support channel that helps you to quickly solve the problem. -->
 
 <!-- [Community Forum](https://github.com/featbit/featbit/discussions/34) - where you can request new features, ask questions, show-n-tell, etc.
@@ -86,7 +88,7 @@ You can following the [**Getting Started (Docs)**](https://featbit.gitbook.io/) 
 
 Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. 
 
-[**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) . 
+[**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ). 
 
 
 

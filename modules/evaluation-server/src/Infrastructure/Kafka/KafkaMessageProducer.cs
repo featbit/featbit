@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Kafka;
 
-public partial class KafkaMessageProducer : IMessageProducer
+public partial class KafkaMessageProducer : IMqMessageProducer
 {
     private readonly ILogger<KafkaMessageProducer> _logger;
     private readonly IProducer<Null, string> _producer;

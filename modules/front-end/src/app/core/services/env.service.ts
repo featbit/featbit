@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IEnvironment } from '@shared/types';
+import { catchError } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -31,5 +32,11 @@ export class EnvService {
   removeEnv(projectId: string, envId: string): Observable<any> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}`;
     return this.http.delete(url);
+  }
+
+  isKeyUsed(projectId: string, key: string): Observable<boolean> {
+    const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/is-key-used?key=${key}`;
+
+    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 }

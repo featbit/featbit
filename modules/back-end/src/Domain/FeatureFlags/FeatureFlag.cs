@@ -14,6 +14,8 @@ public class FeatureFlag : FullAuditedEntity
 
     public string Name { get; set; }
 
+    public string Description { get; set; }
+
     public string Key { get; set; }
 
     public string VariationType { get; set; }
@@ -36,11 +38,12 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool IsArchived { get; set; }
 
-    public FeatureFlag(Guid envId, string name, string key, Guid currentUserId) : base(currentUserId)
+    public FeatureFlag(Guid envId, string name, string description, string key, Guid currentUserId) : base(currentUserId)
     {
         EnvId = envId;
 
         Name = name;
+        Description = description;
         Key = key;
 
         var falsyVariationId = Guid.NewGuid().ToString();
@@ -132,11 +135,12 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public DataChange UpdateSetting(string name, bool isEnabled, string disabledVariationId, Guid currentUserId)
+    public DataChange UpdateSetting(string name, string description, bool isEnabled, string disabledVariationId, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
         Name = name;
+        Description = description;
         IsEnabled = isEnabled;
         DisabledVariationId = disabledVariationId;
 

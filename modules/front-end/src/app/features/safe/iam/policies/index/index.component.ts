@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {encodeURIComponentFfc} from '@utils/index';
+import { copyToClipboard, encodeURIComponentFfc } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import {Router} from "@angular/router";
-import {NzMessageService} from "ng-zorro-antd/message";
+import { Router } from "@angular/router";
+import { NzMessageService } from "ng-zorro-antd/message";
 import { IPagedPolicy, IPolicy, PolicyFilter, policyRn } from "@features/safe/iam/types/policy";
 import { PolicyService } from "@services/policy.service";
 
@@ -84,7 +84,7 @@ export class IndexComponent implements OnInit {
   }
 
   copyText(text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }

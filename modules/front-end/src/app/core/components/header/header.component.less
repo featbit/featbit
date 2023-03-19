@@ -19,6 +19,13 @@
   }
 }
 
+.ant-tag {
+  font-size: 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  padding: 2px 8px;
+}
+
 .subscription-plan-wrapper {
   margin-right: 16px;
   cursor: pointer;
@@ -163,32 +170,37 @@ i:hover {
 }
 
 .header-btns {
-  width: 60px;
-  height: 60px;
-  float: right;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  padding: 12px 8px;
-  background: @grey5-color;
-  border-radius: 42px;
-  gap: 32px;
-  position: relative;
-  margin-left: auto;
-  margin-right: 10px;
 
-  .guide-btn {
+  .header-btn {
     font-size: 18px;
     cursor: pointer;
     padding: 8px 13px;
     margin-top: 3px;
     border-radius: 42px;
     box-sizing: border-box;
+
+    &.feedback {
+      font-size: 14px;
+      font-weight: 700;
+
+      &:hover {
+        color: @green70-color;
+      }
+    }
   }
 
-  .guide-btn:hover {
+  .header-btn:hover {
     span {
       color: @green70-color;
     }
   }
+
+  .org-btns {
+    display:flex;
+    justify-content: flex-end;
+    align-items: center
+  }
 }
+

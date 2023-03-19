@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { encodeURIComponentFfc, getAuth } from '@utils/index';
+import { copyToClipboard, encodeURIComponentFfc, getAuth } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Router } from "@angular/router";
@@ -88,7 +88,7 @@ export class IndexComponent implements OnInit {
   }
 
   copyText(text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }

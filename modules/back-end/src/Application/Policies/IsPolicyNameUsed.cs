@@ -19,7 +19,7 @@ public class IsPolicyNameUsedHandler : IRequestHandler<IsPolicyNameUsed, bool>
     public async Task<bool> Handle(IsPolicyNameUsed request, CancellationToken cancellationToken)
     {
         var isNameUsed =
-            await _service.AnyAsync(x => x.OrganizationId == request.OrganizationId && x.Name == request.Name);
+            await _service.AnyAsync(x => x.OrganizationId == request.OrganizationId && string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase));
 
         return isNameUsed;
     }

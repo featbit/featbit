@@ -2,8 +2,8 @@ using System.Text;
 using Domain.Identity;
 using Domain.Messages;
 using Domain.Users;
+using Infrastructure.AccessTokens;
 using Infrastructure.AuditLogs;
-using Infrastructure.HostedServices;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
 using Infrastructure.Environments;
@@ -13,7 +13,7 @@ using Infrastructure.FeatureFlags;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
-using Infrastructure.Messages;
+using Infrastructure.Kafka;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
@@ -69,7 +69,7 @@ public static class ConfigureServices
             });
 
         // hosted services
-        services.AddHostedService<KafkaConsumerService>();
+        services.AddHostedService<KafkaMessageConsumer>();
 
         // typed http clients
         services.AddHttpClient<IOlapService, OlapService>(httpClient =>
@@ -95,6 +95,7 @@ public static class ConfigureServices
         services.AddTransient<IExperimentMetricService, ExperimentMetricService>();
         services.AddTransient<IAuditLogService, AuditLogService>();
         services.AddSingleton<IEvaluator, Evaluator>();
+        services.AddTransient<IAccessTokenService, AccessTokenService>();
 
         return services;
     }

@@ -10,12 +10,12 @@ public partial class KafkaMessageConsumer : BackgroundService
 {
     private readonly ILogger<KafkaMessageConsumer> _logger;
     private readonly IConsumer<Null, string> _consumer;
-    private readonly IEnumerable<IKafkaMessageHandler> _messageHandlers;
+    private readonly IEnumerable<IMqMessageHandler> _messageHandlers;
 
     public KafkaMessageConsumer(
         IConfiguration configuration,
         ILogger<KafkaMessageConsumer> logger,
-        IEnumerable<IKafkaMessageHandler> messageHandlers)
+        IEnumerable<IMqMessageHandler> messageHandlers)
     {
         _logger = logger;
         _messageHandlers = messageHandlers;
@@ -53,13 +53,16 @@ public partial class KafkaMessageConsumer : BackgroundService
 
         _consumer.Subscribe(topics);
 
+        ConsumeResult<Null, string>? consumeResult = null;
+        var message = string.Empty;
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                var consumeResult = _consumer.Consume(cancellationToken);
+                consumeResult = _consumer.Consume(cancellationToken);
                 if (consumeResult.IsPartitionEOF)
                 {
+                    // reached end of topic
                     continue;
                 }
 
@@ -70,23 +73,13 @@ public partial class KafkaMessageConsumer : BackgroundService
                     continue;
                 }
 
-                await handler.HandleAsync(consumeResult, cancellationToken);
-
-                // store offset manually
-                _consumer.StoreOffset(consumeResult);
+                message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
+                await handler.HandleAsync(message, cancellationToken);
             }
             catch (ConsumeException ex)
             {
                 var error = ex.Error.ToString();
-                if (error.StartsWith("Subscribed topic not available"))
-                {
-                    // ignore topic not exists exception
-                    // because we currently set `auto.create.topics.enable=true` on broker
-                    // ref: https://kafka.apache.org/documentation/#brokerconfigs_auto.create.topics.enable
-                    continue;
-                }
-
-                Log.FailedConsumeMessage(_logger, error);
+                Log.FailedConsumeMessage(_logger, message, error);
 
                 if (ex.Error.IsFatal)
                 {
@@ -100,14 +93,29 @@ public partial class KafkaMessageConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                Log.ErrorConsumeMessage(_logger, ex);
+                Log.ErrorConsumeMessage(_logger, message, ex);
+            }
+            finally
+            {
+                try
+                {
+                    if (consumeResult != null)
+                    {
+                        // store offset manually
+                        _consumer.StoreOffset(consumeResult);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorStoreOffset(_logger, ex);
+                }
             }
         }
     }
 
     public override void Dispose()
     {
-        _consumer.Unsubscribe();
+        // Commit offsets and leave the group cleanly.
         _consumer.Close();
         _consumer.Dispose();
 

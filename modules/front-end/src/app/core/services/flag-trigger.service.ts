@@ -16,7 +16,7 @@ export class FlagTriggerService {
   }
 
   getTriggerUrl(token: string): string {
-    return this.baseUrl + `/trigger/run/${token}`;
+    return this.baseUrl + `/run/${token}`;
   }
 
   getList(featureFlagId: string): Observable<IFlagTrigger[]> {

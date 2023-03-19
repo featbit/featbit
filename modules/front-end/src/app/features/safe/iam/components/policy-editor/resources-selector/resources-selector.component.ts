@@ -1,15 +1,15 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
-import {NzSelectComponent} from "ng-zorro-antd/select";
+import { Component, EventEmitter, Input, Output, ViewChild } from "@angular/core";
+import { NzSelectComponent } from "ng-zorro-antd/select";
 import {
+  isResourceGeneral,
   Resource,
   ResourceParamViewModel,
   ResourceType,
-  ResourceTypeEnum,
   RNViewModel,
   rscParamsDict
-} from "@features/safe/iam/components/policy-editor/types";
-import {ResourceService} from "@services/resource.service";
-import {deepCopy} from "@utils/index";
+} from "@shared/policy";
+import { ResourceService } from "@services/resource.service";
+import { deepCopy } from "@utils/index";
 
 @Component({
   selector: 'resources-selector',
@@ -44,8 +44,10 @@ export class ResourcesSelectorComponent {
   @Input() selectedResources: Resource[] = [];
 
   onResourceChange() {
-    if (this.resourceType.type === ResourceTypeEnum.General) {
+    if (isResourceGeneral(this.resourceSelectModel.type, this.resourceSelectModel.rn)) {
       this.selectedResources = [];
+    } else {
+      this.selectedResources = this.selectedResources.filter((r) => !isResourceGeneral(r.type, r.rn))
     }
     this.selectedResources = [...this.selectedResources, {...this.resourceSelectModel}];
     this.onSelectedResourcesChange.next(this.selectedResources);
@@ -88,14 +90,14 @@ export class ResourcesSelectorComponent {
     const paramValues = rsc.rn.split(':')
       .map(r => {
         const part = r.split('/');
-        return {type: part[0], val: part[1]}})
-      .reduce((acc, cur) => {
-        acc[cur.type] = cur.val;
+        return {type: part[0], val: part[1], isAnyChecked: part[1] === '*' }})
+      .reduce((acc, { type, val, isAnyChecked}) => {
+        acc[type] = { val: val, isAnyChecked };
         return acc;
       }, {});
 
     if (paramValues) {
-      this.rscParams = this.rscParams.map(p => ({...p, val: paramValues[p.resourceType]}));
+      this.rscParams = this.rscParams.map(p => ({...p, val: paramValues[p.resourceType].val, isAnyChecked: paramValues[p.resourceType].isAnyChecked}));
     }
   }
 

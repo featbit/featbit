@@ -3,7 +3,7 @@ using Domain.Core;
 
 namespace Infrastructure.Fakes;
 
-public class FakeMessageProducer : IMessageProducer
+public class FakeMessageProducer : IMqMessageProducer
 {
     public Task PublishAsync<TMessage>(string topic, TMessage? message) where TMessage : class
     {

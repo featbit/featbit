@@ -22,8 +22,11 @@ app-root {
   padding: 6px 0 7px 0;
 }
 
-.ant-collapse>.ant-collapse-item>.ant-collapse-header {
-  padding: 0;
+.ant-collapse {
+  border-radius: 8px;
+  .ant-collapse-item>.ant-collapse-header {
+    padding: 8px 16px;
+  }
 }
 
 .menu-list li a i {
@@ -133,7 +136,7 @@ app-root {
 
 // bordered input
 .standard-bordered-input {
-  border: 1px solid @grey200-color;
+  border: 1px solid @grey20-color;
   box-sizing: border-box;
   border-radius: 8px;
 
@@ -499,7 +502,7 @@ app-root {
   nz-input-group {
     width: 380px;
     height: 45px;
-    border: 1px solid @grey200-color;
+    border: 1px solid @grey20-color;
     border-radius: 8px;
     background: #FFFFFF;
 
@@ -549,10 +552,18 @@ app-root {
 
 // custom card style
 .ant-descriptions-title {
+  display:flex;
+  align-items: center;
+  gap: 8px;
   color: @grey70-color;
   font-weight: 700;
   font-size: 18px;
   line-height: 150%;
+
+  .ant-tag {
+    margin-top: 4px;
+    font-weight: 500;
+  }
 }
 
 .ant-descriptions-extra {
@@ -1088,4 +1099,21 @@ app-root {
 // enable ant-input-suffix pointer events
 .ant-input-suffix {
   pointer-events: unset;
+}
+
+.drawer-footer-btn {
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    border-radius: 30px;
+  }
+}
+
+.copy-icon {
+  cursor: pointer;
+  margin: 0 4px;
+  &:hover {
+    color: @green60-color;
+  }
 }

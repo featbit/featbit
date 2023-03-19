@@ -8,7 +8,7 @@
     <div class="title">
       <div class="label">
         <div i18n="@@ff.triggers.triggers">Event triggers</div>
-        <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;" i18n="@@ff.triggers.programmatically-turn-on-off">Programmatically turn ON or Off the feature flag</div>
+        <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;" i18n="@@ff.triggers.programmatically-turn-on-off">Programmatically turn ON or Off the feature flag.</div>
       </div>
     </div>
     <div class="action-btns">
@@ -38,8 +38,9 @@
                 </div>
                 <div class="trigger-description">{{trigger.description}}</div>
                 <div class="trigger-url">
-                  <span *ngIf="!trigger.canCopyToken">{{getTriggerUrl(trigger.token)}}</span>
-                  <span *ngIf="trigger.canCopyToken" nz-typography nzCopyable nzCopyText="{{ getTriggerUrl(trigger.token) }}">{{getTriggerUrl(trigger.token)}}</span>
+                  <span>{{getTriggerUrl(trigger.token)}}</span>
+                  <i *ngIf="trigger.canCopyToken" (click)="copyText($event, getTriggerUrl(trigger.token))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                  <i nz-icon nz-tooltip="curl -X PUT {{ getTriggerUrl(trigger.token) }}" nzType="icons:icon-info-outline"></i>
                 </div>
                 <div class="warning" *ngIf="trigger.canCopyToken">
                   <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>

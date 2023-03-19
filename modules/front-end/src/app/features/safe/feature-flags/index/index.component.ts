@@ -18,6 +18,7 @@ import { NzNotificationService } from "ng-zorro-antd/notification";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { NzModalService } from "ng-zorro-antd/modal";
+import { copyToClipboard } from '@utils/index';
 
 @Component({
   selector: 'index',
@@ -39,7 +40,8 @@ export class IndexComponent implements OnInit {
   ) {
     this.featureFlagForm = this.fb.group({
       name: ['', Validators.required],
-      key: ['', Validators.required, this.flagKeyAsyncValidator]
+      key: ['', Validators.required, this.flagKeyAsyncValidator],
+      description:['',Validators.maxLength(512)]
     });
   }
 
@@ -271,7 +273,7 @@ export class IndexComponent implements OnInit {
 
   nameChange(name: string) {
     let keyControl = this.featureFlagForm.get('key')!;
-    keyControl.setValue(slugify(name));
+    keyControl.setValue(slugify(name ?? ''));
     keyControl.markAsDirty();
   }
 
@@ -367,7 +369,7 @@ export class IndexComponent implements OnInit {
   }
 
   copyText(event, text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
   }

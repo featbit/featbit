@@ -5,10 +5,13 @@ import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
 import { PermissionsService } from "@services/permissions.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/permissions";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
+import { copyToClipboard } from '@utils/index';
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FeedbackService } from "@services/feedback.service";
 
 @Component({
   selector: 'app-header',
@@ -37,11 +40,18 @@ export class HeaderComponent implements OnInit {
     private organizationService: OrganizationService,
     private projectService: ProjectService,
     private message: NzMessageService,
+    private fb: FormBuilder,
+    private feedbackService: FeedbackService,
     private readonly breadcrumbService: BreadcrumbService,
     private permissionsService: PermissionsService,
     private messageQueueService: MessageQueueService,
   ) {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
+
+    this.feedbackForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      message:['',[Validators.required]]
+    });
   }
 
   ngOnInit(): void {
@@ -61,6 +71,14 @@ export class HeaderComponent implements OnInit {
     this.messageQueueService.subscribe(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED, () => {
       this.selectCurrentProjectEnv();
     });
+  }
+
+  isCurrentProject(project: IProject): boolean {
+    return this.currentProjectEnv?.projectId === project.id;
+  }
+
+  isCurrentEnv(env: IEnvironment): boolean {
+    return this.currentProjectEnv?.envId === env.id;
   }
 
   canListProjects = false;
@@ -94,6 +112,7 @@ export class HeaderComponent implements OnInit {
       projectId: this.selectedProject.id,
       projectName: this.selectedProject.name,
       envId: this.selectedEnv.id,
+      envKey: this.selectedEnv.key,
       envName: this.selectedEnv.name,
       envSecret: this.selectedEnv.secrets[0].value
     };
@@ -146,8 +165,42 @@ export class HeaderComponent implements OnInit {
 
   // copy environment key
   copyText(event, text: string) {
-    navigator.clipboard.writeText(text).then(
-      () => this.message.success($localize`:@@common.copy-success:Copied`)
+    copyToClipboard(text).then(
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
+  }
+
+  // feedback
+  feedbackModalVisible = false;
+  sendingFeedback = false;
+  feedbackForm: FormGroup;
+
+  openFeedbackModal() {
+    this.feedbackModalVisible = true;
+    this.feedbackForm.reset();
+  }
+  sendFeedback() {
+    if (this.feedbackForm.invalid) {
+      for (const i in this.feedbackForm.controls) {
+        this.feedbackForm.controls[i].markAsDirty();
+        this.feedbackForm.controls[i].updateValueAndValidity();
+      }
+    }
+
+    this.sendingFeedback = true;
+    const { email, message } = this.feedbackForm.value;
+
+    this.feedbackService.sendFeedback(email, message).subscribe({
+      next: () => {
+        this.message.success($localize `:@@common.feedback-success-message:Thank you for sending us your feedback, we'll get back to you very soon!`);
+      },
+      error: () => {
+        this.message.error($localize `:@@common.feedback-failure-message:We were not able to send your feedback, Please try again!`);
+      },
+      complete: () => {
+        this.sendingFeedback = false;
+        this.feedbackModalVisible = false;
+      }
+    });
   }
 }

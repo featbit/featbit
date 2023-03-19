@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { getCurrentOrganization } from "@utils/project-env";
 import { environment } from "src/environments/environment";
-import { Resource, ResourceTypeEnum } from "@features/safe/iam/components/policy-editor/types";
+import { Resource, ResourceTypeEnum } from "@shared/policy";
 import { Observable } from "rxjs";
 import { Injectable } from "@angular/core";
 

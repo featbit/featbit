@@ -5,10 +5,12 @@ public static class ErrorCodes
     // general
     public const string InternalServerError = nameof(InternalServerError);
     public const string Unauthorized = nameof(Unauthorized);
+    public const string Forbidden = nameof(Forbidden);
 
     // application
     public const string ResourceNotFound = nameof(ResourceNotFound);
     public const string InvalidJson = nameof(InvalidJson);
+    public const string EntityExistsAlready = nameof(EntityExistsAlready);
 
     // identity error codes
     public const string MethodIsRequired = nameof(MethodIsRequired);
@@ -22,7 +24,8 @@ public static class ErrorCodes
 
     // common
     public const string NameIsRequired = nameof(NameIsRequired);
-
+    public const string KeyIsRequired = nameof(KeyIsRequired);
+    
     // onboarding
     public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
     public const string ProjectNameRequired = nameof(ProjectNameRequired);
@@ -47,7 +50,6 @@ public static class ErrorCodes
     public const string InvalidVariationType = nameof(InvalidVariationType);
     public const string FeatureFlagIdIsRequired = nameof(FeatureFlagIdIsRequired);
     public const string FeatureFlagVariationIdIsRequired = nameof(FeatureFlagVariationIdIsRequired);
-    public const string FeatureFlagKeyIsRequired = nameof(FeatureFlagKeyIsRequired);
     public const string InvalidIntervalType = nameof(InvalidIntervalType);
     public const string InvalidFrom = nameof(InvalidFrom);
     public const string InvalidTo = nameof(InvalidTo);
@@ -65,4 +67,8 @@ public static class ErrorCodes
     public const string EventTypeIsRequired = nameof(EventTypeIsRequired);
     public const string EventNameIsRequired = nameof(EventNameIsRequired);
     public const string MetricIsBeingUsedByExperiment = nameof(MetricIsBeingUsedByExperiment);
+    
+    // access tokens
+    public const string InvalidAccessTokenType = nameof(InvalidAccessTokenType);
+    public const string ServiceAccessTokenMustDefinePolicies = nameof(ServiceAccessTokenMustDefinePolicies);
 }

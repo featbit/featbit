@@ -24,7 +24,7 @@ public class CachePopulatingHostedService : IHostedService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occured when populating cache.");
+            _logger.LogError(ex, "Exception occurred when populating cache.");
         }
     }
 

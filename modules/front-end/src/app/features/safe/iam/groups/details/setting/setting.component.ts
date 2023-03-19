@@ -4,6 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { GroupService } from "@services/group.service";
 import { groupRn, IGroup } from "@features/safe/iam/types/group";
+import { copyToClipboard } from '@utils/index';
 
 @Component({
   selector: 'user-setting',
@@ -75,7 +76,7 @@ export class SettingComponent implements OnInit {
   }
 
   copyText(text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }

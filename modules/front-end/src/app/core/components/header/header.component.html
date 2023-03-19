@@ -6,47 +6,47 @@
   </nz-breadcrumb>
 
   <div class="header-btns">
-    <div class="guide-btn" nz-tooltip="Quick Start Guide" i18n-nz-tooltip="@@common.quick-start-guide" (click)="onQuickStartGuideClick()">
+    <div class="header-btn feedback" (click)="openFeedbackModal()" i18n="@@common.feedback">Feedback</div>
+    <div class="header-btn" nzTooltipPlacement="bottom" nz-tooltip="Quick Start Guide" i18n-nz-tooltip="@@common.quick-start-guide" (click)="onQuickStartGuideClick()">
       <span nz-icon nzType="read" nzTheme="outline"></span>
     </div>
-  </div>
-  <div style="display:flex;justify-content: flex-end;align-items: center">
-    <div class="header-info">
-      <div class="org-proj-env">
+    <div class="org-btns">
+      <div class="header-info">
+        <div class="org-proj-env">
         <span [routerLink]="['/organizations']">
           <i nz-icon nzType="icons:icon-org"></i>
           {{currentOrganization?.name}}
         </span>
-        <span (click)="envModalVisible=true">
+          <span (click)="envModalVisible=true">
           <i nz-icon nzType="icons:icon-proj"></i>
-          {{currentProjectEnv?.projectName}}
+            {{currentProjectEnv?.projectName}}
         </span>
-        <span (click)="envModalVisible=true" nz-popover i18n-nz-popover="@@common.env-secret" nzPopoverTitle="Environment Secret"
-          [nzPopoverContent]="environmentSecretContent"
-          style="background-color: transparent;"
-          nzPopoverOverlayClassName="env-secret-popover">
+          <span (click)="envModalVisible=true" nz-popover i18n-nz-popover="@@common.env-secret" nzPopoverTitle="Environment Secret"
+                [nzPopoverContent]="environmentSecretContent"
+                style="background-color: transparent;"
+                nzPopoverOverlayClassName="env-secret-popover">
 
           <i nz-icon nzType="icons:icon-env"></i>
-          {{currentProjectEnv?.envName}}
+            {{currentProjectEnv?.envName}}
 
-          <ng-template #environmentSecretContent>
+            <ng-template #environmentSecretContent>
             <div class="env-secret-popover-content" (click)="copyText($event, currentProjectEnv?.envSecret)">
               <i class="copy-icon" nz-icon
-                nzType="icons:icon-copy"></i>
+                 nzType="icons:icon-copy"></i>
               {{currentProjectEnv?.envSecret}}
             </div>
           </ng-template>
         </span>
-      </div>
+        </div>
 
-      <div class="switch" (click)="envModalVisible=true">
-        <button class="switch-link-btn" nz-button nzType="link">
-          <i nz-icon nzType="icons:icon-swap"></i>
-        </button>
+        <div class="switch" (click)="envModalVisible=true">
+          <button class="switch-link-btn" nz-button nzType="link">
+            <i nz-icon nzType="icons:icon-swap"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
-
 </section>
 
 <nz-modal nzCentered nzWidth="792" [nzVisible]="envModalVisible" [nzFooter]="modalFooter"
@@ -58,7 +58,7 @@
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
         <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"
           *ngFor="let project of availableProjects" (click)="onSelectProject(project)">
-          {{ project.name }}
+          {{ project.name }} <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
         </nz-list-item>
         <ng-template #projectHeader>
           <span class="header" i18n="@@common.projects">Projects</span>
@@ -67,7 +67,7 @@
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
         <nz-list-item [ngClass]="{'item-selected': selectedEnv?.id === env.id}" *ngFor="let env of availableEnvs"
           (click)="onSelectEnv(env)">
-          {{ env.name }}
+          {{ env.name }} <nz-tag nzColor="green" *ngIf="isCurrentEnv(env)" i18n="@@common.current">Current</nz-tag>
         </nz-list-item>
         <ng-template #envHeader>
           <span class="header" i18n="@@common.environments">Environments</span>
@@ -78,5 +78,36 @@
   <ng-template #modalFooter>
     <button nz-button nzType="default" (click)="envModelCancel()" i18n="@@common.cancel">Cancel</button>
     <button nz-button nzType="primary" (click)="envModalConfirm()" i18n="@@common.save">Save</button>
+  </ng-template>
+</nz-modal>
+
+<nz-modal [nzVisible]="feedbackModalVisible"
+          [nzTitle]="feedbackModalTitle"
+          [nzCentered]="true"
+          [nzContent]="feedbackModalContent"
+          [nzFooter]="feedbackModalFooter"
+          (nzOnCancel)="feedbackModalVisible=false">
+  <ng-template #feedbackModalTitle><ng-container i18n="@@common.send-feedback">Send feedback</ng-container></ng-template>
+  <ng-template #feedbackModalContent>
+    <form nz-form [formGroup]="feedbackForm" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.email">Email</nz-form-label>
+        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.email-invalid" nzErrorTip="Invalid Email">
+          <input nz-input formControlName="email" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.message">Message</nz-form-label>
+        <nz-form-control nzHasFeedback nzErrorTip="Message is mandatory" i18n-nzErrorTip="@@common.message-mandatory">
+          <textarea nz-input formControlName="message" i18n-placeholder="@@common.message-placeholder" placeholder="Have you any feedback for us?">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-template>
+
+  <ng-template #feedbackModalFooter>
+    <button nz-button nzType="default" (click)="feedbackModalVisible=false" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" [nzLoading]="sendingFeedback" [disabled]="feedbackForm.invalid" (click)="sendFeedback()" i18n="@@common.send">Send</button>
   </ng-template>
 </nz-modal>

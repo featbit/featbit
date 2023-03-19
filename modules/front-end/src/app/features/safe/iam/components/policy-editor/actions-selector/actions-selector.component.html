@@ -7,7 +7,7 @@
   </div>
   <div class="selected-actions" *ngIf="selectedActions.length">
     <div nz-col class="action" *ngFor="let act of selectedActions">
-      <div class="inner-box">
+      <div class="inner-box" nz-tooltip="{{act.name}} ({{act.description}})">
         {{act.displayName}} ({{act.name}})
       </div>
       <button nz-button nzType="default" [nzSize]="'large'" (click)="removeAction(act)"><i nz-icon nzType="close"></i></button>

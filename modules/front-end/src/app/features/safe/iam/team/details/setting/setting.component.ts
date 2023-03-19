@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IAuthProps } from "@shared/types";
-import { getAuth } from "@utils/index";
+import { getAuth, copyToClipboard } from "@utils/index";
 import { IMember, memberRn } from "@features/safe/iam/types/member";
 import { MemberService } from "@services/member.service";
 import {UserService} from "@services/user.service";
@@ -54,7 +54,7 @@ export class SettingComponent implements OnInit {
   }
 
   copyText(text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }

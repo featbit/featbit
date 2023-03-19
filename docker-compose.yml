@@ -123,6 +123,26 @@ services:
       - featbit-network-full
     volumes:
       - kafka:/bitnami/kafka
+  
+  init-kafka-topics:
+    image: 'bitnami/kafka:3.2.3'
+    depends_on:
+      kafka:
+        condition: service_started
+    networks:
+      - featbit-network-full
+    entrypoint:
+      - bash
+      - "-c"
+      - |
+        echo "Waiting for Kafka to be ready..."
+        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092; do sleep 5; done;
+        echo "Kafka is ready now, start creating topics."
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic api-feature-flag-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic api-segment-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic evaluation-server-endusers;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic ch_events_json;
+        echo "Seed kafka topic finished."
 
   clickhouse-server:
     image: clickhouse/clickhouse-server:22.3

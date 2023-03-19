@@ -201,12 +201,19 @@
           Key
         </nz-form-label>
         <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
-          <input nz-input formControlName="key" i18n-placeholder="@@ff.idx.key-generated-from-name" placeholder="Key can be auto-generated from name" />
+          <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name" />
           <ng-template #keyErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@ff.idx.key-cannot-be-empty">Key cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@ff.idx.key-has-been-used">This key has been used</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@ff.idx.key-validation-failed">Key validation failed</ng-container>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
           </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@common.description">Description</nz-form-label>
+        <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@ff.description.cannot-exceed-512-characters">
+          <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
+          </textarea>
         </nz-form-control>
       </nz-form-item>
     </form>

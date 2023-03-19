@@ -1,15 +1,15 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IProject, IEnvironment, IProjectEnv, ISecret, SecretTypeEnum } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
 import { EnvService } from '@services/env.service';
 import { NzMessageService } from "ng-zorro-antd/message";
 import {PermissionsService} from "@services/permissions.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/permissions";
-import {ResourceTypeEnum} from "@features/safe/iam/components/policy-editor/types";
 import {MessageQueueService} from "@services/message-queue.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { EnvSecretService } from "@services/env-secret.service";
+import { copyToClipboard } from '@utils/index';
+import { ResourceTypeEnum, generalResourceRNPattern, permissionActions } from "@shared/policy";
 
 @Component({
   selector: 'app-project',
@@ -59,8 +59,12 @@ export class ProjectComponent implements OnInit {
     }
   }
 
-  isEnvDeleteBtnVisible(env: IEnvironment): boolean {
-    return this.currentProjectEnv?.envId !== env.id;
+  isCurrentProject(project: IProject): boolean {
+    return this.currentProjectEnv?.projectId === project.id;
+  }
+
+  isCurrentEnv(env: IEnvironment): boolean {
+    return this.currentProjectEnv?.envId === env.id;
   }
 
   onCreateProjectClick() {
@@ -79,7 +83,7 @@ export class ProjectComponent implements OnInit {
     this.creatEditProjectFormVisible = true;
   }
 
-  getEnvRN(project: IProject, env: IEnvironment): string {
+  getEnvRN(project: IProject, env: Partial<IEnvironment>): string {
     if (!project || !env) {
       return '';
     }
@@ -176,7 +180,7 @@ export class ProjectComponent implements OnInit {
   }
 
   copyText(text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.messageService.success($localize `:@@common.copy-success:Copied`)
     );
   }

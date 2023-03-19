@@ -4,6 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { IPolicy, policyRn } from "@features/safe/iam/types/policy";
 import { PolicyService } from "@services/policy.service";
+import { copyToClipboard } from '@utils/index';
 
 @Component({
   selector: 'user-setting',
@@ -28,11 +29,13 @@ export class SettingComponent implements OnInit {
   }
 
   isLoading = true;
+  isEditable = true;
   policy: IPolicy;
   private getPolicy(policyId: string) {
     this.policyService.get(policyId).subscribe(policy => {
       this.policy = policy;
       this.isLoading = false;
+      if (policy.type == "SysManaged") this.isEditable = false;
     }, () => this.isLoading = false);
   }
 
@@ -75,7 +78,7 @@ export class SettingComponent implements OnInit {
   }
 
   copyText(text: string) {
-    navigator.clipboard.writeText(text).then(
+    copyToClipboard(text).then(
       () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }

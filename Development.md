@@ -22,14 +22,14 @@ launch these two services from the code.
 
 ## Setup dependencies
 
-Open [docker-compose-dev.yml](./docker-compose-dev.yml) and **comment out ui and api-server service**, they are the
+Open [docker-compose-dev.yml](./docker-compose-dev.yml) and **comment out ui and/or api-server service according to the scope of your work**, they are the
 first two services. Then do
 
 ```bash
 docker compose -f docker-compose-dev.yml up -d
 ```
 
-Wait until all services are successfully launched, and we're ready to run API and UI locally.
+Wait until all services are successfully launched, and we're ready to run API and/or UI locally.
 
 ## Run API
 

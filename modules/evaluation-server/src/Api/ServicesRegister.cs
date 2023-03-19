@@ -5,6 +5,7 @@ using Infrastructure.Caches;
 using Infrastructure.Fakes;
 using Infrastructure.Kafka;
 using Infrastructure.MongoDb;
+using Infrastructure.MqMessageHandlers;
 using Infrastructure.Redis;
 using Infrastructure.Services;
 using Infrastructure.WsMessageHandlers;
@@ -63,7 +64,7 @@ public static class ServicesRegister
         {
             services.AddTransient<ICachePopulatingService, FakeCachePopulatingService>();
             services.AddTransient<ICacheService, FakeCacheService>();
-            services.AddSingleton<IMessageProducer, FakeMessageProducer>();
+            services.AddSingleton<IMqMessageProducer, FakeMessageProducer>();
         }
         else
         {
@@ -79,12 +80,12 @@ public static class ServicesRegister
             services.AddSingleton<ICacheService, RedisService>();
 
             // kafka message producer & consumer
-            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+            services.AddSingleton<IMqMessageProducer, KafkaMessageProducer>();
             services.AddHostedService<KafkaMessageConsumer>();
 
-            // kafka message handlers
-            services.AddSingleton<IKafkaMessageHandler, FeatureFlagChangeMessageHandler>();
-            services.AddSingleton<IKafkaMessageHandler, SegmentChangeMessageHandler>();
+            // message handlers
+            services.AddSingleton<IMqMessageHandler, FeatureFlagChangeMessageHandler>();
+            services.AddSingleton<IMqMessageHandler, SegmentChangeMessageHandler>();
         }
 
         return builder;

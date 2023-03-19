@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { IPolicy, IPolicyStatement } from "@features/safe/iam/types/policy";
+import { IPolicy } from "@features/safe/iam/types/policy";
 import { PolicyService } from "@services/policy.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { IPolicyStatement } from "@shared/policy";
 
 @Component({
   selector: 'permission',

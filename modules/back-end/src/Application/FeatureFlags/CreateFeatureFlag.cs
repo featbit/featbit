@@ -12,6 +12,8 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
     public string Name { get; set; }
 
     public string Key { get; set; }
+
+    public string Description { get; set; }
 }
 
 public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
@@ -22,7 +24,7 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 
         RuleFor(x => x.Key)
-            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagKeyIsRequired)
+            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired)
             .Matches(FeatureFlag.KeyFormat).WithErrorCode(ErrorCodes.InvalidFlagKeyFormat);
     }
 }
@@ -48,7 +50,7 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
 
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = new FeatureFlag(request.EnvId, request.Name, request.Key, _currentUser.Id);
+        var flag = new FeatureFlag(request.EnvId, request.Name, request.Description, request.Key, _currentUser.Id);
         await _service.AddOneAsync(flag);
 
         // write audit log

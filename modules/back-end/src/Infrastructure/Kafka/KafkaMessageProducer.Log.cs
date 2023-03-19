@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Messages;
+namespace Infrastructure.Kafka;
 
 public partial class KafkaMessageProducer
 {

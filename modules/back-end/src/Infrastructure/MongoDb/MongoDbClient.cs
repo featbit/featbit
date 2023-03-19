@@ -1,3 +1,4 @@
+using Domain.AccessTokens;
 using Domain.AuditLogs;
 using Domain.EndUsers;
 using Domain.ExperimentMetrics;
@@ -59,6 +60,8 @@ public class MongoDbClient
 
         { typeof(Experiment), "Experiments" },
         { typeof(ExperimentMetric), "ExperimentMetrics" },
+        
+        { typeof(AccessToken), "AccessTokens" },
     };
 
     public IMongoCollection<TEntity> CollectionOf<TEntity>()
