@@ -4,7 +4,7 @@ namespace Api.Authentication;
 
 public static class Schemes
 {
-    public const string SchemeSelector = "";
+    public const string SchemeSelector = "auth-scheme-selector";
 
     public const string JwtBearer = JwtBearerDefaults.AuthenticationScheme;
 

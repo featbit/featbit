@@ -1,8 +1,8 @@
-using System.Security.Claims;
+using Domain.Policies;
 
 namespace Api.Authorization;
 
 public interface IPermissionChecker
 {
-    Task<bool> IsGrantedAsync(ClaimsPrincipal claimsPrincipal, string permissionName);
+    Task<bool> IsGrantedAsync(IEnumerable<PolicyStatement> statements, string permissionName);
 }

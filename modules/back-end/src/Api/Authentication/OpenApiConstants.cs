@@ -1,6 +1,6 @@
 namespace Api.Authentication;
 
-public class OpenApiConstants
+public static class OpenApiConstants
 {
-    public const string AccessTokenStoreKey = "access-token";
+    public const string PermissionStoreKey = "pemissions";
 }

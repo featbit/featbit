@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.Net.Http.Headers;
 
-namespace Api.Setup;
+namespace Api.Authorization;
 
 public class ApiAuthorizationResultHandler : IAuthorizationMiddlewareResultHandler
 {

@@ -1,5 +1,6 @@
 using System.Text;
 using Api.Authentication;
+using Api.Authorization;
 using Domain.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;

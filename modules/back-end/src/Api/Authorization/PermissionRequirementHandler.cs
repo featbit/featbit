@@ -1,3 +1,5 @@
+using Domain.Policies;
+
 namespace Api.Authorization;
 
 public class PermissionRequirementHandler : AuthorizationHandler<PermissionRequirement>
@@ -13,7 +15,8 @@ public class PermissionRequirementHandler : AuthorizationHandler<PermissionRequi
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        if (await _permissionChecker.IsGrantedAsync(context.User, requirement.PermissionName))
+        // TODO: read permissions from http context
+        if (await _permissionChecker.IsGrantedAsync(Array.Empty<PolicyStatement>(), requirement.PermissionName))
         {
             context.Succeed(requirement);
         }
