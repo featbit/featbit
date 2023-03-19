@@ -88,8 +88,8 @@ export class AccessTokenDrawerComponent {
       type: [AccessTokenTypeEnum.Personal, [Validators.required]]
     });
 
-    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
-    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   isServiceAccessToken: boolean = false

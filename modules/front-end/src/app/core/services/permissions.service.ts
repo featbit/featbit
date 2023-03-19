@@ -63,7 +63,7 @@ export class PermissionsService {
   }
 
   // if return undefined, that means zero permission is defined on that resource
-  canTakeAction(rn: string, action: IamPolicyAction): boolean | undefined | any {
+  isGranted(rn: string, action: IamPolicyAction): boolean | undefined | any {
     const matchedPermissions = this.userPermissions.filter(permission => {
       if (permission.resourceType === ResourceTypeEnum.All) {
         return true;

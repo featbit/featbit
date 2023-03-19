@@ -28,11 +28,11 @@ export class EnvDrawerComponent {
   set env(env: IEnvironment) {
     this.isEditing = env && !!env.id;
     if (this.isEditing) {
-      this.title = $localize `:@@org.project.editEnv:Edit environment`;
+      this.title = $localize`:@@org.project.editEnv:Edit environment`;
       this.initForm(true);
       this.patchForm(env);
     } else {
-      this.title = $localize `:@@org.project.addEnv:Add environment`;
+      this.title = $localize`:@@org.project.addEnv:Add environment`;
       this.initForm(false);
       this.resetForm();
     }
@@ -60,7 +60,7 @@ export class EnvDrawerComponent {
   initForm(isKeyDisabled: boolean) {
     this.envForm = this.fb.group({
       name: [null, [Validators.required]],
-      key: [{ disabled: isKeyDisabled, value: null }, Validators.required, this.keyAsyncValidator],
+      key: [{disabled: isKeyDisabled, value: null}, Validators.required, this.keyAsyncValidator],
       description: [null],
     });
   }
@@ -79,9 +79,9 @@ export class EnvDrawerComponent {
     map(isKeyUsed => {
       switch (isKeyUsed) {
         case true:
-          return { error: true, duplicated: true };
+          return {error: true, duplicated: true};
         case undefined:
-          return { error: true, unknown: true };
+          return {error: true, unknown: true};
         default:
           return null;
       }
@@ -116,7 +116,7 @@ export class EnvDrawerComponent {
 
     this.isLoading = true;
 
-    const { name, key, description } = this.envForm.value;
+    const {name, key, description} = this.envForm.value;
     const projectId = this.env.projectId;
 
     if (this.isEditing) {
@@ -128,21 +128,21 @@ export class EnvDrawerComponent {
         .subscribe(
           ({id, name, description, secrets}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: true, env: { name, description, id, key, projectId, secrets }});
-            this.message.success($localize `:@@org.project.envUpdateSuccess:Environment successfully updated`);
+            this.close.emit({isEditing: true, env: {name, description, id, key, projectId, secrets}});
+            this.message.success($localize`:@@org.project.envUpdateSuccess:Environment successfully updated`);
           },
           () => {
             this.isLoading = false;
           }
         );
     } else {
-      this.envService.postCreateEnv(this.env.projectId, { name, key, description, projectId })
+      this.envService.postCreateEnv(this.env.projectId, {name, key, description, projectId})
         .pipe()
         .subscribe(
           ({id, name, description, secrets}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: false, env: { name, description, id, key, projectId, secrets }});
-            this.message.success($localize `:@@org.project.envCreateSuccess:Environment successfully created`);
+            this.close.emit({isEditing: false, env: {name, description, id, key, projectId, secrets}});
+            this.message.success($localize`:@@org.project.envCreateSuccess:Environment successfully created`);
           },
           () => {
             this.isLoading = false;
@@ -159,9 +159,9 @@ export class EnvDrawerComponent {
     }
 
     if (!this.isEditing) { // creation
-      return this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.CreateEnv);
+      return this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.CreateEnv);
     } else {
-      return this.permissionsService.canTakeAction(this.rn, permissionActions.UpdateEnvSettings);
+      return this.permissionsService.isGranted(this.rn, permissionActions.UpdateEnvSettings);
     }
   }
 }
