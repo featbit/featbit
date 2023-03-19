@@ -11,9 +11,9 @@
       <div class="value">
         <ng-container *ngIf="!isEditingTitle">
           <span [nz-tooltip]="policy.name" class="text">{{policy.name}}</span>
-          <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+          <i *ngIf="isEditable" class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
         </ng-container>
-        <ng-container *ngIf="isEditingTitle">
+        <ng-container *ngIf="isEditingTitle"> 
           <input nz-input placeholder="Name" i18n-placeholder="@@common.name" [(ngModel)]="policy.name" />
           <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
         </ng-container>
@@ -22,7 +22,7 @@
     <div class="item description" [class]="{editing: isEditingDescription}">
       <ng-container *ngIf="!isEditingDescription">
         <span>{{policy.description}}</span>
-        <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
+        <i *ngIf="isEditable" class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
       </ng-container>
       <ng-container *ngIf="isEditingDescription">
         <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="policy.description" [nzAutosize]="{ minRows: 3 }"></textarea>
