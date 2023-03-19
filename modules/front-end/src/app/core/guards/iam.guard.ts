@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
-import {PermissionsService} from "@services/permissions.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/policy";
-import {NzMessageService} from "ng-zorro-antd/message";
+import { PermissionsService } from "@services/permissions.service";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,8 @@ export class IAMGuard implements CanActivate {
     private router: Router,
     private message: NzMessageService,
     private permissionsService: PermissionsService
-  ) { }
+  ) {
+  }
 
   async canActivate(
     route: ActivatedRouteSnapshot,
@@ -22,7 +23,7 @@ export class IAMGuard implements CanActivate {
   }
 
   async checkPermission(url: string): Promise<boolean | UrlTree> {
-    const canManageIAM = !!this.permissionsService.canTakeAction(generalResourceRNPattern.iam, permissionActions.CanManageIAM);
+    const canManageIAM = this.permissionsService.canTakeAction(generalResourceRNPattern.iam, permissionActions.CanManageIAM);
 
     if (!canManageIAM) {
       this.message.warning(this.permissionsService.genericDenyMessage);

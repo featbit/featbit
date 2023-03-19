@@ -117,7 +117,7 @@ export class AccessTokenDrawerComponent {
   }
 
   setAuthorizedPermissions() {
-    const hasOwnerPolicy = this.permissionsService.policies.some((policy) => policy.name === 'Owner' && policy.type === 'SysManaged');
+    const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === 'SysManaged');
 
     let permissions = [];
     if (hasOwnerPolicy) {
@@ -133,7 +133,7 @@ export class AccessTokenDrawerComponent {
           }
         })
     } else {
-      permissions = this.permissionsService.permissions;
+      permissions = this.permissionsService.userPermissions;
     }
 
     permissions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
