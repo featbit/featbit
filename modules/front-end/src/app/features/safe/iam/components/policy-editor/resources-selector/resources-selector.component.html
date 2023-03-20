@@ -29,7 +29,7 @@
       <nz-option
         *ngIf="!isResourceLoading" nzCustomContent [nzValue]="rsc" [nzHide]="isSelected(rsc)">
         <div class="resource-selection-item">
-          <div class="title">{{ rsc.rn | T: rsc.name: "resource" }}</div>
+          <div class="title">{{ rsc.name | T: rsc.name: "resource" }}</div>
           <div class="digest">{{ getDigest(rsc) }}</div>
         </div>
       </nz-option>

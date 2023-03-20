@@ -9,7 +9,7 @@ public static class ResourceHelper
         switch (resourceType)
         {
             case ResourceTypes.FeatureFlag:
-                return "project/*:env/*:feature-flag/*";
+                return "project/*:env/*:flag/*";
         }
 
         return string.Empty;

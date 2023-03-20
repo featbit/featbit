@@ -4,11 +4,11 @@ namespace Api.Authorization;
 
 public static class Permissions
 {
-    public const string CreateFeatureFlag = nameof(CreateFeatureFlag);
+    public const string ManageFeatureFlag = nameof(ManageFeatureFlag);
 
     public static readonly Dictionary<string, string> ResourceMap = new(StringComparer.OrdinalIgnoreCase)
     {
-        { CreateFeatureFlag, ResourceTypes.FeatureFlag }
+        { ManageFeatureFlag, ResourceTypes.FeatureFlag }
     };
 
     public static readonly string[] All = ResourceMap.Keys.ToArray();

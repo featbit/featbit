@@ -13,7 +13,7 @@ import {
   EffectEnum,
   generalResourceRNPattern,
   permissionActions,
-  ResourceTypeAccount,
+  ResourceTypeAccount, ResourceTypeFlag,
   ResourceTypeIAM
 } from "@shared/policy";
 import { NzModalService } from "ng-zorro-antd/modal";
@@ -38,13 +38,8 @@ export class AccessTokenDrawerComponent {
   isEditing: boolean = false;
 
   // This property is used to define the order of displaying the resource types, it also defines the resource types applicable to OPEN API
-  // TODO replace with real open API resource types
   resourceTypes: ResourceType[] = [
-    ResourceTypeAccount,
-    ResourceTypeIAM,
-    ResourceTypeAccessToken,
-    ResourceTypeProject,
-    ResourceTypeEnv
+    ResourceTypeFlag
   ];
 
   authorizedResourceTypes: ResourceType[] = [];

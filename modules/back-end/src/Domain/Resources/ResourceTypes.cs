@@ -14,5 +14,5 @@ public static class ResourceTypes
 
     public const string Env = "env";
 
-    public const string FeatureFlag = "feature-flag";
+    public const string FeatureFlag = "flag";
 }
