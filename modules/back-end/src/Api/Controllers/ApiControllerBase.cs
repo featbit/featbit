@@ -1,10 +1,11 @@
+using Api.Filters;
 using Application.Users;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Api.Controllers;
 
+[Authorize]
 [ApiController]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+[VerifyOpenApiApplicable]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class ApiControllerBase : ControllerBase
 {

@@ -85,6 +85,11 @@
                     <ng-template #iconTplEnv>
                       <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
                     </ng-template>
+                    <nz-divider nzType="vertical"></nz-divider>
+                    <a (click)="copyText(env.id)" class="copy-id">
+                      <span style="color: #717D8A;" i18n="@@org.project.copy-id">Copy Id</span>
+                      <i style="color: #717D8A;" nz-icon i18n-nz-tooltip="@@org.project.env-id-copy-description" nz-tooltip="Copy Id of the environment, the Id is needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
+                    </a>
                   </div>
                 </div>
               </div>

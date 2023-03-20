@@ -4,8 +4,8 @@ import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
 import { EnvService } from '@services/env.service';
 import { NzMessageService } from "ng-zorro-antd/message";
-import {PermissionsService} from "@services/permissions.service";
-import {MessageQueueService} from "@services/message-queue.service";
+import { PermissionsService } from "@services/permissions.service";
+import { MessageQueueService } from "@services/message-queue.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { EnvSecretService } from "@services/env-secret.service";
 import { copyToClipboard } from '@utils/index';
@@ -45,13 +45,14 @@ export class ProjectComponent implements OnInit {
     private envSecretService: EnvSecretService,
     private messageService: NzMessageService,
     public permissionsService: PermissionsService
-  ) { }
+  ) {
+  }
 
   ngOnInit(): void {
     const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
     this.currentOrganizationId = currentAccountProjectEnv.organization.id;
     this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
-    const canListProjects = this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.ListProjects);
+    const canListProjects = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListProjects);
     if (canListProjects) {
       this.projectService
         .getProjects(this.currentOrganizationId)
@@ -74,7 +75,7 @@ export class ProjectComponent implements OnInit {
 
   onCreateEnvClick(project: IProject) {
     this.project = project;
-    this.env = { projectId: project.id } as IEnvironment;
+    this.env = {projectId: project.id} as IEnvironment;
     this.creatEditEnvFormVisible = true;
   }
 
@@ -98,7 +99,7 @@ export class ProjectComponent implements OnInit {
   }
 
   onDeleteEnvClick(project: IProject, env: IEnvironment) {
-    const canDelete = this.permissionsService.canTakeAction(this.getEnvRN(project, env), permissionActions.DeleteEnv);
+    const canDelete = this.permissionsService.isGranted(this.getEnvRN(project, env), permissionActions.DeleteEnv);
     if (!canDelete) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -106,23 +107,23 @@ export class ProjectComponent implements OnInit {
 
     this.envService.removeEnv(project.id, env.id).subscribe(() => {
       project.environments = project.environments.filter(e => e.id !== env.id);
-      this.messageService.success($localize `:@@org.project.env-remove-success:Environment successfully removed`);
+      this.messageService.success($localize`:@@org.project.env-remove-success:Environment successfully removed`);
       // emit project list change event
       this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
     })
   }
 
   onDeleteProjectClick(project: IProject) {
-    const canDelete = this.permissionsService.canTakeAction(this.permissionsService.getResourceRN(ResourceTypeEnum.Project, project), permissionActions.DeleteProject);
+    const canDelete = this.permissionsService.isGranted(this.permissionsService.getResourceRN(ResourceTypeEnum.Project, project), permissionActions.DeleteProject);
     if (!canDelete) {
-     this.messageService.warning(this.permissionsService.genericDenyMessage);
-     return;
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
     }
 
     this.projectService.removeProject(this.currentOrganizationId, project.id).subscribe(() => {
       // remove the deleted project from list
       this.projects = this.projects.filter(item => item.id !== project.id);
-      this.messageService.success($localize `:@@org.project.project-remove-success:Project successfully removed`);
+      this.messageService.success($localize`:@@org.project.project-remove-success:Project successfully removed`);
       // emit project list change event
       this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
     });
@@ -163,8 +164,8 @@ export class ProjectComponent implements OnInit {
     }
 
     if (data.isEditing) {
-      this.project.environments = this.project.environments.map(e => e.id === data.env.id ? { ...e, ...data.env } : e);
-      this.env = { ...this.env, ...data.env };
+      this.project.environments = this.project.environments.map(e => e.id === data.env.id ? {...e, ...data.env} : e);
+      this.env = {...this.env, ...data.env};
     } else {
       this.project.environments.push(data.env);
     }
@@ -181,7 +182,7 @@ export class ProjectComponent implements OnInit {
 
   copyText(text: string) {
     copyToClipboard(text).then(
-      () => this.messageService.success($localize `:@@common.copy-success:Copied`)
+      () => this.messageService.success($localize`:@@common.copy-success:Copied`)
     );
   }
 
@@ -195,7 +196,7 @@ export class ProjectComponent implements OnInit {
   currentSecretId: string;
 
   createSecret(project: IProject, env: IEnvironment) {
-    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.CreateEnvSecret);
+    const isAllowed = this.permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.CreateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -205,7 +206,7 @@ export class ProjectComponent implements OnInit {
     this.env = env;
     this.isEditingSecret = false;
 
-    this.secretModalTitle = $localize `:@@org.project.add-secret:Add secret`;
+    this.secretModalTitle = $localize`:@@org.project.add-secret:Add secret`;
     this.secretForm = this.fb.group({
       name: [null, Validators.required],
       type: [SecretTypeEnum.Client, Validators.required]
@@ -214,7 +215,7 @@ export class ProjectComponent implements OnInit {
   }
 
   editSecret(project: IProject, env: IEnvironment, secret: ISecret) {
-    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.UpdateEnvSecret);
+    const isAllowed = this.permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.UpdateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -230,7 +231,7 @@ export class ProjectComponent implements OnInit {
       type: [secret.type, Validators.required]
     });
 
-    this.secretModalTitle = $localize `:@@org.project.edit-secret:Edit secret: ${secret.name}`;
+    this.secretModalTitle = $localize`:@@org.project.edit-secret:Edit secret: ${secret.name}`;
     this.isSecretModalVisible = true;
   }
 
@@ -242,7 +243,7 @@ export class ProjectComponent implements OnInit {
   }
 
   deleteSecret(project: IProject, env: IEnvironment, secretId: string) {
-    const isAllowed = this.permissionsService.canTakeAction(`project/${project.name}:env/${env.name}`, permissionActions.DeleteEnvSecret);
+    const isAllowed = this.permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.DeleteEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -253,7 +254,7 @@ export class ProjectComponent implements OnInit {
         env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
       },
       error: () => {
-        this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+        this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
       }
     });
   }
@@ -267,9 +268,9 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
-    const { name, type } = this.secretForm.value;
+    const {name, type} = this.secretForm.value;
     if (this.isEditingSecret) {
-      const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
+      const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
       if (!isAllowed) {
         this.messageService.warning(this.permissionsService.genericDenyMessage);
         return;
@@ -279,7 +280,7 @@ export class ProjectComponent implements OnInit {
         next: () => {
           this.env.secrets = this.env.secrets.map((secret) => {
             if (secret.id === this.currentSecretId) {
-              return { ...secret, name };
+              return {...secret, name};
             }
 
             return secret;
@@ -287,11 +288,11 @@ export class ProjectComponent implements OnInit {
           this.isSecretModalVisible = false;
         },
         error: () => {
-          this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+          this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
         }
       });
     } else {
-      const isAllowed = this.permissionsService.canTakeAction(`project/${this.project.name}:env/${this.env.name}`, permissionActions.CreateEnvSecret);
+      const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.CreateEnvSecret);
       if (!isAllowed) {
         this.messageService.warning(this.permissionsService.genericDenyMessage);
         return;
@@ -303,7 +304,7 @@ export class ProjectComponent implements OnInit {
           this.isSecretModalVisible = false;
         },
         error: () => {
-          this.messageService.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
+          this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
         }
       });
     }
