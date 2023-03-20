@@ -94,6 +94,7 @@ public static class ServicesRegister
             .AddOpenApi(Schemes.OpenApi);
 
         // authorization
+        builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
         builder.Services.AddAuthorization(options =>
         {
