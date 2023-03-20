@@ -9,6 +9,13 @@ namespace Api.Controllers;
 [ApiVersion(2.0)]
 public class BasicController : ApiControllerBase
 {
+    [AllowAnonymous]
+    [HttpGet("allow-anonymous")]
+    public ApiResponse<bool> AllowAnonymous()
+    {
+        return Ok(true);
+    }
+
     [HttpGet("authorized"), MapToApiVersion(1.0)]
     public ApiResponse<ICurrentUser> Authorized()
     {
