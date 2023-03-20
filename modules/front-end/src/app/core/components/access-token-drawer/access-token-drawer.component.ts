@@ -13,7 +13,7 @@ import {
   EffectEnum,
   generalResourceRNPattern,
   permissionActions,
-  ResourceTypeAccount,
+  ResourceTypeAccount, ResourceTypeFlag,
   ResourceTypeIAM
 } from "@shared/policy";
 import { NzModalService } from "ng-zorro-antd/modal";
@@ -39,13 +39,8 @@ export class AccessTokenDrawerComponent {
   isEditing: boolean = false;
 
   // This property is used to define the order of displaying the resource types, it also defines the resource types applicable to OPEN API
-  // TODO replace with real open API resource types
   resourceTypes: ResourceType[] = [
-    ResourceTypeAccount,
-    ResourceTypeIAM,
-    ResourceTypeAccessToken,
-    ResourceTypeProject,
-    ResourceTypeEnv
+    ResourceTypeFlag
   ];
 
   authorizedResourceTypes: ResourceType[] = [];
@@ -89,8 +84,8 @@ export class AccessTokenDrawerComponent {
       type: [AccessTokenTypeEnum.Personal, [Validators.required]]
     });
 
-    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
-    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   isServiceAccessToken: boolean = false
@@ -118,7 +113,7 @@ export class AccessTokenDrawerComponent {
   }
 
   setAuthorizedPermissions() {
-    const hasOwnerPolicy = this.permissionsService.policies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
+    const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
     let permissions = [];
     if (hasOwnerPolicy) {
@@ -134,7 +129,7 @@ export class AccessTokenDrawerComponent {
           }
         })
     } else {
-      permissions = this.permissionsService.permissions;
+      permissions = this.permissionsService.userPermissions;
     }
 
     permissions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));

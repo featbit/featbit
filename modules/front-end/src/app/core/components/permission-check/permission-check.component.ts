@@ -1,5 +1,5 @@
-import {Component, Input, OnInit} from "@angular/core";
-import {PermissionsService} from "@services/permissions.service";
+import { Component, Input, OnInit } from "@angular/core";
+import { PermissionsService } from "@services/permissions.service";
 import { IamPolicyAction } from "@shared/policy";
 
 @Component({
@@ -14,10 +14,11 @@ export class PermissionCheckComponent implements OnInit {
   @Input() messageIfDeny: string = this.permissionsService.genericDenyMessage;
 
   canTakeAction: boolean = false;
+
   constructor(private permissionsService: PermissionsService) {
   }
 
   ngOnInit(): void {
-    this.canTakeAction = this.permissionsService.canTakeAction(this.rn, this.action);
+    this.canTakeAction = this.permissionsService.isGranted(this.rn, this.action);
   }
 }

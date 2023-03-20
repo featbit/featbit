@@ -6,9 +6,12 @@ export default {
     zh: '权限管理'
   },
   'project': {
-    zh: '项目'
+    zh: '所有项目'
   },
-  'Environment': {
-    zh: '环境'
+  'env': {
+    zh: '所有环境'
+  },
+  'flag': {
+    zh: '所有开关'
   }
 }

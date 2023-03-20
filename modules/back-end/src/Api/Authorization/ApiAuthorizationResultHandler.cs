@@ -4,35 +4,42 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.Net.Http.Headers;
 
-namespace Api.Setup;
+namespace Api.Authorization;
 
 public class ApiAuthorizationResultHandler : IAuthorizationMiddlewareResultHandler
 {
-    private readonly AuthorizationMiddlewareResultHandler _defaultHandler = new();
-
     public async Task HandleAsync(
         RequestDelegate next,
         HttpContext context,
         AuthorizationPolicy policy,
         PolicyAuthorizationResult authorizeResult)
     {
-        if (!authorizeResult.Succeeded)
-        {
-            var response = context.Response;
+        var response = context.Response;
 
+        if (authorizeResult.Challenged)
+        {
             response.Headers.Append(
                 HeaderNames.WWWAuthenticate,
                 JwtBearerDefaults.AuthenticationScheme
             );
             response.StatusCode = StatusCodes.Status401Unauthorized;
 
-            var authError = ApiResponse<object>.Error(ErrorCodes.Unauthorized);
-            await response.WriteAsJsonAsync(authError);
+            var unauthorized = ApiResponse<object>.Error(ErrorCodes.Unauthorized);
+            await response.WriteAsJsonAsync(unauthorized);
 
             return;
         }
 
-        // fallback to the default implementation
-        await _defaultHandler.HandleAsync(next, context, policy, authorizeResult);
+        if (authorizeResult.Forbidden)
+        {
+            response.StatusCode = StatusCodes.Status403Forbidden;
+
+            var forbidden = ApiResponse<object>.Error(ErrorCodes.Forbidden);
+            await response.WriteAsJsonAsync(forbidden);
+
+            return;
+        }
+
+        await next(context);
     }
 }
