@@ -16,8 +16,18 @@ public class PermissionRequirementHandler : AuthorizationHandler<PermissionRequi
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        if (context.Resource is HttpContext httpContext &&
-            httpContext.Items[OpenApiConstants.PermissionStoreKey] is IEnumerable<PolicyStatement> permissions)
+        if (context.Resource is not HttpContext httpContext)
+        {
+            return Task.CompletedTask;
+        }
+
+        if (httpContext.User.Identity?.AuthenticationType == Schemes.JwtBearer)
+        {
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+        }
+
+        if (httpContext.Items[OpenApiConstants.PermissionStoreKey] is IEnumerable<PolicyStatement> permissions)
         {
             if (_permissionChecker.IsGranted(permissions, requirement))
             {

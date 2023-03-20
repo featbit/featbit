@@ -81,6 +81,8 @@ public static class ServicesRegister
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
+                    AuthenticationType = Schemes.JwtBearer,
+
                     ValidateIssuer = true,
                     ValidIssuer = jwtOption["Issuer"],
 
