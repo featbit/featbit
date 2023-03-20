@@ -23,12 +23,13 @@ public class ResourceService : IResourceService
 
         return filter.Type switch
         {
-            ResourceType.All => new[] { Resource.All },
-            ResourceType.Account => new[] { Resource.AllAccount },
-            ResourceType.IAM => new[] { Resource.AllIam },
-            ResourceType.AccessToken => new[] { Resource.AllAccessToken },
-            ResourceType.Env => await GetEnvsAsync(organizationId, name),
-            ResourceType.Project => await GetProjectsAsync(organizationId, name),
+            ResourceTypes.All => new[] { Resource.All },
+            ResourceTypes.Account => new[] { Resource.AllAccount },
+            ResourceTypes.Iam => new[] { Resource.AllIam },
+            ResourceTypes.AccessToken => new[] { Resource.AllAccessToken },
+            ResourceTypes.FeatureFlag => new[] { Resource.AllFeatureFlag },
+            ResourceTypes.Env => await GetEnvsAsync(organizationId, name),
+            ResourceTypes.Project => await GetProjectsAsync(organizationId, name),
             _ => Array.Empty<Resource>()
         };
     }
@@ -55,7 +56,7 @@ public class ResourceService : IResourceService
             Id = x.Id,
             Name = x.Name,
             Rn = x.Rn,
-            Type = ResourceType.Project
+            Type = ResourceTypes.Project
         }).ToList();
 
         resources.Insert(0, Resource.AllProject);
@@ -92,7 +93,7 @@ public class ResourceService : IResourceService
             Id = x.Id,
             Name = x.Name,
             Rn = x.Rn,
-            Type = ResourceType.Env
+            Type = ResourceTypes.Env
         }).ToList();
 
         resources.Insert(0, Resource.AllProjectEnv);

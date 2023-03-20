@@ -1,5 +1,3 @@
-using System.Text;
-using Domain.Identity;
 using Domain.Messages;
 using Domain.Users;
 using Infrastructure.AccessTokens;
@@ -24,7 +22,6 @@ using Infrastructure.Triggers;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -47,26 +44,6 @@ public static class ConfigureServices
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserStore, MongoDbUserStore>();
         services.AddScoped<IIdentityService, IdentityService>();
-
-        // authentication
-        var jwtOption = configuration.GetSection(JwtOptions.Jwt);
-        services.Configure<JwtOptions>(jwtOption);
-        services
-            .AddAuthentication()
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtOption["Issuer"],
-
-                    ValidateAudience = true,
-                    ValidAudience = jwtOption["Audience"],
-
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]))
-                };
-            });
 
         // hosted services
         services.AddHostedService<KafkaMessageConsumer>();

@@ -1,9 +1,11 @@
+using Api.Authorization;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
 
 namespace Api.Controllers;
 
+[Authorize(Permissions.ManageFeatureFlag)]
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/feature-flags")]
 public class FeatureFlagController : ApiControllerBase
 {

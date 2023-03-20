@@ -20,6 +20,14 @@ public class BasicControllerTests
     }
 
     [Fact]
+    public async Task AllowAnonymous()
+    {
+        var response = await _app.GetAsync("api/v1/basic/allow-anonymous", authenticated: false);
+
+        await Verify(response);
+    }
+
+    [Fact]
     public async Task Authorized()
     {
         var response = await _app.GetAsync("api/v1/basic/authorized", authenticated: true);
