@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Domain.Policies;
+﻿using Domain.Policies;
 using Domain.Resources;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -21,7 +20,7 @@ public class PermissionAttribute : ActionFilterAttribute
         {
             new()
             {
-                ResourceType = ResourceType.AccessToken,
+                ResourceType = ResourceTypes.AccessToken,
                 Effect = EffectType.Allow,
                 Actions = new[] { Actions.ListAccessTokens },
                 Resources = new[] { "access-token/*" }
@@ -44,12 +43,12 @@ public class PermissionAttribute : ActionFilterAttribute
     {
         var matchedPermissions = userPermissions.Where(permission =>
         {
-            if (permission.ResourceType == ResourceType.All)
+            if (permission.ResourceType == ResourceTypes.All)
             {
                 return true;
             }
 
-            return permission.Resources.Any(pattern => MatchPattern(rn, pattern)) &&
+            return permission.Resources.Any(pattern => ResourceHelper.IsRnMatchPattern(rn, pattern)) &&
                    permission.Actions.Any(act => act == "*" || act == action.Name);
         }).ToArray();
 
@@ -60,21 +59,5 @@ public class PermissionAttribute : ActionFilterAttribute
         }
 
         return matchedPermissions.All(x => x.Effect == EffectType.Allow);
-    }
-
-    private static bool MatchPattern(string str, string rule)
-    {
-        string EscapeRegex(string s)
-        {
-            return Regex.Replace(s, "([.*+?^=!:${}()|\\[\\]\\\\/])", "\\$1");
-        }
-
-        var matchPattern = rule
-            .Split('*')
-            .Select(EscapeRegex)
-            .Aggregate((x, y) => $"{x}.*{y}");
-
-        var regex = new Regex($"^{matchPattern}$");
-        return regex.IsMatch(str);
     }
 }

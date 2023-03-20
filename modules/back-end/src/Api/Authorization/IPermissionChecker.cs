@@ -4,5 +4,5 @@ namespace Api.Authorization;
 
 public interface IPermissionChecker
 {
-    Task<bool> IsGrantedAsync(IEnumerable<PolicyStatement> statements, string permissionName);
+    bool IsGranted(IEnumerable<PolicyStatement> statements, PermissionRequirement requirement);
 }

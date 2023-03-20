@@ -1,13 +1,13 @@
 ﻿namespace Domain.Resources;
 
-public class ResourceType
+public static class ResourceTypes
 {
     public const string All = "*";
 
     public const string Account = "account";
-    
-    public const string IAM = "iam";
-    
+
+    public const string Iam = "iam";
+
     public const string AccessToken = "access-token";
 
     public const string Project = "project";

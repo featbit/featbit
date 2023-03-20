@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Domain.Policies;
 using Domain.Resources;
 
@@ -6,49 +5,44 @@ namespace Api.Authorization;
 
 public class DefaultPermissionChecker : IPermissionChecker
 {
-    public async Task<bool> IsGrantedAsync(IEnumerable<PolicyStatement> statements, string permissionName)
+    private readonly ILogger<DefaultPermissionChecker> _logger;
+
+    public DefaultPermissionChecker(ILogger<DefaultPermissionChecker> logger)
     {
-        return await Task.FromResult(true);
+        _logger = logger;
     }
 
-    private static bool CanTakeAction(
-        string rn,
-        PermissionDefinition permissionDefinition,
-        IEnumerable<PolicyStatement> statements)
+    public bool IsGranted(IEnumerable<PolicyStatement> statements, PermissionRequirement requirement)
     {
-        var matchedPermissions = statements.Where(permission =>
+        var permission = requirement.PermissionName;
+
+        // get resource type
+        if (!Permissions.ResourceMap.TryGetValue(permission, out var resourceType))
         {
-            if (permission.ResourceType == ResourceType.All)
+            _logger.LogWarning("The permission '{Permission}' has no corresponding resourceType.", permission);
+            return false;
+        }
+
+        var rn = ResourceHelper.GetRn(resourceType);
+
+        // get matched statements
+        var matchedStatements = statements.Where(statement =>
+        {
+            if (statement.ResourceType == ResourceTypes.All)
             {
                 return true;
             }
 
-            return permission.Resources.Any(pattern => MatchPattern(rn, pattern)) &&
-                   permission.Actions.Any(act => act == "*" || act == permissionDefinition.Name);
+            return statement.Resources.Any(pattern => ResourceHelper.IsRnMatchPattern(rn, pattern)) &&
+                   statement.Actions.Any(act => act == "*" || act == permission);
         }).ToArray();
 
-        // no matched permissions
-        if (matchedPermissions.Length == 0)
+        // no matched statements
+        if (!matchedStatements.Any())
         {
             return false;
         }
 
-        return matchedPermissions.All(x => x.Effect == EffectType.Allow);
-    }
-
-    private static bool MatchPattern(string str, string rule)
-    {
-        string EscapeRegex(string s)
-        {
-            return Regex.Replace(s, "([.*+?^=!:${}()|\\[\\]\\\\/])", "\\$1");
-        }
-
-        var matchPattern = rule
-            .Split('*')
-            .Select(EscapeRegex)
-            .Aggregate((x, y) => $"{x}.*{y}");
-
-        var regex = new Regex($"^{matchPattern}$");
-        return regex.IsMatch(str);
+        return matchedStatements.All(x => x.Effect == EffectType.Allow);
     }
 }

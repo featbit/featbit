@@ -1,4 +1,3 @@
-using Api.Authorization;
 using Application.AccessTokens;
 using Application.Bases.Models;
 
@@ -8,7 +7,6 @@ namespace Api.Controllers;
 public class AccessTokenController : ApiControllerBase
 {
     [HttpGet]
-    [Authorize(Permissions.ListAccessTokens)]
     public async Task<ApiResponse<PagedResult<AccessTokenVm>>> GetListAsync(
         Guid organizationId,
         [FromQuery] AccessTokenFilter filter)

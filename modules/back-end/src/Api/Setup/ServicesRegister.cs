@@ -93,6 +93,19 @@ public static class ServicesRegister
             })
             .AddOpenApi(Schemes.OpenApi);
 
+        // authorization
+        builder.Services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
+        builder.Services.AddAuthorization(options =>
+        {
+            foreach (var permission in Permissions.All)
+            {
+                options.AddPolicy(
+                    permission,
+                    policyBuilder => policyBuilder.AddRequirements(new PermissionRequirement(permission))
+                );
+            }
+        });
+
         // replace default authorization result handler
         var authorizationResultHandler =
             ServiceDescriptor.Singleton<IAuthorizationMiddlewareResultHandler>(new ApiAuthorizationResultHandler());

@@ -6,9 +6,9 @@ public class PermissionRequirement : IAuthorizationRequirement
 
     public PermissionRequirement(string permissionName)
     {
-        if (string.IsNullOrWhiteSpace(permissionName))
+        if (!Permissions.IsDefined(permissionName))
         {
-            throw new ArgumentException("Permission cannot be null or whitespace.", nameof(permissionName));
+            throw new ArgumentException($"The permission '{permissionName}' is not defined.", nameof(permissionName));
         }
 
         PermissionName = permissionName;

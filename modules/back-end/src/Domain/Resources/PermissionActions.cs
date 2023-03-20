@@ -26,7 +26,7 @@ public static class PermissionActions
             new PermissionAction
             {
                 Name = Resources.Actions.ListAccessTokens,
-                ResourceType = ResourceType.AccessToken
+                ResourceType = ResourceTypes.AccessToken
             }
         }
     };

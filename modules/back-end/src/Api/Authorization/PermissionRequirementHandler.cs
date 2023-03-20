@@ -1,3 +1,4 @@
+using Api.Authentication;
 using Domain.Policies;
 
 namespace Api.Authorization;
@@ -11,14 +12,19 @@ public class PermissionRequirementHandler : AuthorizationHandler<PermissionRequi
         _permissionChecker = permissionChecker;
     }
 
-    protected override async Task HandleRequirementAsync(
+    protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        // TODO: read permissions from http context
-        if (await _permissionChecker.IsGrantedAsync(Array.Empty<PolicyStatement>(), requirement.PermissionName))
+        if (context.Resource is HttpContext httpContext &&
+            httpContext.Items[OpenApiConstants.PermissionStoreKey] is IEnumerable<PolicyStatement> permissions)
         {
-            context.Succeed(requirement);
+            if (_permissionChecker.IsGranted(permissions, requirement))
+            {
+                context.Succeed(requirement);
+            }
         }
+
+        return Task.CompletedTask;
     }
 }
