@@ -27,6 +27,7 @@ import {
   ResourceTypeEnv,
   ResourceTypeProject
 } from "@shared/policy";
+import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 
 @Component({
   selector: 'access-token-drawer',
@@ -112,7 +113,7 @@ export class AccessTokenDrawerComponent {
   }
 
   setAuthorizedPermissions() {
-    const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === 'SysManaged');
+    const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
     let permissions = [];
     if (hasOwnerPolicy) {

@@ -9,7 +9,7 @@ import {
   ResourceType
 } from "@shared/policy";
 import {deepCopy, encodeURIComponentFfc, uuidv4} from "@utils/index";
-import {IPolicy} from "@features/safe/iam/types/policy";
+import { IPolicy, PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {PolicyService} from "@services/policy.service";
 import {Router} from "@angular/router";
@@ -115,7 +115,7 @@ export class PolicyEditorComponent {
   set _(policy: IPolicy) {
     if (policy) {
       this._policy = deepCopy(policy);
-      this.readonly = policy.type === 'SysManaged';
+      this.readonly = policy.type === PolicyTypeEnum.SysManaged;
       this.statements = policy.statements.map(statement => new PolicyStatementViewModel(statement));
     }
   }
