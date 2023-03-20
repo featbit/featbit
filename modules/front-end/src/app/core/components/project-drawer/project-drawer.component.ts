@@ -1,10 +1,10 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {FormBuilder, FormGroup, Validators} from '@angular/forms';
-import {NzMessageService} from 'ng-zorro-antd/message';
-import {IProject} from '@shared/types';
-import {ProjectService} from '@services/project.service';
-import {PermissionsService} from "@services/permissions.service";
-import {ResourceTypeEnum, generalResourceRNPattern, permissionActions} from "@shared/policy";
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { IProject } from '@shared/types';
+import { ProjectService } from '@services/project.service';
+import { PermissionsService } from "@services/permissions.service";
+import { ResourceTypeEnum, generalResourceRNPattern, permissionActions } from "@shared/policy";
 
 @Component({
   selector: 'app-project-drawer',
@@ -26,10 +26,10 @@ export class ProjectDrawerComponent implements OnInit {
   set project(project: IProject) {
     this.isEditing = !!project;
     if (this.isEditing) {
-      this.title = $localize `:@@org.project.editProject:Edit project`;
+      this.title = $localize`:@@org.project.editProject:Edit project`;
       this.patchForm(project);
     } else {
-      this.title = $localize `:@@org.project.addProject:Add project`;
+      this.title = $localize`:@@org.project.addProject:Add project`;
       this.resetForm();
     }
     this._project = project;
@@ -50,7 +50,8 @@ export class ProjectDrawerComponent implements OnInit {
     private projectService: ProjectService,
     private message: NzMessageService,
     private permissionsService: PermissionsService
-  ) { }
+  ) {
+  }
 
   ngOnInit(): void {
     this.initForm();
@@ -73,15 +74,15 @@ export class ProjectDrawerComponent implements OnInit {
   }
 
   onClose() {
-    this.close.emit({ isEditing: false, project: undefined });
+    this.close.emit({isEditing: false, project: undefined});
   }
 
   canTakeAction() {
     if (!this.isEditing) { // creation
-      return this.permissionsService.canTakeAction(generalResourceRNPattern.project, permissionActions.CreateProject);
+      return this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.CreateProject);
     } else {
       const rn = this.permissionsService.getResourceRN(ResourceTypeEnum.Project, this.project);
-      return this.permissionsService.canTakeAction(rn, permissionActions.UpdateProjectSettings);
+      return this.permissionsService.isGranted(rn, permissionActions.UpdateProjectSettings);
     }
   }
 
@@ -100,7 +101,7 @@ export class ProjectDrawerComponent implements OnInit {
 
     this.isLoading = true;
 
-    const { name } = this.projectForm.value;
+    const {name} = this.projectForm.value;
 
     if (this.isEditing) {
       this.projectService
@@ -109,7 +110,7 @@ export class ProjectDrawerComponent implements OnInit {
           updatedProject => {
             this.isLoading = false;
             this.close.emit({isEditing: true, project: updatedProject});
-            this.message.success($localize `:@@org.project.projectUpdateSuccess:Project successfully updated`);
+            this.message.success($localize`:@@org.project.projectUpdateSuccess:Project successfully updated`);
           },
           _ => {
             this.isLoading = false;
@@ -122,7 +123,7 @@ export class ProjectDrawerComponent implements OnInit {
           createdProject => {
             this.isLoading = false;
             this.close.emit({isEditing: false, project: createdProject});
-            this.message.success($localize `:@@org.project.projectCreateSuccess:Project successfully created`);
+            this.message.success($localize`:@@org.project.projectCreateSuccess:Project successfully created`);
           },
           _ => {
             this.isLoading = false;

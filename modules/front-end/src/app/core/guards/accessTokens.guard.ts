@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
-import {PermissionsService} from "@services/permissions.service";
-import {generalResourceRNPattern, permissionActions} from "@shared/policy";
-import {NzMessageService} from "ng-zorro-antd/message";
+import { PermissionsService } from "@services/permissions.service";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,8 @@ export class AccessTokensGuard implements CanActivate {
     private router: Router,
     private message: NzMessageService,
     private permissionsService: PermissionsService
-  ) { }
+  ) {
+  }
 
   async canActivate(
     route: ActivatedRouteSnapshot,
@@ -22,13 +23,13 @@ export class AccessTokensGuard implements CanActivate {
   }
 
   async checkPermission(url: string): Promise<boolean | UrlTree> {
-    const canListAccessTokens = !!this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ListAccessTokens);
+    const isGranted = !!this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ListAccessTokens);
 
-    if (!canListAccessTokens) {
+    if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return this.router.parseUrl('/');
     }
 
-    return canListAccessTokens;
+    return isGranted;
   }
 }

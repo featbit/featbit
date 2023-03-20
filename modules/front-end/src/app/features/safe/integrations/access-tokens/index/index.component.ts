@@ -44,7 +44,7 @@ export class IndexComponent implements OnInit {
       debounceTime(500)
     ).subscribe(searchText => {
       this.teamService.searchMembers(currentAccount.id, searchText).subscribe({
-        next:(result) => {
+        next: (result) => {
           this.creatorList = result.items;
           this.isCreatorsLoading = false;
         },
@@ -54,8 +54,8 @@ export class IndexComponent implements OnInit {
       });
     });
 
-    this.canTakeActionOnPersonalAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
-    this.canTakeActionOnServiceAccessToken = this.permissionsService.canTakeAction(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   private search$ = new Subject();
@@ -63,6 +63,7 @@ export class IndexComponent implements OnInit {
   creatorSearchChange$ = new BehaviorSubject('');
   isCreatorsLoading = false;
   creatorList: any[];
+
   onSearchCreators(value: string) {
     if (value.length > 0) {
       this.isCreatorsLoading = true;
@@ -95,7 +96,7 @@ export class IndexComponent implements OnInit {
 
         this.isLoading = false;
       },
-      error:() => this.isLoading = false
+      error: () => this.isLoading = false
     });
   }
 
@@ -121,7 +122,7 @@ export class IndexComponent implements OnInit {
     } else {
       this.accessTokens.items = this.accessTokens.items.map((ac) => {
         if (ac.id === data.id) {
-          return { ...ac, name: data.name };
+          return {...ac, name: data.name};
         }
 
         return ac;
@@ -129,30 +130,31 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  currentAccessToken: IAccessToken = { name: null, type: AccessTokenTypeEnum.Personal, permissions: []};
-  creatOrEdit(accessToken: IAccessToken = { name: null, type: AccessTokenTypeEnum.Personal, permissions: []}) {
+  currentAccessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []};
+
+  creatOrEdit(accessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []}) {
     this.currentAccessToken = accessToken;
     this.accessTokenDrawerVisible = true;
   }
 
   delete(accessToken: IAccessToken) {
     this.accessTokenService.delete(accessToken.id).subscribe({
-      next:() => {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         this.accessTokens.items = this.accessTokens.items.filter(it => it.id !== accessToken.id);
         this.accessTokens.totalCount--;
       },
-      error: () => this.message.error($localize `:@@common.operation-failed:Operation failed`)
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
     })
   }
 
   toggleStatus(accessToken: IAccessToken) {
     this.accessTokenService.toggleStatus(accessToken.id).subscribe({
-      next:() => {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-        accessToken.status = accessToken.status === this.AccessTokenStatusActive ? this.AccessTokenStatusInactive :  this.AccessTokenStatusActive;
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        accessToken.status = accessToken.status === this.AccessTokenStatusActive ? this.AccessTokenStatusInactive : this.AccessTokenStatusActive;
       },
-      error: () => this.message.error($localize `:@@common.operation-failed:Operation failed`)
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
     })
   }
 }
