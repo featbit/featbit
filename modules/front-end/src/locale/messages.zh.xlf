@@ -169,7 +169,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">131</context>
+          <context context-type="linenumber">136</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
@@ -1289,7 +1289,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>添加环境</target>
       </trans-unit>
@@ -2241,7 +2241,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <target>当前选项</target>
       </trans-unit>
@@ -3057,7 +3057,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <target>删除后不可恢复，确定要删除么？</target>
       </trans-unit>
@@ -3145,7 +3145,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">115</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -5305,7 +5305,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">132</context>
+          <context context-type="linenumber">137</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -6521,15 +6521,31 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">106</context>
         </context-group>
         <target>编辑</target>
+      </trans-unit>
+      <trans-unit id="org.project.copy-id" datatype="html">
+        <source>Copy Id</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+        <target>复制 Id</target>
+      </trans-unit>
+      <trans-unit id="org.project.env-id-copy-description" datatype="html">
+        <source>Copy Id of the environment, the Id is needed when calling FeatBit REST API</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+        <target>复制环境 Id, 当调用 FeatBit REST API 时需要提供此 Id</target>
       </trans-unit>
       <trans-unit id="org.project.secret-name" datatype="html">
         <source>The name of the secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">141</context>
         </context-group>
         <target>秘钥名称</target>
       </trans-unit>
@@ -6537,7 +6553,7 @@
         <source>The secret would be used by a client side or server side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <target>该秘钥将被用于客户端还是服务端 SDK</target>
       </trans-unit>
@@ -6545,7 +6561,7 @@
         <source>Type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <target>类型</target>
       </trans-unit>
@@ -6553,7 +6569,7 @@
         <source>Client Side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">149</context>
+          <context context-type="linenumber">154</context>
         </context-group>
         <target>客户端 SDK</target>
       </trans-unit>
@@ -6561,7 +6577,7 @@
         <source>Server Side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">150</context>
+          <context context-type="linenumber">155</context>
         </context-group>
         <target>服务端 SDK</target>
       </trans-unit>
