@@ -1,9 +1,11 @@
+using Api.Filters;
 using Application.Users;
 
 namespace Api.Controllers;
 
 [Authorize]
 [ApiController]
+[VerifyOpenApiApplicable]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class ApiControllerBase : ControllerBase
 {
