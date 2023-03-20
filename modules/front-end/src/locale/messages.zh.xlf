@@ -193,7 +193,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
@@ -305,7 +305,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">56</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
@@ -613,11 +613,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">154</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
@@ -693,15 +693,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">256</context>
+          <context context-type="linenumber">257</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">290</context>
+          <context context-type="linenumber">291</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">306</context>
+          <context context-type="linenumber">307</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -725,7 +725,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">169</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -777,7 +777,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">184</context>
+          <context context-type="linenumber">185</context>
         </context-group>
         <target>复制成功</target>
       </trans-unit>
@@ -1209,7 +1209,7 @@
         <source>We use the key to give you friendly URLs. Keys should only contain letters, numbers, ., _ or -.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -1221,7 +1221,7 @@
         <source>Key can be auto-generated from name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">35</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -1233,7 +1233,7 @@
         <source>Key cannot be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">37</context>
+          <context context-type="linenumber">40</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -1245,7 +1245,7 @@
         <source>This key has been used</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">41</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -1257,7 +1257,7 @@
         <source>Key validation failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">42</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -1269,7 +1269,7 @@
         <source>Description</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">47</context>
         </context-group>
         <target>描述</target>
       </trans-unit>
@@ -1657,11 +1657,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">147</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">157</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
@@ -2341,7 +2341,7 @@
         <source>You don&apos;t have permissions to read project list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <target>您没有查看项目列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -2349,7 +2349,7 @@
         <source>You don&apos;t have permissions to read environment list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">63</context>
         </context-group>
         <target>您没有查看该环境列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -2357,7 +2357,7 @@
         <source>You don&apos;t have permissions to read project and environment list, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">63</context>
         </context-group>
         <target>您没有查看项目环境列表的权限， 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -2365,7 +2365,7 @@
         <source>Thank you for sending us your feedback, we&apos;ll get back to you very soon!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">195</context>
+          <context context-type="linenumber">199</context>
         </context-group>
         <target>感谢您给我们发送反馈，我们会尽快和您联系！</target>
       </trans-unit>
@@ -2373,7 +2373,7 @@
         <source>We were not able to send your feedback, Please try again!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">198</context>
+          <context context-type="linenumber">202</context>
         </context-group>
         <target>反馈发送失败，请稍后重试！</target>
       </trans-unit>
@@ -2773,7 +2773,7 @@
         <source>Project successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">113</context>
         </context-group>
         <target>项目更新成功</target>
       </trans-unit>
@@ -2781,7 +2781,7 @@
         <source>Project successfully created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.ts</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">126</context>
         </context-group>
         <target>项目创建成功</target>
       </trans-unit>
@@ -6569,7 +6569,7 @@
         <source>Environment successfully removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <target>环境创建成功</target>
       </trans-unit>
@@ -6577,7 +6577,7 @@
         <source>Project successfully removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">126</context>
         </context-group>
         <target>项目删除成功</target>
       </trans-unit>
@@ -6585,7 +6585,7 @@
         <source>Add secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">208</context>
+          <context context-type="linenumber">209</context>
         </context-group>
         <target>添加秘钥</target>
       </trans-unit>
@@ -6593,7 +6593,7 @@
         <source>Edit secret: <x id="PH" equiv-text="secret.name"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">233</context>
+          <context context-type="linenumber">234</context>
         </context-group>
         <target>编辑：<x id="PH" equiv-text="secret.name"/></target>
       </trans-unit>

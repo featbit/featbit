@@ -37,14 +37,9 @@
           <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name"
                  placeholder="Key can be auto-generated from name"/>
           <ng-template #keyErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty
-            </ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been
-              used
-            </ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation
-              failed
-            </ng-container>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
           </ng-template>
         </nz-form-control>
       </nz-form-item>
@@ -58,8 +53,7 @@
     </form>
 
     <button [disabled]="!isGranted()" class="submit-btn" (click)="doSubmit()" nz-button [nzType]="'primary'"
-            [nzLoading]="isLoading" i18n="@@common.save">Save
-    </button>
+            [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
