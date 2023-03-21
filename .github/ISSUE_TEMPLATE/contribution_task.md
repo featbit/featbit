@@ -19,7 +19,7 @@ We usually give 2 weeks for a feature request, which means you have 2 weeks to i
 3.
 4. 
 
-If the feature is UI related, make sure you complete the following tasks before finishing work:
+If the feature is UI related, make sure you complete the following tasks before submit your work:
 - merge featbit main into your current branch
 - run `npm run i18n`
 
