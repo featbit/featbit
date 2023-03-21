@@ -18,8 +18,7 @@ export class AccessTokenService {
   constructor(private http: HttpClient) { }
 
   get baseUrl() {
-    const organizationId = getCurrentOrganization().id;
-    return `${environment.url}/api/v1/organizations/${organizationId}/access-tokens`;
+    return `${environment.url}/api/v1/access-tokens`;
   }
 
   getList(filter: AccessTokenFilter = new AccessTokenFilter()): Observable<IPagedAccessToken> {

@@ -13,6 +13,7 @@ import {NzMessageService} from "ng-zorro-antd/message";
 import {Injectable} from "@angular/core";
 import { CURRENT_ORGANIZATION, IDENTITY_TOKEN } from "../../shared/utils/localstorage-keys";
 import {IResponse} from "@shared/types";
+import { getCurrentOrganization } from "@utils/project-env";
 
 @Injectable()
 export class RequestResponseInterceptor implements HttpInterceptor {
@@ -24,7 +25,7 @@ export class RequestResponseInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = localStorage.getItem(IDENTITY_TOKEN);
-    const currentOrgId = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()))?.id ?? '';
+    const currentOrgId = getCurrentOrganization()?.id ?? '';
 
     const authedReq = request.clone({
       headers: request.headers

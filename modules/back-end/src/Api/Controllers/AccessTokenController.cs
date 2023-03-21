@@ -3,17 +3,15 @@ using Application.Bases.Models;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/access-tokens")]
+[Route("api/v{version:apiVersion}/access-tokens")]
 public class AccessTokenController : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ApiResponse<PagedResult<AccessTokenVm>>> GetListAsync(
-        Guid organizationId,
-        [FromQuery] AccessTokenFilter filter)
+    public async Task<ApiResponse<PagedResult<AccessTokenVm>>> GetListAsync([FromQuery] AccessTokenFilter filter)
     {
         var request = new GetAccessTokenList
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             Filter = filter
         };
 
@@ -22,11 +20,11 @@ public class AccessTokenController : ApiControllerBase
     }
 
     [HttpGet("is-name-used")]
-    public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid organizationId, string name)
+    public async Task<ApiResponse<bool>> IsNameUsedAsync(string name)
     {
         var request = new IsAccessTokenNameUsed
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             Name = name
         };
 
@@ -35,9 +33,9 @@ public class AccessTokenController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ApiResponse<AccessTokenVm>> CreateAsync(Guid organizationId, CreateAccessToken request)
+    public async Task<ApiResponse<AccessTokenVm>> CreateAsync(CreateAccessToken request)
     {
-        request.OrganizationId = organizationId;
+        request.OrganizationId = OrgId;
 
         var accessToken = await Mediator.Send(request);
         return Ok(accessToken);
