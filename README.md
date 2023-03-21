@@ -1,13 +1,12 @@
 
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
 
 # [FeatBit](https://featbit.co)    <a href="https://twitter.com/intent/tweet?text=A%20scalable%2C%20fast%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" height=23></a>
 
-[![License](https://img.shields.io/static/v1?style=for-the-badge&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=for-the-badge&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
-[![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)   [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/RealFeatBit)     
+[![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-) <!-- ALL-CONTRIBUTORS-BADGE:END --> [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
+[![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.io/)   [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/RealFeatBit)
 
 
 <h3 align="left">
@@ -107,7 +106,7 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/FeatBit"><img src="https://avatars.githubusercontent.com/u/68597908?v=4?s=100" width="100px;" alt="Comiscience"/><br /><sub><b>Comiscience</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=cosmic-flood" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/san-ki"><img src="https://avatars.githubusercontent.com/u/66792330?v=4?s=100" width="100px;" alt="Sanket"/><br /><sub><b>Sanket</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=san-ki" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/sagar110599"><img src="https://avatars.githubusercontent.com/u/46983757?v=4?s=100" width="100px;" alt="sagar110599"/><br /><sub><b>sagar110599</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=sagar110599" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/DaveFz"><img src="https://avatars.githubusercontent.com/u/47706547?v=4?s=100" width="100px;" alt="Dave"/><br /><sub><b>Dave</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=DaveFz" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/DaveFz"><img src="https://avatars.githubusercontent.com/u/47706547?v=4?s=100" width="100px;" alt="Dave"/><br /><sub><b>Dave</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=DaveFz" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=DaveFz" title="Code"></a></td>
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/kabirhasan/"><img src="https://avatars.githubusercontent.com/u/29860651?v=4?s=100" width="100px;" alt="Kabir Hasan"/><br /><sub><b>Kabir Hasan</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=kabir-webDev" title="Code">💻</a></td>
@@ -121,32 +120,9 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
 ## License
 
 FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
 
-
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/cosmos-explorer"><img src="https://avatars.githubusercontent.com/u/88151306?v=4?s=100" width="100px;" alt="cosmos-explorer"/><br /><sub><b>cosmos-explorer</b></sub></a><br /><a href="#userTesting-cosmos-explorer" title="User Testing">📓</a> <a href="https://github.com/featbit/featbit/commits?author=cosmos-explorer" title="Code">💻</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
