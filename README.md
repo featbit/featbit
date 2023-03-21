@@ -111,7 +111,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/cosmos-explorer"><img src="https://avatars.githubusercontent.com/u/88151306?v=4?s=100" width="100px;" alt="cosmos-explorer"/><br /><sub><b>cosmos-explorer</b></sub></a><br /><a href="#userTesting-cosmos-explorer" title="User Testing">📓</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/cosmos-explorer"><img src="https://avatars.githubusercontent.com/u/88151306?v=4?s=100" width="100px;" alt="cosmos-explorer"/><br /><sub><b>cosmos-explorer</b></sub></a><br /><a href="#userTesting-cosmos-explorer" title="User Testing">📓</a> <a href="https://github.com/featbit/featbit/commits?author=cosmos-explorer" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
