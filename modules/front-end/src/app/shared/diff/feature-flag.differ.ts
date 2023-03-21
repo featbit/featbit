@@ -10,6 +10,7 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
 export class FeatureFlagDiffer implements IDiffer {
   private primitiveConfig = [
     { label: $localize `:@@differ.name:name`, path: ['name'] },
+    { label: $localize `:@@differ.description:description`, path: ['description'] },
   ];
 
   diff(obj1Str: string, obj2Str: string, ref: IRefType): ICategory[] {
