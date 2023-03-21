@@ -10,36 +10,30 @@ import { MessageQueueService } from "@services/message-queue.service";
   providedIn: 'root'
 })
 export class ProjectService {
-  baseUrl = `${environment.url}/api/v1/organizations/#organizationId/projects`;
+  baseUrl = `${environment.url}/api/v1/projects`;
 
   constructor(private http: HttpClient, private messageQueueService: MessageQueueService,) { }
 
-  // 获取 project 列表
-  public getProjects(organizationId: string): Observable<IProject[]> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
-    return this.http.get<IProject[]>(url);
+  public getProjects(): Observable<IProject[]> {
+    return this.http.get<IProject[]>(this.baseUrl);
   }
 
-  getProject(organizationId: string, projectId: string): Observable<IProject> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${projectId}`;
+  getProject(projectId: string): Observable<IProject> {
+    const url =  `${this.baseUrl}/${projectId}`;
     return this.http.get<IProject>(url);
   }
 
-  // 创建 project
-  postCreateProject(organizationId: string, params): Observable<any> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
-    return this.http.post(url, params);
+  postCreateProject(params): Observable<any> {
+    return this.http.post(this.baseUrl, params);
   }
 
-  // 更新 project
-  putUpdateProject(organizationId: string, params): Observable<any> {
-    const url = `${this.baseUrl.replace(/#organizationId/ig, `${organizationId}`)}/${params.id}`;
+  putUpdateProject(params): Observable<any> {
+    const url = `${this.baseUrl}/${params.id}`;
     return this.http.put(url, params);
   }
 
-  // 删除 project
-  removeProject(organizationId: string, projectId: string): Observable<any> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `/${projectId}`;
+  removeProject(projectId: string): Observable<any> {
+    const url = `${this.baseUrl}/${projectId}`;
     return this.http.delete(url);
   }
 
@@ -56,13 +50,13 @@ export class ProjectService {
   }
 
   // get current project env for account
-  getCurrentProjectEnv(orginzationId: string): Observable<IProjectEnv> {
+  getCurrentProjectEnv(): Observable<IProjectEnv> {
     return new Observable(observer => {
       const localCurrentProjectEnv = this.getLocalCurrentProjectEnv();
       if (localCurrentProjectEnv) {
         observer.next(localCurrentProjectEnv);
       } else {
-        this.getProjects(orginzationId).subscribe(projects => {
+        this.getProjects().subscribe(projects => {
           // chose first project first env as default value
           const firstProject = projects[0];
           const firstProjectEnv = firstProject.environments[0];

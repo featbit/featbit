@@ -3,7 +3,7 @@ using Domain.Projects;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/projects")]
+[Route("api/v{version:apiVersion}/projects")]
 public class ProjectController : ApiControllerBase
 {
     [HttpGet]
@@ -20,11 +20,11 @@ public class ProjectController : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync(Guid organizationId)
+    public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync()
     {
         var request = new GetProjectList
         {
-            OrganizationId = organizationId
+            OrganizationId = OrgId
         };
 
         var projects = await Mediator.Send(request);
@@ -32,19 +32,17 @@ public class ProjectController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ApiResponse<ProjectWithEnvs>> CreateAsync(Guid organizationId, CreateProject request)
+    public async Task<ApiResponse<ProjectWithEnvs>> CreateAsync(CreateProject request)
     {
-        request.OrganizationId = organizationId;
+        request.OrganizationId = OrgId;
 
         var projectWithEnvs = await Mediator.Send(request);
         return Ok(projectWithEnvs);
     }
 
-    [HttpPut("{id:guid}")]
-    public async Task<ApiResponse<ProjectVm>> UpdateAsync(Guid id, UpdateProject request)
+    [HttpPut]
+    public async Task<ApiResponse<ProjectVm>> UpdateAsync(UpdateProject request)
     {
-        request.Id = id;
-
         var project = await Mediator.Send(request);
         return Ok(project);
     }

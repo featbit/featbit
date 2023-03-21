@@ -31,7 +31,6 @@ export class ProjectComponent implements OnInit {
   searchValue: string;
 
   // current project env
-  currentOrganizationId: string;
   currentProjectEnv: IProjectEnv;
 
   projects: IProject[] = [];
@@ -50,12 +49,11 @@ export class ProjectComponent implements OnInit {
 
   ngOnInit(): void {
     const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
-    this.currentOrganizationId = currentAccountProjectEnv.organization.id;
     this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
     const canListProjects = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListProjects);
     if (canListProjects) {
       this.projectService
-        .getProjects(this.currentOrganizationId)
+        .getProjects()
         .subscribe(projects => this.projects = projects);
     }
   }
@@ -120,7 +118,7 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
-    this.projectService.removeProject(this.currentOrganizationId, project.id).subscribe(() => {
+    this.projectService.removeProject(project.id).subscribe(() => {
       // remove the deleted project from list
       this.projects = this.projects.filter(item => item.id !== project.id);
       this.messageService.success($localize`:@@org.project.project-remove-success:Project successfully removed`);

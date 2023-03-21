@@ -34,12 +34,12 @@ export class OrganizationService {
   }
 
   addUser(params: any): Observable<any> {
-    const url = `${this.baseUrl}/${params.organizationId}/add-user`;
+    const url = `${this.baseUrl}/add-user`;
     return this.http.post<boolean>(url, params);
   }
 
-  onboarding(organizationId: any, params: any): Observable<any> {
-    const url = `${this.baseUrl}/${organizationId}/onboarding`;
+  onboarding(params: any): Observable<any> {
+    const url = `${this.baseUrl}/onboarding`;
     return this.http.post(url, params);
   }
 
