@@ -42,6 +42,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "san-ki",
+      "name": "Sanket",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66792330?v=4",
+      "profile": "https://github.com/san-ki",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
