@@ -1,0 +1,98 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "cosmos-explorer",
+      "name": "cosmos-explorer",
+      "avatar_url": "https://avatars.githubusercontent.com/u/88151306?v=4",
+      "profile": "https://github.com/cosmos-explorer",
+      "contributions": [
+        "userTesting",
+        "code"
+      ]
+    },
+    {
+      "login": "deleteLater",
+      "name": "deleteLater",
+      "avatar_url": "https://avatars.githubusercontent.com/u/34052208?v=4",
+      "profile": "https://github.com/deleteLater",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "dsun0720",
+      "name": "s2002a",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38680131?v=4",
+      "profile": "https://github.com/dsun0720",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "cosmic-flood",
+      "name": "Comiscience",
+      "avatar_url": "https://avatars.githubusercontent.com/u/68597908?v=4",
+      "profile": "https://github.com/FeatBit",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "san-ki",
+      "name": "Sanket",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66792330?v=4",
+      "profile": "https://github.com/san-ki",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "sagar110599",
+      "name": "sagar110599",
+      "avatar_url": "https://avatars.githubusercontent.com/u/46983757?v=4",
+      "profile": "https://github.com/sagar110599",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "DaveFz",
+      "name": "Dave",
+      "avatar_url": "https://avatars.githubusercontent.com/u/47706547?v=4",
+      "profile": "https://github.com/DaveFz",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kabir-webDev",
+      "name": "Kabir Hasan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/29860651?v=4",
+      "profile": "https://www.linkedin.com/in/kabirhasan/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Michaelg22",
+      "name": "MikeG",
+      "avatar_url": "https://avatars.githubusercontent.com/u/62085623?v=4",
+      "profile": "https://github.com/Michaelg22",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "featbit",
+  "projectOwner": "featbit"
+}

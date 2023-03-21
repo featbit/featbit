@@ -1024,7 +1024,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">293</context>
+          <context context-type="linenumber">294</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.review-and-save" datatype="html">
@@ -6293,29 +6293,40 @@
           <context context-type="linenumber">9</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="differ.description" datatype="html">
+        <source>description</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="differ.feature-flag" datatype="html">
         <source>feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">25</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">37</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.the-return-value-when-flag-is-disabled" datatype="html">
         <source>the return value when flag is disabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">48</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.settings" datatype="html">
         <source>Settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
@@ -6326,43 +6337,43 @@
         <source>Tags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">105</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.variation-type" datatype="html">
         <source>variation type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">124</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.variation" datatype="html">
         <source>variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">138</context>
+          <context context-type="linenumber">139</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">153</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">163</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.variations" datatype="html">
         <source>Variations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">173</context>
+          <context context-type="linenumber">174</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.updated-rule" datatype="html">
         <source>Updated rule:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">198</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
@@ -6373,7 +6384,7 @@
         <source>Added rule:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">217</context>
+          <context context-type="linenumber">218</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
@@ -6384,7 +6395,7 @@
         <source>Removed rule:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">234</context>
+          <context context-type="linenumber">235</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
@@ -6395,7 +6406,7 @@
         <source>Rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">252</context>
+          <context context-type="linenumber">253</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
@@ -6406,7 +6417,7 @@
         <source>Individual targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">272</context>
+          <context context-type="linenumber">273</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
@@ -6417,14 +6428,14 @@
         <source>Send to experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">282</context>
+          <context context-type="linenumber">283</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.fallthrough" datatype="html">
         <source>Default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">318</context>
+          <context context-type="linenumber">319</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.serve-value" datatype="html">
@@ -6432,13 +6443,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/diff/index.ts</context>
           <context context-type="linenumber">94</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="differ.description" datatype="html">
-        <source>description</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.segment" datatype="html">
