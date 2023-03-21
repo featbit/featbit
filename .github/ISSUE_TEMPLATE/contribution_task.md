@@ -23,7 +23,7 @@ If the feature is UI related, make sure to do the following at the end of the wo
 - merge featbit main into your current branch
 - run `npm run i18n`
 
-and commit the following files:
+and commit the following files if there are any changes:
 - [messages.xlf](../../modules/front-end/src/locale/messages.xlf)
 - [messages.zh.xlf](../../modules/front-end/src/locale/messages.zh.xlf)
 
