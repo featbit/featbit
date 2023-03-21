@@ -11,7 +11,7 @@ import {catchError, map} from 'rxjs/operators';
 import {Router} from "@angular/router";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {Injectable} from "@angular/core";
-import { CURRENT_ORGANIZATION, IDENTITY_TOKEN } from "../../shared/utils/localstorage-keys";
+import { IDENTITY_TOKEN } from "../../shared/utils/localstorage-keys";
 import {IResponse} from "@shared/types";
 import { getCurrentOrganization } from "@utils/project-env";
 
