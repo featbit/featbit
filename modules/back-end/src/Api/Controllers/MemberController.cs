@@ -4,15 +4,15 @@ using Application.Policies;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/members")]
+[Route("api/v{version:apiVersion}/members")]
 public class MemberController : ApiControllerBase
 {
     [HttpGet("{memberId:guid}")]
-    public async Task<ApiResponse<MemberVm>> GetAsync(Guid organizationId, Guid memberId)
+    public async Task<ApiResponse<MemberVm>> GetAsync(Guid memberId)
     {
         var request = new GetMember
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             MemberId = memberId
         };
 
@@ -21,11 +21,11 @@ public class MemberController : ApiControllerBase
     }
 
     [HttpDelete("{memberId:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid organizationId, Guid memberId)
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid memberId)
     {
         var request = new DeleteMember
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             MemberId = memberId
         };
 
@@ -34,13 +34,11 @@ public class MemberController : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<ApiResponse<PagedResult<MemberVm>>> GetListAsync(
-        Guid organizationId,
-        [FromQuery] MemberFilter filter)
+    public async Task<ApiResponse<PagedResult<MemberVm>>> GetListAsync([FromQuery] MemberFilter filter)
     {
         var request = new GetMemberList
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             Filter = filter
         };
 
@@ -50,13 +48,12 @@ public class MemberController : ApiControllerBase
 
     [HttpGet("{memberId:guid}/groups")]
     public async Task<ApiResponse<PagedResult<MemberGroupVm>>> GetGroupsAsync(
-        Guid organizationId,
         Guid memberId,
         [FromQuery] MemberGroupFilter filter)
     {
         var request = new GetMemberGroup
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             MemberId = memberId,
             Filter = filter
         };
@@ -66,11 +63,11 @@ public class MemberController : ApiControllerBase
     }
 
     [HttpGet("{memberId:guid}/policies")]
-    public async Task<ApiResponse<IEnumerable<PolicyVm>>> GetPoliciesAsync(Guid organizationId, Guid memberId)
+    public async Task<ApiResponse<IEnumerable<PolicyVm>>> GetPoliciesAsync(Guid memberId)
     {
         var request = new GetMemberPolicy
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             MemberId = memberId
         };
 
@@ -80,13 +77,12 @@ public class MemberController : ApiControllerBase
 
     [HttpGet("{memberId:guid}/direct-policies")]
     public async Task<ApiResponse<PagedResult<MemberPolicyVm>>> GetDirectPoliciesAsync(
-        Guid organizationId,
         Guid memberId,
         [FromQuery] MemberPolicyFilter filter)
     {
         var request = new GetDirectPolicies
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             MemberId = memberId,
             Filter = filter
         };
@@ -97,13 +93,12 @@ public class MemberController : ApiControllerBase
 
     [HttpGet("{memberId:guid}/inherited-policies")]
     public async Task<ApiResponse<PagedResult<InheritedMemberPolicy>>> GetInheritedPoliciesAsync(
-        Guid organizationId,
         Guid memberId,
         [FromQuery] InheritedMemberPolicyFilter filter)
     {
         var request = new GetInheritedPolicies
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             MemberId = memberId,
             Filter = filter
         };
@@ -113,11 +108,11 @@ public class MemberController : ApiControllerBase
     }
 
     [HttpPut("{memberId:guid}/add-policy/{policyId:guid}")]
-    public async Task<ApiResponse<bool>> AddPolicyAsync(Guid organizationId, Guid memberId, Guid policyId)
+    public async Task<ApiResponse<bool>> AddPolicyAsync(Guid memberId, Guid policyId)
     {
         var request = new AddMemberPolicy
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             MemberId = memberId,
             PolicyId = policyId
         };
@@ -127,11 +122,11 @@ public class MemberController : ApiControllerBase
     }
 
     [HttpPut("{memberId:guid}/remove-policy/{policyId:guid}")]
-    public async Task<ApiResponse<bool>> RemovePolicyAsync(Guid organizationId, Guid memberId, Guid policyId)
+    public async Task<ApiResponse<bool>> RemovePolicyAsync(Guid memberId, Guid policyId)
     {
         var request = new RemoveMemberPolicy
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             MemberId = memberId,
             PolicyId = policyId
         };
