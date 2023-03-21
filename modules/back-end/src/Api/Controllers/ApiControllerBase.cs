@@ -1,3 +1,4 @@
+using Api.Authentication;
 using Api.Filters;
 using Application.Users;
 
@@ -19,6 +20,12 @@ public class ApiControllerBase : ControllerBase
     protected ICurrentUser CurrentUser
     {
         get { return _currentUser ??= HttpContext.RequestServices.GetRequiredService<ICurrentUser>(); }
+    }
+
+    private Guid? _orgId;
+    protected Guid OrgId
+    {
+        get { return _orgId ??= Guid.Parse(HttpContext.Request.Headers[OpenApiConstants.OrgIdHeaderkey]); }
     }
 
     protected static ApiResponse<TData> Ok<TData>(TData data) => ApiResponse<TData>.Ok(data);
