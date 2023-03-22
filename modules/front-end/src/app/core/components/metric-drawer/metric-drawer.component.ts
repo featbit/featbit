@@ -3,11 +3,9 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { IOrganization } from '@shared/types';
 import { MetricService } from '@services/metric.service';
 import { TeamService } from '@services/team.service';
 import { uuidv4 } from '@utils/index';
-import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 import {
   CustomEventSuccessCriteria,
   CustomEventTrackOption,
@@ -68,16 +66,17 @@ export class MetricDrawerComponent implements OnInit {
     private metricService: MetricService,
     private message: NzMessageService
   ) {
-    const currentAccount: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
-
     this.maintainerSearchChange$.pipe(
       debounceTime(500)
     ).subscribe(searchText => {
-      this.teamService.searchMembers(currentAccount.id, searchText).subscribe((result) => {
-        this.maintainerList = result.items;
-        this.isMaintainersLoading = false;
-      }, _ => {
-        this.isMaintainersLoading = false;
+      this.teamService.search(searchText).subscribe({
+        next: (result) => {
+          this.maintainerList = result.items;
+          this.isMaintainersLoading = false;
+        },
+        error: _ => {
+          this.isMaintainersLoading = false;
+        }
       });
     });
    }

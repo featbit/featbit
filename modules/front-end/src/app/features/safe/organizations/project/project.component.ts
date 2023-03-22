@@ -53,7 +53,7 @@ export class ProjectComponent implements OnInit {
     const canListProjects = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListProjects);
     if (canListProjects) {
       this.projectService
-        .getProjects()
+        .getList()
         .subscribe(projects => this.projects = projects);
     }
   }
@@ -118,7 +118,7 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
-    this.projectService.removeProject(project.id).subscribe(() => {
+    this.projectService.delete(project.id).subscribe(() => {
       // remove the deleted project from list
       this.projects = this.projects.filter(item => item.id !== project.id);
       this.messageService.success($localize`:@@org.project.project-remove-success:Project successfully removed`);

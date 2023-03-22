@@ -158,7 +158,7 @@ export class HeaderComponent implements OnInit {
   }
 
   private setAllProjects() {
-    this.projectService.getProjects()
+    this.projectService.getList()
       .subscribe(projects => this.allProjects = projects);
   }
 

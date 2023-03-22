@@ -47,7 +47,7 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
             var claimsPrincipal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
             
-            Context.Request.Headers.Add(OpenApiConstants.OrgIdHeaderkey, accessToken.OrganizationId.ToString());
+            Context.Request.Headers.Add(OpenApiConstants.OrgIdHeaderKey, accessToken.OrganizationId.ToString());
             
             if (accessToken.Type == AccessTokenTypes.Service)
             {
@@ -60,7 +60,6 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
 
                 var statements = policies.SelectMany(x => x.Statements);
                 Context.Items[OpenApiConstants.PermissionStoreKey] = statements;
-                
             }
 
             return AuthenticateResult.Success(ticket);

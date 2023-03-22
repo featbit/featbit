@@ -14,25 +14,25 @@ export class ProjectService {
 
   constructor(private http: HttpClient, private messageQueueService: MessageQueueService,) { }
 
-  public getProjects(): Observable<IProject[]> {
+  getList(): Observable<IProject[]> {
     return this.http.get<IProject[]>(this.baseUrl);
   }
 
-  getProject(projectId: string): Observable<IProject> {
+  get(projectId: string): Observable<IProject> {
     const url =  `${this.baseUrl}/${projectId}`;
     return this.http.get<IProject>(url);
   }
 
-  postCreateProject(params): Observable<any> {
+  create(params): Observable<any> {
     return this.http.post(this.baseUrl, params);
   }
 
-  putUpdateProject(params): Observable<any> {
-    const url = `${this.baseUrl}/${params.id}`;
+  update(id: string, params): Observable<any> {
+    const url = `${this.baseUrl}/${id}`;
     return this.http.put(url, params);
   }
 
-  removeProject(projectId: string): Observable<any> {
+  delete(projectId: string): Observable<any> {
     const url = `${this.baseUrl}/${projectId}`;
     return this.http.delete(url);
   }
@@ -56,7 +56,7 @@ export class ProjectService {
       if (localCurrentProjectEnv) {
         observer.next(localCurrentProjectEnv);
       } else {
-        this.getProjects().subscribe(projects => {
+        this.getList().subscribe(projects => {
           // chose first project first env as default value
           const firstProject = projects[0];
           const firstProjectEnv = firstProject.environments[0];

@@ -25,7 +25,7 @@ public class ApiControllerBase : ControllerBase
     private Guid? _orgId;
     protected Guid OrgId
     {
-        get { return _orgId ??= Guid.Parse(HttpContext.Request.Headers[OpenApiConstants.OrgIdHeaderkey]); }
+        get { return _orgId ??= Guid.Parse(HttpContext.Request.Headers[OpenApiConstants.OrgIdHeaderKey]); }
     }
 
     protected static ApiResponse<TData> Ok<TData>(TData data) => ApiResponse<TData>.Ok(data);

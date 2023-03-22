@@ -40,9 +40,10 @@ public class ProjectController : ApiControllerBase
         return Ok(projectWithEnvs);
     }
 
-    [HttpPut]
-    public async Task<ApiResponse<ProjectVm>> UpdateAsync(UpdateProject request)
+    [HttpPut("{id:guid}")]
+    public async Task<ApiResponse<ProjectVm>> UpdateAsync(Guid id, UpdateProject request)
     {
+        request.Id = id;
         var project = await Mediator.Send(request);
         return Ok(project);
     }

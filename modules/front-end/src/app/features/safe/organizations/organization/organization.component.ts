@@ -85,7 +85,7 @@ export class OrganizationComponent implements OnInit {
     const {id, initialized} = this.currentOrganization;
 
     this.isLoading = true;
-    this.organizationService.updateOrganization({ name })
+    this.organizationService.update({ name })
       .pipe()
       .subscribe({
         next: () => {

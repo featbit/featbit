@@ -7,17 +7,16 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class TeamService {
-  baseUrl: string = `${environment.url}/api/v1/organizations/#organizationId/members`;
+  baseUrl: string = `${environment.url}/api/v1/members`;
 
   constructor(private http: HttpClient) { }
 
-  public getMembers(organizationId: string): Observable<any> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`);
-    return this.http.get(url);
+  public getMembers(): Observable<any> {
+    return this.http.get(this.baseUrl);
   }
 
-  public searchMembers(organizationId: string, searchText: string): Observable<any> {
-    const url = this.baseUrl.replace(/#organizationId/ig, `${organizationId}`) + `?searchText=${searchText}`;
+  public search(searchText: string): Observable<any> {
+    const url = `${this.baseUrl}?searchText=${searchText}`;
     return this.http.get(url);
   }
 }
