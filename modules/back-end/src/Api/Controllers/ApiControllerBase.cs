@@ -25,7 +25,20 @@ public class ApiControllerBase : ControllerBase
     private Guid? _orgId;
     protected Guid OrgId
     {
-        get { return _orgId ??= Guid.Parse(HttpContext.Request.Headers[OpenApiConstants.OrgIdHeaderKey]); }
+        get
+        {
+            if (_orgId.HasValue)
+            {
+                return _orgId.Value;
+            }
+
+            var orgIdHeaderValue = HttpContext.Request.Headers[OpenApiConstants.OrgIdHeaderKey];
+
+            _orgId = Guid.TryParse(orgIdHeaderValue, out var orgId)
+                ? orgId
+                : Guid.Empty;
+            return _orgId.Value;
+        }
     }
 
     protected static ApiResponse<TData> Ok<TData>(TData data) => ApiResponse<TData>.Ok(data);

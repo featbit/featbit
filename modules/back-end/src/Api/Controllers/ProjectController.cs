@@ -44,6 +44,7 @@ public class ProjectController : ApiControllerBase
     public async Task<ApiResponse<ProjectVm>> UpdateAsync(Guid id, UpdateProject request)
     {
         request.Id = id;
+
         var project = await Mediator.Send(request);
         return Ok(project);
     }
