@@ -9,8 +9,6 @@ import {
   IPagedAccessToken
 } from "@features/safe/integrations/access-tokens/types/access-token";
 import { AccessTokenService } from "@services/access-token.service";
-import { IOrganization } from "@shared/types";
-import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 import { TeamService } from "@services/team.service";
 import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
@@ -38,12 +36,10 @@ export class IndexComponent implements OnInit {
     private permissionsService: PermissionsService,
     private accessTokenService: AccessTokenService
   ) {
-    const currentAccount: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
-
     this.creatorSearchChange$.pipe(
       debounceTime(500)
     ).subscribe(searchText => {
-      this.teamService.searchMembers(currentAccount.id, searchText).subscribe({
+      this.teamService.search(searchText).subscribe({
         next: (result) => {
           this.creatorList = result.items;
           this.isCreatorsLoading = false;

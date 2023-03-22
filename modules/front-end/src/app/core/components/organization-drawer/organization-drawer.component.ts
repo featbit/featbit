@@ -51,7 +51,7 @@ export class OrganizationDrawerComponent implements OnInit {
 
     const { name } = this.orgForm.value;
 
-    this.accountService.createOrganization({ name })
+    this.accountService.create({ name })
       .pipe()
       .subscribe(
         res => {

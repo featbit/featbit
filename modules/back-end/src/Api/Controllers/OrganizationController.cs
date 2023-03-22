@@ -31,50 +31,50 @@ public class OrganizationController : ApiControllerBase
         return Ok(organization);
     }
 
-    [HttpPost("{id:guid}/add-user")]
-    public async Task<ApiResponse<bool>> AddMemberByEmailAsync(Guid id, [FromBody] AddUser request)
+    [HttpPost("add-user")]
+    public async Task<ApiResponse<bool>> AddMemberByEmailAsync([FromBody] AddUser request)
     {
-        request.OrganizationId = id;
+        request.OrganizationId = OrgId;
 
         var success = await Mediator.Send(request);
 
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}/remove-user")]
-    public async Task<ApiResponse<bool>> RemoveMemberAsync(Guid id, RemoveUser request)
+    [HttpPut("remove-user")]
+    public async Task<ApiResponse<bool>> RemoveMemberAsync(RemoveUser request)
     {
-        request.OrganizationId = id;
+        request.OrganizationId = OrgId;
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
-    [HttpPost("{id:guid}/onboarding")]
-    public async Task<ApiResponse<bool>> Onboarding(Guid id, [FromBody] Onboarding request)
+    [HttpPost("onboarding")]
+    public async Task<ApiResponse<bool>> Onboarding([FromBody] Onboarding request)
     {
-        request.OrganizationId = id;
+        request.OrganizationId = OrgId;
 
         var success = await Mediator.Send(request);
 
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}")]
-    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(Guid id, UpdateOrganization request)
+    [HttpPut]
+    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganization request)
     {
-        request.Id = id;
+        request.Id = OrgId;
 
         var organization = await Mediator.Send(request);
         return Ok(organization);
     }
 
-    [HttpDelete("{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
+    [HttpDelete]
+    public async Task<ApiResponse<bool>> DeleteAsync()
     {
         var request = new DeleteOrganization
         {
-            Id = id
+            Id = OrgId
         };
 
         var success = await Mediator.Send(request);

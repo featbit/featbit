@@ -83,7 +83,7 @@ export class IndexComponent implements OnInit {
     const curProjectId = currentProjectEnv.projectId;
     const curEnvId = currentProjectEnv.envId;
 
-    this.projectService.getProject(curAccountId, curProjectId)
+    this.projectService.get(curProjectId)
       .pipe(map(project => project.environments))
       .subscribe(envs => {
         this.envs = envs.filter(x => x.id !== curEnvId);

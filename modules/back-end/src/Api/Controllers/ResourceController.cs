@@ -2,17 +2,15 @@ using Application.Resources;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/resources")]
+[Route("api/v{version:apiVersion}/resources")]
 public class ResourceController : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ApiResponse<IEnumerable<ResourceVm>>> GetListAsync(
-        Guid organizationId,
-        [FromQuery] ResourceFilter filter)
+    public async Task<ApiResponse<IEnumerable<ResourceVm>>> GetListAsync([FromQuery] ResourceFilter filter)
     {
         var request = new GetResourceList
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             Filter = filter
         };
 

@@ -43,10 +43,8 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
                 return AuthenticateResult.Fail("invalid-access-token");
             }
 
-            var identity = new ClaimsIdentity(Schemes.OpenApi);
-            var claimsPrincipal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
-
+            // set organization id header & store permissions
+            Context.Request.Headers.Add(OpenApiConstants.OrgIdHeaderKey, accessToken.OrganizationId.ToString());
             if (accessToken.Type == AccessTokenTypes.Service)
             {
                 Context.Items[OpenApiConstants.PermissionStoreKey] = accessToken.Permissions;
@@ -59,6 +57,11 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
                 var statements = policies.SelectMany(x => x.Statements);
                 Context.Items[OpenApiConstants.PermissionStoreKey] = statements;
             }
+
+            // construct ticket
+            var identity = new ClaimsIdentity(Schemes.OpenApi);
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
 
             return AuthenticateResult.Success(ticket);
         }
