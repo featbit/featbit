@@ -6,6 +6,7 @@ namespace Application.FeatureFlags;
 public class SetTags : IRequest<bool>
 {
     public Guid EnvId { get; set; }
+    
     public string Key { get; set; }
 
     public ICollection<string> Tags { get; set; }

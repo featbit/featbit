@@ -105,7 +105,7 @@ export class FeatureFlagService {
     return this.http.put(url, {});
   }
 
-  public update(payload: IFeatureFlagTargeting): Observable<boolean> {
+  public updateTargeting(payload: IFeatureFlagTargeting): Observable<boolean> {
     const url = `${this.baseUrl}/${payload.key}/targeting`;
     return this.http.put<boolean>(url, payload);
   }

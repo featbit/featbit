@@ -188,7 +188,7 @@ export class ExptRulesDrawerComponent {
   doSubmit() {
     const { key, targetUsers, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
 
-    this.featureFlagService.update({ key, targetUsers, rules, fallthrough, exptIncludeAllTargets })
+    this.featureFlagService.updateTargeting({ key, targetUsers, rules, fallthrough, exptIncludeAllTargets })
       .subscribe((result) => {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.close.emit({ isSaved: true, data: this.featureFlag });
