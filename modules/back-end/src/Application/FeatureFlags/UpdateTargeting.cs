@@ -43,7 +43,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 
     public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
-        var flag = await _flagService.FindOneAsync(x => x.EnvId == request.EnvId && x.Key == request.Key);
+        var flag = await _flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateTargeting(
             request.TargetUsers,
             request.Rules,

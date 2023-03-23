@@ -46,7 +46,7 @@ public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
 
     public async Task<bool> Handle(UpdateVariations request, CancellationToken cancellationToken)
     {
-        var flag = await _service.FindOneAsync(x => x.EnvId == request.EnvId && x.Key == request.Key);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateVariations(request.VariationType, request.Variations, _currentUser.Id);
         await _service.UpdateAsync(flag);
 

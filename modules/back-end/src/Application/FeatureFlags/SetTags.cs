@@ -26,7 +26,7 @@ public class SetTagsHandler : IRequestHandler<SetTags, bool>
 
     public async Task<bool> Handle(SetTags request, CancellationToken cancellationToken)
     {
-        var flag = await _service.FindOneAsync(x => x.EnvId == request.EnvId && x.Key == request.Key);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.SetTags(request.Tags, _currentUser.Id);
 
         // write audit log

@@ -33,7 +33,7 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
 
     public async Task<bool> Handle(DeleteFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = await _service.FindOneAsync(x => x.EnvId == request.EnvId && x.Key == request.Key);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         if (!flag.IsArchived)
         {
             throw new BusinessException(ErrorCodes.CannotDeleteUnArchivedFeatureFlag);

@@ -31,7 +31,7 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
 
     public async Task<bool> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = await _service.FindOneAsync(x => x.EnvId == request.EnvId && x.Key == request.Key);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Toggle(_currentUser.Id);
         await _service.UpdateAsync(flag);
 
