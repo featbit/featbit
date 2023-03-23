@@ -5,7 +5,9 @@ namespace Application.FeatureFlags;
 
 public class RestoreFeatureFlag : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public Guid EnvId { get; set; }
+    
+    public string Key { get; set; }
 }
 
 public class UnArchiveFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, bool>
@@ -29,7 +31,7 @@ public class UnArchiveFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, b
 
     public async Task<bool> Handle(RestoreFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.Id);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Restore(_currentUser.Id);
         await _service.UpdateAsync(flag);
 

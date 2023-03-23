@@ -5,7 +5,9 @@ namespace Application.FeatureFlags;
 
 public class ToggleFeatureFlag : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public Guid EnvId { get; set; }
+    
+    public string Key { get; set; }
 }
 
 public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
@@ -29,7 +31,7 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
 
     public async Task<bool> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.Id);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Toggle(_currentUser.Id);
         await _service.UpdateAsync(flag);
 

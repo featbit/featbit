@@ -7,7 +7,9 @@ namespace Application.FeatureFlags;
 
 public class UpdateVariations : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public Guid EnvId { get; set; }
+    
+    public string Key { get; set; }
 
     public string VariationType { get; set; }
 
@@ -44,7 +46,7 @@ public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
 
     public async Task<bool> Handle(UpdateVariations request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.Id);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateVariations(request.VariationType, request.Variations, _currentUser.Id);
         await _service.UpdateAsync(flag);
 

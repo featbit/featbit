@@ -6,7 +6,9 @@ namespace Application.FeatureFlags;
 
 public class UpdateSetting : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public Guid EnvId { get; set; }
+    
+    public string Key { get; set; }
 
     public string Name { get; set; }
     
@@ -47,7 +49,7 @@ public class UpdateSettingHandler : IRequestHandler<UpdateSetting, bool>
 
     public async Task<bool> Handle(UpdateSetting request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.Id);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateSetting(request.Name, request.Description, request.IsEnabled, request.DisabledVariationId, _currentUser.Id);
         await _service.UpdateAsync(flag);
 

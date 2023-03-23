@@ -5,7 +5,9 @@ namespace Application.FeatureFlags;
 
 public class SetTags : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public Guid EnvId { get; set; }
+    
+    public string Key { get; set; }
 
     public ICollection<string> Tags { get; set; }
 }
@@ -25,7 +27,7 @@ public class SetTagsHandler : IRequestHandler<SetTags, bool>
 
     public async Task<bool> Handle(SetTags request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.Id);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.SetTags(request.Tags, _currentUser.Id);
 
         // write audit log

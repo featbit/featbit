@@ -281,10 +281,10 @@ export class TargetingComponent implements OnInit {
   onSave(data: any) {
     this.isLoading = true;
 
-    const { id, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
+    const { key, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
     const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
 
-    this.featureFlagService.update({ id, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment: data.comment }).subscribe({
+    this.featureFlagService.updateTargeting({ key, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment: data.comment }).subscribe({
       next: () => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);

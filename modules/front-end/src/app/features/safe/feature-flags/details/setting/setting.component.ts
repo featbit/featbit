@@ -186,9 +186,9 @@ export class SettingComponent {
     }
     this.toggleVariationEditState();
 
-    const { id, variationType, variations } = this.featureFlag;
+    const { key, variationType, variations } = this.featureFlag;
     const payload: IVariationsPayload = {
-      id,
+      key,
       variationType: variationType || VariationTypeEnum.string,
       variations: variations.filter(v => !v.isInvalid)
     };
@@ -315,9 +315,9 @@ export class SettingComponent {
   }
 
   onSaveSettings(cb?: Function) {
-    const { id, name, description, isEnabled, variationType, disabledVariationId, variations } = this.featureFlag;
+    const { key, name, description, isEnabled, variationType, disabledVariationId, variations } = this.featureFlag;
     const payload: ISettingPayload = {
-      id,
+      key,
       name,
       description,
       isEnabled,
@@ -339,7 +339,7 @@ export class SettingComponent {
   }
 
   restoreFlag() {
-    this.featureFlagService.restore(this.featureFlag.id).subscribe(_ => {
+    this.featureFlagService.restore(this.featureFlag.key).subscribe(_ => {
       this.featureFlag.isArchived = false;
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
@@ -347,7 +347,7 @@ export class SettingComponent {
   }
 
   deleteFlag() {
-    this.featureFlagService.delete(this.featureFlag.id).subscribe(success => {
+    this.featureFlagService.delete(this.featureFlag.key).subscribe(success => {
       if (success) {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.router.navigateByUrl('/feature-flags');
