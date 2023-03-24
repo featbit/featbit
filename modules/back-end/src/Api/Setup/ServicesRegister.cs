@@ -57,6 +57,23 @@ public static class ServicesRegister
                     includeControllerXmlComments: true
                 );
             }
+
+            options.DocInclusionPredicate((docName, apiDesc) =>
+            {
+                if (docName != OpenApiConstants.ApiGroupName)
+                {
+                    // same logic with SwaggerGeneratorOptions.DefaultDocInclusionPredicate
+                    return apiDesc.GroupName == null || apiDesc.GroupName == docName;
+                }
+
+                if (!apiDesc.TryGetMethodInfo(out var methodInfo))
+                {
+                    return false;
+                }
+
+                // method with OpenApiAttribute
+                return methodInfo.GetCustomAttributes(typeof(OpenApiAttribute), false).Length > 0;
+            });
         });
 
         // health check dependencies

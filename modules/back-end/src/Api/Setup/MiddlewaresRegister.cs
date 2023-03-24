@@ -1,6 +1,7 @@
 using Api.Middlewares;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Swashbuckle.AspNetCore.SwaggerUI;
+using OpenApiConstants = Api.Authentication.OpenApiConstants;
 
 namespace Api.Setup;
 
@@ -15,26 +16,26 @@ public static class MiddlewaresRegister
         // external use
         app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
 
-        // middlewares for dev environment
-        if (app.Environment.IsDevelopment())
+        // enable swagger
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
-                options.EnableFilter();
-                options.DisplayRequestDuration();
-                options.DocExpansion(DocExpansion.List);
+            options.EnableFilter();
+            options.DisplayRequestDuration();
+            options.DocExpansion(DocExpansion.List);
 
-                // build a swagger endpoint for each discovered API version
-                var descriptions = app.DescribeApiVersions();
-                foreach (var description in descriptions)
-                {
-                    var url = $"/swagger/{description.GroupName}/swagger.json";
-                    var name = description.GroupName.ToUpperInvariant();
-                    options.SwaggerEndpoint(url, name);
-                }
-            });
-        }
+            // build a swagger endpoint for each discovered API version
+            var descriptions = app.DescribeApiVersions();
+            foreach (var description in descriptions)
+            {
+                var url = $"/swagger/{description.GroupName}/swagger.json";
+                var name = description.GroupName.ToUpperInvariant();
+                options.SwaggerEndpoint(url, name);
+            }
+
+            const string openApiGroup = OpenApiConstants.ApiGroupName;
+            options.SwaggerEndpoint($"/swagger/{openApiGroup}/swagger.json", openApiGroup);
+        });
 
         // enable cors
         app.UseCors();
