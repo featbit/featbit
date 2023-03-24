@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Api.Authentication;
 using Api.Filters;
 using Application.Users;
@@ -7,6 +8,8 @@ namespace Api.Controllers;
 [Authorize]
 [ApiController]
 [VerifyOpenApiApplicable]
+[Consumes(MediaTypeNames.Application.Json)]
+[Produces(MediaTypeNames.Application.Json)]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class ApiControllerBase : ControllerBase
 {

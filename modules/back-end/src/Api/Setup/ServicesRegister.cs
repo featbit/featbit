@@ -52,7 +52,10 @@ public static class ServicesRegister
             foreach (var xmlComment in xmlComments)
             {
                 // integrate xml comments
-                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlComment));
+                options.IncludeXmlComments(
+                    Path.Combine(AppContext.BaseDirectory, xmlComment),
+                    includeControllerXmlComments: true
+                );
             }
         });
 

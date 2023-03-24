@@ -1,5 +1,6 @@
 using Api.Middlewares;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 namespace Api.Setup;
 
@@ -20,9 +21,12 @@ public static class MiddlewaresRegister
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
-                var descriptions = app.DescribeApiVersions();
+                options.EnableFilter();
+                options.DisplayRequestDuration();
+                options.DocExpansion(DocExpansion.List);
 
                 // build a swagger endpoint for each discovered API version
+                var descriptions = app.DescribeApiVersions();
                 foreach (var description in descriptions)
                 {
                     var url = $"/swagger/{description.GroupName}/swagger.json";
@@ -34,7 +38,7 @@ public static class MiddlewaresRegister
 
         // enable cors
         app.UseCors();
-        
+
         // authentication & authorization
         app.UseAuthentication();
         app.UseAuthorization();
