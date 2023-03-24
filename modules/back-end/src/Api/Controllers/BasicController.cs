@@ -34,6 +34,7 @@ public class BasicController : ApiControllerBase
     /// </remarks>
     /// <response code="200">Success</response>
     /// <response code="401">Unauthorized</response>
+    /// <response code="403">Forbidden</response>
     [OpenApi]
     [HttpGet("string"), MapToApiVersion(1.0)]
     public ApiResponse<string> GetStringV1()
@@ -52,6 +53,7 @@ public class BasicController : ApiControllerBase
     /// </remarks>
     /// <response code="200">Success</response>
     /// <response code="401">Unauthorized</response>
+    /// <response code="403">Forbidden</response>
     [OpenApi]
     [HttpGet("string"), MapToApiVersion(2.0)]
     public ApiResponse<string> GetStringV2()

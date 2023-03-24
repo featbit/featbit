@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using OpenApiConstants = Api.Authentication.OpenApiConstants;
 
 namespace Api.Setup;
 
@@ -73,6 +75,44 @@ public static class ServicesRegister
 
                 // method with OpenApiAttribute
                 return methodInfo.GetCustomAttributes(typeof(OpenApiAttribute), false).Length > 0;
+            });
+
+            options.AddSecurityDefinition("JwtBearer", new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.Http,
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                Description =
+                    "Standard Authorization header using the Bearer scheme (JWT). Example: \"Bearer {token}\"",
+            });
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "JwtBearer" }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+
+            options.AddSecurityDefinition("AccessToken", new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.ApiKey,
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Scheme = "AccessToken",
+                Description = "Use access token to access this API"
+            });
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "AccessToken" }
+                    },
+                    Array.Empty<string>()
+                }
             });
         });
 
