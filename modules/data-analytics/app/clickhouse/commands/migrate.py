@@ -1,5 +1,7 @@
 from textwrap import indent
 
+from flask import current_app
+
 from app.setting import (CLICKHOUSE_CLUSTER, CLICKHOUSE_DATABASE, CLICKHOUSE_HOST,
                          CLICKHOUSE_PASSWORD, CLICKHOUSE_REPLICATION,
                          CLICKHOUSE_SECURE, CLICKHOUSE_USER)
@@ -28,23 +30,26 @@ def migrate(upto: int = 9999, check: bool = False, plan: bool = False, print_sql
         verify_ssl_cert=False,
         autocreate=True
     )
+
+    current_app.logger.info("Migration in ClickHouse")
+
     if check or plan:
         if print_sql:
-            print("List of clickhouse migrations to be applied:")
+            current_app.logger.info("List of clickhouse migrations to be applied:")
         migrations = list(_get_unapplied_migrations(database, upto))
         for migration_name, operations in migrations:
-            print(f"Migration would get applied: {migration_name}")
+            current_app.logger.info(f"Migration would get applied: {migration_name}")
             for op in operations:
                 sql = getattr(op, "_sql", None)
                 if print_sql and sql is not None:
-                    print(indent("\n\n".join(sql), "    "))
+                    current_app.logger.info(indent("\n\n".join(sql), "    "))
         if len(migrations) == 0:
-            print("Clickhouse migrations up to date!")
+            current_app.logger.info("Clickhouse migrations up to date!")
         else:
             exit(1)
     else:
         database.migrate(MIGRATIONS_PACKAGE_NAME, upto, replicated=CLICKHOUSE_REPLICATION)
-        print("✅ Migration successful")
+        current_app.logger.info("✅ Migration successful")
 
 
 def _get_unapplied_migrations(database: Database, upto: int):

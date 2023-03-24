@@ -4,8 +4,10 @@ from logging.config import dictConfig
 from flask import Flask
 
 from app.config import DevelopmentConfig, ProductionConfig
-from app.extensions import get_scheduler, get_cache
-from app.setting import CACHE_KEY_PREFIX, CACHE_TYPE, DEFAULT_LOGGING_CONFIG, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT, WSGI
+from app.extensions import get_cache, get_mongodb, get_scheduler
+from app.setting import (CACHE_KEY_PREFIX, CACHE_TYPE, DEFAULT_LOGGING_CONFIG,
+                         LIGHT_VERSION, MONGO_URI, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT,
+                         WSGI)
 
 CONFIGS = {
     'production': ProductionConfig,
@@ -38,11 +40,15 @@ def _create_app(config_name='default') -> Flask:
                               "CACHE_REDIS_PASSWORD": REDIS_PASSWORD})
     cache.init_app(__app)
 
-    if WSGI:
-        _init_aps_scheduler(__app)
-
-    from app.commands import migrate_clickhouse
-    __app.cli.add_command(migrate_clickhouse, name='migrate-clickhouse')
+    if not LIGHT_VERSION:
+        if WSGI:
+            _init_aps_scheduler(__app)
+        from app.commands import migrate_clickhouse
+        __app.cli.add_command(migrate_clickhouse, name='migrate-database')
+    else:
+        get_mongodb(__app, MONGO_URI)
+        from app.commands import migrate_mongodb
+        __app.cli.add_command(migrate_mongodb, name='migrate-database')
 
     return __app
 

@@ -3,9 +3,9 @@ from typing import Any, Dict, Iterable
 
 from app.clickhouse.client import sync_execute
 from app.experimentation.models.event.sql import (GET_PROP_ZTEST_VARS_SQL,
-                                                  GET_TTEST_VARS_SQL)
+                                                  GET_TTEST_VARS_SQL, cal_experiment_vars_from_mongod)
 from app.experimentation.models.experiment import Experiment, Variation
-from app.setting import DATE_ISO_FMT, DATE_UTC_FMT
+from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, LIGHT_VERSION
 from scipy.stats import ttest_ind_from_stats
 from statsmodels.stats.power import (NormalIndPower, TTestIndPower,
                                      tt_ind_solve_power, zt_ind_solve_power)
@@ -20,18 +20,24 @@ class TrendsExperimentResult:
     default_power = 0.8
 
     def __init__(self, experiment: Experiment):
+        if not LIGHT_VERSION:
+            start = experiment.start.strftime(DATE_ISO_FMT)
+            end = experiment.end.strftime(DATE_ISO_FMT)
+        else:
+            start = experiment.start
+            end = experiment.end
         self._expt = experiment
         self._query_params = {
             "flag_id": experiment.flag_id,
             "event_name": experiment.event_name,
             "event": experiment.event_type,
             "env_id": experiment.env_id,
-            "start": experiment.start.strftime(DATE_ISO_FMT),
-            "end": experiment.end.strftime(DATE_ISO_FMT),
+            "start": start,
+            "end": end
         }
 
     def get_results(self) -> Dict[str, Any]:
-        output = self.cal_normal_results()
+        output = self._cal_normal_results()
         return {
             'exptId': self._expt.id,
             'eventType': self._expt.event_numeric_type,
@@ -45,7 +51,7 @@ class TrendsExperimentResult:
             'results': output
         }
 
-    def cal_normal_results(self) -> Dict[str, Any]:
+    def _cal_normal_results(self) -> Dict[str, Any]:
 
         def standard_output(variation: Variation,
                             baseline: str,
@@ -74,7 +80,7 @@ class TrendsExperimentResult:
                     'isWinner': is_winner,
                     'isInvalid': is_result_invalid}
 
-        variations: Dict[str, Variation] = self.get_variations(alpha=self.default_alpha)
+        variations: Dict[str, Variation] = self._get_variations(alpha=self.default_alpha)
         output = [standard_output(Variation(var), self._expt.baseline, None, None, False, True) for var in self._expt.variations if var not in variations.keys()]
 
         baseline_var = variations.get(self._expt.baseline, None)
@@ -89,10 +95,15 @@ class TrendsExperimentResult:
                 output.append(standard_output(variation, self._expt.baseline, change_to_baseline, p_value, False, is_result_invalid))
         return self._cal_winner_for_each_variation_result(output)
 
-    def get_variations(self, alpha=default_alpha) -> Dict[str, Variation]:
-        sql, props_test = (GET_PROP_ZTEST_VARS_SQL, True) if not self._expt.is_numeric_expt else (GET_TTEST_VARS_SQL, False)
+    def _get_variations(self, alpha=default_alpha) -> Dict[str, Variation]:
+        props_test = not self._expt.is_numeric_expt
+        if not LIGHT_VERSION:
+            sql = GET_PROP_ZTEST_VARS_SQL if props_test else GET_TTEST_VARS_SQL
+            rs = sync_execute(sql, args=self._query_params)
+        else:
+            rs = cal_experiment_vars_from_mongod(self._query_params, props_test)
         return dict((var_key, Variation(key=var_key, count=count, exposure=exposure, mean_sample=mean_sample, stdev_sample=stdev_sample, alpha=alpha, proportions_test=props_test))
-                    for count, exposure, mean_sample, stdev_sample, var_key in sync_execute(sql, args=self._query_params))
+                    for count, exposure, mean_sample, stdev_sample, var_key in rs)
 
     def _ztest_p_value(self, baseline_var: Variation, test_var: Variation) -> float:
         _, p_value = proportions_ztest([baseline_var.exposure, test_var.exposure], [baseline_var.count, test_var.count], alternative='two-sided', prop_var=False)

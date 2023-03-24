@@ -2,6 +2,8 @@ import os
 
 from utils import get_from_env, str_to_bool
 
+LIGHT_VERSION = get_from_env("LIGHT_VERSION", True, type_cast=str_to_bool)
+
 WSGI = get_from_env("WSGI", False, type_cast=str_to_bool)
 
 TEST = get_from_env("TEST", True, type_cast=str_to_bool)
@@ -36,6 +38,9 @@ REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = os.getenv("REDIS_PORT", "6379")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@localhost:27017")
+MONGO_DB = os.getenv("MONGO_INITDB_DATABASE", "featbit")
+MONGO_DB_EVENTS_COLLECTION = "Events"
 
 SHELL_PLUS_PRINT_SQL = True if TEST else False
 
