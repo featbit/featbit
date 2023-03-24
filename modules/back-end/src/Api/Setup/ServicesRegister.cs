@@ -46,7 +46,15 @@ public static class ServicesRegister
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            var xmlComments = new[] { "Api.xml", "Application.xml", "Domain.xml", "Infrastructure.xml" };
+            foreach (var xmlComment in xmlComments)
+            {
+                // integrate xml comments
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlComment));
+            }
+        });
 
         // health check dependencies
         builder.Services.AddHealthChecks();
