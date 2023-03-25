@@ -83,7 +83,7 @@ public static class ServicesRegister
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
                 Description =
-                    "Standard Authorization header using the Bearer scheme (JWT). Example: \"Bearer {token}\"",
+                    "Standard Authorization header using the Bearer scheme (JWT). Example: \"Authorization: Bearer eyJ...\""
             });
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
@@ -102,7 +102,7 @@ public static class ServicesRegister
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Scheme = "AccessToken",
-                Description = "Use access token to access this API"
+                Description = "Use access token to access this API. Example: \"Authorization: api-MzQ...\""
             });
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {

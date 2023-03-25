@@ -1,3 +1,5 @@
+using Api.Controllers;
+
 namespace Application.IntegrationTests.Basics;
 
 [Collection(nameof(TestApp))]
@@ -48,6 +50,14 @@ public class BasicControllerTests
     public async Task HandleException()
     {
         var response = await _app.GetAsync("api/v1/basic/exception");
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task ModelBinding()
+    {
+        var response = await _app.PostAsync("api/v2/basic/bar", new Bar("1", "bar"));
 
         await Verify(response);
     }

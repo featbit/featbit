@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Application.Users;
 using Api.Authentication;
 
@@ -32,9 +33,6 @@ public class BasicController : ApiControllerBase
     ///     GET api/v1/basic/string
     /// 
     /// </remarks>
-    /// <response code="200">Success</response>
-    /// <response code="401">Unauthorized</response>
-    /// <response code="403">Forbidden</response>
     [OpenApi]
     [HttpGet("string"), MapToApiVersion(1.0)]
     public ApiResponse<string> GetStringV1()
@@ -51,9 +49,6 @@ public class BasicController : ApiControllerBase
     ///     GET api/v2/basic/string
     /// 
     /// </remarks>
-    /// <response code="200">Success</response>
-    /// <response code="401">Unauthorized</response>
-    /// <response code="403">Forbidden</response>
     [OpenApi]
     [HttpGet("string"), MapToApiVersion(2.0)]
     public ApiResponse<string> GetStringV2()
@@ -61,9 +56,51 @@ public class BasicController : ApiControllerBase
         return Ok("v2");
     }
 
+    /// <summary>
+    /// Create a bar object
+    /// </summary>
+    /// <param name="bar">The bar object</param>
+    /// <remarks>
+    /// Sample request:
+    ///
+    ///     POST api/v2/basic/bar
+    ///     {
+    ///         "id": "1",
+    ///         "name": "bar"
+    ///     }
+    /// 
+    /// </remarks>
+    [OpenApi]
+    [HttpPost("bar"), MapToApiVersion(2.0)]
+    public ApiResponse<Bar> CreateBar(Bar bar)
+    {
+        return Ok(bar);
+    }
+
     [HttpGet("exception")]
     public ApiResponse<string> ThrowException()
     {
         throw new Exception("exception message");
+    }
+}
+
+public class Bar
+{
+    /// <summary>
+    /// The id
+    /// </summary>
+    [Required(AllowEmptyStrings = false)]
+    public string Id { get; set; }
+
+    /// <summary>
+    /// The name
+    /// </summary>
+    [Required(AllowEmptyStrings = false)]
+    public string Name { get; set; }
+
+    public Bar(string id, string name)
+    {
+        Id = id;
+        Name = name;
     }
 }
