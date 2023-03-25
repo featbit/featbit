@@ -1,10 +1,7 @@
-from typing import Any, Dict, Iterable, List, Tuple
-
-import pandas as pd
+from typing import Any, Dict, List, Tuple
 
 from app.clickhouse.models.event.sql import event_table_name
-from app.mongodb.db import get_db
-from app.setting import MONGO_DB_EVENTS_COLLECTION
+from app.mongodb.models.event.util import get_events_sample_from_mongod
 
 FLAG_EVENTS_CTE = f"""flag_events as
 (
@@ -73,64 +70,56 @@ GET_TTEST_VARS_SQL = f"""WITH
 {GET_VARS_SQL}"""
 
 
-def _get_events_sample_from_mongod(query_params: Dict[str, Any],
-                                   kind: str = 'featureflag',
-                                   cols: Iterable[str] = []) -> pd.DataFrame:
-    if kind == 'featureflag':
-        query = [
-            {
-                '$match': {
-                    'event': 'FlagValue',
-                    'env_id': query_params['env_id'],
-                    'distinct_id': query_params['flag_id'],
-                    'timestamp': {
-                        '$gt': query_params['start'],
-                        '$lt': query_params['end']
-                    },
-                    "properties.sendToExperiment": True
-                }
-            }, {
-                '$project': {
-                    '_id': 0,
-                    'timestamp': 1,
-                    'user_key': '$properties.userKeyId',
-                    'user_name': '$properties.userName',
-                    'variation': '$properties.variationId'
-                }
+def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dict[str, Any]:
+    return [
+        {
+            '$match': {
+                'event': 'FlagValue',
+                'env_id': query_params['env_id'],
+                'distinct_id': query_params['flag_id'],
+                'timestamp': {
+                    '$gt': query_params['start'],
+                    '$lt': query_params['end']
+                },
+                "properties.sendToExperiment": True
             }
-        ]
-    else:
-        query = [
-            {
-                '$match': {
-                    'event': query_params['event'],
-                    'env_id': query_params['env_id'],
-                    'distinct_id': query_params['event_name'],
-                    'timestamp': {
-                        '$gt': query_params['start'],
-                        '$lt': query_params['end']
-                    },
-                }
-            }, {
-                '$project': {
-                    '_id': 0,
-                    'timestamp': 1,
-                    'user_key': '$properties.user.keyId',
-                    'user_name': '$properties.user.name',
-                    'weight': '$properties.numericValue'
-                }
+        }, {
+            '$project': {
+                '_id': 0,
+                'timestamp': 1,
+                'user_key': '$properties.userKeyId',
+                'variation': '$properties.variationId'
             }
-        ]
-    db = get_db()
-    df = pd.DataFrame(list(db[MONGO_DB_EVENTS_COLLECTION].aggregate(query)))
-    if len(cols) > 0:
-        df = df[cols]
-    return df
+        }
+    ]
+
+
+def _query_metric_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dict[str, Any]:
+    return [
+        {
+            '$match': {
+                'event': query_params['event'],
+                'env_id': query_params['env_id'],
+                'distinct_id': query_params['event_name'],
+                'timestamp': {
+                    '$gt': query_params['start'],
+                    '$lt': query_params['end']
+                },
+            }
+        }, {
+            '$project': {
+                '_id': 0,
+                'timestamp': 1,
+                'user_key': '$properties.user.keyId',
+                'weight': '$properties.numericValue'
+            }
+        }
+    ]
 
 
 def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], props_test: bool) -> List[Tuple]:
-    df_ff_events = _get_events_sample_from_mongod(query_params, kind='featureflag', cols=['user_key', 'variation'])
-    df_metric_events = _get_events_sample_from_mongod(query_params, kind='metric', cols=['user_key', 'weight'])
+    df_ff_events = get_events_sample_from_mongod(_query_ff_events_sample_from_mongod(query_params), cols=['user_key', 'variation'])
+    df_metric_events = get_events_sample_from_mongod(_query_metric_events_sample_from_mongod(query_params), cols=['user_key', 'weight'])
     if props_test:
         df_metric_events["weight"] = 1.0
 

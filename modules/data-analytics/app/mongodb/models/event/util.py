@@ -3,11 +3,13 @@
 import random
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from app.mongodb.db import get_db
 from app.setting import MONGO_DB_EVENTS_COLLECTION
 from utils import to_UTC_datetime
+
+import pandas as pd
 
 
 def _generate_guid() -> str:
@@ -38,3 +40,12 @@ def bulk_create_events(list_properties: List[Dict[str, Any]]) -> None:
     events = [_make_event(props) for props in list_properties]
     db = get_db()
     db[MONGO_DB_EVENTS_COLLECTION].insert_many(events)
+
+
+def get_events_sample_from_mongod(query: Dict[str, Any],
+                                  cols: Iterable[str] = []) -> pd.DataFrame:
+    db = get_db()
+    df = pd.DataFrame(list(db[MONGO_DB_EVENTS_COLLECTION].aggregate(query)))
+    if len(cols) > 0:
+        df = df[cols]
+    return df
