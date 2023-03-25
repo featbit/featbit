@@ -16,25 +16,37 @@ public static class MiddlewaresRegister
         // external use
         app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
 
-        // enable swagger
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
+        // enable swagger in development environment
+        if (app.Environment.IsDevelopment())
         {
-            options.EnableFilter();
-            options.DisplayRequestDuration();
-            options.DocExpansion(DocExpansion.List);
-
-            // build a swagger endpoint for each discovered API version
-            var descriptions = app.DescribeApiVersions();
-            foreach (var description in descriptions)
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
             {
-                var url = $"/swagger/{description.GroupName}/swagger.json";
-                var name = description.GroupName.ToUpperInvariant();
-                options.SwaggerEndpoint(url, name);
-            }
+                options.EnableFilter();
+                options.DisplayRequestDuration();
+                options.DocExpansion(DocExpansion.List);
 
-            const string openApiGroup = OpenApiConstants.ApiGroupName;
-            options.SwaggerEndpoint($"/swagger/{openApiGroup}/swagger.json", openApiGroup);
+                // build a swagger endpoint for each discovered API version
+                var descriptions = app.DescribeApiVersions();
+                foreach (var description in descriptions)
+                {
+                    var url = $"/swagger/{description.GroupName}/swagger.json";
+                    var name = description.GroupName.ToUpperInvariant();
+                    options.SwaggerEndpoint(url, name);
+                }
+
+                const string openApiGroup = OpenApiConstants.ApiGroupName;
+                options.SwaggerEndpoint($"/swagger/{openApiGroup}/swagger.json", openApiGroup);
+            });
+        }
+
+        // enable ReDoc
+        app.UseReDoc(options =>
+        {
+            options.RoutePrefix = "docs";
+            options.DocumentTitle = "FeatBit OpenApi Doc";
+            options.SpecUrl = $"/swagger/{OpenApiConstants.ApiGroupName}/swagger.json";
+            options.ExpandResponses("200");
         });
 
         // enable cors
