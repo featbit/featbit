@@ -1,10 +1,8 @@
-import pandas as pd
-
 from datetime import datetime, timedelta
 from enum import Enum
 from math import ceil
 
-from utils import time_to_special_tz
+import pandas as pd
 
 
 class FrequencyType(Enum):
@@ -13,6 +11,19 @@ class FrequencyType(Enum):
     DAY = 'day'
     HOUR = 'hour'
     MINUTE = 'minute'
+
+
+def date_trunc_format(freq: FrequencyType = FrequencyType.DAY, date_to_week_num=True) -> str:
+    if freq == FrequencyType.MONTH:
+        return '%Y-%m-01'
+    elif freq == FrequencyType.WEEK:
+        return '%G-%V-1' if date_to_week_num else '%G-%V-%u'
+    elif freq == FrequencyType.DAY:
+        return '%Y-%m-%d'
+    elif freq == FrequencyType.HOUR:
+        return '%Y-%m-%d %H:00:00'
+    else:
+        return '%Y-%m-%d %H:%M:00'
 
 
 def date_trunc(df: pd.DataFrame,

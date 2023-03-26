@@ -1,6 +1,7 @@
+import pandas as pd
 from typing import Any, Dict
 from app.clickhouse.models.event import event_table_name
-from app.main.models.statistics.time_series import date_trunc
+from app.main.models.statistics.time_series import date_trunc_format
 from app.mongodb.models.event.util import get_events_sample_from_mongod
 
 
@@ -26,7 +27,7 @@ GET_FLAG_EVENTS_BY_INTERVAL_SQL = f"""WITH
 """
 
 
-def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dict[str, Any]:
+def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any], format: str) -> Dict[str, Any]:
     return [
         {
             '$match': {
@@ -41,22 +42,45 @@ def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dict[st
         }, {
             '$project': {
                 '_id': 0,
-                'timestamp': 1,
+                'timestamp': {
+                    '$dateToString': {
+                        'date': '$timestamp',
+                        'timezone': query_params['tz'],
+                        'format': format
+                    }
+                },
                 'user_key': '$properties.userKeyId',
                 'variation': '$properties.variationId'
+            }
+        }, {
+            '$group': {
+                '_id': {'variation': '$variation', 'timestamp': '$timestamp'},
+                'count': {'$sum': 1}
+            }
+        }, {
+            '$project': {
+                '_id': 0,
+                'count': 1,
+                'variation': '$_id.variation',
+                'timestamp': '$_id.timestamp',
             }
         }
     ]
 
 
 def make_statistic_ff_events_from_mongod(query_params: Dict[str, Any]):
-    df = get_events_sample_from_mongod(_query_ff_events_sample_from_mongod(query_params), cols=['timestamp', 'user_key', 'variation'])
+    format = date_trunc_format(query_params['interval_type'])
+    df = get_events_sample_from_mongod(_query_ff_events_sample_from_mongod(query_params, format), cols=['count', 'variation', 'timestamp'])
     if df.empty:
         return []
-    df = date_trunc(df, 'timestamp', freq=query_params['interval_type'], to_tz=query_params['tz'])
-    df = df.groupby(['variation', 'timestamp']) \
-        .agg(count=('user_key', 'count')) \
-        .sort_values(['variation', 'timestamp']) \
-        .reset_index()
+    format = date_trunc_format(query_params['interval_type'], date_to_week_num=False)
+    df['timestamp'] = pd.to_datetime(df['timestamp'], format=format)
+    df['timestamp'] = df['timestamp'].dt.tz_localize(query_params['tz'])
+    df = df.sort_values(['variation', 'timestamp'])
+    # df = date_trunc(df, 'timestamp', freq=query_params['interval_type'], to_tz=query_params['tz'])
+    # df = df.groupby(['variation', 'timestamp']) \
+    #     .agg(count=('user_key', 'count')) \
+    #     .sort_values(['variation', 'timestamp']) \
+    #     .reset_index()
     for count, var_key, time in df[['count', 'variation', 'timestamp']].values.tolist():
         yield count, var_key, time.to_pydatetime()
