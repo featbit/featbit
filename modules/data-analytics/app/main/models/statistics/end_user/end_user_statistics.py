@@ -2,9 +2,9 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 from app.clickhouse.client import sync_execute
-from app.main.models.statistics.end_user.sql import (count_user_sql,
-                                                     get_users_sql)
-from app.setting import DATE_ISO_FMT, DATE_UTC_FMT
+from app.main.models.statistics.end_user.sql import (
+    count_and_list_user_from_mongodb, count_user_sql, get_users_sql)
+from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, LIGHT_VERSION
 from utils import to_UTC_datetime
 
 END_USER_PARAMS_NECESSARY_COLUMNS = ['flagExptId', 'envId', 'startTime']
@@ -76,12 +76,18 @@ class EndUserParams:
 
 class EndUserStatistics:
     def __init__(self, params: "EndUserParams"):
+        if not LIGHT_VERSION:
+            start = params.start.strftime(DATE_ISO_FMT)
+            end = params.end.strftime(DATE_ISO_FMT)
+        else:
+            start = params.start
+            end = params.end
         self._params = params
         self._query_params = {
             'flag_id': params.flag_id,
             'env_id': params.env_id,
-            'start': params.start.strftime(DATE_ISO_FMT),
-            'end': params.end.strftime(DATE_ISO_FMT),
+            'start': start,
+            'end': end,
             'limit': params.limit,
             'offset': params.limit * params.page
         }
@@ -94,11 +100,14 @@ class EndUserStatistics:
         has_variation = 'variation' in self._query_params
         has_user = 'user_search_key' in self._query_params
 
-        for res in sync_execute(count_user_sql(has_variation, has_user), args=self._query_params):
-            user_count = res[0]
+        if not LIGHT_VERSION:
+            for res in sync_execute(count_user_sql(has_variation, has_user), args=self._query_params):
+                user_count = res[0]
+            rs = sync_execute(get_users_sql(has_variation, has_user), args=self._query_params)
+        else:
+            user_count, rs = count_and_list_user_from_mongodb(self._query_params, has_variation=has_variation, has_user=has_user)
 
         items = [{"variationId": var_key, "keyId": user_key, "name": user_name, "lastEvaluatedAt": time.strftime(DATE_UTC_FMT)}
-                 for var_key, user_key, user_name, time in sync_execute(get_users_sql(has_variation, has_user), args=self._query_params)]
-
+                 for var_key, user_key, user_name, time in rs]
         return {"totalCount": user_count,
                 "items": items}

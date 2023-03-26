@@ -27,7 +27,7 @@ GET_FLAG_EVENTS_BY_INTERVAL_SQL = f"""WITH
 """
 
 
-def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any], format: str) -> Dict[str, Any]:
+def _query_ff_events_stat_from_mongod(query_params: Dict[str, Any], format: str) -> Dict[str, Any]:
     return [
         {
             '$match': {
@@ -70,17 +70,12 @@ def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any], format: st
 
 def make_statistic_ff_events_from_mongod(query_params: Dict[str, Any]):
     format = date_trunc_format(query_params['interval_type'])
-    df = get_events_sample_from_mongod(_query_ff_events_sample_from_mongod(query_params, format), cols=['count', 'variation', 'timestamp'])
+    df = get_events_sample_from_mongod(_query_ff_events_stat_from_mongod(query_params, format), cols=['count', 'variation', 'timestamp'])
     if df.empty:
         return []
     format = date_trunc_format(query_params['interval_type'], date_to_week_num=False)
     df['timestamp'] = pd.to_datetime(df['timestamp'], format=format)
     df['timestamp'] = df['timestamp'].dt.tz_localize(query_params['tz'])
     df = df.sort_values(['variation', 'timestamp'])
-    # df = date_trunc(df, 'timestamp', freq=query_params['interval_type'], to_tz=query_params['tz'])
-    # df = df.groupby(['variation', 'timestamp']) \
-    #     .agg(count=('user_key', 'count')) \
-    #     .sort_values(['variation', 'timestamp']) \
-    #     .reset_index()
     for count, var_key, time in df[['count', 'variation', 'timestamp']].values.tolist():
         yield count, var_key, time.to_pydatetime()
