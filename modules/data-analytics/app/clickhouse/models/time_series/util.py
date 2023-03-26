@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from enum import Enum
 from math import ceil
-from typing import Iterable, Tuple
 
 from app.clickhouse.client import sync_execute
 from app.clickhouse.models.time_series.sql import (DAY_SERIES, HOUR_SERIES,
@@ -22,7 +21,7 @@ class FrequencyType(Enum):
 def time_series(utc_start: datetime,
                 utc_end: datetime,
                 localtz: str,
-                freq: FrequencyType = FrequencyType.DAY) -> Iterable[Tuple[datetime]]:
+                freq: FrequencyType = FrequencyType.DAY):
     def delta_time(delta: timedelta, base: int) -> int:
         v = delta.total_seconds() / base
         return ceil(v + 1) if v % 1 == 0 else ceil(v)
@@ -49,4 +48,5 @@ def time_series(utc_start: datetime,
         upper_bound = delta_time(delta, 86400) + 1
         sql = DAY_SERIES
     query_params['upperbound'] = upper_bound
-    return sync_execute(sql, args=query_params)
+    for dt, *_ in sync_execute(sql, args=query_params):
+        yield dt

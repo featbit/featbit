@@ -15,6 +15,32 @@ class FrequencyType(Enum):
     MINUTE = 'minute'
 
 
+def date_trunc(df: pd.DataFrame,
+               col: str,
+               freq: FrequencyType = FrequencyType.DAY,
+               from_tz='UTC',
+               to_tz='UTC') -> pd.DataFrame:
+    if not df.empty:
+        # convert tz to get local time
+        df[col] = df[col].dt.tz_localize(None)
+        df[col] = df[col].dt.tz_localize(from_tz).dt.tz_convert(to_tz)
+        # remove tz info before date trunc
+        df[col] = df[col].dt.tz_localize(None)
+        if freq == FrequencyType.MONTH:
+            df[col] = df[col].dt.to_period('M').dt.start_time
+        elif freq == FrequencyType.WEEK:
+            df[col] = df[col].dt.to_period('W').dt.start_time
+        elif freq == FrequencyType.DAY:
+            df[col] = df[col].dt.to_period('D').dt.start_time
+        elif freq == FrequencyType.HOUR:
+            df[col] = df[col].dt.to_period('H').dt.start_time
+        else:
+            df[col] = df[col].dt.to_period('T').dt.start_time
+        # add tz info after date trunc
+        df[col] = df[col].dt.tz_localize(to_tz)
+    return df
+
+
 def generate_time_series(utc_start: datetime,
                          utc_end: datetime,
                          localtz: str,
@@ -26,7 +52,6 @@ def generate_time_series(utc_start: datetime,
     if utc_start > utc_end:
         return []
     delta = utc_end - utc_start
-    start = time_to_special_tz(utc_start, localtz)
 
     if (freq_type == FrequencyType.MONTH):
         upper_bound = delta_time(delta, 86400 * 30) + 1
@@ -44,5 +69,8 @@ def generate_time_series(utc_start: datetime,
         upper_bound = delta_time(delta, 86400) + 1
         freq = 'D'
 
-    for ts in pd.DataFrame(pd.date_range(start=start, periods=upper_bound, freq=freq, tz=localtz), columns=['timestamp']).values.tolist():
+    df = pd.DataFrame(pd.date_range(start=utc_start, periods=upper_bound, freq=freq), columns=['timestamp'])
+    df = date_trunc(df, 'timestamp', freq=freq_type, to_tz=localtz)
+
+    for ts in df.values.tolist():
         yield ts[0].to_pydatetime()

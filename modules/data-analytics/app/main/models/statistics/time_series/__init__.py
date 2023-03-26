@@ -1,1 +1,1 @@
-from app.main.models.statistics.time_series.util import FrequencyType, generate_time_series
+from app.main.models.statistics.time_series.util import FrequencyType, generate_time_series, date_trunc
