@@ -86,7 +86,6 @@ def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dict[st
         }, {
             '$project': {
                 '_id': 0,
-                'timestamp': 1,
                 'user_key': '$properties.userKeyId',
                 'variation': '$properties.variationId'
             }
@@ -109,7 +108,6 @@ def _query_metric_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dic
         }, {
             '$project': {
                 '_id': 0,
-                'timestamp': 1,
                 'user_key': '$properties.user.keyId',
                 'weight': '$properties.numericValue'
             }
@@ -117,10 +115,12 @@ def _query_metric_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dic
     ]
 
 
-def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], props_test: bool) -> List[Tuple]:
+def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], props_test: bool):
     df_ff_events = get_events_sample_from_mongod(_query_ff_events_sample_from_mongod(query_params), cols=['user_key', 'variation'])
+    if df_ff_events.empty:
+        return []
     df_metric_events = get_events_sample_from_mongod(_query_metric_events_sample_from_mongod(query_params), cols=['user_key', 'weight'])
-    if props_test:
+    if props_test and not df_metric_events.empty:
         df_metric_events["weight"] = 1.0
 
     df = df_ff_events.merge(df_metric_events, on='user_key', how='left') \
@@ -133,4 +133,5 @@ def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], props_test: bo
              avg=('weight', lambda x: x.mean()), stddev=('weight', lambda x: x.std(ddof=1))) \
         .sort_values('variation') \
         .reset_index()
-    return [tuple(row) for row in df[['uniq', 'sum', 'avg', 'stddev', 'variation']].values.tolist()]
+    for count, exposure, mean_sample, stdev_sample, var_key in df[['uniq', 'sum', 'avg', 'stddev', 'variation']].values.tolist():
+        yield count, exposure, mean_sample, stdev_sample, var_key

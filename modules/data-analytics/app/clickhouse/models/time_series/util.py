@@ -27,7 +27,7 @@ def time_series(utc_start: datetime,
         v = delta.total_seconds() / base
         return ceil(v + 1) if v % 1 == 0 else ceil(v)
 
-    if not utc_start or not utc_end or utc_start > utc_start or not localtz or not freq:
+    if utc_start > utc_end:
         return []
     delta = utc_end - utc_start
     query_params = {"start": time_to_special_tz(utc_start, localtz).strftime(DATE_SIM_FMT),

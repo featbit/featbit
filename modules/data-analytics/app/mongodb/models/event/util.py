@@ -46,6 +46,6 @@ def get_events_sample_from_mongod(query: Dict[str, Any],
                                   cols: Iterable[str] = []) -> pd.DataFrame:
     db = get_db()
     df = pd.DataFrame(list(db[MONGO_DB_EVENTS_COLLECTION].aggregate(query)))
-    if len(cols) > 0:
+    if not df.empty and len(cols) > 0:
         df = df[cols]
     return df
