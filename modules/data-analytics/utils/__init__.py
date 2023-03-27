@@ -55,9 +55,9 @@ def format_float_positional(value: float) -> Optional[str]:
 
 def time_to_special_tz(source: Union[datetime, date], tz: str) -> datetime:
     if isinstance(source, datetime):
-        return source.astimezone(pytz.timezone(tz)) if source.tzinfo else source.replace(tzinfo=pytz.timezone(tz))
+        return source.astimezone(pytz.timezone(tz)) if source.tzinfo else pytz.timezone(tz).localize(source)
     elif isinstance(source, date):
-        return datetime.combine(source, datetime.min.time()).replace(tzinfo=pytz.timezone(tz))
+        return pytz.timezone(tz).localize(datetime.combine(source, datetime.min.time()))
     else:
         raise ValueError("source is neithor datetime nor date")
 
