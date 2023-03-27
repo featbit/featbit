@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from app.clickhouse.models.event.sql import event_table_name
 from app.mongodb.models.event.util import get_events_sample_from_mongod
@@ -70,7 +70,7 @@ GET_TTEST_VARS_SQL = f"""WITH
 {GET_VARS_SQL}"""
 
 
-def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dict[str, Any]:
+def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> List[Dict[str, Any]]:
     return [
         {
             '$match': {
@@ -93,7 +93,7 @@ def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dict[st
     ]
 
 
-def _query_metric_events_sample_from_mongod(query_params: Dict[str, Any]) -> Dict[str, Any]:
+def _query_metric_events_sample_from_mongod(query_params: Dict[str, Any]) -> List[Dict[str, Any]]:
     return [
         {
             '$match': {

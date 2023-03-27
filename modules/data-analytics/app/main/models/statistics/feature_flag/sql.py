@@ -1,9 +1,10 @@
+from typing import Any, Dict, List
+
 import pandas as pd
-from typing import Any, Dict
+
 from app.clickhouse.models.event import event_table_name
 from app.main.models.statistics.time_series import date_trunc_format
 from app.mongodb.models.event.util import get_events_sample_from_mongod
-
 
 FLAG_EVENTS_BY_INTERVAL_CTE = f"""flag_events_by_interval as
 (SELECT tag_0 AS target_user, tag_1 AS variation, date_trunc(%(interval_type)s, timestamp, %(tz)s) AS time
@@ -27,7 +28,7 @@ GET_FLAG_EVENTS_BY_INTERVAL_SQL = f"""WITH
 """
 
 
-def _query_ff_events_stat_from_mongod(query_params: Dict[str, Any], format: str) -> Dict[str, Any]:
+def _query_ff_events_stat_from_mongod(query_params: Dict[str, Any], format: str) -> List[Dict[str, Any]]:
     return [
         {
             '$match': {

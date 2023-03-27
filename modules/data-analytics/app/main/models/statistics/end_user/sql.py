@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from app.clickhouse.models.event import event_table_name
 from app.mongodb.models.event import get_events_sample_from_mongod
@@ -59,7 +59,7 @@ def get_users_sql(has_variation: bool = False, has_user: bool = False) -> str:
     return GET_USERS_PAGENATION.format(user_subquery=_user_subquery_sql(has_variation, has_user))
 
 
-def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any], has_variation: bool = False, has_user: bool = False) -> Dict[str, Any]:
+def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any], has_variation: bool = False, has_user: bool = False) -> List[Dict[str, Any]]:
     match = {
         'event': 'FlagValue',
         'env_id': query_params['env_id'],
