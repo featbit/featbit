@@ -2,6 +2,7 @@ using Asp.Versioning.ApiExplorer;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using OpenApiConstants = Api.Authentication.OpenApiConstants;
 
 namespace Api.Setup;
 
@@ -29,19 +30,33 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
         // note: you might choose to skip or document deprecated API versions differently
         foreach (var description in _provider.ApiVersionDescriptions)
         {
-            options.SwaggerDoc(description.GroupName, CreateInfoForApiVersion(description));
+            var backendApiInfo = CreateOpenApiInfo(
+                "FeatBit Backend Api",
+                description.ApiVersion.ToString(),
+                description.IsDeprecated
+            );
+
+            options.SwaggerDoc(description.GroupName, backendApiInfo);
         }
 
-        OpenApiInfo CreateInfoForApiVersion(ApiVersionDescription description)
+        // open api swagger doc
+        options.SwaggerDoc(OpenApiConstants.ApiGroupName, CreateOpenApiInfo("FeatBit Open Api", "1.0"));
+
+        OpenApiInfo CreateOpenApiInfo(string title, string version, bool isDeprecated = false)
         {
-            var info = new OpenApiInfo()
+            var info = new OpenApiInfo
             {
-                Title = "FeatBit Backend Api",
-                Version = description.ApiVersion.ToString(),
-                License = new OpenApiLicense() { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
+                Title = title,
+                Version = version,
+                Contact = new OpenApiContact
+                {
+                    Name = "FeatBit",
+                    Url = new Uri("https://github.com/featbit/featbit")
+                },
+                License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
             };
 
-            if (description.IsDeprecated)
+            if (isDeprecated)
             {
                 info.Description += "<span style=\"color:red\"> This API version has been deprecated.</span>";
             }

@@ -1,12 +1,19 @@
+using System.Net.Mime;
 using Api.Authentication;
 using Api.Filters;
 using Application.Users;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Controllers;
 
 [Authorize]
 [ApiController]
 [VerifyOpenApiApplicable]
+[Consumes(MediaTypeNames.Application.Json)]
+[Produces(MediaTypeNames.Application.Json)]
+[SwaggerResponse(200)]
+[SwaggerResponse(401)]
+[SwaggerResponse(403)]
 [Route("api/v{version:apiVersion}/[controller]")]
 public class ApiControllerBase : ControllerBase
 {

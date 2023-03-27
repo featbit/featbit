@@ -4,6 +4,8 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
 </Project>

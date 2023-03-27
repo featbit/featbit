@@ -4,17 +4,19 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Application\Application.csproj" />
+        <ProjectReference Include="..\Application\Application.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Confluent.Kafka" Version="1.9.3" />
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
-      <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
-      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.23.1" />
+        <PackageReference Include="Confluent.Kafka" Version="1.9.3"/>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9"/>
+        <PackageReference Include="MongoDB.Driver" Version="2.17.1"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.23.1"/>
     </ItemGroup>
 
 </Project>
