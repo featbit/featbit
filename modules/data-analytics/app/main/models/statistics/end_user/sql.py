@@ -35,7 +35,7 @@ GET_USERS_PAGENATION = """WITH users_cte AS
 (
 {user_subquery}
 )
-SELECT variation, user_key, max(user_name), max(timestamp) AS time
+SELECT variation, user_key, any(user_name), max(timestamp) AS time
 FROM users_cte
 GROUP BY variation, user_key
 ORDER BY time DESC
@@ -94,8 +94,8 @@ def count_and_list_user_from_mongodb(query_params: Dict[str, Any], has_variation
     lower = query_params['offset']
     upper = query_params['offset'] + query_params['limit']
     df = df.groupby(['variation', 'user_key']) \
-        .agg(user_name=('user_name', 'max'), timestamp=('timestamp', 'max')) \
-        .sort_values('timestamp', ascending=False).iloc[lower:upper] \
+        .agg(user_name=('user_name', 'first'), timestamp=('timestamp', 'max')) \
+        .sort_values('timestamp', ascending=False)[lower:upper] \
         .reset_index()
     users = [(var_key, user_key, user_name, time.to_pydatetime()) for var_key, user_key, user_name, time in df.values.tolist()]
     return num.item(), users
