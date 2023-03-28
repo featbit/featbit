@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "W8dlw0w9pbPM7z6iUGQJ5q0gArtXqiziqe/RRDbdmdVOHIJp74/w3vHwzCagdTYKqNsgoMPsK0p1HsMmD/bOnA==",
+  "success": true,
+  "projectFilePath": "C:\\Code\\featbit\\featbit\\llm\\dotnet-sample\\FineTuneRMFFResultConsoleApp\\FineTuneRMFFResultConsoleApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\hu-be\\.nuget\\packages\\featbit.serversdk\\1.1.0\\featbit.serversdk.1.1.0.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\system.io.pipelines\\6.0.0\\system.io.pipelines.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

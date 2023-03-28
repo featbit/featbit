@@ -1,0 +1,1 @@
+{ "prompt": "Remove all feature flag with key fk3 in following code: \r\r ```csharp  \r  var o=new FbOptionsBuilder().Offline(true).Build();var c=new FbClient(options);var a=client.StringVariation(\"fk3\",FbUser.Builder(\"anonymous\").Build(),defaultValue:\"t\");if(a==\"t\") Console.Write(\"fk3:t\");```", "completion": "```csharp \r Console.Write(\"fk3:t\"); \r ```" }
