@@ -43,7 +43,10 @@ public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchRe
             result.Message = x.ErrorMessage;
         });
 
-        await _service.UpdateAsync(flag);
+        if (result.Success)
+        {
+            await _service.UpdateAsync(flag);
+        }
 
         return result;
     }
