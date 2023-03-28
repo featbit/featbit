@@ -6,7 +6,6 @@ public static class ErrorCodes
     public const string InternalServerError = nameof(InternalServerError);
     public const string Unauthorized = nameof(Unauthorized);
     public const string Forbidden = nameof(Forbidden);
-    public const string OperationsAreRequired = nameof(OperationsAreRequired);
 
     // application
     public const string ResourceNotFound = nameof(ResourceNotFound);
@@ -26,7 +25,7 @@ public static class ErrorCodes
     // common
     public const string NameIsRequired = nameof(NameIsRequired);
     public const string KeyIsRequired = nameof(KeyIsRequired);
-    
+
     // onboarding
     public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
     public const string ProjectNameRequired = nameof(ProjectNameRequired);
@@ -68,7 +67,7 @@ public static class ErrorCodes
     public const string EventTypeIsRequired = nameof(EventTypeIsRequired);
     public const string EventNameIsRequired = nameof(EventNameIsRequired);
     public const string MetricIsBeingUsedByExperiment = nameof(MetricIsBeingUsedByExperiment);
-    
+
     // access tokens
     public const string InvalidAccessTokenType = nameof(InvalidAccessTokenType);
     public const string ServiceAccessTokenMustDefinePolicies = nameof(ServiceAccessTokenMustDefinePolicies);

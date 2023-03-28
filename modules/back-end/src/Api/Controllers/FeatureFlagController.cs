@@ -11,21 +11,6 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/feature-flags")]
 public class FeatureFlagController : ApiControllerBase
 {
-    [OpenApi]
-    [HttpPatch("{key}")]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonPatchDocument operations)
-    {
-        var request = new PatchFeatureFlag
-        {
-            EnvId = envId,
-            Key = key,
-            Operations = operations
-        };
-
-        var result = await Mediator.Send(request);
-        return result.Success ? Ok(true) : Error<bool>(result.Message);
-    }
-    
     [HttpGet]
     public async Task<ApiResponse<PagedResult<FeatureFlagVm>>> GetListAsync(
         Guid envId,
@@ -138,12 +123,27 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    [OpenApi]
+    [HttpPatch("{key}")]
+    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonPatchDocument operations)
+    {
+        var request = new PatchFeatureFlag
+        {
+            EnvId = envId,
+            Key = key,
+            Operations = operations
+        };
+
+        var result = await Mediator.Send(request);
+        return result.Success ? Ok(true) : Error<bool>(result.Message);
+    }
+
     [HttpPut("{key}/variations")]
     public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
     {
         request.Key = key;
         request.EnvId = envId;
-        
+
         var success = await Mediator.Send(request);
         return Ok(success);
     }

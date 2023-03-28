@@ -1,4 +1,3 @@
-using Application.Bases;
 using Microsoft.AspNetCore.JsonPatch;
 
 namespace Application.FeatureFlags;
@@ -10,15 +9,6 @@ public class PatchFeatureFlag : IRequest<PatchResult>
     public string Key { get; set; }
 
     public JsonPatchDocument Operations { get; set; }
-}
-
-public class PatchFeatureFlagValidator : AbstractValidator<PatchFeatureFlag>
-{
-    public PatchFeatureFlagValidator()
-    {
-        RuleFor(x => x.Operations)
-            .NotEmpty().WithErrorCode(ErrorCodes.OperationsAreRequired);
-    }
 }
 
 public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchResult>
