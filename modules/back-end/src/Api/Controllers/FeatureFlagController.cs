@@ -1,7 +1,9 @@
+using Api.Authentication;
 using Api.Authorization;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Api.Controllers;
 
@@ -9,6 +11,21 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/feature-flags")]
 public class FeatureFlagController : ApiControllerBase
 {
+    [OpenApi]
+    [HttpPatch("{key}")]
+    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonPatchDocument operations)
+    {
+        var request = new PatchFeatureFlag
+        {
+            EnvId = envId,
+            Key = key,
+            Operations = operations
+        };
+
+        var result = await Mediator.Send(request);
+        return result.Success ? Ok(true) : Error<bool>(result.Message);
+    }
+    
     [HttpGet]
     public async Task<ApiResponse<PagedResult<FeatureFlagVm>>> GetListAsync(
         Guid envId,

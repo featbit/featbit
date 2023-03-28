@@ -182,6 +182,13 @@ public static class ServicesRegister
             ServiceDescriptor.Singleton<IAuthorizationMiddlewareResultHandler>(new ApiAuthorizationResultHandler());
         builder.Services.Replace(authorizationResultHandler);
 
+        // set json patch
+        builder.Services.AddControllers(options =>
+            {
+                options.InputFormatters.Insert(0, JsonPatchInputFormatter.GetJsonPatchInputFormatter());
+            })
+            .AddNewtonsoftJson();
+        
         return builder;
     }
 }
