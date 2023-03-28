@@ -2,7 +2,6 @@ using System.Text;
 using Api.Authentication;
 using Api.Authorization;
 using Domain.Identity;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -18,10 +17,7 @@ public static class ServicesRegister
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
         // add services for controllers
-        builder.Services.AddControllers(options =>
-        {
-            options.InputFormatters.Insert(0, GetJsonPatchInputFormatter());
-        });
+        builder.Services.AddControllers();
 
         // make all generated paths URLs are lowercase
         builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
@@ -187,22 +183,5 @@ public static class ServicesRegister
         builder.Services.Replace(authorizationResultHandler);
 
         return builder;
-    }
-
-    // ref: https://learn.microsoft.com/en-us/aspnet/core/web-api/jsonpatch?view=aspnetcore-6.0#add-support-for-json-patch-when-using-systemtextjson
-    private static NewtonsoftJsonPatchInputFormatter GetJsonPatchInputFormatter()
-    {
-        var builder = new ServiceCollection()
-            .AddLogging()
-            .AddMvc()
-            .AddNewtonsoftJson()
-            .Services.BuildServiceProvider();
-
-        return builder
-            .GetRequiredService<IOptions<MvcOptions>>()
-            .Value
-            .InputFormatters
-            .OfType<NewtonsoftJsonPatchInputFormatter>()
-            .First();
     }
 }

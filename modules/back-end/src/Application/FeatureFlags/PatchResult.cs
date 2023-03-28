@@ -6,8 +6,25 @@ public class PatchResult
 
     public string Message { get; set; }
 
-    public PatchResult()
+    public static PatchResult Ok()
     {
-        Success = true;
+        var ok = new PatchResult
+        {
+            Success = true,
+            Message = string.Empty
+        };
+
+        return ok;
+    }
+
+    public static PatchResult Fail(string error)
+    {
+        var failed = new PatchResult
+        {
+            Success = false,
+            Message = error
+        };
+
+        return failed;
     }
 }

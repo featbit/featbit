@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Newtonsoft.Json.Serialization;
 
 namespace Application.FeatureFlags;
 
@@ -8,7 +10,7 @@ public class PatchFeatureFlag : IRequest<PatchResult>
 
     public string Key { get; set; }
 
-    public JsonPatchDocument Operations { get; set; }
+    public List<Operation> Operations { get; set; }
 }
 
 public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchResult>
@@ -22,20 +24,18 @@ public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchRe
 
     public async Task<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
     {
-        var result = new PatchResult();
         var flag = await _service.GetAsync(request.EnvId, request.Key);
 
-        request.Operations.ApplyTo(flag, x =>
-        {
-            result.Success = false;
-            result.Message = x.ErrorMessage;
-        });
+        var error = string.Empty;
+        var patch = new JsonPatchDocument(request.Operations, new DefaultContractResolver());
+        patch.ApplyTo(flag, jsonPatchError => error = jsonPatchError.ErrorMessage);
 
-        if (result.Success)
+        if (!string.IsNullOrWhiteSpace(error))
         {
-            await _service.UpdateAsync(flag);
+            return PatchResult.Fail(error);
         }
 
-        return result;
+        await _service.UpdateAsync(flag);
+        return PatchResult.Ok();
     }
 }

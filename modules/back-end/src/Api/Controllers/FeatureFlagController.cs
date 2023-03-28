@@ -3,7 +3,7 @@ using Api.Authorization;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
-using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
 
 namespace Api.Controllers;
 
@@ -125,7 +125,7 @@ public class FeatureFlagController : ApiControllerBase
 
     [OpenApi]
     [HttpPatch("{key}")]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonPatchDocument operations)
+    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] List<Operation> operations)
     {
         var request = new PatchFeatureFlag
         {
