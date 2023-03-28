@@ -24,12 +24,10 @@ public class PatchFeatureFlagValidator : AbstractValidator<PatchFeatureFlag>
 public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchResult>
 {
     private readonly IFeatureFlagService _service;
-    private readonly IMapper _mapper;
 
-    public PatchFeatureFlagHandler(IFeatureFlagService service, IMapper mapper)
+    public PatchFeatureFlagHandler(IFeatureFlagService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
     public async Task<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
