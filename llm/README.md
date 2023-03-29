@@ -48,4 +48,8 @@ We should give GPT power to self create fine-tune data.
 ```shell
 openai api fine_tunes.create -t featbit-fine-tune-rm-ff-beta-005.jsonl -m davinci --n_epochs 1
 
+openai api fine_tunes.follow -i ft-lROGdDlR0NJeMwCdUjSJOPlK
+openai api fine_tunes.cancel -i ft-lROGdDlR0NJeMwCdUjSJOPlK
+
+openai api fine_tunes.follow -i ft-5yu3Aj2RxdAvD7fkQefBtZID
 ```
