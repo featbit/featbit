@@ -1,6 +1,6 @@
 
 ```shell
-export OPENAI_API_KEY="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"
+export OPENAI_API_KEY=""
 ```
 
 ```shell
@@ -41,6 +41,11 @@ Search "What are tokens and how to count them?" in documentation to understand h
 
 [https://platform.openai.com/tokenizer](https://platform.openai.com/tokenizer)
 
-## Important
 
 We should give GPT power to self create fine-tune data.
+
+
+```shell
+openai api fine_tunes.create -t featbit-fine-tune-rm-ff-beta-005.jsonl -m davinci --n_epochs 1
+
+```
