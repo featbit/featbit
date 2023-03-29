@@ -1,9 +1,11 @@
+using Newtonsoft.Json;
+using System.Text.Json;
 using Api.Authentication;
 using Api.Authorization;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
-using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace Api.Controllers;
 
@@ -125,13 +127,14 @@ public class FeatureFlagController : ApiControllerBase
 
     [OpenApi]
     [HttpPatch("{key}")]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] List<Operation> operations)
+    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
     {
+        var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
         var request = new PatchFeatureFlag
         {
             EnvId = envId,
             Key = key,
-            Operations = operations
+            Patch = patch
         };
 
         var result = await Mediator.Send(request);
