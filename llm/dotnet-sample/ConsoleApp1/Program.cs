@@ -21,8 +21,7 @@ public class RunCore
     {
         var f1 = _c.BoolVariation("f1", _u, defaultValue: false);
         var f2 = _c.IntVariation("f2", _u, defaultValue: 6);
-        var f3 = _c.StringVariation("f3", _u, defaultValue: "V");
-        var f = new SomeFunctions(f1, f2, f3);
+        var f = new SomeFunctions(f1, f2);
         f.R1();
         f.R2();
         f.R3();

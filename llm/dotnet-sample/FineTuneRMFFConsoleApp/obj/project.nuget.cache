@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "DIJF6HS2e6Oeyecow5w+Aweo5LQ7RYDuzWwbECpuuyPBY3EFsNvagstoQHUtcOb6DTFv3ctk9mPu5W2bPf0K/g==",
+  "dgSpecHash": "vhhAXD6oVDZlwF0CSIvbBCeanr52Idnhuc9Q66Su548WmFsj5lwnlrHNRbIh9iZW64EzfU28zhh/K3v/4I40Qg==",
   "success": true,
   "projectFilePath": "C:\\Code\\featbit\\featbit\\llm\\dotnet-sample\\FineTuneRMFFConsoleApp\\FineTuneRMFFConsoleApp.csproj",
   "expectedPackageFiles": [

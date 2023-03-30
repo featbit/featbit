@@ -6,7 +6,12 @@ var o = new FbOptionsBuilder().Offline(true).Build();
 var c = new FbClient(o);
 var u = FbUser.Builder("anonymous").Build();
 
-r1();
+var b = c.StringVariation("f2", u, defaultValue: "on");
+if (b == "on")
+{
+    r1();
+    r2();
+}
 
 var f2 = c.StringVariation("f2", u, defaultValue: "t");
 if (f2 == "t")
