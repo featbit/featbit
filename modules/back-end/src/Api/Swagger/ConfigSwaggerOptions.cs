@@ -27,15 +27,15 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
     /// <inheritdoc />
     public void Configure(SwaggerGenOptions options)
     {
-        AddBackendApiDoc(options, _provider);
-        AddOpenApiDoc(options);
+        AddDocs(options, _provider);
         DefineDocInclusionPredicate(options);
         AddXmlComments(options);
         AddSecurity(options);
     }
 
-    private static void AddBackendApiDoc(SwaggerGenOptions options, IApiVersionDescriptionProvider provider)
+    private static void AddDocs(SwaggerGenOptions options, IApiVersionDescriptionProvider provider)
     {
+        // backend api doc
         // add a swagger document for each discovered API version
         // note: you might choose to skip or document deprecated API versions differently
         foreach (var description in provider.ApiVersionDescriptions)
@@ -48,11 +48,31 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 
             options.SwaggerDoc(description.GroupName, backendApiInfo);
         }
-    }
 
-    private static void AddOpenApiDoc(SwaggerGenOptions options)
-    {
+        // open api doc
         options.SwaggerDoc(OpenApiConstants.ApiGroupName, CreateOpenApiInfo("FeatBit Open Api", "1.0"));
+
+        OpenApiInfo CreateOpenApiInfo(string title, string version, bool isDeprecated = false)
+        {
+            var info = new OpenApiInfo
+            {
+                Title = title,
+                Version = version,
+                Contact = new OpenApiContact
+                {
+                    Name = "FeatBit",
+                    Url = new Uri("https://github.com/featbit/featbit")
+                },
+                License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
+            };
+
+            if (isDeprecated)
+            {
+                info.Description += "<span style=\"color:red\"> This API version has been deprecated.</span>";
+            }
+
+            return info;
+        }
     }
 
     private static void DefineDocInclusionPredicate(SwaggerGenOptions options)
@@ -127,27 +147,5 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
                 Array.Empty<string>()
             }
         });
-    }
-
-    private static OpenApiInfo CreateOpenApiInfo(string title, string version, bool isDeprecated = false)
-    {
-        var info = new OpenApiInfo
-        {
-            Title = title,
-            Version = version,
-            Contact = new OpenApiContact
-            {
-                Name = "FeatBit",
-                Url = new Uri("https://github.com/featbit/featbit")
-            },
-            License = new OpenApiLicense { Name = "MIT", Url = new Uri("https://opensource.org/licenses/MIT") }
-        };
-
-        if (isDeprecated)
-        {
-            info.Description += "<span style=\"color:red\"> This API version has been deprecated.</span>";
-        }
-
-        return info;
     }
 }
