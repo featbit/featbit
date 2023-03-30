@@ -1,14 +1,13 @@
 using System.Text;
 using Api.Authentication;
 using Api.Authorization;
+using Api.Swagger;
 using Domain.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
-using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using OpenApiConstants = Api.Authentication.OpenApiConstants;
 
 namespace Api.Setup;
 
@@ -48,73 +47,7 @@ public static class ServicesRegister
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-        builder.Services.AddSwaggerGen(options =>
-        {
-            var xmlComments = new[] { "Api.xml", "Application.xml", "Domain.xml", "Infrastructure.xml" };
-            foreach (var xmlComment in xmlComments)
-            {
-                // integrate xml comments
-                options.IncludeXmlComments(
-                    Path.Combine(AppContext.BaseDirectory, xmlComment),
-                    includeControllerXmlComments: true
-                );
-            }
-
-            options.DocInclusionPredicate((docName, apiDesc) =>
-            {
-                if (docName != OpenApiConstants.ApiGroupName)
-                {
-                    // same logic with SwaggerGeneratorOptions.DefaultDocInclusionPredicate
-                    return apiDesc.GroupName == null || apiDesc.GroupName == docName;
-                }
-
-                if (!apiDesc.TryGetMethodInfo(out var methodInfo))
-                {
-                    return false;
-                }
-
-                // method with OpenApiAttribute
-                return methodInfo.GetCustomAttributes(typeof(OpenApiAttribute), false).Length > 0;
-            });
-
-            options.AddSecurityDefinition("JwtBearer", new OpenApiSecurityScheme
-            {
-                Type = SecuritySchemeType.Http,
-                Scheme = "Bearer",
-                BearerFormat = "JWT",
-                Description =
-                    "Standard Authorization header using the Bearer scheme (JWT). Example: \"Authorization: Bearer eyJ...\""
-            });
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "JwtBearer" }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-
-            options.AddSecurityDefinition("AccessToken", new OpenApiSecurityScheme
-            {
-                Type = SecuritySchemeType.ApiKey,
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Scheme = "AccessToken",
-                Description = "Use access token to access this API. Example: \"Authorization: api-MzQ...\""
-            });
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "AccessToken" }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        });
+        builder.Services.AddSwaggerGen();
 
         // health check dependencies
         builder.Services.AddHealthChecks();
