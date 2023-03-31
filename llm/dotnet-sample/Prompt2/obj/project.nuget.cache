@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "POaVjUuMeaKEtE5E525V9k45+LLwtdMGcgsITcshCOJzbtwr5l/EHl3ebDT6NC2eopRUw+DRl86DmOIUxD0QSw==",
+  "success": true,
+  "projectFilePath": "C:\\Code\\featbit\\featbit\\llm\\dotnet-sample\\Prompt2\\T2Prompt.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\hu-be\\.nuget\\packages\\featbit.serversdk\\1.1.0\\featbit.serversdk.1.1.0.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\system.io.pipelines\\6.0.0\\system.io.pipelines.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

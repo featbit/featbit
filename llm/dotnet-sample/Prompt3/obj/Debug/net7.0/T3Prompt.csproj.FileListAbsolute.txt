@@ -1,0 +1,5 @@
+C:\Code\featbit\featbit\llm\dotnet-sample\Prompt3\obj\Debug\net7.0\T3Prompt.csproj.AssemblyReference.cache
+C:\Code\featbit\featbit\llm\dotnet-sample\Prompt3\obj\Debug\net7.0\T3Prompt.GeneratedMSBuildEditorConfig.editorconfig
+C:\Code\featbit\featbit\llm\dotnet-sample\Prompt3\obj\Debug\net7.0\T3Prompt.AssemblyInfoInputs.cache
+C:\Code\featbit\featbit\llm\dotnet-sample\Prompt3\obj\Debug\net7.0\T3Prompt.AssemblyInfo.cs
+C:\Code\featbit\featbit\llm\dotnet-sample\Prompt3\obj\Debug\net7.0\T3Prompt.csproj.CoreCompileInputs.cache
