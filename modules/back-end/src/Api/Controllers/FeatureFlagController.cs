@@ -2,10 +2,13 @@ using Newtonsoft.Json;
 using System.Text.Json;
 using Api.Authentication;
 using Api.Authorization;
+using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
@@ -129,146 +132,10 @@ public class FeatureFlagController : ApiControllerBase
     /// Update a feature with the JSON patch method
     /// </summary>
     /// <remarks>
-    /// This is a http PATCH method to update a feature flag. Sample requests:
-    ///
-    ///     Update the name and description
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "replace",
-    ///        "path": "/name",
-    ///        "value": "name 1"
-    ///      },
-    ///      {
-    ///        "op": "replace",
-    ///        "path": "/description",
-    ///        "value": "description 1"
-    ///      }
-    ///     ]
-    ///
-    ///     Archive the flag
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "replace",
-    ///        "path": "/isArchived",
-    ///        "value": true
-    ///      }
-    ///     ]
-    ///
-    ///     Restore the flag
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "replace",
-    ///        "path": "/isArchived",
-    ///        "value": false
-    ///      }
-    ///     ]
-    ///
-    ///     Enable the flag
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "replace",
-    ///        "path": "/isEnabled",
-    ///        "value": true
-    ///      }
-    ///     ]
-    ///
-    ///     Disable the flag
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "replace",
-    ///        "path": "/isEnabled",
-    ///        "value": false
-    ///      }
-    ///     ]
-    ///
-    ///     Add a tag to the end
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "add",
-    ///        "path": "/tags/-",
-    ///        "value": "tag1"
-    ///      }
-    ///     ]
-    ///
-    ///     Remove the first tag
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "add",
-    ///        "path": "/tags/0"
-    ///      }
-    ///     ]
-    ///
-    ///     Add target user when the targeting variation has no users: make sure that variation id and user keyId exist
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "add",
-    ///        "path":  "/targetUsers/-",
-    ///        "value": {
-    ///          "variationId": "51dfeca4-c1b0-4aa4-aff1-851ddb1c180d",
-    ///          "keyIds": ["user1", "user2"]
-    ///        }
-    ///      }
-    ///     ]
-    ///
-    ///     Add target user to the frist variation
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "add",
-    ///        "path":  "/targetUsers/0/keyIds/0",
-    ///        "value": "user4"
-    ///      }
-    ///     ]
-    ///
-    ///     Remove the first rule
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "remove",
-    ///        "path": "/rules/0"
-    ///      }
-    ///     ]
-    ///
-    ///     Remove the first rule
-    ///     PATCH api/v1/envs/{{envId}}/feature-flags/{{flagKey}}
-    ///     [
-    ///      {
-    ///        "op": "remove",
-    ///        "path": "/rules/0",
-    ///        "value": {
-    ///          "id": "f5a5629e-523d-459e-b0b0-f4996e32842a",
-    ///          "name": "Rule 2",
-    ///          "dispatchKey": "name",
-    ///          "includedInExpt": false,
-    ///          "conditions": [{
-    ///            "property": "keyId",
-    ///            "op": "IsOneOf",
-    ///            "value": "[\"ja\",\"jb\",\"jc\"]"
-    ///          }],
-    ///         "variations": [{
-    ///           "id": "51dfeca4-c1b0-4aa4-aff1-851ddb1c180d",
-    ///           "rollout": [0,0.64],
-    ///           "exptRollout": 1
-    ///         },
-    ///         {
-    ///          "id": "990c319a-a21d-418b-a900-4fd4713ade29",
-    ///          "rollout": [0.64,1],
-    ///          "exptRollout": 1
-    ///         }]
-    ///        }
-    ///      }
-    ///     ]
-    /// 
+    /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
     /// </remarks>
     [OpenApi]
+    [SwaggerRequestExample(typeof(Operation), typeof(PatchFeatureFlagExamples))]
     [HttpPatch("{key}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
     {
