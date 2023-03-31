@@ -3,10 +3,7 @@ import argparse
 
 
 def main(apikey: str, code: str, ffKey: str, variation: str) -> None:
-    # print(f"API Key: {apikey}, Code: {code}, ffKey: {ffKey}, variation: {variation}")
-    # result = f"API Key: {apikey}, Code: {code}, ffKey: {ffKey}, variation: {variation}"
-
-    # python3 chat-completion-cli.py --apikey "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" --ffKey "ui-c" --variation "true" --code "public class UProm{public string UP(FbClient c){var user=FbUser.Builder(\"usage\").Name(\"usage\").Build();string total=\"0\",num1=\"3\",num2=\"12\";var ifC=c.BoolVariation(\"ui-c\",user,defaultValue:false);if(ifC==true){return total+num1+num2;}return total;}}"
+    # python3 chat-completion-cli.py --apikey "" --ffKey "ui-c" --variation "true" --codePath "/mnt/c/Code/featbit/featbit/llm/dotnet-sample/U1Prompt/Program.cs"
 
     openai.api_key = "" + apikey
     prompt = (
@@ -18,8 +15,6 @@ def main(apikey: str, code: str, ffKey: str, variation: str) -> None:
         + variation
         + "` return value. Also, maintain any other code not related to these feature flags. Ignore the defaultValue. Provide just the code, excluding any descriptions."
     )
-
-    # print(prompt)
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-0301",
@@ -86,8 +81,10 @@ def main(apikey: str, code: str, ffKey: str, variation: str) -> None:
             },
         ],
     )
-    print("Completion")
-    print(response.choices[0].message.content)
+
+    # print(response)
+    # remove ```csharp in` response.choices[0].message.content and ``` at the end of the string
+    print(response.choices[0].message.content.replace("```csharp", "")[:-3])
 
 
 if __name__ == "__main__":
@@ -97,7 +94,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--variation", required=True, help="Feature Flag valid return variation."
     )
-    parser.add_argument("--code", required=True, help="Code source.")
+    parser.add_argument("--codePath", required=True, help="Code source path.")
 
     args = parser.parse_args()
-    main(args.apikey, args.code, args.ffKey, args.variation)
+
+
+    # read file and give it to a string variable
+    with open(args.codePath, "r") as file:
+        codeSource = file.read()
+
+    main(args.apikey, codeSource, args.ffKey, args.variation)
+
