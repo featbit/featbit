@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Api.Setup;
@@ -16,6 +17,7 @@ public static class ServicesRegister
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
         // add services for controllers
+        builder.Services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvcOptions>();
         builder.Services.AddControllers();
 
         // make all generated paths URLs are lowercase
@@ -48,6 +50,7 @@ public static class ServicesRegister
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies
         builder.Services.AddHealthChecks();

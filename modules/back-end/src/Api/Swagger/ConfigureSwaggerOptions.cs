@@ -2,6 +2,7 @@ using Api.Authentication;
 using Asp.Versioning.ApiExplorer;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using OpenApiConstants = Api.Authentication.OpenApiConstants;
 
@@ -31,6 +32,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
         DefineDocInclusionPredicate(options);
         AddXmlComments(options);
         AddSecurity(options);
+        AddFilters(options);
     }
 
     private static void AddDocs(SwaggerGenOptions options, IApiVersionDescriptionProvider provider)
@@ -147,5 +149,10 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
                 Array.Empty<string>()
             }
         });
+    }
+
+    private static void AddFilters(SwaggerGenOptions options)
+    {
+        options.ExampleFilters();
     }
 }
