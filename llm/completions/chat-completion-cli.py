@@ -3,8 +3,6 @@ import argparse
 
 
 def main(apikey: str, code: str, ffKey: str, variation: str) -> None:
-    # python3 chat-completion-cli.py --apikey "" --ffKey "ui-c" --variation "true" --codePath "/mnt/c/Code/featbit/featbit/llm/dotnet-sample/U1Prompt/Program.cs"
-
     openai.api_key = "" + apikey
     prompt = (
         "```csharp "

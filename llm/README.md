@@ -1,62 +1,25 @@
 
-```shell
-export OPENAI_API_KEY=""
-```
 
-```shell
-openai api fine_tunes.create -t featbit-fine-tune-rm-ff-beta-001.jsonl -m davinci
-
-openai api fine_tunes.follow -i ft-ejfRvG4sYnmPYmLg60vXHVcX
-openai api fine_tunes.follow -i ft-i33ftlPCiNPXEVvaNEHRP9zH
-```
-
-```shell
-openai api fine_tunes.create -t featbit-fine-tune-rm-ff-beta-002.jsonl -m davinci
-
-openai api fine_tunes.follow -i ft-M4Vwpib2B1WeL6sJYkgJ0kfe
-```
-
-```shell
-openai api fine_tunes.create -t featbit-fine-tune-rm-ff-beta-003.jsonl -m davinci
-
-openai api fine_tunes.follow -i ft-gp7eYCwYfDvn3ld6TH8Fuplf
-```
-
-```shell
-openai api fine_tunes.create -t featbit-fine-tune-rm-ff-beta-004.jsonl -m davinci
-
-openai api fine_tunes.follow -i ft-cOe7Z5Fe18T336ibu0hYqV75
-```
-
-Search "What are tokens and how to count them?" in documentation to understand how token is consumed
-
-
-[https://openai.com/pricing](https://openai.com/pricing)
-
-| Model | Prompt | Completion |
-| --- | --- | --- |
-| 8K context | $0.03 / 1K tokens | $0.06 / 1K tokens |
-| 32K context | $0.06 / 1K tokens | $0.12 / 1K tokens |
-
-
-[https://platform.openai.com/tokenizer](https://platform.openai.com/tokenizer)
-
-
-We should give GPT power to self create fine-tune data.
 
 
 ```shell
-openai api fine_tunes.create -t featbit-fine-tune-rm-ff-beta-005.jsonl -m davinci --n_epochs 1
-
-openai api fine_tunes.follow -i ft-lROGdDlR0NJeMwCdUjSJOPlK
-openai api fine_tunes.cancel -i ft-lROGdDlR0NJeMwCdUjSJOPlK
-
-openai api fine_tunes.follow -i ft-5yu3Aj2RxdAvD7fkQefBtZID
+python3 chat-completion-cli.py --apikey "" --ffKey "ui-c" --variation "true" --codePath "/mnt/c/Code/featbit/featbit/llm/dotnet-sample/U1Prompt/Program.cs"
 ```
 
 
-
 ```shell
-openai api fine_tunes.create -t featbit-fine-tune-rm-ff-beta-001.jsonl -m text-davinci-003 --n_epochs 1
+export OPENAI_API_KEY="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"
+
+openai api fine_tunes.create -t featbit-fine-tune-model.jsonl -m davinci
+
+openai api fine_tunes.follow -i ft-7hlkp5mY4r6UoFIdPXFZn5HE
+
+openai api fine_tunes.results -i ft-featbit-2023-04-01-03-10-21
+
+prompt = (
+        "```csharp public class UProm{public string UP(FbClient c){var user=FbUser.Builder(\"usage\").Name(\"usage\").Build();string total=\"0\",num1=\"3\",num2=\"12\";var ifC=c.BoolVariation(\"ui-c\",user,defaultValue:false);if(ifC==true){return total+num1+num2;}return total;}}``` In the given code, eliminate the feature flags tied to the key `ui-c`, while preserving the code associated with the `true` return value. Also, maintain any other code not related to these feature flags. Ignore the defaultValue. Provide just the code, excluding any descriptions."
+    )
+
+openai api completions.create -m davinci:ft-featbit-2023-04-01-03-10-21 -p '```csharp public class UProm{public string UP(FbClient c){var user=FbUser.Builder("usage").Name("usage").Build();string total="0",num1="3",num2="12";var ifC=c.BoolVariation("ui-c",user,defaultValue:false);if(ifC==true){return total+num1+num2;}return total;}}``` In the given code, eliminate the feature flags tied to the key `ui-c`, while preserving the code associated with the `true` return value. Also, maintain any other code not related to these feature flags. Ignore the defaultValue. Provide just the code, excluding any descriptions.'
 ```
 
