@@ -67,7 +67,7 @@ export interface IFeatureFlag {
 }
 
 export interface IFeatureFlagTargeting {
-  id: string,
+  key: string,
   targetUsers: IVariationUser[],
   rules: IRule[],
   fallthrough: IFallthrough,
@@ -97,7 +97,7 @@ export enum VariationTypeEnum {
 }
 
 export interface ISettingPayload {
-  id: string,
+  key:string,
   name: string;
   description: string;
   isEnabled: boolean;
@@ -107,7 +107,7 @@ export interface ISettingPayload {
 }
 
 export interface IVariationsPayload {
-  id: string,
+  key: string,
   variationType: VariationTypeEnum,
   variations: IVariation[]
 }

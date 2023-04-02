@@ -7,7 +7,9 @@ namespace Application.FeatureFlags;
 
 public class UpdateTargeting : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public Guid EnvId { get; set; }
+    
+    public string Key { get; set; }
 
     public ICollection<TargetUser> TargetUsers { get; set; }
 
@@ -41,7 +43,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 
     public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
-        var flag = await _flagService.GetAsync(request.Id);
+        var flag = await _flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateTargeting(
             request.TargetUsers,
             request.Rules,

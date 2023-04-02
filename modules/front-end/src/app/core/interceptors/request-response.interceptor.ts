@@ -11,8 +11,9 @@ import {catchError, map} from 'rxjs/operators';
 import {Router} from "@angular/router";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {Injectable} from "@angular/core";
-import {IDENTITY_TOKEN} from "../../shared/utils/localstorage-keys";
+import { IDENTITY_TOKEN } from "../../shared/utils/localstorage-keys";
 import {IResponse} from "@shared/types";
+import { getCurrentOrganization } from "@utils/project-env";
 
 @Injectable()
 export class RequestResponseInterceptor implements HttpInterceptor {
@@ -23,8 +24,13 @@ export class RequestResponseInterceptor implements HttpInterceptor {
   ) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<unknown>> {
+    const token = localStorage.getItem(IDENTITY_TOKEN);
+    const currentOrgId = getCurrentOrganization()?.id ?? '';
+
     const authedReq = request.clone({
-      headers: request.headers.set('Authorization', 'Bearer ' + localStorage.getItem(IDENTITY_TOKEN))
+      headers: request.headers
+        .set('Authorization', `Bearer ${token}`)
+        .set('Organization', currentOrgId)
     });
 
     return next.handle(authedReq)

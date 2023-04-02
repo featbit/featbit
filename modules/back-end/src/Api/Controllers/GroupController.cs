@@ -3,7 +3,7 @@ using Application.Groups;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/organizations/{organizationId:guid}/groups")]
+[Route("api/v{version:apiVersion}/groups")]
 public class GroupController : ApiControllerBase
 {
     [HttpGet("{id:guid}")]
@@ -19,11 +19,11 @@ public class GroupController : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<ApiResponse<PagedResult<GroupVm>>> GetListAsync(Guid organizationId, [FromQuery] GroupFilter filter)
+    public async Task<ApiResponse<PagedResult<GroupVm>>> GetListAsync([FromQuery] GroupFilter filter)
     {
         var request = new GetGroupList
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             Filter = filter
         };
 
@@ -32,11 +32,11 @@ public class GroupController : ApiControllerBase
     }
 
     [HttpGet("is-name-used")]
-    public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid organizationId, string name)
+    public async Task<ApiResponse<bool>> IsNameUsedAsync(string name)
     {
         var request = new IsGroupNameUsed
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             Name = name
         };
 
@@ -45,9 +45,9 @@ public class GroupController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ApiResponse<GroupVm>> CreateAsync(Guid organizationId, CreateGroup request)
+    public async Task<ApiResponse<GroupVm>> CreateAsync(CreateGroup request)
     {
-        request.OrganizationId = organizationId;
+        request.OrganizationId = OrgId;
 
         var group = await Mediator.Send(request);
         return Ok(group);
@@ -76,13 +76,12 @@ public class GroupController : ApiControllerBase
 
     [HttpGet("{groupId:guid}/members")]
     public async Task<ApiResponse<PagedResult<GroupMemberVm>>> GetMembersAsync(
-        Guid organizationId,
         Guid groupId,
         [FromQuery] GroupMemberFilter filter)
     {
         var request = new GetGroupMember
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             GroupId = groupId,
             Filter = filter
         };
@@ -92,11 +91,11 @@ public class GroupController : ApiControllerBase
     }
 
     [HttpPut("{groupId:guid}/add-member/{memberId:guid}")]
-    public async Task<ApiResponse<bool>> AddMemberAsync(Guid organizationId, Guid groupId, Guid memberId)
+    public async Task<ApiResponse<bool>> AddMemberAsync(Guid groupId, Guid memberId)
     {
         var request = new AddGroupMember
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             GroupId = groupId,
             MemberId = memberId
         };
@@ -120,13 +119,12 @@ public class GroupController : ApiControllerBase
 
     [HttpGet("{groupId:guid}/policies")]
     public async Task<ApiResponse<PagedResult<GroupPolicyVm>>> GetPoliciesAsync(
-        Guid organizationId,
         Guid groupId,
         [FromQuery] GroupPolicyFilter filter)
     {
         var request = new GetGroupPolicy
         {
-            OrganizationId = organizationId,
+            OrganizationId = OrgId,
             GroupId = groupId,
             Filter = filter
         };

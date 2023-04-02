@@ -39,7 +39,6 @@ export class ProjectDrawerComponent implements OnInit {
     return this._project;
   }
 
-  @Input() currentOrganizationId: string;
   @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
 
@@ -104,31 +103,27 @@ export class ProjectDrawerComponent implements OnInit {
     const {name} = this.projectForm.value;
 
     if (this.isEditing) {
-      this.projectService
-        .putUpdateProject(this.currentOrganizationId, {name, id: this.project.id})
-        .subscribe(
-          updatedProject => {
-            this.isLoading = false;
-            this.close.emit({isEditing: true, project: updatedProject});
-            this.message.success($localize`:@@org.project.projectUpdateSuccess:Project successfully updated`);
-          },
-          _ => {
-            this.isLoading = false;
-          }
-        );
+      this.projectService.update(this.project.id, { name }).subscribe({
+        next: updatedProject => {
+          this.isLoading = false;
+          this.close.emit({isEditing: true, project: updatedProject});
+          this.message.success($localize`:@@org.project.projectUpdateSuccess:Project successfully updated`);
+        },
+        error: _ => {
+          this.isLoading = false;
+        }
+      });
     } else {
-      this.projectService
-        .postCreateProject(this.currentOrganizationId, {name})
-        .subscribe(
-          createdProject => {
-            this.isLoading = false;
-            this.close.emit({isEditing: false, project: createdProject});
-            this.message.success($localize`:@@org.project.projectCreateSuccess:Project successfully created`);
-          },
-          _ => {
-            this.isLoading = false;
-          }
-        );
+      this.projectService.create({ name }).subscribe({
+        next: createdProject => {
+          this.isLoading = false;
+          this.close.emit({isEditing: false, project: createdProject});
+          this.message.success($localize`:@@org.project.projectCreateSuccess:Project successfully created`);
+        },
+        error: _ => {
+          this.isLoading = false;
+        }
+      });
     }
   }
 }

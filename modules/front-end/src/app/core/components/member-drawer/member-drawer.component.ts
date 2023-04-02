@@ -17,7 +17,7 @@ export class MemberDrawerComponent {
 
   isPoliciesLoading = true;
   policyFilter: PolicyFilter = new PolicyFilter(null, 1, 50);
-  organizationId: string;
+
   policies: IPagedPolicy = {
     items: [],
     totalCount: 0
@@ -41,11 +41,6 @@ export class MemberDrawerComponent {
     private policyService: PolicyService,
     private groupService: GroupService
   ) {
-    this.organizationService.getCurrentOrganization().subscribe(() => {
-      const { organization } = this.organizationService.getCurrentOrganizationProjectEnv();
-      this.organizationId = organization.id;
-    });
-
     this.getPolicies();
     this.getGroups();
 
@@ -114,7 +109,7 @@ export class MemberDrawerComponent {
     const method = 'Email';
 
     this.isLoading = true;
-    this.organizationService.addUser({ organizationId: this.organizationId, method, email, policyIds, groupIds }).subscribe(
+    this.organizationService.addUser({ method, email, policyIds, groupIds }).subscribe(
       () => {
         this.isLoading = false;
         this.close.emit(true);

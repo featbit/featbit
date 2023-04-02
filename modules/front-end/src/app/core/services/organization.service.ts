@@ -18,28 +18,27 @@ export class OrganizationService {
     private projectService: ProjectService
   ) { }
 
-  getOrganizations(): Observable<any> {
+  getList(): Observable<any> {
     const url = this.baseUrl;
     return this.http.get(url);
   }
 
-  createOrganization(params: any): Observable<any> {
+  create(params: any): Observable<any> {
     const url = this.baseUrl;
     return this.http.post(url, params);
   }
 
-  updateOrganization(params: any): Observable<any> {
-    const url = `${this.baseUrl}/${params.id}`;
-    return this.http.put(url, params);
+  update(params: any): Observable<any> {
+    return this.http.put(this.baseUrl, params);
   }
 
   addUser(params: any): Observable<any> {
-    const url = `${this.baseUrl}/${params.organizationId}/add-user`;
+    const url = `${this.baseUrl}/add-user`;
     return this.http.post<boolean>(url, params);
   }
 
-  onboarding(organizationId: any, params: any): Observable<any> {
-    const url = `${this.baseUrl}/${organizationId}/onboarding`;
+  onboarding(params: any): Observable<any> {
+    const url = `${this.baseUrl}/onboarding`;
     return this.http.post(url, params);
   }
 
@@ -70,7 +69,7 @@ export class OrganizationService {
     return new Observable(observer => {
       const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
       if (this.organizations.length === 0 || !orgStr || JSON.parse(orgStr)?.plan === undefined) {
-        this.getOrganizations().subscribe(res => {
+        this.getList().subscribe(res => {
           this.organizations = res as IOrganization[];
           if (!orgStr) {
             const currentOrg = this.organizations[0];

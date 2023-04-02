@@ -9,7 +9,7 @@ public class DeleteFeatureFlag : IRequest<bool>
 {
     public Guid EnvId { get; set; }
 
-    public Guid Id { get; set; }
+    public string Key { get; set; }
 }
 
 public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
@@ -33,20 +33,20 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
 
     public async Task<bool> Handle(DeleteFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.Id);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         if (!flag.IsArchived)
         {
             throw new BusinessException(ErrorCodes.CannotDeleteUnArchivedFeatureFlag);
         }
 
-        await _service.DeleteAsync(request.Id);
+        await _service.DeleteAsync(flag.Id);
 
         // write audit log
         var auditLog = AuditLog.ForRemove(flag, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag delete notification
-        await _publisher.Publish(new OnFeatureFlagDeleted(request.EnvId, request.Id), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagDeleted(request.EnvId, flag.Id), cancellationToken);
 
         return true;
     }

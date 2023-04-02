@@ -1,7 +1,14 @@
+using Newtonsoft.Json;
+using System.Text.Json;
+using Api.Authentication;
 using Api.Authorization;
+using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
@@ -59,77 +66,106 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flag);
     }
 
-    [HttpPut("{id:guid}/archive")]
-    public async Task<ApiResponse<bool>> ArchiveAsync(Guid id)
+    [HttpPut("{key}/archive")]
+    public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, string key)
     {
         var request = new ArchiveFeatureFlag
         {
-            Id = id
+            EnvId = envId,
+            Key = key
         };
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}/restore")]
-    public async Task<ApiResponse<bool>> RestoreAsync(Guid id)
+    [HttpPut("{key}/restore")]
+    public async Task<ApiResponse<bool>> RestoreAsync(Guid envId, string key)
     {
         var request = new RestoreFeatureFlag
         {
-            Id = id
+            EnvId = envId,
+            Key = key
         };
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
-    [HttpDelete("{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
+    [HttpDelete("{key}")]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, string key)
     {
         var request = new DeleteFeatureFlag
         {
             EnvId = envId,
-            Id = id
+            Key = key
         };
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}/toggle")]
-    public async Task<ApiResponse<bool>> ToggleAsync(Guid id)
+    [HttpPut("{key}/toggle")]
+    public async Task<ApiResponse<bool>> ToggleAsync(Guid envId, string key)
     {
         var request = new ToggleFeatureFlag
         {
-            Id = id
+            EnvId = envId,
+            Key = key
         };
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}/settings")]
-    public async Task<ApiResponse<bool>> UpdateSettingAsync(Guid id, UpdateSetting request)
+    [HttpPut("{key}/settings")]
+    public async Task<ApiResponse<bool>> UpdateSettingAsync(Guid envId, string key, UpdateSetting request)
     {
-        request.Id = id;
+        request.Key = key;
+        request.EnvId = envId;
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}/variations")]
-    public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid id, UpdateVariations request)
+    /// <summary>
+    /// Update a feature with the JSON patch method
+    /// </summary>
+    /// <remarks>
+    /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
+    /// </remarks>
+    [OpenApi]
+    [SwaggerRequestExample(typeof(Operation), typeof(PatchFeatureFlagExamples))]
+    [HttpPatch("{key}")]
+    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
     {
-        request.Id = id;
+        var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
+        var request = new PatchFeatureFlag
+        {
+            EnvId = envId,
+            Key = key,
+            Patch = patch
+        };
+
+        var result = await Mediator.Send(request);
+        return result.Success ? Ok(true) : Error<bool>(result.Message);
+    }
+
+    [HttpPut("{key}/variations")]
+    public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
+    {
+        request.Key = key;
+        request.EnvId = envId;
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
-    [HttpPut("{id:guid}/targeting")]
-    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid id, UpdateTargeting request)
+    [HttpPut("{key}/targeting")]
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
     {
-        request.Id = id;
+        request.Key = key;
+        request.EnvId = envId;
 
         var success = await Mediator.Send(request);
         return Ok(success);
@@ -162,12 +198,13 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(tags);
     }
 
-    [HttpPut("{id:guid}/tags")]
-    public async Task<ApiResponse<bool>> SetTagsAsync(Guid id, ICollection<string> tags)
+    [HttpPut("{key}/tags")]
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, ICollection<string> tags)
     {
         var request = new SetTags
         {
-            Id = id,
+            EnvId = envId,
+            Key = key,
             Tags = tags
         };
 

@@ -36,8 +36,8 @@ export class FeatureFlagService {
     this.currentFeatureFlag = data;
   }
 
-  public toggleStatus(id: string): Observable<any> {
-    const url = `${this.baseUrl}/${id}/toggle`;
+  public toggleStatus(key: string): Observable<any> {
+    const url = `${this.baseUrl}/${key}/toggle`;
     return this.http.put(url, {})
   }
 
@@ -62,19 +62,19 @@ export class FeatureFlagService {
   }
 
   updateSetting(payload: ISettingPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.id}/settings`;
+    const url = `${this.baseUrl}/${payload.key}/settings`;
 
     return this.http.put<boolean>(url, payload);
   }
 
   updateVariations(payload: IVariationsPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.id}/variations`;
+    const url = `${this.baseUrl}/${payload.key}/variations`;
 
     return this.http.put<boolean>(url, payload);
   }
 
-  delete(id: string): Observable<boolean> {
-    const url = `${this.baseUrl}/${id}`;
+  delete(key: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}`;
 
     return this.http.delete<boolean>(url);
   }
@@ -95,18 +95,18 @@ export class FeatureFlagService {
     return this.http.post<ICopyToEnvResult>(url, flagIds);
   }
 
-  public archive(id: string): Observable<any> {
-    const url = `${this.baseUrl}/${id}/archive`;
+  public archive(key: string): Observable<any> {
+    const url = `${this.baseUrl}/${key}/archive`;
     return this.http.put(url, {});
   }
 
-  public restore(id: string): Observable<any> {
-    const url = `${this.baseUrl}/${id}/restore`;
+  public restore(key: string): Observable<any> {
+    const url = `${this.baseUrl}/${key}/restore`;
     return this.http.put(url, {});
   }
 
-  public update(payload: IFeatureFlagTargeting): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.id}/targeting`;
+  public updateTargeting(payload: IFeatureFlagTargeting): Observable<boolean> {
+    const url = `${this.baseUrl}/${payload.key}/targeting`;
     return this.http.put<boolean>(url, payload);
   }
 
@@ -116,7 +116,7 @@ export class FeatureFlagService {
   }
 
   setTags(flag: IFeatureFlag): Observable<boolean> {
-    const url = `${this.baseUrl}/${flag.id}/tags`;
+    const url = `${this.baseUrl}/${flag.key}/tags`;
     return this.http.put<boolean>(url, flag.tags);
   }
 

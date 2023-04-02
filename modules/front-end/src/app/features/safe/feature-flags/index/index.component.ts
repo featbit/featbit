@@ -83,7 +83,7 @@ export class IndexComponent implements OnInit {
     const curProjectId = currentProjectEnv.projectId;
     const curEnvId = currentProjectEnv.envId;
 
-    this.projectService.getProject(curAccountId, curProjectId)
+    this.projectService.get(curProjectId)
       .pipe(map(project => project.environments))
       .subscribe(envs => {
         this.envs = envs.filter(x => x.id !== curEnvId);
@@ -308,7 +308,7 @@ export class IndexComponent implements OnInit {
         `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
     }
 
-    this.featureFlagService.toggleStatus(data.id)
+    this.featureFlagService.toggleStatus(data.key)
       .subscribe(_ => {
         this.msg.success(msg);
         data.isEnabled = !data.isEnabled;
@@ -331,7 +331,7 @@ export class IndexComponent implements OnInit {
       nzCentered: true,
       nzClassName: 'information-modal-dialog',
       nzOnOk: () => {
-        this.featureFlagService.archive(flag.id).subscribe({
+        this.featureFlagService.archive(flag.key).subscribe({
             next: () => {
               this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
               this.onSearch();
@@ -344,7 +344,7 @@ export class IndexComponent implements OnInit {
   }
 
   restore(flag: IFeatureFlag) {
-    this.featureFlagService.restore(flag.id).subscribe({
+    this.featureFlagService.restore(flag.key).subscribe({
       next: () => {
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
         this.onSearch();
@@ -354,7 +354,7 @@ export class IndexComponent implements OnInit {
   }
 
   delete(flag: IFeatureFlag) {
-    this.featureFlagService.delete(flag.id).subscribe({
+    this.featureFlagService.delete(flag.key).subscribe({
       next: () => {
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
         this.onSearch();

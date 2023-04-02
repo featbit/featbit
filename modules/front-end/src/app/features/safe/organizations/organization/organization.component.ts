@@ -85,19 +85,19 @@ export class OrganizationComponent implements OnInit {
     const {id, initialized} = this.currentOrganization;
 
     this.isLoading = true;
-    this.organizationService.updateOrganization({name, id})
+    this.organizationService.update({ name })
       .pipe()
-      .subscribe(
-        () => {
+      .subscribe({
+        next: () => {
           this.isLoading = false;
           this.message.success($localize`:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
           this.organizationService.setOrganization({id, initialized, name});
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
-        () => {
+        error: () => {
           this.isLoading = false;
         }
-      );
+      });
   }
 
 }

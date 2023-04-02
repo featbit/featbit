@@ -5,7 +5,9 @@ namespace Application.FeatureFlags;
 
 public class ArchiveFeatureFlag : IRequest<bool>
 {
-    public Guid Id { get; set; }
+    public Guid EnvId { get; set; }
+    
+    public string Key { get; set; }
 }
 
 public class ArchiveFeatureFlagHandler : IRequestHandler<ArchiveFeatureFlag, bool>
@@ -29,7 +31,7 @@ public class ArchiveFeatureFlagHandler : IRequestHandler<ArchiveFeatureFlag, boo
 
     public async Task<bool> Handle(ArchiveFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.Id);
+        var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Archive(_currentUser.Id);
         await _service.UpdateAsync(flag);
 
