@@ -1,7 +1,4 @@
-using System.Text.Json;
-using Domain.EndUsers;
 using Domain.Messages;
-using Domain.Utils;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -11,59 +8,65 @@ namespace Infrastructure.Redis;
 public partial class RedisMessageConsumer : BackgroundService
 {
     private readonly IConnectionMultiplexer _redis;
-    private readonly IEndUserService _service;
+    private readonly Dictionary<string, IMessageHandler> _handlers;
     private readonly ILogger<RedisMessageConsumer> _logger;
 
     public RedisMessageConsumer(
         IConnectionMultiplexer redis,
-        IEndUserService service,
+        IEnumerable<IMessageHandler> handlers,
         ILogger<RedisMessageConsumer> logger)
     {
         _redis = redis;
-        _service = service;
+        _handlers = handlers.ToDictionary(x => x.Topic, x => x);
         _logger = logger;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return Task.Factory.StartNew(
-            async () => { await StartConsumerLoop(stoppingToken); },
-            TaskCreationOptions.LongRunning
-        );
+        var tasks = new[]
+        {
+            ConsumeAsync(Topics.EndUser, stoppingToken),
+            ConsumeAsync(Topics.Insights, stoppingToken)
+        };
+
+        return Task.WhenAll(tasks);
     }
 
-    private async Task StartConsumerLoop(CancellationToken cancellationToken)
+    public async Task ConsumeAsync(string topic, CancellationToken cancellationToken)
     {
         var db = _redis.GetDatabase();
-        var message = string.Empty;
 
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                var messages = await db.ListLeftPopAsync(Topics.EndUser, 100);
-                if (messages.Length == 0)
+                var rawMessages = await db.ListLeftPopAsync(topic, 100);
+                if (rawMessages.Length == 0)
                 {
                     // If there is no message, delay consumer by 1 second
                     await Task.Delay(1000, cancellationToken);
                     return;
                 }
 
-                for (var i = 0; i < messages.Length; i++)
+                if (!_handlers.TryGetValue(topic, out var handler))
                 {
-                    message = messages[i].ToString();
+                    Log.NoHandlerForTopic(_logger, topic);
+                    return;
+                }
 
-                    var endUserMessage =
-                        JsonSerializer.Deserialize<EndUserMessage>(message, ReusableJsonSerializerOptions.Web);
-                    if (endUserMessage == null)
+                for (var i = 0; i < rawMessages.Length; i++)
+                {
+                    var message = rawMessages[i].ToString();
+
+                    try
                     {
-                        continue;
+                        await handler.HandleAsync(message, cancellationToken);
+                        Log.MessageHandled(_logger, message);
                     }
-
-                    // upsert endUser and it's properties
-                    var endUser = endUserMessage.AsEndUser();
-                    await _service.UpsertAsync(endUser);
-                    await _service.AddNewPropertiesAsync(endUser);
+                    catch (Exception ex)
+                    {
+                        Log.ErrorConsumeMessage(_logger, message, ex);
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -72,7 +75,7 @@ public partial class RedisMessageConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                Log.ErrorConsumeMessage(_logger, message, ex);
+                Log.ErrorConsumeTopic(_logger, topic, ex);
             }
         }
     }
