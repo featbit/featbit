@@ -40,6 +40,7 @@ public partial class RedisMessageConsumer : BackgroundService
         {
             try
             {
+                // LPop json message from topic list
                 var rawMessages = await db.ListLeftPopAsync(topic, 100);
                 if (rawMessages.Length == 0)
                 {

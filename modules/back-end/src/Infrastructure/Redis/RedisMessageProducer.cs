@@ -22,12 +22,11 @@ public partial class RedisMessageProducer : IMessageProducer
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
+
+            // Publish message to topic
             await _database.PublishAsync(topic, jsonMessage);
 
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                Log.MessagePublished(_logger, jsonMessage);
-            }
+            Log.MessagePublished(_logger, jsonMessage);
         }
         catch (Exception ex)
         {
