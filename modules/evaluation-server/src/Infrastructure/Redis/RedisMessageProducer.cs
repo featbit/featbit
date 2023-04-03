@@ -21,6 +21,8 @@ public partial class RedisMessageProducer : IMqMessageProducer
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
+
+            // RPush json message to topic list
             await _database.ListRightPushAsync(topic, jsonMessage);
 
             Log.MessagePublished(_logger, jsonMessage);

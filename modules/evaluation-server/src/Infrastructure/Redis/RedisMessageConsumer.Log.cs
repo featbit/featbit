@@ -12,7 +12,7 @@ public partial class RedisMessageConsumer
         [LoggerMessage(2, LogLevel.Debug, "Message {Message} was handled successfully.", EventName = "MessageHandled")]
         public static partial void MessageHandled(ILogger logger, string message);
 
-        [LoggerMessage(3, LogLevel.Error, "Exception occurred when consume message: {Message}.", EventName = "ErrorConsumeMessage")]
+        [LoggerMessage(3, LogLevel.Error, "Exception occurred while consuming message: {Message}.", EventName = "ErrorConsumeMessage")]
         public static partial void ErrorConsumeMessage(ILogger logger, string message, Exception exception);
     }
 }
