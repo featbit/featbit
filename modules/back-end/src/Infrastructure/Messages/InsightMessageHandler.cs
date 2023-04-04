@@ -63,15 +63,25 @@ public class InsightMessageHandler : IMessageHandler, IDisposable
             {
                 if (_eventsBuffer.Count == 0)
                 {
+                    // If there are no events in the buffer, continue to wait for the next tick.
                     continue;
                 }
 
-                // get snapshots and clear buffer
+                // Get snapshots of the events and clear the buffer.
                 var snapshots = _eventsBuffer.ToArray();
                 _eventsBuffer.Clear();
 
-                await _events.InsertManyAsync(snapshots);
-                _logger.LogDebug("{Count} insight events has been handled", snapshots.Length);
+                // Split each snapshot into groups of 100
+                foreach (var chunked in snapshots.Chunk(100))
+                {
+                    await _events.InsertManyAsync(chunked);
+                }
+
+                // Check log level here to avoid unnecessary memory allocation
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug("{Count} insight events has been handled", snapshots.Length);
+                }
             }
         }
         catch (Exception ex)
