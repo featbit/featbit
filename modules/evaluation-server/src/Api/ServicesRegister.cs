@@ -59,35 +59,55 @@ public static class ServicesRegister
         services.AddSingleton<TargetRuleMatcher>();
         services.AddSingleton<EvaluationService>();
 
-        // for integration tests, use faked services 
         if (builder.Environment.IsEnvironment("IntegrationTests"))
         {
-            services.AddTransient<ICachePopulatingService, FakeCachePopulatingService>();
-            services.AddTransient<ICacheService, FakeCacheService>();
-            services.AddSingleton<IMqMessageProducer, FakeMessageProducer>();
+            // for integration tests, use faked services 
+            AddFakeMessagingServices(services);
         }
         else
         {
-            // mongodb (used to populating redis data)
-            services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
-            services.AddSingleton<MongoDbClient>();
-
-            // redis
-            services.AddSingleton<IConnectionMultiplexer>(
-                _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
-            );
-            services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
-            services.AddSingleton<ICacheService, RedisService>();
-
-            // kafka message producer & consumer
-            services.AddSingleton<IMqMessageProducer, KafkaMessageProducer>();
-            services.AddHostedService<KafkaMessageConsumer>();
-
-            // message handlers
-            services.AddSingleton<IMqMessageHandler, FeatureFlagChangeMessageHandler>();
-            services.AddSingleton<IMqMessageHandler, SegmentChangeMessageHandler>();
+            AddMessagingServices(services, configuration);
         }
 
         return builder;
+    }
+
+    private static void AddFakeMessagingServices(IServiceCollection services)
+    {
+        services.AddTransient<ICachePopulatingService, FakeCachePopulatingService>();
+        services.AddTransient<ICacheService, FakeCacheService>();
+        services.AddSingleton<IMqMessageProducer, FakeMessageProducer>();
+    }
+
+    private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
+    {
+        // mongodb (used to populating redis data)
+        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
+        services.AddSingleton<MongoDbClient>();
+
+        // redis
+        services.AddSingleton<IConnectionMultiplexer>(
+            _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
+        );
+        services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
+        services.AddSingleton<ICacheService, RedisService>();
+
+        // message handlers
+        services.AddSingleton<IMqMessageHandler, FeatureFlagChangeMessageHandler>();
+        services.AddSingleton<IMqMessageHandler, SegmentChangeMessageHandler>();
+
+        var lightVersion = configuration["LIGHT_VERSION"];
+        if (lightVersion == bool.TrueString)
+        {
+            // add redis message producer & consumer
+            services.AddSingleton<IMqMessageProducer, RedisMessageProducer>();
+            services.AddHostedService<RedisMessageConsumer>();
+        }
+        else
+        {
+            // add kafka message producer & consumer
+            services.AddSingleton<IMqMessageProducer, KafkaMessageProducer>();
+            services.AddHostedService<KafkaMessageConsumer>();
+        }
     }
 }

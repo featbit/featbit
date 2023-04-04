@@ -12,9 +12,11 @@ using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
 using Infrastructure.Kafka;
+using Infrastructure.Messages;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
+using Infrastructure.Redis;
 using Infrastructure.Resources;
 using Infrastructure.Segments;
 using Infrastructure.Targeting;
@@ -22,6 +24,7 @@ using Infrastructure.Triggers;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using StackExchange.Redis;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -37,16 +40,13 @@ public static class ConfigureServices
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
 
-        // message producer
-        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+        // messaging services
+        AddMessagingServices(services, configuration);
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserStore, MongoDbUserStore>();
         services.AddScoped<IIdentityService, IdentityService>();
-
-        // hosted services
-        services.AddHostedService<KafkaMessageConsumer>();
 
         // typed http clients
         services.AddHttpClient<IOlapService, OlapService>(httpClient =>
@@ -75,5 +75,27 @@ public static class ConfigureServices
         services.AddTransient<IAccessTokenService, AccessTokenService>();
 
         return services;
+    }
+
+    private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
+    {
+        var lightVersion = configuration["LIGHT_VERSION"];
+        if (lightVersion == bool.TrueString)
+        {
+            services.AddSingleton<IConnectionMultiplexer>(
+                _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
+            );
+
+            services.AddSingleton<IMessageProducer, RedisMessageProducer>();
+
+            services.AddTransient<IMessageHandler, EndUserMessageHandler>();
+            services.AddTransient<IMessageHandler, InsightMessageHandler>();
+            services.AddHostedService<RedisMessageConsumer>();
+        }
+        else
+        {
+            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+            services.AddHostedService<KafkaMessageConsumer>();
+        }
     }
 }
