@@ -3,5 +3,7 @@
 **/.DS_Store
 /infra/mongodb/data/db/
 /infra/redis/data/
-/.vscode
 benchmark/k6-scripts/test-results/
+
+
+.vscode/
