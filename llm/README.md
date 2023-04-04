@@ -27,7 +27,7 @@ Parameters:
 You can run the Python file using the command below:
 
 ```shell
-python3 chat-completion-cli.py --apikey "fake-bBGB03xcxUQi891GdeqFakeqvOCeTMsOr9rE0M" --ffKey "language" --variation "en-us" --codePath "/mnt/c/Code/featbit/featbit/llm/dotnet-sample/U1Prompt/Program.cs"
+python3 chat-completion-cli.py --apikey "your-openapi-key" --ffKey "language" --variation "en-us" --codePath "/mnt/c/Code/featbit/featbit/llm/dotnet-sample/U1Prompt/Program.cs"
 ```
 Here are two examples of what the execution process mentioned above looks like:
 

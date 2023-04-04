@@ -5,5 +5,5 @@
 /infra/redis/data/
 benchmark/k6-scripts/test-results/
 
-
+# Ignore VS Code files
 .vscode/
