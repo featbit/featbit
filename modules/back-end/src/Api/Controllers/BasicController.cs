@@ -33,7 +33,6 @@ public class BasicController : ApiControllerBase
     ///     GET api/v1/basic/string
     /// 
     /// </remarks>
-    [OpenApi]
     [HttpGet("string"), MapToApiVersion(1.0)]
     public ApiResponse<string> GetStringV1()
     {
@@ -49,7 +48,6 @@ public class BasicController : ApiControllerBase
     ///     GET api/v2/basic/string
     /// 
     /// </remarks>
-    [OpenApi]
     [HttpGet("string"), MapToApiVersion(2.0)]
     public ApiResponse<string> GetStringV2()
     {
@@ -70,7 +68,6 @@ public class BasicController : ApiControllerBase
     ///     }
     /// 
     /// </remarks>
-    [OpenApi]
     [HttpPost("bar"), MapToApiVersion(2.0)]
     public ApiResponse<Bar> CreateBar(Bar bar)
     {
