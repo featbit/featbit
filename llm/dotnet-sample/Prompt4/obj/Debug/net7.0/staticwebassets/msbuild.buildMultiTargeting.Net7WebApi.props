@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\Net7WebApi.props" />
-</Project>
