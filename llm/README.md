@@ -13,23 +13,26 @@ This folder of FeatBit's main repository contains the executive files you can te
 
 ## Run remove-feature-flag chat-completion cli
 
-In folder `remove-feature-flags`, you see a file `chat-completion-cli.py`. This file is a simple Python program which call the OpenAI's ChatCompletion method to tell ChatGPT-3 to remove dead feature flags and related code.
+In the remove-feature-flags folder, you'll find a file named chat-completion-cli.py. This is a simple Python program that calls OpenAI's ChatCompletion method, instructing ChatGPT-3 to remove dead feature flags and any associated code.
 
-You can consider that `chat-completion-cli.py` is a prompt service, you call run the python file with pre-requested parameters. This file will prompt a command to the ChatGPT.
+Think of chat-completion-cli.py as a prompt service. You can execute the Python file with the required parameters, and it will send a command to ChatGPT.
 
 Parameters:
 
-- `apikey`, your API Key to cal ChatGPT API service.
-- `ffKey`, the feature flag key that you want to remove in your project.
-- `variation`, the feature flag return value that you want the program keep the code related to this return value.
-- `codePath`, the file path that you want to scan the code and where you want to remove dead feature flags.
+- `apikey`: Your API key for accessing the ChatGPT API service.
+- `ffKey`: The feature flag you wish to remove from your project.
+- `variation`: The feature flag return value corresponding to the code you want to retain.
+- `codePath`: The file path of the code you want to scan and where you want to remove dead feature flags.
 
-You can run the python file with command below:
+You can run the Python file using the command below:
 
 ```shell
 python3 chat-completion-cli.py --apikey "fake-bBGB03xcxUQi891GdeqFakeqvOCeTMsOr9rE0M" --ffKey "language" --variation "en-us" --codePath "/mnt/c/Code/featbit/featbit/llm/dotnet-sample/U1Prompt/Program.cs"
 ```
-Then you will get a execution result like below:
+Here are two examples of what the execution process mentioned above looks like:
 
+![image](https://user-images.githubusercontent.com/68597908/229683743-00836ef5-f251-4e5f-9da4-120c68a28057.png)
+
+![image](https://user-images.githubusercontent.com/68597908/229683788-a791581d-fd83-4c6b-93ed-56d7aee406d0.png)
 
 
