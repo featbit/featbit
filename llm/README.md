@@ -36,3 +36,31 @@ Here are two examples of what the execution process mentioned above looks like:
 ![image](https://user-images.githubusercontent.com/68597908/229683788-a791581d-fd83-4c6b-93ed-56d7aee406d0.png)
 
 
+
+You can refer to the `remove-feature-flags/chat-completion-cli.py` source code to see how I wrote the program. Additionally, you can explore sample-data projects for fine-tuning in another [FeatBit's GitHub repository](https://github.com/featbit/chatgpt-fine-tune).
+
+### Addressing feature flag technical debt in other languages
+
+I planned to make it possible for all other language framework, I think I need more community support for all of that.
+
+I have plans to expand this functionality to other language frameworks, but I will need more support from the community to achieve this goal.
+
+
+
+## Optimal Developer Tools Onboarding Experience
+
+Leveraging ChatGPT's code completion and code insertion capabilities, developers can effortlessly initialize FeatBit in their existing projects with just a simple prompt. Even without fine-tuning, you can utilize chat-completion to have GPT-4 read the GitHub documentation and learn how to use FeatBit's SDK.
+
+The image below illustrates the trial steps:
+
+1. I input the FeatBit .NET SDK documentation into ChatGPT-4.
+2. I copy the code source from an ASP.NET Core 7's Program.cs file.
+3. Instruct GPT-4 to initialize FeatBit's .NET SDK within the code source.
+3. GPT-4 returned the modified code after initialization.
+
+
+
+
+## Contribution
+
+If you're interested in what I'm doing, please join our [online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
