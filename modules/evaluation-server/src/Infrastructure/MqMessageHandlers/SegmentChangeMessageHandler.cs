@@ -3,7 +3,6 @@ using Domain.Core;
 using Domain.Protocol;
 using Domain.Services;
 using Domain.WebSockets;
-using Infrastructure.Caches;
 
 namespace Infrastructure.MqMessageHandlers;
 
@@ -11,16 +10,11 @@ public class SegmentChangeMessageHandler : IMqMessageHandler
 {
     public string Topic => Topics.SegmentChange;
 
-    private readonly ICacheService _cacheService;
     private readonly IConnectionManager _connectionManager;
     private readonly IDataSyncService _dataSyncService;
 
-    public SegmentChangeMessageHandler(
-        ICacheService cacheService,
-        IConnectionManager connectionManager,
-        IDataSyncService dataSyncService)
+    public SegmentChangeMessageHandler(IConnectionManager connectionManager, IDataSyncService dataSyncService)
     {
-        _cacheService = cacheService;
         _connectionManager = connectionManager;
         _dataSyncService = dataSyncService;
     }
@@ -34,9 +28,6 @@ public class SegmentChangeMessageHandler : IMqMessageHandler
         {
             throw new InvalidDataException("invalid segment change data");
         }
-
-        // upsert redis
-        await _cacheService.UpsertSegmentAsync(segment);
 
         // push change message to sdk
         var envId = segment.GetProperty("envId").GetGuid();
