@@ -17,7 +17,7 @@ public class RedisService : ICacheService
         // get flag keys
         var index = RedisKeys.FlagIndex(envId);
         var ids = await _redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
-        var keys = ids.Select(id => RedisKeys.FeatureFlag(id!));
+        var keys = ids.Select(id => RedisKeys.Flag(id!));
 
         // get flags
         var tasks = keys.Select(key => _redis.StringGetAsync(key));
@@ -29,7 +29,7 @@ public class RedisService : ICacheService
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
     {
-        var keys = ids.Select(RedisKeys.FeatureFlag);
+        var keys = ids.Select(RedisKeys.Flag);
 
         var tasks = keys.Select(key => _redis.StringGetAsync(key));
         var values = await Task.WhenAll(tasks);
