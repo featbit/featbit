@@ -24,10 +24,10 @@ public class InsightMessageHandler : IMessageHandler, IDisposable
         _events = mongodb.CollectionOf("Events");
         _eventsBuffer = new List<BsonDocument>();
 
+        _logger = logger;
+
         _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         _flushWorker = FlushEventsAsync();
-
-        _logger = logger;
     }
 
     public Task HandleAsync(string message, CancellationToken cancellationToken)

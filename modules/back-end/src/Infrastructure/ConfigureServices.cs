@@ -46,6 +46,7 @@ public static class ConfigureServices
             _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
         );
         services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
+        services.AddTransient<ICacheService, RedisCacheService>();
 
         // populating cache
         services.AddHostedService<CachePopulatingHostedService>();
