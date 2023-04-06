@@ -52,9 +52,6 @@ public static class ServicesRegister
         services.AddTransient<IMessageHandler, EchoMessageHandler>();
         services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
-        // cache populating service
-        services.AddHostedService<CachePopulatingHostedService>();
-
         // evaluation related services
         services.AddSingleton<TargetRuleMatcher>();
         services.AddSingleton<EvaluationService>();
@@ -74,7 +71,6 @@ public static class ServicesRegister
 
     private static void AddFakeMessagingServices(IServiceCollection services)
     {
-        services.AddTransient<ICachePopulatingService, FakeCachePopulatingService>();
         services.AddTransient<ICacheService, FakeCacheService>();
         services.AddSingleton<IMqMessageProducer, FakeMessageProducer>();
     }
@@ -89,7 +85,6 @@ public static class ServicesRegister
         services.AddSingleton<IConnectionMultiplexer>(
             _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
         );
-        services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
         services.AddSingleton<ICacheService, RedisService>();
 
         // message handlers
