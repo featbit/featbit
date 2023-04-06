@@ -1,3 +1,4 @@
+using Application.Caches;
 using Domain.Messages;
 using Domain.Users;
 using Infrastructure.AccessTokens;
@@ -39,6 +40,15 @@ public static class ConfigureServices
         // mongodb
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
+
+        // redis
+        services.AddSingleton<IConnectionMultiplexer>(
+            _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
+        );
+        services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
+
+        // populating cache
+        services.AddHostedService<CachePopulatingHostedService>();
 
         // messaging services
         AddMessagingServices(services, configuration);
@@ -82,10 +92,6 @@ public static class ConfigureServices
         var lightVersion = configuration["LIGHT_VERSION"];
         if (lightVersion == bool.TrueString)
         {
-            services.AddSingleton<IConnectionMultiplexer>(
-                _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
-            );
-
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
 
             services.AddTransient<IMessageHandler, EndUserMessageHandler>();
