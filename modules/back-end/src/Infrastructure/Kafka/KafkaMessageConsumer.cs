@@ -53,6 +53,7 @@ public partial class KafkaMessageConsumer : BackgroundService
     private async Task StartConsumerLoop(CancellationToken cancellationToken)
     {
         _consumer.Subscribe(Topics.EndUser);
+        _logger.LogInformation("Start consuming {Topic} messages...", Topics.EndUser);
 
         ConsumeResult<Null, string>? consumeResult = null;
         var message = string.Empty;

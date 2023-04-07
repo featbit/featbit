@@ -35,6 +35,7 @@ public partial class RedisMessageConsumer : BackgroundService
     {
         var db = _redis.GetDatabase();
 
+        _logger.LogInformation("Start consuming {Topic} messages...", topic);
         while (!cancellationToken.IsCancellationRequested)
         {
             try
