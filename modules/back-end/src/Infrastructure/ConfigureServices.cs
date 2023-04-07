@@ -88,7 +88,7 @@ public static class ConfigureServices
     private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
     {
         var lightVersion = configuration["LIGHT_VERSION"];
-        if (lightVersion == bool.TrueString)
+        if (lightVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
 

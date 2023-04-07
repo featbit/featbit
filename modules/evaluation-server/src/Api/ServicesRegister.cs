@@ -92,7 +92,7 @@ public static class ServicesRegister
         services.AddSingleton<IMqMessageHandler, SegmentChangeMessageHandler>();
 
         var lightVersion = configuration["LIGHT_VERSION"];
-        if (lightVersion == bool.TrueString)
+        if (lightVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {
             // add redis message producer & consumer
             services.AddSingleton<IMqMessageProducer, RedisMessageProducer>();
