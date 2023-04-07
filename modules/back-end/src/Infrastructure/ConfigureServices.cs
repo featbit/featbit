@@ -25,7 +25,6 @@ using Infrastructure.Triggers;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using StackExchange.Redis;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -42,9 +41,7 @@ public static class ConfigureServices
         services.AddSingleton<MongoDbClient>();
 
         // redis
-        services.AddSingleton<IConnectionMultiplexer>(
-            _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
-        );
+        services.AddSingleton<IRedisClient, DefaultRedisClient>();
         services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
         services.AddTransient<ICacheService, RedisCacheService>();
 

@@ -1,18 +1,17 @@
 using Domain.Messages;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
 
 public partial class RedisMessageConsumer : BackgroundService
 {
-    private readonly IConnectionMultiplexer _redis;
+    private readonly IRedisClient _redis;
     private readonly Dictionary<string, IMessageHandler> _handlers;
     private readonly ILogger<RedisMessageConsumer> _logger;
 
     public RedisMessageConsumer(
-        IConnectionMultiplexer redis,
+        IRedisClient redis,
         IEnumerable<IMessageHandler> handlers,
         ILogger<RedisMessageConsumer> logger)
     {
