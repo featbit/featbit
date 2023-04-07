@@ -33,18 +33,24 @@ public class InsightMessageHandler : IMessageHandler, IDisposable
     {
         var jsonNode = JsonNode.Parse(message)!.AsObject();
 
-        // replace uuid with _id
+        // Replace uuid with _id
         jsonNode["_id"] = jsonNode["uuid"]!.GetValue<string>();
         jsonNode.Remove("uuid");
 
-        // properties json string to object
+        // Convert properties JSON string to object
         jsonNode["properties"] = JsonNode.Parse(jsonNode["properties"]!.GetValue<string>());
 
-        // timestamp to utc-datetime
+        // Convert timestamp to UTC DateTime
         var timestampInMilliseconds = jsonNode["timestamp"]!.GetValue<long>() / 1000;
-        jsonNode["timestamp"] = DateTimeOffset.FromUnixTimeMilliseconds(timestampInMilliseconds).UtcDateTime;
+        var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampInMilliseconds).UtcDateTime;
+        jsonNode["timestamp"] = timestamp;
 
-        var bsonDocument = jsonNode.ToBsonDocument();
+        // Convert JSON object to BSON document
+        var bsonDocument = BsonDocument.Parse(jsonNode.ToJsonString());
+        // Change timestamp type to DateTime, otherwise it will be String
+        bsonDocument["timestamp"] = timestamp;
+
+        // Add event to buffer
         _eventsBuffer.Add(bsonDocument);
 
         return Task.CompletedTask;
