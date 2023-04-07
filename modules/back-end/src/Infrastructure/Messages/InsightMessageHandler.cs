@@ -3,7 +3,6 @@ using Domain.Messages;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 
 namespace Infrastructure.Messages;
 
@@ -32,24 +31,21 @@ public class InsightMessageHandler : IMessageHandler, IDisposable
 
     public Task HandleAsync(string message, CancellationToken cancellationToken)
     {
-        try
-        {
-            var jsonNode = JsonNode.Parse(message)!.AsObject();
+        var jsonNode = JsonNode.Parse(message)!.AsObject();
 
-            // replace uuid with _id
-            jsonNode["_id"] = jsonNode["uuid"];
-            jsonNode.Remove("uuid");
+        // replace uuid with _id
+        jsonNode["_id"] = jsonNode["uuid"]!.GetValue<string>();
+        jsonNode.Remove("uuid");
 
-            var timestampInMilliseconds = jsonNode["timestamp"]!.GetValue<long>() / 1000;
-            jsonNode["timestamp"] = DateTimeOffset.FromUnixTimeMilliseconds(timestampInMilliseconds).UtcDateTime;
+        // properties json string to object
+        jsonNode["properties"] = JsonNode.Parse(jsonNode["properties"]!.GetValue<string>());
 
-            var bsonDocument = jsonNode.ToBsonDocument();
-            _eventsBuffer.Add(bsonDocument);
-        }
-        catch (JsonException)
-        {
-            // ignore invalid json
-        }
+        // timestamp to utc-datetime
+        var timestampInMilliseconds = jsonNode["timestamp"]!.GetValue<long>() / 1000;
+        jsonNode["timestamp"] = DateTimeOffset.FromUnixTimeMilliseconds(timestampInMilliseconds).UtcDateTime;
+
+        var bsonDocument = jsonNode.ToBsonDocument();
+        _eventsBuffer.Add(bsonDocument);
 
         return Task.CompletedTask;
     }

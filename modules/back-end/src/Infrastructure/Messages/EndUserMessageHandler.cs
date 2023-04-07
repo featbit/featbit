@@ -20,13 +20,9 @@ public class EndUserMessageHandler : IMessageHandler
     {
         var endUserMessage =
             JsonSerializer.Deserialize<EndUserMessage>(message, ReusableJsonSerializerOptions.Web);
-        if (endUserMessage == null)
-        {
-            return;
-        }
 
         // upsert endUser and it's properties
-        var endUser = endUserMessage.AsEndUser();
+        var endUser = endUserMessage!.AsEndUser();
         await _service.UpsertAsync(endUser);
         await _service.AddNewPropertiesAsync(endUser);
     }
