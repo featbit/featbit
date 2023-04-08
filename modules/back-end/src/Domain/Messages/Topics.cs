@@ -1,6 +1,6 @@
 namespace Domain.Messages;
 
-public class Topics
+public static class Topics
 {
     public const string EndUser = "evaluation-server-endusers";
 
