@@ -16,6 +16,13 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/feature-flags")]
 public class FeatureFlagController : ApiControllerBase
 {
+    /// <summary>
+    /// Get flag list of an environment
+    /// </summary>
+    /// <remarks>
+    /// Get the list of flags of a particular environment.
+    /// </remarks>
+    [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<PagedResult<FeatureFlagVm>>> GetListAsync(
         Guid envId,
@@ -31,6 +38,13 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flags);
     }
 
+    /// <summary>
+    /// Get a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Get a single feature flag by key.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("{key}")]
     public async Task<ApiResponse<FeatureFlag>> GetAsync(Guid envId, string key)
     {
@@ -57,6 +71,13 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(isUsed);
     }
 
+    /// <summary>
+    /// Create a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Create a feature flag with the given name, key, and description.
+    /// </remarks>
+    [OpenApi]
     [HttpPost]
     public async Task<ApiResponse<FeatureFlag>> CreateAsync(Guid envId, CreateFeatureFlag request)
     {
@@ -66,6 +87,10 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flag);
     }
 
+    /// <summary>
+    /// Archive a feature flag
+    /// </summary>
+    [OpenApi]
     [HttpPut("{key}/archive")]
     public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, string key)
     {
@@ -79,6 +104,10 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Restore a feature flag
+    /// </summary>
+    [OpenApi]
     [HttpPut("{key}/restore")]
     public async Task<ApiResponse<bool>> RestoreAsync(Guid envId, string key)
     {
@@ -92,6 +121,10 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Delete a feature flag
+    /// </summary>
+    [OpenApi]
     [HttpDelete("{key}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, string key)
     {

@@ -20,6 +20,9 @@ public class FeatureFlagVm
     
     public DateTime UpdatedAt { get; set; }
 
+    /// <summary>
+    /// The possible variation value(s) that would be returned. 
+    /// </summary>
     public Serves Serves { get; set; }
 
     public ICollection<string> Tags { get; set; }
