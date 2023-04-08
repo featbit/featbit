@@ -14,8 +14,6 @@ public class CachePopulatingHostedService : IHostedService
     {
         _populatingService = populatingService;
         _logger = logger;
-        _populatingService = populatingService;
-        _logger = logger;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
