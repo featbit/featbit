@@ -14,7 +14,7 @@ public class PatchFeatureFlag : IRequest<PatchResult>
 public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchResult>
 {
     private readonly IFeatureFlagService _service;
-    
+
     public PatchFeatureFlagHandler(IFeatureFlagService service)
     {
         _service = service;
@@ -33,7 +33,6 @@ public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchRe
         }
 
         await _service.UpdateAsync(flag);
-
         return PatchResult.Ok();
     }
 }
