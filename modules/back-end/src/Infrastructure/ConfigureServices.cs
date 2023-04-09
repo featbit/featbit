@@ -87,19 +87,21 @@ public static class ConfigureServices
 
     private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
     {
-        var lightVersion = configuration["LIGHT_VERSION"];
-        if (lightVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
+        var isProVersion = configuration["IS_PRO"];
+        if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {
+            // use kafka as message queue in pro version
+            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+            services.AddHostedService<KafkaMessageConsumer>();
+        }
+        else
+        {
+            // use redis as message queue
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
 
             services.AddTransient<IMessageHandler, EndUserMessageHandler>();
             services.AddTransient<IMessageHandler, InsightMessageHandler>();
             services.AddHostedService<RedisMessageConsumer>();
-        }
-        else
-        {
-            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
-            services.AddHostedService<KafkaMessageConsumer>();
         }
     }
 }

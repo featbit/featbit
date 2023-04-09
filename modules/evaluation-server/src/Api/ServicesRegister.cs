@@ -91,18 +91,18 @@ public static class ServicesRegister
         services.AddSingleton<IMqMessageHandler, FeatureFlagChangeMessageHandler>();
         services.AddSingleton<IMqMessageHandler, SegmentChangeMessageHandler>();
 
-        var lightVersion = configuration["LIGHT_VERSION"];
-        if (lightVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
+        var isProVersion = configuration["IS_PRO"];
+        if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {
-            // add redis message producer & consumer
-            services.AddSingleton<IMqMessageProducer, RedisMessageProducer>();
-            services.AddHostedService<RedisMessageConsumer>();
+            // use kafka as message queue in pro version
+            services.AddSingleton<IMqMessageProducer, KafkaMessageProducer>();
+            services.AddHostedService<KafkaMessageConsumer>();
         }
         else
         {
-            // add kafka message producer & consumer
-            services.AddSingleton<IMqMessageProducer, KafkaMessageProducer>();
-            services.AddHostedService<KafkaMessageConsumer>();
+            // use redis as message queue
+            services.AddSingleton<IMqMessageProducer, RedisMessageProducer>();
+            services.AddHostedService<RedisMessageConsumer>();
         }
     }
 }
