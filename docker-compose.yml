@@ -1,4 +1,4 @@
-name: featbit-full
+name: featbit
 version: "3"
 services:
   ui:
@@ -12,56 +12,54 @@ services:
     ports:
       - "8081:80"
     networks:
-      - featbit-network-full
+      - featbit-network
 
   api-server:
     image: featbit/featbit-api-server:latest
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
+      - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
     depends_on:
       - mongodb
-      - kafka
+      - redis
       - da-server
     ports:
       - "5000:5000"
     networks:
-      - featbit-network-full
+      - featbit-network
 
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
       - Redis__ConnectionString=redis:6379
     depends_on:
       - mongodb
-      - kafka
       - redis
     ports:
       - "5100:5100"
     networks:
-      - featbit-network-full
+      - featbit-network
 
   da-server:
     image: featbit/featbit-data-analytics-server:latest
     depends_on:
-      - zookeeper
-      - kafka
-      - clickhouse-server
+      - mongodb
+      - redis
     ports:
       - "8200:80"
     networks:
-      - featbit-network-full
+      - featbit-network
     environment:
-      KAFKA_HOSTS: kafka:9092
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+      MONGO_URI: mongodb://admin:password@mongodb:27017
+      MONGO_INITDB_DATABASE: featbit
+      MONGO_HOST: mongodb
+      LIGHT_VERSION: true
 
   mongodb:
     image: mongo:5.0.14
@@ -76,7 +74,7 @@ services:
       - mongodb:/data/db
       - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
-      - featbit-network-full
+      - featbit-network
 
   redis:
     image: bitnami/redis:6.2.10
@@ -84,88 +82,15 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
-      - featbit-network-full
+      - featbit-network
     ports:
       - "6379:6379"
     volumes:
       - redis:/data
 
-  zookeeper:
-    image: bitnami/zookeeper:3.8.1
-    restart: on-failure
-    ports:
-      - '2181:2181'
-    volumes:
-      - zookeeper:/bitnami/zookeeper
-    environment:
-      ALLOW_ANONYMOUS_LOGIN: 'true'
-    networks:
-      - featbit-network-full
-
-  kafka:
-    image: bitnami/kafka:3.2.3
-    restart: on-failure
-    depends_on:
-      - zookeeper
-    ports:
-      - '9092:9092'
-      - '29092:29092'
-    environment:
-      KAFKA_BROKER_ID: 1001
-      KAFKA_CFG_RESERVED_BROKER_MAX_ID: 1001
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      ALLOW_PLAINTEXT_LISTENER: 'true'
-    networks:
-      - featbit-network-full
-    volumes:
-      - kafka:/bitnami/kafka
-  
-  init-kafka-topics:
-    image: 'bitnami/kafka:3.2.3'
-    depends_on:
-      kafka:
-        condition: service_started
-    networks:
-      - featbit-network-full
-    entrypoint:
-      - bash
-      - "-c"
-      - |
-        echo "Waiting for Kafka to be ready..."
-        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092; do sleep 5; done;
-        echo "Kafka is ready now, start creating topics."
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic api-feature-flag-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic api-segment-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic evaluation-server-endusers;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic ch_events_json;
-        echo "Seed kafka topic finished."
-
-  clickhouse-server:
-    image: clickhouse/clickhouse-server:22.3
-    restart: on-failure
-    depends_on:
-      - zookeeper
-      - kafka
-    ports:
-      - "8123:8123"
-      - "8443:8443"
-      - "9000:9000"
-      - "9009:9009"
-      - "9440:9440"
-    networks:
-      - featbit-network-full
-    volumes:
-      - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
-      - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
-      - clickhouse-server:/var/lib/clickhouse
-
 networks:
-  featbit-network-full:
-    name: featbit-network-full
+  featbit-network:
+    name: featbit-network
     driver: bridge
     ipam:
       config:
@@ -174,6 +99,3 @@ networks:
 volumes:
   mongodb:
   redis:
-  kafka:
-  clickhouse-server:
-  zookeeper:
