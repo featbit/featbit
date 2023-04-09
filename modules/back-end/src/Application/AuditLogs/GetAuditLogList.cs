@@ -50,7 +50,7 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
                 
                 // API triggered change
                 item.CreatorName = accessToken.Name;
-                item.CreatorEmail = "OpenAPI";
+                item.CreatorEmail = "Access token";
             }
         }
 
