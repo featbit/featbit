@@ -59,7 +59,6 @@ services:
       MONGO_URI: mongodb://admin:password@mongodb:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: mongodb
-      LIGHT_VERSION: true
 
   mongodb:
     image: mongo:5.0.14
