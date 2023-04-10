@@ -17,10 +17,10 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
     private readonly IMapper _mapper;
 
     public GetAuditLogListHandler(
-        IAuditLogService auditLogService, 
-        IUserService userService, 
-        IMapper mapper, 
-        IAccessTokenService accessTokenService)
+        IAuditLogService auditLogService,
+        IUserService userService,
+        IAccessTokenService accessTokenService,
+        IMapper mapper)
     {
         _auditLogService = auditLogService;
         _userService = userService;
@@ -41,14 +41,13 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
             {
                 item.CreatorName = user.Name;
                 item.CreatorEmail = user.Email;
+                continue;
             }
-            else
+
+            // An audit log may also be created by an access token
+            var accessToken = await _accessTokenService.GetAsync(item.CreatorId);
+            if (accessToken != null)
             {
-                var accessToken = await _accessTokenService.GetAsync(item.CreatorId);
-                
-                if (accessToken == null) continue;
-                
-                // API triggered change
                 item.CreatorName = accessToken.Name;
                 item.CreatorEmail = "Access token";
             }

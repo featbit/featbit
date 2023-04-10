@@ -62,7 +62,7 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
             // construct ticket
             var identity = new ClaimsIdentity(Schemes.OpenApi);
             identity.AddClaim(new Claim(UserClaims.Id, accessToken.Id.ToString()));
-            
+
             var claimsPrincipal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
 
