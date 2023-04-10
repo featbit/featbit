@@ -59,7 +59,7 @@ the default credentials.
 - password: **123456**
 
 **Attention** : With the default configuration, the FeatBit's portal is only accessible from the local machine on which you ran docker
-compose. To make it accessible publicly, check the [**Installation Doc**](https://featbit.gitbook.io/docs/installation#attention).
+compose. To make it accessible publicly, check the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly).
 
 You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey.
 
