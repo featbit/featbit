@@ -44,22 +44,24 @@ Feature flag is a modern engineering technology that decouples code deployments 
 
 ## Getting Started
 
-Clone the repository to your server or local machine and boot up the services.
+Clone the repository to your server or local machine, and then boot up the services.
+
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
 docker compose up -d
 ```
-Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and log in with default credentials.
+
+Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and log in with
+the default credentials.
 
 - username: **test@featbit.com**
 - password: **123456**
 
+**Attention** : With the default configuration, UI is only accessible from the local machine on which you ran docker
+compose. To make it accessible publicly, check the [**Installation Doc**](https://featbit.gitbook.io/docs/installation#attention).
 
-**Attention** : with the default configuration, the UI is accessible only from the local machine (on which you have run docker compose), please read [**Installation Doc**](https://featbit.gitbook.io/docs/installation#attention) to make it accessible publicly.
-
-You can following the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey.
-
+You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey.
 
 ## Features
 
