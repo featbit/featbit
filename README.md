@@ -58,7 +58,7 @@ the default credentials.
 - username: **test@featbit.com**
 - password: **123456**
 
-**Attention** : With the default configuration, UI is only accessible from the local machine on which you ran docker
+**Attention** : With the default configuration, the FeatBit's portal is only accessible from the local machine on which you ran docker
 compose. To make it accessible publicly, check the [**Installation Doc**](https://featbit.gitbook.io/docs/installation#attention).
 
 You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey.
