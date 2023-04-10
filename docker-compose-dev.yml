@@ -67,9 +67,6 @@ services:
       MONGO_URI: mongodb://admin:password@mongodb:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: mongodb
-      CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
-      IS_PRO: false
 
   mongodb:
     image: mongo:5.0.14

@@ -64,7 +64,7 @@ services:
       REDIS_PORT: 6379
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
-      LIGHT_VERSION: false
+      IS_PRO: true
 
   mongodb:
     image: mongo:5.0.14
