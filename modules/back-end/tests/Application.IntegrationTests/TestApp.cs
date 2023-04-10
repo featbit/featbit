@@ -2,10 +2,12 @@ using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using Application.Caches;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
 using Infrastructure.Kafka;
+using Infrastructure.Redis;
 using Infrastructure.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -37,6 +39,9 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(userStore);
             collection.Replace(passwordHasher);
             collection.Replace(currentUser);
+
+            collection.Replace(ServiceDescriptor.Singleton<IRedisClient, TestRedisClient>());
+            collection.Replace(ServiceDescriptor.Transient<ICachePopulatingService, TestCachePopulatingService>());
 
             // remove the kafka consumer from the test application because it is not needed
             var kafkaConsumerService =

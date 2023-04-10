@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, Iterable, Optional, Tuple
 
 import scipy as sp
+
 from utils import format_float_positional, to_UTC_datetime
 
 EXPT_NECESSARY_COLUMNS = ["exptId", "envId", "flagExptId", "eventName", "eventType", "startExptTime", "baselineVariationId", "variationIds"]
@@ -14,7 +15,7 @@ def cal_confidence_interval(sample_size: int,
                             mean: float,
                             stdev: float,
                             confidence_level: float = 0.95,
-                            proportions_test: bool = True) -> Optional[Tuple[float, float]]:
+                            proportions_test: bool = True) -> Optional[Tuple[str, str]]:
     sterr = stdev / math.sqrt(sample_size)
     r = sterr * sp.stats.t.ppf((1 + confidence_level) / 2., sample_size - 1)
     low_bound = mean - r
@@ -34,14 +35,14 @@ class Variation:
                  exposure: Optional[int] = None,
                  mean_sample: Optional[float] = None,
                  stdev_sample: Optional[float] = None,
-                 alpha: int = 0.05,
+                 alpha: float = 0.05,
                  proportions_test: bool = True):
         self._key = key
         self._count = count
         self._exposure = exposure
         self._mean = mean_sample
         self._stdev = stdev_sample
-        self._confidence_interval = None if exposure is None or exposure <= 0 else cal_confidence_interval(count, mean_sample, stdev_sample, 1 - alpha, proportions_test)
+        self._confidence_interval = None if exposure is None or exposure <= 0 else cal_confidence_interval(count, mean_sample, stdev_sample, 1 - alpha, proportions_test)  # type: ignore
 
     @property
     def key(self) -> str:
@@ -64,7 +65,7 @@ class Variation:
         return self._stdev
 
     @property
-    def confidence_interval(self) -> Optional[Tuple[float, float]]:
+    def confidence_interval(self) -> Optional[Tuple[str, str]]:
         return self._confidence_interval
 
 

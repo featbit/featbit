@@ -2,6 +2,6 @@
 
 set FLASK_APP='flasky:app'
 
-flask migrate-clickhouse
+flask migrate-database
 
 flask run

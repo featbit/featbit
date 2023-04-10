@@ -11,7 +11,7 @@ from app.setting import KAFKA_PRODUCER_ENABLED
 from utils import to_UTC_datetime, dt_to_seconds_or_millis_or_micros
 
 
-def _make_event(properties: Optional[Dict[str, Any]] = {}) -> str:
+def _make_event(properties: Optional[Dict[str, Any]] = {}) -> Dict[str, Any]:
     if properties is None:
         properties = {}
 

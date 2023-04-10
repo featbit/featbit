@@ -1,4 +1,4 @@
-namespace Infrastructure.Caches;
+namespace Application.Caches;
 
 public interface ICachePopulatingService
 {

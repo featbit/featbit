@@ -6,13 +6,15 @@ clickhouse-pool==0.5.3
 clickhouse-driver==0.2.1
 kafka-python==2.0.2
 sqlparse==0.3.0
-numpy > 1.17
-scipy > 1.3
-statsmodels > 0.13
+numpy>1.17
+scipy>1.3
+pandas>1.3
+statsmodels>0.13
 gunicorn==20.1.0
 infi-clickhouse-orm@ git+https://github.com/PostHog/infi.clickhouse_orm@37722f350f3b449bbcd6564917c436b0d93e796f
 redis > 4.3
 Flask-Caching > 2.0.0
+Flask-PyMongo
 Flask-APScheduler
 python-dotenv
 pytest

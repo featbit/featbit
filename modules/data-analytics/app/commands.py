@@ -1,7 +1,8 @@
 import click
 from flask.cli import with_appcontext
 
-from app.clickhouse.commands import migrate
+from app.clickhouse.commands import migrate as migrate_ch
+from app.mongodb.commands import migrate as migrate_mongo
 
 
 @click.command()
@@ -19,4 +20,10 @@ from app.clickhouse.commands import migrate
               help="Use with --plan or --check. Also prints SQL for each migration to be applied.")
 @with_appcontext
 def migrate_clickhouse(upto, check, plan, print_sql):
-    return migrate(upto, check, plan, print_sql)
+    return migrate_ch(upto, check, plan, print_sql)
+
+
+@click.command()
+@with_appcontext
+def migrate_mongodb():
+    migrate_mongo()

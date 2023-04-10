@@ -3,10 +3,11 @@ from itertools import groupby
 from typing import Any, Dict, Iterable, Optional
 
 from app.clickhouse.client import sync_execute
-from app.clickhouse.models.time_series import FrequencyType, time_series
-from app.main.models.statistics.feature_flag.sql import \
-    GET_FLAG_EVENTS_BY_INTERVAL_SQL
-from app.setting import DATE_ISO_FMT, DATE_UTC_FMT
+from app.main.models.statistics.feature_flag.sql import (
+    GET_FLAG_EVENTS_BY_INTERVAL_SQL, make_statistic_ff_events_from_mongod)
+from app.main.models.statistics.time_series import (FrequencyType,
+                                                    generate_time_series)
+from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, IS_PRO
 from utils import time_to_special_tz, to_UTC_datetime
 
 INTERVAL_PARAMS_NECESSARY_COLUMNS = ['flagExptId', 'envId', 'startTime', 'intervalType']
@@ -23,9 +24,9 @@ class IntervalParams:
         self.__flag_id = flag_id
         self.__env_id = env_id
         self.__start = to_UTC_datetime(start_time)
-        self.__end = to_UTC_datetime(end_time) if end_time else datetime.utcnow()
+        self.__end = to_UTC_datetime(end_time) if end_time else time_to_special_tz(datetime.utcnow(), 'UTC')
         self.__interval = FrequencyType[interval_type]
-        self.__tz = timezone
+        self.__tz = timezone if timezone else 'UTC'
 
     @property
     def flag_id(self) -> str:
@@ -64,30 +65,40 @@ class IntervalParams:
 
 class FeatureFlagIntervalStatistics:
     def __init__(self, params: "IntervalParams"):
+        if IS_PRO:
+            interval_type = params.interval.value
+            start = params.start.strftime(DATE_ISO_FMT)
+            end = params.end.strftime(DATE_ISO_FMT)
+        else:
+            interval_type = params.interval
+            start = params.start
+            end = params.end
         self._params = params
         self._query_params = {
-            'interval_type': params.interval.value,
+            'interval_type': interval_type,
             'flag_id': params.flag_id,
             'env_id': params.env_id,
-            'start': params.start.strftime(DATE_ISO_FMT),
-            'end': params.end.strftime(DATE_ISO_FMT),
+            'start': start,
+            'end': end,
             'tz': params.timezone
         }
 
     def get_results(self) -> Iterable[Dict[str, Any]]:
 
         def handle_time(time):
-            if self._params.interval == FrequencyType.WEEK or self._params.interval == FrequencyType.MONTH:
-                return time_to_special_tz(time_to_special_tz(time, self._params.timezone), 'UTC')
-            return time_to_special_tz(time, 'UTC')
+            return time_to_special_tz(time_to_special_tz(time, self._params.timezone), 'UTC')
 
         def iter(groups):
-            for ts in time_series(self._params.start, self._params.end, self._params.timezone, self._params.interval):
-                ts_str = handle_time(ts[0]).strftime(DATE_UTC_FMT)
+            for ts in generate_time_series(self._params.start, self._params.end, self._params.timezone, self._params.interval):
+                ts_str = handle_time(ts).strftime(DATE_UTC_FMT)
                 counts = groups.get(ts_str, [])
                 yield {"time": ts_str, "variations": counts}
 
+        if IS_PRO:
+            rs = sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL, args=self._query_params)
+        else:
+            rs = make_statistic_ff_events_from_mongod(self._query_params)
         counts_gen = ({"time": handle_time(time).strftime(DATE_UTC_FMT), "id": var_key, "val": count}
-                      for count, var_key, time in sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL, args=self._query_params))
+                      for count, var_key, time in rs)  # type: ignore
         counts_by_group = dict((time, list(group)) for time, group in groupby(sorted(counts_gen, key=lambda x: x["time"]), key=lambda x: x.pop("time")))
         return list(iter(counts_by_group))
