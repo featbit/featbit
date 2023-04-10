@@ -6,7 +6,7 @@ from flask import Flask
 from app.config import DevelopmentConfig, ProductionConfig
 from app.extensions import get_cache, get_mongodb, get_scheduler
 from app.setting import (CACHE_KEY_PREFIX, CACHE_TYPE, DEFAULT_LOGGING_CONFIG,
-                         LIGHT_VERSION, MONGO_URI, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT,
+                         IS_PRO, MONGO_URI, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT,
                          WSGI)
 
 CONFIGS = {
@@ -40,7 +40,7 @@ def _create_app(config_name='default') -> Flask:
                               "CACHE_REDIS_PASSWORD": REDIS_PASSWORD})
     cache.init_app(__app)
 
-    if not LIGHT_VERSION:
+    if IS_PRO:
         if WSGI:
             _init_aps_scheduler(__app)
         from app.commands import migrate_clickhouse
@@ -70,4 +70,4 @@ def _init_aps_scheduler(flask: Flask) -> None:
 def get_app(config_name='default') -> Flask:
     if __app is None:
         _create_app(config_name)
-    return __app
+    return __app  # type: ignore

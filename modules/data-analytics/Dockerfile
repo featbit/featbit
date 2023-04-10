@@ -12,7 +12,7 @@ ARG REDIS_PASSWORD=
 ARG MONGO_HOST=mongodb
 ARG MONGO_URI=mongodb://admin:password@mongodb:27017
 ARG MONGO_INITDB_DATABASE=featbit
-ARG LIGHT_VERSION=false
+ARG IS_PRO=false
 ENV KAFKA_HOSTS=${KAFKA_HOSTS} \
     CLICKHOUSE_USER=${CLICKHOUSE_USER} \
     CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD} \
@@ -26,7 +26,7 @@ ENV KAFKA_HOSTS=${KAFKA_HOSTS} \
     MONGO_HOST=${MONGO_HOST} \
     MONGO_URI=${MONGO_URI} \
     MONGO_DB=${MONGO_INITDB_DATABASE} \
-    LIGHT_VERSION=${LIGHT_VERSION}
+    IS_PRO=${IS_PRO}
 RUN apt update &&apt install -y nginx && apt install -y supervisor && apt install -y git
 RUN mkdir -p /var/log/nginx && \
     touch /var/log/nginx/access.log && \

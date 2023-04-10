@@ -1,5 +1,6 @@
 
 import json
+from typing import Union
 
 from flask import abort, current_app, jsonify, request
 
@@ -10,7 +11,7 @@ from app.main.models.statistics import (EndUserParams, EndUserStatistics,
                                         FeatureFlagIntervalStatistics,
                                         IntervalParams)
 from app.mongodb.models.event import bulk_create_events as bulk_create_events_mongod
-from app.setting import LIGHT_VERSION
+from app.setting import IS_PRO
 from utils import internal_error_handler, to_md5_hexdigest
 
 main = get_main_blueprint()
@@ -36,9 +37,9 @@ def create_events():
         abort(500, description=str(e))
 
 
-def _create_events(json_events: str):
+def _create_events(json_events: Union[str, bytes]) -> None:
     events = json.loads(json_events)
-    if not LIGHT_VERSION:
+    if IS_PRO:
         bulk_create_events_ch(events)
     else:
         bulk_create_events_mongod(events)

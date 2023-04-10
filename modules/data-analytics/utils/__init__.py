@@ -49,8 +49,8 @@ class SingletonDecorator:
         return self.instance
 
 
-def format_float_positional(value: float) -> Optional[str]:
-    return None if value is None else np.format_float_positional(value, precision=10, trim='-')
+def format_float_positional(value: float) -> str:
+    return np.format_float_positional(value, precision=10, trim='-')
 
 
 def time_to_special_tz(source: Union[datetime, date], tz: str) -> datetime:

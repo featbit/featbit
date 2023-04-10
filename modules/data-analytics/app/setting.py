@@ -2,7 +2,7 @@ import os
 
 from utils import get_from_env, str_to_bool
 
-LIGHT_VERSION = get_from_env("LIGHT_VERSION", True, type_cast=str_to_bool)
+IS_PRO = get_from_env("IS_PRO", False, type_cast=str_to_bool)
 
 WSGI = get_from_env("WSGI", False, type_cast=str_to_bool)
 
