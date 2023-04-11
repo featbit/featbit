@@ -24,8 +24,8 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
     {
         _auditLogService = auditLogService;
         _userService = userService;
-        _mapper = mapper;
         _accessTokenService = accessTokenService;
+        _mapper = mapper;
     }
 
     public async Task<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
