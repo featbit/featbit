@@ -2,28 +2,18 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
 
-public class RedisKeyPrefixes
+public static class RedisKeys
 {
-    public const string FlagIndex = "ff_index_";
+    private const string FlagPrefix = "ff_";
+    private const string FlagIndexPrefix = "ff_index_";
+    private const string SegmentPrefix = "segment_";
+    private const string SegmentIndexPrefix = "segment_index_";
 
-    public const string Flag = "ff_";
+    public static RedisKey FlagIndex(Guid envId) => new($"{FlagIndexPrefix}{envId}");
 
-    public const string SegmentIndex = "segment_index_";
+    public static RedisKey Flag(string id) => new($"{FlagPrefix}{id}");
 
-    public const string Segment = "segment_";
-}
+    public static RedisKey SegmentIndex(Guid envId) => new($"{SegmentIndexPrefix}{envId}");
 
-public class RedisKeys
-{
-    public static RedisKey FlagIndex(Guid envId) => new($"{RedisKeyPrefixes.FlagIndex}{envId}");
-
-    public static RedisKey FeatureFlag(Guid id) => new($"{RedisKeyPrefixes.Flag}{id}");
-
-    public static RedisKey FeatureFlag(string id) => new($"{RedisKeyPrefixes.Flag}{id}");
-
-    public static RedisKey SegmentIndex(Guid envId) => new($"{RedisKeyPrefixes.SegmentIndex}{envId}");
-
-    public static RedisKey Segment(Guid id) => new($"{RedisKeyPrefixes.Segment}{id}");
-
-    public static RedisKey Segment(string id) => new($"{RedisKeyPrefixes.Segment}{id}");
+    public static RedisKey Segment(string id) => new($"{SegmentPrefix}{id}");
 }

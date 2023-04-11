@@ -52,6 +52,7 @@ public partial class KafkaMessageConsumer : BackgroundService
         var topics = new[] { Topics.FeatureFlagChange, Topics.SegmentChange };
 
         _consumer.Subscribe(topics);
+        _logger.LogInformation("Start consuming flag & segment change messages...");
 
         ConsumeResult<Null, string>? consumeResult = null;
         var message = string.Empty;

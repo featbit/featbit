@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Caches;
+namespace Application.Caches;
 
 public class CachePopulatingHostedService : IHostedService
 {

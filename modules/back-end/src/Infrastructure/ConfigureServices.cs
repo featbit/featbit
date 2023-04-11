@@ -1,3 +1,4 @@
+using Application.Caches;
 using Domain.Messages;
 using Domain.Users;
 using Infrastructure.AccessTokens;
@@ -12,9 +13,11 @@ using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
 using Infrastructure.Kafka;
+using Infrastructure.Messages;
 using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
+using Infrastructure.Redis;
 using Infrastructure.Resources;
 using Infrastructure.Segments;
 using Infrastructure.Targeting;
@@ -37,16 +40,21 @@ public static class ConfigureServices
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
 
-        // message producer
-        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+        // redis
+        services.AddSingleton<IRedisClient, DefaultRedisClient>();
+        services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
+        services.AddTransient<ICacheService, RedisCacheService>();
+
+        // populating cache
+        services.AddHostedService<CachePopulatingHostedService>();
+
+        // messaging services
+        AddMessagingServices(services, configuration);
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserStore, MongoDbUserStore>();
         services.AddScoped<IIdentityService, IdentityService>();
-
-        // hosted services
-        services.AddHostedService<KafkaMessageConsumer>();
 
         // typed http clients
         services.AddHttpClient<IOlapService, OlapService>(httpClient =>
@@ -75,5 +83,25 @@ public static class ConfigureServices
         services.AddTransient<IAccessTokenService, AccessTokenService>();
 
         return services;
+    }
+
+    private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
+    {
+        var isProVersion = configuration["IS_PRO"];
+        if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
+        {
+            // use kafka as message queue in pro version
+            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+            services.AddHostedService<KafkaMessageConsumer>();
+        }
+        else
+        {
+            // use redis as message queue
+            services.AddSingleton<IMessageProducer, RedisMessageProducer>();
+
+            services.AddTransient<IMessageHandler, EndUserMessageHandler>();
+            services.AddTransient<IMessageHandler, InsightMessageHandler>();
+            services.AddHostedService<RedisMessageConsumer>();
+        }
     }
 }

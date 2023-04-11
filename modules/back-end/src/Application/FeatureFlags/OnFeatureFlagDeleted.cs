@@ -1,3 +1,5 @@
+using Application.Caches;
+
 namespace Application.FeatureFlags;
 
 public class OnFeatureFlagDeleted : INotification
@@ -15,8 +17,16 @@ public class OnFeatureFlagDeleted : INotification
 
 public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDeleted>
 {
-    public Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
+    private readonly ICacheService _cache;
+
+    public OnFeatureFlagDeletedHandler(ICacheService cache)
     {
-        return Task.CompletedTask;
+        _cache = cache;
+    }
+
+    public async Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
+    {
+        // delete cache
+        await _cache.DeleteFlagAsync(notification.EnvId, notification.FlagId);
     }
 }
