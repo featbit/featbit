@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Application.Services;
 using Domain.AccessTokens;
+using Domain.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
@@ -60,6 +61,8 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
 
             // construct ticket
             var identity = new ClaimsIdentity(Schemes.OpenApi);
+            identity.AddClaim(new Claim(UserClaims.Id, accessToken.Id.ToString()));
+
             var claimsPrincipal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(claimsPrincipal, Scheme.Name);
 

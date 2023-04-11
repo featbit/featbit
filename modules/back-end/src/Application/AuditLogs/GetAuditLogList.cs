@@ -13,12 +13,18 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
 {
     private readonly IAuditLogService _auditLogService;
     private readonly IUserService _userService;
+    private readonly IAccessTokenService _accessTokenService;
     private readonly IMapper _mapper;
 
-    public GetAuditLogListHandler(IAuditLogService auditLogService, IUserService userService, IMapper mapper)
+    public GetAuditLogListHandler(
+        IAuditLogService auditLogService,
+        IUserService userService,
+        IAccessTokenService accessTokenService,
+        IMapper mapper)
     {
         _auditLogService = auditLogService;
         _userService = userService;
+        _accessTokenService = accessTokenService;
         _mapper = mapper;
     }
 
@@ -31,13 +37,20 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
         foreach (var item in logVms.Items)
         {
             var user = users.FirstOrDefault(x => x.Id == item.CreatorId);
-            if (user == null)
+            if (user != null)
             {
+                item.CreatorName = user.Name;
+                item.CreatorEmail = user.Email;
                 continue;
             }
 
-            item.CreatorName = user.Name;
-            item.CreatorEmail = user.Email;
+            // An audit log may also be created by an access token
+            var accessToken = await _accessTokenService.GetAsync(item.CreatorId);
+            if (accessToken != null)
+            {
+                item.CreatorName = accessToken.Name;
+                item.CreatorEmail = "Access token";
+            }
         }
 
         return logVms;
