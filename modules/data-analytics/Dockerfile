@@ -13,6 +13,7 @@ ARG MONGO_HOST=mongodb
 ARG MONGO_URI=mongodb://admin:password@mongodb:27017
 ARG MONGO_INITDB_DATABASE=featbit
 ARG IS_PRO=false
+ARG CHECK_DB_LIVNESS=true
 ENV KAFKA_HOSTS=${KAFKA_HOSTS} \
     CLICKHOUSE_USER=${CLICKHOUSE_USER} \
     CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD} \
@@ -26,7 +27,8 @@ ENV KAFKA_HOSTS=${KAFKA_HOSTS} \
     MONGO_HOST=${MONGO_HOST} \
     MONGO_URI=${MONGO_URI} \
     MONGO_DB=${MONGO_INITDB_DATABASE} \
-    IS_PRO=${IS_PRO}
+    IS_PRO=${IS_PRO} \
+    CHECK_DB_LIVNESS=${CHECK_DB_LIVNESS}
 RUN apt update &&apt install -y nginx && apt install -y supervisor && apt install -y git
 RUN mkdir -p /var/log/nginx && \
     touch /var/log/nginx/access.log && \
