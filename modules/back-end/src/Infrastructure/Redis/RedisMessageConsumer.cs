@@ -41,9 +41,8 @@ public partial class RedisMessageConsumer : BackgroundService
             try
             {
                 // LPop json message from topic list
-                var rawMessages = await db.ListLeftPopAsync(topic, 100);
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-                if (rawMessages == null || rawMessages.Length == 0)
+                var rawMessage = await db.ListLeftPopAsync(topic);
+                if (!rawMessage.HasValue)
                 {
                     // If the topic doesn't exist yet or there are no messages, delay the consumer by 1 second
                     await Task.Delay(1000, cancellationToken);
@@ -56,19 +55,15 @@ public partial class RedisMessageConsumer : BackgroundService
                     continue;
                 }
 
-                for (var i = 0; i < rawMessages.Length; i++)
+                var message = rawMessage.ToString();
+                try
                 {
-                    var message = rawMessages[i].ToString();
-
-                    try
-                    {
-                        await handler.HandleAsync(message, cancellationToken);
-                        Log.MessageHandled(_logger, message);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.ErrorConsumeMessage(_logger, message, ex);
-                    }
+                    await handler.HandleAsync(message, cancellationToken);
+                    Log.MessageHandled(_logger, message);
+                }
+                catch (Exception ex)
+                {
+                    Log.ErrorConsumeMessage(_logger, message, ex);
                 }
             }
             catch (OperationCanceledException)
