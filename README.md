@@ -77,9 +77,12 @@ You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/
 - **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
 - **Web API**, automate your workflow with Web APIs.
 - **Platform-level**, manage your flags in multiple projects and environments.
+- **Pro Solution for Big Data**, a professional version tailored for teams and companies with millions of daily feature usage, custom events, and A/B testing insights.
+
+### Experimental Features
 - **Deep Self-Hosted Solution**, host a feature flag service in your customers' private environments.
 - **ChatGPT Tech Debt Reduction**, utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
-- **Pro Solution for Big Data**, a professional version tailored for teams and companies with millions of daily feature usage, custom events, and A/B testing insights.
+
 
 
 
