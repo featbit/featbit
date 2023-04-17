@@ -10,13 +10,13 @@
 
 
 <h3 align="left">
+  <a href="https://tryitonline.featbit.co/">Try it Online</a>
+  <span> · </span>
   <a href="https://www.youtube.com/watch?v=hfww1FpjHV0" >Quick overview (Video)</a>
   <span> · </span>
   <a href="https://featbit.gitbook.io/">Documentation</a>
   <span> · </span>
-  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support (Slack)</a>
-  <span> · </span>
-  <a href="https://www.featbit.co//blogs?tag=Best+Practice&term=">Best Practice</a>
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Support (Slack)</a>
 </h3>
 
 
