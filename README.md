@@ -77,6 +77,9 @@ You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/
 - **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
 - **Web API**, automate your workflow with Web APIs.
 - **Platform-level**, manage your flags in multiple projects and environments.
+- **Dee[ Self-Hosted Solution**, host feature flags service in your customer's private environment.
+- **ChatGPT Reduce Tech Debt**, use ChatGPT4's & FeatBit's fine-tuning solution to minimize technical debt.
+
 
 
 
