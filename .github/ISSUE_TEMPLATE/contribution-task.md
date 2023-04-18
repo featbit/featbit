@@ -1,5 +1,5 @@
 ---
-name: Custom issue template
+name: Contribution task
 about: Describe this issue template's purpose here.
 title: "[Good First Issues]: XXX"
 labels: good first issue, help wanted, points:4
