@@ -10,13 +10,13 @@
 
 
 <h3 align="left">
+  <a href="https://tryitonline.featbit.co/">Try it Online</a>
+  <span> · </span>
   <a href="https://www.youtube.com/watch?v=hfww1FpjHV0" >Quick overview (Video)</a>
   <span> · </span>
   <a href="https://featbit.gitbook.io/">Documentation</a>
   <span> · </span>
-  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Online Support (Slack)</a>
-  <span> · </span>
-  <a href="https://www.featbit.co//blogs?tag=Best+Practice&term=">Best Practice</a>
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Support (Slack)</a>
 </h3>
 
 
@@ -77,6 +77,12 @@ You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/
 - **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
 - **Web API**, automate your workflow with Web APIs.
 - **Platform-level**, manage your flags in multiple projects and environments.
+- **Pro Solution for Big Data**, a professional version tailored for teams and companies with millions of daily feature usage, custom events, and A/B testing insights.
+
+### Experimental Features
+- **Deep Self-Hosted Solution**, host a feature flag service in your customers' private environments.
+- **ChatGPT Tech Debt Reduction**, utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
+
 
 
 
