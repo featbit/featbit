@@ -1,3 +1,9 @@
+---
+name: Feature Suggestion
+title:  Feature Suggestion: [Title of Feature]
+labels: enhancement
+---
+
 ## Description
 [Provide a detailed description of the feature you are suggesting, including what problem it solves and how it would benefit users.]
 
