@@ -1,6 +1,6 @@
 ---
 name: Contribution task
-about: Describe this issue template's purpose here.
+about: Template for creating contribution task
 title: "[Good First Issues]: XXX"
 labels: good first issue, help wanted, points:4
 assignees: ''
