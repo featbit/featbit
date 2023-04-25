@@ -4,7 +4,6 @@ about: Template for creating contribution task
 title: "[Good First Issues]: XXX"
 labels: good first issue, help wanted, points:4
 assignees: ''
-
 ---
 
 # Description
@@ -15,26 +14,26 @@ assignees: ''
 
 # Setup dev environment
 
-Please read the [doc](../../Development.md) to set up your development environment.
+Please read the [doc](../blob/main/Development.md) to set up your development environment.
 
 # Deadline
 
-We usually give 2 weeks for a feature request, which means you have 2 weeks to implement the feature starting from the day it is assigned to you. If you have any difficulties, please contact us in [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
+We usually give 2 weeks for a feature request, which means you have 2 weeks to implement the feature starting from the
+day it is assigned to you. If you have any difficulties, please contact us
+in [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
 
 # How to implement
 
-1.
-2.
-3.
-4. 
+1. Fork the FeatBit repository.
+2. Create a branch issues-{issues number}
+3. Implement the task based on Description and Scope mentioned above.
+4. Submit your PR
 
-If the feature is UI related, make sure you complete the following tasks before submit your work:
-- merge featbit main into your current branch
+If the feature is UI related, make sure you complete the following tasks before submit your PR:
+
+- merge featbit main branch into your working branch
 - run `npm run i18n`
-
-and commit the following files if there are any changes:
-- [messages.xlf](../../modules/front-end/src/locale/messages.xlf)
-- [messages.zh.xlf](../../modules/front-end/src/locale/messages.zh.xlf)
+- commit **messages.xlf & messages.zh.xlf** file changes (if any)
 
 # Contribution points
 
