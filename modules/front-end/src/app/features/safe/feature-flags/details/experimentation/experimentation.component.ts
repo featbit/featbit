@@ -334,7 +334,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       invalidVariation,
       winnerVariation,
       results: iterationResults,
-      dateTimeInterval: `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')} - ${iteration.endTime? moment(iteration.endTime).format('YYYY-MM-DD HH:mm') : moment(new Date()).format('YYYY-MM-DD HH:mm')}  (${nowStr})`
+      dateTimeInterval: `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')} - ` +
+        `${iteration.endTime ?
+          moment(iteration.endTime).format('YYYY-MM-DD HH:mm') :
+          moment(new Date()).format('YYYY-MM-DD HH:mm')}  (${nowStr})`
     };
   }
 
