@@ -1,0 +1,57 @@
+<div class="form-content" style="overflow-y: auto;">
+  <nz-card nzBorderless>
+    <div class="step-btns">
+      <nz-steps [nzCurrent]="currentStep" (nzIndexChange)="onStepChange($event)">
+        <nz-step></nz-step>
+        <nz-step></nz-step>
+        <nz-step></nz-step>
+        <nz-step></nz-step>
+      </nz-steps>
+    </div>
+
+    <div class="steps">
+      <div class="step step1" *ngIf="currentStep === 0">
+        <form [formGroup]="step0Form">
+          <div class="info-item">
+            <p nz-typography i18n="@@common.org-name">Organization name</p>
+            <input nz-input placeholder="E.g. Featbit" formControlName="organizationName" />
+          </div>
+          <div class="info-item">
+            <p nz-typography i18n="@@common.project-name">Project name</p>
+            <input nz-input placeholder="E.g. Official website" formControlName="projectName" />
+          </div>
+        </form>
+      </div>
+      <div class="step step2" *ngIf="currentStep === 1">
+        <form [formGroup]="step0Form">
+          <div class="info-item">
+            <p nz-typography i18n="@@common.org-name">Organization name</p>
+            <input nz-input placeholder="E.g. Featbit" formControlName="organizationName" />
+          </div>
+        </form>
+      </div>
+      <div class="step step2" *ngIf="currentStep === 2">
+        <form [formGroup]="step0Form">
+          <div class="info-item">
+            <p nz-typography i18n="@@common.org-name">Organization name</p>
+            <input nz-input placeholder="E.g. Featbit" formControlName="organizationName" />
+          </div>
+        </form>
+      </div>
+      <div class="step step2" *ngIf="currentStep === 3">
+        <form [formGroup]="step0Form">
+          <div class="info-item">
+            <p nz-typography i18n="@@common.org-name">Organization name</p>
+            <input nz-input placeholder="E.g. Featbit" formControlName="organizationName" />
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="steps-action">
+      <button nz-button nzType="primary" [disabled]="!step0Form.valid" (click)="done()">
+        <span i18n="@@common.complete">Complete</span>
+      </button>
+    </div>
+  </nz-card>
+</div>

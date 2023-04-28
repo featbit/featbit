@@ -1,0 +1,28 @@
+@import "variables";
+
+.detail-body {
+  width: 100%;
+  padding: 0 0 10px 0;
+  position: relative;
+
+  .content-container {
+    height: calc(100% - 180px);
+    overflow: auto;
+
+    .standard-div {
+      &:not(:last-child) {
+        margin-bottom: 24px;
+      }
+    }
+
+    nz-card {
+      border-radius: 10px;
+      ::ng-deep .ant-card-actions {
+        border-bottom-left-radius: 10px !important;
+        border-bottom-right-radius: 10px !important;
+      }
+    }
+  }
+}
+
+

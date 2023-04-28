@@ -51,6 +51,11 @@ export class SafeComponent implements OnInit, OnDestroy {
   private setMenus(): void {
     this.menus = [
       {
+        title: $localize `:@@menu.get-started:Get started`,
+        icon: 'icons:icon-switch',
+        path: '/get-started'
+      },
+      {
         title: $localize `:@@menu.FF:Feature flags`,
         icon: 'icons:icon-switch',
         path: '/feature-flags'

@@ -9,6 +9,13 @@ const routes: Routes = [
     component: SafeComponent,
     children: [
       {
+        path: 'get-started',
+        loadChildren: () => import("./get-started/get-started.module").then(m => m.GetStartedModule),
+        data: {
+          breadcrumb: $localize `:@@get-started:Get started`
+        },
+      },
+      {
         path: 'feature-flags',
         loadChildren: () => import("./feature-flags/feature-flags.module").then(m => m.FeatureFlagsModule),
         data: {

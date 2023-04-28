@@ -1,66 +1,50 @@
-<!-- react tutorial drawer -->
-<nz-drawer
-  [nzClosable]="false"
-  [nzVisible]="isVisible"
-  [nzWidth]="450"
-  nzPlacement="right"
-  (nzOnClose)="onClose()"
-  [nzFooter]="footer">
-  <ng-container *nzDrawerContent>
-    <div class="guide-body">
-      <a target="_blank" i18n="@@guide.go-to-doc" href="https://featbit.gitbook.io/docs">Go to documentation</a>
-      <div class="block">
-        <h4 nz-typography i18n="@@guide.get-started">Get started</h4>
-        <a class="btn-link" target="_blank" href="https://featbit.gitbook.io/docs/">
-          <span nz-icon nzType="play-square" nzTheme="outline"></span>
-          1. <span i18n="@@guide.featbit-in-3-min">FeatBit in 3 minutes</span>
-        </a>
-        <a class="btn-link" target="_blank"
-          href="https://featbit.gitbook.io/docs/get-started/create-two-feature-flags">
-          <span nz-icon nzType="flag" nzTheme="outline"></span>
-          2. <span i18n="@@guide.create-ff">Create feature flags for the demo</span>
-        </a>
-        <a class="btn-link" target="_blank"
-          href="{{demoUrl}}">
-          <span nz-icon nzType="block" nzTheme="outline"></span>
-          3. <span i18n="@@guide.try-interactive-demo">Try interactive with the demo</span>
-        </a>
-        <a class="btn-link" target="_blank" href="https://featbit.gitbook.io/docs/get-started/connect-an-sdk">
-          <span nz-icon nzType="code" nzTheme="outline"></span>
-          4. <span i18n="@@guide.connect-to-sdk">Connect to SDK</span>
-        </a>
-      </div>
-      <div class="block">
-        <h4 nz-typography i18n="@@guide.guides-title">How-to guides with demo & SDK</h4>
-        <a class="btn-link" target="_blank"
-          href="https://featbit.gitbook.io/docs/how-to-guides/testing-in-production">
-          <span nz-icon nzType="book" nzTheme="outline"></span>
-          <ng-container i18n="@@guide.testing-in-production">Testing in production</ng-container>
-        </a>
-        <a class="btn-link" target="_blank"
-          href="https://featbit.gitbook.io/docs/how-to-guides/targeted-progressive-delivery">
-          <span nz-icon nzType="book" nzTheme="outline"></span>
-          <ng-container i18n="@@guide.targeted-progressive-delivery">Targeted progressive delivery</ng-container>
-        </a>
-        <a class="btn-link" target="_blank"
-          href="https://featbit.gitbook.io/docs/how-to-guides/ab-testing">
-          <span nz-icon nzType="book" nzTheme="outline"></span>
-          <ng-container i18n="@@guide.ab-testing">A/B testing</ng-container>
-        </a>
-        <a class="btn-link" target="_blank"
-          href="https://featbit.gitbook.io/docs/how-to-guides/entitlement">
-          <span nz-icon nzType="book" nzTheme="outline"></span>
-          <ng-container i18n="@@guide.empower-teams">Entitlement management</ng-container>
-        </a>
-      </div>
-      <a target="_blank" i18n="@@guide.how-to-doc" style="font-size: 15px;" href="https://featbit.gitbook.io/docs/how-to-guides">
-        More how-to guides documentation...</a>
-    </div>
-  </ng-container>
-
-  <ng-template #footer>
-    <div class="drawer-footer-btn">
-      <button nz-button nzType="primary" (click)="onClose()" i18n="@@common.close">Close</button>
-    </div>
-  </ng-template>
-</nz-drawer>
+<div class="guide-body">
+  <a target="_blank" i18n="@@guide.go-to-doc" href="https://featbit.gitbook.io/docs">Go to documentation</a>
+  <div class="block">
+    <h4 nz-typography i18n="@@guide.get-started">Get started</h4>
+    <a class="btn-link" target="_blank" href="https://featbit.gitbook.io/docs/">
+      <span nz-icon nzType="play-square" nzTheme="outline"></span>
+      1. <span i18n="@@guide.featbit-in-3-min">FeatBit in 3 minutes</span>
+    </a>
+    <a class="btn-link" target="_blank"
+       href="https://featbit.gitbook.io/docs/get-started/create-two-feature-flags">
+      <span nz-icon nzType="flag" nzTheme="outline"></span>
+      2. <span i18n="@@guide.create-ff">Create feature flags for the demo</span>
+    </a>
+    <a class="btn-link" target="_blank"
+       href="{{demoUrl}}">
+      <span nz-icon nzType="block" nzTheme="outline"></span>
+      3. <span i18n="@@guide.try-interactive-demo">Try interactive with the demo</span>
+    </a>
+    <a class="btn-link" target="_blank" href="https://featbit.gitbook.io/docs/get-started/connect-an-sdk">
+      <span nz-icon nzType="code" nzTheme="outline"></span>
+      4. <span i18n="@@guide.connect-to-sdk">Connect to SDK</span>
+    </a>
+  </div>
+  <div class="block">
+    <h4 nz-typography i18n="@@guide.guides-title">How-to guides with demo & SDK</h4>
+    <a class="btn-link" target="_blank"
+       href="https://featbit.gitbook.io/docs/how-to-guides/testing-in-production">
+      <span nz-icon nzType="book" nzTheme="outline"></span>
+      <ng-container i18n="@@guide.testing-in-production">Testing in production</ng-container>
+    </a>
+    <a class="btn-link" target="_blank"
+       href="https://featbit.gitbook.io/docs/how-to-guides/targeted-progressive-delivery">
+      <span nz-icon nzType="book" nzTheme="outline"></span>
+      <ng-container i18n="@@guide.targeted-progressive-delivery">Targeted progressive delivery</ng-container>
+    </a>
+    <a class="btn-link" target="_blank"
+       href="https://featbit.gitbook.io/docs/how-to-guides/ab-testing">
+      <span nz-icon nzType="book" nzTheme="outline"></span>
+      <ng-container i18n="@@guide.ab-testing">A/B testing</ng-container>
+    </a>
+    <a class="btn-link" target="_blank"
+       href="https://featbit.gitbook.io/docs/how-to-guides/entitlement">
+      <span nz-icon nzType="book" nzTheme="outline"></span>
+      <ng-container i18n="@@guide.empower-teams">Entitlement management</ng-container>
+    </a>
+  </div>
+  <a target="_blank" i18n="@@guide.how-to-doc" style="font-size: 15px;"
+     href="https://featbit.gitbook.io/docs/how-to-guides">
+    More how-to guides documentation...</a>
+</div>

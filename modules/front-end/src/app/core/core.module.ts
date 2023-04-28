@@ -65,7 +65,7 @@ import { ServeComponent } from "@core/components/find-rule/serve/serve.component
 import { RuleComponent } from "@core/components/find-rule/rule/rule.component";
 import { NzCardModule } from "ng-zorro-antd/card";
 import { TranslationPipe } from "@core/pipes/translation.pipe";
-import { GuideComponent } from "@core/components/guide/guide.component";
+import { GuideDrawerComponent } from "@core/components/guide-drawer/guide-drawer.component";
 import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-variation-value.pipe";
 import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
@@ -83,6 +83,7 @@ import { AccessTokenDrawerComponent } from "@core/components/access-token-drawer
 import { AccessTokenTypePipe } from "@core/pipes/access-token-type.pipe";
 import { AccessTokenStatusPipe } from "@core/pipes/access-token-status.pipe";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
+import { GuideComponent } from "@core/components/guide/guide.component";
 
 @NgModule({
   declarations: [
@@ -118,6 +119,7 @@ import { NzCollapseModule } from "ng-zorro-antd/collapse";
     ServeComponent,
     RuleComponent,
     GuideComponent,
+    GuideDrawerComponent,
     AuditLogsComponent,
     AuditLogComponent,
     ChangeListComponent,
@@ -206,6 +208,7 @@ import { NzCollapseModule } from "ng-zorro-antd/collapse";
     ServeComponent,
     RuleComponent,
     GuideComponent,
+    GuideDrawerComponent,
     AuditLogsComponent,
     AuditLogComponent,
     ChangeListComponent,
