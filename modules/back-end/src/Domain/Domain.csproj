@@ -8,8 +8,4 @@
         <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
-    <ItemGroup>
-      <PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
-    </ItemGroup>
-
 </Project>
