@@ -5,9 +5,8 @@ namespace Domain.Utils;
 public static class StringHelper
 {
     /// <summary>
-    /// This regular expression matches any single character that is one of the following special characters:
-    /// . * + ? ^ = ! : $ { } ( ) | [ ] / \
-    /// It can be used to search for any of these special characters in a given text or string.
+    /// Escapes a set of characters (. * + ? ^ = ! : $ { } ( ) | [ ] / \) by replacing them with their escape codes.
+    /// This converts a string so that it can be used as a constant within a regular expression safely.
     /// </summary>
     /// <param name="s"></param>
     /// <returns>The replaced string</returns>
