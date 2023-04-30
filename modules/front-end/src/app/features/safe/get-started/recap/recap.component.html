@@ -1,18 +1,14 @@
 <nz-card nzBorderless>
-  <nz-descriptions [nzTitle]="titleTemplate"></nz-descriptions>
-  <ng-template #titleTemplate>
-    <span>Recapitulation</span>
-  </ng-template>
-
-  <div>
-    <div class="basic">
-      <div>
-        <div class="desc-name">
-          <span i18n="@@commoname">Evaluation Server Host</span>
-        </div>
-        <div class="desc-content">https://abc.com</div>
+  <nz-descriptions nzTitle="Recapitulation">
+    <nz-descriptions-item nzTitle="Evaluation Server Host">https://abc.com</nz-descriptions-item>
+    <nz-descriptions-item nzTitle="Open API Host">https://def.com</nz-descriptions-item>
+    <nz-descriptions-item nzTitle="Secrets">
+      <div *ngFor="let secret of secrets" class="secret">
+        <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{secret.name}}</span>
+        <nz-tag nzColor="geekblue" *ngIf="secret.type == secretTypeServer" i18n="@@common.server">server</nz-tag>
+        <nz-tag nzColor="cyan" *ngIf="secret.type == secretTypeClient" i18n="@@common.client">client</nz-tag>
+        <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
       </div>
-    </div>
-    <div class="secrets"></div>
-  </div>
+    </nz-descriptions-item>
+  </nz-descriptions>
 </nz-card>

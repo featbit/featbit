@@ -14,6 +14,7 @@ import {CoreModule} from "@core/core.module";
 import { RecapComponent } from "@features/safe/get-started/recap/recap.component";
 import { NzCardModule } from "ng-zorro-antd/card";
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
+import { NzTagModule } from "ng-zorro-antd/tag";
 
 @NgModule({
   declarations: [
@@ -21,20 +22,21 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     StepsComponent,
     RecapComponent
   ],
-    imports: [
-        CoreModule,
-        CommonModule,
-        NzStepsModule,
-        NzButtonModule,
-        NzInputModule,
-        NzTypographyModule,
-        GetStartedRoutingModule,
-        NzDividerModule,
-        NzIconModule,
-        NzToolTipModule,
-        NzCardModule,
-        NzDescriptionsModule
-    ],
+  imports: [
+    CoreModule,
+    CommonModule,
+    NzStepsModule,
+    NzButtonModule,
+    NzInputModule,
+    NzTypographyModule,
+    GetStartedRoutingModule,
+    NzDividerModule,
+    NzIconModule,
+    NzToolTipModule,
+    NzCardModule,
+    NzDescriptionsModule,
+    NzTagModule
+  ],
   providers: [
   ]
 })

@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { Component, OnInit } from '@angular/core';
 import { copyToClipboard } from "@utils/index";
+import { ISecret, SecretTypeEnum } from "@shared/types";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
   selector: 'recap',
@@ -8,8 +9,29 @@ import { copyToClipboard } from "@utils/index";
   styleUrls: ['./recap.component.less']
 })
 export class RecapComponent implements OnInit {
+
+  secretTypeClient = SecretTypeEnum.Client;
+  secretTypeServer = SecretTypeEnum.Server;
+
+  secrets: ISecret[] = [];
   constructor(
-    private message: NzMessageService) {
+    private messageService: NzMessageService,
+  ) {
+    this.secrets = [
+      {
+        id: 'aaa',
+        name: 'api',
+        type: SecretTypeEnum.Server,
+        value: 'xxxxxxxx'
+      },
+      {
+        id: 'bbb',
+        name: 'bbbbbb',
+        type: SecretTypeEnum.Client,
+        value: 'yyyyyyyy'
+      }
+    ]
+
   }
 
   ngOnInit(): void {
@@ -17,7 +39,7 @@ export class RecapComponent implements OnInit {
 
   copyText(event, text: string) {
     copyToClipboard(text).then(
-      () => this.message.success($localize `:@@common.copy-success:Copied`)
+      () => this.messageService.success($localize `:@@common.copy-success:Copied`)
     );
   }
 }
