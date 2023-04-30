@@ -3353,7 +3353,7 @@
         <target>上传成功</target>
       </trans-unit>
       <trans-unit id="users.idx.ff-segments" datatype="html">
-        <source>Feature flags and segments</source>
+        <source>Evaluate on flags and segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
           <context context-type="linenumber">10</context>
@@ -3362,7 +3362,7 @@
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">123</context>
         </context-group>
-        <target>开关和用户组：</target>
+        <target>评估开关和用户组：</target>
       </trans-unit>
       <trans-unit id="common.feature-flag" datatype="html">
         <source>Feature flag</source>
