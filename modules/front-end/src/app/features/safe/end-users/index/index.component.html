@@ -120,7 +120,7 @@
               <td>{{ user.keyId }}</td>
               <td *ngFor="let prop of extraColumns">{{getCustomizePropertyValue(user, prop)}}</td>
               <td>
-                <a class="primary-link-btn" (click)="onSegmentsAndFlagsClick(user)" i18n="@@users.idx.ff-segments">Feature flags and segments</a>
+                <a class="primary-link-btn" (click)="onSegmentsAndFlagsClick(user)" i18n="@@users.idx.ff-segments">Evaluate on flags and segments</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 <a class="primary-link-btn" nz-button nzType="link" (click)="navigateToUserDetail(user)" i18n="@@common.details">Details</a>
               </td>

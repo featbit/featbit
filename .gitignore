@@ -7,3 +7,8 @@ benchmark/k6-scripts/test-results/
 
 # Ignore VS Code files
 .vscode/
+
+#Ignore VS files
+.vs/
+/.vs/VSWorkspaceState.json
+/.vs/featbit/v17/.wsuo

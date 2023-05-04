@@ -7,7 +7,7 @@
   [nzWidth]="950"
   [nzVisible]="visible"
   (nzOnClose)="close.emit()">
-  <ng-template #drawTitle><ng-container i18n="@@users.idx.ff-segments">Feature flags and segments</ng-container>: <span style="display:inline-block;padding: 0 5px; font-weight: 600">{{user?.name}} ({{user?.keyId}})</span></ng-template>
+  <ng-template #drawTitle><span style="display:inline-block;padding: 0 5px; font-weight: 600">{{user?.name}} ({{user?.keyId}})</span></ng-template>
   <ng-container *nzDrawerContent>
     <nz-tabset class="no-bottom-line">
       <nz-tab i18n-nzTitle="@@common.feature-flag" nzTitle="Feature flag">
