@@ -8,5 +8,5 @@ public static class Topics
 
     public const string SegmentChange = "api-segment-change";
 
-    public const string Insights = "ch_events_json";
+    public const string Insights = "ch-events-json";
 }
