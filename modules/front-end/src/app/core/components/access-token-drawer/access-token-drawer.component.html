@@ -4,7 +4,7 @@
   [nzVisible]="visible"
   nzPlacement="right"
   [nzTitle]="title"
-  [nzWidth]="700"
+  [nzWidth]="500"
   (nzOnClose)="onClose()"
   [nzFooter]="footer">
   <ng-container *nzDrawerContent>
@@ -39,6 +39,7 @@
         </nz-form-control>
       </nz-form-item>
     </form>
+    <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
     <!-- Permissions -->
     <div *ngIf="isServiceAccessToken" class="permissions">
       <nz-form-label nzRequired i18n="@@common.permissions">Permissions</nz-form-label>
@@ -80,9 +81,6 @@
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
   </ng-template>
   <ng-template #footer>
-    <div class="drawer-footer-btn">
-      <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
-    </div>
   </ng-template>
 </nz-drawer>
 
