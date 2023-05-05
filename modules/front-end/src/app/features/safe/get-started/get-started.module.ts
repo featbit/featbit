@@ -15,6 +15,7 @@ import { RecapComponent } from "@features/safe/get-started/recap/recap.component
 import { NzCardModule } from "ng-zorro-antd/card";
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { ConnectAnSdkComponent } from './steps/connect-an-sdk/connect-an-sdk.component';
+import { NzTabsModule } from "ng-zorro-antd/tabs";
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import { ConnectAnSdkComponent } from './steps/connect-an-sdk/connect-an-sdk.com
     NzIconModule,
     NzToolTipModule,
     NzCardModule,
-    NzDescriptionsModule
+    NzDescriptionsModule,
+    NzTabsModule
   ],
   providers: []
 })
