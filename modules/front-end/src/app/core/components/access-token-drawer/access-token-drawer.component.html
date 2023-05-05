@@ -5,8 +5,7 @@
   nzPlacement="right"
   [nzTitle]="title"
   [nzWidth]="500"
-  (nzOnClose)="onClose()"
-  [nzFooter]="footer">
+  (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="form" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <!-- name -->
@@ -79,8 +78,6 @@
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
-  </ng-template>
-  <ng-template #footer>
   </ng-template>
 </nz-drawer>
 
