@@ -84,6 +84,7 @@ import { AccessTokenTypePipe } from "@core/pipes/access-token-type.pipe";
 import { AccessTokenStatusPipe } from "@core/pipes/access-token-status.pipe";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { GuideComponent } from "@core/components/guide/guide.component";
+import { PrismComponent } from './components/prism/prism.component';
 
 @NgModule({
   declarations: [
@@ -124,7 +125,8 @@ import { GuideComponent } from "@core/components/guide/guide.component";
     AuditLogComponent,
     ChangeListComponent,
     ChangeReviewComponent,
-    AccessTokenDrawerComponent
+    AccessTokenDrawerComponent,
+    PrismComponent
   ],
   imports: [
     CommonModule,
@@ -213,7 +215,8 @@ import { GuideComponent } from "@core/components/guide/guide.component";
     AuditLogComponent,
     ChangeListComponent,
     ChangeReviewComponent,
-    AccessTokenDrawerComponent
+    AccessTokenDrawerComponent,
+    PrismComponent
   ]
 })
 export class CoreModule { }
