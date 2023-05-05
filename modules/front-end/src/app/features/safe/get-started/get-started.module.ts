@@ -14,12 +14,14 @@ import {CoreModule} from "@core/core.module";
 import { RecapComponent } from "@features/safe/get-started/recap/recap.component";
 import { NzCardModule } from "ng-zorro-antd/card";
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
+import { ConnectAnSdkComponent } from './steps/connect-an-sdk/connect-an-sdk.component';
 
 @NgModule({
   declarations: [
     GetStartedComponent,
     StepsComponent,
-    RecapComponent
+    RecapComponent,
+    ConnectAnSdkComponent
   ],
     imports: [
         CoreModule,
