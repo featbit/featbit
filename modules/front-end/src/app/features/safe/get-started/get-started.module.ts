@@ -16,6 +16,7 @@ import { NzCardModule } from "ng-zorro-antd/card";
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { ConnectAnSdkComponent } from './steps/connect-an-sdk/connect-an-sdk.component';
 import { NzTabsModule } from "ng-zorro-antd/tabs";
+import { NzTagModule } from 'ng-zorro-antd/tag';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { NzTabsModule } from "ng-zorro-antd/tabs";
     NzToolTipModule,
     NzCardModule,
     NzDescriptionsModule,
-    NzTabsModule
+    NzTabsModule,
+    NzTagModule
   ],
   providers: []
 })
