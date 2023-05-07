@@ -15,11 +15,12 @@ export class RecapComponent implements OnInit {
 
   secretTypeClient = SecretTypeEnum.Client;
   secretTypeServer = SecretTypeEnum.Server;
-  
+
   env: IEnvironment;
   sdkEnpoint: string;
   apiHost: string;
-  envSecret: string = 'xpF9nCGqNkuoHBL3xO5iHQ4RiDhL9qLUWT6KdK2mSegQ';
+  selectedSecret: ISecret;
+
   constructor(
     private message: NzMessageService,
     private accountService: OrganizationService,
@@ -32,6 +33,7 @@ export class RecapComponent implements OnInit {
     this.envService.getEnv(currentAccountProjectEnv.projectEnv.projectId, currentAccountProjectEnv.projectEnv.envId).subscribe({
       next: (env) => {
         this.env = env;
+        this.selectedSecret = env.secrets[0];
       },
       error: () => {
         this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);
@@ -39,6 +41,18 @@ export class RecapComponent implements OnInit {
     });
   }
 
+  compareWith: (obj1: any, obj2: any) => boolean = (obj1: any, obj2: any) => {
+    if (obj1 && obj2) {
+      return obj1.id === obj2.id;
+    } else {
+      return false;
+    }
+  };
+
+  onSearchSecrets(query: string) {
+    this.env.secrets
+
+  }
   ngOnInit(): void {
   }
 

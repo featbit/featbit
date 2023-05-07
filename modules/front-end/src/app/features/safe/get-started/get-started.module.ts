@@ -17,6 +17,7 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { ConnectAnSdkComponent } from './steps/connect-an-sdk/connect-an-sdk.component';
 import { NzTabsModule } from "ng-zorro-antd/tabs";
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzSelectModule } from "ng-zorro-antd/select";
 
 @NgModule({
   declarations: [
@@ -25,22 +26,23 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
     RecapComponent,
     ConnectAnSdkComponent
   ],
-  imports: [
-    CoreModule,
-    CommonModule,
-    NzStepsModule,
-    NzButtonModule,
-    NzInputModule,
-    NzTypographyModule,
-    GetStartedRoutingModule,
-    NzDividerModule,
-    NzIconModule,
-    NzToolTipModule,
-    NzCardModule,
-    NzDescriptionsModule,
-    NzTabsModule,
-    NzTagModule
-  ],
+    imports: [
+        CoreModule,
+        CommonModule,
+        NzStepsModule,
+        NzButtonModule,
+        NzInputModule,
+        NzTypographyModule,
+        GetStartedRoutingModule,
+        NzDividerModule,
+        NzIconModule,
+        NzToolTipModule,
+        NzCardModule,
+        NzDescriptionsModule,
+        NzTabsModule,
+        NzTagModule,
+        NzSelectModule
+    ],
   providers: []
 })
 export class GetStartedModule { }
