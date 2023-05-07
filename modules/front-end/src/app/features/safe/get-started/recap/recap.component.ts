@@ -36,6 +36,7 @@ export class RecapComponent implements OnInit {
       next: (env) => {
         this.env = env;
         this.selectedSecret = env.secrets[0];
+        this.secretChange.emit(this.selectedSecret);
       },
       error: () => {
         this.message.error($localize `:@@common.error-occurred-try-again:Error occurred, please try again`);

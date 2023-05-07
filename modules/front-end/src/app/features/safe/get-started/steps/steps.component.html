@@ -11,19 +11,11 @@
 
     <div class="steps">
       <div class="step step1" *ngIf="currentStep === 0">
-        <form [formGroup]="step0Form">
-          <div class="info-item">
-            <p nz-typography i18n="@@common.org-name">Organization name</p>
-            <input nz-input placeholder="E.g. Featbit" formControlName="organizationName" />
-          </div>
-          <div class="info-item">
-            <p nz-typography i18n="@@common.project-name">Project name</p>
-            <input nz-input placeholder="E.g. Official website" formControlName="projectName" />
-          </div>
-        </form>
+        <create-feature-flag></create-feature-flag>
       </div>
       <div class="step step2" *ngIf="currentStep === 1">
-        <connect-an-sdk></connect-an-sdk>
+        <div>ABC: {{secret?.value}}</div>
+        <connect-an-sdk [secret]="secret?.value"></connect-an-sdk>
       </div>
       <div class="step step2" *ngIf="currentStep === 2">
         <form [formGroup]="step0Form">

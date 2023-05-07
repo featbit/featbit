@@ -18,13 +18,17 @@ import { ConnectAnSdkComponent } from './steps/connect-an-sdk/connect-an-sdk.com
 import { NzTabsModule } from "ng-zorro-antd/tabs";
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSelectModule } from "ng-zorro-antd/select";
+import {
+  CreateFeatureFlagComponent
+} from "@features/safe/get-started/steps/create-feature-flag/create-feature-flag.component";
 
 @NgModule({
   declarations: [
     GetStartedComponent,
     StepsComponent,
     RecapComponent,
-    ConnectAnSdkComponent
+    ConnectAnSdkComponent,
+    CreateFeatureFlagComponent
   ],
     imports: [
         CoreModule,

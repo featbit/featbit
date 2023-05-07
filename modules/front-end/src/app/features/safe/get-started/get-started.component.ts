@@ -13,6 +13,8 @@ export class GetStartedComponent implements OnInit, OnDestroy {
   public auth: IAuthProps;
   private destroy$: Subject<void> = new Subject();
 
+  secret: ISecret;
+
   constructor() { }
 
   ngOnInit(): void {
@@ -25,6 +27,6 @@ export class GetStartedComponent implements OnInit, OnDestroy {
   }
 
   onSecretChange(secret: ISecret) {
-    console.log(secret.value);
+    this.secret = secret;
   }
 }

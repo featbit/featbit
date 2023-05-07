@@ -1,23 +1,42 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
 
 @Component({
   selector: 'connect-an-sdk',
   templateUrl: './connect-an-sdk.component.html',
   styleUrls: ['./connect-an-sdk.component.less']
 })
-export class ConnectAnSdkComponent implements OnInit {
+export class ConnectAnSdkComponent implements OnInit, OnChanges {
 
   @Input() flagKey: string = 'the-flag-key';
-  @Input() envSecret: string = 'the-env-secret';
+  @Input() secret: string;
+
+  javaScriptSnippet: string;
+  csharpSnippet: string;
+
+  reload: boolean = false;
+
+  constructor(private ref: ChangeDetectorRef) {
+  }
+
 
   ngOnInit() {
   }
 
-  javascriptSnippet = `
+  ngOnChanges() {
+    this.reload = true;
+    this.buildJavaScriptSnippet(this.secret, '');
+    this.buildCsharpSnippet(this.secret, '');
+    this.ref.detectChanges();
+    this.reload = false;
+  }
+
+  private buildJavaScriptSnippet(secret: string, sdkEndpoint: string) {
+    this.javaScriptSnippet = `
 import fbClient from 'featbit-js-client-sdk';
 
 const option = {
-  secret: '${this.envSecret}',
+  secret: '${secret}',
+  api: xxxx,
   user: {
     name: 'Bot',
     keyId: 'bot-id',
@@ -45,13 +64,16 @@ fbClient.on('ff_update:YOUR_FEATURE_KEY', (change) => {
   const myFeature = fbClient.variation('YOUR_FEATURE_KEY', defaultValue);
 });
   `;
+  }
 
-  csharpSnippet = `
+
+  private buildCsharpSnippet(secret: string, sdkEndpoint: string) {
+    this.csharpSnippet = `
 using FeatBit.Sdk.Server;
 using FeatBit.Sdk.Server.Model;
 
 // Set secret to your FeatBit SDK secret.
-const string secret = "${this.envSecret}";
+const string secret = "${secret}";
 
 // Creates a new client instance that connects to FeatBit with the default option.
 var client = new FbClient(secret);
@@ -84,4 +106,5 @@ Console.WriteLine(
 // close the client to ensure that all insights are sent out before the app exits
 await client.CloseAsync();
   `
+  }
 }

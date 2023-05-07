@@ -1,9 +1,10 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import {OrganizationService} from "@services/organization.service";
+import { ISecret } from "@shared/types";
 
 @Component({
   selector: 'steps',
@@ -13,6 +14,9 @@ import {OrganizationService} from "@services/organization.service";
 export class StepsComponent implements OnDestroy {
 
   private destroy$: Subject<void> = new Subject();
+
+  @Input() secret: ISecret;
+
   currentStep = 0;
   currentOrganizationId: string;
   step0Form: FormGroup;
