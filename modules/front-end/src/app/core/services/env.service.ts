@@ -14,6 +14,11 @@ export class EnvService {
 
   constructor(private http: HttpClient) { }
 
+  public getEnv(projectId: string, envId: string): Observable<IEnvironment> {
+    const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}`;
+    return this.http.get<IEnvironment>(url);
+  }
+
   public getEnvs(projectId: string): Observable<IEnvironment[]> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`);
     return this.http.get<IEnvironment[]>(url);

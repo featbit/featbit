@@ -10,17 +10,20 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzDividerModule } from "ng-zorro-antd/divider";
 import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
-import {CoreModule} from "@core/core.module";
+import { CoreModule } from "@core/core.module";
 import { RecapComponent } from "@features/safe/get-started/recap/recap.component";
 import { NzCardModule } from "ng-zorro-antd/card";
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
-import { NzTagModule } from "ng-zorro-antd/tag";
+import { ConnectAnSdkComponent } from './steps/connect-an-sdk/connect-an-sdk.component';
+import { NzTabsModule } from "ng-zorro-antd/tabs";
+import { NzTagModule } from 'ng-zorro-antd/tag';
 
 @NgModule({
   declarations: [
     GetStartedComponent,
     StepsComponent,
-    RecapComponent
+    RecapComponent,
+    ConnectAnSdkComponent
   ],
   imports: [
     CoreModule,
@@ -35,9 +38,9 @@ import { NzTagModule } from "ng-zorro-antd/tag";
     NzToolTipModule,
     NzCardModule,
     NzDescriptionsModule,
+    NzTabsModule,
     NzTagModule
   ],
-  providers: [
-  ]
+  providers: []
 })
 export class GetStartedModule { }

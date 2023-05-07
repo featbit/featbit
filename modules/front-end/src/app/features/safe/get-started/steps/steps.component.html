@@ -23,12 +23,7 @@
         </form>
       </div>
       <div class="step step2" *ngIf="currentStep === 1">
-        <form [formGroup]="step0Form">
-          <div class="info-item">
-            <p nz-typography i18n="@@common.org-name">Organization name</p>
-            <input nz-input placeholder="E.g. Featbit" formControlName="organizationName" />
-          </div>
-        </form>
+        <connect-an-sdk></connect-an-sdk>
       </div>
       <div class="step step2" *ngIf="currentStep === 2">
         <form [formGroup]="step0Form">

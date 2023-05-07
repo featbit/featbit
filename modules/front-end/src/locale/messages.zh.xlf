@@ -2577,7 +2577,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">361</context>
+          <context context-type="linenumber">367</context>
         </context-group>
         <target>转化率</target>
       </trans-unit>
@@ -3353,7 +3353,7 @@
         <target>上传成功</target>
       </trans-unit>
       <trans-unit id="users.idx.ff-segments" datatype="html">
-        <source>Feature flags and segments</source>
+        <source>Evaluate on flags and segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
           <context context-type="linenumber">10</context>
@@ -3362,7 +3362,7 @@
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">123</context>
         </context-group>
-        <target>开关和用户组：</target>
+        <target>评估开关和用户组：</target>
       </trans-unit>
       <trans-unit id="common.feature-flag" datatype="html">
         <source>Feature flag</source>
@@ -4549,11 +4549,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">362</context>
+          <context context-type="linenumber">368</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">362</context>
+          <context context-type="linenumber">368</context>
         </context-group>
         <target>平均值</target>
       </trans-unit>
@@ -4633,11 +4633,19 @@
         </context-group>
         <target>查看图表</target>
       </trans-unit>
+      <trans-unit id="common.now" datatype="html">
+        <source>Now</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">331</context>
+        </context-group>
+        <target>现在</target>
+      </trans-unit>
       <trans-unit id="common.time" datatype="html">
         <source>Time</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">356</context>
+          <context context-type="linenumber">362</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>

@@ -1,14 +1,40 @@
-<nz-card nzBorderless>
-  <nz-descriptions nzTitle="Recapitulation">
-    <nz-descriptions-item nzTitle="Evaluation Server Host">https://abc.com</nz-descriptions-item>
-    <nz-descriptions-item nzTitle="Open API Host">https://def.com</nz-descriptions-item>
-    <nz-descriptions-item nzTitle="Secrets">
-      <div *ngFor="let secret of secrets" class="secret">
-        <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{secret.name}}</span>
-        <nz-tag nzColor="geekblue" *ngIf="secret.type == secretTypeServer" i18n="@@common.server">server</nz-tag>
-        <nz-tag nzColor="cyan" *ngIf="secret.type == secretTypeClient" i18n="@@common.client">client</nz-tag>
-        <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
-      </div>
-    </nz-descriptions-item>
-  </nz-descriptions>
-</nz-card>
+<div class="recap">
+  <nz-card nzBorderless>
+    <nz-descriptions nzTitle="Recapitulation" nzBordered [nzColumn]="{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }">
+      <nz-descriptions-item nzTitle="SDK endpoint">
+        <span class="click-to-copy" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(sdkEnpoint)">{{sdkEnpoint}}</span>
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Open API Host">
+        <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(apiHost)"></i>
+        {{apiHost}}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Secrets">
+        <div class="secrets">
+          <div *ngFor="let secret of env?.secrets" class="secret">
+            <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{secret.name}}</span>
+            <nz-tag nzColor="geekblue" *ngIf="secret.type == secretTypeServer" i18n="@@common.server">server</nz-tag>
+            <nz-tag nzColor="cyan" *ngIf="secret.type == secretTypeClient" i18n="@@common.client">client</nz-tag>
+            <span class="secret-value click-to-copy" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
+            <span>
+              <button nz-button nzSize="small" nzType="link" (click)="editSecret(project, env, secret)">
+                <i nz-icon nzType="edit" nzTheme="outline"></i>
+              </button>
+              <button
+                i18n-nz-popconfirm="@@org.project.remove-secret-confirm"
+                nz-popconfirm="This operation cannot be reverted, make sure this secret is removed from all SDKs before removing."
+                nzPopconfirmPlacement="bottomRight"
+                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                nz-button
+                nzSize="small"
+                nzType="link"
+                nzDanger
+                (nzOnConfirm)="deleteSecret(project, env, secret.id)">
+                <i nz-icon nzType="delete" nzTheme="outline"></i>
+              </button>
+            </span>
+          </div>
+        </div>
+      </nz-descriptions-item> 
+    </nz-descriptions>
+  </nz-card>
+</div>
