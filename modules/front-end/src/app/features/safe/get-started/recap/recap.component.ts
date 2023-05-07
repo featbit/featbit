@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { copyToClipboard } from "@utils/index";
 import { environment } from 'src/environments/environment';
-import { IEnvironment, IProjectEnv, ISecret, SecretTypeEnum } from '@shared/types';
+import { IEnvironment, ISecret, SecretTypeEnum } from '@shared/types';
 import { OrganizationService } from '@core/services/organization.service';
 import { EnvService } from '@core/services/env.service';
 
@@ -12,6 +12,8 @@ import { EnvService } from '@core/services/env.service';
   styleUrls: ['./recap.component.less']
 })
 export class RecapComponent implements OnInit {
+
+  @Output() secretChange: EventEmitter<ISecret> = new EventEmitter();
 
   secretTypeClient = SecretTypeEnum.Client;
   secretTypeServer = SecretTypeEnum.Server;
@@ -49,11 +51,11 @@ export class RecapComponent implements OnInit {
     }
   };
 
-  onSearchSecrets(query: string) {
-    this.env.secrets
-
-  }
   ngOnInit(): void {
+  }
+
+  onSecretChange(secret: ISecret) {
+    this.secretChange.emit(secret);
   }
 
   copyText(text: string) {

@@ -18,6 +18,7 @@
             i18n-nzPlaceHolder="@@get-started.select-secret"
             nzPlaceHolder="Select secret"
             [compareWith]="compareWith"
+            (ngModelChange)="onSecretChange($event)"
             [nzCustomTemplate]="secretTemplate"
           >
             <ng-container *ngFor="let secret of env?.secrets">
