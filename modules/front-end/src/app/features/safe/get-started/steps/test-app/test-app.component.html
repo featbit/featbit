@@ -1,10 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
+<div class="test-app">
+  <div class="wrapper">
+    <div class="title">
+      <ng-container *ngIf="status === statusActive">
+        Listening for live events for the flag <span class="flag-key">{{flagKey}}</span>.
+      </ng-container>
+      <ng-container *ngIf="status === statusSuccess">
+        Listening for live events for the flag <span class="flag-key">{{flagKey}}</span> succeeded.
+      </ng-container>
+      <ng-container *ngIf="status === statusException">
+        Listening for live events for the flag <span class="flag-key">{{flagKey}}</span> failed.
+      </ng-container>
+    </div>
 
-</body>
-</html>
+    <div>
+      <nz-progress
+        [nzWidth]="80"
+        nzType="circle"
+        [nzPercent]="normalizedProgress"
+        [nzStatus]="status"
+      ></nz-progress>
+    </div>
+
+    <div>
+      <button nz-button nzType="primary" *ngIf="status === statusException" (click)="start()">
+        <span i18n="@@common.retry-connection">Retry connection</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="steps-action">
+    <button class="pre-btn" nz-button nzType="primary" (click)="onPrev.emit()">
+      <span i18n="@@common.prev">Prev</span>
+    </button>
+    <button nz-button nzType="primary" [disabled]="status !== statusSuccess" (click)="onComplete.emit()">
+      <span i18n="@@common.complete">Complete</span>
+    </button>
+  </div>
+</div>

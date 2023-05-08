@@ -24,6 +24,7 @@ import {
 import { NzFormModule } from "ng-zorro-antd/form";
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { TestAppComponent } from "@features/safe/get-started/steps/test-app/test-app.component";
+import { NzProgressModule } from "ng-zorro-antd/progress";
 
 @NgModule({
   declarations: [
@@ -51,7 +52,8 @@ import { TestAppComponent } from "@features/safe/get-started/steps/test-app/test
     NzTagModule,
     NzSelectModule,
     NzFormModule,
-    NzSkeletonModule
+    NzSkeletonModule,
+    NzProgressModule
   ],
   providers: []
 })

@@ -54,9 +54,17 @@ export class StepsComponent implements OnDestroy {
     this.currentStep = step;
   }
 
-  onStep0Complete(flag: IFeatureFlag) {
+  onStepFlagCreationComplete(flag: IFeatureFlag) {
     this.flag = { ...flag };
     this.onStepChange(this.currentStep + 1);
+  }
+
+  onStepTestAppComplete(flag: IFeatureFlag) {
+    console.log('complete');
+  }
+
+  toStep(step: number) {
+    this.onStepChange(step);
   }
 
   done() {
