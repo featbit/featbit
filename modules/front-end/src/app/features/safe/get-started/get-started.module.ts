@@ -25,6 +25,7 @@ import { NzFormModule } from "ng-zorro-antd/form";
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { TestAppComponent } from "@features/safe/get-started/steps/test-app/test-app.component";
 import { NzProgressModule } from "ng-zorro-antd/progress";
+import { MarkdownModule } from "ngx-markdown";
 
 @NgModule({
   declarations: [
@@ -53,7 +54,8 @@ import { NzProgressModule } from "ng-zorro-antd/progress";
     NzSelectModule,
     NzFormModule,
     NzSkeletonModule,
-    NzProgressModule
+    NzProgressModule,
+    MarkdownModule.forChild()
   ],
   providers: []
 })
