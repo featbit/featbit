@@ -51,7 +51,11 @@ export class StepsComponent implements OnDestroy {
     this.currentStep = step;
   }
 
-  done(): void {
+  onNext(step: number) {
+    this.onStepChange(this.currentStep + 1);
+  }
+
+  done() {
     const { organizationName, projectName } = this.step0Form.value;
     const environments = ['Dev', 'Prod'];
 

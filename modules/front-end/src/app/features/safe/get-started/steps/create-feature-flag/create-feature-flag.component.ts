@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { FeatureFlagService } from "@services/feature-flag.service";
@@ -13,8 +13,10 @@ import { NzMessageService } from "ng-zorro-antd/message";
 })
 export class CreateFeatureFlagComponent {
 
+  @Output() onNext = new EventEmitter<void>();
+
+  variationTypeBoolean = 'boolean';
   form: FormGroup;
-  creating: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -44,25 +46,19 @@ export class CreateFeatureFlagComponent {
     first()
   );
 
-  nameChange(name: string) {
+  onNameChange(name: string) {
     let keyControl = this.form.get('key')!;
     keyControl.setValue(slugify(name ?? ''));
     keyControl.markAsDirty();
   }
 
-  variationTypeBoolean = 'boolean';
-
-  create() {
-    this.creating = true;
-
+  createFlag() {
     this.featureFlagService.create(this.form.value).subscribe({
       next: (result: IFeatureFlag) => {
+        this.onNext.emit();
       },
       error: (err) => {
         this.message.error(err.error);
-      },
-      complete: () => {
-        this.creating = false;
       }
     });
   }

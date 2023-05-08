@@ -8,7 +8,7 @@
             formControlName="name"
             placeholder="A human-friendly name for your feature flag"
             i18n-placeholder="@@ff.feature-flag-name"
-            (ngModelChange)="nameChange($event)"
+            (ngModelChange)="onNameChange($event)"
           />
         </nz-form-control>
       </nz-form-item>
@@ -61,4 +61,10 @@
       </nz-form-control>
     </nz-form-item>
   </form>
+
+  <div class="steps-action">
+    <button nz-button nzType="primary" [disabled]="!form.valid" (click)="createFlag()">
+      <span i18n="@@common.next">Next</span>
+    </button>
+  </div>
 </div>

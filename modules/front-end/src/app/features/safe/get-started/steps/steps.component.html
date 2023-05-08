@@ -1,4 +1,4 @@
-<div class="form-content" style="overflow-y: auto;">
+<div class="steps-wrapper">
   <nz-card nzBorderless>
     <div class="step-btns">
       <nz-steps [nzCurrent]="currentStep" (nzIndexChange)="onStepChange($event)">
@@ -11,7 +11,7 @@
 
     <div class="steps">
       <div class="step step1" *ngIf="currentStep === 0">
-        <create-feature-flag></create-feature-flag>
+        <create-feature-flag (onNext)="onNext($event)"></create-feature-flag>
       </div>
       <div class="step step2" *ngIf="currentStep === 1">
         <connect-an-sdk [secret]="secret?.value"></connect-an-sdk>
@@ -32,12 +32,6 @@
           </div>
         </form>
       </div>
-    </div>
-
-    <div class="steps-action">
-      <button nz-button nzType="primary" [disabled]="!step0Form.valid" (click)="done()">
-        <span i18n="@@common.complete">Complete</span>
-      </button>
     </div>
   </nz-card>
 </div>
