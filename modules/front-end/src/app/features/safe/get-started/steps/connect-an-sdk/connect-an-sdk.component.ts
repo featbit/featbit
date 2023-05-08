@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'connect-an-sdk',
@@ -9,10 +10,15 @@ export class ConnectAnSdkComponent implements OnChanges {
 
   @Input() flagKey: string = 'the-flag-key';
   @Input() secret: string = 'the-sdk-secret';
-  @Input() sdkEndpoint: string = 'the-sdk-endpoint';
+
+  sdkEndpoint: string = 'the-sdk-endpoint';
 
   jsSnippet: string;
   csharpSnippet: string;
+
+  constructor() {
+    this.sdkEndpoint = environment.evaluationUrl;
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     // update snippets when flagKey/secret/sdkEndpoint changed
