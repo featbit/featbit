@@ -66,7 +66,7 @@ fbClient.on('ff_update:${this.flagKey}', (change) => {
   // change has this structure {id: '${this.flagKey}', oldValue: theOldValue, newValue: theNewValue }
   // the type of theOldValue and theNewValue is defined on FeatBit
 });
-  `;
+  `.trim();
   }
 
   private buildPythonSnippet() {
@@ -91,7 +91,7 @@ if client.initialize:
 
 # ensure that the SDK shuts down cleanly and has a chance to deliver events to FeatBit before the program exits
 client.stop()
-    `;
+    `.trim();
   }
 
   private buildJavaSnippet() {
@@ -139,7 +139,7 @@ class Main {
         System.out.println("APP FINISHED");
     }
 }
-    `;
+    `.trim();
   }
 
   private buildCSharpSnippet() {
@@ -180,7 +180,7 @@ Console.WriteLine(
 
 // close the client to ensure that all insights are sent out before the app exits
 await client.CloseAsync();
-  `
+  `.trim()
   }
 
   private buildGoSnippet() {
@@ -215,6 +215,6 @@ func main() {
         fmt.Println("SDK initialization failed")
     }
 }
-    `;
+    `.trim();
   }
 }
