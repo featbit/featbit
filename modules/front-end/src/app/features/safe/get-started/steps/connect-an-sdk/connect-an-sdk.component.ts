@@ -1,42 +1,34 @@
-import { ChangeDetectorRef, Component, Input, OnChanges, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 @Component({
   selector: 'connect-an-sdk',
   templateUrl: './connect-an-sdk.component.html',
   styleUrls: ['./connect-an-sdk.component.less']
 })
-export class ConnectAnSdkComponent implements OnInit, OnChanges {
+export class ConnectAnSdkComponent implements OnChanges {
 
   @Input() flagKey: string = 'the-flag-key';
-  @Input() secret: string;
+  @Input() secret: string = 'the-sdk-secret';
+  @Input() sdkEndpoint: string = 'the-sdk-endpoint';
 
-  javaScriptSnippet: string;
+  jsSnippet: string;
   csharpSnippet: string;
 
-  reload: boolean = false;
-
-  constructor(private ref: ChangeDetectorRef) {
+  ngOnChanges(changes: SimpleChanges): void {
+    // update snippets when flagKey/secret/sdkEndpoint changed
+    if (changes.flagKey || changes.secret || changes.sdkEndpoint) {
+      this.jsSnippet = this.buildJsSnippet();
+      this.csharpSnippet = this.buildCSharpSnippet();
+    }
   }
 
-
-  ngOnInit() {
-  }
-
-  ngOnChanges() {
-    this.reload = true;
-    this.buildJavaScriptSnippet(this.secret, '');
-    this.buildCsharpSnippet(this.secret, '');
-    this.ref.detectChanges();
-    this.reload = false;
-  }
-
-  private buildJavaScriptSnippet(secret: string, sdkEndpoint: string) {
-    this.javaScriptSnippet = `
+  private buildJsSnippet(): string {
+    return `
 import fbClient from 'featbit-js-client-sdk';
 
 const option = {
-  secret: '${secret}',
-  api: xxxx,
+  secret: '${this.secret}',
+  api: '${this.sdkEndpoint}',
   user: {
     name: 'Bot',
     keyId: 'bot-id',
@@ -66,14 +58,13 @@ fbClient.on('ff_update:YOUR_FEATURE_KEY', (change) => {
   `;
   }
 
-
-  private buildCsharpSnippet(secret: string, sdkEndpoint: string) {
-    this.csharpSnippet = `
+  private buildCSharpSnippet() {
+    return `
 using FeatBit.Sdk.Server;
 using FeatBit.Sdk.Server.Model;
 
 // Set secret to your FeatBit SDK secret.
-const string secret = "${secret}";
+const string secret = "${this.secret}";
 
 // Creates a new client instance that connects to FeatBit with the default option.
 var client = new FbClient(secret);

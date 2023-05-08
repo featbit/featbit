@@ -14,7 +14,6 @@
         <create-feature-flag></create-feature-flag>
       </div>
       <div class="step step2" *ngIf="currentStep === 1">
-        <div>ABC: {{secret?.value}}</div>
         <connect-an-sdk [secret]="secret?.value"></connect-an-sdk>
       </div>
       <div class="step step2" *ngIf="currentStep === 2">

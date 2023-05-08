@@ -14,16 +14,34 @@ import 'prismjs/components/prism-csharp';
   styleUrls: ['./prism.component.less']
 })
 export class PrismComponent implements AfterViewInit {
-  @Input() code: string;
-  @Input() language: string;
+  private _code: string;
+  @Input()
+  set code(value: string) {
+    this._code = value;
+    this.highlight();
+  }
 
-  @ViewChild('codeElement') codeEle!: ElementRef;
+  get code(): string {
+    return this._code;
+  }
+
+  @Input() language: string = 'javascript';
+
+  @ViewChild('codeElement') codeEle: ElementRef;
 
   constructor(private message: NzMessageService) {
   }
 
-  ngAfterViewInit(): void {
-    Prism.highlightElement(this.codeEle.nativeElement);
+  ngAfterViewInit() {
+    this.highlight();
+  }
+
+  highlight() {
+    if (this.codeEle) {
+      let nativeEl = this.codeEle.nativeElement;
+      nativeEl.textContent = this._code;
+      Prism.highlightElement(nativeEl);
+    }
   }
 
   copyCode() {
