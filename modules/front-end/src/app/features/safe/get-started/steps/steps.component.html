@@ -5,7 +5,6 @@
         <nz-step></nz-step>
         <nz-step></nz-step>
         <nz-step></nz-step>
-        <nz-step></nz-step>
       </nz-steps>
     </div>
 
@@ -17,20 +16,7 @@
         <connect-an-sdk [secret]="secret?.value" [flagKey]="flag.key"></connect-an-sdk>
       </div>
       <div class="step step2" *ngIf="currentStep === 2">
-        <form [formGroup]="step0Form">
-          <div class="info-item">
-            <p nz-typography i18n="@@common.org-name">Organization name</p>
-            <input nz-input placeholder="E.g. Featbit" formControlName="organizationName" />
-          </div>
-        </form>
-      </div>
-      <div class="step step2" *ngIf="currentStep === 3">
-        <form [formGroup]="step0Form">
-          <div class="info-item">
-            <p nz-typography i18n="@@common.org-name">Organization name</p>
-            <input nz-input placeholder="E.g. Featbit" formControlName="organizationName" />
-          </div>
-        </form>
+        <test-app></test-app>
       </div>
     </div>
   </nz-card>

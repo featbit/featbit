@@ -23,6 +23,7 @@ import {
 } from "@features/safe/get-started/steps/create-feature-flag/create-feature-flag.component";
 import { NzFormModule } from "ng-zorro-antd/form";
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
+import { TestAppComponent } from "@features/safe/get-started/steps/test-app/test-app.component";
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
     StepsComponent,
     RecapComponent,
     ConnectAnSdkComponent,
-    CreateFeatureFlagComponent
+    CreateFeatureFlagComponent,
+    TestAppComponent
   ],
   imports: [
     CoreModule,
