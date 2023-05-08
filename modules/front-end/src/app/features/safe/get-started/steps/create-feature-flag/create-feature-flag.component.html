@@ -2,7 +2,7 @@
   <form nz-form [formGroup]="form" class="standard-form" nzLayout="vertical">
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
+        <nz-form-control i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
           <input
             nz-input
             formControlName="name"
