@@ -1,3 +1,64 @@
-<div class="card-container">
-sgsf
+<div class="create-feature-flag">
+  <form nz-form [formGroup]="form" class="standard-form" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
+          <input
+            nz-input
+            formControlName="name"
+            placeholder="A human-friendly name for your feature flag"
+            i18n-placeholder="@@ff.feature-flag-name"
+            (ngModelChange)="nameChange($event)"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label
+          nzRequired
+          i18n-nzTooltipTitle="@@ff.key-description"
+          nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation">
+          Key
+        </nz-form-label>
+        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
+          <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name" />
+          <ng-template #keyErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    <nz-form-item>
+      <nz-form-label i18n="@@common.description">Description</nz-form-label>
+      <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@ff.description.cannot-exceed-512-characters">
+          <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
+          </textarea>
+      </nz-form-control>
+    </nz-form-item>
+      <nz-form-item>
+        <nz-form-label
+          i18n-nzTooltipTitle="@@common.data-type"
+          nzTooltipTitle="We currently support string, boolean, number and json types, you can modify it in the feature flag detail page later"
+          i18n="@@common.data-type">Data type</nz-form-label>
+        <nz-form-control>
+          <input nz-input [disabled]="true" [value]="variationTypeBoolean"/>
+        </nz-form-control>
+      </nz-form-item>
+    <nz-form-item>
+      <nz-form-label
+        i18n-nzTooltipTitle="@@common.default-serve-tooltip"
+        nzTooltipTitle="Define which variation users will see by default when the flag is Enabled or Disabled"
+        i18n="@@common.default-rule">Default rule</nz-form-label>
+      <nz-form-control>
+        <div class="default-rule">
+          <span class="default-rule-label" i18n="@@common.serve-if-enabled">If the flag is Enabled, serve</span>
+          <span class="default-rule-value"><span class="variation-tip tip-0"></span><span>true</span></span>
+        </div>
+        <div class="default-rule">
+          <span class="default-rule-label" i18n="@@common.serve-if-disabled">If the flag is Disabled, serve</span>
+          <span class="default-rule-value"><span class="variation-tip tip-1"></span><span>false</span></span>
+        </div>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
 </div>

@@ -21,6 +21,8 @@ import { NzSelectModule } from "ng-zorro-antd/select";
 import {
   CreateFeatureFlagComponent
 } from "@features/safe/get-started/steps/create-feature-flag/create-feature-flag.component";
+import { NzFormModule } from "ng-zorro-antd/form";
+import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 
 @NgModule({
   declarations: [
@@ -30,23 +32,25 @@ import {
     ConnectAnSdkComponent,
     CreateFeatureFlagComponent
   ],
-    imports: [
-        CoreModule,
-        CommonModule,
-        NzStepsModule,
-        NzButtonModule,
-        NzInputModule,
-        NzTypographyModule,
-        GetStartedRoutingModule,
-        NzDividerModule,
-        NzIconModule,
-        NzToolTipModule,
-        NzCardModule,
-        NzDescriptionsModule,
-        NzTabsModule,
-        NzTagModule,
-        NzSelectModule
-    ],
+  imports: [
+    CoreModule,
+    CommonModule,
+    NzStepsModule,
+    NzButtonModule,
+    NzInputModule,
+    NzTypographyModule,
+    GetStartedRoutingModule,
+    NzDividerModule,
+    NzIconModule,
+    NzToolTipModule,
+    NzCardModule,
+    NzDescriptionsModule,
+    NzTabsModule,
+    NzTagModule,
+    NzSelectModule,
+    NzFormModule,
+    NzSkeletonModule
+  ],
   providers: []
 })
 export class GetStartedModule { }
