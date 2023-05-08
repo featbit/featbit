@@ -11,10 +11,10 @@
 
     <div class="steps">
       <div class="step step1" *ngIf="currentStep === 0">
-        <create-feature-flag (onNext)="onNext($event)"></create-feature-flag>
+        <create-feature-flag [flag]="flag" (onComplete)="onStep0Complete($event)"></create-feature-flag>
       </div>
       <div class="step step2" *ngIf="currentStep === 1">
-        <connect-an-sdk [secret]="secret?.value"></connect-an-sdk>
+        <connect-an-sdk [secret]="secret?.value" [flagKey]="flag.key"></connect-an-sdk>
       </div>
       <div class="step step2" *ngIf="currentStep === 2">
         <form [formGroup]="step0Form">

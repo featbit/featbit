@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import {OrganizationService} from "@services/organization.service";
 import { ISecret } from "@shared/types";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Component({
   selector: 'steps',
@@ -12,6 +13,8 @@ import { ISecret } from "@shared/types";
   styleUrls: ['./steps.component.less']
 })
 export class StepsComponent implements OnDestroy {
+
+  flag: IFeatureFlag;
 
   private destroy$: Subject<void> = new Subject();
 
@@ -51,7 +54,8 @@ export class StepsComponent implements OnDestroy {
     this.currentStep = step;
   }
 
-  onNext(step: number) {
+  onStep0Complete(flag: IFeatureFlag) {
+    this.flag = { ...flag };
     this.onStepChange(this.currentStep + 1);
   }
 

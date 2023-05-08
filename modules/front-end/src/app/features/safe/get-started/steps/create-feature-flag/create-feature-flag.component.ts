@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { FeatureFlagService } from "@services/feature-flag.service";
@@ -11,9 +11,10 @@ import { NzMessageService } from "ng-zorro-antd/message";
   templateUrl: './create-feature-flag.component.html',
   styleUrls: ['./create-feature-flag.component.less']
 })
-export class CreateFeatureFlagComponent {
+export class CreateFeatureFlagComponent implements OnInit{
 
-  @Output() onNext = new EventEmitter<void>();
+  @Input() flag: IFeatureFlag;
+  @Output() onComplete = new EventEmitter<IFeatureFlag>();
 
   variationTypeBoolean = 'boolean';
   form: FormGroup;
@@ -23,10 +24,23 @@ export class CreateFeatureFlagComponent {
     private featureFlagService: FeatureFlagService,
     private message: NzMessageService,
   ) {
+  }
+
+  ngOnInit() {
+    let name: string = '';
+    let key: string = '';
+    let description: string = '';
+
+    if (this.flag) {
+      name = this.flag.name;
+      key = this.flag.key;
+      description = this.flag.description;
+    }
+
     this.form = this.fb.group({
-      name: ['', Validators.required],
-      key: ['', Validators.required, this.flagKeyAsyncValidator],
-      description:['',Validators.maxLength(512)]
+      name: [name, Validators.required],
+      key: [key, Validators.required, this.flagKeyAsyncValidator],
+      description:[description,Validators.maxLength(512)]
     });
   }
 
@@ -55,7 +69,7 @@ export class CreateFeatureFlagComponent {
   createFlag() {
     this.featureFlagService.create(this.form.value).subscribe({
       next: (result: IFeatureFlag) => {
-        this.onNext.emit();
+        this.onComplete.emit(result);
       },
       error: (err) => {
         this.message.error(err.error);
