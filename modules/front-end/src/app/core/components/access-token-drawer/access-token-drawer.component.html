@@ -39,7 +39,7 @@
       </nz-form-item>
     </form>
     <!-- Permissions -->
-    <nz-form-item *ngIf="isServiceAccessToken" class="permissions">
+    <div *ngIf="isServiceAccessToken" class="permissions">
       <nz-form-label nzRequired i18n="@@common.permissions">Permissions</nz-form-label>
       <div class="">
         <nz-collapse nzExpandIconPosition="right">
@@ -73,7 +73,7 @@
           </nz-collapse-panel>
         </nz-collapse>
       </div>
-    </nz-form-item>
+    </div>
     <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
