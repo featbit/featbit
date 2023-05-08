@@ -11,7 +11,7 @@ export class ConnectAnSdkComponent implements OnChanges {
   @Input() flagKey: string = 'the-flag-key';
   @Input() secret: string = 'the-sdk-secret';
 
-  sdkEndpoint: string = 'the-sdk-endpoint';
+  sdkEndpoint: string = environment.evaluationUrl;
 
   jsSnippet: string;
   pythonSnippet: string;
@@ -24,10 +24,6 @@ export class ConnectAnSdkComponent implements OnChanges {
     name: 'tester',
     group: 'qa'
   };
-
-  constructor() {
-    this.sdkEndpoint = environment.evaluationUrl;
-  }
 
   ngOnChanges(changes: SimpleChanges): void {
     // update snippets when flagKey/secret/sdkEndpoint changed
