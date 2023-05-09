@@ -1,29 +1,36 @@
 <nz-page-header>
-  <nz-page-header-title>Title</nz-page-header-title>
-  <nz-page-header-subtitle>This is a subtitle</nz-page-header-subtitle>
+  <nz-page-header-title>Connect An SDK</nz-page-header-title>
+  <nz-page-header-subtitle>Integrate FeatBit into your application</nz-page-header-subtitle>
   <nz-page-header-content>
     <p nz-paragraph>
       Below is some starter code to integrate FeatBit into your app.
     </p>
     <nz-tabset nzSize="small" nzAnimated="false">
       <nz-tab nzTitle="Javascript">
-        <p nz-paragraph>
+        <h5 nz-typography>Installation</h5>
+        <p nz-typography>Install the SDK via npm by running the following command in your terminal.</p>
+        <prism code="npm install featbit-js-client-sdk" language="bash"></prism>
+        <h5 nz-typography>Quick Start</h5>
+        <p nz-typography>
+          The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-js-client-sdk">full javascript sdk doc</a> for more details.
         </p>
-        <prism code="npm install featbit-js-client-sdk" language="bash"></prism>
         <prism [code]="jsSnippet" language="javascript"></prism>
       </nz-tab>
       <nz-tab nzTitle="Python">
-        <p nz-paragraph>
+        <h5 nz-typography>Installation</h5>
+        <p nz-typography>Install the SDK via pip by running the following command in your terminal.</p>
+        <prism code="pip install fb-python-sdk" language="bash"></prism>
+        <h5 nz-typography>Quick Start</h5>
+        <p nz-typography>
+          The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-python-sdk">full python sdk doc</a> for more details.
         </p>
-        <prism code="pip install fb-python-sdk" language="bash"></prism>
         <prism [code]="pythonSnippet" language="python"></prism>
       </nz-tab>
       <nz-tab nzTitle="Java">
-        <p nz-paragraph>
-          Read the <a target="_blank" href="https://github.com/featbit/featbit-java-sdk">full java sdk doc</a> for more details.
-        </p>
+        <h5 nz-typography>Installation</h5>
+        <p nz-typography>Open your project's pom.xml file and add the following dependency.</p>
         <prism code="
           <dependencies>
               <!-- https://mvnrepository.com/artifact/co.featbit/featbit-java-sdk -->
@@ -37,20 +44,32 @@
           <!-- Or in Gradle -->
           <!-- implementation 'co.featbit:featbit-java-sdk:1.1.1' -->" language="xml">
         </prism>
+        <h5 nz-typography>Quick Start</h5>
+        <p nz-typography>
+          The following code demonstrates the basic usages of the SDK.
+          Read the <a target="_blank" href="https://github.com/featbit/featbit-java-sdk">full java sdk doc</a> for more details.
+        </p>
         <prism [code]="javaSnippet" language="java"></prism>
       </nz-tab>
       <nz-tab nzTitle="CSharp">
-        <p nz-paragraph>
+        <h5 nz-typography>Installation</h5>
+        <p nz-typography>Install the SDK via dotnet cli by running the following command in your terminal.</p>
+        <prism code="dotnet add package FeatBit.ServerSdk" language="bash"></prism>
+        <h5 nz-typography>Quick Start</h5>
+        <p nz-typography>
+          The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-dotnet-sdk">full csharp sdk doc</a> for more details.
         </p>
-        <prism code="dotnet add package FeatBit.ServerSdk" language="bash"></prism>
         <prism [code]="csharpSnippet" language="csharp"></prism>
       </nz-tab>
       <nz-tab nzTitle="Go">
-        <p nz-paragraph>
+        <h5 nz-typography>Installation</h5>
+        <p nz-typography>Install the SDK via go cli by running the following command in your terminal.</p>
+        <prism code="go get github.com/featbit/featbit-go-sdk" language="bash"></prism>
+        <p nz-typography>
+          The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-go-sdk">full go sdk doc</a> for more details.
         </p>
-        <prism code="go get github.com/featbit/featbit-go-sdk" language="bash"></prism>
         <prism [code]="goSnippet" language="go"></prism>
       </nz-tab>
     </nz-tabset>
