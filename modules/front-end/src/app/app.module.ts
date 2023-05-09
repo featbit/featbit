@@ -1,4 +1,4 @@
-import {LOCALE_ID, NgModule} from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -11,9 +11,8 @@ import { IconsProviderModule } from "./icons-provider.module";
 import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
-import {NzSelectModule} from "ng-zorro-antd/select";
-import {AccountProjectEnvResolver} from "@services/account-preject-env-resolver.service";
-
+import { NzSelectModule } from "ng-zorro-antd/select";
+import { AccountProjectEnvResolver } from "@services/account-preject-env-resolver.service";
 
 @NgModule({
   declarations: [
@@ -28,7 +27,7 @@ import {AccountProjectEnvResolver} from "@services/account-preject-env-resolver.
     IconsProviderModule,
     NzLayoutModule,
     NzMessageModule,
-    NzSelectModule
+    NzSelectModule,
   ],
   providers: [
     AccountProjectEnvResolver,

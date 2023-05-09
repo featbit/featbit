@@ -1,0 +1,207 @@
+/**
+ * prism.js Visual Studio Code Theme
+ * @author Visual Studio Code
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #9CDCFE;
+  background: none;
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+/* Code blocks */
+
+pre[class*="language-"] {
+  padding: 1em;
+  margin: .5em 0;
+  overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+  border-radius: 4px;
+  background: #1E1E1E;
+  font-size: 14px;
+}
+
+/* Inline code */
+
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+  white-space: normal;
+}
+
+.token.comment,
+.token.block-comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #6A9955;
+}
+
+.token.punctuation {
+  color: #CCC;
+}
+
+.token.tag,
+.token.namespace,
+.token.deleted {
+  color: #569CD6;
+}
+
+.token.attr-name {
+  color: #9CDCFE;
+}
+
+.token.function-name {
+  color: #6196cc;
+}
+
+.token.boolean {
+  color: #569CD6;
+}
+
+.token.number {
+  color: #B5CEA8;
+}
+
+.token.function {
+  color: #DCDCAA;
+}
+
+.token.property,
+.token.constant,
+.token.symbol {
+  color: #51b6c4;
+}
+
+.token.builtin,
+.token.class-name {
+  color: #4EC9B0;
+}
+
+.token.selector,
+.token.important,
+.token.atrule,
+.token.keyword {
+  color: #C586C0;
+}
+
+.token.variable,
+.token.string,
+.token.char,
+.token.attr-value,
+.token.variable {
+  color: #CE9169;
+}
+
+.token.regex {
+  color: #d16969;
+}
+
+.token.operator {
+  color: #D4D4D4;
+}
+
+.token.entity,
+.token.url {
+  color: #67cdcc;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+/* diff */
+
+.language-diff {
+
+  .token.inserted {
+    color: #8fce00;
+  }
+}
+
+/* Html */
+
+.language-html :not(.token) {
+  color: #d4d4d4;
+}
+
+.language-html .token.punctuation {
+  color: #808080;
+}
+
+/* TypeScript, Javascript */
+
+.language-ts,
+.language-typescript,
+.language-js,
+.language-javascript {
+  color: #9CDCFE;
+
+  .token.string {
+    color: #CE9169;
+  }
+
+  .token.punctuation {
+    color: #D4D4D4;
+  }
+
+  .script-punctuation + .token.punctuation + .token.punctuation {
+    color: #D4D4D4;
+  }
+
+  .script-punctuation + .token.punctuation + .token.punctuation ~ .token.punctuation {
+    color: #D4D4D4;
+  }
+
+  .script-punctuation + .token.punctuation + .token.punctuation ~ .token.punctuation + .token.punctuation {
+    color: #3F9CD6;
+  }
+
+  .keyword-class,
+  .keyword-const,
+  .keyword-constructor,
+  .keyword-function,
+  .keyword-implements,
+  .keyword-new,
+  .keyword-private,
+  .keyword-public,
+  .keyword-readonly,
+  .keyword-this {
+    color: #569CD6;
+  }
+
+  .keyword-void {
+    color: #4EC9B0;
+  }
+
+  .import-member {
+    color: #9CDCFE;
+  }
+}

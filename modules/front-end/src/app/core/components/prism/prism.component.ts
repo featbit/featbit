@@ -8,8 +8,8 @@ import 'prismjs/components/prism-python';
 import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-csharp';
 import 'prismjs/components/prism-go';
-
-// import more languages on-demand
+import 'prismjs/components/prism-bash';
+import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace'
 
 @Component({
   selector: 'prism',
@@ -20,7 +20,7 @@ export class PrismComponent implements AfterViewInit {
   private _code: string;
   @Input()
   set code(value: string) {
-    this._code = value.trimEnd();
+    this._code = value;
     this.highlight();
   }
 
@@ -33,6 +33,13 @@ export class PrismComponent implements AfterViewInit {
   @ViewChild('codeElement') codeEle: ElementRef;
 
   constructor(private message: NzMessageService) {
+    Prism.plugins.NormalizeWhitespace.setDefaults({
+      'remove-trailing': true,
+      'remove-indent': true,
+      'left-trim': true,
+      'right-trim': true,
+      'remove-initial-line-feed': false
+    });
   }
 
   ngAfterViewInit() {
