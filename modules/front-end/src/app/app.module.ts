@@ -14,10 +14,6 @@ import { FormsModule } from "@angular/forms";
 import { NzSelectModule } from "ng-zorro-antd/select";
 import { AccountProjectEnvResolver } from "@services/account-preject-env-resolver.service";
 
-// ngx-markdown is using Marked parser
-import 'marked'
-import { MarkdownModule } from "ngx-markdown";
-
 @NgModule({
   declarations: [
     AppComponent
@@ -32,7 +28,6 @@ import { MarkdownModule } from "ngx-markdown";
     NzLayoutModule,
     NzMessageModule,
     NzSelectModule,
-    MarkdownModule.forRoot()
   ],
   providers: [
     AccountProjectEnvResolver,
