@@ -1,4 +1,5 @@
 import { startOfMinute } from 'date-fns'
+import { getTimezoneString } from "@utils/index";
 
 export enum PeriodOption {
   Last30m = '30m',
@@ -33,8 +34,8 @@ export interface IVariationInsights {
 export interface IInsightsFilter {
   featureFlagKey: string,
   intervalType: IntervalType,
-  from: string, // included
-  to: string, // included
+  from: number, // included
+  to: number, // included
   timezone: string
 }
 
@@ -42,8 +43,8 @@ export interface IFeatureFlagEndUserFilter {
   query: string,
   featureFlagKey: string,
   variationId: string,
-  from: string, // included
-  to: string, // included
+  from: number, // included
+  to: number, // included
   pageIndex: number;
   pageSize: number;
 }
@@ -82,7 +83,7 @@ export class InsightsFilter {
       intervalType: this.intervalType,
       from,
       to,
-      timezone: this.getTimezoneString()
+      timezone: getTimezoneString()
     }
   }
 
@@ -120,14 +121,7 @@ export class InsightsFilter {
     return days;
   }
 
-  // The result is in Etc/GMT format
-  private getTimezoneString() {
-    const offset = - new Date().getTimezoneOffset() / 60;
-
-    return encodeURIComponent(`Etc/GMT${offset >= 0 ? '-': '+'}${Math.abs(offset)}`);
-  }
-
-  getFromAndTo(): [string, string] {
+  getFromAndTo(): [number, number] {
     let from, to, startDate, endDate;
 
     const today = new Date();

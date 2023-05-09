@@ -143,3 +143,10 @@ export const copyToClipboard = (text: string) => {
     });
   }
 }
+
+// The result is in Etc/GMT format
+export const getTimezoneString = () => {
+  const offset = - new Date().getTimezoneOffset() / 60;
+
+  return encodeURIComponent(`Etc/GMT${offset >= 0 ? '-': '+'}${Math.abs(offset)}`);
+}
