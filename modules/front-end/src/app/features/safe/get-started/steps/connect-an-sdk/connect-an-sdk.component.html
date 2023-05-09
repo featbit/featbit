@@ -1,17 +1,37 @@
-<nz-tabset nzSize="small" nzAnimated="false">
-  <nz-tab nzTitle="Javascript">
-    <prism [code]="jsSnippet" language="javascript"></prism>
-  </nz-tab>
-  <nz-tab nzTitle="Python">
-    <prism [code]="pythonSnippet" language="python"></prism>
-  </nz-tab>
-  <nz-tab nzTitle="Java">
-    <prism [code]="javaSnippet" language="java"></prism>
-  </nz-tab>
-  <nz-tab nzTitle="CSharp">
-    <prism [code]="csharpSnippet" language="csharp"></prism>
-  </nz-tab>
-  <nz-tab nzTitle="Go">
-    <prism [code]="goSnippet" language="go"></prism>
-  </nz-tab>
-</nz-tabset>
+<nz-page-header>
+  <nz-page-header-title>Title</nz-page-header-title>
+  <nz-page-header-subtitle>This is a subtitle</nz-page-header-subtitle>
+  <nz-page-header-content>
+    <div nz-row>
+      <div class="content">
+        <p nz-paragraph>
+          Ant Design interprets the color system into two levels: a system-level color system and a product-level
+          color system.
+        </p>
+        <p nz-paragraph>
+          Ant Design's design team preferred to design with the HSB color model, which makes it easier for designers
+          to have a clear psychological expectation of color when adjusting colors, as well as facilitate
+          communication in teams.
+        </p>
+      </div>
+    </div>
+
+    <nz-tabset nzSize="small" nzAnimated="false">
+      <nz-tab nzTitle="Javascript">
+        <prism [code]="jsSnippet" language="javascript"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="Python">
+        <prism [code]="pythonSnippet" language="python"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="Java">
+        <prism [code]="javaSnippet" language="java"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="CSharp">
+        <prism [code]="csharpSnippet" language="csharp"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="Go">
+        <prism [code]="goSnippet" language="go"></prism>
+      </nz-tab>
+    </nz-tabset>
+  </nz-page-header-content>
+</nz-page-header>
