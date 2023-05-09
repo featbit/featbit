@@ -4,9 +4,8 @@
   [nzVisible]="visible"
   nzPlacement="right"
   [nzTitle]="title"
-  [nzWidth]="700"
-  (nzOnClose)="onClose()"
-  [nzFooter]="footer">
+  [nzWidth]="500"
+  (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="form" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <!-- name -->
@@ -75,14 +74,10 @@
         </nz-collapse>
       </div>
     </div>
+    <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
-  </ng-template>
-  <ng-template #footer>
-    <div class="drawer-footer-btn">
-      <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
-    </div>
   </ng-template>
 </nz-drawer>
 
