@@ -1,23 +1,19 @@
-<div class="steps-wrapper">
-  <nz-card nzBorderless>
-    <div class="step-btns">
-      <nz-steps [nzCurrent]="currentStep" (nzIndexChange)="onStepChange($event)">
-        <nz-step></nz-step>
-        <nz-step></nz-step>
-        <nz-step></nz-step>
-      </nz-steps>
-    </div>
+<nz-card nzBorderless>
+  <nz-steps nzType="navigation" [nzCurrent]="currentStep" (nzIndexChange)="onStepChange($event)">
+    <nz-step nzTitle="Create A Flag" nzDescription="Starts with a flag"></nz-step>
+    <nz-step nzTitle="Connect An SDK" nzDescription="Integrate with your app"></nz-step>
+    <nz-step nzTitle="Test your application" nzDescription="Verify SDK connected"></nz-step>
+  </nz-steps>
 
-    <div class="steps">
-      <div *ngIf="currentStep === 0">
-        <create-feature-flag [flag]="flag" (onComplete)="onFlagCreated($event)"></create-feature-flag>
-      </div>
-      <div *ngIf="currentStep === 1">
-        <connect-an-sdk [flagKey]="flag?.key" (onComplete)="goNext()" (onPrev)="goPrev()"></connect-an-sdk>
-      </div>
-      <div *ngIf="currentStep === 2">
-        <test-app [flagKey]="flag?.key" (onComplete)="navigateToFlagList()" (onPrev)="goPrev()"></test-app>
-      </div>
+  <div class="step-content">
+    <div *ngIf="currentStep === 0">
+      <create-feature-flag [flag]="flag" (onComplete)="onFlagCreated($event)"></create-feature-flag>
     </div>
-  </nz-card>
-</div>
+    <div *ngIf="currentStep === 1">
+      <connect-an-sdk [flagKey]="flag?.key" (onComplete)="goNext()" (onPrev)="goPrev()"></connect-an-sdk>
+    </div>
+    <div *ngIf="currentStep === 2">
+      <test-app [flagKey]="flag?.key" (onComplete)="navigateToFlagList()" (onPrev)="goPrev()"></test-app>
+    </div>
+  </div>
+</nz-card>
