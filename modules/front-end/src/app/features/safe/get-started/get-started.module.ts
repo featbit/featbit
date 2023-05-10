@@ -11,7 +11,6 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
 import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { CoreModule } from "@core/core.module";
-import { RecapComponent } from "@features/safe/get-started/recap/recap.component";
 import { NzCardModule } from "ng-zorro-antd/card";
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { ConnectAnSdkComponent } from './steps/connect-an-sdk/connect-an-sdk.component';
@@ -31,7 +30,6 @@ import { NzPageHeaderModule } from "ng-zorro-antd/page-header";
   declarations: [
     GetStartedComponent,
     StepsComponent,
-    RecapComponent,
     ConnectAnSdkComponent,
     CreateFeatureFlagComponent,
     TestAppComponent
