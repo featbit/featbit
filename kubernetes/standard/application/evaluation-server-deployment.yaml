@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: evaluation-server
+  name: evaluation-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evaluation-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: evaluation-server
+    spec:
+      containers:
+        - env:
+            - name: MongoDb__ConnectionString
+              value: mongodb://admin:password@mongodb:27017
+            - name: MongoDb__Database
+              value: featbit
+            - name: Redis__ConnectionString
+              value: redis:6379
+          image: featbit/featbit-evaluation-server:latest
+          name: evaluation-server
+          ports:
+            - containerPort: 5100
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+      restartPolicy: Always
+status: {}
