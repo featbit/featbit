@@ -2,8 +2,46 @@
   <nz-page-header-title>Connect An SDK</nz-page-header-title>
   <nz-page-header-subtitle>Integrate FeatBit into your application</nz-page-header-subtitle>
   <nz-page-header-content>
+    <h5 nz-typography>SDK Configs</h5>
+    <nz-descriptions nzSize="small" nzBordered [nzColumn]="{ xxl: 1, xl: 1, lg: 1, md: 1, sm: 1, xs: 1 }">
+      <nz-descriptions-item nzTitle="SDK endpoint">
+        <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(sdkEndpoint)"></i>
+        {{sdkEndpoint}}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Open API Host">
+        <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(apiHost)"></i>
+        {{apiHost}}
+      </nz-descriptions-item>
+      <nz-descriptions-item nzTitle="Secrets" class="secrets">
+        <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(selectedSecret.value)"></i>
+        <nz-select
+          class="secrets"
+          [(ngModel)]="selectedSecret"
+          i18n-nzPlaceHolder="@@get-started.select-secret"
+          nzPlaceHolder="Select secret"
+          (ngModelChange)="buildSnippets()"
+          [nzCustomTemplate]="secretTemplate"
+          nzOptionHeightPx="36"
+        >
+          <ng-container *ngFor="let secret of env?.secrets">
+            <nz-option nzCustomContent [nzValue]="secret">
+              <span>{{secret.name}}</span>
+              <nz-tag nzColor="geekblue" *ngIf="secret.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
+              <nz-tag nzColor="cyan" *ngIf="secret.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
+              <span>{{secret.value}}</span>
+            </nz-option>
+          </ng-container>
+        </nz-select>
+        <ng-template #secretTemplate let-selected>
+          <span>{{selected.nzValue.name}}</span>
+          <nz-tag nzColor="geekblue" *ngIf="selected.nzValue.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
+          <nz-tag nzColor="cyan" *ngIf="selected.nzValue.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
+          <span>{{selected.nzValue.value}}</span>
+        </ng-template>
+      </nz-descriptions-item>
+    </nz-descriptions>
     <p nz-paragraph>
-      Below is some starter code to integrate FeatBit into your app.
+      Below is some starter code to integrate FeatBit into your app. More languages coming soon!
     </p>
     <nz-tabset nzSize="small" nzAnimated="false">
       <nz-tab nzTitle="Javascript">

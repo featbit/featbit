@@ -1,5 +1,10 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { copyToClipboard } from "@utils/index";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { IEnvironment, ISecret, SecretTypeEnum } from "@shared/types";
+import { getCurrentProjectEnv } from "@utils/project-env";
+import { EnvService } from "@services/env.service";
 
 @Component({
   selector: 'connect-an-sdk',
@@ -9,9 +14,56 @@ import { environment } from 'src/environments/environment';
 export class ConnectAnSdkComponent implements OnChanges {
 
   @Input() flagKey: string = 'the-flag-key';
-  @Input() secret: string = 'the-sdk-secret';
+
+  protected readonly SecretTypeEnum = SecretTypeEnum;
 
   sdkEndpoint: string = environment.evaluationUrl;
+  apiHost: string = environment.url;
+
+  selectedSecret: ISecret;
+  get secret(): string {
+    return this.selectedSecret?.value ?? 'the-sdk-secret';
+  }
+
+  env: IEnvironment;
+
+  constructor(
+    private message: NzMessageService,
+    private envService: EnvService
+  ) {
+    const projectEnv = getCurrentProjectEnv();
+    this.envService.getEnv(projectEnv.projectId, projectEnv.envId).subscribe({
+      next: env => {
+        this.env = env;
+        this.selectedSecret = env.secrets[0];
+        this.buildSnippets();
+      },
+      error: () => {
+        this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
+      }
+    });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // update snippets when flagKey changed
+    if (changes.flagKey) {
+      this.buildSnippets();
+    }
+  }
+
+  buildSnippets() {
+    this.jsSnippet = this.buildJsSnippet();
+    this.pythonSnippet = this.buildPythonSnippet();
+    this.javaSnippet = this.buildJavaSnippet();
+    this.csharpSnippet = this.buildCSharpSnippet();
+    this.goSnippet = this.buildGoSnippet();
+  }
+
+  copyText(text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize`:@@common.copy-success:Copied`)
+    );
+  }
 
   jsSnippet: string;
   pythonSnippet: string;
@@ -24,17 +76,6 @@ export class ConnectAnSdkComponent implements OnChanges {
     name: 'tester',
     group: 'qa'
   };
-
-  ngOnChanges(changes: SimpleChanges): void {
-    // update snippets when flagKey/secret/sdkEndpoint changed
-    if (changes.flagKey || changes.secret || changes.sdkEndpoint) {
-      this.jsSnippet = this.buildJsSnippet();
-      this.pythonSnippet = this.buildPythonSnippet();
-      this.javaSnippet = this.buildJavaSnippet();
-      this.csharpSnippet = this.buildCSharpSnippet();
-      this.goSnippet = this.buildGoSnippet();
-    }
-  }
 
   private buildJsSnippet(): string {
     return `
