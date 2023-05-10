@@ -9,14 +9,14 @@
     </div>
 
     <div class="steps">
-      <div class="step step1" *ngIf="currentStep === 0">
-        <create-feature-flag [flag]="flag" (onComplete)="onStepFlagCreationComplete($event)"></create-feature-flag>
+      <div *ngIf="currentStep === 0">
+        <create-feature-flag [flag]="flag" (onComplete)="onFlagCreated($event)"></create-feature-flag>
       </div>
-      <div class="step step2" *ngIf="currentStep === 1">
-        <connect-an-sdk [secret]="secret?.value" [flagKey]="flag?.key"></connect-an-sdk>
+      <div *ngIf="currentStep === 1">
+        <connect-an-sdk [flagKey]="flag?.key"></connect-an-sdk>
       </div>
-      <div class="step step2" *ngIf="currentStep === 2">
-        <test-app [flagKey]="flag?.key" (onComplete)="onStepTestAppComplete" (onPrev)="toStep(1)"></test-app>
+      <div *ngIf="currentStep === 2">
+        <test-app [flagKey]="flag?.key" (onComplete)="navigateToFlagList()" (onPrev)="goPrev()"></test-app>
       </div>
     </div>
   </nz-card>

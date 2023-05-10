@@ -1,82 +1,39 @@
-import { Component, Input, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import {OrganizationService} from "@services/organization.service";
-import { ISecret } from "@shared/types";
+import { Component } from '@angular/core';
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'steps',
   templateUrl: './steps.component.html',
   styleUrls: ['./steps.component.less']
 })
-export class StepsComponent implements OnDestroy {
+export class StepsComponent {
 
   flag: IFeatureFlag;
 
-  private destroy$: Subject<void> = new Subject();
-
-  @Input() secret: ISecret;
-
   currentStep = 0;
-  currentOrganizationId: string;
-  step0Form: FormGroup;
 
-  constructor(
-    private router: Router,
-    private organizationService: OrganizationService,
-    private msg: NzMessageService,
-    private fb: FormBuilder
-  ) {
-
-    this.step0Form = this.fb.group({
-      organizationName: ['', [Validators.required]],
-      projectName: ['', [Validators.required]]
-    });
-
-    this.organizationService.getCurrentOrganization().subscribe(() => {
-      const { organization } = this.organizationService.getCurrentOrganizationProjectEnv();
-      this.currentOrganizationId = organization.id;
-      this.step0Form.patchValue({
-        organizationName: organization.name
-      });
-    });
+  constructor(private router: Router) {
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  goPrev() {
+    this.currentStep -= 1;
+  }
+
+  goNext() {
+    this.currentStep += 1;
   }
 
   onStepChange(step: number): void {
     this.currentStep = step;
   }
 
-  onStepFlagCreationComplete(flag: IFeatureFlag) {
+  onFlagCreated(flag: IFeatureFlag) {
     this.flag = { ...flag };
-    this.onStepChange(this.currentStep + 1);
+    this.goNext();
   }
 
-  onStepTestAppComplete(flag: IFeatureFlag) {
-    console.log('complete');
-  }
-
-  toStep(step: number) {
-    this.onStepChange(step);
-  }
-
-  done() {
-    const { organizationName, projectName } = this.step0Form.value;
-    const environments = ['Dev', 'Prod'];
-
-    this.organizationService.onboarding({ organizationName, projectName, environments })
-    .subscribe(({ flagKeyName }) => {
-      this.organizationService.setOrganization({ id: this.currentOrganizationId, initialized: true, name: organizationName });
-      this.router.navigateByUrl(`/feature-flags?status=init`);
-    }, _ => {
-      this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
-    })
+  navigateToFlagList() {
+    this.router.navigateByUrl("/feature-flags").then();
   }
 }
