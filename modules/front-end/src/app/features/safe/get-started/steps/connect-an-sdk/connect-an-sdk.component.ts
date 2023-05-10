@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { copyToClipboard } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
@@ -14,6 +14,8 @@ import { EnvService } from "@services/env.service";
 export class ConnectAnSdkComponent implements OnChanges {
 
   @Input() flagKey: string = 'the-flag-key';
+  @Output() onPrev = new EventEmitter<void>();
+  @Output() onComplete = new EventEmitter<void>();
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
 

@@ -13,7 +13,7 @@
         <create-feature-flag [flag]="flag" (onComplete)="onFlagCreated($event)"></create-feature-flag>
       </div>
       <div *ngIf="currentStep === 1">
-        <connect-an-sdk [flagKey]="flag?.key"></connect-an-sdk>
+        <connect-an-sdk [flagKey]="flag?.key" (onComplete)="goNext()" (onPrev)="goPrev()"></connect-an-sdk>
       </div>
       <div *ngIf="currentStep === 2">
         <test-app [flagKey]="flag?.key" (onComplete)="navigateToFlagList()" (onPrev)="goPrev()"></test-app>

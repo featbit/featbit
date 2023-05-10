@@ -111,5 +111,14 @@
         <prism [code]="goSnippet" language="go"></prism>
       </nz-tab>
     </nz-tabset>
+
+    <div class="steps-action">
+      <button class="pre-btn" nz-button nzType="primary" (click)="onPrev.emit()">
+        <span i18n="@@common.prev">Prev</span>
+      </button>
+      <button nz-button nzType="primary" (click)="onComplete.emit()">
+        <span i18n="@@common.next">Next</span>
+      </button>
+    </div>
   </nz-page-header-content>
 </nz-page-header>
