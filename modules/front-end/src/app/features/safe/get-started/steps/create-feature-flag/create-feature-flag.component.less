@@ -1,9 +1,26 @@
 @import "variables";
 
 .create-feature-flag {
+
+  .flag-selector {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px;
+
+    nz-select {
+      min-width: 300px;
+    }
+  }
+
   form {
-    margin: auto;
-    max-width: 600px;
+    display: flex;
+    justify-content: space-evenly;
+    gap: 32px;
+
+    div {
+      flex-grow: 1;
+    }
   }
 
   .default-rule-label {

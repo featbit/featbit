@@ -7,11 +7,15 @@ export interface IFeatureFlagListItem {
   id: string;
   name: string;
   key: string;
+  description: string;
   tags: string[];
   isEnabled: boolean;
   updatedAt: Date;
   variationType: string;
   serves: IVariationOverview,
+
+  // UI only
+  isNew?: boolean
 }
 
 export interface IVariationOverview {

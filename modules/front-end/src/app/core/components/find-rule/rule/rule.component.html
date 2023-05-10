@@ -13,9 +13,9 @@
       [(ngModel)]="selectedProp"
       (ngModelChange)="onPropertyChange()">
       <nz-option nzCustomContent *ngFor="let userProp of filteredProps" [nzValue]="userProp" [nzLabel]="userProp.name">
-        <div class="user-selection-item">
+        <div class="user-selection-item" [class]="{'creation-selection-item': userProp.isNew}">
           <div class="title">
-            <ng-container *ngIf="userProp.isNew" i18n="@@core.components.findrule.rule.create-prop">Create property</ng-container> {{ userProp.name }}
+            <ng-container *ngIf="userProp.isNew" i18n="@@common.create-with-comma">Create:</ng-container> {{ userProp.name }}
           </div>
         </div>
       </nz-option>
