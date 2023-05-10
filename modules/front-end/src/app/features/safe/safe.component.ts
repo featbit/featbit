@@ -16,7 +16,6 @@ export class SafeComponent implements OnInit, OnDestroy {
   public menus: IMenuItem[] = [];
   public auth: IAuthProps;
   public menuExtended: boolean = true;
-  public isGuideVisible = false;
 
   private destory$: Subject<void> = new Subject();
 
@@ -29,10 +28,6 @@ export class SafeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.auth = getAuth();
-
-    this.messageQueueService.subscribe(this.messageQueueService.topics.QUICK_START_GUIDE_ONCLICK, () => {
-      this.isGuideVisible = true;
-    });
   }
 
   ngOnDestroy(): void {
@@ -42,10 +37,6 @@ export class SafeComponent implements OnInit, OnDestroy {
 
   toggleMenu(extended: boolean) {
     this.menuExtended = extended;
-  }
-
-  onCompleteModalClose() {
-    this.isGuideVisible = true;
   }
 
   private setMenus(): void {
@@ -132,9 +123,5 @@ export class SafeComponent implements OnInit, OnDestroy {
 
   public async logout() {
     await this.identityService.doLogoutUser();
-  }
-
-  onGuideDrawerClosed(){
-    this.isGuideVisible = false;
   }
 }

@@ -65,7 +65,6 @@ import { ServeComponent } from "@core/components/find-rule/serve/serve.component
 import { RuleComponent } from "@core/components/find-rule/rule/rule.component";
 import { NzCardModule } from "ng-zorro-antd/card";
 import { TranslationPipe } from "@core/pipes/translation.pipe";
-import { GuideDrawerComponent } from "@core/components/guide-drawer/guide-drawer.component";
 import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-variation-value.pipe";
 import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
@@ -120,7 +119,6 @@ import { PrismComponent } from './components/prism/prism.component';
     ServeComponent,
     RuleComponent,
     GuideComponent,
-    GuideDrawerComponent,
     AuditLogsComponent,
     AuditLogComponent,
     ChangeListComponent,
@@ -210,7 +208,6 @@ import { PrismComponent } from './components/prism/prism.component';
     ServeComponent,
     RuleComponent,
     GuideComponent,
-    GuideDrawerComponent,
     AuditLogsComponent,
     AuditLogComponent,
     ChangeListComponent,

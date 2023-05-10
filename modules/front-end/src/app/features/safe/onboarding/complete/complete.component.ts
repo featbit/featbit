@@ -1,9 +1,9 @@
-import {Component, EventEmitter, OnDestroy, OnInit, Output} from "@angular/core";
-import {ActivatedRoute} from "@angular/router";
+import {Component, OnDestroy, OnInit} from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 import {Subject} from "rxjs";
 import {OrganizationService} from "@services/organization.service";
 import {IOrganization} from "@shared/types";
-
+import { encodeURIComponentFfc } from "@utils/index";
 
 
 @Component({
@@ -14,13 +14,11 @@ import {IOrganization} from "@shared/types";
 export class CompleteComponent implements OnInit, OnDestroy {
   private destroy$: Subject<void> = new Subject();
 
-  @Output()
-  close: EventEmitter<any> = new EventEmitter();
-
   public isVisible: boolean = false;
   public currentOrg: IOrganization;
 
   constructor(
+    private router: Router,
     private route: ActivatedRoute,
     private organizationService: OrganizationService
   ) {
@@ -37,7 +35,7 @@ export class CompleteComponent implements OnInit, OnDestroy {
 
   onClose() {
     this.isVisible = false;
-    this.close.emit();
+    this.router.navigateByUrl(`/get-started`);
   }
 
   ngOnDestroy(): void {
