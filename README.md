@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) 
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.io/)   [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/RealFeatBit) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section --> [![All Contributors](https://img.shields.io/badge/all_contributors-12-orange.svg?style=flat-square)](#contributors-) <!-- ALL-CONTRIBUTORS-BADGE:END --> 
+[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.io/)   [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/RealFeatBit) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section --> [![All Contributors](https://img.shields.io/badge/all_contributors-14-orange.svg?style=flat-square)](#contributors-) <!-- ALL-CONTRIBUTORS-BADGE:END --> 
 
 
 <h3 align="left">
@@ -122,6 +122,8 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
       <td align="center" valign="top" width="14.28%"><a href="https://michaelyuhe.zeabur.app/"><img src="https://avatars.githubusercontent.com/u/63531512?v=4?s=100" width="100px;" alt="夏宇航"/><br /><sub><b>夏宇航</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=MichaelYuhe" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=Michaelg22" title="Medal">🥇</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://linktr.ee/exilon"><img src="https://avatars.githubusercontent.com/u/80382462?v=4?s=100" width="100px;" alt="Exilon"/><br /><sub><b>Exilon</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=Exilon24" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/fMoro1999"><img src="https://avatars.githubusercontent.com/u/49589241?v=4?s=100" width="100px;" alt="Francesco Moro"/><br /><sub><b>Francesco Moro</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=fMoro1999" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://webstaurantstore.com"><img src="https://avatars.githubusercontent.com/u/128187904?v=4?s=100" width="100px;" alt="rbrennan"/><br /><sub><b>rbrennan</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=wss-rbrennan" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mucoban"><img src="https://avatars.githubusercontent.com/u/80916997?v=4?s=100" width="100px;" alt="Mücahit Çoban"/><br /><sub><b>Mücahit Çoban</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=mucoban" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
