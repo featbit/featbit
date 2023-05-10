@@ -32,41 +32,44 @@ import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 
 @NgModule({
-  declarations: [
-    OrganizationsComponent,
-    OrganizationComponent,
-    ProfileComponent,
-    ProjectComponent,
-    ProjectFilterPipe
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    CoreModule,
-    NzFormModule,
-    NzTabsModule,
-    NzIconModule,
-    NzInputModule,
-    NzButtonModule,
-    NzMessageModule,
-    NzDividerModule,
-    NzTypographyModule,
-    NzModalModule,
-    NzSelectModule,
-    NzTableModule,
-    NzSpinModule,
-    NzCardModule,
-    NzDescriptionsModule,
-    NzSpaceModule,
-    NzPopconfirmModule,
-    NzRadioModule,
-    NzSkeletonModule,
-    NzTagModule,
-    ScrollingModule,
-    ReactiveFormsModule,
-    OrganizationsRoutingModule,
-    CoreModule,
-    NzToolTipModule
-  ]
+    declarations: [
+        OrganizationsComponent,
+        OrganizationComponent,
+        ProfileComponent,
+        ProjectComponent,
+        ProjectFilterPipe
+    ],
+    exports: [
+        OrganizationComponent
+    ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        CoreModule,
+        NzFormModule,
+        NzTabsModule,
+        NzIconModule,
+        NzInputModule,
+        NzButtonModule,
+        NzMessageModule,
+        NzDividerModule,
+        NzTypographyModule,
+        NzModalModule,
+        NzSelectModule,
+        NzTableModule,
+        NzSpinModule,
+        NzCardModule,
+        NzDescriptionsModule,
+        NzSpaceModule,
+        NzPopconfirmModule,
+        NzRadioModule,
+        NzSkeletonModule,
+        NzTagModule,
+        ScrollingModule,
+        ReactiveFormsModule,
+        OrganizationsRoutingModule,
+        CoreModule,
+        NzToolTipModule
+    ]
 })
 export class OrganizationsModule { }
