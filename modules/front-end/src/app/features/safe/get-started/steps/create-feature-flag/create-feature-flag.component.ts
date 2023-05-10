@@ -160,14 +160,18 @@ export class CreateFeatureFlagComponent implements OnInit{
     keyControl.markAsDirty();
   }
 
-  createFlag() {
-    this.featureFlagService.create(this.form.value).subscribe({
-      next: (result: IFeatureFlag) => {
-        this.onComplete.emit(result);
-      },
-      error: (err) => {
-        this.message.error(err.error);
-      }
-    });
+  next() {
+    if (this.isCreatingFlag) {
+      this.featureFlagService.create(this.form.value).subscribe({
+        next: (result: IFeatureFlag) => {
+          this.onComplete.emit(result);
+        },
+        error: (err) => {
+          this.message.error(err.error);
+        }
+      });
+    } else {
+      this.onComplete.emit(this.flag);
+    }
   }
 }
