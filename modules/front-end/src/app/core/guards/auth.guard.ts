@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { getAuth } from '@shared/utils';
-import { LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
+import { GET_STARTED, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
 import { OrganizationService } from '@services/organization.service';
 import {PermissionsService} from "@services/permissions.service";
 
@@ -32,6 +32,11 @@ export class AuthGuard implements CanActivate {
         const orgProj = this.accountService.getCurrentOrganizationProjectEnv();
         if (orgProj.organization?.initialized === false) {
           return this.router.parseUrl('/onboarding');
+        } else if (!url.startsWith("/get-started")) {
+          const getStarted = localStorage.getItem(GET_STARTED());
+          if (!getStarted) {
+            return this.router.parseUrl('/get-started');
+          }
         }
       }
 

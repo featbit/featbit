@@ -6,7 +6,7 @@ import {
   CURRENT_PROJECT,
   IDENTITY_TOKEN,
   LOGIN_REDIRECT_URL,
-  USER_PROFILE
+  USER_PROFILE, GET_STARTED
 } from "@utils/localstorage-keys";
 import { Router } from "@angular/router";
 import { OrganizationService } from '@services/organization.service';
@@ -67,6 +67,7 @@ export class IdentityService {
   async doLogoutUser(keepOrgProject: boolean = true) {
     const storageToKeep = {
       [CURRENT_LANGUAGE()]: localStorage.getItem(CURRENT_LANGUAGE()),
+      [GET_STARTED()]: localStorage.getItem(GET_STARTED()),
     };
 
     if (keepOrgProject) {

@@ -23,5 +23,4 @@ export class LoginGuard implements CanActivate {
     if (!token) return true;
     return this.router.parseUrl('/');
   }
-
 }

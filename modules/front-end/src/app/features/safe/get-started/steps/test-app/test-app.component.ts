@@ -1,8 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { NzProgressStatusType } from "ng-zorro-antd/progress";
 import { FeatureFlagService } from "@services/feature-flag.service";
-import { InsightsFilter, IntervalType } from "@features/safe/feature-flags/details/insights/types";
+import { IntervalType } from "@features/safe/feature-flags/details/insights/types";
 import { getTimezoneString } from "@utils/index";
+import { GET_STARTED } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'test-app',
@@ -94,5 +95,10 @@ export class TestAppComponent implements OnInit{
     this.startTime = new Date().getTime();
     this.refreshStatus();
     this.refreshProgress();
+  }
+
+  startJourney() {
+    localStorage.setItem(GET_STARTED(), 'true');
+    this.onComplete.emit();
   }
 }
