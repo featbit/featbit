@@ -7,12 +7,10 @@
 
   <nz-page-header *ngIf="isFlagListInitialized; else loadingTem;">
     <nz-page-header-title>Create a Feature Flag</nz-page-header-title>
-    <nz-page-header-subtitle>
-      A Feature Flag controls what you want to release, who receive it and how it will be delivered.
-    </nz-page-header-subtitle>
     <nz-page-header-content>
       <div *ngIf="isFlagListInitialized && !isCreatingFlag" class="flag-selector">
-        <div>Select an existing Flag or type the name to create a new one</div>
+        <p nz-typography>A Feature Flag controls what you want to release, who receive it and how it will be delivered.</p>
+        <p nz-typography>Select an existing Flag or type the name to create a new one</p>
 
         <nz-select
           i18n-nzPlaceHolder="@@common.select-or-create-ff"
