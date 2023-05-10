@@ -114,6 +114,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "wss-rbrennan",
+      "name": "rbrennan",
+      "avatar_url": "https://avatars.githubusercontent.com/u/128187904?v=4",
+      "profile": "http://webstaurantstore.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "mucoban",
+      "name": "Mücahit Çoban",
+      "avatar_url": "https://avatars.githubusercontent.com/u/80916997?v=4",
+      "profile": "https://github.com/mucoban",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
