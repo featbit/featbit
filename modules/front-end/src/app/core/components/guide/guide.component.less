@@ -1,11 +1,14 @@
+@import "variables";
+
 .guide-body {
   .block {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    padding: 24px 24px;
 
     &:not(:first-child) {
-      margin-top: 32px;
+      border-top: 1px solid @grey40-color;
     }
 
     ul {
