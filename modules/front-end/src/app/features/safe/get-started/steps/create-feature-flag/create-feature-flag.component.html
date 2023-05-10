@@ -68,15 +68,9 @@
                 <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name"
                        placeholder="Key can be auto-generated from name"/>
                 <ng-template #keyErrorTpl let-control>
-                  <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be
-                    empty
-                  </ng-container>
-                  <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been
-                    used
-                  </ng-container>
-                  <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation
-                    failed
-                  </ng-container>
+                  <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+                  <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
+                  <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
                 </ng-template>
               </nz-form-control>
             </nz-form-item>
@@ -93,10 +87,9 @@
           <div>
             <nz-form-item>
               <nz-form-label
-                i18n-nzTooltipTitle="@@common.data-type"
+                i18n-nzTooltipTitle="@@common.data-type-tooltip"
                 nzTooltipTitle="We currently support string, boolean, number and json types, you can modify it in the feature flag detail page later"
-                i18n="@@common.data-type">Data type
-              </nz-form-label>
+                i18n="@@common.data-type">Data type</nz-form-label>
               <nz-form-control>
                 <input nz-input [disabled]="true" [value]="variationTypeBoolean"/>
               </nz-form-control>
@@ -105,8 +98,7 @@
               <nz-form-label
                 i18n-nzTooltipTitle="@@common.default-serve-tooltip"
                 nzTooltipTitle="Define which variation users will see by default when the flag is Enabled or Disabled"
-                i18n="@@common.default-rule">Default rule
-              </nz-form-label>
+                i18n="@@common.default-rule">Default rule</nz-form-label>
               <nz-form-control>
                 <div class="default-rule">
                   <span class="default-rule-label" i18n="@@common.serve-if-enabled">If the flag is Enabled, serve</span>
