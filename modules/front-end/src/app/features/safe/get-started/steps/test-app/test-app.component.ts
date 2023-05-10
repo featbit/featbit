@@ -56,7 +56,7 @@ export class TestAppComponent implements OnInit{
         } else {
           this.refreshStatus();
         }
-      }, 1000);
+      }, 5000);
     }
   }
 
