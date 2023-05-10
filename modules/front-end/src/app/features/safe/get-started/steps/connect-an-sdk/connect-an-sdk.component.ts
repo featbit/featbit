@@ -195,7 +195,9 @@ const string secret = "${this.secret}";
 var client = new FbClient(secret);
 if (!client.Initialized)
 {
-    Console.WriteLine("FbClient failed to initialize. All Variation* calls returns default value...");
+    Console.WriteLine(
+        "FbClient failed to initialize. All Variation calls will use fallback value."
+    );
 }
 else
 {
@@ -243,7 +245,8 @@ func main() {
 
     defer func() {
         if client != nil {
-            // ensure that the SDK shuts down cleanly and has a chance to deliver events to FeatBit before the program exits
+            // ensure that the SDK shuts down cleanly and has a chance to deliver events
+            // to FeatBit before the program exits
             _ = client.Close()
         }
     }()

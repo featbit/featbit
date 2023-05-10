@@ -37,6 +37,7 @@ export class PrismComponent implements AfterViewInit {
       'remove-trailing': true,
       'remove-indent': true,
       'left-trim': true,
+      'break-lines': 100,
       'right-trim': true,
       'remove-initial-line-feed': false
     });
