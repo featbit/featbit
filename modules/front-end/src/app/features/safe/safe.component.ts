@@ -4,7 +4,6 @@ import { IAuthProps } from '@shared/types';
 import { IMenuItem } from '@core/components/menu/menu';
 import { getAuth } from '@shared/utils';
 import { IdentityService } from "@services/identity.service";
-import { MessageQueueService } from "@services/message-queue.service";
 
 @Component({
   selector: 'app-safe',
@@ -19,10 +18,7 @@ export class SafeComponent implements OnInit, OnDestroy {
 
   private destory$: Subject<void> = new Subject();
 
-  constructor(
-    private identityService: IdentityService,
-    private messageQueueService: MessageQueueService
-  ) {
+  constructor(private identityService: IdentityService) {
     this.setMenus();
   }
 
@@ -42,17 +38,17 @@ export class SafeComponent implements OnInit, OnDestroy {
   private setMenus(): void {
     this.menus = [
       {
-        title: $localize `:@@menu.get-started:Get started`,
-        icon: 'icons:icon-switch',
+        title: $localize `:@@menu.get-started:Get Started`,
+        icon: 'icons:icon-get-started',
         path: '/get-started'
       },
       {
-        title: $localize `:@@menu.FF:Feature flags`,
+        title: $localize `:@@menu.FF:Feature Flags`,
         icon: 'icons:icon-switch',
         path: '/feature-flags'
       },
       {
-        title: $localize `:@@menu.end-users:End users`,
+        title: $localize `:@@menu.end-users:End Users`,
         icon: 'icons:icon-switch-user',
         path: '/users'
       },
@@ -67,12 +63,12 @@ export class SafeComponent implements OnInit, OnDestroy {
         path: '/experiments'
       },
       {
-        title: $localize `:@@menu.data-sync:Data sync`,
+        title: $localize `:@@menu.data-sync:Data Sync`,
         icon: 'icons:icon-data-sync',
         path: '/data-sync'
       },
       {
-        title: $localize `:@@auditlogs.audit-logs:Audit logs`,
+        title: $localize `:@@auditlogs.audit-logs:Audit Logs`,
         icon: 'audit',
         path: '/audit-logs'
       },
@@ -112,7 +108,7 @@ export class SafeComponent implements OnInit, OnDestroy {
         path: '/integrations/access-tokens',
         children: [
           {
-            title: $localize `:@@menu.integrations.access-tokens:Access tokens`,
+            title: $localize `:@@menu.integrations.access-tokens:Access Tokens`,
             icon: '',
             path: '/integrations/access-tokens'
           }
