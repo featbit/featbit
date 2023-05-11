@@ -47,26 +47,15 @@ Apply each manifest individually. The commands in powershell scripts can be used
 
 **Port Forwarding**
 
-Get the pod name for the api server and set up port forwarding, ex.
-```
-kubectl port-forward pods/api-server-559957f76d-9xhxm 5000:5000 -n featbit
-```
+*Port forwarding is not needed when using an ingress*
 
-Get the pod name for the evaluation server and set up port forwarding, ex.
-```
- kubectl port-forward pods/evaluation-server-666496bf58-lnk8r 5100:5100 -n featbit
-```
+With kubectl you can forward to a pod, deployment, replicaset, or service. These examples use services 
 
-Get the pod name for the evaluation server and set up port forwarding, ex.
 ```
- kubectl port-forward pods/evaluation-server-666496bf58-lnk8r 5100:5100 -n featbit
+kubectl port-forward services/api-server 5000:5000 -n featbit
+kubectl port-forward services/evaluation-server 5100:5100 -n featbit
+kubectl port-forward services/ui 8081:8081 -n featbit
 ```
-
-Get the pod name for the ui server and set up port forwarding, ex.
-```
- kubectl port-forward pods/ui-67cf6899b4-pt9l4 8080:80 -n featbit
-```
-
 
 **Ingress**
 
