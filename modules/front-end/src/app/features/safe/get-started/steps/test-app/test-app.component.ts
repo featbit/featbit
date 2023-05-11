@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { NzProgressStatusType } from "ng-zorro-antd/progress";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { IntervalType } from "@features/safe/feature-flags/details/insights/types";
@@ -10,7 +10,7 @@ import { GET_STARTED } from "@utils/localstorage-keys";
   templateUrl: './test-app.component.html',
   styleUrls: ['./test-app.component.less']
 })
-export class TestAppComponent implements OnInit{
+export class TestAppComponent implements OnInit, OnDestroy {
 
   @Input() flagKey: string = 'the-flag-key';
 
@@ -30,39 +30,56 @@ export class TestAppComponent implements OnInit{
   statusException = 'exception' as NzProgressStatusType;
   statusActive = 'active' as NzProgressStatusType;
 
-  constructor(private featureFlagService: FeatureFlagService,) {
+  updateProgressTimer: number;
+  updateStatusTimer: number;
+
+  constructor(private featureFlagService: FeatureFlagService) {
   }
 
-  private refreshProgress() {
+  ngOnInit() {
+    this.progress = 0;
+    this.normalizedProgress = 0;
+    this.status = this.statusActive;
+    this.startTime = new Date().getTime();
+    this.startRefreshStatus();
+    this.startRefreshProgress();
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.updateProgressTimer);
+    clearTimeout(this.updateStatusTimer);
+  }
+
+  private startRefreshProgress() {
     if (this.status === this.statusSuccess) {
       this.progress = 100;
       this.normalizedProgress = 100;
-    } else if(this.status === this.statusActive && this.progress < 100) {
-      setTimeout(async () => {
+    } else if (this.status === this.statusActive && this.progress < 100) {
+      this.updateProgressTimer = setTimeout(async () => {
         this.progress = Math.min(this.progress + this.progressRefreshInterval / this.progressTimeout * 100, 100);
         this.normalizedProgress = Math.trunc(this.progress);
-        this.refreshProgress();
+        this.startRefreshProgress();
       }, this.progressRefreshInterval);
     } else {
       this.status = this.statusException;
     }
   }
 
-  private refreshStatus() {
+  private startRefreshStatus() {
     if (this.status === this.statusActive && this.progress < 100) {
-      setTimeout(async () => {
+      this.updateStatusTimer = setTimeout(async () => {
         const hasEvents = await this.flagHasEvents();
         if (hasEvents) {
           this.status = this.statusSuccess;
         } else {
-          this.refreshStatus();
+          this.startRefreshStatus();
         }
       }, 5000);
     }
   }
 
-  private flagHasEvents (): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+  private flagHasEvents(): Promise<boolean> {
+    return new Promise((resolve, _) => {
       const filter = {
         featureFlagKey: this.flagKey,
         intervalType: IntervalType.Minute,
@@ -82,19 +99,6 @@ export class TestAppComponent implements OnInit{
         }
       })
     });
-  }
-
-  ngOnInit() {
-    this.start();
-  }
-
-  start() {
-    this.progress = 0;
-    this.normalizedProgress = 0;
-    this.status = this.statusActive;
-    this.startTime = new Date().getTime();
-    this.refreshStatus();
-    this.refreshProgress();
   }
 
   startJourney() {
