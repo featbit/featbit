@@ -59,6 +59,8 @@ export class TestAppComponent implements OnInit, OnDestroy {
       this.progress = 100;
       this.normalizedProgress = 100;
     } else if (this.status === this.statusActive && this.progress < 100) {
+      // The warning is nodejs related, it's incorrect, it's ignored
+      // @ts-ignore
       this.updateProgressTimer = setTimeout(async () => {
         this.progress = Math.min(this.progress + this.progressRefreshInterval / this.progressTimeout * 100, 100);
         this.normalizedProgress = Math.trunc(this.progress);
@@ -75,6 +77,8 @@ export class TestAppComponent implements OnInit, OnDestroy {
     }
 
     if (this.status === this.statusActive && this.progress < 100) {
+      // The warning is nodejs related, it's incorrect, it's ignored
+      // @ts-ignore
       this.updateStatusTimer = setTimeout(async () => {
         const hasEvents = await this.flagHasEvents();
         if (hasEvents) {
