@@ -12,14 +12,14 @@ const routes: Routes = [
         path: 'get-started',
         loadChildren: () => import("./get-started/get-started.module").then(m => m.GetStartedModule),
         data: {
-          breadcrumb: $localize `:@@get-started:Get started`
+          breadcrumb: $localize `:@@get-started:Get Started`
         },
       },
       {
         path: 'feature-flags',
         loadChildren: () => import("./feature-flags/feature-flags.module").then(m => m.FeatureFlagsModule),
         data: {
-          breadcrumb: $localize `:@@feature-flags:Feature flags`
+          breadcrumb: $localize `:@@feature-flags:Feature Flags`
         },
       },
       {
@@ -47,14 +47,14 @@ const routes: Routes = [
         path: 'data-sync',
         loadChildren: () => import("./data-sync/data-sync.module").then(m => m.DataSyncModule),
         data: {
-          breadcrumb: $localize `:@@data-sync:Data sync`
+          breadcrumb: $localize `:@@data-sync:Data Sync`
         },
       },
       {
         path: 'audit-logs',
         loadChildren: () => import("./audit-logs/audit-logs.module").then(m => m.AuditLogsModule),
         data: {
-          breadcrumb: $localize `:@@auditlogs.audit-logs:Audit logs`
+          breadcrumb: $localize `:@@auditlogs.audit-logs:Audit Logs`
         },
       },
       {
