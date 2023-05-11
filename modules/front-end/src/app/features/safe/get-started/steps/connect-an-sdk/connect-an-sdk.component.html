@@ -112,4 +112,16 @@
       </nz-tab>
     </nz-tabset>
   </nz-page-header-content>
+  <nz-page-header-extra>
+    <nz-button-group>
+      <button nz-button nzType="link" (click)="onPrev.emit()">
+        <span nz-icon nzType="left"></span>
+        <span i18n="@@common.prev">Prev</span>
+      </button>
+      <button nz-button nzType="link">
+        <span i18n="@@common.next" (click)="onComplete.emit()">Next</span>
+        <span nz-icon nzType="right"></span>
+      </button>
+    </nz-button-group>
+  </nz-page-header-extra>
 </nz-page-header>

@@ -33,15 +33,17 @@
           </button>
         </div>
       </div>
-
-      <div class="steps-action">
-        <button class="pre-btn" nz-button nzType="primary" (click)="onPrev.emit()">
+    </nz-page-header-content>
+    <nz-page-header-extra>
+      <nz-button-group>
+        <button nz-button nzType="link" (click)="onPrev.emit()">
+          <span nz-icon nzType="left"></span>
           <span i18n="@@common.prev">Prev</span>
         </button>
-        <button nz-button nzType="primary" (click)="startJourney()">
-          <span i18n="@@common.start-your-journey">Start your journey</span>
+        <button nz-button nzType="link">
+          <span i18n="@@common.next" (click)="startJourney()">Start your journey</span>
         </button>
-      </div>
-    </nz-page-header-content>
+      </nz-button-group>
+    </nz-page-header-extra>
   </nz-page-header>
 </div>

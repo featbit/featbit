@@ -111,12 +111,14 @@
           </div>
         </form>
       </div>
-
-      <div class="steps-action">
-        <button nz-button nzType="primary" [disabled]="!isNextEnabled" (click)="next()">
-          <span i18n="@@common.next">Next</span>
-        </button>
-      </div>
     </nz-page-header-content>
+    <nz-page-header-extra>
+      <nz-button-group>
+        <button nz-button nzType="link" [disabled]="!isNextEnabled" (click)="next()">
+          <span i18n="@@common.next">Next</span>
+          <span nz-icon nzType="right"></span>
+        </button>
+      </nz-button-group>
+    </nz-page-header-extra>
   </nz-page-header>
 </div>
