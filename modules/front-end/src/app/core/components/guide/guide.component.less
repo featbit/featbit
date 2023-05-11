@@ -1,22 +1,43 @@
 @import "variables";
 
-.guide-body {
+nz-card {
   border-radius: 12px;
-  overflow: hidden;
+}
 
-  .block {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 24px 24px;
-    background-color: @white;
+.block {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 0 12px;
 
-    &:not(:first-child) {
-      border-top: 1px solid @grey30-color;
-    }
-
-    ul {
-      list-style-type: decimal;
-    }
+  &:last-of-type {
+    padding-bottom: 12px;
   }
+}
+
+h4 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #88929d;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 12px;
+
+  &:last-of-type {
+    margin-bottom: 8px;
+  }
+}
+
+ol {
+  padding-left: 2em;
+  margin-bottom: 12px;
+
+  li + li {
+    margin-top: 0.25em;
+  }
+}
+
+a:hover {
+  text-decoration: underline;
 }
