@@ -24,10 +24,6 @@ export class StepsComponent {
     this.currentStep += 1;
   }
 
-  onStepChange(step: number): void {
-    this.currentStep = step;
-  }
-
   onFlagCreated(flag: IFeatureFlag) {
     this.flag = { ...flag };
     this.goNext();
