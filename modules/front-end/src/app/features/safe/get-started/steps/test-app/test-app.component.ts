@@ -37,6 +37,10 @@ export class TestAppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.start();
+  }
+
+  start() {
     this.progress = 0;
     this.normalizedProgress = 0;
     this.status = this.statusActive;
@@ -66,6 +70,10 @@ export class TestAppComponent implements OnInit, OnDestroy {
   }
 
   private startRefreshStatus() {
+    if (!this.flagKey) {
+      return;
+    }
+
     if (this.status === this.statusActive && this.progress < 100) {
       this.updateStatusTimer = setTimeout(async () => {
         const hasEvents = await this.flagHasEvents();
