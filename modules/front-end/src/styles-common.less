@@ -122,6 +122,14 @@ app-root {
   }
 }
 
+// link type button(not disabled) on hover style
+.ant-btn.ant-btn-link:not([disabled]):hover {
+  text-decoration: none;
+  border-color: @primary-color;
+  transition-duration: .1s;
+  border-radius: 8px !important;
+}
+
 // no-bottom-line ant-tabs
 .no-bottom-line .ant-tabs-nav::before {
   border: none;
