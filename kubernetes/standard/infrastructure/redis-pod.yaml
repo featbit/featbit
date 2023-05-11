@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: redis
+  name: redis
+spec:
+  containers:
+    - env:
+        - name: ALLOW_EMPTY_PASSWORD
+          value: "yes"
+      image: bitnami/redis:6.2.10
+      name: redis
+      ports:
+        - containerPort: 6379
+      resources: {}
+      volumeMounts:
+        - mountPath: /data
+          name: redis
+  restartPolicy: OnFailure
+  volumes:
+    - name: redis
+      persistentVolumeClaim:
+        claimName: redis
+status: {}
