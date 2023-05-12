@@ -5,7 +5,7 @@
       <div class="wrapper">
         <div class="title">
           <span  *ngIf="status === statusActive">
-            <span i18n="@@get-started.listen-for-sdk-events">Listening for SDK live events for the flag:</span>&nbsp; <span class="flag-key">{{flagKey}}</span>.
+            <span i18n="@@get-started.listen-for-sdk-events">Listening for SDK live events for the flag:</span><span class="flag-key">{{flagKey}}</span>
           </span>
           <span i18n="@@get-started.listen-for-sdk-success" *ngIf="status === statusSuccess">Congratulations, your SDK is successfully set up.</span>
           <span i18n="@@get-started.listen-for-sdk-failure" *ngIf="status === statusException">We were not able to detect any events, please go back to the previous step and make sure you have initialized the SDK with correct options.</span>
