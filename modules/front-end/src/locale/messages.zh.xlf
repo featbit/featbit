@@ -2210,7 +2210,7 @@
         <target>查看</target>
       </trans-unit>
       <trans-unit id="guide.experimentation-documentation" datatype="html">
-        <source>Experimentation Documentation</source>
+        <source> Experimentation Documentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">37</context>
@@ -2234,7 +2234,7 @@
         <target>邀请团队成员</target>
       </trans-unit>
       <trans-unit id="guide.to-your-organization" datatype="html">
-        <source>to your organization</source>
+        <source> to your organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">45</context>
@@ -2250,7 +2250,7 @@
         <target>管理</target>
       </trans-unit>
       <trans-unit id="guide.custom-permissions" datatype="html">
-        <source>custom permissions</source>
+        <source> custom permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">51</context>
