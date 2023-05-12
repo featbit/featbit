@@ -15,7 +15,7 @@ public class ResetPasswordValidator : AbstractValidator<ResetPassword>
     public ResetPasswordValidator()
     {
         RuleFor(x => x.NewPassword)
-            .Length(6).WithErrorCode(ErrorCodes.PasswordTooShort);
+            .MinimumLength(6).WithErrorCode(ErrorCodes.PasswordTooShort);
     }
 }
 
