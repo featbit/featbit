@@ -3,7 +3,7 @@
           [nzTitle]="modalTitle"
           [nzContent]="editModalContent"
           [nzFooter]="editModalFooter"
-          (nzOnCancel)="onClose()">
+          (nzOnCancel)="close()">
   <ng-template #modalTitle>
     <ng-container i18n="@@onboarding.complete.title">We've created a project for</ng-container>
     <span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentOrg.name}}</span>
@@ -22,10 +22,11 @@
   </ng-template>
 
   <ng-template #editModalFooter>
-    <div class="onboarding-complete-footer">
-      <button nz-button nzType="primary" (click)="onClose()">
-        <span i18n="@@common.get-started">Get started</span>
-      </button>
-    </div>
+    <button nz-button nzType="default" (click)="close()">
+      <span i18n="@@common.cancel">Cancel</span>
+    </button>
+    <button nz-button nzType="primary" (click)="getStarted()">
+      <span i18n="@@common.get-started">Get started</span>
+    </button>
   </ng-template>
 </nz-modal>

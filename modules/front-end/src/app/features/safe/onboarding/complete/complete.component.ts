@@ -33,8 +33,12 @@ export class CompleteComponent implements OnInit, OnDestroy {
     })
   }
 
-  onClose() {
+  close() {
     this.isVisible = false;
+  }
+
+  getStarted() {
+    this.close();
     this.router.navigateByUrl(`/get-started`);
   }
 
