@@ -5204,7 +5204,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">38,39</context>
+          <context context-type="linenumber">34,35</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.next" datatype="html">
@@ -5216,10 +5216,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">118</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">41,42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.select-or-create-ff" datatype="html">
@@ -5298,6 +5294,10 @@
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
           <context context-type="linenumber">15</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="get-started.validate-description" datatype="html">
         <source>Verify SDK connected</source>
@@ -5306,11 +5306,39 @@
           <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.retry-connection" datatype="html">
-        <source>Retry connection</source>
+      <trans-unit id="get-started.listen-for-sdk-events" datatype="html">
+        <source>Listening for SDK live events for the flag:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">29,31</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="get-started.listen-for-sdk-success" datatype="html">
+        <source>Congratulations, your SDK is successfully set up.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="get-started.listen-for-sdk-failure" datatype="html">
+        <source>We were not able to detect any events, please go back to the previous step and make sure you have initialized the SDK with correct options.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">11,15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.retry" datatype="html">
+        <source>Retry</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">25,26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.start-journey" datatype="html">
+        <source>Start your journey</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">37,39</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.action" datatype="html">

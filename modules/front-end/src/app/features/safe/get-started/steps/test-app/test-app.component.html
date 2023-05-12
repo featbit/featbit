@@ -1,18 +1,14 @@
 <div class="test-app">
   <nz-page-header>
-    <nz-page-header-title>Test your SDK connection</nz-page-header-title>
+    <nz-page-header-title i18n="@@get-started.validate-title">Test your connection</nz-page-header-title>
     <nz-page-header-content>
       <div class="wrapper">
         <div class="title">
-          <ng-container *ngIf="status === statusActive">
-            Listening for SDK live events for the flag <span class="flag-key">{{flagKey}}</span>.
-          </ng-container>
-          <ng-container *ngIf="status === statusSuccess">
-            Congratulations, your SDK is successfully set up.
-          </ng-container>
-          <ng-container *ngIf="status === statusException">
-            We were not able to detect any events, please go back to the previous step and make sure you have initialized the SDK with correct options.
-          </ng-container>
+          <span  *ngIf="status === statusActive">
+            <span i18n="@@get-started.listen-for-sdk-events">Listening for SDK live events for the flag:</span>&nbsp; <span class="flag-key">{{flagKey}}</span>.
+          </span>
+          <span i18n="@@get-started.listen-for-sdk-success" *ngIf="status === statusSuccess">Congratulations, your SDK is successfully set up.</span>
+          <span i18n="@@get-started.listen-for-sdk-failure" *ngIf="status === statusException">We were not able to detect any events, please go back to the previous step and make sure you have initialized the SDK with correct options.</span>
         </div>
 
         <div>
@@ -26,7 +22,7 @@
 
         <div>
           <button nz-button nzType="primary" *ngIf="status === statusException" (click)="start()">
-            <span i18n="@@common.retry-connection">Retry connection</span>
+            <span i18n="@@common.retry">Retry</span>
           </button>
         </div>
       </div>
@@ -38,7 +34,7 @@
           <span i18n="@@common.prev">Prev</span>
         </button>
         <button nz-button nzType="default">
-          <span i18n="@@common.next" (click)="startJourney()">Start your journey</span>
+          <span i18n="@@common.start-journey" (click)="startJourney()">Start your journey</span>
         </button>
       </nz-button-group>
     </nz-page-header-extra>
