@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { IdentityService } from "@services/identity.service";
 import { IAuthProps, ISecret } from "@shared/types";
 import { getAuth } from "@utils/index";
 
@@ -24,9 +23,5 @@ export class GetStartedComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  onSecretChange(secret: ISecret) {
-    this.secret = secret;
   }
 }
