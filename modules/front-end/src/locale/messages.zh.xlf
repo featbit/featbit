@@ -2311,7 +2311,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">72</context>
         </context-group>
-        <target>通过以下方式联系我们：</target>
+        <target>通过以下方式联系我们:</target>
       </trans-unit>
       <trans-unit id="guide.or" datatype="html">
         <source>or</source>
