@@ -2175,7 +2175,7 @@
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">17</context>
         </context-group>
-        <target>通过Demo进行交互学习</target>
+        <target>通过 Demo 进行交互学习</target>
       </trans-unit>
       <trans-unit id="guide.deploy-with" datatype="html">
         <source>Deploy with</source>
@@ -5731,6 +5731,54 @@
           <context context-type="linenumber">106</context>
         </context-group>
         <target>如果开关被关闭时，返回</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-title" datatype="html">
+        <source>Create A Flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <target>创建开关</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-description" datatype="html">
+        <source>Starts with a flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>开始创建开关</target>
+      </trans-unit>
+      <trans-unit id="get-started.integrate-sdk-title" datatype="html">
+        <source>Connect An SDK</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <target>连接 SDK</target>
+      </trans-unit>
+      <trans-unit id="get-started.integrate-sdk-description" datatype="html">
+        <source>Integrate with your app</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target>设置应用程序</target>
+      </trans-unit>
+      <trans-unit id="get-started.validate-title" datatype="html">
+        <source>Test your application</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>测试应用程序</target>
+      </trans-unit>
+      <trans-unit id="get-started.validate-description" datatype="html">
+        <source>Verify SDK connected</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <target>确认 SDK 连接正确</target>
       </trans-unit>
       <trans-unit id="common.retry-connection" datatype="html">
         <source>Retry connection</source>

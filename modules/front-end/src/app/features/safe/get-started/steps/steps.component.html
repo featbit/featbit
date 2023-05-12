@@ -1,8 +1,20 @@
 <nz-card nzBorderless>
   <nz-steps nzType="navigation" [nzCurrent]="currentStep">
-    <nz-step nzTitle="Create A Flag" nzDescription="Starts with a flag"></nz-step>
-    <nz-step nzTitle="Connect An SDK" nzDescription="Integrate with your app"></nz-step>
-    <nz-step nzTitle="Test your application" nzDescription="Verify SDK connected"></nz-step>
+    <nz-step
+      i18n-nzTitle="@@get-started.create-flag-title"
+      nzTitle="Create A Flag"
+      i18n-nzDescription="@@get-started.create-flag-description"
+      nzDescription="Starts with a flag"></nz-step>
+    <nz-step
+      i18n-nzTitle="@@get-started.integrate-sdk-title"
+      nzTitle="Connect An SDK"
+      i18n-nzDescription="@@get-started.integrate-sdk-description"
+      nzDescription="Integrate with your app"></nz-step>
+    <nz-step
+      i18n-nzTitle="@@get-started.validate-title"
+      nzTitle="Test your application"
+      i18n-nzDescription="@@get-started.validate-description"
+      nzDescription="Verify SDK connected"></nz-step>
   </nz-steps>
 
   <div class="step-content">
