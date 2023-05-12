@@ -26,10 +26,10 @@ public partial class RedisMessageConsumer : BackgroundService
         var consumer = _redis.GetSubscriber();
 
         // Subscribe Topics.FeatureFlagChange, Topics.SegmentChange
-        var channels = new RedisChannel(Topics.DataChange, RedisChannel.PatternMode.Pattern);
+        var channels = new RedisChannel(Topics.DataChangePattern, RedisChannel.PatternMode.Pattern);
         var queue = await consumer.SubscribeAsync(channels);
 
-        _logger.LogInformation("Start consuming flag & segment change messages through channel {Channel}.", Topics.DataChange);
+        _logger.LogInformation("Start consuming flag & segment change messages through channel {Channel}.", Topics.DataChangePattern);
         // process messages sequentially. ref: https://stackexchange.github.io/StackExchange.Redis/PubSubOrder.html
         queue.OnMessage(HandleMessageAsync);
 
