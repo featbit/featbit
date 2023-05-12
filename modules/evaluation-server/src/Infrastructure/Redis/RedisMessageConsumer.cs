@@ -26,7 +26,7 @@ public partial class RedisMessageConsumer : BackgroundService
         var consumer = _redis.GetSubscriber();
 
         // Subscribe Topics.FeatureFlagChange, Topics.SegmentChange
-        var channels = new RedisChannel("api-*-change", RedisChannel.PatternMode.Pattern);
+        var channels = new RedisChannel(Topics.DataChange, RedisChannel.PatternMode.Pattern);
         var queue = await consumer.SubscribeAsync(channels);
 
         _logger.LogInformation("Start consuming flag & segment change messages...");
