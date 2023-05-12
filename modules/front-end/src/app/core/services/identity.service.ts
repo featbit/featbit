@@ -56,9 +56,15 @@ export class IdentityService {
           if (redirectUrl) {
             localStorage.removeItem(LOGIN_REDIRECT_URL);
             this.router.navigateByUrl(redirectUrl);
-          } else {
-            this.router.navigateByUrl('/');
+            return;
           }
+
+          if (!localStorage.getItem(GET_STARTED())) {
+            this.router.navigateByUrl('/get-started');
+            return;
+          }
+
+          this.router.navigateByUrl('/');
         }, () => resolve());
       }, () => resolve());
     });

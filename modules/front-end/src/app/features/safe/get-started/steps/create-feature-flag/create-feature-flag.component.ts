@@ -11,6 +11,7 @@ import {
   IFeatureFlagListItem,
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/switch-index";
+import { GET_STARTED } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'create-feature-flag',
@@ -91,6 +92,8 @@ export class CreateFeatureFlagComponent implements OnInit{
   }
 
   ngOnInit() {
+    localStorage.setItem(GET_STARTED(), 'true');
+
     let name: string = '';
     let key: string = '';
     let description: string = '';

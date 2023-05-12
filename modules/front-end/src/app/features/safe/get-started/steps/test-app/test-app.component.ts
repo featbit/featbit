@@ -3,7 +3,6 @@ import { NzProgressStatusType } from "ng-zorro-antd/progress";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { IntervalType } from "@features/safe/feature-flags/details/insights/types";
 import { getTimezoneString } from "@utils/index";
-import { GET_STARTED } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'test-app',
@@ -114,7 +113,6 @@ export class TestAppComponent implements OnInit, OnDestroy {
   }
 
   startJourney() {
-    localStorage.setItem(GET_STARTED(), 'true');
     this.onComplete.emit();
   }
 }
