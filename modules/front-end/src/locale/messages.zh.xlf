@@ -3741,7 +3741,7 @@
         <target>服务错误，请联系运营人员。</target>
       </trans-unit>
       <trans-unit id="auditlogs.audit-logs" datatype="html">
-        <source>Audit logs</source>
+        <source>Audit Logs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/audit-logs-routing.module.ts</context>
           <context context-type="linenumber">9</context>
