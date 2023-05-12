@@ -1,21 +1,20 @@
 <nz-page-header>
-  <nz-page-header-title>Connect An SDK</nz-page-header-title>
-  <nz-page-header-subtitle>Integrate FeatBit into your application</nz-page-header-subtitle>
+  <nz-page-header-title i18n="@@get-started.integrate-sdk-title">Connect An SDK</nz-page-header-title>
+  <nz-page-header-subtitle i18n="@@get-started.integrate-sdk-subtitle">Integrate FeatBit into your application</nz-page-header-subtitle>
   <nz-page-header-content>
-    <h5 nz-typography>SDK Configs</h5>
+    <h5 nz-typography i18n="@@get-started.sdk-configs-title">SDK Configs</h5>
     <nz-descriptions nzSize="small" nzBordered [nzColumn]="1">
-      <nz-descriptions-item nzTitle="SDK endpoint">
+      <nz-descriptions-item i18n-nzTitle="@@get-started.sdk-endpoint" nzTitle="SDK Endpoint">
         <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(sdkEndpoint)"></i>
         {{sdkEndpoint}}
       </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Open API Host">
+      <nz-descriptions-item i18n-nzTitle="@@get-started.open-api-endpoint" nzTitle="Open API Endpoint">
         <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(apiHost)"></i>
         {{apiHost}}
       </nz-descriptions-item>
-      <nz-descriptions-item nzTitle="Secrets" class="secrets">
+      <nz-descriptions-item i18n-nzTitle="@@get-started.secrets" nzTitle="Secrets">
         <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(selectedSecret.value)"></i>
         <nz-select
-          class="secrets"
           [(ngModel)]="selectedSecret"
           i18n-nzPlaceHolder="@@get-started.select-secret"
           nzPlaceHolder="Select secret"
@@ -40,15 +39,15 @@
         </ng-template>
       </nz-descriptions-item>
     </nz-descriptions>
-    <p nz-paragraph>
+    <p nz-paragraph i18n="@@get-started.connect-an-sdk-introduction">
       Below is some starter code to integrate FeatBit into your app. More languages coming soon!
     </p>
     <nz-tabset nzSize="small" nzAnimated="false">
       <nz-tab nzTitle="Javascript">
-        <h5 nz-typography>Installation</h5>
-        <p nz-typography>Install the SDK via npm by running the following command in your terminal.</p>
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
         <prism code="npm install featbit-js-client-sdk" language="bash"></prism>
-        <h5 nz-typography>Quick Start</h5>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
         <p nz-typography>
           The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-js-client-sdk">full javascript sdk doc</a> for more details.
@@ -56,10 +55,10 @@
         <prism [code]="jsSnippet" language="javascript"></prism>
       </nz-tab>
       <nz-tab nzTitle="Python">
-        <h5 nz-typography>Installation</h5>
-        <p nz-typography>Install the SDK via pip by running the following command in your terminal.</p>
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
         <prism code="pip install fb-python-sdk" language="bash"></prism>
-        <h5 nz-typography>Quick Start</h5>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
         <p nz-typography>
           The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-python-sdk">full python sdk doc</a> for more details.
@@ -67,7 +66,7 @@
         <prism [code]="pythonSnippet" language="python"></prism>
       </nz-tab>
       <nz-tab nzTitle="Java">
-        <h5 nz-typography>Installation</h5>
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
         <p nz-typography>Open your project's pom.xml file and add the following dependency.</p>
         <prism code="
           <dependencies>
@@ -82,7 +81,7 @@
           <!-- Or in Gradle -->
           <!-- implementation 'co.featbit:featbit-java-sdk:1.1.1' -->" language="xml">
         </prism>
-        <h5 nz-typography>Quick Start</h5>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
         <p nz-typography>
           The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-java-sdk">full java sdk doc</a> for more details.
@@ -90,10 +89,10 @@
         <prism [code]="javaSnippet" language="java"></prism>
       </nz-tab>
       <nz-tab nzTitle="CSharp">
-        <h5 nz-typography>Installation</h5>
-        <p nz-typography>Install the SDK via dotnet cli by running the following command in your terminal.</p>
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
         <prism code="dotnet add package FeatBit.ServerSdk" language="bash"></prism>
-        <h5 nz-typography>Quick Start</h5>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
         <p nz-typography>
           The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-dotnet-sdk">full csharp sdk doc</a> for more details.
@@ -101,9 +100,10 @@
         <prism [code]="csharpSnippet" language="csharp"></prism>
       </nz-tab>
       <nz-tab nzTitle="Go">
-        <h5 nz-typography>Installation</h5>
-        <p nz-typography>Install the SDK via go cli by running the following command in your terminal.</p>
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
         <prism code="go get github.com/featbit/featbit-go-sdk" language="bash"></prism>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
         <p nz-typography>
           The following code demonstrates the basic usages of the SDK.
           Read the <a target="_blank" href="https://github.com/featbit/featbit-go-sdk">full go sdk doc</a> for more details.
