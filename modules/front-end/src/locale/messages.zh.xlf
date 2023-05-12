@@ -213,7 +213,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -1253,7 +1253,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <target>Key 可以由名称自动生成</target>
       </trans-unit>
@@ -1269,7 +1269,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">67</context>
         </context-group>
         <target>Key 不能为空</target>
       </trans-unit>
@@ -1285,7 +1285,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">70</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <target>该 Key 已经被使用</target>
       </trans-unit>
@@ -1301,7 +1301,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>Key 校验失败</target>
       </trans-unit>
@@ -2093,11 +2093,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
@@ -5113,7 +5113,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <target>数据类型</target>
       </trans-unit>
@@ -5481,7 +5481,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <target>不能超过512个字符</target>
       </trans-unit>
@@ -5676,9 +5676,37 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">118</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <target>下一步</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-title" datatype="html">
+        <source>Create a Feature Flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <target>创建开关</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-paragraph-1" datatype="html">
+        <source>A Feature Flag controls what you want to release, who receive it and how it will be delivered.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target>开关可以控制您想要发布的特性，向谁开放该特性以及如何分发。</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-paragraph-2" datatype="html">
+        <source>Select an existing Flag or type the name to create a new one</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>选择已有开关或者创建一个新的</target>
       </trans-unit>
       <trans-unit id="common.select-or-create-ff" datatype="html">
         <source>Select or create a feature flag</source>
@@ -5692,7 +5720,7 @@
         <source>We currently support string, boolean, number and json types, you can modify it in the feature flag detail page later</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>当前我们支持 string, boolean, number 和 json 四种数据类型，您可以稍后在开关详情页修改数据类型</target>
       </trans-unit>
@@ -5700,7 +5728,7 @@
         <source>Define which variation users will see by default when the flag is Enabled or Disabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">96</context>
         </context-group>
         <target>设置当开关被打开或关闭时用户将默认接收到的返回值</target>
       </trans-unit>
@@ -5708,7 +5736,7 @@
         <source>Default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <target>默认规则</target>
       </trans-unit>
@@ -5716,7 +5744,7 @@
         <source>If the flag is Enabled, serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">100</context>
         </context-group>
         <target>如果开关被打开时，返回</target>
       </trans-unit>
@@ -5724,17 +5752,9 @@
         <source>If the flag is Disabled, serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>如果开关被关闭时，返回</target>
-      </trans-unit>
-      <trans-unit id="get-started.create-flag-title" datatype="html">
-        <source>Create A Flag</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
-          <context context-type="linenumber">5</context>
-        </context-group>
-        <target>创建开关</target>
       </trans-unit>
       <trans-unit id="get-started.create-flag-description" datatype="html">
         <source>Starts with a flag</source>

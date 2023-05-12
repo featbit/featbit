@@ -6,11 +6,11 @@
   </ng-template>
 
   <nz-page-header *ngIf="isFlagListInitialized; else loadingTem;">
-    <nz-page-header-title>Create a Feature Flag</nz-page-header-title>
+    <nz-page-header-title i18n="@@get-started.create-flag-title">Create a Feature Flag</nz-page-header-title>
     <nz-page-header-content>
       <div *ngIf="isFlagListInitialized && !isCreatingFlag" class="flag-selector">
-        <p nz-typography>A Feature Flag controls what you want to release, who receive it and how it will be delivered.</p>
-        <p nz-typography>Select an existing Flag or type the name to create a new one</p>
+        <p nz-typography i18n="@@get-started.create-flag-paragraph-1">A Feature Flag controls what you want to release, who receive it and how it will be delivered.</p>
+        <p nz-typography i18n="@@get-started.create-flag-paragraph-2">Select an existing Flag or type the name to create a new one</p>
 
         <nz-select
           i18n-nzPlaceHolder="@@common.select-or-create-ff"
@@ -58,9 +58,7 @@
               <nz-form-label
                 nzRequired
                 i18n-nzTooltipTitle="@@ff.key-description"
-                nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation">
-                Key
-              </nz-form-label>
+                nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation">Key</nz-form-label>
               <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..."
                                [nzErrorTip]="keyErrorTpl">
                 <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name"
