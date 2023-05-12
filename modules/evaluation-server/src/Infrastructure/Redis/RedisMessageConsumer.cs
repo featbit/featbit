@@ -31,7 +31,7 @@ public partial class RedisMessageConsumer : BackgroundService
 
         _logger.LogInformation(
             "Start consuming flag & segment change messages through channel {Channel}.",
-            Topics.DataChangePattern
+            channels.ToString()
         );
         // process messages sequentially. ref: https://stackexchange.github.io/StackExchange.Redis/PubSubOrder.html
         queue.OnMessage(HandleMessageAsync);
