@@ -130,7 +130,7 @@ if client.initialize:
     user_name = '${this.tester.name}'
     user = {'key': user_key, 'name': user_name}
     detail = client.variation_detail(flag_key, user, default=None)
-    print(f'flag {flag_key} returns {detail.value} for user {user_key}, reason: {detail.reason}')
+    print(f'flag {flag_key} returns {detail.variation} for user {user_key}, reason: {detail.reason}')
 
 # ensure that the SDK shuts down cleanly and has a chance to deliver events
 # to FeatBit before the program exits
