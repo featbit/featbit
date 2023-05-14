@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: da-server
+  name: da-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: da-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: da-server
+    spec:
+      containers:
+        - env:
+            - name: MONGO_HOST
+              value: mongodb
+            - name: MONGO_INITDB_DATABASE
+              value: featbit
+            - name: MONGO_URI
+              value: mongodb://admin:password@mongodb:27017
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+          image: featbit/featbit-data-analytics-server:latest
+          name: da-server
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+      restartPolicy: Always
+status: {}

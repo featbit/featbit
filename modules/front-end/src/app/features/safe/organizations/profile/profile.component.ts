@@ -89,18 +89,24 @@ export class ProfileComponent {
 
     const { currentPassword, confirmPassword } = this.resetPasswordForm.value;
     this.isResettingPassword = true;
-    this.identityService.resetPassword(currentPassword, confirmPassword).subscribe(resetResult => {
-      if (resetResult.success) {
-        this.message.success($localize`:@@org.profile.reset-password-success:Reset password success`);
-        this.resetPasswordForm.reset();
-      } else {
-        let message = $localize`:@@org.profile.reset-password-failed:Reset password failed, reason: [reason].`
-          .replace("[reason]", resetResult.reason);
+    this.identityService.resetPassword(currentPassword, confirmPassword).subscribe({
+      next: (resetResult) => {
+        if (resetResult.success) {
+          this.message.success($localize`:@@org.profile.reset-password-success:Reset password success`);
+          this.resetPasswordForm.reset();
+        } else {
+          let message = $localize`:@@org.profile.reset-password-failed:Reset password failed, reason: [reason].`
+            .replace("[reason]", resetResult.reason);
 
-        this.message.warning(message);
+          this.message.warning(message);
+        }
+
+        this.isResettingPassword = false;
+      },
+      error: () => {
+        this.message.error($localize`:@@common.operation-failed:Operation failed`);
+        this.isResettingPassword = false;
       }
-
-      this.isResettingPassword = false;
     });
   }
 }

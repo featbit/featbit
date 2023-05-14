@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: evaluation-server
+  name: evaluation-server
+spec:
+  ports:
+    - name: "5100"
+      port: 5100
+      targetPort: 5100
+  selector:
+    app: evaluation-server
+status:
+  loadBalancer: {}

@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ui-route
+  namespace: featbit
+spec:
+  entryPoints:
+    - websecure
+  routes:
+  - kind: Rule
+    match: Host(`featbit-ui.local`)
+    services:
+    - name: ui
+      namespace: featbit
+      port: 80
+    middlewares: []

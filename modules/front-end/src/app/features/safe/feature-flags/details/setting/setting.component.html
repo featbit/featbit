@@ -53,8 +53,8 @@
     </div>
     <div class="status-switcher" >
       <div class="switcher">
-        <nz-switch *ngIf="featureFlag.isEnabled" i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off" nz-popconfirm="Are you sure to turn it off? The variation set below would be returned." nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}" (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
-        <nz-switch *ngIf="!featureFlag.isEnabled" i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on" nz-popconfirm="Are you sure to turn it on?  The matching targeting users' or rules' serving variation would be returned" nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}" (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
+        <nz-switch *ngIf="featureFlag.isEnabled" i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off" nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state." nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}" (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
+        <nz-switch *ngIf="!featureFlag.isEnabled" i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on" nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation." nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}" (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
         <span><ng-container i18n="@@ff.ff-is">The feature flag is</ng-container>&nbsp;<nz-tag *ngIf="featureFlag.isEnabled" class="status on">ON</nz-tag><nz-tag *ngIf="!featureFlag.isEnabled" class="status off">OFF</nz-tag></span>
       </div>
       <div class="disabled-variation">
