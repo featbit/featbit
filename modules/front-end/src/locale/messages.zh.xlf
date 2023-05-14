@@ -4922,20 +4922,28 @@
         <target>点击复制</target>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-turn-ff-off" datatype="html">
-        <source>Are you sure to turn it off? The variation set below would be returned.</source>
+        <source>Are you sure to turn it off? The flag will return the variation that you specified for its off state.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">56</context>
         </context-group>
-        <target>确定要将开关设置为 OFF 吗? 设置后将只返回下方设置的开关关闭时的返回值。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <target>确定要关闭开关么？关闭后开关将返回处于关闭状态时的设定值。</target>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-turn-ff-on" datatype="html">
-        <source>Are you sure to turn it on?  The matching targeting users&apos; or rules&apos; serving variation would be returned</source>
+        <source>Are you sure to turn it on? The flag will return the matching targeting users&apos; or rules&apos; serving variation.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">57</context>
         </context-group>
-        <target>确定要将开关设置为 ON 吗? 设置后将按照目标条件匹配用户。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+        <target>确定要打开开关么？打开后开关将按照既定规则匹配用户返回值。</target>
       </trans-unit>
       <trans-unit id="ff.ff-is" datatype="html">
         <source>The feature flag is</source>
@@ -5256,22 +5264,6 @@
           <context context-type="linenumber">76</context>
         </context-group>
         <target>标签</target>
-      </trans-unit>
-      <trans-unit id="ff.idx.are-you-sure-to-disable-ff" datatype="html">
-        <source>Are you sure to turn it off? The variation returned would be changed when it is off</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">98</context>
-        </context-group>
-        <target>确定要关闭该开关吗? 关闭后开关将返回处于关闭状态时的设定值。</target>
-      </trans-unit>
-      <trans-unit id="ff.idx.are-you-sure-to-enable-ff" datatype="html">
-        <source>Are you sure to turn it on? The matching targeting users&apos; or rules&apos; serving variation would be returned</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">105</context>
-        </context-group>
-        <target>确定要开启该开关吗? 开启后将按照目标条件匹配用户。</target>
       </trans-unit>
       <trans-unit id="common.num-variations" datatype="html">
         <source>Variations</source>
