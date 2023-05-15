@@ -3572,7 +3572,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">39,40</context>
+          <context context-type="linenumber">21,22</context>
         </context-group>
         <target>登录</target>
       </trans-unit>
@@ -3592,21 +3592,13 @@
         </context-group>
         <target>非法用户名</target>
       </trans-unit>
-      <trans-unit id="4267710907648326582" datatype="html">
-        <source>password is mandatory</source>
+      <trans-unit id="login.password-not-required-for-demo" datatype="html">
+        <source>The demo environment does not require password.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">19,20</context>
+          <context context-type="linenumber">19,21</context>
         </context-group>
-        <target>请输入密码</target>
-      </trans-unit>
-      <trans-unit id="4809196861118879526" datatype="html">
-        <source>password</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">26,27</context>
-        </context-group>
-        <target>密码</target>
+        <target>演示环境不需要密码</target>
       </trans-unit>
       <trans-unit id="4322589063241191419" datatype="html">
         <source>username and/or password incorrect</source>
