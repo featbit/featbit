@@ -3756,7 +3756,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">71,70</context>
+          <context context-type="linenumber">63,62</context>
         </context-group>
         <target>审计日志</target>
       </trans-unit>
@@ -7241,7 +7241,7 @@
         <source>Get Started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">41,40</context>
+          <context context-type="linenumber">33,32</context>
         </context-group>
         <target>开始使用</target>
       </trans-unit>
@@ -7249,7 +7249,7 @@
         <source>Feature Flags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">46,45</context>
+          <context context-type="linenumber">38,37</context>
         </context-group>
         <target>开关管理</target>
       </trans-unit>
@@ -7257,7 +7257,7 @@
         <source>End Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">51,50</context>
+          <context context-type="linenumber">43,42</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -7265,7 +7265,7 @@
         <source>Segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">56,55</context>
+          <context context-type="linenumber">48,47</context>
         </context-group>
         <target>用户组</target>
       </trans-unit>
@@ -7273,7 +7273,7 @@
         <source>Experiments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">61,60</context>
+          <context context-type="linenumber">53,52</context>
         </context-group>
         <target>数据实验</target>
       </trans-unit>
@@ -7281,7 +7281,7 @@
         <source>Data Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">66,65</context>
+          <context context-type="linenumber">58,57</context>
         </context-group>
         <target>数据同步</target>
       </trans-unit>
@@ -7289,7 +7289,7 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">79,78</context>
+          <context context-type="linenumber">71,70</context>
         </context-group>
         <target>机构管理</target>
       </trans-unit>
@@ -7297,7 +7297,7 @@
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">84,83</context>
+          <context context-type="linenumber">76,75</context>
         </context-group>
         <target>权限管理</target>
       </trans-unit>
@@ -7305,7 +7305,7 @@
         <source>Team</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">89,88</context>
+          <context context-type="linenumber">81,80</context>
         </context-group>
         <target>团队</target>
       </trans-unit>
@@ -7313,7 +7313,7 @@
         <source>Groups</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">94,93</context>
+          <context context-type="linenumber">86,85</context>
         </context-group>
         <target>组</target>
       </trans-unit>
@@ -7321,7 +7321,7 @@
         <source>Policies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">99,98</context>
+          <context context-type="linenumber">91,90</context>
         </context-group>
         <target>策略</target>
       </trans-unit>
@@ -7329,7 +7329,7 @@
         <source>Integrations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">106,105</context>
+          <context context-type="linenumber">98,97</context>
         </context-group>
         <target>服务集成</target>
       </trans-unit>
@@ -7337,7 +7337,7 @@
         <source>Access Tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">111,110</context>
+          <context context-type="linenumber">103,102</context>
         </context-group>
         <target>访问密钥</target>
       </trans-unit>

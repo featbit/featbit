@@ -3499,7 +3499,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">71,70</context>
+          <context context-type="linenumber">63,62</context>
         </context-group>
       </trans-unit>
       <trans-unit id="sync-locally" datatype="html">
@@ -6610,91 +6610,91 @@
         <source>Get Started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">41,40</context>
+          <context context-type="linenumber">33,32</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.FF" datatype="html">
         <source>Feature Flags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">46,45</context>
+          <context context-type="linenumber">38,37</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.end-users" datatype="html">
         <source>End Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">51,50</context>
+          <context context-type="linenumber">43,42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.segments" datatype="html">
         <source>Segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">56,55</context>
+          <context context-type="linenumber">48,47</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.experiments" datatype="html">
         <source>Experiments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">61,60</context>
+          <context context-type="linenumber">53,52</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.data-sync" datatype="html">
         <source>Data Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">66,65</context>
+          <context context-type="linenumber">58,57</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.organization" datatype="html">
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">79,78</context>
+          <context context-type="linenumber">71,70</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.iam" datatype="html">
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">84,83</context>
+          <context context-type="linenumber">76,75</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.iam.team" datatype="html">
         <source>Team</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">89,88</context>
+          <context context-type="linenumber">81,80</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.iam.group" datatype="html">
         <source>Groups</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">94,93</context>
+          <context context-type="linenumber">86,85</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.iam.policies" datatype="html">
         <source>Policies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">99,98</context>
+          <context context-type="linenumber">91,90</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.integrations" datatype="html">
         <source>Integrations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">106,105</context>
+          <context context-type="linenumber">98,97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="menu.integrations.access-tokens" datatype="html">
         <source>Access Tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">111,110</context>
+          <context context-type="linenumber">103,102</context>
         </context-group>
       </trans-unit>
       <trans-unit id="segment.details.segment-not-used" datatype="html">
