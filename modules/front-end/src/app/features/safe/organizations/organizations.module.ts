@@ -39,9 +39,6 @@ import { NzToolTipModule } from "ng-zorro-antd/tooltip";
     ProjectComponent,
     ProjectFilterPipe
   ],
-  exports: [
-    OrganizationComponent
-  ],
   imports: [
     CommonModule,
     FormsModule,

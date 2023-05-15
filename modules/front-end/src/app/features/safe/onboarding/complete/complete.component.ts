@@ -1,19 +1,14 @@
-import {Component, OnDestroy, OnInit} from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import {Subject} from "rxjs";
-import {OrganizationService} from "@services/organization.service";
-import {IOrganization} from "@shared/types";
-import { encodeURIComponentFfc } from "@utils/index";
-
+import { OrganizationService } from "@services/organization.service";
+import { IOrganization } from "@shared/types";
 
 @Component({
   selector: 'onboarding-complete',
   templateUrl: './complete.component.html',
   styleUrls: ['./complete.component.less']
 })
-export class CompleteComponent implements OnInit, OnDestroy {
-  private destroy$: Subject<void> = new Subject();
-
+export class CompleteComponent implements OnInit {
   public isVisible: boolean = false;
   public currentOrg: IOrganization;
 
@@ -27,7 +22,7 @@ export class CompleteComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe(queryMap => {
-      if(queryMap.has('status')) {
+      if (queryMap.has('status')) {
         this.isVisible = queryMap.get('status') === 'init';
       }
     })
@@ -40,10 +35,5 @@ export class CompleteComponent implements OnInit, OnDestroy {
   getStarted() {
     this.close();
     this.router.navigateByUrl(`/get-started`);
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
