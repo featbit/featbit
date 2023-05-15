@@ -17,7 +17,7 @@ public class EnvironmentController : ApiControllerBase
         var project = await Mediator.Send(request);
         return Ok(project);
     }
-    
+
     [HttpPost]
     public async Task<ApiResponse<EnvironmentVm>> CreateAsync(Guid projectId, CreateEnvironment request)
     {

@@ -15,7 +15,7 @@ public class GetEnvironmentHandler : IRequestHandler<GetEnvironment, Environment
         _service = service;
         _mapper = mapper;
     }
-    
+
     public async Task<EnvironmentVm> Handle(GetEnvironment request, CancellationToken cancellationToken)
     {
         var env = await _service.GetAsync(request.Id);
