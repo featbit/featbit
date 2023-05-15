@@ -28,8 +28,8 @@ export class CreateFeatureFlagComponent implements OnInit{
     }
   };
 
-  @Input() flag: IFeatureFlag;
-  @Output() onComplete = new EventEmitter<IFeatureFlag>();
+  @Input() flag: IFeatureFlagListItem;
+  @Output() onComplete = new EventEmitter<IFeatureFlagListItem>();
 
   variationTypeBoolean = 'boolean';
   form: FormGroup;
@@ -88,7 +88,19 @@ export class CreateFeatureFlagComponent implements OnInit{
   }
 
   get isNextEnabled() {
-    return this.isFlagListInitialized && (this.flag || this.form.valid);
+    if (!this.isFlagListInitialized) {
+      return false;
+    }
+
+    if (!this.flag) {
+      return false;
+    }
+
+    if (this.flag.isNew) {
+      return this.form.valid;
+    }
+
+    return true;
   }
 
   ngOnInit() {
@@ -132,9 +144,8 @@ export class CreateFeatureFlagComponent implements OnInit{
   }
 
   onFeatureFlagChange(data: IFeatureFlagListItem) {
-    const flag = { ...data } as any as IFeatureFlag;
+    this.flag = { ...data };
     this.isCreatingFlag = data.isNew;
-    this.flag = flag;
 
     if (this.isCreatingFlag) {
       this.patchForm();
@@ -167,7 +178,7 @@ export class CreateFeatureFlagComponent implements OnInit{
     if (this.isCreatingFlag) {
       this.featureFlagService.create(this.form.value).subscribe({
         next: (result: IFeatureFlag) => {
-          this.onComplete.emit(result);
+          this.onComplete.emit(result as any as IFeatureFlagListItem);
         },
         error: (err) => {
           this.message.error(err.error);

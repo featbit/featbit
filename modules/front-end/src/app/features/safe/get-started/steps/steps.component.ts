@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { Router } from "@angular/router";
+import { IFeatureFlagListItem } from "@features/safe/feature-flags/types/switch-index";
 
 @Component({
   selector: 'steps',
@@ -9,7 +9,7 @@ import { Router } from "@angular/router";
 })
 export class StepsComponent {
 
-  flag: IFeatureFlag;
+  flag: IFeatureFlagListItem;
 
   currentStep = 0;
 
@@ -24,7 +24,7 @@ export class StepsComponent {
     this.currentStep += 1;
   }
 
-  onFlagCreated(flag: IFeatureFlag) {
+  onFlagCreated(flag: IFeatureFlagListItem) {
     this.flag = { ...flag };
     this.goNext();
   }
