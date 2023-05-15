@@ -18,7 +18,7 @@ import { GET_STARTED } from "@utils/localstorage-keys";
   templateUrl: './create-feature-flag.component.html',
   styleUrls: ['./create-feature-flag.component.less']
 })
-export class CreateFeatureFlagComponent implements OnInit{
+export class CreateFeatureFlagComponent implements OnInit {
 
   public compareWith: (obj1: any, obj2: any) => boolean = (obj1: any, obj2: any) => {
     if (obj1 && obj2) {
@@ -119,18 +119,18 @@ export class CreateFeatureFlagComponent implements OnInit{
     this.form = this.fb.group({
       name: [name, Validators.required],
       key: [key, Validators.required, this.flagKeyAsyncValidator],
-      description:[description,Validators.maxLength(512)]
+      description: [description, Validators.maxLength(512)]
     });
   }
 
   patchForm() {
     const { name, key, description } = { ...this.flag };
 
-    this.form.patchValue({
+    setTimeout(() => this.form.patchValue({
       name,
       key,
       description
-    });
+    }), 10);
   }
 
   isFeatureFlagsLoading = false;
