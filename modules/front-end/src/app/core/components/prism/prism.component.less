@@ -1,3 +1,5 @@
+@import "variables";
+
 pre {
   position: relative;
 
@@ -8,5 +10,9 @@ pre {
     top: 14px;
     font-size: 16px;
     color: white;
+
+    &:hover {
+      color: @primary-color;
+    }
   }
 }

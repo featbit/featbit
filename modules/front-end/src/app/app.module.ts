@@ -27,7 +27,7 @@ import { AccountProjectEnvResolver } from "@services/account-preject-env-resolve
     IconsProviderModule,
     NzLayoutModule,
     NzMessageModule,
-    NzSelectModule,
+    NzSelectModule
   ],
   providers: [
     AccountProjectEnvResolver,

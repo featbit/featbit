@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { getAuth } from '@shared/utils';
-import { GET_STARTED, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
+import { LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
 import { OrganizationService } from '@services/organization.service';
 import {PermissionsService} from "@services/permissions.service";
 

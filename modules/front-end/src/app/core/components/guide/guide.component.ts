@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { OrganizationService } from '@services/organization.service';
 import { environment } from 'src/environments/environment';
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'guide',
@@ -11,11 +11,8 @@ export class GuideComponent {
 
   demoUrl: string;
 
-  constructor(
-    private organizationService: OrganizationService
-  ) {
-    const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
-    const envSecret = currentOrganizationProjectEnv?.projectEnv?.envSecret;
+  constructor() {
+    const envSecret = getCurrentProjectEnv().envSecret;
     this.demoUrl = `${environment.demoUrl}?envKey=${envSecret}&evaluationUrl=${environment.evaluationUrl}`;
   }
 }

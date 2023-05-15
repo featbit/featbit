@@ -6,7 +6,8 @@ import {
   CURRENT_PROJECT,
   IDENTITY_TOKEN,
   LOGIN_REDIRECT_URL,
-  USER_PROFILE, GET_STARTED
+  USER_PROFILE,
+  GET_STARTED
 } from "@utils/localstorage-keys";
 import { Router } from "@angular/router";
 import { OrganizationService } from '@services/organization.service';
