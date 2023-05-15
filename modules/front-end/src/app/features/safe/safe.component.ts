@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 import { IAuthProps } from '@shared/types';
 import { IMenuItem } from '@core/components/menu/menu';
 import { getAuth } from '@shared/utils';
@@ -10,13 +9,11 @@ import { IdentityService } from "@services/identity.service";
   templateUrl: './safe.component.html',
   styleUrls: ['./safe.component.less']
 })
-export class SafeComponent implements OnInit, OnDestroy {
+export class SafeComponent implements OnInit {
 
   public menus: IMenuItem[] = [];
   public auth: IAuthProps;
   public menuExtended: boolean = true;
-
-  private destory$: Subject<void> = new Subject();
 
   constructor(private identityService: IdentityService) {
     this.setMenus();
@@ -24,11 +21,6 @@ export class SafeComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.auth = getAuth();
-  }
-
-  ngOnDestroy(): void {
-    this.destory$.next();
-    this.destory$.complete();
   }
 
   toggleMenu(extended: boolean) {
