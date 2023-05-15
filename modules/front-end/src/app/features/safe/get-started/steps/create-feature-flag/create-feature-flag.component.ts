@@ -92,15 +92,11 @@ export class CreateFeatureFlagComponent implements OnInit {
       return false;
     }
 
-    if (!this.flag) {
-      return false;
-    }
-
-    if (this.flag.isNew) {
+    if (this.isCreatingFlag) {
       return this.form.valid;
     }
 
-    return true;
+    return this.flag;
   }
 
   ngOnInit() {
