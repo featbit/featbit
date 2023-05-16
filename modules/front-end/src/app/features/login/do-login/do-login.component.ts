@@ -55,17 +55,17 @@ export class DoLoginComponent implements OnInit {
     this.isLogin = false;
 
     if (!response.success) {
-      this.message.error($localize `username and/or password incorrect` );
+      this.message.error($localize `:@@common.incorrect-email-or-password:Email and/or password incorrect` );
       return;
     }
 
     await this.identityService.doLoginUser(response.data.token);
-    this.message.success($localize `Login with success`);
+    this.message.success($localize `:@@common.login-success:Login with success`);
   }
 
   handleError(_) {
     this.isLogin = false;
 
-    this.message.error($localize `Error occurred, please contact the support.`);
+    this.message.error($localize `:@@common.login-error:Error occurred, please contact the support.`);
   }
 }

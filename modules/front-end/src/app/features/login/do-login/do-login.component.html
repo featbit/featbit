@@ -1,5 +1,5 @@
 <nz-tabset class="no-bottom-line">
-  <nz-tab i18n-nzTitle nzTitle="Login">
+  <nz-tab i18n-nzTitle="@@common.login" nzTitle="Login">
     <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
       <nz-form-item>
         <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
@@ -10,16 +10,16 @@
             <i nz-icon nzType="icons:icon-email"></i>
           </ng-template>
           <ng-template #invalidPhoneNumberOrEmail let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n>username is mandatory</ng-container>
-            <ng-container *ngIf="control.hasError('invalid')" i18n>Illegal username</ng-container>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.email-cannot-be-empty">Email is mandatory</ng-container>
+            <ng-container *ngIf="control.hasError('invalid')" i18n="@@common.invalid-email">Invalid Email</ng-container>
           </ng-template>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-control i18n-nzErrorTip nzErrorTip="password is mandatory">
+        <nz-form-control i18n-nzErrorTip="@@common.password-mandatory" nzErrorTip="password is mandatory">
           <nz-input-group [nzPrefix]="passwordPrefix" [nzSuffix]="suffixTemplate">
             <input
-              i18n-placeholder
+              i18n-placeholder="@@common.password"
               formControlName="password"
               [type]="passwordVisible ? 'text' : 'password'"
               nz-input
@@ -36,7 +36,7 @@
           </ng-template>
         </nz-form-control>
       </nz-form-item>
-      <button type="submit" nz-button nzType="primary" class="submit-btn" [nzLoading]="isLogin" i18n>Login</button>
+      <button type="submit" nz-button nzType="primary" class="submit-btn" [nzLoading]="isLogin" i18n="@@common.login">Login</button>
     </form>
   </nz-tab>
 </nz-tabset>
