@@ -87,7 +87,7 @@ export class CreateFeatureFlagComponent implements OnInit {
     return this.isFlagListInitialized && this.isCreatingFlag;
   }
 
-  get isNextEnabled() {
+  get isNextEnabled(): boolean {
     if (!this.isFlagListInitialized) {
       return false;
     }
@@ -96,7 +96,7 @@ export class CreateFeatureFlagComponent implements OnInit {
       return this.form.valid;
     }
 
-    return this.flag;
+    return !!this.flag;
   }
 
   ngOnInit() {
