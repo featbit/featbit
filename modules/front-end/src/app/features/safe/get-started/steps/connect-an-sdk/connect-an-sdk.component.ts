@@ -20,6 +20,7 @@ export class ConnectAnSdkComponent implements OnChanges {
   protected readonly SecretTypeEnum = SecretTypeEnum;
 
   sdkEndpoint: string = environment.evaluationUrl;
+  streamingEndpoint: string = environment.evaluationUrl?.replace(/^http/, 'ws');
   apiHost: string = environment.url;
 
   selectedSecret: ISecret;
@@ -118,8 +119,8 @@ from fbclient import get, set_config
 from fbclient.config import Config
 
 env_secret = '${this.secret}'
-event_url = 'http://localhost:5100'
-streaming_url = 'ws://localhost:5100'
+event_url = '${this.sdkEndpoint}'
+streaming_url = '${this.streamingEndpoint}'
 
 set_config(Config(env_secret, event_url, streaming_url))
 client = get()
@@ -151,8 +152,8 @@ import java.io.IOException;
 class Main {
     public static void main(String[] args) throws IOException {
         String envSecret = "${this.secret}";
-        String streamUrl = "ws://localhost:5100";
-        String eventUrl = "http://localhost:5100";
+        String eventUrl = "${this.sdkEndpoint}";
+        String streamUrl = "${this.streamingEndpoint}";
 
         FBConfig config = new FBConfig.Builder()
                 .streamingURL(streamUrl)
@@ -190,12 +191,16 @@ class Main {
     return `
 using FeatBit.Sdk.Server;
 using FeatBit.Sdk.Server.Model;
+using FeatBit.Sdk.Server.Options;
 
-// Set secret to your FeatBit SDK secret.
-const string secret = "${this.secret}";
+// setup sdk options
+var options = new FbOptionsBuilder("${this.secret}")
+    .Event(new Uri("${this.sdkEndpoint}"))
+    .Steaming(new Uri("${this.streamingEndpoint}"))
+    .Build();
 
-// Creates a new client instance that connects to FeatBit with the default option.
-var client = new FbClient(secret);
+// creates a new client instance that connects to FeatBit with the custom option.
+var client = new FbClient(options);
 if (!client.Initialized)
 {
     Console.WriteLine(
@@ -241,8 +246,8 @@ import (
 
 func main() {
     envSecret := "${this.secret}"
-    streamingUrl := "ws://localhost:5100"
-    eventUrl := "http://localhost:5100"
+    eventUrl := "${this.sdkEndpoint}"
+    streamingUrl := "${this.streamingEndpoint}"
 
     client, err := featbit.NewFBClient(envSecret, streamingUrl, eventUrl)
 
