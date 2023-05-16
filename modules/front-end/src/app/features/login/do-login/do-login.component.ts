@@ -25,11 +25,9 @@ export class DoLoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.pwdLoginForm = this.fb.group({
-      identity: ['test@featbit.com', [Validators.required, phoneNumberOrEmailValidator]],
+      identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
       password: ['123456', [Validators.required]]
     });
-
-    this.passwordLogin();
   }
 
   passwordLogin() {

@@ -1,4 +1,5 @@
-<div class="message">
-  <i class="warning-icon" *ngIf="type === 'warning'" nz-icon nzType="icons:icon-warning"></i>
+<div class="message" [ngClass]="type">
+  <i *ngIf="type === 'warning'" nz-icon nzType="icons:icon-warning"></i>
+  <i *ngIf="type === 'info'" nz-icon nzType="icons:icon-info-outline"></i>
   {{content}}
 </div>
