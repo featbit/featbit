@@ -22,14 +22,13 @@ import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/i
 })
 export class FeatureFlagService {
   public currentFeatureFlag: IFeatureFlag = null;
-  public envId: string;
 
   get baseUrl() {
-    return `${environment.url}/api/v1/envs/${this.envId}/feature-flags`;
+    const envId = getCurrentProjectEnv().envId;
+    return `${environment.url}/api/v1/envs/${envId}/feature-flags`;
   }
 
   constructor(private http: HttpClient) {
-    this.envId = getCurrentProjectEnv().envId;
   }
 
   public setCurrentFeatureFlag(data: IFeatureFlag) {
