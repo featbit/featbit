@@ -7,8 +7,6 @@
 name: Publish Docker Images
 
 on:
-  release:
-    types: [ created ]
   workflow_dispatch:
     inputs:
       version:
@@ -16,13 +14,12 @@ on:
         required: true
 
 env:
-  TEST_TAG: test
   LATEST_TAG: latest
-  VERSION_TAG: ${{ github.event.inputs.version || github.ref_name }}
-  APP_UI: featbit-ui
-  APP_API: featbit-api-server
-  APP_DA: featbit-data-analytics-server
-  APP_EVAL: featbit-evaluation-server
+  VERSION_TAG: ${{ github.event.inputs.version }}
+  APP_UI: ui-tio
+  APP_API: api-tio
+  APP_DA: da-server-tio
+  APP_EVAL: evaluation-server-tio
 
 jobs:
   build-publish:
@@ -52,7 +49,7 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/front-end"
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
@@ -65,7 +62,7 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/back-end"
           file: ./deploy/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
@@ -78,7 +75,7 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/data-analytics"
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.VERSION_TAG }}
@@ -91,7 +88,7 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/evaluation-server"
           file: ./deploy/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.VERSION_TAG }}
