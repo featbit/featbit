@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import {OrganizationService} from "@services/organization.service";
+import { GET_STARTED } from "@utils/localstorage-keys";
 
 @Component({
   selector: 'init-steps',
@@ -56,8 +57,14 @@ export class StepsComponent implements OnDestroy {
     const environments = ['Dev', 'Prod'];
 
     this.organizationService.onboarding({ organizationName, projectName, environments })
-    .subscribe(({ flagKeyName }) => {
+    .subscribe(() => {
       this.organizationService.setOrganization({ id: this.currentOrganizationId, initialized: true, name: organizationName });
+
+      if (!localStorage.getItem(GET_STARTED())) {
+        this.router.navigateByUrl('/get-started?status=init');
+        return;
+      }
+
       this.router.navigateByUrl(`/feature-flags?status=init`);
     }, _ => {
       this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);

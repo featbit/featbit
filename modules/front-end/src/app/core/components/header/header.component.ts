@@ -162,10 +162,6 @@ export class HeaderComponent implements OnInit {
       .subscribe(projects => this.allProjects = projects);
   }
 
-  onQuickStartGuideClick() {
-    this.messageQueueService.emit(this.messageQueueService.topics.QUICK_START_GUIDE_ONCLICK);
-  }
-
   // copy environment key
   copyText(event, text: string) {
     copyToClipboard(text).then(

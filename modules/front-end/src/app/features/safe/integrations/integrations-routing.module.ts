@@ -13,7 +13,7 @@ const routes: Routes = [
         canActivate: [AccessTokensGuard],
         loadChildren: () => import("./access-tokens/access-tokens.module").then(m => m.AccessTokensModule),
         data: {
-          breadcrumb: $localize `:@@integrations.routing.access-tokens:Access tokens`
+          breadcrumb: $localize `:@@integrations.routing.access-tokens:Access Tokens`
         },
       }
     ]

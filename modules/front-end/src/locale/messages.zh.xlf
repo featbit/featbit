@@ -5,11 +5,11 @@
         <source>Name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">14</context>
+          <context context-type="linenumber">13</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
@@ -98,6 +98,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">185</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">46</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
@@ -189,7 +193,7 @@
         <source>Validating...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">15</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
@@ -208,6 +212,10 @@
           <context context-type="linenumber">203</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
           <context context-type="linenumber">83</context>
         </context-group>
@@ -217,7 +225,7 @@
         <source>Access token name cannot be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <target>访问密钥名称不能为空</target>
       </trans-unit>
@@ -225,7 +233,7 @@
         <source>This access token name is not available</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">19</context>
         </context-group>
         <target>该名称已被使用</target>
       </trans-unit>
@@ -233,7 +241,7 @@
         <source>Type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">26</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
@@ -265,7 +273,7 @@
         <source>Permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -281,7 +289,7 @@
         <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="linenumber">58</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -297,7 +305,7 @@
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">77</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
@@ -321,7 +329,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">80,81</context>
+          <context context-type="linenumber">77,78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
@@ -377,7 +385,7 @@
         <source>Access token created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>成功创建访问秘钥</target>
       </trans-unit>
@@ -385,7 +393,7 @@
         <source>Copy and save this token now, the token value will be masked once you leave the page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">96</context>
         </context-group>
         <target>请复制并保存 Token，一旦离开该页面后，该 Token 将会被隐藏。</target>
       </trans-unit>
@@ -393,7 +401,7 @@
         <source>OK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <target>OK</target>
       </trans-unit>
@@ -689,7 +697,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">70</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
@@ -725,7 +733,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">172</context>
+          <context context-type="linenumber">168</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/prism/prism.component.ts</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -746,6 +758,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
           <context context-type="linenumber">373</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.ts</context>
+          <context context-type="linenumber">66</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -906,6 +922,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
@@ -1149,11 +1169,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">79,80</context>
+          <context context-type="linenumber">76,77</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">110,111</context>
+          <context context-type="linenumber">107,108</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
@@ -1227,6 +1247,10 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">204</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
         <target>Key 可以由名称自动生成</target>
       </trans-unit>
       <trans-unit id="common.key-cannot-be-empty" datatype="html">
@@ -1238,6 +1262,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">206</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">67</context>
         </context-group>
         <target>Key 不能为空</target>
       </trans-unit>
@@ -1251,6 +1279,10 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">207</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
         <target>该 Key 已经被使用</target>
       </trans-unit>
       <trans-unit id="common.key-validation-failed" datatype="html">
@@ -1262,6 +1294,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">208</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>Key 校验失败</target>
       </trans-unit>
@@ -1394,6 +1430,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
           <context context-type="linenumber">100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.ts</context>
+          <context context-type="linenumber">44</context>
         </context-group>
         <target>发生错误，请重试</target>
       </trans-unit>
@@ -1664,6 +1704,10 @@
           <context context-type="linenumber">153</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
+          <context context-type="linenumber">107</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
           <context context-type="linenumber">142</context>
         </context-group>
@@ -1837,13 +1881,21 @@
         </context-group>
         <target>选择用户属性</target>
       </trans-unit>
-      <trans-unit id="core.components.findrule.rule.create-prop" datatype="html">
-        <source>Create property</source>
+      <trans-unit id="common.create-with-comma" datatype="html">
+        <source>Create:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
           <context context-type="linenumber">18</context>
         </context-group>
-        <target>创建属性</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <target>新建</target>
       </trans-unit>
       <trans-unit id="core.components.findrule.rule.select-operation" datatype="html">
         <source>Select operation</source>
@@ -2040,6 +2092,14 @@
           <context context-type="linenumber">215</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">78</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
           <context context-type="linenumber">28</context>
         </context-group>
@@ -2085,35 +2145,27 @@
         </context-group>
         <target>描述</target>
       </trans-unit>
-      <trans-unit id="guide.go-to-doc" datatype="html">
-        <source>Go to documentation</source>
+      <trans-unit id="guide.guides-title-documentation" datatype="html">
+        <source>Documentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">11</context>
+          <context context-type="linenumber">3</context>
         </context-group>
-        <target>访问文档</target>
+        <target>文档</target>
       </trans-unit>
       <trans-unit id="guide.get-started" datatype="html">
-        <source>Get started</source>
+        <source>Getting Started with Quick Demo</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">13</context>
+          <context context-type="linenumber">6</context>
         </context-group>
         <target>快速开始</target>
-      </trans-unit>
-      <trans-unit id="guide.featbit-in-3-min" datatype="html">
-        <source>FeatBit in 3 minutes</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <target>3分钟了解 FeatBit</target>
       </trans-unit>
       <trans-unit id="guide.create-ff" datatype="html">
         <source>Create feature flags for the demo</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">21</context>
+          <context context-type="linenumber">12</context>
         </context-group>
         <target>建立两个功能开关</target>
       </trans-unit>
@@ -2121,85 +2173,153 @@
         <source>Try interactive with the demo</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">26</context>
+          <context context-type="linenumber">17</context>
         </context-group>
-        <target>通过Demo进行交互学习</target>
+        <target>通过 Demo 进行交互学习</target>
       </trans-unit>
-      <trans-unit id="guide.connect-to-sdk" datatype="html">
-        <source>Connect to SDK</source>
+      <trans-unit id="guide.deploy-with" datatype="html">
+        <source>Deploy with</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">23</context>
         </context-group>
-        <target>学习使用SDK</target>
+        <target>将 FeatBit 部署到</target>
       </trans-unit>
-      <trans-unit id="guide.guides-title" datatype="html">
-        <source>How-to guides with demo &amp; SDK</source>
+      <trans-unit id="guide.view-docs-for-our-sdks" datatype="html">
+        <source>View docs for our SDKs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="linenumber">28</context>
         </context-group>
-        <target>实战案例</target>
+        <target>查看 SDKs 文档</target>
       </trans-unit>
-      <trans-unit id="guide.testing-in-production" datatype="html">
-        <source>Testing in production</source>
+      <trans-unit id="guide.view-docs-for-our-open-apis" datatype="html">
+        <source>View docs for our Open APIs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">32</context>
         </context-group>
-        <target>在生产环境上测试</target>
+        <target>查看 API 文档</target>
       </trans-unit>
-      <trans-unit id="guide.targeted-progressive-delivery" datatype="html">
-        <source>Targeted progressive delivery</source>
+      <trans-unit id="guide.browser-the" datatype="html">
+        <source>Browse the</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">36</context>
         </context-group>
-        <target>可租户定制化的渐进式交付</target>
+        <target>查看</target>
       </trans-unit>
-      <trans-unit id="guide.ab-testing" datatype="html">
-        <source>A/B testing</source>
+      <trans-unit id="guide.experimentation-documentation" datatype="html">
+        <source> Experimentation Documentation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <target>数据实验文档</target>
+      </trans-unit>
+      <trans-unit id="guide.guides-title-invite-your-team" datatype="html">
+        <source>Invite Your Team</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <target>邀请您的团队</target>
+      </trans-unit>
+      <trans-unit id="guide.invite-team-members" datatype="html">
+        <source>Invite team members</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <target>邀请团队成员</target>
+      </trans-unit>
+      <trans-unit id="guide.to-your-organization" datatype="html">
+        <source> to your organization</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+        <target>到您的组织</target>
+      </trans-unit>
+      <trans-unit id="guide.manage" datatype="html">
+        <source>Manage</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">48</context>
         </context-group>
-        <target>AB测试</target>
+        <target>管理</target>
       </trans-unit>
-      <trans-unit id="guide.empower-teams" datatype="html">
-        <source>Entitlement management</source>
+      <trans-unit id="guide.custom-permissions" datatype="html">
+        <source> custom permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">51</context>
         </context-group>
-        <target>功能订阅管理</target>
+        <target>自定义权限</target>
       </trans-unit>
-      <trans-unit id="guide.how-to-doc" datatype="html">
-        <source> More how-to guides documentation...</source>
+      <trans-unit id="guide.guides-title-need-assistance" datatype="html">
+        <source>Need Assistance?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">56,57</context>
+          <context context-type="linenumber">55</context>
         </context-group>
-        <target>关于实战案例更多文档</target>
+        <target>需要帮助？</target>
       </trans-unit>
-      <trans-unit id="common.close" datatype="html">
-        <source>Close</source>
+      <trans-unit id="guide.join-our" datatype="html">
+        <source>Join our</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">57</context>
         </context-group>
+        <target>加入</target>
+      </trans-unit>
+      <trans-unit id="guide.slack-chaneel" datatype="html">
+        <source>Slack Channel</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
-          <context context-type="linenumber">131,133</context>
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">60</context>
         </context-group>
+        <target>Slack</target>
+      </trans-unit>
+      <trans-unit id="guide.for-discussions" datatype="html">
+        <source>for discussions</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">171,172</context>
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">61</context>
         </context-group>
+        <target>讨论群</target>
+      </trans-unit>
+      <trans-unit id="guide.open-an-issue-on-github" datatype="html">
+        <source>Open an issue on GitHub</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">242,243</context>
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">66</context>
         </context-group>
-        <target>关闭</target>
+        <target>创建 GitHub issue</target>
+      </trans-unit>
+      <trans-unit id="guide.guides-title-premium-support" datatype="html">
+        <source>Premium Support</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+        <target>技术支持</target>
+      </trans-unit>
+      <trans-unit id="guide.reach-us-on" datatype="html">
+        <source>Reach us on</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+        <target>通过以下方式联系我们:</target>
+      </trans-unit>
+      <trans-unit id="guide.or" datatype="html">
+        <source>or</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+        <target>或者</target>
       </trans-unit>
       <trans-unit id="common.feedback" datatype="html">
         <source>Feedback</source>
@@ -2209,19 +2329,11 @@
         </context-group>
         <target>反馈</target>
       </trans-unit>
-      <trans-unit id="common.quick-start-guide" datatype="html">
-        <source>Quick Start Guide</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-        <target>快速开始引导</target>
-      </trans-unit>
       <trans-unit id="common.change-environment" datatype="html">
         <source>Change environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">53,55</context>
+          <context context-type="linenumber">50,52</context>
         </context-group>
         <target>更改环境</target>
       </trans-unit>
@@ -2229,11 +2341,11 @@
         <source>Current</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">61,62</context>
+          <context context-type="linenumber">58,59</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">70,71</context>
+          <context context-type="linenumber">67,68</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -2249,7 +2361,7 @@
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">64,65</context>
+          <context context-type="linenumber">61,62</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -2257,7 +2369,7 @@
         <source>Environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">73,75</context>
+          <context context-type="linenumber">70,72</context>
         </context-group>
         <target>环境</target>
       </trans-unit>
@@ -2265,7 +2377,7 @@
         <source>Send feedback</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">90,91</context>
+          <context context-type="linenumber">87,88</context>
         </context-group>
         <target>发送反馈</target>
       </trans-unit>
@@ -2273,7 +2385,7 @@
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">94,95</context>
+          <context context-type="linenumber">91,92</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -2301,7 +2413,7 @@
         <source>Invalid Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">95,96</context>
+          <context context-type="linenumber">92,93</context>
         </context-group>
         <target>邮箱地址无效</target>
       </trans-unit>
@@ -2309,7 +2421,7 @@
         <source>Message</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">100,101</context>
+          <context context-type="linenumber">97,98</context>
         </context-group>
         <target>信息</target>
       </trans-unit>
@@ -2317,7 +2429,7 @@
         <source>Message is mandatory</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">98</context>
         </context-group>
         <target>信息不能为空</target>
       </trans-unit>
@@ -2325,7 +2437,7 @@
         <source>Have you any feedback for us?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">102,104</context>
+          <context context-type="linenumber">99,101</context>
         </context-group>
         <target>反馈信息</target>
       </trans-unit>
@@ -2333,7 +2445,7 @@
         <source>Send</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">111,112</context>
+          <context context-type="linenumber">108,109</context>
         </context-group>
         <target>发送</target>
       </trans-unit>
@@ -2365,7 +2477,7 @@
         <source>Thank you for sending us your feedback, we&apos;ll get back to you very soon!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">199</context>
+          <context context-type="linenumber">195</context>
         </context-group>
         <target>感谢您给我们发送反馈，我们会尽快和您联系！</target>
       </trans-unit>
@@ -2373,7 +2485,7 @@
         <source>We were not able to send your feedback, Please try again!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">198</context>
         </context-group>
         <target>反馈发送失败，请稍后重试！</target>
       </trans-unit>
@@ -2577,7 +2689,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">361</context>
+          <context context-type="linenumber">367</context>
         </context-group>
         <target>转化率</target>
       </trans-unit>
@@ -3256,14 +3368,6 @@
         </context-group>
         <target>请选择目标用户</target>
       </trans-unit>
-      <trans-unit id="common.new-user" datatype="html">
-        <source>Create user</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">37</context>
-        </context-group>
-        <target>新建用户</target>
-      </trans-unit>
       <trans-unit id="common.edit-targeting-user" datatype="html">
         <source>Edit targeting user</source>
         <context-group purpose="location">
@@ -3280,7 +3384,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">290</context>
+          <context context-type="linenumber">293</context>
         </context-group>
         <target>保存与更新成功</target>
       </trans-unit>
@@ -3351,18 +3455,6 @@
           <context context-type="linenumber">46</context>
         </context-group>
         <target>上传成功</target>
-      </trans-unit>
-      <trans-unit id="users.idx.ff-segments" datatype="html">
-        <source>Feature flags and segments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">123</context>
-        </context-group>
-        <target>开关和用户组：</target>
       </trans-unit>
       <trans-unit id="common.feature-flag" datatype="html">
         <source>Feature flag</source>
@@ -3500,6 +3592,22 @@
         </context-group>
         <target>格式化</target>
       </trans-unit>
+      <trans-unit id="common.close" datatype="html">
+        <source>Close</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
+          <context context-type="linenumber">131,133</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">171,172</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">242,243</context>
+        </context-group>
+        <target>关闭</target>
+      </trans-unit>
       <trans-unit id="integrations.access-token.active" datatype="html">
         <source>Active</source>
         <context-group purpose="location">
@@ -3633,18 +3741,18 @@
         <target>服务错误，请联系运营人员。</target>
       </trans-unit>
       <trans-unit id="auditlogs.audit-logs" datatype="html">
-        <source>Audit logs</source>
+        <source>Audit Logs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/audit-logs/audit-logs-routing.module.ts</context>
           <context context-type="linenumber">9</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">79,78</context>
+          <context context-type="linenumber">63,62</context>
         </context-group>
         <target>审计日志</target>
       </trans-unit>
@@ -3696,7 +3804,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">22</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>用户</target>
       </trans-unit>
@@ -3940,6 +4048,14 @@
         </context-group>
         <target>属性管理</target>
       </trans-unit>
+      <trans-unit id="users.idx.ff-segments" datatype="html">
+        <source>Evaluate on flags and segments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">123</context>
+        </context-group>
+        <target>评估开关和用户组：</target>
+      </trans-unit>
       <trans-unit id="expt.expt" datatype="html">
         <source>Experiments</source>
         <context-group purpose="location">
@@ -4052,7 +4168,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">199</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <target>数据加载失败，请重试</target>
       </trans-unit>
@@ -4549,11 +4665,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">362</context>
+          <context context-type="linenumber">368</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">362</context>
+          <context context-type="linenumber">368</context>
         </context-group>
         <target>平均值</target>
       </trans-unit>
@@ -4633,11 +4749,19 @@
         </context-group>
         <target>查看图表</target>
       </trans-unit>
+      <trans-unit id="common.now" datatype="html">
+        <source>Now</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">331</context>
+        </context-group>
+        <target>现在</target>
+      </trans-unit>
       <trans-unit id="common.time" datatype="html">
         <source>Time</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">356</context>
+          <context context-type="linenumber">362</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>
@@ -4899,6 +5023,10 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">200</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
         <target>在代码中使用 key （大小写敏感）来获取开关返回值</target>
       </trans-unit>
       <trans-unit id="common.click-to-copy" datatype="html">
@@ -4908,26 +5036,46 @@
           <context context-type="linenumber">51</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
           <context context-type="linenumber">51</context>
         </context-group>
         <target>点击复制</target>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-turn-ff-off" datatype="html">
-        <source>Are you sure to turn it off? The variation set below would be returned.</source>
+        <source>Are you sure to turn it off? The flag will return the variation that you specified for its off state.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">56</context>
         </context-group>
-        <target>确定要将开关设置为 OFF 吗? 设置后将只返回下方设置的开关关闭时的返回值。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <target>确定要关闭开关么？关闭后开关将返回处于关闭状态时的设定值。</target>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-turn-ff-on" datatype="html">
-        <source>Are you sure to turn it on?  The matching targeting users&apos; or rules&apos; serving variation would be returned</source>
+        <source>Are you sure to turn it on? The flag will return the matching targeting users&apos; or rules&apos; serving variation.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">57</context>
         </context-group>
-        <target>确定要将开关设置为 ON 吗? 设置后将按照目标条件匹配用户。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+        <target>确定要打开开关么？打开后开关将按照既定规则匹配用户返回值。</target>
       </trans-unit>
       <trans-unit id="ff.ff-is" datatype="html">
         <source>The feature flag is</source>
@@ -4970,6 +5118,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">82,83</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <target>数据类型</target>
       </trans-unit>
@@ -5061,7 +5213,7 @@
         </context-group>
         <target>设置AB测试规则</target>
       </trans-unit>
-      <trans-unit id="ff.components.details.targeting.default" datatype="html">
+      <trans-unit id="ff.targeting.default" datatype="html">
         <source>Default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -5137,7 +5289,7 @@
         <source>Rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">224</context>
+          <context context-type="linenumber">227</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
@@ -5149,7 +5301,7 @@
         <source>Failed to Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">294</context>
+          <context context-type="linenumber">297</context>
         </context-group>
         <target>保存失败</target>
       </trans-unit>
@@ -5157,7 +5309,7 @@
         <source>Fallthrough rule can not be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">314</context>
+          <context context-type="linenumber">317</context>
         </context-group>
         <target>默认返回值不能为空</target>
       </trans-unit>
@@ -5165,7 +5317,7 @@
         <source>The sum of fallthrough rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">326</context>
+          <context context-type="linenumber">329</context>
         </context-group>
         <target>请确认默认返回值的总百分比必须为100%</target>
       </trans-unit>
@@ -5173,11 +5325,11 @@
         <source>The conditions of each rule must be set</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">336</context>
+          <context context-type="linenumber">339</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">352</context>
+          <context context-type="linenumber">355</context>
         </context-group>
         <target>每条规则的所有条件都不能为空</target>
       </trans-unit>
@@ -5185,7 +5337,7 @@
         <source>The sum of each rule&apos;s rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">364</context>
+          <context context-type="linenumber">367</context>
         </context-group>
         <target>请确认匹配条件中每条规则的总百分比必须为100%！</target>
       </trans-unit>
@@ -5249,22 +5401,6 @@
         </context-group>
         <target>标签</target>
       </trans-unit>
-      <trans-unit id="ff.idx.are-you-sure-to-disable-ff" datatype="html">
-        <source>Are you sure to turn it off? The variation returned would be changed when it is off</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">98</context>
-        </context-group>
-        <target>确定要关闭该开关吗? 关闭后开关将返回处于关闭状态时的设定值。</target>
-      </trans-unit>
-      <trans-unit id="ff.idx.are-you-sure-to-enable-ff" datatype="html">
-        <source>Are you sure to turn it on? The matching targeting users&apos; or rules&apos; serving variation would be returned</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">105</context>
-        </context-group>
-        <target>确定要开启该开关吗? 开启后将按照目标条件匹配用户。</target>
-      </trans-unit>
       <trans-unit id="common.num-variations" datatype="html">
         <source>Variations</source>
         <context-group purpose="location">
@@ -5304,6 +5440,10 @@
           <context context-type="linenumber">186</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
           <context context-type="linenumber">137</context>
         </context-group>
@@ -5313,11 +5453,15 @@
         </context-group>
         <target>名称不能为空</target>
       </trans-unit>
-      <trans-unit id="ff.idx.feature-flag-name" datatype="html">
+      <trans-unit id="ff.feature-flag-name" datatype="html">
         <source>A human-friendly name for your feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">190</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">51</context>
         </context-group>
         <target>开关名称</target>
       </trans-unit>
@@ -5326,6 +5470,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">214</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <target>不能超过512个字符</target>
       </trans-unit>
@@ -5459,6 +5607,478 @@
           <context context-type="linenumber">330</context>
         </context-group>
         <target>确定要存档该开关吗？</target>
+      </trans-unit>
+      <trans-unit id="get-started.integrate-sdk-title" datatype="html">
+        <source>Connect An SDK</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <target>连接 SDK</target>
+      </trans-unit>
+      <trans-unit id="get-started.integrate-sdk-subtitle" datatype="html">
+        <source>Integrate FeatBit into your application</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+        <target>将 FeatBit 集成到应用中</target>
+      </trans-unit>
+      <trans-unit id="get-started.sdk-configs-title" datatype="html">
+        <source>SDK Configs</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <target>SDK 配置</target>
+      </trans-unit>
+      <trans-unit id="get-started.sdk-endpoint" datatype="html">
+        <source>SDK Endpoint</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>SDK 端点</target>
+      </trans-unit>
+      <trans-unit id="get-started.open-api-endpoint" datatype="html">
+        <source>Open API Endpoint</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <target>Open API 端点</target>
+      </trans-unit>
+      <trans-unit id="get-started.secrets" datatype="html">
+        <source>Secrets</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>秘钥</target>
+      </trans-unit>
+      <trans-unit id="get-started.select-secret" datatype="html">
+        <source>Select secret</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <target>选择秘钥</target>
+      </trans-unit>
+      <trans-unit id="common.server" datatype="html">
+        <source>server</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+        <target>服务端</target>
+      </trans-unit>
+      <trans-unit id="common.client" datatype="html">
+        <source>client</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+        <target>客户端</target>
+      </trans-unit>
+      <trans-unit id="get-started.connect-an-sdk-introduction" datatype="html">
+        <source> Below is some starter code to integrate FeatBit into your app. More languages coming soon! </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">42,44</context>
+        </context-group>
+        <target>以下是一些将 FeatBit 集成到应用程序中的代码示例。未来我们将支持更多的语言!</target>
+      </trans-unit>
+      <trans-unit id="get-started.installation-title" datatype="html">
+        <source>Installation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+        <target>安装</target>
+      </trans-unit>
+      <trans-unit id="get-started.install-sdk-command" datatype="html">
+        <source>Install the SDK by running the following command in your terminal.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">99</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+        <target>在你的终端运行以下命令来安装 SDK。</target>
+      </trans-unit>
+      <trans-unit id="get-started.quick-start-title" datatype="html">
+        <source>Quick Start</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">101</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">114</context>
+        </context-group>
+        <target>快速入门</target>
+      </trans-unit>
+      <trans-unit id="get-started.quick-start-introduction" datatype="html">
+        <source>The following code demonstrates the basic usages of the SDK.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+        <target>以下代码演示了 SDK 的基本用法。</target>
+      </trans-unit>
+      <trans-unit id="get-started.read" datatype="html">
+        <source>Read</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+        <target>阅读</target>
+      </trans-unit>
+      <trans-unit id="get-started.the-full-sdk-doc" datatype="html">
+        <source> the full sdk doc </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">67</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">118</context>
+        </context-group>
+        <target>完整的 SDK 文档</target>
+      </trans-unit>
+      <trans-unit id="get-startd.for-more-details" datatype="html">
+        <source>for more details.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">119</context>
+        </context-group>
+        <target>以获取更多信息。</target>
+      </trans-unit>
+      <trans-unit id="get-started.edit-pom-xml" datatype="html">
+        <source>Open your project&apos;s pom.xml file and add the following dependency.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+        <target>打开项目的 pom.xml 文件并添加以下依赖项。</target>
+      </trans-unit>
+      <trans-unit id="common.prev" datatype="html">
+        <source>Prev</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">129</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+        <target>上一步</target>
+      </trans-unit>
+      <trans-unit id="common.next" datatype="html">
+        <source>Next</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">132</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+        <target>下一步</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-title" datatype="html">
+        <source>Create a Feature Flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <target>创建开关</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-paragraph-1" datatype="html">
+        <source>A Feature Flag controls what you want to release, who receive it and how it will be delivered.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target>开关可以控制您想要发布的特性，向谁开放该特性以及如何分发。</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-paragraph-2" datatype="html">
+        <source>Select an existing Flag or type the name to create a new one</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>选择已有开关或者创建一个新的</target>
+      </trans-unit>
+      <trans-unit id="common.select-or-create-ff" datatype="html">
+        <source>Select or create a feature flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <target>选择或者新建开关</target>
+      </trans-unit>
+      <trans-unit id="common.data-type-tooltip" datatype="html">
+        <source>We currently support string, boolean, number and json types, you can modify it in the feature flag detail page later</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+        <target>当前我们支持 string, boolean, number 和 json 四种数据类型，您可以稍后在开关详情页修改数据类型</target>
+      </trans-unit>
+      <trans-unit id="common.default-serve-tooltip" datatype="html">
+        <source>Define which variation users will see by default when the flag is Enabled or Disabled</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+        <target>设置当开关被打开或关闭时用户将默认接收到的返回值</target>
+      </trans-unit>
+      <trans-unit id="common.default-rule" datatype="html">
+        <source>Default rule</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">97</context>
+        </context-group>
+        <target>默认规则</target>
+      </trans-unit>
+      <trans-unit id="common.serve-if-enabled" datatype="html">
+        <source>If the flag is Enabled, serve</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+        <target>如果开关被打开时，返回</target>
+      </trans-unit>
+      <trans-unit id="common.serve-if-disabled" datatype="html">
+        <source>If the flag is Disabled, serve</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+        <target>如果开关被关闭时，返回</target>
+      </trans-unit>
+      <trans-unit id="get-started.create-flag-description" datatype="html">
+        <source>Starts with a flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>开始创建开关</target>
+      </trans-unit>
+      <trans-unit id="get-started.integrate-sdk-description" datatype="html">
+        <source>Integrate with your app</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>设置应用程序</target>
+      </trans-unit>
+      <trans-unit id="get-started.validate-title" datatype="html">
+        <source>Test your application</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
+        <target>测试应用程序</target>
+      </trans-unit>
+      <trans-unit id="get-started.validate-description" datatype="html">
+        <source>Verify SDK connection</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <target>确认 SDK 连接正确</target>
+      </trans-unit>
+      <trans-unit id="get-started.test-app-intro-part1" datatype="html">
+        <source>The SDK&apos;s connection is currently undergoing active verification by tracking the call to the &apos;</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+        <target>通过监听针对 </target>
+      </trans-unit>
+      <trans-unit id="get-started.test-app-intro-part2" datatype="html">
+        <source>&apos; feature flag that you set up in Step 1. You can copy and run the starter code provided in Step 2 to test the connection.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">10,12</context>
+        </context-group>
+        <target> 的开关调用来验证 SDK 的连接。你可以复制并运行上一步中提供的示例代码来测试连接。</target>
+      </trans-unit>
+      <trans-unit id="get-started.start-monitoring-events" datatype="html">
+        <source>Now monitoring the live events of the feature flag call...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">12,15</context>
+        </context-group>
+        <target>现在正在监听开关调用的实时事件...</target>
+      </trans-unit>
+      <trans-unit id="get-started.listen-for-sdk-success" datatype="html">
+        <source>Congratulations, your SDK is successfully set up.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">22,23</context>
+        </context-group>
+        <target>恭喜，SDK 连接成功。</target>
+      </trans-unit>
+      <trans-unit id="get-started.listen-for-sdk-failure" datatype="html">
+        <source>We were not able to detect any events, please go back to the previous step and make sure you have initialized the SDK with correct options.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">23,24</context>
+        </context-group>
+        <target>未能接收到任何事件，请返回上一步并确认正确设置了 SDK。</target>
+      </trans-unit>
+      <trans-unit id="common.retry" datatype="html">
+        <source>Retry</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">25,26</context>
+        </context-group>
+        <target>重试</target>
+      </trans-unit>
+      <trans-unit id="common.start-journey" datatype="html">
+        <source>Start your journey</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">28,30</context>
+        </context-group>
+        <target>开启旅程</target>
+      </trans-unit>
+      <trans-unit id="common.skip" datatype="html">
+        <source>Skip</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">40,41</context>
+        </context-group>
+        <target>跳过</target>
       </trans-unit>
       <trans-unit id="common.action" datatype="html">
         <source>Action</source>
@@ -6153,7 +6773,7 @@
         <target>停用</target>
       </trans-unit>
       <trans-unit id="integrations.routing.access-tokens" datatype="html">
-        <source>Access tokens</source>
+        <source>Access Tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/integrations-routing.module.ts</context>
           <context context-type="linenumber">16</context>
@@ -6192,19 +6812,11 @@
         </context-group>
         <target>每个环境拥有自己的 SDk secret, 您可以在 Dev 环境中进行开发和测试，完成后再发布到 Prod 环境。</target>
       </trans-unit>
-      <trans-unit id="onboarding.complete.third-paragrah" datatype="html">
-        <source>Next, click on the &apos;Quick Start Doc&apos; button on the top-right corner to get started!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">22</context>
-        </context-group>
-        <target>接下来，然我们开始学些如何创建并使用开关。</target>
-      </trans-unit>
       <trans-unit id="common.get-started" datatype="html">
         <source>Get started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/complete/complete.component.html</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <target>开始使用</target>
       </trans-unit>
@@ -6453,7 +7065,7 @@
         <source>Reset password success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">95</context>
         </context-group>
         <target>重置密码成功</target>
       </trans-unit>
@@ -6461,7 +7073,7 @@
         <source>Reset password failed, reason: [reason].</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">97</context>
+          <context context-type="linenumber">98</context>
         </context-group>
         <target>重置密码失败，原因: [reason]。</target>
       </trans-unit>
@@ -6488,22 +7100,6 @@
           <context context-type="linenumber">43</context>
         </context-group>
         <target>秘钥</target>
-      </trans-unit>
-      <trans-unit id="common.server" datatype="html">
-        <source>server</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-        <target>服务端</target>
-      </trans-unit>
-      <trans-unit id="common.client" datatype="html">
-        <source>client</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
-          <context context-type="linenumber">50</context>
-        </context-group>
-        <target>客户端</target>
       </trans-unit>
       <trans-unit id="org.project.remove-secret-confirm" datatype="html">
         <source>This operation cannot be reverted, make sure this secret is removed from all SDKs before removing.</source>
@@ -6613,11 +7209,19 @@
         </context-group>
         <target>编辑：<x id="PH" equiv-text="secret.name"/></target>
       </trans-unit>
-      <trans-unit id="feature-flags" datatype="html">
-        <source>Feature flags</source>
+      <trans-unit id="get-started" datatype="html">
+        <source>Get Started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
           <context context-type="linenumber">15</context>
+        </context-group>
+        <target>开始使用</target>
+      </trans-unit>
+      <trans-unit id="feature-flags" datatype="html">
+        <source>Feature Flags</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <target>开关</target>
       </trans-unit>
@@ -6625,7 +7229,7 @@
         <source>Segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">36</context>
         </context-group>
         <target>用户组</target>
       </trans-unit>
@@ -6633,15 +7237,15 @@
         <source>Experiments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <target>数据实验</target>
       </trans-unit>
       <trans-unit id="data-sync" datatype="html">
-        <source>Data sync</source>
+        <source>Data Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <target>数据同步</target>
       </trans-unit>
@@ -6649,23 +7253,31 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
-          <context context-type="linenumber">57</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <target>组织机构</target>
       </trans-unit>
-      <trans-unit id="menu.FF" datatype="html">
-        <source>Feature flags</source>
+      <trans-unit id="menu.get-started" datatype="html">
+        <source>Get Started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">54,53</context>
+          <context context-type="linenumber">33,32</context>
+        </context-group>
+        <target>开始使用</target>
+      </trans-unit>
+      <trans-unit id="menu.FF" datatype="html">
+        <source>Feature Flags</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">38,37</context>
         </context-group>
         <target>开关管理</target>
       </trans-unit>
       <trans-unit id="menu.end-users" datatype="html">
-        <source>End users</source>
+        <source>End Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">59,58</context>
+          <context context-type="linenumber">43,42</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -6673,7 +7285,7 @@
         <source>Segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">64,63</context>
+          <context context-type="linenumber">48,47</context>
         </context-group>
         <target>用户组</target>
       </trans-unit>
@@ -6681,15 +7293,15 @@
         <source>Experiments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">69,68</context>
+          <context context-type="linenumber">53,52</context>
         </context-group>
         <target>数据实验</target>
       </trans-unit>
       <trans-unit id="menu.data-sync" datatype="html">
-        <source>Data sync</source>
+        <source>Data Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">74,73</context>
+          <context context-type="linenumber">58,57</context>
         </context-group>
         <target>数据同步</target>
       </trans-unit>
@@ -6697,7 +7309,7 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">87,86</context>
+          <context context-type="linenumber">71,70</context>
         </context-group>
         <target>机构管理</target>
       </trans-unit>
@@ -6705,7 +7317,7 @@
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">92,91</context>
+          <context context-type="linenumber">76,75</context>
         </context-group>
         <target>权限管理</target>
       </trans-unit>
@@ -6713,7 +7325,7 @@
         <source>Team</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">97,96</context>
+          <context context-type="linenumber">81,80</context>
         </context-group>
         <target>团队</target>
       </trans-unit>
@@ -6721,7 +7333,7 @@
         <source>Groups</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">102,101</context>
+          <context context-type="linenumber">86,85</context>
         </context-group>
         <target>组</target>
       </trans-unit>
@@ -6729,7 +7341,7 @@
         <source>Policies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">107,106</context>
+          <context context-type="linenumber">91,90</context>
         </context-group>
         <target>策略</target>
       </trans-unit>
@@ -6737,15 +7349,15 @@
         <source>Integrations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">114,113</context>
+          <context context-type="linenumber">98,97</context>
         </context-group>
         <target>服务集成</target>
       </trans-unit>
       <trans-unit id="menu.integrations.access-tokens" datatype="html">
-        <source>Access tokens</source>
+        <source>Access Tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">119,118</context>
+          <context context-type="linenumber">103,102</context>
         </context-group>
         <target>访问密钥</target>
       </trans-unit>

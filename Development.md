@@ -1,18 +1,17 @@
 # Introduction
 
-Welcome to the FeatBit development documentation.
-
-This document will guide you through the stages of setting up your development environment, connecting to our code base
-and finally submitting code to the project!
+Welcome to the FeatBit development documentation! This guide will walk you through setting up your development
+environment, connecting to our code base, and submitting code to the project.
 
 # Get Started
 
-FeatBit consists of multiple services, to understand the architecture, please read
-our [document](https://featbit.gitbook.io/docs/tech-stack/architecture).
+FeatBit consists of multiple services, to learn more about the architecture, please read
+our [documentation](https://featbit.gitbook.io/docs/tech-stack/architecture).
 
-![Architecture](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2Fn8WleMePXy4BW6b0qQq2%2Fimage.png?alt=media&token=27fd5b0e-e704-4e01-b084-b8f5399f2565)
+![Architecture](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2FELW411vbJvKbSu1uG2Z0%2Fimage.png?alt=media&token=4fff2e66-cbca-4c45-b8c0-8fc99d357d13)
 
 To get started, we need to clone FeatBit's repository first.
+
 ```bash
 git clone https://github.com/featbit/featbit
 ```
@@ -22,7 +21,8 @@ launch these two services from the code.
 
 ## Setup dependencies
 
-Open [docker-compose-dev.yml](./docker-compose-dev.yml) and **comment out ui and/or api-server service according to the scope of your work**, they are the
+Open [docker-compose-dev.yml](./docker-compose-dev.yml) and **comment out ui and/or api-server service according to the
+scope of your work**, they are the
 first two services. Then do
 
 ```bash
@@ -36,37 +36,7 @@ Wait until all services are successfully launched, and we're ready to run API an
 The API project is built with [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), make sure you have the
 latest .NET 6.0 SDK installed before you start.
 
-The API solution is located at **modules/back-end** folder. To connect to its dependencies(mongodb, kafka, da-server),
-we need to update the **src/Api/appsettings.Development.json** file to this:
-
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
-    }
-  },
-  "Jwt": {
-    "Issuer": "featbit",
-    "Audience": "featbit-api",
-    "Key": "featbit-identity-key"
-  },
-  "MongoDb": {
-    "ConnectionString": "mongodb://admin:password@localhost:27017",
-    "Database": "featbit"
-  },
-  "Kafka": {
-    "BootstrapServers": "localhost:29092"
-  },
-  "OLAP": {
-    "ServiceHost": "http://localhost:8200"
-  },
-  "AllowedHosts": "*"
-}
-```
-
-Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, then the swagger would be available
+Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, then the swagger should be available
 at [http://localhost:5000/swagger](http://localhost:5000/swagger).
 
 ## Run UI
@@ -81,7 +51,7 @@ npm install
 npm run start
 ```
 
-The UI would be available at [http://localhost:4200](http://localhost:4200).
+Then UI should be available at [http://localhost:4200](http://localhost:4200).
 
 The above process would launch the UI in English language.
 

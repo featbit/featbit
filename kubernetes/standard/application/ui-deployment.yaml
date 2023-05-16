@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ui
+  name: ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ui
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: ui
+    spec:
+      containers:
+        - env:
+            - name: API_URL
+              value: http://localhost:5000
+            - name: DEMO_URL
+              value: https://featbit-samples.vercel.app
+            - name: EVALUATION_URL
+              value: http://localhost:5100
+          image: featbit/featbit-ui:latest
+          name: ui
+          ports:
+            - containerPort: 80
+          resources:
+           limits:
+             memory: 512Mi
+             cpu: "1"
+           requests:
+             memory: 256Mi
+             cpu: "0.2"
+      restartPolicy: Always
+status: {}
+
+
+

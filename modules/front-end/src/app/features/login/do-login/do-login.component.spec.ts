@@ -28,7 +28,6 @@ describe('DoLoginComponent', () => {
   });
 
   it('should create', () => {
-    console.log('aa');
     expect(component).toBeTruthy();
   });
 });

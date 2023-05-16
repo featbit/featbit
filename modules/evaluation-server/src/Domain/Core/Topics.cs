@@ -2,11 +2,12 @@ namespace Domain.Core;
 
 public class Topics
 {
-    public const string EndUser = "evaluation-server-endusers";
+    public const string EndUser = "featbit-endusers";
 
-    public const string FeatureFlagChange = "api-feature-flag-change";
+    // This pattern **must** cover FeatureFlagChange & SegmentChange
+    public const string DataChangePattern = "featbit-*-change";
+    public const string FeatureFlagChange = "featbit-feature-flag-change";
+    public const string SegmentChange = "featbit-segment-change";
 
-    public const string SegmentChange = "api-segment-change";
-
-    public const string Insights = "ch_events_json";
+    public const string Insights = "featbit-insights";
 }

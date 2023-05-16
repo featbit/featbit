@@ -1,0 +1,50 @@
+@import "variables";
+
+.create-feature-flag {
+
+  .flag-selector {
+    nz-select {
+      min-width: 300px;
+    }
+  }
+
+  form {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 32px;
+
+    div {
+      flex-grow: 1;
+    }
+  }
+
+  .default-rule-label {
+    color: @grey50-color;
+  }
+
+  .default-rule {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .default-rule-value {
+    display: flex;
+    align-items: center;
+  }
+
+  .variation-tip {
+    margin-left: 16px;
+  }
+}
+
+nz-button-group {
+  button {
+    border-radius: 8px !important;
+
+    &:not([disabled]) {
+      color: white;
+      background-color: @primary-color;
+    }
+  }
+}

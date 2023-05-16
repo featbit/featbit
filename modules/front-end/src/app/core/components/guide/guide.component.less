@@ -1,27 +1,43 @@
-.guide-body {
-  .block {
-    margin: 20px 0;
+@import "variables";
 
-    .subtitle {
-      margin: -12px 0 12px 0;
-    }
-    .btn-link {
-      color: rgba(0, 0, 0, 0.85);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid rgba(0, 0, 0, 0.39);
-      border-radius: 4px;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
+nz-card {
+  border-radius: 12px;
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 0 12px;
+
+  &:last-of-type {
+    padding-bottom: 12px;
   }
 }
 
-.guide-footer {
-  display: flex;
-  justify-content: flex-end;
-  button {
-    border-radius: 30px;
+h4 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #88929d;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 12px;
+
+  &:last-of-type {
+    margin-bottom: 8px;
   }
+}
+
+ol {
+  padding-left: 2em;
+  margin-bottom: 12px;
+
+  li + li {
+    margin-top: 0.25em;
+  }
+}
+
+a:hover {
+  text-decoration: underline;
 }

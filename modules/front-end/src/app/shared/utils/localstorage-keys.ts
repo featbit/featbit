@@ -19,3 +19,7 @@ export function CURRENT_USER_FILTER_ATTRIBUTE(envId: string): string {
 export function CURRENT_LANGUAGE(): string {
   return getLocalStorageKey('current-lang', true);
 }
+
+export function GET_STARTED(): string {
+  return getLocalStorageKey('get-started', false);
+}

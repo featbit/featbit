@@ -35,7 +35,7 @@
           <div *ngIf="row.isEditing, then editingRow else showRow"></div>
           <ng-template #editingRow>
             <td>
-              <input type="text" nz-input [(ngModel)]="row.key" i18n-placeholder="@@name" placeholder="Name" />
+              <input class="standard-bordered-input" type="text" nz-input [(ngModel)]="row.key" i18n-placeholder="@@name" placeholder="Name" />
             </td>
             <td>
               <nz-select nzShowSearch nzAllowClear [nzDropdownRender]="newItemTpl" i18n-nzPlaceHolder="@@select-type" nzPlaceHolder="Select type"
@@ -54,7 +54,7 @@
               </ng-template>
             </td>
             <td>
-              <input type="text" nz-input [(ngModel)]="row.value" i18n-placeholder="@@url" placeholder="URL" />
+              <input class="standard-bordered-input" type="text" nz-input [(ngModel)]="row.value" i18n-placeholder="@@url" placeholder="URL" />
             </td>
           </ng-template>
           <ng-template #showRow>

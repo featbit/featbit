@@ -328,12 +328,18 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     const invalidVariation = !!iterationResults.find(e => e.isInvalid && !e.isBaseline);
     const winnerVariation = !!iterationResults.find(e => e.isWinner);
 
+    const nowStr = $localize `:@@common.now:Now`;
+    const startStr = `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')}`;
+    const endStr = `${iteration.endTime ?
+      moment(iteration.endTime).format('YYYY-MM-DD HH:mm') :
+      moment(new Date()).format('YYYY-MM-DD HH:mm')}  (${nowStr})`
+
     return {
       ...iteration,
       invalidVariation,
       winnerVariation,
       results: iterationResults,
-      dateTimeInterval: `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')} - ${iteration.endTime? moment(iteration.endTime).format('YYYY-MM-DD HH:mm') : moment(new Date()).format('YYYY-MM-DD HH:mm') + ' (现在)'}`
+      dateTimeInterval: `${startStr} - ${endStr}`
     };
   }
 
