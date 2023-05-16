@@ -19,14 +19,12 @@ import {
   providedIn: 'root'
 })
 export class EnvUserService {
-  public envId: string = null;
-
   constructor(private http: HttpClient) {
-    this.envId = getCurrentProjectEnv().envId;
   }
 
   get baseUrl() {
-    return `${environment.url}/api/v1/envs/${this.envId}/end-users`;
+    const envId = getCurrentProjectEnv().envId;
+    return `${environment.url}/api/v1/envs/${envId}/end-users`;
   }
 
   get(id: string): Observable<IUserType> {

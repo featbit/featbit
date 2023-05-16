@@ -10,7 +10,6 @@ import { catchError } from "rxjs/operators";
 })
 export class EnvService {
   baseUrl = `${environment.url}/api/v1/projects/#projectId/envs`;
-  envs: IEnvironment[] = [];
 
   constructor(private http: HttpClient) { }
 

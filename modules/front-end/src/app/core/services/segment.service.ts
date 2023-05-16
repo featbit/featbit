@@ -16,15 +16,12 @@ import { catchError } from "rxjs/operators";
 })
 export class SegmentService {
 
-  public current: ISegment = null;
-  public envId: string;
-
   get baseUrl() {
-    return `${environment.url}/api/v1/envs/${this.envId}/segments`;
+    const envId = getCurrentProjectEnv().envId;
+    return `${environment.url}/api/v1/envs/${envId}/segments`;
   }
 
   constructor(private http: HttpClient) {
-    this.envId = getCurrentProjectEnv().envId;
   }
 
   public getSegmentList(filter: SegmentListFilter = new SegmentListFilter()): Observable<ISegmentListModel> {
@@ -81,14 +78,6 @@ export class SegmentService {
     };
 
     return this.http.post(this.baseUrl, body);
-  }
-
-  public setCurrent(data: ISegment) {
-    this.current = data;
-  }
-
-  public getCurrent(): ISegment {
-    return this.current;
   }
 
   delete(id: string): Observable<boolean> {
