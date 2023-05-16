@@ -5415,7 +5415,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">34,35</context>
+          <context context-type="linenumber">37,38</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.next" datatype="html">
@@ -5522,31 +5522,45 @@
         </context-group>
       </trans-unit>
       <trans-unit id="get-started.validate-description" datatype="html">
-        <source>Verify SDK connected</source>
+        <source>Verify SDK connection</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/steps.component.html</context>
           <context context-type="linenumber">19</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="get-started.listen-for-sdk-events" datatype="html">
-        <source>Listening for SDK live events for the flag:</source>
+      <trans-unit id="get-started.test-app-intro-part1" datatype="html">
+        <source>The SDK&apos;s connection is currently undergoing active verification by tracking the call to the &apos;</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">8</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="get-started.test-app-intro-part2" datatype="html">
+        <source>&apos; feature flag that you set up in Step 1. You can copy and run the starter code provided in Step 2 to test the connection.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">10,12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="get-started.start-monitoring-events" datatype="html">
+        <source>Now monitoring the live events of the feature flag call...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">12,15</context>
         </context-group>
       </trans-unit>
       <trans-unit id="get-started.listen-for-sdk-success" datatype="html">
         <source>Congratulations, your SDK is successfully set up.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">10,11</context>
+          <context context-type="linenumber">22,23</context>
         </context-group>
       </trans-unit>
       <trans-unit id="get-started.listen-for-sdk-failure" datatype="html">
         <source>We were not able to detect any events, please go back to the previous step and make sure you have initialized the SDK with correct options.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">11,15</context>
+          <context context-type="linenumber">23,24</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.retry" datatype="html">
@@ -5560,7 +5574,14 @@
         <source>Start your journey</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">37,39</context>
+          <context context-type="linenumber">28,30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.skip" datatype="html">
+        <source>Skip</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">40,41</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.action" datatype="html">

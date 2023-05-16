@@ -111,8 +111,4 @@ export class TestAppComponent implements OnInit, OnDestroy {
       })
     });
   }
-
-  startJourney() {
-    this.onComplete.emit();
-  }
 }
