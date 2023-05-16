@@ -16,16 +16,12 @@ import {
 })
 export class ExperimentService {
 
-  public envId: string = null;
-
   get baseUrl() {
-    return environment.url + `/api/v1/envs/${this.envId}/experiments`;
+    const envId = getCurrentProjectEnv().envId;
+    return environment.url + `/api/v1/envs/${envId}/experiments`;
   }
 
-  constructor(
-    private http: HttpClient
-  ) {
-    this.envId = getCurrentProjectEnv().envId;
+  constructor(private http: HttpClient) {
   }
 
   createExperiment(params: IExptCreation): Observable<IExpt[]> {

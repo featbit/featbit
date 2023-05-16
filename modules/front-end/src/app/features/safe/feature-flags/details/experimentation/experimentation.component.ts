@@ -15,6 +15,7 @@ import {
   EventType,
   ExperimentStatus
 } from "@features/safe/experiments/types";
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'ff-experimentations',
@@ -49,6 +50,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   exptRulesVisible = false;
 
+  envId: string = '';
+
   constructor(
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
@@ -62,6 +65,8 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
       this.variations = [...this.featureFlag.variations];
       this.loadExperiments();
     });
+
+    this.envId = getCurrentProjectEnv().envId;
   }
 
   ngOnDestroy(): void {
@@ -90,7 +95,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
           ({
             exptId: expt.id,
             iterationId: i.id,
-            flagExptId: `${this.experimentService.envId}-${expt.featureFlagKey}`,
+            flagExptId: `${this.envId}-${expt.featureFlagKey}`,
             baselineVariationId: expt.baselineVariation.id,
             variationIds: this.featureFlag.variations.map(v => v.id),
             eventName: expt.metricEventName,
@@ -242,7 +247,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     const param = {
       exptId: expt.id,
       iterationId: expt.selectedIteration.id,
-      flagExptId: `${this.experimentService.envId}-${expt.featureFlagKey}`,
+      flagExptId: `${this.envId}-${expt.featureFlagKey}`,
       baselineVariationId: expt.baselineVariation.id,
       variationIds: this.featureFlag.variations.map(v => v.id),
       eventName: expt.metricEventName,

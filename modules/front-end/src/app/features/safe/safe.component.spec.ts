@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SafeComponent } from './main.component';
+import { SafeComponent } from './safe.component';
 
 describe('MainComponent', () => {
   let component: SafeComponent;
