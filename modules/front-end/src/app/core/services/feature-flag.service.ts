@@ -21,7 +21,6 @@ import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/i
   providedIn: 'root'
 })
 export class FeatureFlagService {
-  public currentFeatureFlag: IFeatureFlag = null;
 
   get baseUrl() {
     const envId = getCurrentProjectEnv().envId;
@@ -29,10 +28,6 @@ export class FeatureFlagService {
   }
 
   constructor(private http: HttpClient) {
-  }
-
-  public setCurrentFeatureFlag(data: IFeatureFlag) {
-    this.currentFeatureFlag = data;
   }
 
   public toggleStatus(key: string): Observable<any> {

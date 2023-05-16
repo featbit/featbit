@@ -11,7 +11,7 @@ import {
 } from "../types/switch-index";
 import { debounceTime, first, map, switchMap } from 'rxjs/operators';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentProjectEnv } from "@utils/project-env";
 import { ProjectService } from "@services/project.service";
 import { IEnvironment } from "@shared/types";
 import { NzNotificationService } from "ng-zorro-antd/notification";
@@ -62,8 +62,6 @@ export class IndexComponent implements OnInit {
 
     let currentProjectEnv = getCurrentProjectEnv();
 
-    this.featureFlagService.envId = currentProjectEnv.envId;
-
     // get switch list
     this.$search.pipe(
       debounceTime(200)
@@ -79,7 +77,6 @@ export class IndexComponent implements OnInit {
     });
 
     // get current envs
-    const curAccountId = getCurrentOrganization().id;
     const curProjectId = currentProjectEnv.projectId;
     const curEnvId = currentProjectEnv.envId;
 
@@ -318,8 +315,7 @@ export class IndexComponent implements OnInit {
   }
 
   public navigateToFlagDetail(data: IFeatureFlag) {
-    this.featureFlagService.setCurrentFeatureFlag(data);
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(data.key)}/targeting`);
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(data.key)}/targeting`).then();
   }
 
   archive(flag: IFeatureFlag) {

@@ -152,7 +152,6 @@ export class IndexComponent implements OnInit, OnDestroy {
     const { name, description } = this.segmentForm.value;
     this.segmentService.create(name, description).subscribe({
       next: (segment: ISegment) => {
-        this.segmentService.setCurrent(segment);
         this.toRouter(segment.id);
         this.creating = false;
       },
@@ -201,7 +200,6 @@ export class IndexComponent implements OnInit, OnDestroy {
   onIntoSegmentDetail(data: ISegment) {
     if(this.isIntoing) return;
     this.isIntoing = true;
-    this.segmentService.setCurrent(data);
     this.toRouter(data.id);
   }
 

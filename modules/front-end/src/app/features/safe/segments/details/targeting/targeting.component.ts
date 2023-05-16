@@ -91,7 +91,6 @@ export class TargetingComponent implements OnInit {
 
   private loadSegment(segment: ISegment) {
     this.segmentDetail = new Segment(segment);
-    this.segmentService.setCurrent(this.segmentDetail.segment);
     // load users
     const userKeyIds = [...segment.included, ...segment.excluded];
     if (userKeyIds.length > 0) {

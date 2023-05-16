@@ -17,7 +17,6 @@ import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
 import {RefTypeEnum} from "@core/components/audit-log/types";
 import {ISegment} from "@features/safe/segments/types/segments-index";
-import { DefaultDispatchKey } from "@shared/diff/types";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -106,7 +105,7 @@ export class TargetingComponent implements OnInit {
       this.segmentService.getByIds(segmentIdRefs).subscribe((segments) => {
         this.segmentIdRefs = segments;
         this.reviewModalVisible = true;
-      }, (err) => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
+      }, _ => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
     } else {
       this.reviewModalVisible = true;
     }
@@ -177,8 +176,6 @@ export class TargetingComponent implements OnInit {
 
           resolve(null);
         }
-
-        this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
       }, () => {
         resolve(null);
       })
@@ -197,7 +194,7 @@ export class TargetingComponent implements OnInit {
             resolve(null);
           }
         },
-        error: (err) => {
+        error: _ => {
           this.msg.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`);
           resolve(null);
         }

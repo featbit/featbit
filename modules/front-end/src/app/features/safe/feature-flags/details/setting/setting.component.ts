@@ -145,7 +145,6 @@ export class SettingComponent {
     this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
       this.featureFlag = new FeatureFlag(result);
       this.setLastSavedVariations();
-      this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
       this.isLoading = false;
     }, () => this.isLoading = false)
   }
@@ -195,7 +194,6 @@ export class SettingComponent {
 
     this.featureFlagService.updateVariations(payload).subscribe({
       next: () => {
-        this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
         this.setLastSavedVariations();
@@ -328,7 +326,6 @@ export class SettingComponent {
 
     this.featureFlagService.updateSetting(payload).subscribe({
       next: () => {
-        this.featureFlagService.setCurrentFeatureFlag(this.featureFlag);
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
         this.isEditingDescription = false;

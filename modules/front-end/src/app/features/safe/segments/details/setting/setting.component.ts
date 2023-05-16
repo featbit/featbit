@@ -1,9 +1,9 @@
-import {Component, OnInit} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ISegment, ISegmentFlagReference } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import {MessageQueueService} from "@services/message-queue.service";
+import { MessageQueueService } from "@services/message-queue.service";
 
 @Component({
   selector: 'segment-setting',
@@ -24,7 +24,6 @@ export class SettingComponent implements OnInit {
     private msg: NzMessageService,
     private segmentService: SegmentService,
     private messageQueueService: MessageQueueService,
-    private router: Router
   ) {
   }
 
@@ -50,7 +49,6 @@ export class SettingComponent implements OnInit {
 
   private loadSegment(segment: ISegment) {
     this.segmentDetail = {...segment};
-    this.segmentService.setCurrent(this.segmentDetail);
     this.isLoading = false;
   }
 
@@ -59,7 +57,6 @@ export class SettingComponent implements OnInit {
       this.segmentDetail = {...result};
       this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
       this.messageQueueService.emit(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id));
-      this.segmentService.setCurrent({...result});
     }, errResponse => this.msg.error(errResponse.error));
   }
 
