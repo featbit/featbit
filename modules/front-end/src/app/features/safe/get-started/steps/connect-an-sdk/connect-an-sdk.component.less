@@ -1,0 +1,39 @@
+@import "variables";
+
+nz-descriptions {
+  margin-bottom: 13px;
+}
+
+nz-descriptions {
+  i {
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 4px;
+  }
+}
+
+nz-page-header {
+  height: calc(100vh - 280px);
+  overflow: hidden;
+
+  nz-page-header-content {
+    height: calc(100% - 25px);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+nz-button-group {
+  button {
+    border-radius: 8px !important;
+
+    &:first-of-type {
+      margin-right: 8px;
+    }
+
+    &:nth-child(2) {
+      color: white;
+      background-color: @primary-color;
+    }
+  }
+}

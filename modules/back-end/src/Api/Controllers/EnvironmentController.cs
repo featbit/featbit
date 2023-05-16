@@ -5,6 +5,19 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/projects/{projectId:guid}/envs")]
 public class EnvironmentController : ApiControllerBase
 {
+    [HttpGet]
+    [Route("{envId:guid}")]
+    public async Task<ApiResponse<EnvironmentVm>> GetAsync(Guid envId)
+    {
+        var request = new GetEnvironment
+        {
+            Id = envId
+        };
+
+        var project = await Mediator.Send(request);
+        return Ok(project);
+    }
+
     [HttpPost]
     public async Task<ApiResponse<EnvironmentVm>> CreateAsync(Guid projectId, CreateEnvironment request)
     {

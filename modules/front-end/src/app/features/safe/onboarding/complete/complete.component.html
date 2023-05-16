@@ -3,7 +3,7 @@
           [nzTitle]="modalTitle"
           [nzContent]="editModalContent"
           [nzFooter]="editModalFooter"
-          (nzOnCancel)="onClose()">
+          (nzOnCancel)="close()">
   <ng-template #modalTitle>
     <ng-container i18n="@@onboarding.complete.title">We've created a project for</ng-container>
     <span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentOrg.name}}</span>
@@ -18,18 +18,12 @@
       </ul>
 
       <div class="paragraph" i18n="@@onboarding.complete.second-paragraph">Each environment has its own SDK secret, you can develop and test in Dev before rolling out to Prod.</div>
-      <div>
-        <ng-container i18n="@@onboarding.complete.third-paragrah">Next, click on the 'Quick Start Doc' button on the top-right corner to get started!</ng-container>
-        <img style="width:100%;margin-top:20px;" src="assets/get-started/docpointer.png" />
-      </div>
     </div>
   </ng-template>
 
   <ng-template #editModalFooter>
-    <div class="onboarding-complete-footer">
-      <button nz-button nzType="primary" (click)="onClose()">
-        <span i18n="@@common.get-started">Get started</span>
-      </button>
-    </div>
+    <button nz-button nzType="primary" (click)="getStarted()">
+      <span i18n="@@common.get-started">Get started</span>
+    </button>
   </ng-template>
 </nz-modal>

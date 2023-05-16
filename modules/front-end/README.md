@@ -37,7 +37,7 @@ export const environment = {
   production: false,
   url: 'http://localhost:5000',
   demoUrl: 'https://featbit-samples.vercel.app',
-  evaluationUrl: 'http:localhost:5100'
+  evaluationUrl: 'http://localhost:5100'
 };
 ```
 Assuming you are running other service on the same machine:

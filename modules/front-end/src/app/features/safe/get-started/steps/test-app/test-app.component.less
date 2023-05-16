@@ -1,0 +1,36 @@
+@import "variables";
+
+.test-app {
+  .wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    line-height: 1.8;
+
+    .centered-text {
+      text-align: center;
+    }
+
+    .result {
+      p {
+        margin-top: 1em;
+      }
+    }
+  }
+}
+
+nz-button-group {
+  button {
+    border-radius: 8px !important;
+
+    &:first-of-type {
+      margin-right: 8px;
+    }
+
+    &:nth-child(2) {
+      color: white;
+      background-color: @primary-color;
+    }
+  }
+}

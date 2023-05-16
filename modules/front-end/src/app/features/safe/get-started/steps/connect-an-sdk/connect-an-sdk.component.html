@@ -1,0 +1,137 @@
+<nz-page-header>
+  <nz-page-header-title i18n="@@get-started.integrate-sdk-title">Connect An SDK</nz-page-header-title>
+  <nz-page-header-subtitle i18n="@@get-started.integrate-sdk-subtitle">Integrate FeatBit into your application</nz-page-header-subtitle>
+  <nz-page-header-content>
+    <h5 nz-typography i18n="@@get-started.sdk-configs-title">SDK Configs</h5>
+    <nz-descriptions nzSize="small" nzBordered [nzColumn]="1">
+      <nz-descriptions-item i18n-nzTitle="@@get-started.sdk-endpoint" nzTitle="SDK Endpoint">
+        <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(sdkEndpoint)"></i>
+        {{sdkEndpoint}}
+      </nz-descriptions-item>
+      <nz-descriptions-item i18n-nzTitle="@@get-started.open-api-endpoint" nzTitle="Open API Endpoint">
+        <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(apiHost)"></i>
+        {{apiHost}}
+      </nz-descriptions-item>
+      <nz-descriptions-item i18n-nzTitle="@@get-started.secrets" nzTitle="Secrets">
+        <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(selectedSecret.value)"></i>
+        <nz-select
+          [(ngModel)]="selectedSecret"
+          i18n-nzPlaceHolder="@@get-started.select-secret"
+          nzPlaceHolder="Select secret"
+          (ngModelChange)="buildSnippets()"
+          [nzCustomTemplate]="secretTemplate"
+          nzOptionHeightPx="36"
+        >
+          <ng-container *ngFor="let secret of env?.secrets">
+            <nz-option nzCustomContent [nzValue]="secret">
+              <span>{{secret.name}}</span>
+              <nz-tag nzColor="geekblue" *ngIf="secret.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
+              <nz-tag nzColor="cyan" *ngIf="secret.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
+              <span>{{secret.value}}</span>
+            </nz-option>
+          </ng-container>
+        </nz-select>
+        <ng-template #secretTemplate let-selected>
+          <span>{{selected.nzValue.name}}</span>
+          <nz-tag nzColor="geekblue" *ngIf="selected.nzValue.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
+          <nz-tag nzColor="cyan" *ngIf="selected.nzValue.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
+          <span>{{selected.nzValue.value}}</span>
+        </ng-template>
+      </nz-descriptions-item>
+    </nz-descriptions>
+    <p nz-paragraph i18n="@@get-started.connect-an-sdk-introduction">
+      Below is some starter code to integrate FeatBit into your app. More languages coming soon!
+    </p>
+    <nz-tabset nzSize="small" nzAnimated="false">
+      <nz-tab nzTitle="Javascript">
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
+        <prism code="npm install featbit-js-client-sdk" language="bash"></prism>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
+        <p nz-typography>
+          <span i18n="@@get-started.quick-start-introduction">The following code demonstrates the basic usages of the SDK.</span>
+          <span i18n="@@get-started.read">Read</span>
+          <a target="_blank" href="https://github.com/featbit/featbit-js-client-sdk"><span i18n="@@get-started.the-full-sdk-doc"> the full sdk doc </span></a>
+          <span i18n="@@get-startd.for-more-details">for more details.</span>
+        </p>
+        <prism [code]="jsSnippet" language="javascript"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="Python">
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
+        <prism code="pip install fb-python-sdk" language="bash"></prism>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
+        <p nz-typography>
+          <span i18n="@@get-started.quick-start-introduction">The following code demonstrates the basic usages of the SDK.</span>
+          <span i18n="@@get-started.read">Read</span>
+          <a target="_blank" href="https://github.com/featbit/featbit-python-sdk"><span i18n="@@get-started.the-full-sdk-doc"> the full sdk doc </span></a>
+          <span i18n="@@get-startd.for-more-details">for more details.</span>
+        </p>
+        <prism [code]="pythonSnippet" language="python"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="Java">
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.edit-pom-xml">Open your project's pom.xml file and add the following dependency.</p>
+        <prism code="
+          <dependencies>
+              <!-- https://mvnrepository.com/artifact/co.featbit/featbit-java-sdk -->
+              <dependency>
+                <groupId>co.featbit</groupId>
+                <artifactId>featbit-java-sdk</artifactId>
+                <version>1.1.1</version>
+              </dependency>
+          </dependencies>
+
+          <!-- Or in Gradle -->
+          <!-- implementation 'co.featbit:featbit-java-sdk:1.1.1' -->" language="xml">
+        </prism>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
+        <p nz-typography>
+          <span i18n="@@get-started.quick-start-introduction">The following code demonstrates the basic usages of the SDK.</span>
+          <span i18n="@@get-started.read">Read</span>
+          <a target="_blank" href="https://github.com/featbit/featbit-java-sdk"><span i18n="@@get-started.the-full-sdk-doc"> the full sdk doc </span></a>
+          <span i18n="@@get-startd.for-more-details">for more details.</span>
+        </p>
+        <prism [code]="javaSnippet" language="java"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="CSharp">
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
+        <prism code="dotnet add package FeatBit.ServerSdk" language="bash"></prism>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
+        <p nz-typography>
+          <span i18n="@@get-started.quick-start-introduction">The following code demonstrates the basic usages of the SDK.</span>
+          <span i18n="@@get-started.read">Read</span>
+          <a target="_blank" href="https://github.com/featbit/featbit-dotnet-sdk"><span i18n="@@get-started.the-full-sdk-doc"> the full sdk doc </span></a>
+          <span i18n="@@get-startd.for-more-details">for more details.</span>
+        </p>
+        <prism [code]="csharpSnippet" language="csharp"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="Go">
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
+        <prism code="go get github.com/featbit/featbit-go-sdk" language="bash"></prism>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
+        <p nz-typography>
+          <span i18n="@@get-started.quick-start-introduction">The following code demonstrates the basic usages of the SDK.</span>
+          <span i18n="@@get-started.read">Read</span>
+          <a target="_blank" href="https://github.com/featbit/featbit-go-sdk"><span i18n="@@get-started.the-full-sdk-doc"> the full sdk doc </span></a>
+          <span i18n="@@get-startd.for-more-details">for more details.</span>
+        </p>
+        <prism [code]="goSnippet" language="go"></prism>
+      </nz-tab>
+    </nz-tabset>
+  </nz-page-header-content>
+  <nz-page-header-extra>
+    <nz-button-group>
+      <button nz-button nzType="default" (click)="onPrev.emit()">
+        <span nz-icon nzType="left"></span>
+        <span i18n="@@common.prev">Prev</span>
+      </button>
+      <button nz-button nzType="default" (click)="onComplete.emit()">
+        <span i18n="@@common.next">Next</span>
+        <span nz-icon nzType="right"></span>
+      </button>
+    </nz-button-group>
+  </nz-page-header-extra>
+</nz-page-header>

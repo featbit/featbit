@@ -1,0 +1,34 @@
+<nz-card nzBorderless>
+  <nz-steps nzType="navigation" [nzCurrent]="currentStep">
+    <nz-step
+      i18n-nzTitle="@@get-started.create-flag-title"
+      nzTitle="Create a Feature Flag"
+      i18n-nzDescription="@@get-started.create-flag-description"
+      nzDescription="Starts with a flag">
+    </nz-step>
+    <nz-step
+      i18n-nzTitle="@@get-started.integrate-sdk-title"
+      nzTitle="Connect An SDK"
+      i18n-nzDescription="@@get-started.integrate-sdk-description"
+      nzDescription="Integrate with your app">
+    </nz-step>
+    <nz-step
+      i18n-nzTitle="@@get-started.validate-title"
+      nzTitle="Test your application"
+      i18n-nzDescription="@@get-started.validate-description"
+      nzDescription="Verify SDK connection">
+    </nz-step>
+  </nz-steps>
+
+  <div class="step-content">
+    <div *ngIf="currentStep === 0">
+      <create-feature-flag [flag]="flag" (onComplete)="onFlagCreated($event)"></create-feature-flag>
+    </div>
+    <div *ngIf="currentStep === 1">
+      <connect-an-sdk [flagKey]="flag?.key" (onComplete)="goNext()" (onPrev)="goPrev()"></connect-an-sdk>
+    </div>
+    <div *ngIf="currentStep === 2">
+      <test-app [flagKey]="flag?.key" (onComplete)="navigateToFlagList()" (onPrev)="goPrev()"></test-app>
+    </div>
+  </div>
+</nz-card>

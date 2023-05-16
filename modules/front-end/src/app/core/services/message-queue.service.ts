@@ -17,7 +17,6 @@ export class MessageQueueService {
     CURRENT_ORG_PROJECT_ENV_CHANGED: 'current_org_project_env_changed',
     PROJECT_LIST_CHANGED: 'project_list_changed',
     USER_PROFILE_CHANGED: 'user_profile_changed',
-    QUICK_START_GUIDE_ONCLICK: 'quick_start_guide_onclick'
   };
 
   public events: Events;

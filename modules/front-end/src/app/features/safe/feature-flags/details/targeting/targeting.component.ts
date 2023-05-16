@@ -187,22 +187,25 @@ export class TargetingComponent implements OnInit {
 
   private loadUserPropsData() {
     return new Promise((resolve) => {
-      this.envUserPropService.get().subscribe((result) => {
-        if (result) {
-          this.userProps = [USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP, ...result];
+      this.envUserPropService.get().subscribe({
+        next: (result) => {
+          if (result) {
+            this.userProps = [USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP, ...result];
 
-          this.onSearchUser();
+            this.onSearchUser();
 
+            resolve(null);
+          }
+        },
+        error: (err) => {
+          this.msg.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`);
           resolve(null);
         }
-      }, _ => {
-        this.msg.error($localize `:@@common.loading-failed-try-again:Loading failed, please try again`);
-        resolve(null);
-      })
+      });
     });
   }
 
-  public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
+  onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
     this.envUserService.search(filter).subscribe(pagedResult => {
       this.userList = [...pagedResult.items];
     })

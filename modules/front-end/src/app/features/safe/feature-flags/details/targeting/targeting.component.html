@@ -22,7 +22,7 @@
     <div class="content-container">
       <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
         <div class="rule-banner">
-          <div class="title" i18n="@@ff.components.details.targeting.default">Default</div>
+          <div class="title" i18n="@@ff.targeting.default">Default</div>
           <i [nz-tooltip]="defaultTooltip" nz-icon nzType="icons:icon-info-outline">
             <ng-template #defaultTooltip>
               <ng-container i18n="@@ff.components.details.targeting.default-tooltip">Serve a variation if the user doesn't met Individual targeting or Targeting Rules.</ng-container>

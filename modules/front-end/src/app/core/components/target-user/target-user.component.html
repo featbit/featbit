@@ -32,9 +32,9 @@
           [nzValue]="item"
           [nzLabel]="item.name"
           [nzHide]="isSelected(item)">
-          <div class="user-selection-item">
+          <div class="user-selection-item" [class]="{'creation-selection-item': item.isNew}">
             <div class="title">
-              <ng-container *ngIf="item.isNew" i18n="@@common.new-user">Create user</ng-container> {{ item.name }}
+              <ng-container *ngIf="item.isNew" i18n="@@common.create-with-comma">Create:</ng-container> {{ item.name }}
             </div>
             <div class="digest">{{getUserDigest(item)}}</div>
           </div>

@@ -6,7 +6,7 @@ const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: $localize `:@@auditlogs.audit-logs:Audit logs`
+      breadcrumb: $localize `:@@auditlogs.audit-logs:Audit Logs`
     },
     component: AuditLogsComponent,
     children: [
