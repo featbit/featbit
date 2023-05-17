@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: clickhouse-server
+  name: clickhouse-server
+spec:
+  containers:
+    - image: clickhouse/clickhouse-server:22.3
+      name: clickhouse-server
+      ports:
+        - containerPort: 8123
+        - containerPort: 8443
+        - containerPort: 9000
+        - containerPort: 9009
+        - containerPort: 9440
+      resources: {}
+      volumeMounts:
+        - mountPath: /etc/clickhouse-server/config.xml
+          name: clickhouse-etc
+          subPath: "config.xml"
+          readOnly: true
+        - mountPath: /etc/clickhouse-server/users.xml
+          name: clickhouse-etc
+          subPath: "users.xml"
+          readOnly: true
+        - mountPath: /var/lib/clickhouse
+          name: clickhouse-server
+        - mountPath: /var/log
+          name: varlog
+    - image: busybox:1.28
+      name: clickhouse-server-err-log
+      args: [/bin/sh, -c, 'tail -n+1 -F /var/log/clickhouse-server/clickhouse-server.err.log']
+      resources: {}
+      volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+      
+  restartPolicy: OnFailure
+  volumes:
+    - name: clickhouse-server
+      persistentVolumeClaim:
+        claimName: clickhouse-server
+    - name: clickhouse-etc
+      configMap:
+        name: clickhouse-etc
+        items:
+          - key: "config.xml"
+            path: "config.xml"
+          - key: "users.xml"
+            path: "users.xml"
+    - name: varlog
+      emptyDir:
+    - configMap:
+        items:
+        - key: agent.yaml
+          path: agent.yaml
+        name: agent-config
+      name: agent-config          
+status: {}
