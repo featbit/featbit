@@ -50,11 +50,5 @@ spec:
           - key: "users.xml"
             path: "users.xml"
     - name: varlog
-      emptyDir:
-    - configMap:
-        items:
-        - key: agent.yaml
-          path: agent.yaml
-        name: agent-config
-      name: agent-config          
+      emptyDir:      
 status: {}
