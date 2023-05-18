@@ -53,5 +53,3 @@ kubectl apply -f .\infrastructure\kafka-service.yaml
 
 kubectl apply -f .\infrastructure\kafka-pod.yaml
 
-# kubectl apply -f .\infrastructure\init-kafka-topics-deployment.yaml
-
