@@ -16,10 +16,12 @@ public static class MiddlewaresRegister
         // external use
         app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
 
-        // enable swagger in development environment
+        //enable swagger
+        app.UseSwagger();
+
+        // enable swagger UI in development environment
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
                 options.EnableFilter();
