@@ -26,7 +26,7 @@ spec:
             - name: MongoDb__Database
               value: featbit
             - name: OLAP__ServiceHost
-              value: http://da-server
+              value: http://da-server:8200
           image: featbit/featbit-api-server:latest
           name: api-server
           ports:
