@@ -35,10 +35,6 @@ kubectl apply -f .\infrastructure\zookeeper-service.yaml
 
 kubectl apply -f .\infrastructure\zookeeper-pod.yaml
 
-kubectl apply -f .\infrastructure\clickhouse-agent-config-configMap.yaml
-
-kubectl apply -f .\infrastructure\clickhouse-configmap-etc.yaml
-
 kubectl apply -f .\infrastructure\clickhouse-configmap-etc.yaml
 
 kubectl apply -f .\infrastructure\clickhouse-server-persistentvolumeclaim.yaml
