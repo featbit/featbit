@@ -22,7 +22,7 @@ spec:
             - name: MongoDb__Database
               value: featbit
             - name: OLAP__ServiceHost
-              value: http://da-server
+              value: http://da-server:8200
             - name: Redis__ConnectionString
               value: redis:6379
           image: featbit/featbit-api-server:latest
