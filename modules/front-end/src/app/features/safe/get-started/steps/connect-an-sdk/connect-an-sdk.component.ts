@@ -5,6 +5,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { IEnvironment, ISecret, SecretTypeEnum } from "@shared/types";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { EnvService } from "@services/env.service";
+import posthog from 'posthog-js';
 
 @Component({
   selector: 'connect-an-sdk',
@@ -66,6 +67,11 @@ export class ConnectAnSdkComponent implements OnChanges {
     copyToClipboard(text).then(
       () => this.message.success($localize`:@@common.copy-success:Copied`)
     );
+  }
+
+  next(){
+    this.onComplete.emit(); 
+    posthog.capture('GS Click Step 2 Next', { property: 'value' });
   }
 
   jsSnippet: string;

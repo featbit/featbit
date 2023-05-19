@@ -12,6 +12,7 @@ import {
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/switch-index";
 import { GET_STARTED } from "@utils/localstorage-keys";
+import posthog from 'posthog-js';
 
 @Component({
   selector: 'create-feature-flag',
@@ -174,6 +175,7 @@ export class CreateFeatureFlagComponent implements OnInit {
     if (this.isCreatingFlag) {
       this.featureFlagService.create(this.form.value).subscribe({
         next: (result: IFeatureFlag) => {
+          posthog.capture('GS Click Step 1 Next', { property: 'value' });
           this.onComplete.emit(result as any as IFeatureFlagListItem);
         },
         error: (err) => {
@@ -181,6 +183,7 @@ export class CreateFeatureFlagComponent implements OnInit {
         }
       });
     } else {
+      posthog.capture('GS Click Step 1 Next', { property: 'value' });
       this.onComplete.emit(this.flag);
     }
   }

@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import packageInfo from '../../package.json';
 import { environment } from '../environments/environment';
+import { Router, Event, NavigationStart, NavigationEnd, NavigationError } from '@angular/router';
+import posthog from 'posthog-js';
 
 interface Locale {
   localeCode: string;
@@ -18,8 +20,13 @@ export class AppComponent {
     { localeCode: 'zh', label: '中文' },
   ];
 
-  constructor() {
-    console.log(`Env: ${environment.production ? 'Prod' : 'dev' }; Version: ${packageInfo.version}`);
+  constructor(private router: Router) {
+    console.log(`Env: ${environment.production ? 'Prod' : 'dev'}; Version: ${packageInfo.version}`);
+    this.router.events.subscribe((event: Event) => {
+      if (event instanceof NavigationEnd) {
+        posthog.capture(`NavigationEnd URL: ${event.urlAfterRedirects}`, { property: 'value' });
+      }
+    });
   }
 }
 

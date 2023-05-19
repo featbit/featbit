@@ -3,6 +3,7 @@ import { NzProgressStatusType } from "ng-zorro-antd/progress";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { IntervalType } from "@features/safe/feature-flags/details/insights/types";
 import { getTimezoneString } from "@utils/index";
+import posthog from 'posthog-js';
 
 @Component({
   selector: 'test-app',
@@ -57,6 +58,7 @@ export class TestAppComponent implements OnInit, OnDestroy {
     if (this.status === this.statusSuccess) {
       this.progress = 100;
       this.normalizedProgress = 100;
+      posthog.capture('GS Click Step 3 Connection Success', { property: 'value' });
     } else if (this.status === this.statusActive && this.progress < 100) {
       // The warning is nodejs related, it's incorrect, it's ignored
       // @ts-ignore
@@ -82,6 +84,8 @@ export class TestAppComponent implements OnInit, OnDestroy {
         const hasEvents = await this.flagHasEvents();
         if (hasEvents) {
           this.status = this.statusSuccess;
+
+          posthog.capture('GS Click Step 3 Connection Success', { property: 'value' });
         } else {
           this.startRefreshStatus();
         }
