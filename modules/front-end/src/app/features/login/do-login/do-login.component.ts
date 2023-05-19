@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
+import posthog from 'posthog-js';
 
 @Component({
   selector: 'app-do-login',
@@ -43,6 +44,8 @@ export class DoLoginComponent implements OnInit {
     }
 
     this.isLogin = true;
+
+    posthog.capture('Click Login', { property: 'value' });
 
     const {identity, password} = this.pwdLoginForm.value;
     this.identityService.loginByEmail(identity, password).subscribe(

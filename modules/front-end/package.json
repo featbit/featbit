@@ -12,6 +12,7 @@
     "test-coverage": "ng test --code-coverage"
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^1.10.3",
     "@angular/animations": "^14.0.0",
     "@angular/common": "^14.0.0",
     "@angular/compiler": "^14.0.0",
@@ -28,6 +29,7 @@
     "moment": "^2.29.4",
     "monaco-editor": "0.33.0",
     "ng-zorro-antd": "14.0.0",
+    "posthog-js": "^1.57.2",
     "prismjs": "^1.29.0",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
