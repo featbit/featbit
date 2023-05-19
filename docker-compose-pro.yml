@@ -20,10 +20,12 @@ services:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Kafka__BootstrapServers=kafka:9092
+      - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
       - IS_PRO=true
     depends_on:
       - mongodb
+      - redis
       - kafka
       - da-server
     ports:
