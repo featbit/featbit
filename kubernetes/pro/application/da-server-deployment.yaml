@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: da-server
+  name: da-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: da-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: da-server
+    spec:
+      containers:
+        - env:
+            - name: CLICKHOUSE_HOST
+              value: clickhouse-server
+            - name: CLICKHOUSE_KAFKA_HOSTS
+              value: kafka:9092
+            - name: IS_PRO
+              value: "true"
+            - name: KAFKA_HOSTS
+              value: kafka:9092
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+          image: featbit/featbit-data-analytics-server:latest
+          name: da-server
+          ports:
+            - containerPort: 80
+          resources: {}
+      restartPolicy: Always
+status: {}

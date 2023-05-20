@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: evaluation-server
+  name: evaluation-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evaluation-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        io.kompose.network/featbit-network: "true"
+        app: evaluation-server
+    spec:
+      containers:
+        - env:
+            - name: IS_PRO
+              value: "true"
+            - name: Kafka__BootstrapServers
+              value: kafka:9092
+            - name: MongoDb__ConnectionString
+              value: mongodb://admin:password@mongodb:27017
+            - name: MongoDb__Database
+              value: featbit
+            - name: Redis__ConnectionString
+              value: redis:6379
+          image: featbit/featbit-evaluation-server:latest
+          name: evaluation-server
+          ports:
+            - containerPort: 5100
+          resources: {}
+      restartPolicy: Always
+status: {}

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: clickhouse-server
+  name: clickhouse-server
+spec:
+  ports:
+    - name: "8123"
+      port: 8123
+      targetPort: 8123
+    - name: "8443"
+      port: 8443
+      targetPort: 8443
+    - name: "9000"
+      port: 9000
+      targetPort: 9000
+    - name: "9009"
+      port: 9009
+      targetPort: 9009
+    - name: "9440"
+      port: 9440
+      targetPort: 9440
+  selector:
+    app: clickhouse-server
+status:
+  loadBalancer: {}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: api-server
+  name: api-server
+spec:
+  ports:
+    - name: "5000"
+      port: 5000
+      targetPort: 5000
+  selector:
+    app: api-server
+status:
+  loadBalancer: {}

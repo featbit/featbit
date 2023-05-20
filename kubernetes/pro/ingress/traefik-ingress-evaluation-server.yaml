@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: evaluation-server-route
+  namespace: featbit
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+    - host: featbit-eval.local
+      http:
+        paths:
+          - path: '/'
+            pathType: Prefix
+            backend:
+              service:
+                name: evaluation-server
+                port: 
+                  number: 5100
