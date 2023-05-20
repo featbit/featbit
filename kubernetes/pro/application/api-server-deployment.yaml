@@ -27,6 +27,8 @@ spec:
               value: featbit
             - name: OLAP__ServiceHost
               value: http://da-server:8200
+            - name: Redis__ConnectionString
+              value: redis:6379
           image: featbit/featbit-api-server:latest
           name: api-server
           ports:
