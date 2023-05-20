@@ -1019,7 +1019,7 @@ app-root {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 300px;
+  max-width: 500px;
   background-color: transparent;
 
   .ant-popover-title {
@@ -1040,6 +1040,12 @@ app-root {
       border-radius: 10px;
       border: 2px solid #bfd0e321;
       box-shadow: 0 4px 12px 0 rgb(217 217 217 / 0%);
+
+      .ant-popover-inner-content {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
     }
 
     .env-secret-popover-content {
