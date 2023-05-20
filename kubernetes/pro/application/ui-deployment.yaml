@@ -23,7 +23,7 @@ spec:
             - name: DEMO_URL
               value: https://featbit-samples.vercel.app
             - name: EVALUATION_URL
-              value: http://localhost:5000
+              value: http://localhost:5100
           image: featbit/featbit-ui:latest
           name: ui
           ports:
