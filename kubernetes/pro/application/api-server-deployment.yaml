@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: api-server
+  name: api-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: api-server
+    spec:
+      containers:
+        - env:
+            - name: IS_PRO
+              value: "true"
+            - name: Kafka__BootstrapServers
+              value: kafka:9092
+            - name: MongoDb__ConnectionString
+              value: mongodb://admin:password@mongodb:27017
+            - name: MongoDb__Database
+              value: featbit
+            - name: OLAP__ServiceHost
+              value: http://da-server:8200
+          image: featbit/featbit-api-server:latest
+          name: api-server
+          ports:
+            - containerPort: 5000
+          resources: {}
+      restartPolicy: Always
+status: {}

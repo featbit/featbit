@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: zookeeper
+  name: zookeeper
+spec:
+  containers:
+    - env:
+        - name: ALLOW_ANONYMOUS_LOGIN
+          value: "true"
+      image: bitnami/zookeeper:3.8.1
+      name: zookeeper
+      ports:
+        - containerPort: 2181
+      resources: {}
+      volumeMounts:
+        - mountPath: /bitnami/zookeeper
+          name: zookeeper
+  restartPolicy: OnFailure
+  volumes:
+    - name: zookeeper
+      persistentVolumeClaim:
+        claimName: zookeeper
+status: {}

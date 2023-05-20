@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: demo-dino-game-vue
+  name: demo-dino-game-vue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-dino-game-vue
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: demo-dino-game-vue
+    spec:
+      containers:
+        - image: featbit/demo-dino-game-vue:latest
+          name: demo-dino-game-vue
+          ports:
+            - containerPort: 80
+          resources:
+           limits:
+             memory: 512Mi
+             cpu: "1"
+           requests:
+             memory: 256Mi
+             cpu: "0.2"
+      restartPolicy: Always
+status: {}
