@@ -250,6 +250,10 @@ export class ProjectComponent implements OnInit {
     this.envSecretService.delete(env.id, secretId).subscribe({
       next: () => {
         env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
+
+        if (this.isCurrentEnv(env)) {
+          this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED);
+        }
       },
       error: () => {
         this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -300,6 +304,10 @@ export class ProjectComponent implements OnInit {
         next: (secret: ISecret) => {
           this.env.secrets = [...this.env.secrets, secret];
           this.isSecretModalVisible = false;
+
+          if (this.isCurrentEnv(this.env)) {
+            this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED);
+          }
         },
         error: () => {
           this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);

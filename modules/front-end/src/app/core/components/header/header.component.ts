@@ -78,6 +78,10 @@ export class HeaderComponent implements OnInit {
     this.messageQueueService.subscribe(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED, () => {
       this.setSelectedProjectEnv();
     });
+
+    this.messageQueueService.subscribe(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED, () => {
+      this.setCurrentEnv();
+    });
   }
 
   isCurrentProject(project: IProject): boolean {
@@ -137,6 +141,17 @@ export class HeaderComponent implements OnInit {
     setTimeout(() => window.location.reload(), 200);
   }
 
+  private setCurrentEnv() {
+    this.envService.getEnv(this.currentProjectEnv.projectId, this.currentProjectEnv.envId).subscribe({
+      next: env => {
+        this.env = env;
+      },
+      error: () => {
+        this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
+      }
+    });
+  }
+
   onSelectProject(project: IProject) {
     this.selectedProject = project;
     this.canListEnvs = this.permissionsService.isGranted(this.permissionsService.getResourceRN('project', project), permissionActions.ListEnvs);
@@ -153,14 +168,7 @@ export class HeaderComponent implements OnInit {
     this.currentOrganization = currentOrganizationProjectEnv.organization;
     this.currentProjectEnv = currentOrganizationProjectEnv.projectEnv;
 
-    this.envService.getEnv(this.currentProjectEnv.projectId, this.currentProjectEnv.envId).subscribe({
-      next: env => {
-        this.env = env;
-      },
-      error: () => {
-        this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
-      }
-    });
+    this.setCurrentEnv();
 
     this.selectedProject = {
       id: this.currentProjectEnv.projectId,
