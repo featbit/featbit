@@ -2201,27 +2201,19 @@
         </context-group>
         <target>查看 API 文档</target>
       </trans-unit>
-      <trans-unit id="guide.browser-the" datatype="html">
-        <source>Browse the</source>
+      <trans-unit id="guide.view-docs-for-experimentation" datatype="html">
+        <source>View docs for Experimentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">36</context>
         </context-group>
-        <target>查看</target>
-      </trans-unit>
-      <trans-unit id="guide.experimentation-documentation" datatype="html">
-        <source> Experimentation Documentation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">37</context>
-        </context-group>
-        <target>数据实验文档</target>
+        <target>查看数据实验文档</target>
       </trans-unit>
       <trans-unit id="guide.guides-title-invite-your-team" datatype="html">
         <source>Invite Your Team</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">39</context>
         </context-group>
         <target>邀请您的团队</target>
       </trans-unit>
@@ -2229,7 +2221,7 @@
         <source>Invite team members</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <target>邀请团队成员</target>
       </trans-unit>
@@ -2237,7 +2229,7 @@
         <source> to your organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">45</context>
+          <context context-type="linenumber">44</context>
         </context-group>
         <target>到您的组织</target>
       </trans-unit>
@@ -2245,7 +2237,7 @@
         <source>Manage</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">48</context>
+          <context context-type="linenumber">47</context>
         </context-group>
         <target>管理</target>
       </trans-unit>
@@ -2253,7 +2245,7 @@
         <source> custom permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <target>自定义权限</target>
       </trans-unit>
@@ -2261,7 +2253,7 @@
         <source>Need Assistance?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">55</context>
+          <context context-type="linenumber">54</context>
         </context-group>
         <target>需要帮助？</target>
       </trans-unit>
@@ -2269,7 +2261,7 @@
         <source>Join our</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">57</context>
+          <context context-type="linenumber">56</context>
         </context-group>
         <target>加入</target>
       </trans-unit>
@@ -2277,7 +2269,7 @@
         <source>Slack Channel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">60</context>
+          <context context-type="linenumber">59</context>
         </context-group>
         <target>Slack</target>
       </trans-unit>
@@ -2285,7 +2277,7 @@
         <source>for discussions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <target>讨论群</target>
       </trans-unit>
@@ -2293,7 +2285,7 @@
         <source>Open an issue on GitHub</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <target>创建 GitHub issue</target>
       </trans-unit>
@@ -2301,7 +2293,7 @@
         <source>Premium Support</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">70</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>技术支持</target>
       </trans-unit>
@@ -2309,7 +2301,7 @@
         <source>Reach us on</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">71</context>
         </context-group>
         <target>通过以下方式联系我们:</target>
       </trans-unit>
@@ -2317,7 +2309,7 @@
         <source>or</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">75</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <target>或者</target>
       </trans-unit>
