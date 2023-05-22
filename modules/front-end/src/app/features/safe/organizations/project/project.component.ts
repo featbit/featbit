@@ -249,7 +249,7 @@ export class ProjectComponent implements OnInit {
     this.envSecretService.delete(env.id, secretId).subscribe({
       next: () => {
         env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
-        this.envSecretsChanged();
+        this.envSecretsChanged(env);
       },
       error: () => {
         this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -290,7 +290,7 @@ export class ProjectComponent implements OnInit {
 
           return secret;
         });
-        this.envSecretsChanged();
+        this.envSecretsChanged(this.env);
         this.isSecretModalVisible = false;
       },
       error: () => {
@@ -309,7 +309,7 @@ export class ProjectComponent implements OnInit {
     this.envSecretService.add(this.env.id, name, type).subscribe({
       next: (secret: ISecret) => {
         this.env.secrets = [...this.env.secrets, secret];
-        this.envSecretsChanged();
+        this.envSecretsChanged(this.env);
         this.isSecretModalVisible = false;
       },
       error: () => {
@@ -318,8 +318,8 @@ export class ProjectComponent implements OnInit {
     });
   }
 
-  envSecretsChanged() {
-    if (this.isCurrentEnv(this.env)) {
+  envSecretsChanged(env: IEnvironment) {
+    if (this.isCurrentEnv(env)) {
       this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED);
     }
   }
