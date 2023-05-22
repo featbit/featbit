@@ -274,7 +274,7 @@ export class ProjectComponent implements OnInit {
     }
   }
 
-  updateSecret(name: string) {
+  private updateSecret(name: string) {
     const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -299,7 +299,7 @@ export class ProjectComponent implements OnInit {
     });
   }
 
-  addSecret(name: string, type: string) {
+  private addSecret(name: string, type: string) {
     const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.CreateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -318,7 +318,7 @@ export class ProjectComponent implements OnInit {
     });
   }
 
-  envSecretsChanged(env: IEnvironment) {
+  private envSecretsChanged(env: IEnvironment) {
     if (this.isCurrentEnv(env)) {
       this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED);
     }
