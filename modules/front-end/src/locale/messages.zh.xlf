@@ -701,15 +701,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">259</context>
+          <context context-type="linenumber">255</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">293</context>
+          <context context-type="linenumber">297</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">313</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -7081,6 +7081,14 @@
         </context-group>
         <target>重置密码失败，原因: [reason]。</target>
       </trans-unit>
+      <trans-unit id="org.project.projectListPermissionDenied" datatype="html">
+        <source>You don&apos;t have permissions to read project list, please contact the admin to grant you the necessary permissions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+        <target>您没有读取项目列表的权限，请联系管理员授予您所需的权限。</target>
+      </trans-unit>
       <trans-unit id="org.project.projectFilterPlacehoder" datatype="html">
         <source>Filter by name</source>
         <context-group purpose="location">
@@ -7088,6 +7096,14 @@
           <context context-type="linenumber">5</context>
         </context-group>
         <target>按名称查找</target>
+      </trans-unit>
+      <trans-unit id="org.project.envListPermissionDenied" datatype="html">
+        <source>You don&apos;t have permissions to read env list, please contact the admin to grant you the necessary permissions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <target>您没有读取环境列表的权限，请联系管理员授予您所需的权限。</target>
       </trans-unit>
       <trans-unit id="commoname" datatype="html">
         <source>Name</source>
@@ -7201,7 +7217,7 @@
         <source>Add secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">207</context>
+          <context context-type="linenumber">206</context>
         </context-group>
         <target>添加秘钥</target>
       </trans-unit>
@@ -7209,7 +7225,7 @@
         <source>Edit secret: <x id="PH" equiv-text="secret.name"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
-          <context context-type="linenumber">232</context>
+          <context context-type="linenumber">231</context>
         </context-group>
         <target>编辑：<x id="PH" equiv-text="secret.name"/></target>
       </trans-unit>
