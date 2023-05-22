@@ -1,5 +1,5 @@
 <div class="standard-div">
-  <permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.ListProjects" i18n-messageIfDeny="@@org.project.projectListPermissionDenied" [messageIfDeny]="'You don\'t have permissions to read project list, please contact the admin to grant you the necessary permissions'">
+  <permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.ListProjects" i18n-messageIfDeny="@@org.project.projectListPermissionDenied" messageIfDeny="You don't have permissions to read project list, please contact the admin to grant you the necessary permissions">
     <div class="project-operations">
       <nz-input-group [nzPrefix]="orgIcon">
         <input type="text" nz-input placeholder="Filter by name" [(ngModel)]="searchValue" i18n-placeholder="@@org.project.projectFilterPlacehoder"/>
@@ -16,7 +16,7 @@
       <div *ngFor="let project of projects | projectFilter: searchValue" class="project">
         <nz-card nzBorderless>
           <nz-descriptions [nzTitle]="titleTemplate" [nzExtra]="extraTemplate"></nz-descriptions>
-          <permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.ListEnvs" i18n-messageIfDeny="@@org.project.envListPermissionDenied" [messageIfDeny]="'You don\'t have permissions to read env list, please contact the admin to grant you the necessary permissions'">
+          <permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.ListEnvs" i18n-messageIfDeny="@@org.project.envListPermissionDenied" messageIfDeny="You don't have permissions to read env list, please contact the admin to grant you the necessary permissions">
             <div class="env-list">
               <div *ngFor="let env of project.environments">
                 <div class="env">
@@ -46,8 +46,8 @@
                       <div class="desc-content">
                         <div *ngFor="let secret of env.secrets" class="secret">
                           <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{secret.name}}</span>
-                          <nz-tag nzColor="geekblue" *ngIf="secret.type == secretTypeServer" i18n="@@common.server">server</nz-tag>
-                          <nz-tag nzColor="cyan" *ngIf="secret.type == secretTypeClient" i18n="@@common.client">client</nz-tag>
+                          <nz-tag nzColor="geekblue" *ngIf="secret.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
+                          <nz-tag nzColor="cyan" *ngIf="secret.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
                           <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
                           <span>
                             <button nz-button nzSize="small" nzType="link" (click)="editSecret(project, env, secret)">
@@ -151,8 +151,8 @@
           nzTooltipTitle="The secret would be used by a client side or server side SDK">Type</nz-form-label>
         <nz-form-control>
           <nz-select [nzDisabled]="isEditingSecret" formControlName="type">
-            <nz-option [nzValue]="secretTypeClient" i18n-nzLabel="@@org.project.secret-type-client-side-sdk" nzLabel="Client Side SDK"></nz-option>
-            <nz-option [nzValue]="secretTypeServer" i18n-nzLabel="@@org.project.secret-type-server-side-sdk" nzLabel="Server Side SDK"></nz-option>
+            <nz-option [nzValue]="SecretTypeEnum.Client" i18n-nzLabel="@@org.project.secret-type-client-side-sdk" nzLabel="Client Side SDK"></nz-option>
+            <nz-option [nzValue]="SecretTypeEnum.Server" i18n-nzLabel="@@org.project.secret-type-server-side-sdk" nzLabel="Server Side SDK"></nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>

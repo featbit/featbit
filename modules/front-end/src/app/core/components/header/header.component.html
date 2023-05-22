@@ -10,32 +10,34 @@
     <div class="org-btns">
       <div class="header-info">
         <div class="org-proj-env">
-        <span [routerLink]="['/organizations']">
-          <i nz-icon nzType="icons:icon-org"></i>
-          {{currentOrganization?.name}}
-        </span>
-          <span (click)="envModalVisible=true">
-          <i nz-icon nzType="icons:icon-proj"></i>
-            {{currentProjectEnv?.projectName}}
-        </span>
-          <span (click)="envModalVisible=true" nz-popover i18n-nz-popover="@@common.env-secret" nzPopoverTitle="Environment Secret"
+          <span [routerLink]="['/organizations']">
+            <i nz-icon nzType="icons:icon-org"></i>
+            {{currentOrganization?.name}}
+          </span>
+            <span (click)="envModalVisible=true">
+            <i nz-icon nzType="icons:icon-proj"></i>
+              {{currentProjectEnv?.projectName}}
+          </span>
+          <span (click)="envModalVisible=true" nz-popover i18n-nz-popover="@@common.env-secret" nzPopoverTitle="Environment Secrets"
                 [nzPopoverContent]="environmentSecretContent"
                 style="background-color: transparent;"
                 nzPopoverOverlayClassName="env-secret-popover">
 
-          <i nz-icon nzType="icons:icon-env"></i>
+            <i nz-icon nzType="icons:icon-env"></i>
             {{currentProjectEnv?.envName}}
-
-            <ng-template #environmentSecretContent>
-            <div class="env-secret-popover-content" (click)="copyText($event, currentProjectEnv?.envSecret)">
-              <i class="copy-icon" nz-icon
-                 nzType="icons:icon-copy"></i>
-              {{currentProjectEnv?.envSecret}}
-            </div>
+          </span>
+          <ng-template #environmentSecretContent>
+            <ng-container *ngFor="let secret of env?.secrets">
+              <div class="env-secret-popover-content" (click)="copyText($event, secret.value)">
+                <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                <span>{{secret.name}}</span>
+                <nz-tag nzColor="geekblue" *ngIf="secret.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
+                <nz-tag nzColor="cyan" *ngIf="secret.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
+                <span>{{secret.value}}</span>
+              </div>
+            </ng-container>
           </ng-template>
-        </span>
         </div>
-
         <div class="switch" (click)="envModalVisible=true">
           <button class="switch-link-btn" nz-button nzType="link">
             <i nz-icon nzType="icons:icon-swap"></i>

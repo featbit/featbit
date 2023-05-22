@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IAuthProps, IOrganization, IProject, IEnvironment, IProjectEnv } from '@shared/types';
+import { IAuthProps, IOrganization, IProject, IEnvironment, IProjectEnv, SecretTypeEnum } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
@@ -12,6 +12,7 @@ import { Observable } from "rxjs";
 import { copyToClipboard } from '@utils/index';
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FeedbackService } from "@services/feedback.service";
+import { EnvService } from '@core/services/env.service';
 
 @Component({
   selector: 'app-header',
@@ -22,6 +23,8 @@ export class HeaderComponent implements OnInit {
 
   @Input() auth: IAuthProps;
 
+  protected readonly SecretTypeEnum = SecretTypeEnum;
+  
   cannotReadProjectsMsg: string;
   cannotReadEnvsMsg: string;
   currentProjectEnv: IProjectEnv;
@@ -36,6 +39,8 @@ export class HeaderComponent implements OnInit {
 
   flags = {};
 
+  env: IEnvironment;
+
   constructor(
     private router: Router,
     private organizationService: OrganizationService,
@@ -46,6 +51,7 @@ export class HeaderComponent implements OnInit {
     private readonly breadcrumbService: BreadcrumbService,
     private permissionsService: PermissionsService,
     private messageQueueService: MessageQueueService,
+    private envService: EnvService
   ) {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
 
@@ -61,16 +67,20 @@ export class HeaderComponent implements OnInit {
 
     this.cannotReadProjectsMsg = $localize`You don't have permissions to read project list, please contact the admin to grant you the necessary permissions`;
     this.cannotReadEnvsMsg = this.canListProjects ? $localize`You don't have permissions to read environment list, please contact the admin to grant you the necessary permissions` : $localize`You don't have permissions to read project and environment list, please contact the admin to grant you the necessary permissions`;
-    this.selectCurrentProjectEnv();
+    this.setSelectedProjectEnv();
     this.setAllProjects();
 
     this.messageQueueService.subscribe(this.messageQueueService.topics.PROJECT_LIST_CHANGED, () => {
       this.setAllProjects();
-      this.selectCurrentProjectEnv();
+      this.setSelectedProjectEnv();
     });
 
     this.messageQueueService.subscribe(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED, () => {
-      this.selectCurrentProjectEnv();
+      this.setSelectedProjectEnv();
+    });
+
+    this.messageQueueService.subscribe(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED, () => {
+      this.setCurrentEnv();
     });
   }
 
@@ -131,6 +141,17 @@ export class HeaderComponent implements OnInit {
     setTimeout(() => window.location.reload(), 200);
   }
 
+  private setCurrentEnv() {
+    this.envService.getEnv(this.currentProjectEnv.projectId, this.currentProjectEnv.envId).subscribe({
+      next: env => {
+        this.env = env;
+      },
+      error: () => {
+        this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
+      }
+    });
+  }
+
   onSelectProject(project: IProject) {
     this.selectedProject = project;
     this.canListEnvs = this.permissionsService.isGranted(this.permissionsService.getResourceRN('project', project), permissionActions.ListEnvs);
@@ -141,16 +162,19 @@ export class HeaderComponent implements OnInit {
     this.selectedEnv = env;
   }
 
-  private selectCurrentProjectEnv() {
+  private setSelectedProjectEnv() {
     const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
 
     this.currentOrganization = currentOrganizationProjectEnv.organization;
     this.currentProjectEnv = currentOrganizationProjectEnv.projectEnv;
 
+    this.setCurrentEnv();
+
     this.selectedProject = {
       id: this.currentProjectEnv.projectId,
       name: this.currentProjectEnv.projectName
     } as IProject;
+
     this.selectedEnv = {
       id: this.currentProjectEnv.envId,
       name: this.currentProjectEnv.envName

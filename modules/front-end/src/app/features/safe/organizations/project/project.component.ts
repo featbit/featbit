@@ -185,8 +185,7 @@ export class ProjectComponent implements OnInit {
   }
 
   // env secrets
-  secretTypeClient = SecretTypeEnum.Client;
-  secretTypeServer = SecretTypeEnum.Server;
+  protected readonly SecretTypeEnum = SecretTypeEnum;
   isSecretModalVisible: boolean = false;
   secretForm: FormGroup;
   secretModalTitle: string;
@@ -250,6 +249,7 @@ export class ProjectComponent implements OnInit {
     this.envSecretService.delete(env.id, secretId).subscribe({
       next: () => {
         env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
+        this.envSecretsChanged(env);
       },
       error: () => {
         this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -268,43 +268,59 @@ export class ProjectComponent implements OnInit {
 
     const {name, type} = this.secretForm.value;
     if (this.isEditingSecret) {
-      const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
-      if (!isAllowed) {
-        this.messageService.warning(this.permissionsService.genericDenyMessage);
-        return;
-      }
-
-      this.envSecretService.update(this.env.id, this.currentSecretId, name).subscribe({
-        next: () => {
-          this.env.secrets = this.env.secrets.map((secret) => {
-            if (secret.id === this.currentSecretId) {
-              return {...secret, name};
-            }
-
-            return secret;
-          });
-          this.isSecretModalVisible = false;
-        },
-        error: () => {
-          this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
-        }
-      });
+      this.updateSecret(name);
     } else {
-      const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.CreateEnvSecret);
-      if (!isAllowed) {
-        this.messageService.warning(this.permissionsService.genericDenyMessage);
-        return;
-      }
+      this.addSecret(name, type);
+    }
+  }
 
-      this.envSecretService.add(this.env.id, name, type).subscribe({
-        next: (secret: ISecret) => {
-          this.env.secrets = [...this.env.secrets, secret];
-          this.isSecretModalVisible = false;
-        },
-        error: () => {
-          this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
-        }
-      });
+  private updateSecret(name: string) {
+    const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
+    if (!isAllowed) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.envSecretService.update(this.env.id, this.currentSecretId, name).subscribe({
+      next: () => {
+        this.env.secrets = this.env.secrets.map((secret) => {
+          if (secret.id === this.currentSecretId) {
+            return { ...secret, name };
+          }
+
+          return secret;
+        });
+        this.envSecretsChanged(this.env);
+        this.isSecretModalVisible = false;
+      },
+      error: () => {
+        this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
+      }
+    });
+  }
+
+  private addSecret(name: string, type: string) {
+    const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.CreateEnvSecret);
+    if (!isAllowed) {
+      this.messageService.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.envSecretService.add(this.env.id, name, type).subscribe({
+      next: (secret: ISecret) => {
+        this.env.secrets = [...this.env.secrets, secret];
+        this.envSecretsChanged(this.env);
+        this.isSecretModalVisible = false;
+      },
+      error: () => {
+        this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
+      }
+    });
+  }
+
+  private envSecretsChanged(env: IEnvironment) {
+    if (this.isCurrentEnv(env)) {
+      this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED);
     }
   }
 }

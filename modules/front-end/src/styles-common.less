@@ -1015,6 +1015,7 @@ app-root {
   }
 }
 
+// env secrets popover style
 .env-secret-popover {
   white-space: nowrap;
   overflow: hidden;
@@ -1040,6 +1041,12 @@ app-root {
       border-radius: 10px;
       border: 2px solid #bfd0e321;
       box-shadow: 0 4px 12px 0 rgb(217 217 217 / 0%);
+
+      .ant-popover-inner-content {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
     }
 
     .env-secret-popover-content {
