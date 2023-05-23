@@ -1,6 +1,4 @@
-import get from 'lodash/get';
-import differenceBy from 'lodash/differenceBy';
-import intersectionBy from 'lodash/intersectionBy'
+import { get, differenceBy, intersectionBy } from 'lodash-es';
 import { Differ, IDiffer } from "@shared/diff/index";
 import { IFeatureFlag, IVariationUser } from "@features/safe/feature-flags/types/details";
 import { ICategory, IChange, IDiffVarationUser, IRefType, OperationEnum } from "@shared/diff/types";

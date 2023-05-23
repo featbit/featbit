@@ -1,6 +1,4 @@
-import get from 'lodash/get';
-import differenceBy from 'lodash/differenceBy';
-import intersectionBy from 'lodash/intersectionBy'
+import { get, differenceBy, intersectionBy } from 'lodash-es';
 import {Differ, IDiffer} from "@shared/diff/index";
 import {ICategory, IChange, IDiffUser, IRefType, OperationEnum} from "@shared/diff/types";
 import {ISegment} from "@features/safe/segments/types/segments-index";

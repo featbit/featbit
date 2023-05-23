@@ -1,5 +1,4 @@
-import keyBy from 'lodash/keyBy';
-import differenceBy from 'lodash/differenceBy';
+import { keyBy, differenceBy } from 'lodash-es';
 
 import {
   ICategory,
