@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EndUsersComponent } from './end-users.component';
+import { PropsDrawerComponent } from './props-drawer.component';
 
-describe('SwitchUserComponent', () => {
-  let component: EndUsersComponent;
-  let fixture: ComponentFixture<EndUsersComponent>;
+describe('PropsDrawerComponent', () => {
+  let component: PropsDrawerComponent;
+  let fixture: ComponentFixture<PropsDrawerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EndUsersComponent ]
+      declarations: [ PropsDrawerComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EndUsersComponent);
+    fixture = TestBed.createComponent(PropsDrawerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

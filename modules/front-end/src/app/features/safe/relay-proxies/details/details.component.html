@@ -1,0 +1,30 @@
+<div class="table-content-area">
+  <div class="table-search-area">
+    <div class="search-inputs">
+      <nz-input-group style="width: 300px" [nzPrefix]="prefixIconSearch">
+        <input  nz-input type="text" i18n-placeholder="@@users.details.filter-by-property-name-or-value" placeholder="Filter by property name or value" [(ngModel)]="searchValue" (ngModelChange)="onSearch()">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+    </div>
+  </div>
+  <div class="table-wrapper">
+    <nz-table #basicTable [nzData]="searchResult"  nzSize="small" nzFrontPagination>
+      <thead>
+      <tr>
+        <th i18n="@@common.name">Name</th>
+        <th i18n="@@users.details.property-value">Value</th>
+        <th i18n="@@common.comment">Comment</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let prop of basicTable.data">
+        <td>{{ prop.name }}</td>
+        <td>{{ prop.value }}</td>
+        <td>{{ getPropRemark(prop.name) }} </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>

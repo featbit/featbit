@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'end-user',
+  selector: 'relay-proxies',
   template: `<router-outlet></router-outlet>`
 })
-export class EndUsersComponent implements OnInit {
+export class RelayProxiesComponent implements OnInit {
 
   constructor() { }
 

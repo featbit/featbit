@@ -65,6 +65,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'relay-proxies',
+        loadChildren: () => import("./relay-proxies/relay-proxies.module").then(m => m.RelayProxiesModule),
+        data: {
+          breadcrumb: $localize `:@@relay-proxies:Relay Proxies`
+        },
+      },
+      {
         path: 'iam',
         canActivate: [IAMGuard],
         loadChildren: () => import("./iam/iam.module").then(m => m.IAMModule),
