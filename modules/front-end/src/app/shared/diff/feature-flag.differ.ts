@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { get, differenceBy, intersectionBy } from 'lodash-es';
 import { Differ, IDiffer } from "@shared/diff/index";
 import { IFeatureFlag, IVariationUser } from "@features/safe/feature-flags/types/details";
 import { ICategory, IChange, IDiffVarationUser, IRefType, OperationEnum } from "@shared/diff/types";
@@ -56,7 +56,7 @@ export class FeatureFlagDiffer implements IDiffer {
 
     // primitive changes
     const primitiveChanges: IChange[] = this.primitiveConfig.flatMap(({label, path}) => {
-      return Differ.comparePrimitives(_.get(ff1, path), _.get(ff2, path), path)
+      return Differ.comparePrimitives(get(ff1, path), get(ff2, path), path)
         .map((change) => ({...change, label}));
     });
 
@@ -81,7 +81,7 @@ export class FeatureFlagDiffer implements IDiffer {
     const path = ['tags'];
     let changes: ICategory[] = [];
 
-    const addedTagChanges = _.differenceBy(newObj.tags, oldObj.tags, (tag) => tag).map((tag) => {
+    const addedTagChanges = differenceBy(newObj.tags, oldObj.tags, (tag) => tag).map((tag) => {
       return {
         op: OperationEnum.ADD,
         isMultiValue: false,
@@ -90,7 +90,7 @@ export class FeatureFlagDiffer implements IDiffer {
       }
     });
 
-    const removedTagChanges = _.differenceBy(oldObj.tags, newObj.tags, (tag) => tag).map((tag) => {
+    const removedTagChanges = differenceBy(oldObj.tags, newObj.tags, (tag) => tag).map((tag) => {
       return {
         op: OperationEnum.REMOVE,
         isMultiValue: false,
@@ -130,7 +130,7 @@ export class FeatureFlagDiffer implements IDiffer {
       });
     }
 
-    const variationChanges = _.intersectionBy(newObj.variations, oldObj.variations, (variation) => variation.id).map((variation) => {
+    const variationChanges = intersectionBy(newObj.variations, oldObj.variations, (variation) => variation.id).map((variation) => {
       const oldVariation = oldObj.variations.find((v) => v.id === variation.id);
       const newVariation = newObj.variations.find((v) => v.id === variation.id);
 
@@ -148,7 +148,7 @@ export class FeatureFlagDiffer implements IDiffer {
       return null;
     }).filter((change) => change !== null);
 
-    const addedVariationChanges = _.differenceBy(newObj.variations, oldObj.variations, (variation) => variation.id).map((variation) => {
+    const addedVariationChanges = differenceBy(newObj.variations, oldObj.variations, (variation) => variation.id).map((variation) => {
       return {
         label: $localize `:@@differ.variation:variation`,
         op: OperationEnum.ADD,
@@ -158,7 +158,7 @@ export class FeatureFlagDiffer implements IDiffer {
       }
     });
 
-    const removedVariationChanges = _.differenceBy(oldObj.variations, newObj.variations, (variation) => variation.id).map((variation) => {
+    const removedVariationChanges = differenceBy(oldObj.variations, newObj.variations, (variation) => variation.id).map((variation) => {
       return {
         label: $localize `:@@differ.variation:variation`,
         op: OperationEnum.REMOVE,
@@ -189,7 +189,7 @@ export class FeatureFlagDiffer implements IDiffer {
     const path = ['rules'];
     let changes: ICategory[] = [];
 
-    const ruleChanges = _.intersectionBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
+    const ruleChanges = intersectionBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
       const oldRule = oldObj.rules.find((r) => r.id === rule.id);
       const newRule = newObj.rules.find((r) => r.id === rule.id);
 
@@ -213,7 +213,7 @@ export class FeatureFlagDiffer implements IDiffer {
       return null;
     }).filter((change) => change !== null);
 
-    const addedRuleChanges = _.differenceBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
+    const addedRuleChanges = differenceBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
       return {
         label: `${$localize `:@@differ.added-rule:Added rule:`} ${rule.name}`,
         op: OperationEnum.RULE,
@@ -230,7 +230,7 @@ export class FeatureFlagDiffer implements IDiffer {
       }
     });
 
-    const removedRuleChanges = _.differenceBy(oldObj.rules, newObj.rules, (rule) => rule.id).map((rule) => {
+    const removedRuleChanges = differenceBy(oldObj.rules, newObj.rules, (rule) => rule.id).map((rule) => {
       return {
         label: `${$localize `:@@differ.removed-rule:Removed rule:`} ${rule.name}`,
         op: OperationEnum.RULE,
@@ -284,13 +284,13 @@ export class FeatureFlagDiffer implements IDiffer {
     ];
 
     const changes: IChange[] = fallthroughPrimitivePaths.flatMap(({label, path}) =>
-      Differ.comparePrimitives(_.get(ff1, path), _.get(ff2, path), path)
+      Differ.comparePrimitives(get(ff1, path), get(ff2, path), path)
         .map((change) => ({...change, label}))
     );
 
     const dispatchKeyPath = ['fallthrough', 'dispatchKey'];
-    if (_.get(ff2, dispatchKeyPath) !== null) {
-      const dispatchKeyChange = Differ.comparePrimitives(_.get(ff1, dispatchKeyPath), _.get(ff2, dispatchKeyPath), dispatchKeyPath)
+    if (get(ff2, dispatchKeyPath) !== null) {
+      const dispatchKeyChange = Differ.comparePrimitives(get(ff1, dispatchKeyPath), get(ff2, dispatchKeyPath), dispatchKeyPath)
         .map((change) => ({...change, label: $localize `:@@differ.dispatch-by:Dispatch by`}));
 
       if(dispatchKeyChange.length > 0) {

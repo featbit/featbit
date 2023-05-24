@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { get, differenceBy, intersectionBy } from 'lodash-es';
 import {Differ, IDiffer} from "@shared/diff/index";
 import {ICategory, IChange, IDiffUser, IRefType, OperationEnum} from "@shared/diff/types";
 import {ISegment} from "@features/safe/segments/types/segments-index";
@@ -31,7 +31,7 @@ export class SegmentDiffer implements IDiffer {
 
     // primitive changes
     const primitiveChanges: IChange[] = this.primitiveConfig.flatMap(({label, path}) => {
-      return Differ.comparePrimitives(_.get(segment1, path), _.get(segment2, path), path)
+      return Differ.comparePrimitives(get(segment1, path), get(segment2, path), path)
         .map((change) => ({...change, label}));
     });
 
@@ -91,7 +91,7 @@ export class SegmentDiffer implements IDiffer {
     let changes: IChange[] = [];
 
     // added users
-    const addedUsers = _.differenceBy(newUsers, oldUsers, (user) => user.keyId);
+    const addedUsers = differenceBy(newUsers, oldUsers, (user) => user.keyId);
     if (addedUsers.length > 0) {
       changes.push({
         op: OperationEnum.ADD,
@@ -103,7 +103,7 @@ export class SegmentDiffer implements IDiffer {
     }
 
     // removed users
-    const removedUsers = _.differenceBy(oldUsers, newUsers, (user) => user.keyId);
+    const removedUsers = differenceBy(oldUsers, newUsers, (user) => user.keyId);
     if (removedUsers.length > 0) {
       changes.push({
         op: OperationEnum.REMOVE,
@@ -121,7 +121,7 @@ export class SegmentDiffer implements IDiffer {
     const path = ['rules'];
     let changes: ICategory[] = [];
 
-    const ruleChanges = _.intersectionBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
+    const ruleChanges = intersectionBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
       const oldRule = oldObj.rules.find((r) => r.id === rule.id);
       const newRule = newObj.rules.find((r) => r.id === rule.id);
 
@@ -140,7 +140,7 @@ export class SegmentDiffer implements IDiffer {
       return null;
     }).filter((change) => change !== null);
 
-    const addedRuleChanges = _.differenceBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
+    const addedRuleChanges = differenceBy(newObj.rules, oldObj.rules, (rule) => rule.id).map((rule) => {
       return {
         label: `${$localize `:@@differ.added-rule:Added rule:`} ${rule.name}`,
         op: OperationEnum.RULE,
@@ -152,7 +152,7 @@ export class SegmentDiffer implements IDiffer {
       }
     });
 
-    const removedRuleChanges = _.differenceBy(oldObj.rules, newObj.rules, (rule) => rule.id).map((rule) => {
+    const removedRuleChanges = differenceBy(oldObj.rules, newObj.rules, (rule) => rule.id).map((rule) => {
       return {
         label: `${$localize `:@@differ.removed-rule:Removed rule:`} ${rule.name}`,
         op: OperationEnum.RULE,
