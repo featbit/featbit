@@ -63,7 +63,7 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         // automatically register users if they do not exist
         if (user == null)
         {
-            initialPwd = PasswordGenerator.New(email);
+            initialPwd = "123456";
             var registerResult = await _identityService.RegisterByEmailAsync(email, initialPwd);
             userId = registerResult.UserId;
         }
