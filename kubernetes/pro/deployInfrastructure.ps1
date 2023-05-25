@@ -29,6 +29,8 @@ kubectl apply -f .\infrastructure\redis-service.yaml
 
 kubectl apply -f .\infrastructure\redis-pod.yaml
 
+kubectl apply -f .\infrastructure\zookeeper-zoo-configmap.yaml
+
 kubectl apply -f .\infrastructure\zookeeper-persistentvolumeclaim.yaml
 
 kubectl apply -f .\infrastructure\zookeeper-service.yaml

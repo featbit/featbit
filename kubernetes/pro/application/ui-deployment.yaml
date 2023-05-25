@@ -13,7 +13,6 @@ spec:
   template:
     metadata:
       labels:
-        io.kompose.network/featbit-network: "true"
         app: ui
     spec:
       containers:
