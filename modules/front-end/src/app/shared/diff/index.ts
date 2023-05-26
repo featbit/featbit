@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { keyBy, differenceBy } from 'lodash-es';
 
 import {
   ICategory,
@@ -44,7 +44,7 @@ export abstract class Differ {
       const oldUsers = oldIndexedObj[vu.variationId]?.users ?? [];
 
       // added users
-      const addedUsers = _.differenceBy(vu.users, oldUsers, (user) => user.keyId);
+      const addedUsers = differenceBy(vu.users, oldUsers, (user) => user.keyId);
       if (addedUsers.length > 0) {
         changes.push({
           op: OperationEnum.ADD,
@@ -56,7 +56,7 @@ export abstract class Differ {
       }
 
       // removed users
-      const removedUsers = _.differenceBy(oldUsers, vu.users, (user) => user.keyId);
+      const removedUsers = differenceBy(oldUsers, vu.users, (user) => user.keyId);
       if (removedUsers.length > 0) {
         changes.push({
           op: OperationEnum.REMOVE,
@@ -79,8 +79,8 @@ export abstract class Differ {
       oldVariations.length !== newVariations.length ||
       // old and new have different items
       (
-        _.differenceBy(oldVariations, newVariations, (v) => v.id).length > 0 ||
-        _.differenceBy(newVariations, oldVariations, (v) => v.id).length > 0
+        differenceBy(oldVariations, newVariations, (v) => v.id).length > 0 ||
+        differenceBy(newVariations, oldVariations, (v) => v.id).length > 0
       ) ||
       // percentage(s) is/are changed
       (
@@ -128,7 +128,7 @@ export abstract class Differ {
 
   private static convertArrayToObj (arr: any[], uniqKey: string): ObjectType {
     if (uniqKey !== '$index') {
-      return _.keyBy(arr, uniqKey);
+      return keyBy(arr, uniqKey);
     } else {
       return arr.reduce((acc, cur, idx) => {
         acc[idx] = cur;

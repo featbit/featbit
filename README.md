@@ -6,7 +6,10 @@
 [![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) 
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
 [![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.io/)   [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/RealFeatBit) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section --> [![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg?style=flat-square)](#contributors-) <!-- ALL-CONTRIBUTORS-BADGE:END -->
+[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.io/)
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/RealFeatBit) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <h3 align="left">
   <a href="https://tryitonline.featbit.co/">Try it Online</a>
@@ -126,6 +129,7 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Shubh8899"><img src="https://avatars.githubusercontent.com/u/63413220?v=4?s=100" width="100px;" alt="Shubham Chauhan"/><br /><sub><b>Shubham Chauhan</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=Shubh8899" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/defqd"><img src="https://avatars.githubusercontent.com/u/104916752?v=4?s=100" width="100px;" alt="defqd"/><br /><sub><b>defqd</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=defqd" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
