@@ -71,4 +71,8 @@ public static class ErrorCodes
     // access tokens
     public const string InvalidAccessTokenType = nameof(InvalidAccessTokenType);
     public const string ServiceAccessTokenMustDefinePolicies = nameof(ServiceAccessTokenMustDefinePolicies);
+    
+    // relay proxies
+    public const string RelayProxyScopeInvalid = nameof(RelayProxyScopeInvalid);
+    public const string RelayProxyAgentInvalid = nameof(RelayProxyAgentInvalid);
 }

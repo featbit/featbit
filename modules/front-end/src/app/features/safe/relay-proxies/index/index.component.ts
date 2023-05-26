@@ -1,158 +1,99 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { OrganizationService } from '@services/organization.service';
+import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { EnvUserPropService } from "@services/env-user-prop.service";
-import { IUserProp, IUserType } from "@shared/types";
-import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
-import { CURRENT_USER_FILTER_ATTRIBUTE } from "@utils/localstorage-keys";
-import { EnvUserService } from "@services/env-user.service";
+import { RelayProxyService } from "@services/relay-proxy.service";
+import { IPagedRelayProxy, IRelayProxy, RelayProxyFilter } from "@features/safe/relay-proxies/types/relay-proxy";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 
 @Component({
-  selector: 'app-user-index',
+  selector: 'relay-proxies',
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.less']
 })
 export class IndexComponent implements OnInit {
-  $search: Subject<void> = new Subject();
-
-  currentEnvId: string;
-  currentAccountId: string;
-
-  list = [];
-  totalCount: number;
-
+  $search = new BehaviorSubject('');
   isLoading: boolean = true;
   proxyDetailvisible: boolean = false;
-  segmentsAndFlagsVisible: boolean = false;
 
-  filter: EnvUserFilter = new EnvUserFilter();
+  filter: RelayProxyFilter = new RelayProxyFilter();
+  relayProxies: IPagedRelayProxy = {
+    items: [],
+    totalCount: 0
+  };
 
   constructor(
-    private envUserService: EnvUserService,
-    private accountService: OrganizationService,
-    private envUserPropService: EnvUserPropService,
-    private router: Router
+    private message: NzMessageService,
+    private relayProxyService: RelayProxyService
   ) {
   }
 
-  getCustomizePropertyValue(user: IUserType, propName: string): string {
-    const presetValueConfig = this.props.find(p => p.name === propName)?.presetValues || [];
-    const property = user.customizedProperties?.find(cp => cp.name === propName);
-    if (property) {
-      const displayValue = presetValueConfig.find(c => c.value === property.value)?.description;
-      return displayValue ? `${displayValue}(${property.value})` : property.value;
-    }
-
-    return '';
-  }
-
-  storeFilterAndAttribute(triggerSearch: boolean = false) {
-    if (triggerSearch) {
-      this.$search.next();
-    }
-
-    const config = {
-      properties: this.filter.properties,
-      attributes: this.extraColumns
-    };
-
-    localStorage.setItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId), JSON.stringify(config));
-  }
-
-  onSearchUserProperties(value: string = ''){
-    const regex = new RegExp(value || '', 'ig');
-    this.filteredProps = this.props.filter(p => regex.test(p.name)).map(p => p.name);
-  }
-
-  onSearchExtraColumns(value: string = ''){
-    const regex = new RegExp(value || '', 'ig');
-    this.filteredExtraColumns = this.props.filter(p => !p.isBuiltIn && regex.test(p.name)).map(p => p.name);
-  }
-
-  props: IUserProp[];
-  filteredProps: string[];
-  extraColumns: string[];
-  filteredExtraColumns: string[];
-
-  isUserPropsLoading: boolean = true;
   ngOnInit(): void {
-    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
-    this.currentAccountId = currentAccountProjectEnv.organization.id;
-    this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
-
-    const filterAndAttributeConfig: any = JSON.parse(localStorage.getItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId)) || '{}');
-    this.filter.properties = filterAndAttributeConfig?.properties || [];
-    this.extraColumns = filterAndAttributeConfig?.attributes || [];
-
-    this.envUserPropService.get().subscribe(props => {
-      this.props = [...props];
-      this.filteredProps = this.props.map(p => p.name);
-      this.filteredExtraColumns = this.props.filter(p => !p.isBuiltIn).map(p => p.name);
-      this.isUserPropsLoading = false;
-    })
-
     this.$search.pipe(
-      debounceTime(400)
+      debounceTime(300)
     ).subscribe(() => {
-      this.fetchUserList();
+      this.getRelayProxies();
     });
-
-    this.$search.next();
   }
 
-  onRemoveFilterItem(prop: string) {
-    this.filter.properties = this.filter.properties.filter(p => p !== prop);
+  getRelayProxies() {
+    this.isLoading = true;
+    this.relayProxyService.getList(this.filter).subscribe({
+      next: (replayProxies) => {
+        this.relayProxies = replayProxies;
+
+        this.isLoading = false;
+      },
+      error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
+      complete: () => this.isLoading = false
+    });
   }
 
-  onRemoveAttributeItem(prop: string) {
-    this.extraColumns = this.extraColumns.filter(p => p !== prop);
-  }
-
-  onSearch(resetPage?: boolean) {
+  doSearch(resetPage?: boolean) {
     if (resetPage) {
       this.filter.pageIndex = 1;
     }
-    this.$search.next();
+    this.$search.next(null);
   }
 
-  fetchUserList() {
-    this.isLoading = true;
-    this.envUserService.search(this.filter).subscribe(
-      pagedResult => {
-        this.isLoading = false;
-        this.list = pagedResult.items;
-        this.totalCount = pagedResult.totalCount;
+  syncAgents(relayProxy: IRelayProxy) {
+
+  }
+
+  delete(relayProxy: IRelayProxy) {
+    this.relayProxyService.delete(relayProxy.id).subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.relayProxies.items = this.relayProxies.items.filter(it => it.id !== relayProxy.id);
+        this.relayProxies.totalCount--;
       },
-      _ => {
-        this.isLoading = false;
-      }
-    );
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    })
   }
 
-  navigateToUserDetail(user: IUserType) {
-    this.router.navigateByUrl(`/users/${encodeURIComponent(user.id)}`);
-  }
-
-  onCreateOrEditProxy() {
+  currentRelayProxy: IRelayProxy = {name: null, description: null, scopes: [], agents: []};
+  createOrEdit(relayProxy: IRelayProxy = {name: null, description: null, scopes: [], agents: []}) {
+    this.currentRelayProxy = relayProxy;
     this.proxyDetailvisible = true;
   }
 
-  onPropsSettingClose() {
+  relayProxyDrawerClosed(data: any) { //{ isEditing: boolean, id: string, name: string, scopes: [], agents: [] }
     this.proxyDetailvisible = false;
-  }
 
-  currentUser: IUserType = null;
+    if (!data) {
+      return;
+    }
 
-  onSegmentsAndFlagsClick(user: IUserType) {
-    this.currentUser = {...user};
-    this.segmentsAndFlagsVisible = true;
-  }
+    if (!data.isEditing) {
+      this.getRelayProxies();
+    } else {
+      this.relayProxies.items = this.relayProxies.items.map((rp) => {
+        if (rp.id === data.id) {
+          return { ...data };
+        }
 
-  onSegmentsAndFlagsClose() {
-    this.currentUser = null;
-    this.segmentsAndFlagsVisible = false;
+        return rp;
+      })
+    }
   }
 }

@@ -9,6 +9,7 @@ using Domain.Members;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Projects;
+using Domain.RelayProxies;
 using Domain.Segments;
 using Domain.Triggers;
 using Domain.Users;
@@ -63,6 +64,8 @@ public class MongoDbClient
         { typeof(ExperimentMetric), "ExperimentMetrics" },
 
         { typeof(AccessToken), "AccessTokens" },
+        
+        { typeof(RelayProxy), "RelayProxies" },
     };
 
     public IMongoCollection<TEntity> CollectionOf<TEntity>()

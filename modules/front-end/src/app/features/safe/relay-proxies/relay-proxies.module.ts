@@ -18,25 +18,27 @@ import {NzPopoverModule} from "ng-zorro-antd/popover";
 import {NzToolTipModule} from "ng-zorro-antd/tooltip";
 import { NzDividerModule } from "ng-zorro-antd/divider";
 import {CoreModule} from "@core/core.module";
+import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
 
 @NgModule({
   declarations: [RelayProxiesComponent, DetailsComponent, IndexComponent],
     imports: [
-      CommonModule,
-      FormsModule,
-      CoreModule,
-      NzTableModule,
-      NzInputModule,
-      NzDrawerModule,
-      NzButtonModule,
-      NzSpinModule,
-      RelayProxiesRoutingModule,
-      NzIconModule,
-      NzGridModule,
-      NzSelectModule,
-      NzPopoverModule,
-      NzToolTipModule,
-      NzDividerModule
+        CommonModule,
+        FormsModule,
+        CoreModule,
+        NzTableModule,
+        NzInputModule,
+        NzDrawerModule,
+        NzButtonModule,
+        NzSpinModule,
+        RelayProxiesRoutingModule,
+        NzIconModule,
+        NzGridModule,
+        NzSelectModule,
+        NzPopoverModule,
+        NzToolTipModule,
+        NzDividerModule,
+        NzPopconfirmModule
     ]
 })
 export class RelayProxiesModule { }

@@ -89,10 +89,9 @@ export class IndexComponent implements OnInit {
     this.accessTokenService.getList(this.filter).subscribe({
       next: (accessTokens) => {
         this.accessTokens = accessTokens;
-
-        this.isLoading = false;
       },
-      error: () => this.isLoading = false
+      error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
+      complete: () => this.isLoading = false
     });
   }
 
@@ -128,7 +127,7 @@ export class IndexComponent implements OnInit {
 
   currentAccessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []};
 
-  creatOrEdit(accessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []}) {
+  createOrEdit(accessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []}) {
     this.currentAccessToken = accessToken;
     this.accessTokenDrawerVisible = true;
   }
