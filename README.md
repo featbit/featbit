@@ -62,7 +62,7 @@
 
 [![image](https://github.com/featbit/featbit/assets/68597908/c046f23d-5b24-4cd9-ba92-541e6c73ea29)](https://www.featbit.co)
 
-
+FeatBit is not just an open-source alternative of Launchdarkly, it allows you host your feature flags service anywhere your buisness need, with compliance and data protection.
 
 ## Features
 
