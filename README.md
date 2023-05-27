@@ -30,6 +30,13 @@
 
 At the beginning You can [Try FeatBit through our online portal (click here)](https://tryitonline.featbit.co) without register account and hosting the service locally.
 
+## Installation
+
+You can host the service in your own environment [through our document check our](https://docs.featbit.co/docs/installation/full-installation) to hosting the service by yourself.
+
+If you want to host the service into K8s, you can check [K8s folder for pro and standard version's manifest files](https://github.com/featbit/featbit/tree/main/kubernetes). 
+
+
 ## Docummentation & Support
 
 FeatBit provide's [robust documentation (click here)](https://docs.featbit.co) to let developers can quickly get started and easily deeply integrate with FeatBit.
@@ -81,9 +88,9 @@ FeatBit is an open-source feature flags management developer tool that empowers 
 
 **Pro Solution for Big Data**, a professional version tailored for teams and companies with millions of daily feature usage, custom events, and A/B testing insights.
 
-### Experimental Features
-- **Deep Self-Hosted Solution**, host a feature flag service in your customers' private environments.
-- **ChatGPT Tech Debt Reduction**, utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
+**Replay Proxy/Agent**, host a feature flag service in your customers' private environments.
+
+**ChatGPT Tech Debt Reduction** (experimental features), utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
 
 ## Contribute
 
