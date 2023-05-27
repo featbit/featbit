@@ -1,28 +1,40 @@
 
-# [FeatBit](https://www.featbit.co) 
+![image](https://github.com/featbit/featbit/assets/68597908/ff7a611e-9504-4f99-bf11-8ba9bccea696)
 
 
+<div id="header" align="center">
+  <div id="badges">
+  <a href="https://github.com/featbit/featbit/blob/main/LICENSE">
+    <img src="https://img.shields.io/static/v1?style=flat-square&label=license&message=MIT&color=brightgreen" />
+  </a>
+  <a href="https://twitter.com/RealFeatBit">
+    <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white"/>
+  </a>  
+  <a href="https://medium.com/@featbit">
+    <img src="https://img.shields.io/badge/Medium-grey?style=flat-square&logo=medium&logoColor=white" alt="Read about RATH on medium"/>
+  </a>
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">
+    <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join FeatBit on Slack"/>
+  </a> 
+  <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+  <a href="https://join.slack.com/t/kanaries-community/shared_invite/zt-1pcosgbua-E_GBPawQOI79C41dPDyyvw">
+    <img src="https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square"/>
+  </a> 
+  <!-- ALL-CONTRIBUTORS-BADGE:END -->
+  </div>
+  <div id="badges">
+  <a href="https://dotnet.microsoft.com/">
+    <img src="https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white"/>
+  </a>
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white"/>
+  </a>
+  <a href="https://angular.io/">
+    <img src="https://img.shields.io/badge/Angular-14.0-DD0031?style=flat-square&logo=angular&logoColor=white"/>
+  </a>
+</div>
+</div>
 
-[![image](https://github.com/featbit/featbit/assets/68597908/caadc156-cb90-41cb-ad5c-f603f7163007)](https://www.featbit.co)
-
-
-<!-- <h4 align="left">
-  <a href="https://tryitonline.featbit.co/">Try it Online</a>
-  <span> · </span>
-  <a href="https://www.featbit.co/" >Quick overview (Video)</a>
-  <span> · </span>
-  <a href="https://featbit.gitbook.io/">Documentation</a>
-  <span> · </span>
-  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Support (Slack)</a>
-</h4> -->
-
-[![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) 
-[![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
-[![](https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.io/)
-[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/RealFeatBit) <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 
 
