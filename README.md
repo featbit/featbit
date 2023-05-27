@@ -1,7 +1,5 @@
 
-
-
-# [FeatBit](https://featbit.co)    <a href="https://twitter.com/intent/tweet?text=A%20scalable%2C%20fast%2C%20and%20open-source%20Feature%20Management%20platform%20that%20empowers%20all%20teams%20to%20deliver%2C%20control%2C%20monetize%2C%20and%20experiment%20with%20their%20software%20at%20https%3A%2F%2Fgithub.com%2Ffeatbit%2Ffeatbit%0A%0A&hashtags=featureflags,dotnet,opensource,featureflag,featuremanagement&via=RealFeatBit"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social" height=23></a>
+# [FeatBit](https://featbit.co) 
 
 [![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) 
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
@@ -11,7 +9,28 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-<h3 align="left">
+[![image](https://github.com/featbit/featbit/assets/68597908/caadc156-cb90-41cb-ad5c-f603f7163007)](https://www.featbit.co)
+
+
+## [Try it Online](https://tryitonline.featbit.co)
+
+At the beginning You can [Try FeatBit through our online portal (click here)](https://tryitonline.featbit.co) without register account and hosting the service locally.
+
+## About FeatBit
+
+An open-source feature flags management developer tool mainly written in C# (.NET) that empower developers to:
+
+**Ship Code Safely**. Mitigate risks with Production Testing, roll out new features to 1% of users initially then expanding, and ensure instant error recovery without redeployment.
+**Innovate Faster**. Decouple feature deployment from release to minimize merge conflicts. Deploy at will, and release any feature immediately upon request from the boss.
+**Targeted Experiences**. Release features to specific target users, and continuously measure and improve the product's business value, while reducing the need for developer involvement.
+**Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
+
+
+
+### 
+
+
+<h2 align="left">
   <a href="https://tryitonline.featbit.co/">Try it Online</a>
   <span> · </span>
   <a href="https://www.youtube.com/watch?v=hfww1FpjHV0" >Quick overview (Video)</a>
@@ -19,7 +38,7 @@
   <a href="https://featbit.gitbook.io/">Documentation</a>
   <span> · </span>
   <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Support (Slack)</a>
-</h3>
+</h2>
 
 
 **FeatBit** is a scalable, fast, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
