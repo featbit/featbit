@@ -53,82 +53,37 @@ FeatBit is an open-source feature flags management developer tool that empowers 
 
 
 
+## More Features
 
-<!-- ## [Documentation](https://docs.featbit.co/)
+**Feature flag list**, create, manage, and filter feature flags.
 
-**FeatBit** is a scalable, fast, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
+**Individual targets**, assign individual users to particular flag variation.
 
-![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
- -->
-<!-- --------------------------------------------------------------------------- -->
+**Targeting users by attribute**, target segments of users by constructing rules.
 
+**Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
 
+**Insights**, check out feature usage during the rollout.
 
+**Flag triggers**, automate changes to your feature flags from external tools.
 
-<!-- ## Introduction
+**IAM**, define access levels to projects, environment, or teams to enforce your policies.
 
-Feature flag is a modern engineering technology that decouples code deployments from feature releases, giving you control over who sees each feature and when they see it. 
+**Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 
-**FeatBit** provides a holistic framework for managing feature flags that enables teams to use flags on a massive scale across various use cases, such as: 
+**Audit Log**, logs for feature flag & segment changes.
 
-- Shipping software safer and faster by rolling out features progressively to target users without redeployment.
-- Measuring the impact of features’ rollouts and running A/B tests to improve feature quality.
-- Giving Sales, CS, and Marketing the ability to fine-tune target audiences and manage customer entitlement.
-- etc.
+**SDKs**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
 
-[**Click here to get more information about FeatBit**](https://www.featbit.co/). -->
-<!-- 
-## Getting Started
+**Web API**, automate your workflow with Web APIs.
 
-Clone the repository to your server or local machine, and then boot up the services.
+**Platform-level**, manage your flags in multiple projects and environments.
 
-```
-git clone https://github.com/featbit/featbit
-cd featbit
-docker compose up -d
-```
-
-Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and log in with
-the default credentials.
-
-- username: **test@featbit.com**
-- password: **123456**
-
-**Attention** : With the default configuration, the FeatBit's portal is only accessible from the local machine on which you ran docker
-compose. To make it accessible publicly, check the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly).
-
-You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey. -->
-
-## Features
-
-- **Feature flag list**, create, manage, and filter feature flags.
-- **Individual targets**, assign individual users to particular flag variation.
-- **Targeting users by attribute**, target segments of users by constructing rules.
-- **Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
-- **Insights**, check out feature usage during the rollout.
-- **Flag triggers**, automate changes to your feature flags from external tools.
-- **IAM**, define access levels to projects, environment, or teams to enforce your policies.
-- **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
-- **Audit Log**, logs for feature flag & segment changes.
-- **SDKs for front & back-end**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
-- **Web API**, automate your workflow with Web APIs.
-- **Platform-level**, manage your flags in multiple projects and environments.
-- **Pro Solution for Big Data**, a professional version tailored for teams and companies with millions of daily feature usage, custom events, and A/B testing insights.
+**Pro Solution for Big Data**, a professional version tailored for teams and companies with millions of daily feature usage, custom events, and A/B testing insights.
 
 ### Experimental Features
 - **Deep Self-Hosted Solution**, host a feature flag service in your customers' private environments.
 - **ChatGPT Tech Debt Reduction**, utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
-
-
-
-
-<!-- - - An online support channel that helps you to quickly solve the problem. -->
-
-<!-- [Community Forum](https://github.com/featbit/featbit/discussions/34) - where you can request new features, ask questions, show-n-tell, etc.
-
-[Architecture](https://featbit.gitbook.io/docs/tech-stack/architecture) - an architecture overview of FeatBit system.
-
-[Benchmark](https://featbit.gitbook.io/docs/tech-stack/benchmark) - the performance report of FeatBit running in non-cluster mode. -->
 
 ## Contribute
 
