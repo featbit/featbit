@@ -28,7 +28,7 @@
 
 ## [Try FeatBit & Get Started](https://tryitonline.featbit.co)
 
-[Try FeatBit through our online portal (click here)](https://tryitonline.featbit.co) without self-hosting. Then getting started by following its guide step by step.
+[Try FeatBit & Getting Started step by step in 3 minutes through our online portal (click here)](https://tryitonline.featbit.co) without self-hosting.
 
 ## Installation | Docs | Support
 
