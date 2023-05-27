@@ -83,6 +83,7 @@ FeatBit is an open-source feature flags management developer tool that empowers 
 
 **ChatGPT Tech Debt Reduction** (experimental features), utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
 
+![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
 ## Contribute
 
