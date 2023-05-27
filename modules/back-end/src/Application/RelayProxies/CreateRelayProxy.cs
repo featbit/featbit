@@ -66,7 +66,7 @@ public class CreateRelayProxyHandler : IRequestHandler<CreateRelayProxy, RelayPr
     public async Task<RelayProxyVm> Handle(CreateRelayProxy request, CancellationToken cancellationToken)
     {
         var existed =
-            await _service.FindOneAsync(at => string.Equals(at.Name, request.Name, StringComparison.OrdinalIgnoreCase));
+            await _service.FindOneAsync(rp => string.Equals(rp.Name, request.Name, StringComparison.OrdinalIgnoreCase));
         
         if (existed != null)
         {

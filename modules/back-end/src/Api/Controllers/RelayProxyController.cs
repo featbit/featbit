@@ -68,4 +68,11 @@ public class RelayProxyController : ApiControllerBase
         
         return Ok(status);
     }
+    
+    [HttpPut("sync-to-agent")]
+    public async Task<ApiResponse<SyncResultVm>> SyncToAgentAsync(SyncToAgent request)
+    {
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }

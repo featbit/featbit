@@ -95,13 +95,16 @@
                 <tr>
                   <th nzWidth="230px" i18n="@@common.name">Name</th>
                   <th nzWidth="280px" i18n="@@common.host">Host</th>
-                  <th nzWidth="80px" nzAlign="center" i18n="@@common.status">Status</th>
+                  <th nzWidth="80px" nzAlign="center">
+                    <ng-container i18n="@@common.status">Status</ng-container>
+                    <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@relay-proxy.click-status-icon-to-refresh-and-view-status-detail" nz-tooltip="The status of the agent, click icon to refresh and view the status detail"></i>
+                  </th>
                   <th nzWidth="80px" nzAlign="center" i18n="@@common.sync">Sync</th>
                   <th nzWidth="90px" nzAlign="center" i18n="@@common.actions">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <ng-container *ngFor="let _ of agentTable.data; let i = index">
+                <ng-container *ngFor="let agent of agentTable.data; let i = index">
                   <tr [formGroupName]="i">
                     <td>
                       <nz-form-control>
@@ -115,20 +118,20 @@
                     </td>
                     <td style="text-align: center" class="status status-{{getAgentStatusFromIndex(i)}}">
                       <ng-container *ngIf="getAgentStatusFromIndex(i) === agentStatusHealthy">
-                        <i (click)="getAgentStatusInfo(i)" nz-icon nzType="check-circle" i18n-nz-tooltip="@@common.click-to-refresh-status-detail" nz-tooltip="Click to refresh the status detail"></i>
+                        <i (click)="getAgentStatusInfoFromControlIndex(i)" nz-icon nzType="check-circle" i18n-nz-tooltip="@@common.healthy" nz-tooltip="Healthy"></i>
                       </ng-container>
                       <ng-container *ngIf="getAgentStatusFromIndex(i) === agentStatusUnhealthy">
-                        <i (click)="getAgentStatusInfo(i)" nz-icon nzType="issues-close" i18n-nz-tooltip="@@common.click-to-refresh-status-detail" nz-tooltip="Click to refresh the status detail"></i>
+                        <i (click)="getAgentStatusInfoFromControlIndex(i)" nz-icon nzType="issues-close" i18n-nz-tooltip="@@common.unhealthy" nz-tooltip="Unhealthy"></i>
                       </ng-container>
                       <ng-container *ngIf="getAgentStatusFromIndex(i) === agentStatusLoading">
-                        <i nz-icon nzType="loading"></i>
+                        <i nz-icon nzType="loading" i18n-nz-tooltip="@@common.loading" nz-tooltip="Loading"></i>
                       </ng-container>
                       <ng-container *ngIf="getAgentStatusFromIndex(i) === agentStatusNone">
-                        <i (click)="getAgentStatusInfo(i)" nz-icon nzType="stop" i18n-nz-tooltip="@@common.click-to-view-status-detail" nz-tooltip="Click to view the status detail"></i>
+                        <i (click)="getAgentStatusInfoFromControlIndex(i)" nz-icon nzType="stop" i18n-nz-tooltip="@@common.unavailable" nz-tooltip="Unavailable"></i>
                       </ng-container>
                     </td>
                     <td style="text-align: center">
-                      <button nz-button nzSize="small" nzType="link" (click)="removeAgent(i)" [disabled]="!isEditing">
+                      <button nz-button nzSize="small" nzType="link" (click)="sync(i)" [nzLoading]="false" [disabled]="!isEditing" [nz-tooltip]="agent.value['syncAt'] | date: 'YYYY-MM-dd HH:mm:ss'">
                         <i nz-icon [nzType]="'sync'"></i>
                       </button>
                     </td>
@@ -159,11 +162,17 @@
   [nzVisible]="agentStatusModalVisible"
   (nzOnCancel)="closeAgentStatusModal()"
   (nzOnOk)="closeAgentStatusModal()"
+  [nzFooter]="modalFooter"
   [nzTitle]="modalTitle">
   <ng-template #modalTitle>
-    <span style="display:inline-block;padding: 0 5px; font-weight: 600">aa</span>
+    <span i18n="@@relay-proxy.agent-status">Agent status</span>
   </ng-template>
   <ng-container *nzModalContent>
     <prism [code]="agentStatus" language="javascript"></prism>
   </ng-container>
+  <ng-template #modalFooter>
+    <button nz-button nzType="primary" (click)="closeAgentStatusModal()">
+      <span i18n="@@common.ok">OK</span>
+    </button>
+  </ng-template>
 </nz-modal>

@@ -10,6 +10,8 @@ import { ProjectService } from "@services/project.service";
 import { RelayProxyService } from "@services/relay-proxy.service";
 import { AgentStatusEnum, IRelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { NzModalService } from "ng-zorro-antd/modal";
+import moment from "moment/moment";
 
 @Component({
   selector: 'relay-proxy-drawer',
@@ -29,6 +31,8 @@ export class RelayProxyDrawerComponent implements OnInit {
   agentStatusNone = AgentStatusEnum.None;
 
   agentStatusDict: {[id: string]: AgentStatusEnum} = {};
+  // indicate if the agent is synchronizing
+  agentSyncDic: {[id: string]: boolean} = {};
 
   title: string = '';
 
@@ -56,6 +60,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     private relayProxyService: RelayProxyService,
     private fb: FormBuilder,
     private message: NzMessageService,
+    private modal: NzModalService,
     public permissionsService: PermissionsService,
   ) {
     this.initForm();
@@ -100,17 +105,18 @@ export class RelayProxyDrawerComponent implements OnInit {
     }
 
     if (relayProxy.agents.length > 0) {
-      const agentArrayForm = this.fb.array(relayProxy.agents.map(x => this.fb.group({
-        id: [x.id, Validators.required],
-        name: [x.name, Validators.required],
-        host: [x.host, Validators.required]
-      })));
+      const agentArrayForm = this.fb.array(relayProxy.agents.map((x, index) => {
+        this.getAgentStatusInfo(x.id, x.host);
+        return this.fb.group({
+          id: [x.id, Validators.required],
+          name: [x.name, Validators.required],
+          host: [x.host, Validators.required],
+          syncAt: [x.syncAt] // this is only for UI to display, the value won't be posted to server
+        });
+      }));
 
       this.form.setControl('agents', agentArrayForm);
     }
-
-    // this.agents.patchValue(relayProxy.agents);
-    // this.refreshFormArray('agents');
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -143,6 +149,12 @@ export class RelayProxyDrawerComponent implements OnInit {
     return this.agentStatusDict[id] || AgentStatusEnum.None;
   }
 
+  getAgentSyncFromIndex(index: number): boolean {
+    const { id } = this.agents.at(index).value;
+
+    return this.agentSyncDic[id] ?? false;
+  }
+
   addAgent() {
     const agentForm = this.fb.group({
       id: [uuidv4(), Validators.required],
@@ -165,7 +177,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.refreshFormArray('agents');
   }
 
-  getAgentStatusInfo(index: number) {
+  async getAgentStatusInfoFromControlIndex(index: number) {
     const { id, host } = this.agents.at(index).value;
 
     if (host === '') {
@@ -173,19 +185,27 @@ export class RelayProxyDrawerComponent implements OnInit {
       return;
     }
 
+    await this.getAgentStatusInfo(id, host);
+    this.openAgentStatusModal();
+  }
+
+  async getAgentStatusInfo(id: string, host: string): Promise<any> {
     this.agentStatusDict[id] = AgentStatusEnum.Loading;
 
-    this.relayProxyService.getAgentStatus(host).subscribe({
-      next: (res) => {
-        this.agentStatusDict[id] = AgentStatusEnum.Healthy; // TODO set the real status
-        this.agentStatus = JSON.stringify(res, null, 2);
-        this.openAgentStatusModal();
-      },
-      error: (_) => {
-        this.agentStatusDict[id] = AgentStatusEnum.Unhealthy;
-        this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
-      }
-    })
+    return new Promise((resolve, reject) => {
+      this.relayProxyService.getAgentStatus(host).subscribe({
+        next: (res) => {
+          this.agentStatusDict[id] = AgentStatusEnum.Healthy; // TODO set the real status
+          this.agentStatus = JSON.stringify(res, null, 2);
+          resolve(null);
+        },
+        error: (_) => {
+          this.agentStatusDict[id] = AgentStatusEnum.Unhealthy;
+          this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
+          reject();
+        }
+      })
+    });
   }
 
   get scopes(): FormArray {
@@ -292,5 +312,22 @@ export class RelayProxyDrawerComponent implements OnInit {
   agentStatus: any;
   openAgentStatusModal() {
     this.agentStatusModalVisible = true;
+  }
+
+  sync(index: number) {
+    const agent = this.agents.at(index)
+    const { id, host } = agent.value;
+    this.agentSyncDic[id] = true;
+
+    this.relayProxyService.syncToAgent(this._relayProxy.id, id, host).subscribe({
+      next: (_) => {
+        agent.patchValue({ syncAt: new Date().getTime() });
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+      },
+      error: (_) => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`),
+      complete: () => {
+        this.agentSyncDic[id] = false;
+      }
+    })
   }
 }

@@ -59,4 +59,11 @@ export class RelayProxyService {
   create(payload: RelayProxyAgent): Observable<IRelayProxy> {
     return this.http.post<IRelayProxy>(this.baseUrl, payload);
   }
+
+  syncToAgent(relayProxyId: string, agentId: string, host: string): Observable<any> {
+    const url = `${this.baseUrl}/sync-to-agent`;
+    const param = { relayProxyId, agentId, host };
+
+    return this.http.put(url, param);
+  }
 }
