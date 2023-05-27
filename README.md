@@ -56,21 +56,19 @@ FeatBit is an open-source feature flags management developer tool that empowers 
 
 
 
-## More Features
+## More Features (Working on It)
 
-**Feature flag list**, create, manage, and filter feature flags.
+**Managing and organizing Feature flags**, create, manage, and filter feature flags. [See docs.](https://docs.featbit.co/docs/feature-flags/organizing-flags/the-flags-list)
 
-**Individual targets**, assign individual users to particular flag variation.
+**Targeting users with flags**. Assign individual users to particular flag variation; [See docs.](https://docs.featbit.co/docs/feature-flags/targeting-users-with-flags)
 
-**Targeting users by attribute**, target segments of users by constructing rules.
+**Reusable Segment**, include or exclude individual users from a segment based on user attribtues. [See docs.](https://docs.featbit.co/docs/feature-flags/users-and-user-segments)
 
-**Reusable Segment**, include or exclude individual users from a segment based on user attribtues.
+**Insights**, check out feature usage during the rollout. [See docs.](https://docs.featbit.co/docs/feature-flags/the-flag-insights)
 
-**Insights**, check out feature usage during the rollout.
+**Feature WorkflowFlag triggers**, control your use of feature flags by creating complex automated workflows within FeatBit. [See docs.](https://docs.featbit.co/docs/feature-flags/feature-workflow)
 
-**Flag triggers**, automate changes to your feature flags from external tools.
-
-**IAM**, define access levels to projects, environment, or teams to enforce your policies.
+**IAM**, define access levels to projects, environment, or teams to enforce your policies. [See docs.](https://docs.featbit.co/docs/iam/about)
 
 **Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 
@@ -86,7 +84,10 @@ FeatBit is an open-source feature flags management developer tool that empowers 
 
 **Replay Proxy/Agent**, host a feature flag service in your customers' private environments.
 
+**Integrations** (experimental features),
+
 **ChatGPT Tech Debt Reduction** (experimental features), utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
+
 
 ## Contribute
 
