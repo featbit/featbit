@@ -52,7 +52,7 @@
 ## About FeatBit & Feature Flag
 
 
-FeatBit is an open-source [feature flags](https://blog.jetbrains.com/space/2022/06/16/feature-flags/) management tool that empowers developers:
+[FeatBit](https://www.featbit.co) is an open-source [feature flags](https://blog.jetbrains.com/space/2022/06/16/feature-flags/) management tool that empowers developers:
 
 **Ship Code Safely**. Mitigate risks with Production Testing, roll out new features to 1% of users initially then expanding, and ensure instant error recovery without redeployment.
 
