@@ -40,7 +40,7 @@
 
 ## Try FeatBit & Get Started
 
-[Try FeatBit and Getting Started step by step within 5 minutes](https://tryitonline.featbit.co) before self-hosting the service.
+[Click here to Try and Getting Started FeatBit within 5 minutes](https://tryitonline.featbit.co) before self-hosting the service.
 
 ![image](https://github.com/featbit/featbit/assets/68597908/b620f0b6-ec79-4e19-8d68-82f910cb9b52)
 
