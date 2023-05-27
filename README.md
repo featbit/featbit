@@ -53,6 +53,8 @@ FeatBit is an open-source feature flags management developer tool that empowers 
 
 ## More Features (Working on It)
 
+**SDKs**, for [Javascript](https://github.com/featbit/featbit-js-client-sdk), [C#](https://github.com/featbit/dotnet-server-sdk), [Java](https://github.com/featbit/featbit-java-sdk), [Python](https://github.com/featbit/featbit-python-sdk), [Go](https://github.com/featbit/featbit-go-sdk) with more coming soon.
+
 **[Managing Feature flags](https://docs.featbit.co/docs/feature-flags/organizing-flags/the-flags-list)**, create, manage, and filter feature flags.
 
 **[Targeting users with flags](https://docs.featbit.co/docs/feature-flags/targeting-users-with-flags)**. Assign individual users to particular flag variation;
@@ -61,27 +63,25 @@ FeatBit is an open-source feature flags management developer tool that empowers 
 
 **[Insights](https://docs.featbit.co/docs/feature-flags/the-flag-insights)**, check out feature usage during the rollout.
 
-**[Feature Workflow](https://docs.featbit.co/docs/feature-flags/feature-workflow)**, control your use of feature flags by creating complex automated workflows within FeatBit.
-
 **[IAM](https://docs.featbit.co/docs/iam/about)**, define access levels to projects, environment, or teams to enforce your policies.
 
-**Experimentation**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
+**[Experimentation](https://docs.featbit.co/docs/experimentation/understanding-experimentation)**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 
-**Audit Log**, logs for feature flag & segment changes.
+**[Audit Log](https://docs.featbit.co/docs/feature-flags/audit-log)**, logs for feature flag & segment changes.
 
-**SDKs**, for Javascript/Typescrit, Java, Python, Go, .NET with more coming soon.
+**[Feature Workflow](https://docs.featbit.co/docs/feature-flags/feature-workflow)**, control your use of feature flags by creating complex automated workflows within FeatBit.
 
-**Web API**, automate your workflow with Web APIs.
+**[Web API](https://docs.featbit.co/docs/integrations/using-featbit-rest-api)**, automate your workflow with Web APIs.
 
-**Platform-level**, manage your flags in multiple projects and environments.
+**[Platform-level](https://docs.featbit.co/docs/feature-flags/organizing-flags/projects)**, manage your flags in multiple projects and environments.
 
-**Pro Solution for Big Data**, a professional version tailored for teams and companies with millions of daily feature usage, custom events, and A/B testing insights.
+**[Pro Solution for Big Data](https://docs.featbit.co/docs/tech-stack/standard-vs.-professional)**, a [professional version](https://docs.featbit.co/docs/installation/full-installation) tailored for teams and companies to accommodate in excess of millions of daily online users with feature usage, custom events, and A/B testing insights.
 
 **Replay Proxy/Agent**, host a feature flag service in your customers' private environments.
 
-**Integrations** (experimental features),
-
 **ChatGPT Tech Debt Reduction** (experimental features), utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
+
+**Integrations** (experimental features), 
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
