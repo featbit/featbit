@@ -35,6 +35,16 @@
 </div>
 </div>
 
+## Try FeatBit & Get Started
+
+[Click here to Try and Getting Started FeatBit within 5 minutes](https://tryitonline.featbit.co) before self-hosting the service.
+
+![image](https://github.com/featbit/featbit/assets/68597908/b620f0b6-ec79-4e19-8d68-82f910cb9b52)
+
+
+## Installation | Docs | Community
+
+[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [Install in K8s](https://github.com/featbit/featbit/tree/main/kubernetes) | [Official Documentation](https://docs.featbit.co) | [Slack Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
 
 
 ## About FeatBit
@@ -52,18 +62,6 @@
 
 [![image](https://github.com/featbit/featbit/assets/68597908/c046f23d-5b24-4cd9-ba92-541e6c73ea29)](https://www.featbit.co)
 
-
-
-## Try FeatBit & Get Started
-
-[Click here to Try and Getting Started FeatBit within 5 minutes](https://tryitonline.featbit.co) before self-hosting the service.
-
-![image](https://github.com/featbit/featbit/assets/68597908/b620f0b6-ec79-4e19-8d68-82f910cb9b52)
-
-
-## Installation | Docs | Community
-
-[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [Install in K8s](https://github.com/featbit/featbit/tree/main/kubernetes) | [Official Documentation](https://docs.featbit.co) | [Slack Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
 
 
 ## Features
