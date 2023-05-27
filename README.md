@@ -44,7 +44,9 @@
 
 ## Installation | Docs | Community
 
-[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [Install in K8s](https://github.com/featbit/featbit/tree/main/kubernetes) | [Official Documentation](https://docs.featbit.co) | [Slack Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
+[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
+
+[Official Website](https://www.featbit.co) | [Documentation](https://docs.featbit.co) | [Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
 
 
 ## About FeatBit
