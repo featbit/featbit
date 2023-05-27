@@ -30,14 +30,9 @@
 
 At the beginning You can [Try FeatBit through our online portal (click here)](https://tryitonline.featbit.co) without register account and hosting the service locally.
 
-## Installation
+## Installation | Docs | Support
 
-[Install Documentation Page](https://docs.featbit.co/docs/installation/full-installation) | [K8s manifest files](https://github.com/featbit/featbit/tree/main/kubernetes)
-
-
-## Docummentation & Support
-
-[FeatBit's Official Documentation](https://docs.featbit.co) | [Online Suport Slack Channel](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
+[Installation Guide](https://docs.featbit.co/docs/installation/full-installation) | [Install in K8s](https://github.com/featbit/featbit/tree/main/kubernetes) | [Official Documentation](https://docs.featbit.co) | [Slack Online Support](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
 
 ## About FeatBit
 
