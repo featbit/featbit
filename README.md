@@ -21,8 +21,11 @@ At the beginning You can [Try FeatBit through our online portal (click here)](ht
 An open-source feature flags management developer tool mainly written in C# (.NET) that empower developers to:
 
 **Ship Code Safely**. Mitigate risks with Production Testing, roll out new features to 1% of users initially then expanding, and ensure instant error recovery without redeployment.
+
 **Innovate Faster**. Decouple feature deployment from release to minimize merge conflicts. Deploy at will, and release any feature immediately upon request from the boss.
+
 **Targeted Experiences**. Release features to specific target users, and continuously measure and improve the product's business value, while reducing the need for developer involvement.
+
 **Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
 
 
