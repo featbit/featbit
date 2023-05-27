@@ -32,16 +32,12 @@ At the beginning You can [Try FeatBit through our online portal (click here)](ht
 
 ## Installation
 
-You can host the service in your own environment [through our document check our](https://docs.featbit.co/docs/installation/full-installation) to hosting the service by yourself.
-
-If you want to host the service into K8s, you can check [K8s folder for pro and standard version's manifest files](https://github.com/featbit/featbit/tree/main/kubernetes). 
+[Install Documentation Page](https://docs.featbit.co/docs/installation/full-installation) | [K8s manifest files](https://github.com/featbit/featbit/tree/main/kubernetes)
 
 
 ## Docummentation & Support
 
-FeatBit provide's [robust documentation (click here)](https://docs.featbit.co) to let developers can quickly get started and easily deeply integrate with FeatBit.
-
-The [Slack #FeatBit channel](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) is designed for both users of FeatBit and those who wish to contribute to the project. It offers a more flexible option for private messaging and is an excellent choice for communication.
+[FeatBit's Official Documentation](https://docs.featbit.co) | [Online Suport Slack Channel](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
 
 ## About FeatBit
 
