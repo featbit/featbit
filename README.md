@@ -1,5 +1,20 @@
 
-# [FeatBit](https://featbit.co) 
+# [FeatBit](https://www.featbit.co) 
+
+
+
+[![image](https://github.com/featbit/featbit/assets/68597908/caadc156-cb90-41cb-ad5c-f603f7163007)](https://www.featbit.co)
+
+
+<!-- <h4 align="left">
+  <a href="https://tryitonline.featbit.co/">Try it Online</a>
+  <span> · </span>
+  <a href="https://www.featbit.co/" >Quick overview (Video)</a>
+  <span> · </span>
+  <a href="https://featbit.gitbook.io/">Documentation</a>
+  <span> · </span>
+  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Support (Slack)</a>
+</h4> -->
 
 [![License](https://img.shields.io/static/v1?style=flat-square&label=license&message=MIT&color=brightgreen)](https://github.com/featbit/featbit/blob/main/LICENSE) 
 [![](https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/)
@@ -9,16 +24,22 @@
 [![All Contributors](https://img.shields.io/badge/all_contributors-16-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
-[![image](https://github.com/featbit/featbit/assets/68597908/caadc156-cb90-41cb-ad5c-f603f7163007)](https://www.featbit.co)
 
 
-## [Try it Online](https://tryitonline.featbit.co)
+## [Try FeatBit](https://tryitonline.featbit.co)
 
 At the beginning You can [Try FeatBit through our online portal (click here)](https://tryitonline.featbit.co) without register account and hosting the service locally.
 
+## Docummentation & Support
+
+FeatBit provide's [robust documentation (click here)](https://docs.featbit.co) to let developers can quickly get started and easily deeply integrate with FeatBit.
+
+The [Slack #FeatBit channel](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) is designed for both users of FeatBit and those who wish to contribute to the project. It offers a more flexible option for private messaging and is an excellent choice for communication.
+
 ## About FeatBit
 
-An open-source feature flags management developer tool mainly written in C# (.NET) that empower developers to:
+
+FeatBit is an open-source feature flags management developer tool that empowers developers to:
 
 **Ship Code Safely**. Mitigate risks with Production Testing, roll out new features to 1% of users initially then expanding, and ensure instant error recovery without redeployment.
 
@@ -28,32 +49,23 @@ An open-source feature flags management developer tool mainly written in C# (.NE
 
 **Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
 
+[![image](https://github.com/featbit/featbit/assets/68597908/c046f23d-5b24-4cd9-ba92-541e6c73ea29)](https://www.featbit.co)
 
 
-### 
 
 
-<h2 align="left">
-  <a href="https://tryitonline.featbit.co/">Try it Online</a>
-  <span> · </span>
-  <a href="https://www.youtube.com/watch?v=hfww1FpjHV0" >Quick overview (Video)</a>
-  <span> · </span>
-  <a href="https://featbit.gitbook.io/">Documentation</a>
-  <span> · </span>
-  <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">Support (Slack)</a>
-</h2>
-
+<!-- ## [Documentation](https://docs.featbit.co/)
 
 **FeatBit** is a scalable, fast, and 100% open-source feature flags management platform that empowers all teams to deliver, control, experiment with and monetize their software.
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
-
+ -->
 ---------------------------------------------------------------------------
 
 
 
 
-## Introduction
+<!-- ## Introduction
 
 Feature flag is a modern engineering technology that decouples code deployments from feature releases, giving you control over who sees each feature and when they see it. 
 
@@ -64,8 +76,8 @@ Feature flag is a modern engineering technology that decouples code deployments 
 - Giving Sales, CS, and Marketing the ability to fine-tune target audiences and manage customer entitlement.
 - etc.
 
-[**Click here to get more information about FeatBit**](https://www.featbit.co/).
-
+[**Click here to get more information about FeatBit**](https://www.featbit.co/). -->
+<!-- 
 ## Getting Started
 
 Clone the repository to your server or local machine, and then boot up the services.
@@ -85,7 +97,7 @@ the default credentials.
 **Attention** : With the default configuration, the FeatBit's portal is only accessible from the local machine on which you ran docker
 compose. To make it accessible publicly, check the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly).
 
-You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey.
+You can then follow the [**Getting Started (Docs)**](https://featbit.gitbook.io/) to start your journey. -->
 
 ## Features
 
