@@ -26,9 +26,9 @@
 
 
 
-## [Try FeatBit](https://tryitonline.featbit.co)
+## [Try FeatBit & Get Started](https://tryitonline.featbit.co)
 
-At the beginning You can [Try FeatBit through our online portal (click here)](https://tryitonline.featbit.co) without register account and hosting the service locally.
+[Try FeatBit through our online portal (click here)](https://tryitonline.featbit.co) without self-hosting. Then getting started by following its guide step by step.
 
 ## Installation | Docs | Support
 
