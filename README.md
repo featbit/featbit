@@ -42,6 +42,9 @@
 
 [Try FeatBit and Getting Started step by step within our Try It Online](https://tryitonline.featbit.co) without self-hosting.
 
+![image](https://github.com/featbit/featbit/assets/68597908/b620f0b6-ec79-4e19-8d68-82f910cb9b52)
+
+
 ## Installation | Docs | Support
 
 [Installation Guide](https://docs.featbit.co/docs/installation/full-installation) | [Install in K8s](https://github.com/featbit/featbit/tree/main/kubernetes) | [Official Documentation](https://docs.featbit.co) | [Slack Online Support](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
