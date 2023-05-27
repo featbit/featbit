@@ -66,7 +66,7 @@ FeatBit is not just an open-source alternative of Launchdarkly, it allows you ho
 
 ## Features
 
-**SDKs**, for [Javascript](https://github.com/featbit/featbit-js-client-sdk), [C#](https://github.com/featbit/dotnet-server-sdk), [Java](https://github.com/featbit/featbit-java-sdk), [Python](https://github.com/featbit/featbit-python-sdk), [Go](https://github.com/featbit/featbit-go-sdk) with more coming soon.
+**SDKs**, for [**Javascript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), [**Go**](https://github.com/featbit/featbit-go-sdk) with more coming soon.
 
 **[Managing Feature flags](https://docs.featbit.co/docs/feature-flags/organizing-flags/the-flags-list)**, create, manage, and filter feature flags.
 
