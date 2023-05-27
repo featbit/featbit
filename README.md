@@ -49,7 +49,7 @@
 
 [Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [Install in K8s](https://github.com/featbit/featbit/tree/main/kubernetes) | [Official Documentation](https://docs.featbit.co) | [Slack Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
 
-## About FeatBit & Feature Flag
+## About FeatBit
 
 
 [FeatBit](https://www.featbit.co) is an open-source [feature flags](https://blog.jetbrains.com/space/2022/06/16/feature-flags/) management tool that empowers developers:
