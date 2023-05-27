@@ -37,18 +37,6 @@
 
 
 
-
-## Try FeatBit & Get Started
-
-[Click here to Try and Getting Started FeatBit within 5 minutes](https://tryitonline.featbit.co) before self-hosting the service.
-
-![image](https://github.com/featbit/featbit/assets/68597908/b620f0b6-ec79-4e19-8d68-82f910cb9b52)
-
-
-## Installation | Docs | Community
-
-[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [Install in K8s](https://github.com/featbit/featbit/tree/main/kubernetes) | [Official Documentation](https://docs.featbit.co) | [Slack Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
-
 ## About FeatBit
 
 
@@ -66,7 +54,19 @@
 
 
 
-## More Features (Working on It)
+## Try FeatBit & Get Started
+
+[Click here to Try and Getting Started FeatBit within 5 minutes](https://tryitonline.featbit.co) before self-hosting the service.
+
+![image](https://github.com/featbit/featbit/assets/68597908/b620f0b6-ec79-4e19-8d68-82f910cb9b52)
+
+
+## Installation | Docs | Community
+
+[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [Install in K8s](https://github.com/featbit/featbit/tree/main/kubernetes) | [Official Documentation](https://docs.featbit.co) | [Slack Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
+
+
+## Features
 
 **SDKs**, for [Javascript](https://github.com/featbit/featbit-js-client-sdk), [C#](https://github.com/featbit/dotnet-server-sdk), [Java](https://github.com/featbit/featbit-java-sdk), [Python](https://github.com/featbit/featbit-python-sdk), [Go](https://github.com/featbit/featbit-go-sdk) with more coming soon.
 
