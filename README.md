@@ -49,7 +49,7 @@
 ## About FeatBit
 
 
-FeatBit is an open-source feature flags management developer tool that empowers developers to:
+FeatBit is an open-source feature flags management tool that empowers developers:
 
 **Ship Code Safely**. Mitigate risks with Production Testing, roll out new features to 1% of users initially then expanding, and ensure instant error recovery without redeployment.
 
