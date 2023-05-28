@@ -24,7 +24,7 @@
         <nz-form-label i18n="@@common.description">Description</nz-form-label>
         <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@common.description.cannot-exceed-512-characters">
           <nz-textarea-count [nzMaxCharacterCount]="512">
-            <textarea rows="1" nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
+            <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
             </textarea>
           </nz-textarea-count>
         </nz-form-control>
