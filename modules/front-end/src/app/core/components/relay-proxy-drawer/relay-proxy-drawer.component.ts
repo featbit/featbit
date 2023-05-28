@@ -11,7 +11,6 @@ import { RelayProxyService } from "@services/relay-proxy.service";
 import { AgentStatusEnum, IRelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { NzModalService } from "ng-zorro-antd/modal";
-import moment from "moment/moment";
 
 @Component({
   selector: 'relay-proxy-drawer',
@@ -106,12 +105,14 @@ export class RelayProxyDrawerComponent implements OnInit {
 
     if (relayProxy.agents.length > 0) {
       const agentArrayForm = this.fb.array(relayProxy.agents.map((x, index) => {
-        this.getAgentStatusInfo(x.id, x.host);
+        this.agentStatusDict[x.id] = AgentStatusEnum.None;
+        this.getAgentStatusInfoAsync(x.id, x.host);
         return this.fb.group({
           id: [x.id, Validators.required],
           name: [x.name, Validators.required],
           host: [x.host, Validators.required],
-          syncAt: [x.syncAt] // this is only for UI to display, the value won't be posted to server
+          syncAt: [x.syncAt], // this is only for UI to display, the value won't be posted to server
+          isNew: [false, Validators.required]
         });
       }));
 
@@ -139,29 +140,17 @@ export class RelayProxyDrawerComponent implements OnInit {
     return this.form.get('agents') as FormArray;
   }
 
-  getAgentStatusFromIndex(index: number): AgentStatusEnum {
-    if (!this.isEditing) {
-      return AgentStatusEnum.None;
-    }
-
-    const { id } = this.agents.at(index).value;
-
-    return this.agentStatusDict[id] || AgentStatusEnum.None;
-  }
-
-  getAgentSyncFromIndex(index: number): boolean {
-    const { id } = this.agents.at(index).value;
-
-    return this.agentSyncDic[id] ?? false;
-  }
-
   addAgent() {
+    const agentId = uuidv4();
     const agentForm = this.fb.group({
-      id: [uuidv4(), Validators.required],
+      id: [agentId, Validators.required],
       name: ['', Validators.required],
-      host: ['', Validators.required]
+      host: ['', Validators.required],
+      syncAt: [''], // this is only for UI to display, the value won't be posted to server
+      isNew: [true, Validators.required], // this is only for UI to display, the value won't be posted to server
     });
 
+    this.agentStatusDict[agentId] = AgentStatusEnum.None;
     this.agents.push(agentForm);
     this.refreshFormArray('agents');
   }
@@ -177,19 +166,17 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.refreshFormArray('agents');
   }
 
-  async getAgentStatusInfoFromControlIndex(index: number) {
-    const { id, host } = this.agents.at(index).value;
-
+  async getAgentStatusInfo(id: string, host: string) {
     if (host === '') {
       this.message.error($localize`:@@common.set-agent-host:You need to set the host url to get its status`);
       return;
     }
 
-    await this.getAgentStatusInfo(id, host);
+    await this.getAgentStatusInfoAsync(id, host);
     this.openAgentStatusModal();
   }
 
-  async getAgentStatusInfo(id: string, host: string): Promise<any> {
+  async getAgentStatusInfoAsync(id: string, host: string): Promise<any> {
     this.agentStatusDict[id] = AgentStatusEnum.Loading;
 
     return new Promise((resolve, reject) => {
@@ -224,10 +211,6 @@ export class RelayProxyDrawerComponent implements OnInit {
 
   removeLesson(index: number) {
     this.scopes.removeAt(index);
-  }
-
-  get environments() {
-    return;
   }
 
   getProjectEnvs(index: number): IEnvironment[] {

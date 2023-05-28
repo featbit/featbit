@@ -37,7 +37,22 @@
   }
 
   .agents {
+    i {
+      font-size: 13px;
+    }
+
+    .sync-button-new {
+      padding-left: 4px;
+    }
+
     .status {
+      .status-wrapper {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        align-items: center;
+      }
+
       &.status-healthy, &.status-loading {
         color: @green70-color;
       }

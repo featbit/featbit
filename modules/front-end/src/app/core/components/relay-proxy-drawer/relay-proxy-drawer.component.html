@@ -88,19 +88,18 @@
               <nz-table #agentTable
                         nzTableLayout="fixed"
                         nzSize="small"
-                        nzFrontPagination
-                        nzShowPagination
+                        [nzFrontPagination]="false"
                         [nzData]="agents.controls">
                 <thead>
                 <tr>
-                  <th nzWidth="230px" i18n="@@common.name">Name</th>
-                  <th nzWidth="280px" i18n="@@common.host">Host</th>
-                  <th nzWidth="80px" nzAlign="center">
+                  <th nzWidth="200px" i18n="@@common.name">Name</th>
+                  <th nzWidth="250px" i18n="@@common.host">Host</th>
+                  <th nzWidth="100px" nzAlign="center">
                     <ng-container i18n="@@common.status">Status</ng-container>
                     <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@relay-proxy.click-status-icon-to-refresh-and-view-status-detail" nz-tooltip="The status of the agent, click icon to refresh and view the status detail"></i>
                   </th>
-                  <th nzWidth="80px" nzAlign="center" i18n="@@common.sync">Sync</th>
-                  <th nzWidth="90px" nzAlign="center" i18n="@@common.actions">Actions</th>
+                  <th nzWidth="120px" nzAlign="center" i18n="@@common.sync">Last Sync</th>
+                  <th nzWidth="200px" nzAlign="center" i18n="@@common.actions">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -116,26 +115,46 @@
                         <input type="text" nz-input formControlName="host" placeholder="Host" i18n-placeholder="@@common.host"/>
                       </nz-form-control>
                     </td>
-                    <td style="text-align: center" class="status status-{{getAgentStatusFromIndex(i)}}">
-                      <ng-container *ngIf="getAgentStatusFromIndex(i) === agentStatusHealthy">
-                        <i (click)="getAgentStatusInfoFromControlIndex(i)" nz-icon nzType="check-circle" i18n-nz-tooltip="@@common.healthy" nz-tooltip="Healthy"></i>
-                      </ng-container>
-                      <ng-container *ngIf="getAgentStatusFromIndex(i) === agentStatusUnhealthy">
-                        <i (click)="getAgentStatusInfoFromControlIndex(i)" nz-icon nzType="issues-close" i18n-nz-tooltip="@@common.unhealthy" nz-tooltip="Unhealthy"></i>
-                      </ng-container>
-                      <ng-container *ngIf="getAgentStatusFromIndex(i) === agentStatusLoading">
+                    <td style="text-align: center" class="status status-{{agentStatusDict[agent.value['id']]}}">
+                      <div class="status-wrapper"
+                           *ngIf="agentStatusDict[agent.value['id']] === agentStatusHealthy"
+                           (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
+                        <i nz-icon nzType="check-circle"></i>
+                        <span i18n="@@common.healthy">Healthy</span>
+                      </div>
+                      <div class="status-wrapper"
+                           *ngIf="agentStatusDict[agent.value['id']] === agentStatusUnhealthy"
+                           (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
+                        <i nz-icon nzType="issues-close"></i>
+                        <span i18n="@@common.unhealthy">Unhealthy</span>
+                      </div>
+                      <div class="status-wrapper" *ngIf="agentStatusDict[agent.value['id']] === agentStatusLoading">
                         <i nz-icon nzType="loading" i18n-nz-tooltip="@@common.loading" nz-tooltip="Loading"></i>
-                      </ng-container>
-                      <ng-container *ngIf="getAgentStatusFromIndex(i) === agentStatusNone">
-                        <i (click)="getAgentStatusInfoFromControlIndex(i)" nz-icon nzType="stop" i18n-nz-tooltip="@@common.unavailable" nz-tooltip="Unavailable"></i>
-                      </ng-container>
-                    </td>
-                    <td style="text-align: center">
-                      <button nz-button nzSize="small" nzType="link" (click)="sync(i)" [nzLoading]="false" [disabled]="!isEditing" [nz-tooltip]="agent.value['syncAt'] | date: 'YYYY-MM-dd HH:mm:ss'">
-                        <i nz-icon [nzType]="'sync'"></i>
+                      </div>
+                      <button class="status-wrapper" nz-button nzSize="small" nzType="link"
+                           [disabled]="agent.value['host'] === ''"
+                           *ngIf="agentStatusDict[agent.value['id']] === agentStatusNone"
+                           (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
+                        <span i18n="@@common.check">Check</span>
                       </button>
                     </td>
                     <td style="text-align: center">
+                      {{agent.value['syncAt'] | date: 'YYYY-MM-dd HH:mm'}}
+                    </td>
+                    <td style="text-align: center">
+                      <span>
+                        <i *ngIf="agent.value['isNew']" nz-icon nzType="question-circle" nzTheme="outline"
+                           i18n-nz-tooltip="@@relay-proxy.save-to-sync-to-agent"
+                           nz-tooltip="The agent setting must be saved to enable the synchronization"></i>
+                        <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
+                                (click)="sync(i)"
+                                [nzLoading]="false"
+                                *ngIf="isEditing"
+                                [disabled]="agent.value['isNew']"
+                                i18n="common.sync"
+                                i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
+                                nz-tooltip="Synchronize the flags and segments within the scopes to FeatBit agent">Sync</button>
+                      </span>
                       <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeAgent(i)">
                         <i nz-icon nzType="icons:icon-delete"></i>
                       </button>
