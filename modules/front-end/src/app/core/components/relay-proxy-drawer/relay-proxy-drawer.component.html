@@ -24,7 +24,7 @@
         <nz-form-label i18n="@@common.description">Description</nz-form-label>
         <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@common.description.cannot-exceed-512-characters">
           <nz-textarea-count [nzMaxCharacterCount]="512">
-            <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
+            <textarea rows="1" nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
             </textarea>
           </nz-textarea-count>
         </nz-form-control>
@@ -33,6 +33,7 @@
         <ng-container formArrayName="scopes">
           <nz-form-label nzRequired>
             <span i18n="@@common.scopes">Scopes</span>
+            <i i18n-nz-tooltip="@@relay-proxy.scopes-tooltip" nz-tooltip="Define the environments that should be synchronized to the agents" nz-icon nzType="icons:icon-info-outline"></i>
             <i nz-icon (click)="addScope()" nzType="icons:icon-add-outline"></i>
           </nz-form-label>
           <div class="scope-selectors">
@@ -53,7 +54,6 @@
                       </nz-option>
                     </nz-select>
                   </nz-form-control>
-
                   <nz-form-control>
                     <nz-select
                       nzMode="tags"
@@ -80,6 +80,13 @@
         <ng-container formArrayName="agents">
           <nz-form-label nzRequired>
             <span i18n="@@common.agents">Agents</span>
+            <i [nz-tooltip]="agentsTooltip" nz-icon nzType="icons:icon-info-outline">
+              <ng-template #agentsTooltip>
+                <ng-container i18n="@@relay-proxy.agents-tooltip">A relay proxy agent is the server running the FeatBit agent program</ng-container>
+                <br>
+                <a target="_blank" href="https://github.com/featbit/featbit-agent" i18n="@@common.check.the.docs">Check the repo</a>
+              </ng-template>
+            </i>
             <i nz-icon (click)="addAgent()" nzType="icons:icon-add-outline"></i>
           </nz-form-label>
 
