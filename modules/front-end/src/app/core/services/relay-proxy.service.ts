@@ -5,7 +5,6 @@ import { Observable, of } from "rxjs";
 import {
   IPagedRelayProxy,
   RelayProxy,
-  RelayProxyAgent,
   RelayProxyFilter
 } from "@features/safe/relay-proxies/types/relay-proxy";
 import { catchError } from "rxjs/operators";

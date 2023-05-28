@@ -44,16 +44,17 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResultVm>
         {
             throw new BusinessException(ErrorCodes.EntityNotExists);
         }
-
-        // TODO sync
         
-        // Save syncAt
         var agent = relayProxy.Agents.FirstOrDefault(agent => agent.Id == request.AgentId);
         if (agent == null)
         {
             throw new BusinessException(ErrorCodes.EntityNotExists);
         }
+
+        // TODO sync
         
+       
+        // Save syncAt
         agent.SyncAt = DateTime.UtcNow;
         
         await _service.UpdateAsync(relayProxy);

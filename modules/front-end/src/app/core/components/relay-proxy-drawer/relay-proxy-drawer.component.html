@@ -2,8 +2,8 @@
   [nzClosable]="false"
   [nzExtra]="extra"
   nzPlacement="right"
-  i18n-nzTitle="@@users.idx.customized-user-properties"
-  nzTitle="End user properties"
+  i18n-nzTitle="@@relay-proxy.drawer-title"
+  nzTitle="Relay Proxy"
   [nzBodyStyle]="{'padding-top': '12px'}"
   [nzWidth]="900"
   [nzVisible]="visible"
@@ -86,7 +86,7 @@
               <ng-template #agentsTooltip>
                 <ng-container i18n="@@relay-proxy.agents-tooltip">A relay proxy agent is the server running the FeatBit agent program</ng-container>
                 <br>
-                <a target="_blank" href="https://github.com/featbit/featbit-agent" i18n="@@common.check.the.docs">Check the repo</a>
+                <a target="_blank" href="https://github.com/featbit/featbit-agent" i18n="@@common.check-the-repo">Check the repo</a>
               </ng-template>
             </i>
             <i nz-icon (click)="addAgent()" nzType="icons:icon-add-outline"></i>
