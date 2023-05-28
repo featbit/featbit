@@ -272,6 +272,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     if (this.isEditing) {
 
     } else {
+      payload.agents = payload.agents.map((agent) => ({...agent, syncAt: null}));
       this.relayProxyService.create(payload).subscribe({
         next: (res) => {
           this.isCreationConfirmModalVisible = true;
