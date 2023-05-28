@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IEnvironment, IProject } from "@shared/types";
-import { uuidv4 } from "@utils/index";
+import { copyToClipboard, uuidv4 } from "@utils/index";
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { PermissionsService } from "@services/permissions.service";
@@ -101,6 +101,8 @@ export class RelayProxyDrawerComponent implements OnInit {
       })));
 
       this.form.setControl('scopes', scopeArrayForm);
+    } else {
+      this.form.setControl('scopes', this.fb.array([]));
     }
 
     if (relayProxy.agents.length > 0) {
@@ -112,11 +114,13 @@ export class RelayProxyDrawerComponent implements OnInit {
           name: [x.name, Validators.required],
           host: [x.host, Validators.required],
           syncAt: [x.syncAt], // this is only for UI to display, the value won't be posted to server
-          isNew: [false, Validators.required]
+          isNew: [false, Validators.required] // this is only for UI to display, the value won't be posted to server
         });
       }));
 
       this.form.setControl('agents', agentArrayForm);
+    } else {
+      this.form.setControl('agents', this.fb.array([]));
     }
   }
 
@@ -270,9 +274,13 @@ export class RelayProxyDrawerComponent implements OnInit {
     } else {
       this.relayProxyService.create(payload).subscribe({
         next: (res) => {
-
+          this.isCreationConfirmModalVisible = true;
+          this._relayProxy = res;
+          this.close.emit({isEditing: false});
+          this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.form.reset();
         },
-        error: (_) => null,
+        error: (_) => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),
       })
     }
   }
@@ -312,5 +320,12 @@ export class RelayProxyDrawerComponent implements OnInit {
         this.agentSyncDic[id] = false;
       }
     })
+  }
+
+  isCreationConfirmModalVisible = false;
+  copyText(event, text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize`:@@common.copy-success:Copied`)
+    );
   }
 }

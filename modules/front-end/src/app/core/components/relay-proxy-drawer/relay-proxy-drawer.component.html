@@ -1,5 +1,5 @@
 <nz-drawer
-  nzClosable="false"
+  [nzClosable]="false"
   [nzExtra]="extra"
   nzPlacement="right"
   i18n-nzTitle="@@users.idx.customized-user-properties"
@@ -149,14 +149,13 @@
                       {{agent.value['syncAt'] | date: 'YYYY-MM-dd HH:mm'}}
                     </td>
                     <td style="text-align: center">
-                      <span>
+                      <span *ngIf="isEditing">
                         <i *ngIf="agent.value['isNew']" nz-icon nzType="question-circle" nzTheme="outline"
                            i18n-nz-tooltip="@@relay-proxy.save-to-sync-to-agent"
                            nz-tooltip="The agent setting must be saved to enable the synchronization"></i>
                         <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
                                 (click)="sync(i)"
                                 [nzLoading]="false"
-                                *ngIf="isEditing"
                                 [disabled]="agent.value['isNew']"
                                 i18n="common.sync"
                                 i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
@@ -200,5 +199,36 @@
     <button nz-button nzType="primary" (click)="closeAgentStatusModal()">
       <span i18n="@@common.ok">OK</span>
     </button>
+  </ng-template>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="isCreationConfirmModalVisible"
+  i18n-nzTitle="@@relay-proxy.relay-proxy-created"
+  nzTitle="Relay proxy created"
+  (nzOnCancel)="isCreationConfirmModalVisible = false"
+  [nzFooter]="confirmFooter"
+  (nzOnOk)="isCreationConfirmModalVisible = false">
+  <ng-container *nzModalContent>
+    <div class="">
+      <nz-alert
+        nzType="warning"
+        i18n-nzDescription="@@common.copy-key-warning"
+        nzDescription="Copy and save this key now, the key will be masked once you leave the page."
+        nzShowIcon
+        nzIconType="icons:icon-warning"
+      ></nz-alert>
+
+      <div class="token-wrapper">
+        <div class="token-name">{{_relayProxy.name}}:</div>
+        <div>
+          <span>{{_relayProxy.key}}</span>
+          <i (click)="copyText($event, _relayProxy.key)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #confirmFooter>
+    <button id="confirm-modal-ok" nz-button nzType="primary" (click)="isCreationConfirmModalVisible = false" i18n="@@common.ok">OK</button>
   </ng-template>
 </nz-modal>
