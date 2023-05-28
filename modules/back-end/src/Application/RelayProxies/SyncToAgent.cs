@@ -16,7 +16,7 @@ public class SyncToAgentValidator : AbstractValidator<SyncToAgent>
     public SyncToAgentValidator()
     {
         RuleFor(x => x.RelayProxyId)
-            .NotEmpty().WithErrorCode(ErrorCodes.RelayProxyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.RelayProxyIdIsRequired);
 
         RuleFor(x => x.AgentId)
             .NotEmpty().WithErrorCode(ErrorCodes.AgentIdIsRequired);

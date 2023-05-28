@@ -6,8 +6,6 @@ public class RelayProxyAgent
 
     public string Name { get; set; }
 
-    public string Key { get; set; }
-
     public string Host { get; set; }
 
     public DateTime? SyncAt { get; set; }
