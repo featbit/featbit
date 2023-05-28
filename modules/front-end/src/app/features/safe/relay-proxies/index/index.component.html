@@ -30,8 +30,7 @@
             <tr>
               <th nzWidth="30%" i18n="@@common.name">Name</th>
               <th nzWidth="25%">Key</th>
-              <th nzWidth="15%" i18n="@@common.status">Status</th>
-              <th nzWidth="10%" nzAlign="center" i18n="@@common.sync">Sync</th>
+              <th nzWidth="25%" i18n="@@common.status">Status</th>
               <th i18n="@@common.actions">Actions</th>
             </tr>
         </thead>
@@ -42,11 +41,9 @@
                 {{ item.name }}
               </td>
               <td>{{item.key}}</td>
-              <td></td>
-              <td style="text-align: center">
-                <button nz-button nzSize="small" nzType="link" (click)="syncAgents(item)">
-                  <i nz-icon [nzType]="'sync'"></i>
-                </button>
+              <td>
+                {{item.healthyAgentCount}}/{{item.agents.length}} <span i18n="@@common.healthy">Healthy</span>
+                <button nz-button nzSize="small" nzType="link" i18n="@@relay-proxy.view-agents-status" (click)="createOrEdit(item)">View agents status</button>
               </td>
               <td>
                 <a style="color: #23AD7F" (click)="createOrEdit(item)" i18n="@@common.edit">Edit</a>

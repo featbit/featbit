@@ -15,7 +15,7 @@ export class RelayProxyFilter {
 
 export interface IPagedRelayProxy {
   totalCount: number;
-  items: IRelayProxy[];
+  items: RelayProxy[];
 }
 
 export enum AgentStatusEnum {
@@ -36,13 +36,20 @@ export class RelayProxyAgent {
   name: string;
   key?: string;
   host: string;
-  syncAt?: Date
+  syncAt?: Date;
+  status?: AgentStatusEnum; // UI only
 }
 
-export interface IRelayProxy {
-  id?: string,
-  name: string,
-  description: string,
-  scopes: RelayProxyScope[],
-  agents: RelayProxyAgent[]
+export class RelayProxy {
+  constructor(
+    public id: string,
+    public name: string,
+    public description: string,
+    public scopes: RelayProxyScope[],
+    public agents: RelayProxyAgent[],
+    public key?: string) {
+  }
+  get healthyAgentCount() {
+    return this.agents.filter((agent) => agent.status === AgentStatusEnum.Healthy).length;
+  }
 }

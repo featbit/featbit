@@ -4,7 +4,7 @@ import { environment } from "../../../environments/environment";
 import { Observable, of } from "rxjs";
 import {
   IPagedRelayProxy,
-  IRelayProxy,
+  RelayProxy,
   RelayProxyAgent,
   RelayProxyFilter
 } from "@features/safe/relay-proxies/types/relay-proxy";
@@ -56,11 +56,11 @@ export class RelayProxyService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  create(payload: IRelayProxy): Observable<IRelayProxy> {
-    return this.http.post<IRelayProxy>(this.baseUrl, payload);
+  create(payload: RelayProxy): Observable<RelayProxy> {
+    return this.http.post<RelayProxy>(this.baseUrl, payload);
   }
 
-  update(payload: IRelayProxy): Observable<boolean> {
+  update(payload: RelayProxy): Observable<boolean> {
     const url = this.baseUrl;
     return this.http.put<boolean>(url + `/${payload.id}`, payload);
   }

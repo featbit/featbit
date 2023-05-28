@@ -8,7 +8,7 @@ import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { ProjectService } from "@services/project.service";
 import { RelayProxyService } from "@services/relay-proxy.service";
-import { AgentStatusEnum, IRelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
+import { AgentStatusEnum, RelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 
 @Component({
@@ -17,7 +17,7 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
   styleUrls: ['./relay-proxy-drawer.component.less']
 })
 export class RelayProxyDrawerComponent implements OnInit {
-  private _relayProxy: IRelayProxy;
+  private _relayProxy: RelayProxy;
 
   form: FormGroup;
 
@@ -35,7 +35,7 @@ export class RelayProxyDrawerComponent implements OnInit {
   title: string = '';
 
   @Input()
-  set relayProxy(relayProxy: IRelayProxy) {
+  set relayProxy(relayProxy: RelayProxy) {
     this.isEditing = relayProxy && !!relayProxy.id;
     if (this.isEditing) {
       this.title = $localize`:@@relay-proxy.edit-title:Edit Relay Proxy`;
@@ -44,7 +44,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     }
 
     this.patchForm(relayProxy);
-    this._relayProxy = {...relayProxy};
+    this._relayProxy = relayProxy;
   }
 
   @Output() close: EventEmitter<any> = new EventEmitter();
@@ -85,7 +85,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     });
   }
 
-  patchForm(relayProxy: Partial<IRelayProxy>) {
+  patchForm(relayProxy: Partial<RelayProxy>) {
     this.form.patchValue({
       name: relayProxy.name,
       description: relayProxy.description

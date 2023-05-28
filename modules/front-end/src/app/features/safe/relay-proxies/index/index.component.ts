@@ -2,7 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { RelayProxyService } from "@services/relay-proxy.service";
-import { IPagedRelayProxy, IRelayProxy, RelayProxyFilter } from "@features/safe/relay-proxies/types/relay-proxy";
+import {
+  AgentStatusEnum,
+  IPagedRelayProxy,
+  RelayProxy,
+  RelayProxyFilter
+} from "@features/safe/relay-proxies/types/relay-proxy";
 import { NzMessageService } from "ng-zorro-antd/message";
 
 
@@ -40,12 +45,38 @@ export class IndexComponent implements OnInit {
     this.isLoading = true;
     this.relayProxyService.getList(this.filter).subscribe({
       next: (replayProxies) => {
-        this.relayProxies = replayProxies;
+        this.relayProxies = {
+          ...replayProxies,
+          items: replayProxies.items.map((proxy) => new RelayProxy(
+            proxy.id,
+            proxy.name,
+            proxy.description,
+            proxy.scopes,
+            proxy.agents.map((agent) => ({...agent, status: AgentStatusEnum.None})),
+            proxy.key
+          ))
+        };
 
+        this.fetchRelayProxiesStatus(this.relayProxies.items);
         this.isLoading = false;
       },
       error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
       complete: () => this.isLoading = false
+    });
+  }
+
+  fetchRelayProxiesStatus(relayProxies: RelayProxy[]) {
+    relayProxies.forEach((relayProxy) => {
+      relayProxy.agents.forEach((agent) => {
+        this.relayProxyService.getAgentStatus(agent.host).subscribe({
+          next: (res) => {
+            agent.status = AgentStatusEnum.Healthy; // Replace with the real status
+          },
+          error: (_) => {
+            agent.status = AgentStatusEnum.Unhealthy;
+          }
+        })
+      })
     });
   }
 
@@ -56,11 +87,11 @@ export class IndexComponent implements OnInit {
     this.$search.next(null);
   }
 
-  syncAgents(relayProxy: IRelayProxy) {
+  syncAgents(relayProxy: RelayProxy) {
 
   }
 
-  delete(relayProxy: IRelayProxy) {
+  delete(relayProxy: RelayProxy) {
     this.relayProxyService.delete(relayProxy.id).subscribe({
       next: () => {
         this.message.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -71,9 +102,9 @@ export class IndexComponent implements OnInit {
     })
   }
 
-  currentRelayProxy: IRelayProxy = {name: null, description: null, scopes: [], agents: []};
-  createOrEdit(relayProxy: IRelayProxy = {name: null, description: null, scopes: [], agents: []}) {
-    this.currentRelayProxy = {...relayProxy};
+  currentRelayProxy: RelayProxy = new RelayProxy(null, null, null, [], []);
+  createOrEdit(relayProxy: RelayProxy = new RelayProxy(null, null, null, [], [])) {
+    this.currentRelayProxy = new RelayProxy(relayProxy.id, relayProxy.name, relayProxy.description, relayProxy.scopes, relayProxy.agents);
     this.proxyDetailvisible = true;
   }
 

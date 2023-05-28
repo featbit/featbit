@@ -13,8 +13,7 @@ import {
   EffectEnum,
   generalResourceRNPattern,
   permissionActions,
-  ResourceTypeAccount, ResourceTypeFlag,
-  ResourceTypeIAM
+  ResourceTypeFlag
 } from "@shared/policy";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard, uuidv4 } from "@utils/index";
@@ -22,11 +21,7 @@ import {
   preProcessPermissions,
   IPermissionStatementGroup, postProcessPermissions
 } from "@features/safe/integrations/access-tokens/types/permission-helper";
-import {
-  ResourceType, ResourceTypeAccessToken,
-  ResourceTypeEnv,
-  ResourceTypeProject
-} from "@shared/policy";
+import { ResourceType, } from "@shared/policy";
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 
 @Component({
