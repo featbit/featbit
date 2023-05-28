@@ -2,8 +2,7 @@
   [nzClosable]="false"
   [nzExtra]="extra"
   nzPlacement="right"
-  i18n-nzTitle="@@relay-proxy.drawer-title"
-  nzTitle="Relay Proxy"
+  [nzTitle]="title"
   [nzBodyStyle]="{'padding-top': '12px'}"
   [nzWidth]="900"
   [nzVisible]="visible"
@@ -138,7 +137,7 @@
                         <span i18n="@@common.unhealthy">Unhealthy</span>
                       </div>
                       <div class="status-wrapper" *ngIf="agentStatusDict[agent.value['id']] === agentStatusLoading">
-                        <i nz-icon nzType="loading" i18n-nz-tooltip="@@common.loading" nz-tooltip="Loading"></i>
+                        <i nz-icon nzType="loading" i18n-nz-tooltip="@@common.loading" nz-tooltip="Loading..."></i>
                       </div>
                       <button class="status-wrapper" nz-button nzSize="small" nzType="link"
                            [disabled]="agent.value['host'] === ''"
