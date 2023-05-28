@@ -9,7 +9,18 @@ public class SyncToAgent: IRequest<SyncResultVm>
     
     public string AgentId { get; set; }
     
-    public string Host { get; set; }
+}
+
+public class SyncToAgentValidator : AbstractValidator<SyncToAgent>
+{
+    public SyncToAgentValidator()
+    {
+        RuleFor(x => x.RelayProxyId)
+            .NotEmpty().WithErrorCode(ErrorCodes.RelayProxyIsRequired);
+
+        RuleFor(x => x.AgentId)
+            .NotEmpty().WithErrorCode(ErrorCodes.AgentIdIsRequired);
+    }
 }
 
 public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResultVm>

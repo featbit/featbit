@@ -1,8 +1,6 @@
 using Application.Bases.Models;
-using Application.RelayProxies;
-using Application.Users;
 
-namespace Application.AccessTokens;
+namespace Application.RelayProxies;
 
 public class GetRelayProxyList : IRequest<PagedResult<RelayProxyVm>>
 {

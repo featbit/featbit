@@ -76,4 +76,6 @@ public static class ErrorCodes
     // relay proxies
     public const string RelayProxyScopeInvalid = nameof(RelayProxyScopeInvalid);
     public const string RelayProxyAgentInvalid = nameof(RelayProxyAgentInvalid);
+    public const string RelayProxyIsRequired = nameof(RelayProxyIsRequired);
+    public const string AgentIdIsRequired = nameof(AgentIdIsRequired);
 }

@@ -1,5 +1,4 @@
-﻿using Application.AccessTokens;
-using Application.Bases.Models;
+﻿using Application.Bases.Models;
 using Application.RelayProxies;
 using Microsoft.Extensions.DependencyInjection.RelayProxies;
 
@@ -27,8 +26,18 @@ public class RelayProxyController : ApiControllerBase
     {
         request.OrganizationId = OrgId;
 
-        var accessToken = await Mediator.Send(request);
-        return Ok(accessToken);
+        var relayProxy = await Mediator.Send(request);
+        return Ok(relayProxy);
+    }
+    
+    [HttpPut("{id:guid}")]
+    public async Task<ApiResponse<bool>> UpdateAsync(Guid id, UpdateRelayProxy request)
+    {
+        request.Id = id;
+
+        var relayProxy = await Mediator.Send(request);
+
+        return Ok(relayProxy);
     }
     
     [HttpGet("is-name-used")]

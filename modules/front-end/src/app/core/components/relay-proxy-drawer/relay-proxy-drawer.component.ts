@@ -10,7 +10,6 @@ import { ProjectService } from "@services/project.service";
 import { RelayProxyService } from "@services/relay-proxy.service";
 import { AgentStatusEnum, IRelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
-import { NzModalService } from "ng-zorro-antd/modal";
 
 @Component({
   selector: 'relay-proxy-drawer',
@@ -31,7 +30,7 @@ export class RelayProxyDrawerComponent implements OnInit {
 
   agentStatusDict: {[id: string]: AgentStatusEnum} = {};
   // indicate if the agent is synchronizing
-  agentSyncDic: {[id: string]: boolean} = {};
+  agentSyncProcessingDic: {[id: string]: boolean} = {};
 
   title: string = '';
 
@@ -45,7 +44,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     }
 
     this.patchForm(relayProxy);
-    this._relayProxy = relayProxy;
+    this._relayProxy = {...relayProxy};
   }
 
   @Output() close: EventEmitter<any> = new EventEmitter();
@@ -59,7 +58,6 @@ export class RelayProxyDrawerComponent implements OnInit {
     private relayProxyService: RelayProxyService,
     private fb: FormBuilder,
     private message: NzMessageService,
-    private modal: NzModalService,
     public permissionsService: PermissionsService,
   ) {
     this.initForm();
@@ -268,18 +266,22 @@ export class RelayProxyDrawerComponent implements OnInit {
     }
 
     const payload = { ...this.form.value };
-
+    payload.agents = payload.agents.map((agent) => ({...agent, syncAt: agent.syncAt || null}));
     if (this.isEditing) {
-
+      this.relayProxyService.update({...payload, id: this._relayProxy.id}).subscribe({
+        next: (res) => {
+          this.close.emit({isEditing: false});
+          this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        },
+        error: (_) => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),
+      })
     } else {
-      payload.agents = payload.agents.map((agent) => ({...agent, syncAt: null}));
       this.relayProxyService.create(payload).subscribe({
         next: (res) => {
           this.isCreationConfirmModalVisible = true;
           this._relayProxy = res;
           this.close.emit({isEditing: false});
           this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-          this.form.reset();
         },
         error: (_) => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),
       })
@@ -307,18 +309,18 @@ export class RelayProxyDrawerComponent implements OnInit {
   }
 
   sync(index: number) {
-    const agent = this.agents.at(index)
-    const { id, host } = agent.value;
-    this.agentSyncDic[id] = true;
+    const agent = this.agents.at(index);
+    const { id } = agent.value;
+    this.agentSyncProcessingDic[id] = true;
 
-    this.relayProxyService.syncToAgent(this._relayProxy.id, id, host).subscribe({
+    this.relayProxyService.syncToAgent(this._relayProxy.id, id).subscribe({
       next: (_) => {
         agent.patchValue({ syncAt: new Date().getTime() });
         this.message.success($localize`:@@common.operation-success:Operation succeeded`);
       },
       error: (_) => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`),
       complete: () => {
-        this.agentSyncDic[id] = false;
+        this.agentSyncProcessingDic[id] = false;
       }
     })
   }

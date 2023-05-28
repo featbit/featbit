@@ -70,7 +70,9 @@
                     </nz-select>
                   </nz-form-control>
                 </div>
-                <i nz-icon nzType="icons:icon-delete" (click)="removeLesson(i)"></i>
+                <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeLesson(i)">
+                  <i nz-icon nzType="icons:icon-delete"></i>
+                </button>
               </div>
             </ng-container>
           </div>
@@ -150,13 +152,13 @@
                     </td>
                     <td style="text-align: center">
                       <span *ngIf="isEditing">
-                        <i *ngIf="agent.value['isNew']" nz-icon nzType="question-circle" nzTheme="outline"
+                        <i *ngIf="agent.value['isNew'] || agent.controls['host'].dirty" nz-icon nzType="question-circle" nzTheme="outline"
                            i18n-nz-tooltip="@@relay-proxy.save-to-sync-to-agent"
                            nz-tooltip="The agent setting must be saved to enable the synchronization"></i>
                         <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
                                 (click)="sync(i)"
                                 [nzLoading]="false"
-                                [disabled]="agent.value['isNew']"
+                                [disabled]="agent.value['isNew'] || agent.controls['host'].dirty"
                                 i18n="common.sync"
                                 i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
                                 nz-tooltip="Synchronize the flags and segments within the scopes to FeatBit agent">Sync</button>

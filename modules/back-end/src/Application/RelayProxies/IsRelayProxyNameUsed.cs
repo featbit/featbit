@@ -1,4 +1,4 @@
-namespace Application.AccessTokens;
+namespace Application.RelayProxies;
 
 public class IsRelayProxyNameUsed : IRequest<bool>
 {

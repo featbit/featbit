@@ -73,7 +73,7 @@ export class IndexComponent implements OnInit {
 
   currentRelayProxy: IRelayProxy = {name: null, description: null, scopes: [], agents: []};
   createOrEdit(relayProxy: IRelayProxy = {name: null, description: null, scopes: [], agents: []}) {
-    this.currentRelayProxy = relayProxy;
+    this.currentRelayProxy = {...relayProxy};
     this.proxyDetailvisible = true;
   }
 

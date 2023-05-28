@@ -56,13 +56,18 @@ export class RelayProxyService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  create(payload: RelayProxyAgent): Observable<IRelayProxy> {
+  create(payload: IRelayProxy): Observable<IRelayProxy> {
     return this.http.post<IRelayProxy>(this.baseUrl, payload);
   }
 
-  syncToAgent(relayProxyId: string, agentId: string, host: string): Observable<any> {
+  update(payload: IRelayProxy): Observable<boolean> {
+    const url = this.baseUrl;
+    return this.http.put<boolean>(url + `/${payload.id}`, payload);
+  }
+
+  syncToAgent(relayProxyId: string, agentId: string): Observable<any> {
     const url = `${this.baseUrl}/sync-to-agent`;
-    const param = { relayProxyId, agentId, host };
+    const param = { relayProxyId, agentId };
 
     return this.http.put(url, param);
   }

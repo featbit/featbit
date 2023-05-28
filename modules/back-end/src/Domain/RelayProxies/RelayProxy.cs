@@ -30,4 +30,12 @@ public class RelayProxy : AuditedEntity
         
         Key = $"rp-{TokenHelper.New(Guid.NewGuid())}";
     }
+
+    public void Update(string name, string description, IEnumerable<RelayProxyScope> scopes, IEnumerable<RelayProxyAgent> agents)
+    {
+        Name = name;
+        Description = description;
+        Scopes = scopes;
+        Agents = agents;
+    }
 }
