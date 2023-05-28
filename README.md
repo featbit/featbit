@@ -35,19 +35,11 @@
 </div>
 </div>
 
-## Try FeatBit & Get Started
+## Try FeatBit Online
 
 [Click here to Try and Getting Started FeatBit within 5 minutes](https://tryitonline.featbit.co) before self-hosting the service.
 
 ![image](https://github.com/featbit/featbit/assets/68597908/b620f0b6-ec79-4e19-8d68-82f910cb9b52)
-
-
-## Installation | Docs | Community
-
-[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
-
-[Official Website](https://www.featbit.co) | [Documentation](https://docs.featbit.co) | [Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
-
 
 ## About FeatBit
 
@@ -64,7 +56,34 @@
 
 [![image](https://github.com/featbit/featbit/assets/68597908/c046f23d-5b24-4cd9-ba92-541e6c73ea29)](https://www.featbit.co)
 
-FeatBit is not just an open-source alternative of Launchdarkly, it allows you host your feature flags service anywhere your buisness need, with compliance and data protection.
+FeatBit allows you host your feature flags service anywhere your buisness need, with compliance and data protection.
+
+
+## Self-Hosting FeatBit
+
+[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
+
+Clone the repository to your server or local machine, and then boot up the services.
+
+```
+git clone https://github.com/featbit/featbit
+cd featbit
+docker compose up -d
+```
+
+Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and log in with
+the default credentials.
+
+- username: **test@featbit.com**
+- password: **123456**
+
+**Attention** : With the default configuration, the FeatBit's portal is only accessible from the local machine on which you ran docker
+compose. To make it accessible publicly, check the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly).
+
+## Documentation & Community
+
+[Official Website](https://www.featbit.co) | [Documentation](https://docs.featbit.co) | [Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
+
 
 ## Features
 
