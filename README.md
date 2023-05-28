@@ -82,7 +82,7 @@ compose. To make it accessible publicly, check the [**FAQ**](https://docs.featbi
 
 ## Documentation & Community
 
-[Official Website](https://www.featbit.co) | [Documentation](https://docs.featbit.co) | [Online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
+[Official Documentation](https://docs.featbit.co) | [Online Support & Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) | [Official Website](https://www.featbit.co)
 
 
 ## Features
@@ -111,7 +111,7 @@ compose. To make it accessible publicly, check the [**FAQ**](https://docs.featbi
 
 **[Pro Solution for Big Data](https://docs.featbit.co/docs/tech-stack/standard-vs.-professional)**, a [professional version](https://docs.featbit.co/docs/installation/full-installation) tailored for teams and companies to accommodate in excess of millions of daily online users with feature usage, custom events, and A/B testing insights.
 
-**Replay Proxy/Agent**, host a feature flag service in your customers' private environments.
+**Relay Proxy/Agent**, host a feature flag service in your customers' private environments. (coming soon)
 
 **ChatGPT Tech Debt Reduction** (experimental features), utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
 
@@ -125,7 +125,7 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 [**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ). 
 
-## Contributors
+### Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
