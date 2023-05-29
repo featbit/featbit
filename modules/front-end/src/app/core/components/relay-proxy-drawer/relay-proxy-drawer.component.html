@@ -4,7 +4,7 @@
   nzPlacement="right"
   [nzTitle]="title"
   [nzBodyStyle]="{'padding-top': '12px'}"
-  [nzWidth]="900"
+  [nzWidth]="980"
   [nzVisible]="visible"
   (nzOnClose)="close.emit()">
   <ng-container *nzDrawerContent>
@@ -41,6 +41,7 @@
                 <div class="proj-env-selectors">
                   <nz-form-control>
                     <nz-select
+                      class="project-selector"
                       nzShowSearch
                       i18n-placeholder="@@common.project"
                       nzPlaceHolder="Project"
@@ -55,6 +56,7 @@
                   </nz-form-control>
                   <nz-form-control>
                     <nz-select
+                      class="env-selector"
                       nzMode="tags"
                       nzShowSearch
                       i18n-placeholder="@@common.environments"
@@ -100,13 +102,13 @@
                         [nzData]="agents.controls">
                 <thead>
                 <tr>
-                  <th nzWidth="200px" i18n="@@common.name">Name</th>
-                  <th nzWidth="250px" i18n="@@common.host">Host</th>
+                  <th nzWidth="240px" i18n="@@common.name">Name</th>
+                  <th nzWidth="290px" i18n="@@common.host">Host</th>
                   <th nzWidth="100px" nzAlign="center">
                     <ng-container i18n="@@common.status">Status</ng-container>
                     <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@relay-proxy.click-status-icon-to-refresh-and-view-status-detail" nz-tooltip="The status of the agent, click icon to refresh and view the status detail"></i>
                   </th>
-                  <th nzWidth="120px" nzAlign="center" i18n="@@common.sync">Last Sync</th>
+                  <th nzWidth="120px" nzAlign="center" i18n="@@common.last-sync">Last Sync</th>
                   <th nzWidth="200px" nzAlign="center" i18n="@@common.actions">Actions</th>
                 </tr>
                 </thead>
@@ -158,13 +160,11 @@
                                 (click)="sync(i)"
                                 [nzLoading]="false"
                                 [disabled]="agent.value['isNew'] || agent.controls['host'].dirty"
-                                i18n="common.sync"
+                                i18n="@@common.sync"
                                 i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
                                 nz-tooltip="Synchronize the flags and segments within the scopes to FeatBit agent">Sync</button>
                       </span>
-                      <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeAgent(i)">
-                        <i nz-icon nzType="icons:icon-delete"></i>
-                      </button>
+                      <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeAgent(i)" i18n="@@common.remove">Remove</button>
                     </td>
                   </tr>
                 </ng-container>
