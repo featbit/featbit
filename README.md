@@ -37,7 +37,8 @@
 
 ## Try FeatBit Online
 
-[Click here to Try and Getting Started FeatBit within 5 minutes](https://tryitonline.featbit.co) before self-hosting the service.
+[To get started with FeatBit quickly and easily, click here](https://example.com) to try it out within 5 minutes. This will allow you to familiarize yourself with the service before considering self-hosting.
+
 
 ![image](https://github.com/featbit/featbit/assets/68597908/b620f0b6-ec79-4e19-8d68-82f910cb9b52)
 
@@ -56,56 +57,64 @@
 
 [![image](https://github.com/featbit/featbit/assets/68597908/c046f23d-5b24-4cd9-ba92-541e6c73ea29)](https://www.featbit.co)
 
-FeatBit allows you host your feature flags service anywhere your buisness need, with compliance and data protection.
-
+FeatBit allows you to host your feature flags service wherever your business needs it, ensuring compliance and data protection.
 
 ## Self-Hosting FeatBit
 
 [Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
 
-Clone the repository to your server or local machine, and then boot up the services.
+To self-host FeatBit, follow these steps:
+
+1 - Clone the repository to your server or local machine:
 
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
+```
+2 - Start the services using Docker Compose:
+
+```
 docker compose up -d
 ```
 
-Once all containers have started, go to FeatBit's portal [http://localhost:8081](http://localhost:8081) and log in with
-the default credentials.
+Once all containers have started, you can access FeatBit's portal at [http://localhost:8081](http://localhost:8081) and log in with the default credentials:
 
-- username: **test@featbit.com**
-- password: **123456**
+- Username: **test@featbit.com**
+- Password: **123456**
 
-**Attention** : With the default configuration, the FeatBit's portal is only accessible from the local machine on which you ran docker
-compose. To make it accessible publicly, check the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly).
+**Note**: By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
 
 ## Documentation & Community
 
-[Official Documentation](https://docs.featbit.co) | [Online Support & Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) | [Official Website](https://www.featbit.co)
+[Official Documentation](https://docs.featbit.co)
 
+[Join our Online Slack Support & Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
+
+[Official Website](https://www.featbit.co)
 
 ## Features
 
-**SDKs**, for [**Javascript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), [**Go**](https://github.com/featbit/featbit-go-sdk) with more coming soon.
+FeatBit offers a range of features including:
 
-**[Managing Feature flags](https://docs.featbit.co/docs/feature-flags/organizing-flags/the-flags-list)**, create, manage, and filter feature flags.
+- **SDKs** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), with more to come.
 
-**[Targeting users with flags](https://docs.featbit.co/docs/feature-flags/targeting-users-with-flags)**. Assign individual users to particular flag variation;
+- **[Managing Feature flags](https://docs.featbit.co/docs/feature-flags/organizing-flags/the-flags-list)**: Create, manage, and filter feature flags.
 
-**[Reusable Segment](https://docs.featbit.co/docs/feature-flags/users-and-user-segments)**, include or exclude users from a segment based on user attribtues.
+- **[Targeting users with flags](https://docs.featbit.co/docs/feature-flags/targeting-users-with-flags)**: Assign individual users to specific flag variations.
 
-**[Insights](https://docs.featbit.co/docs/feature-flags/the-flag-insights)**, check out feature usage during the rollout.
+- **[Reusable Segments](https://docs.featbit.co/docs/feature-flags/users-and-user-segments)**: Include or exclude users from a segment based on user attributes.
 
-**[IAM](https://docs.featbit.co/docs/iam/about)**, define access levels to projects, environment, or teams to enforce your policies.
+- **[Insights](https://docs.featbit.co/docs/feature-flags/the-flag-insights)**: Gain insights into feature usage during the rollout.
 
-**[Experimentation](https://docs.featbit.co/docs/experimentation/understanding-experimentation)**, run feature-level A/B tests anywhere in your stack to make data-driven decisions.
+- **[IAM](https://docs.featbit.co/docs/iam/about)**: Define access levels to projects, environments, or teams to enforce your policies.
 
-**[Audit Log](https://docs.featbit.co/docs/feature-flags/audit-log)**, logs for feature flag & segment changes.
+- **[Experimentation](https://docs.featbit.co/docs/experimentation/understanding-experimentation)**: Run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 
-**[Feature Workflow](https://docs.featbit.co/docs/feature-flags/feature-workflow)**, control your use of feature flags by creating complex automated workflows within FeatBit.
+- **[Audit Log](https://docs.featbit.co/docs/feature-flags/audit-log)**: Keep track of feature flag and segment changes.
 
-**[Web API](https://docs.featbit.co/docs/integrations/using-featbit-rest-api)**, automate your workflow with Web APIs.
+- **[Feature Workflow](https://docs.featbit.co/docs/feature-flags/feature-workflow)**: Control your use of feature flags by creating complex automated workflows within FeatBit.
+
+- **[Web API](https://docs.featbit.co/docs/integrations/using-featbit-rest-api)**, automate your workflow with Web APIs.
 
 **[Platform-level](https://docs.featbit.co/docs/feature-flags/organizing-flags/projects)**, manage your flags in multiple projects and environments.
 
