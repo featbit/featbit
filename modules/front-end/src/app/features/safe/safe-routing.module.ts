@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { SafeComponent } from './safe.component';
 import {IAMGuard} from "@core/guards/iam.guard";
+import { RelayProxiesGuard } from "@core/guards/relayProxies.guard";
 
 const routes: Routes = [
   {
@@ -66,6 +67,7 @@ const routes: Routes = [
       },
       {
         path: 'relay-proxies',
+        canActivate: [RelayProxiesGuard],
         loadChildren: () => import("./relay-proxies/relay-proxies.module").then(m => m.RelayProxiesModule),
         data: {
           breadcrumb: $localize `:@@relay-proxies:Relay Proxies`
