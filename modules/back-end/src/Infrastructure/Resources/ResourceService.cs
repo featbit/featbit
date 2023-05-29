@@ -27,6 +27,7 @@ public class ResourceService : IResourceService
             ResourceTypes.Account => new[] { Resource.AllAccount },
             ResourceTypes.Iam => new[] { Resource.AllIam },
             ResourceTypes.AccessToken => new[] { Resource.AllAccessToken },
+            ResourceTypes.RelayProxy => new[] { Resource.AllRelayProxies },
             ResourceTypes.FeatureFlag => new[] { Resource.AllFeatureFlag },
             ResourceTypes.Env => await GetEnvsAsync(organizationId, name),
             ResourceTypes.Project => await GetProjectsAsync(organizationId, name),

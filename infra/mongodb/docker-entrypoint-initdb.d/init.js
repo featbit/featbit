@@ -119,6 +119,16 @@ db.Policies.insertOne(
                 ],
                 resources: ["access-token/*"]
             },
+			{
+                _id: getUUIDString(),
+                resourceType: "relay-proxy",
+                effect: "allow",
+                actions: [
+                    "ManageRelayProxies",
+                    "ListRelayProxies"
+                ],
+                resources: ["relay-proxy/*"]
+            },
             {
                 _id: getUUIDString(),
                 resourceType: "project",
@@ -170,6 +180,16 @@ db.Policies.insertOne(
                     "ListAccessTokens"
                 ],
                 resources: ["access-token/*"]
+            },
+			{
+                _id: getUUIDString(),
+                resourceType: "relay-proxy",
+                effect: "allow",
+                actions: [
+                    "ManageRelayProxies",
+                    "ListRelayProxies"
+                ],
+                resources: ["relay-proxy/*"]
             },
             {
                 _id: getUUIDString(),
