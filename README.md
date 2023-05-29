@@ -54,9 +54,9 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 
 **Innovate Faster**. Decouples code deployments from feature releases. Deploy at will, and release any feature immediately upon request from the boss.
 
-**Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
-
 **Host Anywhere**. FeatBit allows you to host your feature flags service wherever your business needs it, ensuring compliance and data protection.
+
+**Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
 
 <a href="https://www.featbit.co">
   <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
@@ -69,13 +69,13 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 
 To self-host FeatBit with Docker, follow these steps:
 
-1 - Clone the repository to your server or local machine:
+1. Clone the repository to your server or local machine:
 
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
 ```
-2 - Start the services using Docker Compose:
+2. Start the services using Docker Compose:
 
 ```
 docker compose up -d
@@ -86,7 +86,8 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 - Username: **test@featbit.com**
 - Password: **123456**
 
-**Note**: By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
+> **Note**
+> By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
 
 ## Documentation & Community
 
