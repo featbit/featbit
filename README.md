@@ -37,9 +37,10 @@
 
 ## Try FeatBit Online
 
-[To get started with FeatBit quickly and easily, click here](https://example.com) to try it out within 5 minutes. This will allow you to familiarize yourself with the service before considering self-hosting.
+[To get started with FeatBit quickly and easily, click here](https://tryitonline.featbit.co) to try it out within 5 minutes. This will allow you to familiarize yourself with the service before considering self-hosting.
 
-https://github.com/featbit/featbit/assets/68597908/7cdc06e4-d46f-4a06-930c-8a811759dfe6
+https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
+
 
 
 ## About FeatBit
@@ -59,7 +60,6 @@ https://github.com/featbit/featbit/assets/68597908/7cdc06e4-d46f-4a06-930c-8a811
   <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
 </a>
 
-ouuo
 FeatBit allows you to host your feature flags service wherever your business needs it, ensuring compliance and data protection.
 
 ## Self-Hosting FeatBit
