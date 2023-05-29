@@ -37,7 +37,7 @@
 
 ## Try FeatBit Online
 
-To get started with FeatBit quickly and easily, click here to [try it out within 5 minutes](https://tryitonline.featbit.co). This will allow you to familiarize yourself with the service before considering self-hosting.
+[Try FeatBit online](https://tryitonline.featbit.co) and see how it can help you.
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
