@@ -127,10 +127,13 @@ export class IndexComponent implements OnInit {
 
   currentAccessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []};
 
-  createOrEdit(accessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []}) {
+  showDetailDrawer(accessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []}, readonly: boolean = false) {
     this.currentAccessToken = accessToken;
     this.accessTokenDrawerVisible = true;
+    this.isDetailDrawerReadonly = readonly;
   }
+
+  isDetailDrawerReadonly: boolean = false;
 
   delete(accessToken: IAccessToken) {
     this.accessTokenService.delete(accessToken.id).subscribe({
@@ -151,5 +154,9 @@ export class IndexComponent implements OnInit {
       },
       error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
     })
+  }
+
+  canTakeActionOnAccessToken(type: AccessTokenTypeEnum): boolean {
+    return (type === AccessTokenTypeEnum.Personal && this.canTakeActionOnPersonalAccessToken) || (type === AccessTokenTypeEnum.Service && this.canTakeActionOnServiceAccessToken)
   }
 }

@@ -46,12 +46,18 @@ export class AccessTokenDrawerComponent {
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
       this.permissions = preProcessPermissions(accessToken.permissions);
-      this.title = $localize`:@@integrations.access-token.access-token-drawer.edit-title:Edit Access Token`;
+      if (this._readonly) {
+        this.title = $localize`:@@integrations.access-token.access-token-drawer.view-title:View Access Token`;
+      } else {
+        this.title = $localize`:@@integrations.access-token.access-token-drawer.edit-title:Edit Access Token`;
+      }
     } else {
       accessToken = {name: null, type: AccessTokenTypeEnum.Personal};
       this.setAuthorizedPermissions();
       this.title = $localize`:@@integrations.access-token.access-token-drawer.add-title:Add Access Token`;
     }
+
+
 
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
     this.patchForm(accessToken);
@@ -60,6 +66,17 @@ export class AccessTokenDrawerComponent {
   }
 
   @Input() visible: boolean = false;
+
+  _readonly = false;
+  @Input()
+  set readonly(readonly: boolean) {
+    this._readonly = readonly;
+
+    if (readonly) {
+      this.form.disable();
+    }
+  }
+
   @Output() close: EventEmitter<any> = new EventEmitter();
   title: string = '';
 
