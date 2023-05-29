@@ -66,7 +66,7 @@ FeatBit allows you to host your feature flags service wherever your business nee
 
 [Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
 
-To self-host FeatBit, follow these steps:
+To self-host FeatBit with Docker, follow these steps:
 
 1 - Clone the repository to your server or local machine:
 
