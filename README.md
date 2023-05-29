@@ -55,7 +55,10 @@
 
 **Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
 
-[![image](https://github.com/featbit/featbit/assets/68597908/c046f23d-5b24-4cd9-ba92-541e6c73ea29)](https://www.featbit.co)
+<a href="https://www.featbit.co">
+  <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
+</a>
+
 
 FeatBit allows you to host your feature flags service wherever your business needs it, ensuring compliance and data protection.
 
