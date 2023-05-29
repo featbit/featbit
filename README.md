@@ -37,7 +37,7 @@
 
 ## Try FeatBit Online
 
-[To get started with FeatBit quickly and easily, click here](https://tryitonline.featbit.co) to try it out within 5 minutes. This will allow you to familiarize yourself with the service before considering self-hosting.
+To get started with FeatBit quickly and easily, click here to [try it out within 5 minutes](https://tryitonline.featbit.co). This will allow you to familiarize yourself with the service before considering self-hosting.
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
@@ -56,11 +56,12 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 
 **Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
 
+**Host Anywhere**. FeatBit allows you to host your feature flags service wherever your business needs it, ensuring compliance and data protection.
+
 <a href="https://www.featbit.co">
   <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
 </a>
 
-FeatBit allows you to host your feature flags service wherever your business needs it, ensuring compliance and data protection.
 
 ## Self-Hosting FeatBit
 
