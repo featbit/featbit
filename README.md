@@ -99,35 +99,35 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 
 FeatBit offers a range of features including:
 
-- **SDKs** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), with more to come.
+**SDKs** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), with more to come.
 
-- **[Managing Feature flags](https://docs.featbit.co/docs/feature-flags/organizing-flags/the-flags-list)**: Create, manage, and filter feature flags.
+**[Managing Feature flags](https://docs.featbit.co/docs/feature-flags/organizing-flags/the-flags-list)**: Create, manage, and filter feature flags.
 
-- **[Targeting users with flags](https://docs.featbit.co/docs/feature-flags/targeting-users-with-flags)**: Assign individual users to specific flag variations.
+**[Targeting users with flags](https://docs.featbit.co/docs/feature-flags/targeting-users-with-flags)**: Assign individual users to specific flag variations.
 
-- **[Reusable Segments](https://docs.featbit.co/docs/feature-flags/users-and-user-segments)**: Include or exclude users from a segment based on user attributes.
+**[Reusable Segments](https://docs.featbit.co/docs/feature-flags/users-and-user-segments)**: Include or exclude users from a segment based on user attributes.
 
-- **[Insights](https://docs.featbit.co/docs/feature-flags/the-flag-insights)**: Gain insights into feature usage during the rollout.
+**[Insights](https://docs.featbit.co/docs/feature-flags/the-flag-insights)**: Gain insights into feature usage during the rollout.
 
-- **[IAM](https://docs.featbit.co/docs/iam/about)**: Define access levels to projects, environments, or teams to enforce your policies.
+**[IAM](https://docs.featbit.co/docs/iam/about)**: Define access levels to projects, environments, or teams to enforce your policies.
 
-- **[Experimentation](https://docs.featbit.co/docs/experimentation/understanding-experimentation)**: Run feature-level A/B tests anywhere in your stack to make data-driven decisions.
+**[Experimentation](https://docs.featbit.co/docs/experimentation/understanding-experimentation)**: Run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 
-- **[Audit Log](https://docs.featbit.co/docs/feature-flags/audit-log)**: Keep track of feature flag and segment changes.
+**[Audit Log](https://docs.featbit.co/docs/feature-flags/audit-log)**: Keep track of feature flag and segment changes.
 
-- **[Feature Workflow](https://docs.featbit.co/docs/feature-flags/feature-workflow)**: Control your use of feature flags by creating complex automated workflows within FeatBit.
+**[Feature Workflow](https://docs.featbit.co/docs/feature-flags/feature-workflow)**: Control your use of feature flags by creating complex automated workflows within FeatBit.
 
-- **[Web API](https://docs.featbit.co/docs/integrations/using-featbit-rest-api)**, automate your workflow with Web APIs.
+**[Web APIs](https://docs.featbit.co/docs/integrations/using-featbit-rest-api)**, automate your workflow with Web APIs.
 
 **[Platform-level](https://docs.featbit.co/docs/feature-flags/organizing-flags/projects)**, manage your flags in multiple projects and environments.
 
 **[Pro Solution for Big Data](https://docs.featbit.co/docs/tech-stack/standard-vs.-professional)**, a [professional version](https://docs.featbit.co/docs/installation/full-installation) tailored for teams and companies to accommodate in excess of millions of daily online users with feature usage, custom events, and A/B testing insights.
 
-**Relay Proxy/Agent**, host a feature flag service in your customers' private environments. (coming soon)
-
-**ChatGPT Tech Debt Reduction** (experimental features), utilize ChatGPT4 and FeatBit's fine-tuning solution to minimize technical debt.
+**Relay Proxy/Agent**, host a feature flag service in your customers' private environments.
 
 **Integrations** (experimental features), 
+
+**ChatGPT Tech Debt Reduction** (experimental features), utilize ChatGPT4 and FeatBit's vscode extension to minimize feature flagging technical debt.
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
