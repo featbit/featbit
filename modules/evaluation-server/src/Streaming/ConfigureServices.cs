@@ -1,6 +1,6 @@
 using Domain;
 using Domain.Messages;
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Streaming.Connections;
 using Streaming.Consumers;
