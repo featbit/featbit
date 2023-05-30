@@ -359,7 +359,7 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  getLocalDate(date: Date) {
+  getLocalDate(date: string) {
     if (!date) return '';
     return new Date(date);
   }
