@@ -369,4 +369,8 @@ export class IndexComponent implements OnInit {
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
   }
+
+  getVaritonsWithTitles(variations: string[]) {
+    return variations.map((v: string, index: number) => (`Variation ${index + 1}: ${v}`)).join(', ')
+  }
 }
