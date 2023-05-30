@@ -1,18 +1,19 @@
 using System.Text.Json;
-using Domain.Core;
+using Domain.Messages;
+using Domain.Shared;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
 
-public partial class RedisMessageProducer : IMqMessageProducer
+public partial class RedisMessageProducer : IMessageProducer
 {
     private readonly IDatabase _database;
     private readonly ILogger<RedisMessageProducer> _logger;
 
-    public RedisMessageProducer(IConnectionMultiplexer redis, ILogger<RedisMessageProducer> logger)
+    public RedisMessageProducer(RedisClient redisClient, ILogger<RedisMessageProducer> logger)
     {
-        _database = redis.GetDatabase();
+        _database = redisClient.GetDatabase();
         _logger = logger;
     }
 

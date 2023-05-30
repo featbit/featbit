@@ -1,6 +1,6 @@
 using System.Net.WebSockets;
 using System.Text;
-using Domain.WebSockets;
+using Streaming.Connections;
 
 namespace Application.IntegrationTests.WebSockets;
 

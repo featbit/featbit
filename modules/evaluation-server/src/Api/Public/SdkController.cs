@@ -1,5 +1,5 @@
 using Domain.EndUsers;
-using Domain.Services;
+using Streaming.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Public;

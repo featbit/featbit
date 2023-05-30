@@ -1,9 +1,10 @@
 using System.Text.Json;
-using Domain.Core;
+using Domain.Messages;
+using Domain.Shared;
 
 namespace Infrastructure.Fakes;
 
-public class FakeMessageProducer : IMqMessageProducer
+public class FakeMessageProducer : IMessageProducer
 {
     public Task PublishAsync<TMessage>(string topic, TMessage? message) where TMessage : class
     {

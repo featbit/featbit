@@ -1,15 +1,15 @@
-using Domain.Core;
 using Domain.EndUsers;
 using Domain.Insights;
+using Domain.Messages;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Public;
 
 public class InsightController : PublicApiControllerBase
 {
-    private readonly IMqMessageProducer _producer;
+    private readonly IMessageProducer _producer;
 
-    public InsightController(IMqMessageProducer producer)
+    public InsightController(IMessageProducer producer)
     {
         _producer = producer;
     }

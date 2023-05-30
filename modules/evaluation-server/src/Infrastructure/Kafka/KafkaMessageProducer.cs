@@ -1,13 +1,14 @@
 using System.Net;
 using System.Text.Json;
 using Confluent.Kafka;
-using Domain.Core;
+using Domain.Messages;
+using Domain.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Kafka;
 
-public partial class KafkaMessageProducer : IMqMessageProducer
+public partial class KafkaMessageProducer : IMessageProducer
 {
     private readonly ILogger<KafkaMessageProducer> _logger;
     private readonly IProducer<Null, string> _producer;
