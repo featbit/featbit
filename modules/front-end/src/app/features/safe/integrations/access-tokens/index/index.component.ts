@@ -128,7 +128,7 @@ export class IndexComponent implements OnInit {
   currentAccessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []};
 
   showDetailDrawer(accessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []}, readonly: boolean = false) {
-    this.currentAccessToken = accessToken;
+    this.currentAccessToken = {...accessToken};
     this.accessTokenDrawerVisible = true;
     this.isDetailDrawerReadonly = readonly;
   }

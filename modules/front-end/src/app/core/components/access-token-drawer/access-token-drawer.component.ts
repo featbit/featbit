@@ -58,7 +58,7 @@ export class AccessTokenDrawerComponent {
     }
 
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
-    this.patchForm(accessToken);
+    this.initForm(accessToken.name, accessToken.type);
     this._accessToken = accessToken;
     this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
   }
@@ -81,13 +81,17 @@ export class AccessTokenDrawerComponent {
     private modal: NzModalService,
     private message: NzMessageService
   ) {
-    this.form = this.fb.group({
-      name: ['', [Validators.required], [this.nameAsyncValidator], 'change'],
-      type: [AccessTokenTypeEnum.Personal, [Validators.required]]
-    });
+    this.initForm('', AccessTokenTypeEnum.Personal);
 
     this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
     this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
+  }
+
+  private initForm(name: string, type: AccessTokenTypeEnum) {
+    this.form = this.fb.group({
+      name: [name, [Validators.required], [this.nameAsyncValidator], 'change'],
+      type: [type, [Validators.required]]
+    });
   }
 
   isServiceAccessToken: boolean = false
@@ -96,13 +100,6 @@ export class AccessTokenDrawerComponent {
 
   get accessToken() {
     return this._accessToken;
-  }
-
-  patchForm(accessToken: Partial<IAccessToken>) {
-    this.form.patchValue({
-      name: accessToken.name,
-      type: accessToken.type,
-    });
   }
 
   onClose() {

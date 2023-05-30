@@ -10,7 +10,6 @@ import { ProjectService } from "@services/project.service";
 import { RelayProxyService } from "@services/relay-proxy.service";
 import { AgentStatusEnum, RelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
-import { AccessTokenTypeEnum } from "@features/safe/integrations/access-tokens/types/access-token";
 
 @Component({
   selector: 'relay-proxy-drawer',
@@ -50,8 +49,8 @@ export class RelayProxyDrawerComponent implements OnInit {
       this.title = $localize`:@@relay-proxy.add-title:Add Relay Proxy`;
     }
 
-    this.patchForm(relayProxy);
     this._relayProxy = relayProxy;
+    this.patchForm(relayProxy);
   }
 
   @Output() close: EventEmitter<any> = new EventEmitter();
@@ -67,7 +66,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     private message: NzMessageService,
     public permissionsService: PermissionsService,
   ) {
-    this.initForm();
+    this.initForm('', '', this.fb.array([]), this.fb.array([]));
   }
 
   ngOnInit() {
@@ -83,35 +82,28 @@ export class RelayProxyDrawerComponent implements OnInit {
     }
   }
 
-  initForm() {
+  initForm(name: string, description: string, scopes: FormArray, agents: FormArray) {
     this.form = this.fb.group({
-      name: ['', [Validators.required], [this.nameAsyncValidator], 'change'],
-      description: [null,Validators.maxLength(512)],
-      scopes: this.fb.array([]),
-      agents: this.fb.array([])
+      name: [name, [Validators.required], [this.nameAsyncValidator], 'change'],
+      description: [description,Validators.maxLength(512)],
+      scopes: scopes,
+      agents: agents
     });
   }
 
   patchForm(relayProxy: Partial<RelayProxy>) {
-    this.form.patchValue({
-      name: relayProxy.name,
-      description: relayProxy.description
-    });
-
+    let scopeArrayForm: FormArray<any> = this.fb.array([]);
     if (relayProxy.scopes.length > 0) {
-      const scopeArrayForm = this.fb.array(relayProxy.scopes.map(x => this.fb.group({
+      scopeArrayForm = this.fb.array(relayProxy.scopes.map(x => this.fb.group({
         id: [x.id, Validators.required],
         projectId: [x.projectId, Validators.required],
         envIds: [x.envIds, Validators.required]
       })));
-
-      this.form.setControl('scopes', scopeArrayForm);
-    } else {
-      this.form.setControl('scopes', this.fb.array([]));
     }
 
+    let agentArrayForm: FormArray<any> = this.fb.array([]);
     if (relayProxy.agents.length > 0) {
-      const agentArrayForm = this.fb.array(relayProxy.agents.map((x, index) => {
+      agentArrayForm = this.fb.array(relayProxy.agents.map((x, index) => {
         this.agentStatusDict[x.id] = AgentStatusEnum.None;
         this.getAgentStatusInfoAsync(x.id, x.host);
         return this.fb.group({
@@ -122,11 +114,9 @@ export class RelayProxyDrawerComponent implements OnInit {
           isNew: [false, Validators.required] // this is only for UI to display, the value won't be posted to server
         });
       }));
-
-      this.form.setControl('agents', agentArrayForm);
-    } else {
-      this.form.setControl('agents', this.fb.array([]));
     }
+
+    this.initForm(relayProxy.name, relayProxy.description, scopeArrayForm, agentArrayForm);
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
