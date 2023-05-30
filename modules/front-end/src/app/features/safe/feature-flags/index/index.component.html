@@ -85,7 +85,7 @@
             [nzChecked]="itemChecked(featureFlag)"
             (nzCheckedChange)="onItemChecked(featureFlag)"
           ></td>
-          <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag)">
+          <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag.key)">
               <span>{{featureFlag.name}}</span>
           </td>
           <td>
@@ -141,7 +141,7 @@
           </td>
           <td>{{getLocalDate(featureFlag.updatedAt) | date: 'YYYY-MM-dd HH:mm'}}</td>
           <td>
-            <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag)" i18n="@@common.details">Details</a>
+            <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag.key)" i18n="@@common.details">Details</a>
             <nz-divider nzType="vertical"></nz-divider>
             <ng-container *ngIf="featureFlagFilter.isArchived;then archivedOps else unarchivedOps"></ng-container>
             <ng-template #archivedOps>
