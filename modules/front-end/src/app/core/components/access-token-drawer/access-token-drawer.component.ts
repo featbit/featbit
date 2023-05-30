@@ -46,7 +46,7 @@ export class AccessTokenDrawerComponent {
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
       this.permissions = preProcessPermissions(accessToken.permissions);
-      if (this._readonly) {
+      if (this.readonly) {
         this.title = $localize`:@@integrations.access-token.access-token-drawer.view-title:View Access Token`;
       } else {
         this.title = $localize`:@@integrations.access-token.access-token-drawer.edit-title:Edit Access Token`;
@@ -57,8 +57,6 @@ export class AccessTokenDrawerComponent {
       this.title = $localize`:@@integrations.access-token.access-token-drawer.add-title:Add Access Token`;
     }
 
-
-
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
     this.patchForm(accessToken);
     this._accessToken = accessToken;
@@ -67,15 +65,7 @@ export class AccessTokenDrawerComponent {
 
   @Input() visible: boolean = false;
 
-  _readonly = false;
-  @Input()
-  set readonly(readonly: boolean) {
-    this._readonly = readonly;
-
-    if (readonly) {
-      this.form.disable();
-    }
-  }
+  @Input() readonly: boolean = false;
 
   @Output() close: EventEmitter<any> = new EventEmitter();
   title: string = '';

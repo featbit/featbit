@@ -10,6 +10,7 @@ import { ProjectService } from "@services/project.service";
 import { RelayProxyService } from "@services/relay-proxy.service";
 import { AgentStatusEnum, RelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { AccessTokenTypeEnum } from "@features/safe/integrations/access-tokens/types/access-token";
 
 @Component({
   selector: 'relay-proxy-drawer',
@@ -34,11 +35,17 @@ export class RelayProxyDrawerComponent implements OnInit {
 
   title: string = '';
 
+  @Input() readonly: boolean = false;
+
   @Input()
   set relayProxy(relayProxy: RelayProxy) {
     this.isEditing = relayProxy && !!relayProxy.id;
     if (this.isEditing) {
-      this.title = $localize`:@@relay-proxy.edit-title:Edit Relay Proxy`;
+      if (this.readonly) {
+        this.title = $localize`:@@relay-proxy.view-title:View Relay Proxy`;
+      } else {
+        this.title = $localize`:@@relay-proxy.edit-title:Edit Relay Proxy`;
+      }
     } else {
       this.title = $localize`:@@relay-proxy.add-title:Add Relay Proxy`;
     }
@@ -169,6 +176,11 @@ export class RelayProxyDrawerComponent implements OnInit {
   }
 
   async getAgentStatusInfo(id: string, host: string) {
+    if (this.readonly) {
+      this.message.warning($localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
+      return;
+    }
+
     if (host === '') {
       this.message.error($localize`:@@common.set-agent-host:You need to set the host url to get its status`);
       return;
@@ -221,6 +233,11 @@ export class RelayProxyDrawerComponent implements OnInit {
   }
 
   doSubmit() {
+    if (this.readonly) {
+      this.message.warning($localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
+      return;
+    }
+
     let invalid = false;
     if (this.form.invalid) {
       for (const i in this.form.controls) {

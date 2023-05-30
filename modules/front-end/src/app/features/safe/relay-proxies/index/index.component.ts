@@ -9,6 +9,8 @@ import {
   RelayProxyFilter
 } from "@features/safe/relay-proxies/types/relay-proxy";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { PermissionsService } from "@services/permissions.service";
 
 
 @Component({
@@ -27,10 +29,14 @@ export class IndexComponent implements OnInit {
     totalCount: 0
   };
 
+  canMangeRelayProxies = false;
+
   constructor(
     private message: NzMessageService,
+    private permissionsService: PermissionsService,
     private relayProxyService: RelayProxyService
   ) {
+    this.canMangeRelayProxies = this.permissionsService.isGranted(generalResourceRNPattern.relayProxy, permissionActions.ManageRelayProxies);
   }
 
   ngOnInit(): void {
@@ -87,10 +93,6 @@ export class IndexComponent implements OnInit {
     this.$search.next(null);
   }
 
-  syncAgents(relayProxy: RelayProxy) {
-
-  }
-
   delete(relayProxy: RelayProxy) {
     this.relayProxyService.delete(relayProxy.id).subscribe({
       next: () => {
@@ -103,7 +105,7 @@ export class IndexComponent implements OnInit {
   }
 
   currentRelayProxy: RelayProxy = new RelayProxy(null, null, null, [], []);
-  createOrEdit(relayProxy: RelayProxy = new RelayProxy(null, null, null, [], [])) {
+  showDetailDrawer(relayProxy: RelayProxy = new RelayProxy(null, null, null, [], [])) {
     this.currentRelayProxy = new RelayProxy(relayProxy.id, relayProxy.name, relayProxy.description, relayProxy.scopes, relayProxy.agents);
     this.proxyDetailvisible = true;
   }

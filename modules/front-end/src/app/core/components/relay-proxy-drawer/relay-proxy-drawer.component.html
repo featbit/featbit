@@ -33,7 +33,7 @@
           <nz-form-label nzRequired>
             <span i18n="@@common.scopes">Scopes</span>
             <i i18n-nz-tooltip="@@relay-proxy.scopes-tooltip" nz-tooltip="Define the environments that should be synchronized to the agents" nz-icon nzType="icons:icon-info-outline"></i>
-            <i nz-icon (click)="addScope()" nzType="icons:icon-add-outline"></i>
+            <i *ngIf="!readonly" nz-icon (click)="addScope()" nzType="icons:icon-add-outline"></i>
           </nz-form-label>
           <div class="scope-selectors">
             <ng-container *ngFor="let _ of scopes.controls; let i = index">
@@ -71,7 +71,7 @@
                     </nz-select>
                   </nz-form-control>
                 </div>
-                <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeLesson(i)">
+                <button *ngIf="!readonly" nzDanger nz-button nzSize="small" nzType="link" (click)="removeLesson(i)">
                   <i nz-icon nzType="icons:icon-delete"></i>
                 </button>
               </div>
@@ -90,7 +90,7 @@
                 <a target="_blank" href="https://github.com/featbit/featbit-agent" i18n="@@common.check-the-repo">Check the repo</a>
               </ng-template>
             </i>
-            <i nz-icon (click)="addAgent()" nzType="icons:icon-add-outline"></i>
+            <i *ngIf="!readonly" nz-icon (click)="addAgent()" nzType="icons:icon-add-outline"></i>
           </nz-form-label>
 
           <div class="table-content-area">
@@ -152,19 +152,21 @@
                       {{agent.value['syncAt'] | date: 'YYYY-MM-dd HH:mm'}}
                     </td>
                     <td style="text-align: center">
-                      <span *ngIf="isEditing">
+                      <ng-container *ngIf="!readonly">
+                        <span *ngIf="isEditing">
                         <i *ngIf="agent.value['isNew'] || agent.controls['host'].dirty" nz-icon nzType="question-circle" nzTheme="outline"
                            i18n-nz-tooltip="@@relay-proxy.save-to-sync-to-agent"
                            nz-tooltip="The agent setting must be saved to enable the synchronization"></i>
-                        <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
-                                (click)="sync(i)"
-                                [nzLoading]="false"
-                                [disabled]="agent.value['isNew'] || agent.controls['host'].dirty"
-                                i18n="@@common.sync"
-                                i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
-                                nz-tooltip="Synchronize the flags and segments within the scopes to FeatBit agent">Sync</button>
-                      </span>
-                      <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeAgent(i)" i18n="@@common.remove">Remove</button>
+                          <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
+                                  (click)="sync(i)"
+                                  [nzLoading]="false"
+                                  [disabled]="agent.value['isNew'] || agent.controls['host'].dirty"
+                                  i18n="@@common.sync"
+                                  i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
+                                  nz-tooltip="Synchronize the flags and segments within the scopes to FeatBit agent">Sync</button>
+                        </span>
+                        <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeAgent(i)" i18n="@@common.remove">Remove</button>
+                      </ng-container>
                     </td>
                   </tr>
                 </ng-container>
@@ -175,7 +177,7 @@
         </ng-container>
       </nz-form-item>
     </form>
-    <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" i18n="@@common.save">Save</button>
+    <button *ngIf="!readonly" (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
     <i (click)="close.emit()" nz-icon nzType="icons:icon-close"></i>

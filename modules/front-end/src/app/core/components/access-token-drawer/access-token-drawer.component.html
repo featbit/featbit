@@ -74,7 +74,7 @@
         </nz-collapse>
       </div>
     </div>
-    <button *ngIf="!_readonly" (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
+    <button *ngIf="!readonly" (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
