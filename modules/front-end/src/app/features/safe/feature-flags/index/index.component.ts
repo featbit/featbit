@@ -279,7 +279,7 @@ export class IndexComponent implements OnInit {
 
     this.featureFlagService.create(this.featureFlagForm.value).subscribe({
       next: (result: IFeatureFlag) => {
-        this.navigateToFlagDetail(result);
+        this.navigateToFlagDetail(result.key);
         this.creating = false;
       },
       error: (err) => {
@@ -314,11 +314,11 @@ export class IndexComponent implements OnInit {
       });
   }
 
-  public navigateToFlagDetail(data: IFeatureFlag) {
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(data.key)}/targeting`).then();
+  public navigateToFlagDetail(key: string) {
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`).then();
   }
 
-  archive(flag: IFeatureFlag) {
+  archive(flag: IFeatureFlagListItem) {
     let msg = $localize`:@@ff.archive-flag-warning:Flag <strong>${flag.name}</strong> will be archived, and the value defined in your code will be returned for all your users. Remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
 
     this.modal.confirm({
@@ -339,7 +339,7 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  restore(flag: IFeatureFlag) {
+  restore(flag: IFeatureFlagListItem) {
     this.featureFlagService.restore(flag.key).subscribe({
       next: () => {
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -349,7 +349,7 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  delete(flag: IFeatureFlag) {
+  delete(flag: IFeatureFlagListItem) {
     this.featureFlagService.delete(flag.key).subscribe({
       next: () => {
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
