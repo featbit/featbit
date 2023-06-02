@@ -20,7 +20,7 @@ export class TestAppComponent implements OnInit, OnDestroy {
   private progress: number = 0;
   normalizedProgress: number = 0;
 
-  progressTimeout: number = 1000 * 30;
+  progressTimeout: number = 1000 * 120;
   progressRefreshInterval: number = 50;
 
   status: NzProgressStatusType;
