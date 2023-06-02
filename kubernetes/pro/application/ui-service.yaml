@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     app: ui
-  name: standard-ui
+  name: ui
 spec:
   ports:
     - name: "8081"
