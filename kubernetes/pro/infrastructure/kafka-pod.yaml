@@ -106,6 +106,7 @@ spec:
               echo "Seed kafka topic finished."
       securityContext:
           runAsUser: 1001
+          runAsGroup: 0
           allowPrivilegeEscalation: false
   restartPolicy: Always
   volumes:
