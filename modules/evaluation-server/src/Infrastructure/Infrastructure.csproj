@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    
+
     <PropertyGroup>
         <AssemblyName>FeatBit.EvaluationServer.Infrastructure</AssemblyName>
         <PackageId>FeatBit.EvaluationServer.Infrastructure</PackageId>
@@ -13,7 +13,6 @@
         <PackageReference Include="Confluent.Kafka" Version="1.9.3"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0"/>
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0"/>
-        <PackageReference Include="MongoDB.Driver" Version="2.18.0"/>
         <PackageReference Include="StackExchange.Redis" Version="2.6.70"/>
     </ItemGroup>
 
