@@ -43,8 +43,7 @@ public static class ServicesRegister
         else
         {
             // redis store
-            var redisOptions = configuration.GetValue<RedisOptions>(RedisOptions.Redis);
-            services.AddRedisStore(redisOptions);
+            services.AddRedisStore(options => configuration.GetSection(RedisOptions.Redis).Bind(options));
 
             // message queue
             var isProVersion = configuration["IS_PRO"];

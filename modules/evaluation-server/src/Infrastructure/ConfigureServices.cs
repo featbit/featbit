@@ -11,8 +11,11 @@ namespace Infrastructure;
 
 public static class ConfigureServices
 {
-    public static IServiceCollection AddRedisStore(this IServiceCollection services, RedisOptions options)
+    public static IServiceCollection AddRedisStore(this IServiceCollection services, Action<RedisOptions> configureOptions)
     {
+        var options = new RedisOptions();
+        configureOptions(options);
+
         var redisClient = new RedisClient(options);
         services.TryAddSingleton(redisClient);
         services.AddSingleton<IStore, RedisStore>();
