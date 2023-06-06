@@ -1,10 +1,12 @@
 using Api.Authentication;
+using Api.Authorization;
 using Application.Bases.Models;
 using Application.Segments;
 using Domain.Segments;
 
 namespace Api.Controllers;
 
+[Authorize(Permissions.ManageSegment)]
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/segments")]
 public class SegmentController : ApiControllerBase
 {

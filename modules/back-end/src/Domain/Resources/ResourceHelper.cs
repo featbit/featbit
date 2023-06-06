@@ -10,6 +10,8 @@ public static class ResourceHelper
         {
             case ResourceTypes.FeatureFlag:
                 return "project/*:env/*:flag/*";
+            case ResourceTypes.Segment:
+                return "project/*:env/*:segment/*";
         }
 
         return string.Empty;
