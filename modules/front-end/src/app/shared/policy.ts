@@ -388,6 +388,8 @@ export function isResourceGeneral(type: ResourceTypeEnum, rn: string): boolean {
       return rn === generalResourceRNPattern.env;
     case ResourceTypeEnum.Flag:
       return rn === generalResourceRNPattern.flag;
+    case ResourceTypeEnum.Segment:
+      return rn === generalResourceRNPattern.segment;
   }
 
   return false;
