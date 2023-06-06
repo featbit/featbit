@@ -1,3 +1,4 @@
+using Api.Authentication;
 using Application.Bases.Models;
 using Application.Segments;
 using Domain.Segments;
@@ -7,6 +8,7 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/segments")]
 public class SegmentController : ApiControllerBase
 {
+    [OpenApi]
     [HttpGet("{id:guid}")]
     public async Task<ApiResponse<Segment>> GetAsync(Guid id)
     {
@@ -19,6 +21,7 @@ public class SegmentController : ApiControllerBase
         return Ok(segment);
     }
 
+    [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<PagedResult<SegmentVm>>> GetListAsync(Guid envId, [FromQuery] SegmentFilter filter)
     {
@@ -32,6 +35,7 @@ public class SegmentController : ApiControllerBase
         return Ok(segments);
     }
 
+    [OpenApi]
     [HttpGet("by-ids")]
     public async Task<ApiResponse<IEnumerable<Segment>>> GetByIdsAsync([FromQuery] Guid[] ids)
     {
@@ -44,6 +48,7 @@ public class SegmentController : ApiControllerBase
         return Ok(segments);
     }
 
+    [OpenApi]
     [HttpPost]
     public async Task<ApiResponse<Segment>> CreateAsync(Guid envId, CreateSegment request)
     {
@@ -53,6 +58,7 @@ public class SegmentController : ApiControllerBase
         return Ok(segment);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}")]
     public async Task<ApiResponse<Segment>> UpdateAsync(Guid id, UpdateSegment request)
     {
@@ -62,6 +68,7 @@ public class SegmentController : ApiControllerBase
         return Ok(segment);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}/archive")]
     public async Task<ApiResponse<bool>> ArchiveAsync(Guid id)
     {
@@ -74,6 +81,7 @@ public class SegmentController : ApiControllerBase
         return Ok(success);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}/restore")]
     public async Task<ApiResponse<bool>> RestoreAsync(Guid id)
     {
@@ -86,6 +94,7 @@ public class SegmentController : ApiControllerBase
         return Ok(success);
     }
 
+    [OpenApi]
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
     {
@@ -99,6 +108,7 @@ public class SegmentController : ApiControllerBase
         return Ok(success);
     }
 
+    [OpenApi]
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid envId, string name)
     {
@@ -112,6 +122,7 @@ public class SegmentController : ApiControllerBase
         return Ok(isNameUsed);
     }
 
+    [OpenApi]
     [HttpGet]
     [Route("{id:guid}/flag-references")]
     public async Task<ApiResponse<IEnumerable<FlagReference>>> GetFlagReferencesAsync(Guid envId, Guid id)
