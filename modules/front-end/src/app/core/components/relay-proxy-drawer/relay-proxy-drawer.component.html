@@ -53,7 +53,7 @@
                       nzPlaceHolder="Project"
                       formControlName="projectId">
                       <ng-container *ngFor="let project of projects">
-                        <nz-option *ngIf="!isProjectsLoading" [nzLabel]="project.name" [nzValue]="project.id"></nz-option>
+                        <nz-option *ngIf="!isProjectsLoading" [nzLabel]="project.name" [nzValue]="project.id" [nzHide]="isProjectSelected(project.id)"></nz-option>
                       </ng-container>
                       <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
                         <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
@@ -69,7 +69,7 @@
                       nzPlaceHolder="Environments"
                       formControlName="envIds">
                       <ng-container *ngFor="let env of getProjectEnvs(i)">
-                        <nz-option *ngIf="!isProjectsLoading" [nzLabel]="env.name" [nzValue]="env.id"></nz-option>
+                        <nz-option *ngIf="!isProjectsLoading" [nzLabel]="env.name" [nzValue]="env.id" [nzHide]="isEnvSelected(env.id)"></nz-option>
                       </ng-container>
                       <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
                         <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>

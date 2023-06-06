@@ -229,6 +229,18 @@ export class RelayProxyDrawerComponent implements OnInit {
     return this.projects.find(x => x.id === projectId)?.environments;
   }
 
+  isProjectSelected(projectId: string): boolean {
+    const { scopes } = this.form.value;
+    const allProjectEnvs = this.projects.find((x) => x.id === projectId)?.environments?.map(x => x.id) || [];
+    const selectedProjectEnvIds = scopes.filter((x) => x.projectId === projectId).flatMap(x => x.envIds);
+    return !allProjectEnvs.some((x) => !selectedProjectEnvIds.some(y => y === x));
+  }
+
+  isEnvSelected(envId: string): boolean {
+    const { scopes } = this.form.value;
+    return scopes.some((x) => x.envIds.some(y => y === envId));
+  }
+
   doSubmit() {
     if (this.readonly) {
       this.message.warning($localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
