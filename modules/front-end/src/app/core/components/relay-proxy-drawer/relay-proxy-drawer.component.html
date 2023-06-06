@@ -29,12 +29,18 @@
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <ng-container formArrayName="scopes">
-          <nz-form-label nzRequired>
-            <span i18n="@@common.scopes">Scopes</span>
-            <i i18n-nz-tooltip="@@relay-proxy.scopes-tooltip" nz-tooltip="Define the environments that should be synchronized to the agents" nz-icon nzType="icons:icon-info-outline"></i>
-            <i *ngIf="!readonly" nz-icon (click)="addScope()" nzType="icons:icon-add-outline"></i>
-          </nz-form-label>
+        <nz-form-label nzRequired>
+          <span i18n="@@common.scopes">Scopes</span>
+          <i i18n-nz-tooltip="@@relay-proxy.scopes-tooltip" nz-tooltip="Define the environments that should be synchronized to the agents" nz-icon nzType="icons:icon-info-outline"></i>
+          <i *ngIf="!readonly && !form.value.isAllEnvs" nz-icon (click)="addScope()" nzType="icons:icon-add-outline"></i>
+        </nz-form-label>
+        <nz-form-control>
+          <nz-radio-group formControlName="isAllEnvs" class="custom-scope-type" (ngModelChange)="scopeTypeChange($event)">
+            <label nz-radio [nzValue]="true" i18n="@@common.all-envs">All environments</label>
+            <label nz-radio [nzValue]="false" i18n="@@common.customize-envs">Customize environments</label>
+          </nz-radio-group>
+        </nz-form-control>
+        <ng-container formArrayName="scopes" *ngIf="!form.value.isAllEnvs">
           <div class="scope-selectors">
             <ng-container *ngFor="let _ of scopes.controls; let i = index">
               <div class="scope-form-row" [formGroupName]="i">
@@ -71,7 +77,7 @@
                     </nz-select>
                   </nz-form-control>
                 </div>
-                <button *ngIf="!readonly" nzDanger nz-button nzSize="small" nzType="link" (click)="removeLesson(i)">
+                <button *ngIf="!readonly" nzDanger nz-button nzSize="small" nzType="link" (click)="removeEnv(i)">
                   <i nz-icon nzType="icons:icon-delete"></i>
                 </button>
               </div>

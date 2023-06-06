@@ -66,7 +66,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     private message: NzMessageService,
     public permissionsService: PermissionsService,
   ) {
-    this.initForm('', '', this.fb.array([]), this.fb.array([]));
+    this.initForm('', '', true, this.fb.array([]), this.fb.array([]));
   }
 
   ngOnInit() {
@@ -82,10 +82,11 @@ export class RelayProxyDrawerComponent implements OnInit {
     }
   }
 
-  initForm(name: string, description: string, scopes: FormArray, agents: FormArray) {
+  initForm(name: string, description: string, isAllEnvs: boolean, scopes: FormArray, agents: FormArray) {
     this.form = this.fb.group({
       name: [name, [Validators.required], [this.nameAsyncValidator], 'change'],
       description: [description,Validators.maxLength(512)],
+      isAllEnvs: [isAllEnvs, [Validators.required]],
       scopes: scopes,
       agents: agents
     });
@@ -116,7 +117,7 @@ export class RelayProxyDrawerComponent implements OnInit {
       }));
     }
 
-    this.initForm(relayProxy.name, relayProxy.description, scopeArrayForm, agentArrayForm);
+    this.initForm(relayProxy.name, relayProxy.description, relayProxy.isAllEnvs, scopeArrayForm, agentArrayForm);
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -134,6 +135,12 @@ export class RelayProxyDrawerComponent implements OnInit {
     }),
     first()
   );
+
+  scopeTypeChange(param: boolean) {
+    if (!param && this.scopes.value.length === 0) {
+      this.addScope();
+    }
+  }
 
   get agents(): FormArray {
     return this.form.get('agents') as FormArray;
@@ -213,7 +220,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.scopes.push(scopeForm);
   }
 
-  removeLesson(index: number) {
+  removeEnv(index: number) {
     this.scopes.removeAt(index);
   }
 
@@ -267,12 +274,22 @@ export class RelayProxyDrawerComponent implements OnInit {
       return;
     }
 
-    if (this.scopes.controls.length === 0 || this.scopes.controls.length === 0) {
-      this.message.error($localize`:@@relay-proxy.scope-and-agent-required:At least one scope and one agent are required`);
+    if (!this.form.value.isAllEnvs && this.scopes.controls.length === 0) {
+      this.message.error($localize`:@@relay-proxy.scope-required:At least one environment scope is required`);
+      return;
+    }
+
+    if (this.agents.controls.length === 0) {
+      this.message.error($localize`:@@relay-proxy.agent-required:At least one agent is required`);
       return;
     }
 
     const payload = { ...this.form.value };
+    if (payload.isAllEnvs) {
+      payload.scopes = [];
+      this.scopes.clear();
+    }
+
     payload.agents = payload.agents.map((agent) => ({...agent, syncAt: agent.syncAt || null}));
     if (this.isEditing) {
       this.relayProxyService.update({...payload, id: this._relayProxy.id}).subscribe({

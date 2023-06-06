@@ -9,7 +9,9 @@ public class RelayProxy : AuditedEntity
     public string Key { get; set; }
     
     public string Description { get; set; }
-    
+
+    public bool IsAllEnvs { get; set; }
+
     public IEnumerable<RelayProxyScope> Scopes { get; set; }
     
     public IEnumerable<RelayProxyAgent> Agents { get; set; }
@@ -18,23 +20,26 @@ public class RelayProxy : AuditedEntity
         Guid organizationId,
         string name,
         string description,
+        bool isAllEnvs,
         IEnumerable<RelayProxyScope> scopes,
         IEnumerable<RelayProxyAgent> agents)
     {
         OrganizationId = organizationId;
         Name = name;
         Description = description;
-        
+
+        IsAllEnvs = isAllEnvs;
         Scopes = scopes;
         Agents = agents;
         
         Key = $"rp-{TokenHelper.New(Guid.NewGuid())}";
     }
 
-    public void Update(string name, string description, IEnumerable<RelayProxyScope> scopes, IEnumerable<RelayProxyAgent> agents)
+    public void Update(string name, string description, bool isAllEnvs, IEnumerable<RelayProxyScope> scopes, IEnumerable<RelayProxyAgent> agents)
     {
         Name = name;
         Description = description;
+        IsAllEnvs = isAllEnvs;
         Scopes = scopes;
         Agents = agents;
     }

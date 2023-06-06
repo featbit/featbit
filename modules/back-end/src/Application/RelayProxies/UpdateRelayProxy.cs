@@ -11,6 +11,8 @@ public class UpdateRelayProxy : IRequest<bool>
 
     public string Description { get; set; }
 
+    public bool IsAllEnvs { get; set; }
+
     public IEnumerable<RelayProxyScope> Scopes { get; set; }
     
     public IEnumerable<RelayProxyAgent> Agents { get; set; }
@@ -23,16 +25,17 @@ public class UpdateRelayProxyValidator : AbstractValidator<UpdateRelayProxy>
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 
-        RuleFor(x => x.Scopes)
-            .Must(scopes =>
+        RuleFor(x => x)
+            .Must(y =>
             {
-                return scopes.Any() && 
-                       scopes.All(scope => !string.IsNullOrWhiteSpace(scope.Id) && 
-                                           !string.IsNullOrWhiteSpace(scope.ProjectId) && 
-                                           scope.EnvIds.Any());   
+                var scopes = y.Scopes;
+                return y.IsAllEnvs || (scopes.Any() && 
+                                       scopes.All(scope => !string.IsNullOrWhiteSpace(scope.Id) && 
+                                                           !string.IsNullOrWhiteSpace(scope.ProjectId) && 
+                                                           scope.EnvIds.Any()));   
             })
             .WithErrorCode(ErrorCodes.RelayProxyScopeInvalid);
-        
+
         RuleFor(x => x.Agents)
             .Must(agents =>
             {
@@ -57,7 +60,7 @@ public class UpdateRelayProxyHandler : IRequestHandler<UpdateRelayProxy, bool>
     public async Task<bool> Handle(UpdateRelayProxy request, CancellationToken cancellationToken)
     {
         var relayProxy = await _service.GetAsync(request.Id);
-        relayProxy.Update(request.Name, request.Description, request.Scopes, request.Agents);
+        relayProxy.Update(request.Name, request.Description, request.IsAllEnvs, request.Scopes, request.Agents);
 
         await _service.UpdateAsync(relayProxy);
 

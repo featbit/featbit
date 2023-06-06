@@ -16,6 +16,8 @@ public class CreateRelayProxy : IRequest<RelayProxyVm>
 
     public string Description { get; set; }
 
+    public bool IsAllEnvs { get; set; }
+
     public IEnumerable<RelayProxyScope> Scopes { get; set; }
     
     public IEnumerable<RelayProxyAgent> Agents { get; set; }
@@ -28,13 +30,14 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateRelayProxy>
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 
-        RuleFor(x => x.Scopes)
-            .Must(scopes =>
+        RuleFor(x => x)
+            .Must(y =>
             {
-                return scopes.Any() && 
+                var scopes = y.Scopes;
+                return y.IsAllEnvs || (scopes.Any() && 
                        scopes.All(scope => !string.IsNullOrWhiteSpace(scope.Id) && 
                                            !string.IsNullOrWhiteSpace(scope.ProjectId) && 
-                                           scope.EnvIds.Any());   
+                                           scope.EnvIds.Any()));   
             })
             .WithErrorCode(ErrorCodes.RelayProxyScopeInvalid);
         
@@ -74,7 +77,7 @@ public class CreateRelayProxyHandler : IRequestHandler<CreateRelayProxy, RelayPr
         }
 
         var relayProxy =
-            new RelayProxy(request.OrganizationId, request.Name, request.Description, request.Scopes, request.Agents);
+            new RelayProxy(request.OrganizationId, request.Name, request.Description, request.IsAllEnvs, request.Scopes, request.Agents);
 
         await _service.AddOneAsync(relayProxy);
 

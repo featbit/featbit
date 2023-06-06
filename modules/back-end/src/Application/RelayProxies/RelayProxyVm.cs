@@ -11,7 +11,9 @@ public class RelayProxyVm
     public string Key { get; set; }
 
     public string Description { get; set; }
-    
+
+    public bool IsAllEnvs { get; set; }
+
     public IEnumerable<RelayProxyScope> Scopes { get; set; }
     
     public IEnumerable<RelayProxyAgent> Agents { get; set; }

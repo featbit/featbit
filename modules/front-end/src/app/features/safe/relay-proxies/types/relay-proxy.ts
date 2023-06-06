@@ -45,6 +45,7 @@ export class RelayProxy {
     public id: string,
     public name: string,
     public description: string,
+    public isAllEnvs: boolean,
     public scopes: RelayProxyScope[],
     public agents: RelayProxyAgent[],
     public key?: string) {
