@@ -40,13 +40,14 @@
 [Try FeatBit online](https://tryitonline.featbit.co) to quickly understand a feature flag management tool:
 
 1. Get a glimpse of what a feature flag management tool looks like.
-2. Learn how to efficiently implement a feature flag in your program using the following C# code:
-    ```csharp
-      // You can set featureFlags["feature-a"] to true 
-      // for 30% of users in FeatBit's portal
-      if(featureFlags["feature-a"] == true)
-          RunFeatureA();
-    ```
+2. Learn how to efficiently implement a feature flag in your program using code like this:
+```javascript
+// You can set featureFlags["feature-a"] to true
+// for 30% of users in FeatBit's portal
+if (featureFlags["feature-a"] == true) {
+  RunFeatureA();
+}
+```
 3. Learn how to release a feature gradually and rollback the feature immediately if necessary.
 
 The video below demonstrates how to get started with FeatBit.
