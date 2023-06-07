@@ -42,8 +42,7 @@
 1. Get a glimpse of what a feature flag management tool looks like.
 2. Learn how to efficiently implement a feature flag in your program using code like this:
 ```csharp
-// You can set featureFlags["feature-a"] to true 
-// for 30% of users in FeatBit's portal
+// You can set featureFlags["feature-a"] to true for 30% of users in FeatBit's portal
 if(featureFlags["feature-a"] == true)
   RunFeatureA();
 ```
