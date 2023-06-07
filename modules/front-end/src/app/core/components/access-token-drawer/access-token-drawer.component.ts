@@ -10,11 +10,11 @@ import {
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
 import {
+  ResourceType,
   EffectEnum,
   generalResourceRNPattern,
   permissionActions,
-  ResourceTypeAccount, ResourceTypeFlag,
-  ResourceTypeIAM
+  ResourceTypeFlag, ResourceTypeSegment
 } from "@shared/policy";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard, uuidv4 } from "@utils/index";
@@ -22,11 +22,6 @@ import {
   preProcessPermissions,
   IPermissionStatementGroup, postProcessPermissions
 } from "@features/safe/integrations/access-tokens/types/permission-helper";
-import {
-  ResourceType, ResourceTypeAccessToken,
-  ResourceTypeEnv,
-  ResourceTypeProject
-} from "@shared/policy";
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 
 @Component({
@@ -40,7 +35,8 @@ export class AccessTokenDrawerComponent {
 
   // This property is used to define the order of displaying the resource types, it also defines the resource types applicable to OPEN API
   resourceTypes: ResourceType[] = [
-    ResourceTypeFlag
+    ResourceTypeFlag,
+    ResourceTypeSegment
   ];
 
   authorizedResourceTypes: ResourceType[] = [];
