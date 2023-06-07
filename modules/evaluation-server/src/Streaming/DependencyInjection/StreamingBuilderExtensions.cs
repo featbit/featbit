@@ -46,9 +46,9 @@ public static class StreamingBuilderExtensions
         return builder;
     }
 
-    public static IStreamingBuilder UseFakeStore(this IStreamingBuilder builder)
+    public static IStreamingBuilder UseStore<TStoreType>(this IStreamingBuilder builder) where TStoreType : IStore
     {
-        builder.Services.AddSingleton<IStore, FakeStore>();
+        builder.Services.AddSingleton(typeof(IStore), typeof(TStoreType));
 
         return builder;
     }

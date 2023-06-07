@@ -1,3 +1,4 @@
+using Infrastructure.Fakes;
 using Infrastructure.Redis;
 using Streaming.DependencyInjection;
 
@@ -32,7 +33,7 @@ public static class ServicesRegister
         var streamingBuilder = services.AddStreamingCore();
         if (builder.Environment.IsEnvironment("IntegrationTests"))
         {
-            streamingBuilder.UseFakeStore().UseNullMessageQueue();
+            streamingBuilder.UseStore<FakeStore>().UseNullMessageQueue();
         }
         else
         {
