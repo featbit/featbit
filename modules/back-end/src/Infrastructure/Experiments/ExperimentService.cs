@@ -311,7 +311,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
     public async Task<IEnumerable<ExperimentStatusCountVm>> GetStatusCountAsync(Guid envId)
     {
         var query = Queryable
-            .Where(x => !x.IsArchived)
+            .Where(x => x.EnvId == envId && !x.IsArchived)
             .GroupBy(expt => expt.Status)
             .Select(group => new ExperimentStatusCountVm
             {
