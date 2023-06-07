@@ -1,17 +1,15 @@
 using Domain;
-using Domain.Messages;
-using Microsoft.Extensions.Internal;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Streaming.Connections;
-using Streaming.Consumers;
 using Streaming.Messages;
 using Streaming.Services;
 
-namespace Streaming;
+namespace Streaming.DependencyInjection;
 
-public static class ConfigureServices
+public static class StreamingServiceCollectionExtensions
 {
-    public static IServiceCollection AddStreamingCore(this IServiceCollection services)
+    public static IStreamingBuilder AddStreamingCore(this IServiceCollection services)
     {
         // system clock
         services.AddSingleton<ISystemClock, SystemClock>();
@@ -32,11 +30,6 @@ public static class ConfigureServices
             .AddTransient<IMessageHandler, EchoMessageHandler>()
             .AddTransient<IMessageHandler, DataSyncMessageHandler>();
 
-        // message consumers
-        services
-            .AddSingleton<IMessageConsumer, FeatureFlagChangeMessageConsumer>()
-            .AddSingleton<IMessageConsumer, SegmentChangeMessageConsumer>();
-
-        return services;
+        return new StreamingBuilder(services);
     }
 }

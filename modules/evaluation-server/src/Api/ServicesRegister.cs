@@ -1,6 +1,5 @@
-using Infrastructure;
 using Infrastructure.Redis;
-using Streaming;
+using Streaming.DependencyInjection;
 
 namespace Api;
 
@@ -29,33 +28,26 @@ public static class ServicesRegister
                 .AllowAnyMethod();
         }));
 
-        // add streaming core
-        services.AddStreamingCore();
-
-        // add store and message queue
+        // build streaming service
+        var streamingBuilder = services.AddStreamingCore();
         if (builder.Environment.IsEnvironment("IntegrationTests"))
         {
-            // for integration tests, use faked services
-            services
-                .AddFakeStore()
-                .AddFakeMessageQueue();
+            streamingBuilder.UseFakeStore().UseNullMessageQueue();
         }
         else
         {
-            // redis store
-            services.AddRedisStore(options => configuration.GetSection(RedisOptions.Redis).Bind(options));
+            streamingBuilder.UseRedisStore(options => configuration.GetSection(RedisOptions.Redis).Bind(options));
 
-            // message queue
             var isProVersion = configuration["IS_PRO"];
             if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
             {
                 // use kafka as message queue in pro version
-                services.AddKafkaMessageQueue();
+                streamingBuilder.UseKafkaMessageQueue();
             }
             else
             {
-                // use redis as message queue
-                services.AddRedisMessageQueue();
+                // use redis as message queue in standard version
+                streamingBuilder.UseRedisMessageQueue();
             }
         }
 

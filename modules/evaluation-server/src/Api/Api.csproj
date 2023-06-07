@@ -10,7 +10,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Streaming\Streaming.csproj" />
-      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
