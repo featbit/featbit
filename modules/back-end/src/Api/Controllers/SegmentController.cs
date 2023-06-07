@@ -3,7 +3,6 @@ using Api.Authentication;
 using Api.Authorization;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
-using Application.FeatureFlags;
 using Application.Segments;
 using Domain.Segments;
 using Microsoft.AspNetCore.JsonPatch;
@@ -55,7 +54,7 @@ public class SegmentController : ApiControllerBase
         var segments = await Mediator.Send(request);
         return Ok(segments);
     }
-    
+
     [HttpGet("by-ids")]
     public async Task<ApiResponse<IEnumerable<Segment>>> GetByIdsAsync([FromQuery] Guid[] ids)
     {
@@ -83,7 +82,7 @@ public class SegmentController : ApiControllerBase
         var segment = await Mediator.Send(request);
         return Ok(segment);
     }
-    
+
     [HttpPut("{id:guid}")]
     public async Task<ApiResponse<Segment>> UpdateAsync(Guid id, UpdateSegment request)
     {
@@ -114,7 +113,7 @@ public class SegmentController : ApiControllerBase
         var result = await Mediator.Send(request);
         return result.Success ? Ok(true) : Error<bool>(result.Message);
     }
-    
+
     /// <summary>
     /// Archive a segment
     /// </summary>
@@ -163,7 +162,7 @@ public class SegmentController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
+
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid envId, string name)
     {
@@ -176,7 +175,7 @@ public class SegmentController : ApiControllerBase
         var isNameUsed = await Mediator.Send(request);
         return Ok(isNameUsed);
     }
-    
+
     [HttpGet]
     [Route("{id:guid}/flag-references")]
     public async Task<ApiResponse<IEnumerable<FlagReference>>> GetFlagReferencesAsync(Guid envId, Guid id)

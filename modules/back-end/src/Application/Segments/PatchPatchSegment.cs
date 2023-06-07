@@ -1,9 +1,9 @@
-using Application.Segments;
-using Application.Users;
-using Microsoft.AspNetCore.JsonPatch;
 using Domain.AuditLogs;
+using Application.Users;
+using Application.Bases.Models;
+using Microsoft.AspNetCore.JsonPatch;
 
-namespace Application.FeatureFlags;
+namespace Application.Segments;
 
 public class PatchSegment : IRequest<PatchResult>
 {
@@ -43,7 +43,7 @@ public class PatchSegmentHandler : IRequestHandler<PatchSegment, PatchResult>
         {
             return PatchResult.Fail(error);
         }
-        
+
         segment.UpdatedAt = DateTime.UtcNow;
 
         dataChange.To(segment);
