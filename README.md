@@ -99,11 +99,11 @@ To check the state of a feature flag in your code, you just need a simple functi
 ```csharp
 if (featBit.BoolVariation("feature-a", user)) 
 {
-  // run new feature
+    // Feature A is running because the flag returned true
 } 
 else 
 {
-  // run old version or do nothing
+    // run old version or do nothing, because the flag returned true
 }
 ```
 
