@@ -1,7 +1,6 @@
 
 ![image](https://github.com/featbit/featbit/assets/68597908/ff7a611e-9504-4f99-bf11-8ba9bccea696)
 
-
 <div id="header" align="center">
   <div id="badges">
   <a href="https://github.com/featbit/featbit/blob/main/LICENSE">
@@ -37,20 +36,7 @@
 
 ## Try FeatBit Online
 
-[Try FeatBit online](https://tryitonline.featbit.co) to quickly understand a feature flag management tool:
-
-1. Get a glimpse of what a feature flag management tool looks like.
-2. Learn how to efficiently implement a feature flag in your program using code like this:
-```javascript
-// You can set featureFlags["feature-a"] to true
-// for 30% of users in FeatBit's portal
-if (featureFlags["feature-a"] == true) {
-  RunFeatureA();
-}
-```
-3. Learn how to release a feature gradually and rollback the feature immediately if necessary.
-
-The video below demonstrates how to get started with FeatBit.
+Try FeatBit immediately with [our online demo](https://tryitonline.featbit.co). The video below shows you how to get started quickly.
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
@@ -72,22 +58,15 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
   <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
 </a>
 
+## Get started in 3 steps
 
-## Self-Hosting FeatBit
+### 1. Start FeatBit
 
-[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
-
-To self-host FeatBit with Docker, follow these steps:
-
-1. Clone the repository to your server or local machine:
+To self-host FeatBit with Docker, Run this script:
 
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
-```
-2. Start the services using Docker Compose:
-
-```
 docker compose up -d
 ```
 
@@ -98,6 +77,34 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 
 > **Note**
 > By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
+
+### 2. Connect an SDK
+
+Find your preferred SDK in our list of [official SDKs](https://featbit.gitbook.io/sdks) and import it into your project. Follow the setup guides for your specific SDK.
+
+You can also learn how to connect an SDK in the "Getting Started" section after logging in to the Portal for the first time.
+
+![image](https://github.com/featbit/featbit/assets/68597908/f6fe85dd-0753-4896-8f84-fa17c0037c21)
+
+### 3. Check a feature flag
+
+To check the state of a feature flag in your code, you just need a simple function call to verify the expected value. Here's how it might look in C#:
+
+```csharp
+var user = FbUser.Builder("tester-id").Name("tester").Build();
+if (featbit.BoolVariation("user-new-algorithm", user, defaultValue: false))
+{
+    // run new algorithm
+}
+else
+{
+    // run old algorithm
+}
+```
+
+## Configure and run FeatBit anywhere
+
+The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/docs/installation/full-installation), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/docs/featbit-agent/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
 
 ## Documentation & Community
 
@@ -135,11 +142,11 @@ FeatBit offers a range of features including:
 
 - **[Pro Solution for Big Data](https://docs.featbit.co/docs/tech-stack/standard-vs.-professional)**, a [professional version](https://docs.featbit.co/docs/tech-stack/architecture-professional) tailored for teams and companies to accommodate in excess of millions of daily online users with feature usage, custom events, and A/B testing insights.
 
-- **Relay Proxy/Agent**: Host a feature flag service in your customers' private environments or reduce network latency for your end users.
+- **[Relay Proxy/Agent](https://docs.featbit.co/docs/featbit-agent/featbit-agent)**: Host a feature flag service in your customers' private environments or reduce network latency for your end users.
 
 - **Integrations** (experimental features): Export data to third-party system monitoring services, data analytics services, workflow tools, or any other tools that can optimize your entire workflow.
 
-- **ChatGPT Tech Debt Reduction** (experimental features): Utilize ChatGPT4 and FeatBit's VSCode extension to minimize technical debt associated with feature flagging.
+- **[ChatGPT Tech Debt Reduction](https://github.com/featbit/featbit/blob/doc/readme/llm/README.md)** (experimental features): Utilize ChatGPT4 and FeatBit's VSCode extension to minimize technical debt associated with feature flagging.
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
@@ -189,4 +196,3 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 ## License
 
 FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
-
