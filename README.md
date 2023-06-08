@@ -153,7 +153,7 @@ FeatBit offers a range of features including:
 
 - **[Pro Solution for Big Data](https://docs.featbit.co/docs/tech-stack/standard-vs.-professional)**, a [professional version](https://docs.featbit.co/docs/tech-stack/architecture-professional) tailored for teams and companies to accommodate in excess of millions of daily online users with feature usage, custom events, and A/B testing insights.
 
-- **Relay Proxy/Agent**: Host a feature flag service in your customers' private environments or reduce network latency for your end users.
+- **[Relay Proxy/Agent](https://docs.featbit.co/docs/featbit-agent/featbit-agent)**: Host a feature flag service in your customers' private environments or reduce network latency for your end users.
 
 - **Integrations** (experimental features): Export data to third-party system monitoring services, data analytics services, workflow tools, or any other tools that can optimize your entire workflow.
 
