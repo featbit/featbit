@@ -87,9 +87,27 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 
 Find your preferred SDK in our list of [official SDKs](https://featbit.gitbook.io/sdks) and import it into your project. Follow the setup guides for your specific SDK.
 
-You can also learn how to Connect an SDK in the Getting Started section after the first time you log in to the Portal.
+You can also learn how to connect an SDK in the "Getting Started" section after logging in to the Portal for the first time.
+
+![image](https://github.com/featbit/featbit/assets/68597908/f6fe85dd-0753-4896-8f84-fa17c0037c21)
 
 
+### 3. Check a feature flag
+
+To check the state of a feature flag in your code, you just need a simple function call to verify the expected value. Here's how it might look in C#:
+
+```csharp
+if (featBit.BoolVariation("feature-a")) {
+  // run new feature
+} 
+else {
+  // run old version or do nothing
+}
+```
+
+### Configure and run FeatBit anywhere
+
+The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing Unleash for your own environment, check out the documentation for getting started with self-managed deployments, Unleash configuration options, or running Unleash locally via docker.
 
 ## Documentation & Community
 
