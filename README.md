@@ -60,7 +60,7 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 </a>
 
 
-## Self-Hosting FeatBit
+## Get started in 3 steps
 
 [Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
 
