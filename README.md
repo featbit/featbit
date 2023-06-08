@@ -97,13 +97,14 @@ You can also learn how to connect an SDK in the "Getting Started" section after 
 To check the state of a feature flag in your code, you just need a simple function call to verify the expected value. Here's how it might look in C#:
 
 ```csharp
-if (featBit.BoolVariation("feature-a", user)) 
+var user = FbUser.Builder("tester-id").Name("tester").Build();
+if (featbit.BoolVariation("user-new-algorithm", user, defaultValue: false))
 {
-    // Feature A is running because the flag returned true
-} 
-else 
+    // run new algorithm
+}
+else
 {
-    // run old version or do nothing, because the flag returned true
+    // run old algorithm
 }
 ```
 
@@ -111,9 +112,9 @@ else
 
 The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/docs/installation/full-installation), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/docs/featbit-agent/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
 
-<div align="center">
+<!-- <div align="center">
 <img src="https://github.com/featbit/featbit/assets/68597908/0068d041-0c49-4a5e-a308-28732cb98abe" width="600px" align="center" />
-  </div>
+  </div> -->
 
 
 ## Documentation & Community
