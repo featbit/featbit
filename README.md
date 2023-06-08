@@ -64,7 +64,7 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 
 [Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
 
-### 1. Start Unleash
+### 1. Start FeatBit
 
 To self-host FeatBit with Docker, Run this script:
 
@@ -105,9 +105,11 @@ else {
 }
 ```
 
-### Configure and run FeatBit anywhere
+## Configure and run FeatBit anywhere
 
-The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing Unleash for your own environment, check out the documentation for getting started with self-managed deployments, Unleash configuration options, or running Unleash locally via docker.
+The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/docs/installation/full-installation), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/docs/featbit-agent/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
+
+![image](https://github.com/featbit/featbit/assets/68597908/0068d041-0c49-4a5e-a308-28732cb98abe)
 
 ## Documentation & Community
 
