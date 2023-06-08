@@ -62,7 +62,7 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 
 ## Get started in 3 steps
 
-[Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
+<!-- [Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes) -->
 
 ### 1. Start FeatBit
 
@@ -97,10 +97,12 @@ You can also learn how to connect an SDK in the "Getting Started" section after 
 To check the state of a feature flag in your code, you just need a simple function call to verify the expected value. Here's how it might look in C#:
 
 ```csharp
-if (featBit.BoolVariation("feature-a")) {
+if (featBit.BoolVariation("feature-a", user)) 
+{
   // run new feature
 } 
-else {
+else 
+{
   // run old version or do nothing
 }
 ```
