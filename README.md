@@ -157,7 +157,7 @@ FeatBit offers a range of features including:
 
 - **Integrations** (experimental features): Export data to third-party system monitoring services, data analytics services, workflow tools, or any other tools that can optimize your entire workflow.
 
-- **ChatGPT Tech Debt Reduction** (experimental features): Utilize ChatGPT4 and FeatBit's VSCode extension to minimize technical debt associated with feature flagging.
+- **[ChatGPT Tech Debt Reduction](https://github.com/featbit/featbit/blob/doc/readme/llm/README.md)** (experimental features): Utilize ChatGPT4 and FeatBit's VSCode extension to minimize technical debt associated with feature flagging.
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
 
