@@ -1,7 +1,6 @@
 
 ![image](https://github.com/featbit/featbit/assets/68597908/ff7a611e-9504-4f99-bf11-8ba9bccea696)
 
-
 <div id="header" align="center">
   <div id="badges">
   <a href="https://github.com/featbit/featbit/blob/main/LICENSE">
@@ -59,10 +58,7 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
   <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
 </a>
 
-
 ## Get started in 3 steps
-
-<!-- [Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes) -->
 
 ### 1. Start FeatBit
 
@@ -82,7 +78,6 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 > **Note**
 > By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
 
-
 ### 2. Connect an SDK
 
 Find your preferred SDK in our list of [official SDKs](https://featbit.gitbook.io/sdks) and import it into your project. Follow the setup guides for your specific SDK.
@@ -90,7 +85,6 @@ Find your preferred SDK in our list of [official SDKs](https://featbit.gitbook.i
 You can also learn how to connect an SDK in the "Getting Started" section after logging in to the Portal for the first time.
 
 ![image](https://github.com/featbit/featbit/assets/68597908/f6fe85dd-0753-4896-8f84-fa17c0037c21)
-
 
 ### 3. Check a feature flag
 
@@ -111,11 +105,6 @@ else
 ## Configure and run FeatBit anywhere
 
 The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/docs/installation/full-installation), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/docs/featbit-agent/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
-
-<!-- <div align="center">
-<img src="https://github.com/featbit/featbit/assets/68597908/0068d041-0c49-4a5e-a308-28732cb98abe" width="600px" align="center" />
-  </div> -->
-
 
 ## Documentation & Community
 
@@ -207,4 +196,3 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 ## License
 
 FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
-
