@@ -37,20 +37,7 @@
 
 ## Try FeatBit Online
 
-[Try FeatBit online](https://tryitonline.featbit.co) to quickly understand a feature flag management tool:
-
-1. Get a glimpse of what a feature flag management tool looks like.
-2. Learn how to efficiently implement a feature flag in your program using code like this:
-```javascript
-// You can set featureFlags["feature-a"] to true
-// for 30% of users in FeatBit's portal
-if (featureFlags["feature-a"] == true) {
-  RunFeatureA();
-}
-```
-3. Learn how to release a feature gradually and rollback the feature immediately if necessary.
-
-The video below demonstrates how to get started with FeatBit.
+[Open online Demo to Try FeatBit immediately](https://tryitonline.featbit.co). The video below demonstrates how to get started with FeatBit online Demo.
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
@@ -77,17 +64,13 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 
 [Self-hosting Guide](https://docs.featbit.co/docs/installation/full-installation) | [K8s Manifests](https://github.com/featbit/featbit/tree/main/kubernetes)
 
-To self-host FeatBit with Docker, follow these steps:
+### 1. Start Unleash
 
-1. Clone the repository to your server or local machine:
+To self-host FeatBit with Docker, Run this script:
 
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
-```
-2. Start the services using Docker Compose:
-
-```
 docker compose up -d
 ```
 
@@ -98,6 +81,15 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 
 > **Note**
 > By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
+
+
+### 2. Connect an SDK
+
+Find your preferred SDK in our list of [official SDKs](https://featbit.gitbook.io/sdks) and import it into your project. Follow the setup guides for your specific SDK.
+
+You can also learn how to Connect an SDK in the Getting Started section after the first time you log in to the Portal.
+
+
 
 ## Documentation & Community
 
