@@ -41,9 +41,15 @@
                 {{ item.name }}
               </td>
               <td>{{item.key}}</td>
-              <td>
-                {{item.healthyAgentCount}}/{{item.agents.length}} <span i18n="@@common.healthy">Healthy</span>
-                <button nz-button nzSize="small" nzType="link" i18n="@@relay-proxy.view-agents-status" (click)="showDetailDrawer(item)">View agents status</button>
+              <td (click)="showDetailDrawer(item)">
+                <div class="status">
+                  <span [class]="item.healthyStatus">
+                    {{item.healthyAgentCount}}/{{item.agents.length}} <span i18n="@@common.healthy">Healthy</span>
+                  </span>
+                  <i nz-icon nzType="question-circle" nzTheme="outline"
+                     i18n-nz-tooltip="@@relay-proxy.click-to-view-agents-status"
+                     nz-tooltip="Click to view agent status"></i>
+                </div>
               </td>
               <td>
                 <ng-container *ngIf="!canMangeRelayProxies">

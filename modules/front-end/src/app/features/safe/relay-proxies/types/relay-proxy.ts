@@ -25,6 +25,12 @@ export enum AgentStatusEnum {
   Loading = 'loading'
 }
 
+export enum ProxyStatusEnum {
+  Healthy = 'proxy-healthy', // all agents are healthy
+  Sick = 'proxy-sick', // at least one but not all the agents are unhealthy
+  Unhealthy = 'proxy-unhealthy', // all agents are unhealthy
+}
+
 export class RelayProxyScope {
   id: string;
   projectId: string;
@@ -50,7 +56,18 @@ export class RelayProxy {
     public agents: RelayProxyAgent[],
     public key?: string) {
   }
-  get healthyAgentCount() {
+  get healthyAgentCount(): number {
     return this.agents.filter((agent) => agent.status === AgentStatusEnum.Healthy).length;
+  }
+
+  get healthyStatus(): ProxyStatusEnum {
+    switch (this.agents.length - this.healthyAgentCount) {
+      case 0:
+        return ProxyStatusEnum.Healthy;
+      case this.agents.length:
+        return ProxyStatusEnum.Unhealthy;
+      default:
+        return ProxyStatusEnum.Sick;
+    }
   }
 }
