@@ -149,7 +149,7 @@
                       </div>
                       <button class="status-wrapper" nz-button nzSize="small" nzType="link"
                            [disabled]="agent.value['host'] === ''"
-                           *ngIf="agentStatusDict[agent.value['id']] === agentStatusNone"
+                           *ngIf="isEditing && agentStatusDict[agent.value['id']] === agentStatusNone"
                            (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
                         <span i18n="@@common.check">Check</span>
                       </button>
@@ -160,16 +160,16 @@
                     <td style="text-align: center">
                       <ng-container *ngIf="!readonly">
                         <span *ngIf="isEditing">
-                        <i *ngIf="agent.value['isNew'] || agent.controls['host'].dirty" nz-icon nzType="question-circle" nzTheme="outline"
-                           i18n-nz-tooltip="@@relay-proxy.save-to-sync-to-agent"
-                           nz-tooltip="The agent setting must be saved to enable the synchronization"></i>
-                          <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
-                                  (click)="sync(i)"
-                                  [nzLoading]="false"
-                                  [disabled]="agent.value['isNew'] || agent.controls['host'].dirty"
-                                  i18n="@@common.sync"
-                                  i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
-                                  nz-tooltip="Synchronize the flags and segments within the scopes to FeatBit agent">Sync</button>
+                          <i *ngIf="agent.value['isNew'] || agent.controls['host'].dirty" nz-icon nzType="question-circle" nzTheme="outline"
+                             i18n-nz-tooltip="@@relay-proxy.save-to-sync-to-agent"
+                             nz-tooltip="The agent setting must be saved to enable the synchronization"></i>
+                            <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
+                                    (click)="sync(i)"
+                                    [nzLoading]="false"
+                                    [disabled]="agent.value['isNew'] || agent.controls['host'].dirty"
+                                    i18n="@@common.sync"
+                                    i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
+                                    nz-tooltip="Synchronize the flags and segments within the scopes to FeatBit agent">Sync</button>
                         </span>
                         <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeAgent(i)" i18n="@@common.remove">Remove</button>
                       </ng-container>

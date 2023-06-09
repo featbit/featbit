@@ -75,7 +75,7 @@ export class IndexComponent implements OnInit {
   fetchRelayProxiesStatus(relayProxies: RelayProxy[]) {
     relayProxies.forEach((relayProxy) => {
       relayProxy.agents.forEach((agent) => {
-        this.relayProxyService.getAgentStatus(agent.id, agent.host).subscribe({
+        this.relayProxyService.getAgentStatus(relayProxy.id, agent.host).subscribe({
           next: (res) => {
             agent.status = AgentStatusEnum.Healthy; // Replace with the real status
           },
