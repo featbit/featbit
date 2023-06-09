@@ -13,9 +13,9 @@ public class UpdateRelayProxy : IRequest<bool>
 
     public bool IsAllEnvs { get; set; }
 
-    public IEnumerable<RelayProxyScope> Scopes { get; set; }
+    public IEnumerable<Scope> Scopes { get; set; }
     
-    public IEnumerable<RelayProxyAgent> Agents { get; set; }
+    public IEnumerable<Agent> Agents { get; set; }
 }
 
 public class UpdateRelayProxyValidator : AbstractValidator<UpdateRelayProxy>

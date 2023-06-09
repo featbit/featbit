@@ -2,5 +2,5 @@
 
 public class SyncResultVm
 {
-    public DateTime SyncAt { get; set; }
+    public DateTime? SyncAt { get; set; }
 }

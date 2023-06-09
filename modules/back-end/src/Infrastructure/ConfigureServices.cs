@@ -62,6 +62,7 @@ public static class ConfigureServices
         {
             httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]);
         });
+        services.AddHttpClient<IAgentService, AgentService>();
 
         // custom services
         services.AddScoped<IUserService, UserService>();

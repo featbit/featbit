@@ -66,14 +66,15 @@ public class RelayProxyController : ApiControllerBase
     }
     
     [HttpGet("agent-status")]
-    public async Task<ApiResponse<AgentStatusVm>> GetAgentStatusAsync([FromQuery] string host)
+    public async Task<ApiResponse<ProxyAgentStatusVm>> GetAgentStatusAsync([FromQuery] string host, [FromQuery] Guid relayProxyId)
     {
-        var status = new AgentStatusVm
+        var request = new GetAgentStatus
         {
-            Name = host,
-            Sex = "blue",
-            Hello = "world"
+            RelayProxyId = relayProxyId,
+            Host = host
         };
+        
+        var status = await Mediator.Send(request);
         
         return Ok(status);
     }

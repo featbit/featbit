@@ -36,8 +36,9 @@ export class RelayProxyService {
     return this.http.delete<boolean>(`${this.baseUrl}/${id}`);
   }
 
-  getAgentStatus(host: string): Observable<any> {
+  getAgentStatus(relayProxyId: string, host: string): Observable<any> {
     const queryParam = {
+      relayProxyId,
       host
     };
 

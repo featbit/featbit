@@ -1,6 +1,6 @@
 ﻿namespace Domain.RelayProxies;
 
-public class RelayProxyAgent
+public class Agent
 {
     public string Id { get; set; }
 
@@ -9,4 +9,9 @@ public class RelayProxyAgent
     public string Host { get; set; }
 
     public DateTime? SyncAt { get; set; }
+
+    public void Synced()
+    {
+        SyncAt = DateTime.UtcNow;
+    }
 }

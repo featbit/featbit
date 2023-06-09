@@ -104,14 +104,14 @@ export class RelayProxyDrawerComponent implements OnInit {
 
     let agentArrayForm: FormArray<any> = this.fb.array([]);
     if (relayProxy.agents.length > 0) {
-      agentArrayForm = this.fb.array(relayProxy.agents.map((x, index) => {
-        this.agentStatusDict[x.id] = AgentStatusEnum.None;
-        this.getAgentStatusInfoAsync(x.id, x.host);
+      agentArrayForm = this.fb.array(relayProxy.agents.map((agent) => {
+        this.agentStatusDict[agent.id] = AgentStatusEnum.None;
+        this.getAgentStatusInfoAsync(agent.id, agent.host);
         return this.fb.group({
-          id: [x.id, Validators.required],
-          name: [x.name, Validators.required],
-          host: [x.host, Validators.required],
-          syncAt: [x.syncAt], // this is only for UI to display, the value won't be posted to server
+          id: [agent.id, Validators.required],
+          name: [agent.name, Validators.required],
+          host: [agent.host, Validators.required],
+          syncAt: [agent.syncAt], // this is only for UI to display, the value won't be posted to server
           isNew: [false, Validators.required] // this is only for UI to display, the value won't be posted to server
         });
       }));
@@ -172,7 +172,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.refreshFormArray('agents');
   }
 
-  async getAgentStatusInfo(id: string, host: string) {
+  async getAgentStatusInfo(agentId: string, host: string) {
     if (this.readonly) {
       this.message.warning($localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
       return;
@@ -183,22 +183,22 @@ export class RelayProxyDrawerComponent implements OnInit {
       return;
     }
 
-    await this.getAgentStatusInfoAsync(id, host);
+    await this.getAgentStatusInfoAsync(agentId, host);
     this.openAgentStatusModal();
   }
 
-  async getAgentStatusInfoAsync(id: string, host: string): Promise<any> {
-    this.agentStatusDict[id] = AgentStatusEnum.Loading;
+  async getAgentStatusInfoAsync(agentId: string, host: string): Promise<any> {
+    this.agentStatusDict[agentId] = AgentStatusEnum.Loading;
 
     return new Promise((resolve, reject) => {
-      this.relayProxyService.getAgentStatus(host).subscribe({
+      this.relayProxyService.getAgentStatus(this._relayProxy.id, host).subscribe({
         next: (res) => {
-          this.agentStatusDict[id] = AgentStatusEnum.Healthy; // TODO set the real status
+          this.agentStatusDict[agentId] = AgentStatusEnum.Healthy; // TODO set the real status
           this.agentStatus = JSON.stringify(res, null, 2);
           resolve(null);
         },
         error: (_) => {
-          this.agentStatusDict[id] = AgentStatusEnum.Unhealthy;
+          this.agentStatusDict[agentId] = AgentStatusEnum.Unhealthy;
           this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
           reject();
         }
@@ -350,8 +350,8 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.agentSyncProcessingDic[id] = true;
 
     this.relayProxyService.syncToAgent(this._relayProxy.id, id).subscribe({
-      next: (_) => {
-        agent.patchValue({ syncAt: new Date().getTime() });
+      next: (res) => {
+        agent.patchValue({ syncAt: res.syncAt });
         this.message.success($localize`:@@common.operation-success:Operation succeeded`);
       },
       error: (_) => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`),
