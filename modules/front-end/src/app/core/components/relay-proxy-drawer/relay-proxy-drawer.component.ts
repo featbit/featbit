@@ -193,12 +193,12 @@ export class RelayProxyDrawerComponent implements OnInit {
     return new Promise((resolve, reject) => {
       this.relayProxyService.getAgentStatus(this._relayProxy.id, host).subscribe({
         next: (res) => {
-          this.agentStatusDict[agentId] = AgentStatusEnum.Healthy; // TODO set the real status
+          this.agentStatusDict[agentId] = res.type;
           this.agentStatus = JSON.stringify(res, null, 2);
           resolve(null);
         },
         error: (_) => {
-          this.agentStatusDict[agentId] = AgentStatusEnum.Unhealthy;
+          this.agentStatusDict[agentId] = AgentStatusEnum.None;
           this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
           reject();
         }
