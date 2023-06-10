@@ -119,7 +119,7 @@ db.Policies.insertOne(
                 ],
                 resources: ["access-token/*"]
             },
-			{
+            {
                 _id: getUUIDString(),
                 resourceType: "relay-proxy",
                 effect: "allow",
@@ -181,7 +181,7 @@ db.Policies.insertOne(
                 ],
                 resources: ["access-token/*"]
             },
-			{
+            {
                 _id: getUUIDString(),
                 resourceType: "relay-proxy",
                 effect: "allow",
