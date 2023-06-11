@@ -37,16 +37,11 @@ export class RelayProxyService {
   }
 
   getAgentStatus(relayProxyId: string, host: string): Observable<any> {
-    const queryParam = {
-      relayProxyId,
-      host
-    };
-
-    const url = `${this.baseUrl}/agent-status`;
+    const url = `${this.baseUrl}/${relayProxyId}/agent-status`;
 
     return this.http.get<any>(
       url,
-      {params: new HttpParams({fromObject: queryParam})}
+      { params: { host } }
     );
   }
 
@@ -61,14 +56,14 @@ export class RelayProxyService {
   }
 
   update(payload: RelayProxy): Observable<boolean> {
-    const url = this.baseUrl;
-    return this.http.put<boolean>(url + `/${payload.id}`, payload);
+    const url = `${this.baseUrl}/${payload.id}`;
+
+    return this.http.put<boolean>(url, payload);
   }
 
   syncToAgent(relayProxyId: string, agentId: string): Observable<any> {
-    const url = `${this.baseUrl}/sync-to-agent`;
-    const param = { relayProxyId, agentId };
+    const url = `${this.baseUrl}/${relayProxyId}/agents/${agentId}/sync`;
 
-    return this.http.put(url, param);
+    return this.http.put(url, {});
   }
 }
