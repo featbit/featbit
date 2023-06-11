@@ -1,6 +1,6 @@
-﻿using System.Net.Http.Headers;
+﻿using Domain.RelayProxies;
 using System.Net.Http.Json;
-using Domain.RelayProxies;
+using Microsoft.Net.Http.Headers;
 
 namespace Infrastructure.RelayProxies;
 
@@ -12,24 +12,36 @@ public class AgentService : IAgentService
     {
         _httpClient = httpClient;
     }
-    
+
     public async Task<AgentStatus?> GetStatusAsync(string host, string key)
     {
-        _httpClient.BaseAddress = new Uri(host);
-        
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(key);
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{host}/api/public/proxy/status")
+        {
+            Headers =
+            {
+                { HeaderNames.Authorization, key }
+            }
+        };
 
-        return await _httpClient.GetFromJsonAsync<AgentStatus>("api/public/proxy/status");
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var status = await response.Content.ReadFromJsonAsync<AgentStatus>();
+        return status;
     }
 
-    public async Task SyncAsync(string host, string key, object payload)
+    public async Task BootstrapAsync(string host, string key, object payload)
     {
-        _httpClient.BaseAddress = new Uri(host);
-        
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(key);
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{host}/api/public/proxy/bootstrap")
+        {
+            Headers =
+            {
+                { HeaderNames.Authorization, key }
+            },
+            Content = JsonContent.Create(payload)
+        };
 
-        var response = await _httpClient.PostAsJsonAsync("api/public/proxy/bootstrap", payload);
-        
+        var response = await _httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
 }

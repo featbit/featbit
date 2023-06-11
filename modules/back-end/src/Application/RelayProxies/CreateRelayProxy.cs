@@ -1,17 +1,12 @@
-using System.Text.RegularExpressions;
-using Application.AccessTokens;
 using Application.Bases;
-using Application.Bases.Exceptions;
-using Application.Users;
-using Domain.AccessTokens;
 using Domain.RelayProxies;
 
 namespace Application.RelayProxies;
 
-public class CreateRelayProxy : IRequest<RelayProxyVm>
+public class CreateRelayProxy : IRequest<RelayProxy>
 {
     public Guid OrganizationId { get; set; }
-    
+
     public string Name { get; set; }
 
     public string Description { get; set; }
@@ -19,8 +14,13 @@ public class CreateRelayProxy : IRequest<RelayProxyVm>
     public bool IsAllEnvs { get; set; }
 
     public IEnumerable<Scope> Scopes { get; set; }
-    
+
     public IEnumerable<Agent> Agents { get; set; }
+
+    public RelayProxy AsRelayProxy()
+    {
+        return new RelayProxy(OrganizationId, Name, Description, IsAllEnvs, Scopes, Agents);
+    }
 }
 
 public class CreateAccessTokenValidator : AbstractValidator<CreateRelayProxy>
@@ -53,34 +53,20 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateRelayProxy>
     }
 }
 
-public class CreateRelayProxyHandler : IRequestHandler<CreateRelayProxy, RelayProxyVm>
+public class CreateRelayProxyHandler : IRequestHandler<CreateRelayProxy, RelayProxy>
 {
     private readonly IRelayProxyService _service;
-    private readonly IMapper _mapper;
 
-    public CreateRelayProxyHandler(
-        IRelayProxyService service,
-        IMapper mapper)
+    public CreateRelayProxyHandler(IRelayProxyService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
-    public async Task<RelayProxyVm> Handle(CreateRelayProxy request, CancellationToken cancellationToken)
+    public async Task<RelayProxy> Handle(CreateRelayProxy request, CancellationToken cancellationToken)
     {
-        var existed =
-            await _service.FindOneAsync(rp => string.Equals(rp.Name, request.Name, StringComparison.OrdinalIgnoreCase));
-        
-        if (existed != null)
-        {
-            throw new BusinessException(ErrorCodes.EntityExistsAlready);
-        }
-
-        var relayProxy =
-            new RelayProxy(request.OrganizationId, request.Name, request.Description, request.IsAllEnvs, request.Scopes, request.Agents);
-
+        var relayProxy = request.AsRelayProxy();
         await _service.AddOneAsync(relayProxy);
 
-        return _mapper.Map<RelayProxyVm>(relayProxy);
+        return relayProxy;
     }
 }

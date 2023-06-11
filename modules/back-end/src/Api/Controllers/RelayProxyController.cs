@@ -1,15 +1,14 @@
-﻿using Application.Bases.Models;
+﻿using Domain.RelayProxies;
+using Application.Bases.Models;
 using Application.RelayProxies;
-using Microsoft.Extensions.DependencyInjection.RelayProxies;
 
 namespace Api.Controllers;
-
 
 [Route("api/v{version:apiVersion}/relay-proxies")]
 public class RelayProxyController : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ApiResponse<PagedResult<RelayProxyVm>>> GetListAsync([FromQuery] RelayProxyFilter filter)
+    public async Task<ApiResponse<PagedResult<RelayProxy>>> GetListAsync([FromQuery] RelayProxyFilter filter)
     {
         var request = new GetRelayProxyList
         {
@@ -20,16 +19,16 @@ public class RelayProxyController : ApiControllerBase
         var relayProxies = await Mediator.Send(request);
         return Ok(relayProxies);
     }
-    
+
     [HttpPost]
-    public async Task<ApiResponse<RelayProxyVm>> CreateAsync(CreateRelayProxy request)
+    public async Task<ApiResponse<RelayProxy>> CreateAsync(CreateRelayProxy request)
     {
         request.OrganizationId = OrgId;
 
         var relayProxy = await Mediator.Send(request);
         return Ok(relayProxy);
     }
-    
+
     [HttpPut("{id:guid}")]
     public async Task<ApiResponse<bool>> UpdateAsync(Guid id, UpdateRelayProxy request)
     {
@@ -39,7 +38,7 @@ public class RelayProxyController : ApiControllerBase
 
         return Ok(relayProxy);
     }
-    
+
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(string name)
     {
@@ -52,7 +51,7 @@ public class RelayProxyController : ApiControllerBase
         var isNameUsed = await Mediator.Send(request);
         return Ok(isNameUsed);
     }
-    
+
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
@@ -64,23 +63,23 @@ public class RelayProxyController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
+
     [HttpGet("agent-status")]
-    public async Task<ApiResponse<ProxyAgentStatusVm>> GetAgentStatusAsync([FromQuery] string host, [FromQuery] Guid relayProxyId)
+    public async Task<ApiResponse<AgentStatus>> GetAgentStatusAsync(string host, Guid relayProxyId)
     {
         var request = new GetAgentStatus
         {
             RelayProxyId = relayProxyId,
             Host = host
         };
-        
+
         var status = await Mediator.Send(request);
-        
+
         return Ok(status);
     }
-    
+
     [HttpPut("sync-to-agent")]
-    public async Task<ApiResponse<SyncResultVm>> SyncToAgentAsync(SyncToAgent request)
+    public async Task<ApiResponse<SyncResult>> SyncToAgentAsync(SyncToAgent request)
     {
         var success = await Mediator.Send(request);
         return Ok(success);

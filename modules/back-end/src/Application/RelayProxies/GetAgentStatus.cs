@@ -1,13 +1,12 @@
 ﻿using Application.Bases;
-using Application.Bases.Exceptions;
-using Microsoft.Extensions.DependencyInjection.RelayProxies;
+using Domain.RelayProxies;
 
 namespace Application.RelayProxies;
 
-public class GetAgentStatus: IRequest<ProxyAgentStatusVm>
+public class GetAgentStatus : IRequest<AgentStatus>
 {
     public Guid RelayProxyId { get; set; }
-    
+
     public string Host { get; set; }
 }
 
@@ -23,33 +22,21 @@ public class GetAgentStatusValidator : AbstractValidator<GetAgentStatus>
     }
 }
 
-public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, ProxyAgentStatusVm>
+public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, AgentStatus>
 {
-    private readonly IRelayProxyService _service;
+    private readonly IRelayProxyService _relayProxyService;
     private readonly IAgentService _agentService;
-    private readonly IMapper _mapper;
 
-    public GetAgentStatusHandler(
-        IRelayProxyService service,
-        IAgentService agentService,
-        IMapper mapper)
+    public GetAgentStatusHandler(IRelayProxyService relayProxyService, IAgentService agentService)
     {
-        _service = service;
+        _relayProxyService = relayProxyService;
         _agentService = agentService;
-        _mapper = mapper;
     }
 
-    public async Task<ProxyAgentStatusVm> Handle(GetAgentStatus request, CancellationToken cancellationToken)
+    public async Task<AgentStatus> Handle(GetAgentStatus request, CancellationToken cancellationToken)
     {
-        var relayProxy = await _service.GetAsync(request.RelayProxyId);
-        
-        if (relayProxy == null)
-        {
-            throw new BusinessException(ErrorCodes.EntityNotExists);
-        }
-        
+        var relayProxy = await _relayProxyService.GetAsync(request.RelayProxyId);
         var status = await _agentService.GetStatusAsync(request.Host, relayProxy.Key);
-
-        return _mapper.Map<ProxyAgentStatusVm>(status);
+        return status;
     }
 }

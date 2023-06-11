@@ -1,37 +1,34 @@
+using Domain.RelayProxies;
 using Application.Bases.Models;
 
 namespace Application.RelayProxies;
 
-public class GetRelayProxyList : IRequest<PagedResult<RelayProxyVm>>
+public class GetRelayProxyList : IRequest<PagedResult<RelayProxy>>
 {
     public Guid OrganizationId { get; set; }
 
     public RelayProxyFilter Filter { get; set; }
 }
 
-public class GetRelayProxyListHandler : IRequestHandler<GetRelayProxyList, PagedResult<RelayProxyVm>>
+public class GetRelayProxyListHandler : IRequestHandler<GetRelayProxyList, PagedResult<RelayProxy>>
 {
     private readonly IRelayProxyService _service;
-    private readonly IMapper _mapper;
 
-    public GetRelayProxyListHandler(IRelayProxyService service, IMapper mapper)
+    public GetRelayProxyListHandler(IRelayProxyService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
-    public async Task<PagedResult<RelayProxyVm>> Handle(GetRelayProxyList request, CancellationToken cancellationToken)
+    public async Task<PagedResult<RelayProxy>> Handle(GetRelayProxyList request, CancellationToken cancellationToken)
     {
         var relayProxies =
             await _service.GetListAsync(request.OrganizationId, request.Filter);
-        
-        var replayProxyVms = _mapper.Map<PagedResult<RelayProxyVm>>(relayProxies);
-        
-        foreach (var relayProxy in replayProxyVms.Items)
+
+        foreach (var relayProxy in relayProxies.Items)
         {
             relayProxy.Key = relayProxy.Key[..15] + "**************";
         }
 
-        return replayProxyVms;
+        return relayProxies;
     }
 }

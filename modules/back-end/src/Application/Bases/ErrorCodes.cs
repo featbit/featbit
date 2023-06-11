@@ -11,8 +11,7 @@ public static class ErrorCodes
     public const string ResourceNotFound = nameof(ResourceNotFound);
     public const string InvalidJson = nameof(InvalidJson);
     public const string EntityExistsAlready = nameof(EntityExistsAlready);
-    public const string EntityNotExists = nameof(EntityNotExists);
-    
+
     // identity error codes
     public const string MethodIsRequired = nameof(MethodIsRequired);
     public const string MethodIsInvalid = nameof(MethodIsInvalid);
@@ -72,7 +71,7 @@ public static class ErrorCodes
     // access tokens
     public const string InvalidAccessTokenType = nameof(InvalidAccessTokenType);
     public const string ServiceAccessTokenMustDefinePolicies = nameof(ServiceAccessTokenMustDefinePolicies);
-    
+
     // relay proxies
     public const string RelayProxyScopeInvalid = nameof(RelayProxyScopeInvalid);
     public const string RelayProxyAgentInvalid = nameof(RelayProxyAgentInvalid);
