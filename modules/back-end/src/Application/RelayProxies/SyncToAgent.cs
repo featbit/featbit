@@ -1,106 +1,88 @@
-﻿using Application.Bases;
-using Application.Bases.Exceptions;
+﻿using Application.Bases.Exceptions;
 
 namespace Application.RelayProxies;
 
-public class SyncToAgent: IRequest<SyncResultVm>
+public class SyncToAgent : IRequest<SyncResult>
 {
-    public Guid OrgId { get; set; }
     public Guid RelayProxyId { get; set; }
-    
+
     public string AgentId { get; set; }
-    
 }
 
-public class SyncToAgentValidator : AbstractValidator<SyncToAgent>
+public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
 {
-    public SyncToAgentValidator()
-    {
-        RuleFor(x => x.RelayProxyId)
-            .NotEmpty().WithErrorCode(ErrorCodes.RelayProxyIdIsRequired);
-
-        RuleFor(x => x.AgentId)
-            .NotEmpty().WithErrorCode(ErrorCodes.AgentIdIsRequired);
-    }
-}
-
-public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResultVm>
-{
-    private readonly IRelayProxyService _service;
+    private readonly IRelayProxyService _relayProxyService;
     private readonly IProjectService _projectService;
     private readonly IFeatureFlagService _featureFlagService;
     private readonly ISegmentService _segmentService;
     private readonly IAgentService _agentService;
-    private readonly IMapper _mapper;
 
     public SyncToAgentHandler(
-        IRelayProxyService service,
+        IRelayProxyService relayProxyService,
         IProjectService projectService,
         IFeatureFlagService featureFlagService,
         ISegmentService segmentService,
-        IAgentService agentService,
-        IMapper mapper)
+        IAgentService agentService)
     {
-        _service = service;
+        _relayProxyService = relayProxyService;
         _projectService = projectService;
         _featureFlagService = featureFlagService;
         _segmentService = segmentService;
         _agentService = agentService;
-        _mapper = mapper;
     }
 
-    public async Task<SyncResultVm> Handle(SyncToAgent request, CancellationToken cancellationToken)
+    public async Task<SyncResult> Handle(SyncToAgent request, CancellationToken cancellationToken)
     {
-        var relayProxy = await _service.GetAsync(request.RelayProxyId);
-        
-        if (relayProxy == null)
-        {
-            throw new BusinessException(ErrorCodes.EntityNotExists);
-        }
-        
+        var relayProxy = await _relayProxyService.GetAsync(request.RelayProxyId);
+
         var agent = relayProxy.Agents.FirstOrDefault(agent => agent.Id == request.AgentId);
         if (agent == null)
         {
-            throw new BusinessException(ErrorCodes.EntityNotExists);
+            throw new BusinessException("Inconsistent relay proxy data");
         }
 
-        // fetch feature flags & segments
-        IEnumerable<Guid> envIds;
-        if (relayProxy.IsAllEnvs)
-        {
-            var projects = await _projectService.GetListAsync(request.OrgId);
-            envIds = projects.SelectMany(x => x.Environments).Select(x => x.Id);
-        }
-        else
-        {
-            envIds = relayProxy.Scopes.SelectMany(x => x.EnvIds);
-        }
+        var envIds = relayProxy.IsAllEnvs
+            ? await GetAllEnvIdsAsync(relayProxy.OrganizationId)
+            : relayProxy.Scopes.SelectMany(scope => scope.EnvIds).Distinct().ToArray();
 
         if (!envIds.Any())
         {
-            return new SyncResultVm { SyncAt = agent.SyncAt };
+            return SyncResult.Ok(agent.SyncAt);
         }
 
-        var flags = await _featureFlagService.FindManyAsync(x => envIds.Contains(x.EnvId));
-        var segments = await _segmentService.FindManyAsync(x => envIds.Contains(x.EnvId));
-
-        var payload = new List<object>();
-        foreach (var envId in envIds)
+        try
         {
-            payload.Add(new
+            await PerformSyncAsync();
+
+            relayProxy.AgentSynced(agent);
+            await _relayProxyService.UpdateAsync(relayProxy);
+
+            return SyncResult.Ok(agent.SyncAt);
+        }
+        catch (Exception ex)
+        {
+            return SyncResult.Failed(ex.Message);
+        }
+
+        async Task<Guid[]> GetAllEnvIdsAsync(Guid organizationId)
+        {
+            var projectWithEnvs = await _projectService.GetListAsync(organizationId);
+            return projectWithEnvs.SelectMany(p => p.Environments).Select(env => env.Id).ToArray();
+        }
+
+        async Task PerformSyncAsync()
+        {
+            var flags = await _featureFlagService.FindManyAsync(flag => envIds.Contains(flag.EnvId));
+            var segments = await _segmentService.FindManyAsync(segment => envIds.Contains(segment.EnvId));
+
+            var payload = envIds.Select(envId => new
             {
                 EnvId = envId,
-                Flags = flags.Where(x => x.EnvId == envId),
-                Segments = segments.Where(x => x.EnvId == envId)
-            });
-        }
+                Flags = flags.Where(flag => flag.EnvId == envId),
+                Segments = segments.Where(segment => segment.EnvId == envId)
+            }).ToList();
 
-        await _agentService.SyncAsync(agent.Host, relayProxy.Key, payload);
-            
-        // Save syncAt
-        agent.Synced();
-        await _service.UpdateAsync(relayProxy);
-        
-        return new SyncResultVm { SyncAt = agent.SyncAt };
+            await _agentService.BootstrapAsync(agent.Host, relayProxy.Key, payload);
+        }
     }
 }

@@ -1,55 +1,37 @@
-﻿using Application.Bases;
+﻿using Domain.RelayProxies;
 using Application.Bases.Exceptions;
-using Microsoft.Extensions.DependencyInjection.RelayProxies;
 
 namespace Application.RelayProxies;
 
-public class GetAgentStatus: IRequest<ProxyAgentStatusVm>
+public class GetAgentStatus : IRequest<AgentStatus>
 {
     public Guid RelayProxyId { get; set; }
-    
-    public string Host { get; set; }
+
+    public string AgentId { get; set; }
 }
 
-public class GetAgentStatusValidator : AbstractValidator<GetAgentStatus>
+public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, AgentStatus>
 {
-    public GetAgentStatusValidator()
-    {
-        RuleFor(x => x.Host)
-            .NotEmpty().WithErrorCode(ErrorCodes.RelayProxyAgentHostIsRequired);
-
-        RuleFor(x => x.RelayProxyId)
-            .NotEmpty().WithErrorCode(ErrorCodes.RelayProxyIdIsRequired);
-    }
-}
-
-public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, ProxyAgentStatusVm>
-{
-    private readonly IRelayProxyService _service;
+    private readonly IRelayProxyService _relayProxyService;
     private readonly IAgentService _agentService;
-    private readonly IMapper _mapper;
 
-    public GetAgentStatusHandler(
-        IRelayProxyService service,
-        IAgentService agentService,
-        IMapper mapper)
+    public GetAgentStatusHandler(IRelayProxyService relayProxyService, IAgentService agentService)
     {
-        _service = service;
+        _relayProxyService = relayProxyService;
         _agentService = agentService;
-        _mapper = mapper;
     }
 
-    public async Task<ProxyAgentStatusVm> Handle(GetAgentStatus request, CancellationToken cancellationToken)
+    public async Task<AgentStatus> Handle(GetAgentStatus request, CancellationToken cancellationToken)
     {
-        var relayProxy = await _service.GetAsync(request.RelayProxyId);
-        
-        if (relayProxy == null)
-        {
-            throw new BusinessException(ErrorCodes.EntityNotExists);
-        }
-        
-        var status = await _agentService.GetStatusAsync(request.Host, relayProxy.Key);
+        var relayProxy = await _relayProxyService.GetAsync(request.RelayProxyId);
 
-        return _mapper.Map<ProxyAgentStatusVm>(status);
+        var agent = relayProxy.Agents.FirstOrDefault(x => x.Id == request.AgentId);
+        if (agent == null)
+        {
+            throw new BusinessException("Inconsistent relay proxy data");
+        }
+
+        var status = await _agentService.GetStatusAsync(agent.Host, relayProxy.Key);
+        return status;
     }
 }

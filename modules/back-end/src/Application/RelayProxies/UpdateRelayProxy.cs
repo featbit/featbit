@@ -14,7 +14,7 @@ public class UpdateRelayProxy : IRequest<bool>
     public bool IsAllEnvs { get; set; }
 
     public IEnumerable<Scope> Scopes { get; set; }
-    
+
     public IEnumerable<Agent> Agents { get; set; }
 }
 
@@ -25,26 +25,22 @@ public class UpdateRelayProxyValidator : AbstractValidator<UpdateRelayProxy>
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 
-        RuleFor(x => x)
-            .Must(y =>
+        RuleFor(x => x.Scopes)
+            .Must((proxy, scopes) =>
             {
-                var scopes = y.Scopes;
-                return y.IsAllEnvs || (scopes.Any() && 
-                                       scopes.All(scope => !string.IsNullOrWhiteSpace(scope.Id) && 
-                                                           !string.IsNullOrWhiteSpace(scope.ProjectId) && 
-                                                           scope.EnvIds.Any()));   
+                if (proxy.IsAllEnvs)
+                {
+                    return true;
+                }
+
+                return scopes?.All(scope => scope.IsValid()) ?? false;
             })
-            .WithErrorCode(ErrorCodes.RelayProxyScopeInvalid);
+            .WithErrorCode(ErrorCodes.InvalidRelayProxyScope);
 
         RuleFor(x => x.Agents)
-            .Must(agents =>
-            {
-                return agents.Any() && 
-                       agents.All(scope => !string.IsNullOrWhiteSpace(scope.Id) && 
-                                           !string.IsNullOrWhiteSpace(scope.Name) && 
-                                           !string.IsNullOrWhiteSpace(scope.Host));   
-            })
-            .WithErrorCode(ErrorCodes.RelayProxyAgentInvalid);
+            .NotEmpty()
+            .Must(agents => agents.All(agent => agent.IsValid()))
+            .WithErrorCode(ErrorCodes.InvalidRelayProxyAgent);
     }
 }
 

@@ -10,8 +10,10 @@ public class Agent
 
     public DateTime? SyncAt { get; set; }
 
-    public void Synced()
+    public bool IsValid()
     {
-        SyncAt = DateTime.UtcNow;
+        return !string.IsNullOrWhiteSpace(Id) &&
+               !string.IsNullOrWhiteSpace(Name) &&
+               !string.IsNullOrWhiteSpace(Host);
     }
 }

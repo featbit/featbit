@@ -3,7 +3,6 @@ using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Infrastructure.FeatureFlags;
 
@@ -65,13 +64,6 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
         var items = await itemsQuery.ToListAsync();
 
         return new PagedResult<FeatureFlag>(totalCount, items);
-    }
-
-    public async Task<IEnumerable<FeatureFlag>> GetListByEnvIdsAsync(Guid[] envIds)
-    {
-        return await Queryable
-            .Where(x => envIds.Contains(x.EnvId))
-            .ToListAsync();
     }
 
     public async Task<FeatureFlag> GetAsync(Guid envId, string key)

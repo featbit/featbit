@@ -1,4 +1,4 @@
-﻿namespace Application.FeatureFlags;
+﻿namespace Application.Bases.Models;
 
 public class PatchResult
 {

@@ -17,4 +17,6 @@ public static class ResourceTypes
     public const string Env = "env";
 
     public const string FeatureFlag = "flag";
+
+    public const string Segment = "segment";
 }

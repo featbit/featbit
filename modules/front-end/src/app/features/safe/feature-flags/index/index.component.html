@@ -85,7 +85,7 @@
             [nzChecked]="itemChecked(featureFlag)"
             (nzCheckedChange)="onItemChecked(featureFlag)"
           ></td>
-          <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag)">
+          <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag.key)">
               <span>{{featureFlag.name}}</span>
           </td>
           <td>
@@ -115,26 +115,24 @@
             <div style="min-width: 60px;" >
               <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length === 1">
                 <span class="variation-tip tip-0" style="margin-bottom:2px;"></span>
-                <span style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span nz-tooltip="{{featureFlag.serves.enabledVariations[0]}}" style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves.enabledVariations[0]}}
                 </span>
               </div>
               <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length > 1"
-                   style="cursor: pointer;"
-                   nz-tooltip="{{featureFlag.serves?.enabledVariations?.join(' // ')}}"
-                   >
-                <span *ngFor="let variationValue of featureFlag.serves?.enabledVariations; let key=index; ">
+                   style="cursor: pointer;">
+                <span *ngFor="let _ of featureFlag.serves?.enabledVariations; let key=index; ">
                   <span  class="variation-tip {{'tip-' + key % 9}}" style="margin-right:-3px;margin-bottom:2px;"></span>
                 </span>
-                <span style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span nz-tooltip="{{ getVaritonsWithTitles(featureFlag.serves?.enabledVariations) }}" style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves?.enabledVariations?.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
                 </span>
               </div>
               <div *ngIf="!featureFlag.isEnabled" style="opacity: .5;">
                 <span class="variation-tip tip-9" style="margin-bottom:2px;background-color:darkgray;"></span>
-                <span style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span nz-tooltip="{{featureFlag.serves.disabledVariation}}" style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves?.disabledVariation}}
                 </span>
@@ -143,7 +141,7 @@
           </td>
           <td>{{getLocalDate(featureFlag.updatedAt) | date: 'YYYY-MM-dd HH:mm'}}</td>
           <td>
-            <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag)" i18n="@@common.details">Details</a>
+            <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag.key)" i18n="@@common.details">Details</a>
             <nz-divider nzType="vertical"></nz-divider>
             <ng-container *ngIf="featureFlagFilter.isArchived;then archivedOps else unarchivedOps"></ng-container>
             <ng-template #archivedOps>

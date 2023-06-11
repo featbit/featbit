@@ -13,7 +13,7 @@ export interface IUserType {
   id: string;
   name: string;
   keyId: string;
-  customizedProperties: [{name: string, value: string}];
+  customizedProperties?: [{name: string, value: string}];
 
   isNew?: boolean; // only for front end
 }

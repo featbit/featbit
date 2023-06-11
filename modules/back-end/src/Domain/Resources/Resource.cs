@@ -73,4 +73,12 @@ public class Resource
         Rn = "project/*:env/*:flag/*",
         Type = ResourceTypes.FeatureFlag
     };
+    
+    public static readonly Resource AllSegments = new()
+    {
+        Id = new Guid("f03a822a-047f-11ee-be56-0242ac120002"),
+        Name = "segment",
+        Rn = "project/*:env/*:segment/*",
+        Type = ResourceTypes.Segment
+    };
 }
