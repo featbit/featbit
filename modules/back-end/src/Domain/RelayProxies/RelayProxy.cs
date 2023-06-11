@@ -43,10 +43,10 @@ public class RelayProxy : AuditedEntity
         IEnumerable<Agent> agents)
     {
         Name = name;
-        Description = description;
+        Description = description ?? string.Empty;
         IsAllEnvs = isAllEnvs;
-        Scopes = scopes;
-        Agents = agents;
+        Scopes = scopes ?? Array.Empty<Scope>();
+        Agents = agents ?? Array.Empty<Agent>();
     }
 
     public void AgentSynced(Agent agent) => agent.SyncAt = DateTime.UtcNow;
