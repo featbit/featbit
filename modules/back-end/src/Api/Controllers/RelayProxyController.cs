@@ -35,7 +35,6 @@ public class RelayProxyController : ApiControllerBase
         request.Id = id;
 
         var relayProxy = await Mediator.Send(request);
-
         return Ok(relayProxy);
     }
 
@@ -74,14 +73,13 @@ public class RelayProxyController : ApiControllerBase
         };
 
         var status = await Mediator.Send(request);
-
         return Ok(status);
     }
 
     [HttpPut("sync-to-agent")]
     public async Task<ApiResponse<SyncResult>> SyncToAgentAsync(SyncToAgent request)
     {
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var syncResult = await Mediator.Send(request);
+        return Ok(syncResult);
     }
 }
