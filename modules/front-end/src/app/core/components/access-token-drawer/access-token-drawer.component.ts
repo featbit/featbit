@@ -23,7 +23,6 @@ import {
   preProcessPermissions,
   IPermissionStatementGroup, postProcessPermissions
 } from "@features/safe/integrations/access-tokens/types/permission-helper";
-import { ResourceType, } from "@shared/policy";
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 
 @Component({
@@ -117,7 +116,7 @@ export class AccessTokenDrawerComponent {
   setAuthorizedPermissions() {
     const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
-    let permissions = [];
+    let permissions;
     if (hasOwnerPolicy) {
       permissions = Object.keys(permissionActions)
         .map((property) => {
