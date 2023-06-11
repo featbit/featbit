@@ -29,6 +29,7 @@ public class ResourceService : IResourceService
             ResourceTypes.AccessToken => new[] { Resource.AllAccessToken },
             ResourceTypes.RelayProxy => new[] { Resource.AllRelayProxies },
             ResourceTypes.FeatureFlag => new[] { Resource.AllFeatureFlag },
+            ResourceTypes.Segment => new[] { Resource.AllSegments },
             ResourceTypes.Env => await GetEnvsAsync(organizationId, name),
             ResourceTypes.Project => await GetProjectsAsync(organizationId, name),
             _ => Array.Empty<Resource>()

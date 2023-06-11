@@ -1,12 +1,28 @@
+using System.Text.Json;
+using Api.Authentication;
+using Api.Authorization;
+using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.Segments;
 using Domain.Segments;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Newtonsoft.Json;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
+[Authorize(Permissions.ManageSegment)]
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/segments")]
 public class SegmentController : ApiControllerBase
 {
+    /// <summary>
+    /// Get a segment
+    /// </summary>
+    /// <remarks>
+    /// Get a single segment by id.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("{id:guid}")]
     public async Task<ApiResponse<Segment>> GetAsync(Guid id)
     {
@@ -19,6 +35,13 @@ public class SegmentController : ApiControllerBase
         return Ok(segment);
     }
 
+    /// <summary>
+    /// Get segment list of an environment
+    /// </summary>
+    /// <remarks>
+    /// Get the list of segments of a particular environment.
+    /// </remarks>
+    [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<PagedResult<SegmentVm>>> GetListAsync(Guid envId, [FromQuery] SegmentFilter filter)
     {
@@ -44,6 +67,13 @@ public class SegmentController : ApiControllerBase
         return Ok(segments);
     }
 
+    /// <summary>
+    /// Create a segment
+    /// </summary>
+    /// <remarks>
+    /// Create a segment with the given settings.
+    /// </remarks>
+    [OpenApi]
     [HttpPost]
     public async Task<ApiResponse<Segment>> CreateAsync(Guid envId, CreateSegment request)
     {
@@ -62,6 +92,32 @@ public class SegmentController : ApiControllerBase
         return Ok(segment);
     }
 
+    /// <summary>
+    /// Update a segment with the JSON patch method
+    /// </summary>
+    /// <remarks>
+    /// Perform a partial update to a segment. The request body must be a valid JSON patch.
+    /// </remarks>
+    [OpenApi]
+    [SwaggerRequestExample(typeof(Operation), typeof(PatchSegmentExamples))]
+    [HttpPatch("{id}")]
+    public async Task<ApiResponse<bool>> PatchAsync(Guid id, [FromBody] JsonElement jsonElement)
+    {
+        var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
+        var request = new PatchSegment
+        {
+            Id = id,
+            Patch = patch
+        };
+
+        var result = await Mediator.Send(request);
+        return result.Success ? Ok(true) : Error<bool>(result.Message);
+    }
+
+    /// <summary>
+    /// Archive a segment
+    /// </summary>
+    [OpenApi]
     [HttpPut("{id:guid}/archive")]
     public async Task<ApiResponse<bool>> ArchiveAsync(Guid id)
     {
@@ -74,6 +130,10 @@ public class SegmentController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Restore a segment
+    /// </summary>
+    [OpenApi]
     [HttpPut("{id:guid}/restore")]
     public async Task<ApiResponse<bool>> RestoreAsync(Guid id)
     {
@@ -86,6 +146,10 @@ public class SegmentController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Delete a segment
+    /// </summary>
+    [OpenApi]
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
     {

@@ -162,7 +162,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update a feature with the JSON patch method
+    /// Update a feature flag with the JSON patch method
     /// </summary>
     /// <remarks>
     /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.

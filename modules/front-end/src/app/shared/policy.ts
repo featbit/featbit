@@ -38,7 +38,8 @@ export enum ResourceTypeEnum {
   RelayProxy = 'relay-proxy',
   Project = 'project',
   Env = 'env',
-  Flag = 'flag'
+  Flag = 'flag',
+  Segment = 'segment'
 }
 
 export enum EffectEnum {
@@ -68,7 +69,8 @@ export const generalResourceRNPattern = {
   "relay-proxy": 'relay-proxy/*', // this duplicated property is necessary for resource types consisting of multiple words because of access-token-drawer.component.ts line 132
   project: 'project/*',
   env: 'project/*:env/*',
-  flag: 'project/*:env/*:flag/*'
+  flag: 'project/*:env/*:flag/*',
+  segment: 'project/*:env/*:segment/*'
 };
 
 export const ResourceTypeAll: ResourceType = {
@@ -119,6 +121,12 @@ export const ResourceTypeFlag = {
   displayName: $localize`:@@iam.rsc-type.feature-flag:Feature flag`
 };
 
+export const ResourceTypeSegment = {
+  type: ResourceTypeEnum.Segment,
+  pattern: 'project/{project}:env/{env}/segment/*',
+  displayName: $localize`:@@iam.rsc-type.segment:Segment`
+};
+
 export const resourcesTypes: ResourceType[] = [
   ResourceTypeAll,
   ResourceTypeAccount,
@@ -128,6 +136,7 @@ export const resourcesTypes: ResourceType[] = [
   ResourceTypeProject,
   ResourceTypeEnv,
   ResourceTypeFlag,
+  ResourceTypeSegment
 ];
 
 export interface ResourceParamViewModel {
@@ -179,6 +188,7 @@ export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[
     }
   ],
   [ResourceTypeEnum.Flag]: [],
+  [ResourceTypeEnum.Segment]: [],
 };
 
 export const permissionActions: { [key: string]: IamPolicyAction } = {
@@ -311,6 +321,17 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isSpecificApplicable: false
   },
 
+  // segment
+  ManageSegment: {
+    id: uuidv4(),
+    name: 'ManageSegment',
+    resourceType: ResourceTypeEnum.Segment,
+    displayName: $localize`:@@iam.action.manage-segment:Manage segment`,
+    description: $localize`:@@iam.action.manage-segment:Manage segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: false
+  },
+
   // account
   UpdateOrgName: {
     id: uuidv4(),
@@ -399,6 +420,8 @@ export function isResourceGeneral(type: ResourceTypeEnum, rn: string): boolean {
       return rn === generalResourceRNPattern.env;
     case ResourceTypeEnum.Flag:
       return rn === generalResourceRNPattern.flag;
+    case ResourceTypeEnum.Segment:
+      return rn === generalResourceRNPattern.segment;
   }
 
   return false;
