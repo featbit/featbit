@@ -1,4 +1,4 @@
-﻿using Application.Bases;
+﻿using Application.Bases.Exceptions;
 
 namespace Application.RelayProxies;
 
@@ -7,18 +7,6 @@ public class SyncToAgent : IRequest<SyncResult>
     public Guid RelayProxyId { get; set; }
 
     public string AgentId { get; set; }
-}
-
-public class SyncToAgentValidator : AbstractValidator<SyncToAgent>
-{
-    public SyncToAgentValidator()
-    {
-        RuleFor(x => x.RelayProxyId)
-            .NotEmpty().WithErrorCode(ErrorCodes.RelayProxyIdIsRequired);
-
-        RuleFor(x => x.AgentId)
-            .NotEmpty().WithErrorCode(ErrorCodes.AgentIdIsRequired);
-    }
 }
 
 public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
@@ -50,7 +38,7 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
         var agent = relayProxy.Agents.FirstOrDefault(agent => agent.Id == request.AgentId);
         if (agent == null)
         {
-            return SyncResult.Failed("Inconsistent relay proxy data");
+            throw new BusinessException("Inconsistent relay proxy data");
         }
 
         var envIds = relayProxy.IsAllEnvs
