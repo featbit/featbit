@@ -73,6 +73,6 @@ public static class ErrorCodes
     public const string ServiceAccessTokenMustDefinePolicies = nameof(ServiceAccessTokenMustDefinePolicies);
 
     // relay proxies
-    public const string RelayProxyScopeInvalid = nameof(RelayProxyScopeInvalid);
-    public const string RelayProxyAgentInvalid = nameof(RelayProxyAgentInvalid);
+    public const string InvalidRelayProxyScope = nameof(InvalidRelayProxyScope);
+    public const string InvalidRelayProxyAgent = nameof(InvalidRelayProxyAgent);
 }

@@ -26,11 +26,11 @@ public class RelayProxy : AuditedEntity
     {
         OrganizationId = organizationId;
         Name = name;
-        Description = description;
+        Description = description ?? string.Empty;
 
         IsAllEnvs = isAllEnvs;
-        Scopes = scopes;
-        Agents = agents;
+        Scopes = scopes ?? Array.Empty<Scope>();
+        Agents = agents ?? Array.Empty<Agent>();
 
         Key = $"rp-{TokenHelper.New(Guid.NewGuid())}";
     }
