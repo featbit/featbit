@@ -48,7 +48,6 @@
                   <nz-form-control>
                     <nz-select
                       class="project-selector"
-                      nzShowSearch
                       i18n-placeholder="@@common.project"
                       nzPlaceHolder="Project"
                       formControlName="projectId">
@@ -63,8 +62,7 @@
                   <nz-form-control>
                     <nz-select
                       class="env-selector"
-                      nzMode="tags"
-                      nzShowSearch
+                      nzMode="multiple"
                       i18n-placeholder="@@common.environments"
                       nzPlaceHolder="Environments"
                       formControlName="envIds">
