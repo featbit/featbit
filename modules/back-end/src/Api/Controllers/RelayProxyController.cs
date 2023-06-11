@@ -63,7 +63,7 @@ public class RelayProxyController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpGet("{relayProxyId:guid}/agent-status/{agentId}")]
+    [HttpGet("{relayProxyId:guid}/agents/{agentId}/status")]
     public async Task<ApiResponse<AgentStatus>> GetAgentStatusAsync(Guid relayProxyId, string agentId)
     {
         var request = new GetAgentStatus
@@ -76,7 +76,7 @@ public class RelayProxyController : ApiControllerBase
         return Ok(status);
     }
 
-    [HttpPut("{relayProxyId:guid}/sync-to-agent/{agentId}")]
+    [HttpPut("{relayProxyId:guid}/agents/{agentId}/sync")]
     public async Task<ApiResponse<SyncResult>> SyncToAgentAsync(Guid relayProxyId, string agentId)
     {
         var request = new SyncToAgent
