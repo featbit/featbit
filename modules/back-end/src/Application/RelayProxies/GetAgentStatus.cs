@@ -1,5 +1,4 @@
 ﻿using Domain.RelayProxies;
-using Application.Bases.Exceptions;
 
 namespace Application.RelayProxies;
 
@@ -7,7 +6,7 @@ public class GetAgentStatus : IRequest<AgentStatus>
 {
     public Guid RelayProxyId { get; set; }
 
-    public string AgentId { get; set; }
+    public string Host { get; set; }
 }
 
 public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, AgentStatus>
@@ -25,13 +24,7 @@ public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, AgentStatus
     {
         var relayProxy = await _relayProxyService.GetAsync(request.RelayProxyId);
 
-        var agent = relayProxy.Agents.FirstOrDefault(x => x.Id == request.AgentId);
-        if (agent == null)
-        {
-            throw new BusinessException("Inconsistent relay proxy data");
-        }
-
-        var status = await _agentService.GetStatusAsync(agent.Host, relayProxy.Key);
+        var status = await _agentService.GetStatusAsync(request.Host, relayProxy.Key);
         return status;
     }
 }
