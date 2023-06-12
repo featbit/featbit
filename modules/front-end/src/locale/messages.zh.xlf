@@ -447,7 +447,7 @@
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
           <context context-type="linenumber">52</context>
         </context-group>
-        <target>查看访问秘钥</target>
+        <target>查看访问令牌</target>
       </trans-unit>
       <trans-unit id="integrations.access-token.access-token-drawer.edit-title" datatype="html">
         <source>Edit Access Token</source>
@@ -3554,7 +3554,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">19,20</context>
         </context-group>
-        <target>Name 已经被使用</target>
+        <target>该名称已被使用</target>
       </trans-unit>
       <trans-unit id="common.description.cannot-exceed-512-characters" datatype="html">
         <source>Cannot exceed 512 characters</source>
@@ -3562,7 +3562,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">24</context>
         </context-group>
-        <target>不可以超过512个字符</target>
+        <target>不可以超过 512 个字符</target>
       </trans-unit>
       <trans-unit id="common.scopes" datatype="html">
         <source>Scopes</source>
@@ -3578,7 +3578,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">34</context>
         </context-group>
-        <target>选择要将哪些环境同步到代理</target>
+        <target>选择要同步的项目环境</target>
       </trans-unit>
       <trans-unit id="common.all-envs" datatype="html">
         <source>All environments</source>
@@ -3618,7 +3618,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">92,94</context>
         </context-group>
-        <target>代理指运行了 FeatBit agent 程序的服务器</target>
+        <target>代理指运行了 FeatBit 代理程序的服务器</target>
       </trans-unit>
       <trans-unit id="common.check-the-repo" datatype="html">
         <source>Check the repo</source>
@@ -3758,7 +3758,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
           <context context-type="linenumber">39</context>
         </context-group>
-        <target>查看中继代理</target>
+        <target>查看代理</target>
       </trans-unit>
       <trans-unit id="relay-proxy.edit-title" datatype="html">
         <source>Edit Relay Proxy</source>
@@ -3782,7 +3782,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
           <context context-type="linenumber">176</context>
         </context-group>
-        <target>需要设置 host url 才能获取其状态</target>
+        <target>需要设置 Host 才能获取其状态</target>
       </trans-unit>
       <trans-unit id="relay-proxy.scope-required" datatype="html">
         <source>At least one environment scope is required</source>
@@ -3790,7 +3790,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
           <context context-type="linenumber">284</context>
         </context-group>
-        <target>请设置至少一个环境</target>
+        <target>请添加至少一个环境</target>
       </trans-unit>
       <trans-unit id="relay-proxy.agent-required" datatype="html">
         <source>At least one agent is required</source>
@@ -4074,7 +4074,7 @@
           <context context-type="sourcefile">src/app/core/guards/accessTokens.guard.ts</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target>您没有读取访问秘钥列表的权限，请联系管理员授予您所需的权限。</target>
+        <target>您没有读取访问令牌列表的权限，请联系管理员授予您所需的权限。</target>
       </trans-unit>
       <trans-unit id="permissions.no-permissions-to-visit-iam-page" datatype="html">
         <source>You don&apos;t have permissions to visit IAM, please contact the admin to grant you the necessary permissions</source>
