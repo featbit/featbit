@@ -235,6 +235,17 @@ export class RelayProxyDrawerComponent implements OnInit {
     return scopes.some((x) => x.envIds.some(y => y === envId));
   }
 
+  cancel() {
+    const { agents } = this.form.value;
+
+    if (this.isEditing) {
+      this.close.emit({ isEditing: this.isEditing, ...this._relayProxy, agents: agents});
+      return;
+    }
+
+    this.close.emit();
+  }
+
   doSubmit() {
     if (this.readonly) {
       this.message.warning($localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
@@ -300,7 +311,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     if (this.isEditing) {
       this.relayProxyService.update({...payload, id: this._relayProxy.id}).subscribe({
         next: () => {
-          this.close.emit({isEditing: false});
+          this.close.emit({...this._relayProxy, ...payload, isEditing: true});
           this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         },
         error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),
@@ -310,7 +321,7 @@ export class RelayProxyDrawerComponent implements OnInit {
         next: (relayProxy) => {
           this.isCreationConfirmModalVisible = true;
           this._relayProxy = relayProxy;
-          this.close.emit({isEditing: false});
+          this.close.emit({...this._relayProxy, isEditing: false});
           this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         },
         error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),

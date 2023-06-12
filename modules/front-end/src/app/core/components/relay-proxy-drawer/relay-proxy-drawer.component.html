@@ -6,7 +6,7 @@
   [nzBodyStyle]="{'padding-top': '12px'}"
   [nzWidth]="1100"
   [nzVisible]="visible"
-  (nzOnClose)="close.emit()">
+  (nzOnClose)="cancel()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="form" nzLayout="vertical" class="proxy-form">
       <nz-form-item>

@@ -123,11 +123,21 @@ export class IndexComponent implements OnInit {
     } else {
       this.relayProxies.items = this.relayProxies.items.map((rp) => {
         if (rp.id === data.id) {
-          return { ...data };
+          const result = new RelayProxy(
+            data.id,
+            data.name,
+            data.description,
+            data.isAllEnvs,
+            data.scopes,
+            data.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.None })),
+            rp.key);
+
+          this.fetchRelayProxiesStatus([result]);
+          return result;
         }
 
         return rp;
-      })
+      });
     }
   }
 }
