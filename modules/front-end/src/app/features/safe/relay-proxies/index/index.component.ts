@@ -12,7 +12,6 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 
-
 @Component({
   selector: 'relay-proxies',
   templateUrl: './index.component.html',
@@ -21,7 +20,7 @@ import { PermissionsService } from "@services/permissions.service";
 export class IndexComponent implements OnInit {
   $search = new BehaviorSubject('');
   isLoading: boolean = true;
-  proxyDetailvisible: boolean = false;
+  proxyDetailVisible: boolean = false;
 
   filter: RelayProxyFilter = new RelayProxyFilter();
   relayProxies: IPagedRelayProxy = {
@@ -59,7 +58,7 @@ export class IndexComponent implements OnInit {
             proxy.description,
             proxy.isAllEnvs,
             proxy.scopes,
-            proxy.agents.map((agent) => ({...agent, status: AgentStatusEnum.None})),
+            proxy.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.None })),
             proxy.key
           ))
         };
@@ -67,9 +66,8 @@ export class IndexComponent implements OnInit {
         this.fetchRelayProxiesStatus(this.relayProxies.items);
         this.isLoading = false;
       },
-      error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
-      complete: () => this.isLoading = false
-    });
+      error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
+    }).add(() => this.isLoading = false);
   }
 
   fetchRelayProxiesStatus(relayProxies: RelayProxy[]) {
@@ -105,14 +103,15 @@ export class IndexComponent implements OnInit {
     })
   }
 
-  currentRelayProxy: RelayProxy = new RelayProxy(null, null, null, true,[], []);
-  showDetailDrawer(relayProxy: RelayProxy = new RelayProxy(null, null, null, true,[], [])) {
+  currentRelayProxy: RelayProxy = new RelayProxy(null, null, null, true, [], []);
+
+  showDetailDrawer(relayProxy: RelayProxy = new RelayProxy(null, null, null, true, [], [])) {
     this.currentRelayProxy = new RelayProxy(relayProxy.id, relayProxy.name, relayProxy.description, relayProxy.isAllEnvs, relayProxy.scopes, relayProxy.agents);
-    this.proxyDetailvisible = true;
+    this.proxyDetailVisible = true;
   }
 
   relayProxyDrawerClosed(data: any) { //{ isEditing: boolean, id: string, name: string, scopes: [], agents: [] }
-    this.proxyDetailvisible = false;
+    this.proxyDetailVisible = false;
 
     if (!data) {
       return;
