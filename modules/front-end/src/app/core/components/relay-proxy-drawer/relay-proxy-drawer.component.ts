@@ -9,7 +9,7 @@ import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { ProjectService } from "@services/project.service";
 import { RelayProxyService } from "@services/relay-proxy.service";
 import { AgentStatusEnum, RelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
-import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { debounceTime, finalize, first, map, switchMap } from "rxjs/operators";
 
 @Component({
   selector: 'relay-proxy-drawer',
@@ -67,12 +67,11 @@ export class RelayProxyDrawerComponent implements OnInit {
   ngOnInit() {
     const canListProjects = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListProjects);
     if (canListProjects) {
-      this.projectService
-        .getList()
+      this.projectService.getList()
+        .pipe(finalize(() => this.isProjectsLoading = false))
         .subscribe({
           next: (projects) => this.projects = projects,
           error: (_) => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`),
-          complete: () => this.isProjectsLoading = false
         });
     }
   }
@@ -344,16 +343,15 @@ export class RelayProxyDrawerComponent implements OnInit {
     const { id } = agent.value;
     this.agentSyncProcessingDic[id] = true;
 
-    this.relayProxyService.syncToAgent(this._relayProxy.id, id).subscribe({
-      next: (res) => {
-        agent.patchValue({ syncAt: res.syncAt });
-        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-      },
-      error: (_) => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`),
-      complete: () => {
-        this.agentSyncProcessingDic[id] = false;
-      }
-    })
+    this.relayProxyService.syncToAgent(this._relayProxy.id, id)
+      .pipe(finalize(() => this.agentSyncProcessingDic[id] = false))
+      .subscribe({
+        next: (res) => {
+          agent.patchValue({ syncAt: res.syncAt });
+          this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        },
+        error: (_) => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`)
+      });
   }
 
   isCreationConfirmModalVisible = false;

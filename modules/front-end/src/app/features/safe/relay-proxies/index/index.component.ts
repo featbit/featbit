@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { RelayProxyService } from "@services/relay-proxy.service";
 import {
   AgentStatusEnum,
@@ -48,25 +48,27 @@ export class IndexComponent implements OnInit {
 
   getRelayProxies() {
     this.isLoading = true;
-    this.relayProxyService.getList(this.filter).subscribe({
-      next: (replayProxies) => {
-        this.relayProxies = {
-          ...replayProxies,
-          items: replayProxies.items.map((proxy) => new RelayProxy(
-            proxy.id,
-            proxy.name,
-            proxy.description,
-            proxy.isAllEnvs,
-            proxy.scopes,
-            proxy.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.None })),
-            proxy.key
-          ))
-        };
+    this.relayProxyService.getList(this.filter)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (replayProxies) => {
+          this.relayProxies = {
+            ...replayProxies,
+            items: replayProxies.items.map((proxy) => new RelayProxy(
+              proxy.id,
+              proxy.name,
+              proxy.description,
+              proxy.isAllEnvs,
+              proxy.scopes,
+              proxy.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.None })),
+              proxy.key
+            ))
+          };
 
-        this.fetchRelayProxiesStatus(this.relayProxies.items);
-      },
-      error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
-    }).add(() => this.isLoading = false);
+          this.fetchRelayProxiesStatus(this.relayProxies.items);
+        },
+        error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
+      });
   }
 
   fetchRelayProxiesStatus(relayProxies: RelayProxy[]) {

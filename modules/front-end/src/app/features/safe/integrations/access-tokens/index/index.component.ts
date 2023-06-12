@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import {
@@ -86,10 +86,12 @@ export class IndexComponent implements OnInit {
 
   getAccessTokens() {
     this.isLoading = true;
-    this.accessTokenService.getList(this.filter).subscribe({
-      next: (accessTokens) => this.accessTokens = accessTokens,
-      error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
-    }).add(() => this.isLoading = false);
+    this.accessTokenService.getList(this.filter)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (accessTokens) => this.accessTokens = accessTokens,
+        error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
+      });
   }
 
   doSearch(resetPage?: boolean) {
