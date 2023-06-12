@@ -3602,7 +3602,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">52,53</context>
         </context-group>
-        <target><项目/target>
+        <target>项目</target>
       </trans-unit>
       <trans-unit id="common.agents" datatype="html">
         <source>Agents</source>
