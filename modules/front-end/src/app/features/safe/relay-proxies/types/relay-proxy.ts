@@ -40,7 +40,6 @@ export class RelayProxyScope {
 export class RelayProxyAgent {
   id: string;
   name: string;
-  key?: string;
   host: string;
   syncAt?: Date;
   status?: AgentStatusEnum; // UI only
