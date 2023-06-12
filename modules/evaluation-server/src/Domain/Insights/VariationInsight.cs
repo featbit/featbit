@@ -1,6 +1,6 @@
 #nullable disable
 
-using Domain.Core;
+using Domain.Evaluation;
 
 namespace Domain.Insights;
 

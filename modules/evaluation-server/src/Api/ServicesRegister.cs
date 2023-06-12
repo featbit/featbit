@@ -1,17 +1,6 @@
-using Domain.Core;
-using Domain.Services;
-using Domain.WebSockets;
-using Infrastructure.Caches;
 using Infrastructure.Fakes;
-using Infrastructure.Kafka;
-using Infrastructure.MongoDb;
-using Infrastructure.MqMessageHandlers;
 using Infrastructure.Redis;
-using Infrastructure.Services;
-using Infrastructure.WsMessageHandlers;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Internal;
-using StackExchange.Redis;
+using Streaming.DependencyInjection;
 
 namespace Api;
 
@@ -40,69 +29,29 @@ public static class ServicesRegister
                 .AllowAnyMethod();
         }));
 
-        // add app services
-        services.TryAddSingleton<ISystemClock, SystemClock>();
-        services.AddSingleton<IConnectionManager, ConnectionManager>();
-        services.AddScoped<IConnectionHandler, ConnectionHandler>();
-        services.AddTransient<IDataSyncService, DataSyncService>();
-        services.AddSingleton<EvaluationService>();
-
-        // websocket message handlers
-        services.AddTransient<IMessageHandler, PingMessageHandler>();
-        services.AddTransient<IMessageHandler, EchoMessageHandler>();
-        services.AddTransient<IMessageHandler, DataSyncMessageHandler>();
-
-        // evaluation related services
-        services.AddSingleton<TargetRuleMatcher>();
-        services.AddSingleton<EvaluationService>();
-
+        // build streaming service
+        var streamingBuilder = services.AddStreamingCore();
         if (builder.Environment.IsEnvironment("IntegrationTests"))
         {
-            // for integration tests, use faked services 
-            AddFakeMessagingServices(services);
+            streamingBuilder.UseStore<FakeStore>().UseNullMessageQueue();
         }
         else
         {
-            AddMessagingServices(services, configuration);
+            streamingBuilder.UseRedisStore(options => configuration.GetSection(RedisOptions.Redis).Bind(options));
+
+            var isProVersion = configuration["IS_PRO"];
+            if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
+            {
+                // use kafka as message queue in pro version
+                streamingBuilder.UseKafkaMessageQueue();
+            }
+            else
+            {
+                // use redis as message queue in standard version
+                streamingBuilder.UseRedisMessageQueue();
+            }
         }
 
         return builder;
-    }
-
-    private static void AddFakeMessagingServices(IServiceCollection services)
-    {
-        services.AddTransient<ICacheService, FakeCacheService>();
-        services.AddSingleton<IMqMessageProducer, FakeMessageProducer>();
-    }
-
-    private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
-    {
-        // mongodb (used to populating redis data)
-        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
-        services.AddSingleton<MongoDbClient>();
-
-        // redis
-        services.AddSingleton<IConnectionMultiplexer>(
-            _ => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
-        );
-        services.AddSingleton<ICacheService, RedisService>();
-
-        // message handlers
-        services.AddSingleton<IMqMessageHandler, FeatureFlagChangeMessageHandler>();
-        services.AddSingleton<IMqMessageHandler, SegmentChangeMessageHandler>();
-
-        var isProVersion = configuration["IS_PRO"];
-        if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
-        {
-            // use kafka as message queue in pro version
-            services.AddSingleton<IMqMessageProducer, KafkaMessageProducer>();
-            services.AddHostedService<KafkaMessageConsumer>();
-        }
-        else
-        {
-            // use redis as message queue
-            services.AddSingleton<IMqMessageProducer, RedisMessageProducer>();
-            services.AddHostedService<RedisMessageConsumer>();
-        }
     }
 }

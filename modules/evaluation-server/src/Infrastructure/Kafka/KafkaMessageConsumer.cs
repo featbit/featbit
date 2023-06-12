@@ -1,5 +1,5 @@
 using Confluent.Kafka;
-using Domain.Core;
+using Domain.Messages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,12 +10,12 @@ public partial class KafkaMessageConsumer : BackgroundService
 {
     private readonly ILogger<KafkaMessageConsumer> _logger;
     private readonly IConsumer<Null, string> _consumer;
-    private readonly IEnumerable<IMqMessageHandler> _messageHandlers;
+    private readonly IEnumerable<IMessageConsumer> _messageHandlers;
 
     public KafkaMessageConsumer(
         IConfiguration configuration,
         ILogger<KafkaMessageConsumer> logger,
-        IEnumerable<IMqMessageHandler> messageHandlers)
+        IEnumerable<IMessageConsumer> messageHandlers)
     {
         _logger = logger;
         _messageHandlers = messageHandlers;

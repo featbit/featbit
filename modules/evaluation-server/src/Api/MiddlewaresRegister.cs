@@ -1,4 +1,4 @@
-using Api.Middlewares;
+using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 namespace Api;
