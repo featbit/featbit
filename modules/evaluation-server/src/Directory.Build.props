@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <PackageVersion>2.2.2</PackageVersion>
+        <PackageVersion>2.3.0</PackageVersion>
         <Authors>FeatBit</Authors>
         <Owners>FeatBit</Owners>
         <Company>FeatBit</Company>
