@@ -339,11 +339,11 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.relayProxyService.syncToAgent(this._relayProxy.id, id)
       .pipe(finalize(() => this.agentSyncProcessingDic[id] = false))
       .subscribe({
-        next: (res) => {
-          agent.patchValue({ syncAt: res.syncAt });
+        next: (syncResult) => {
+          agent.patchValue({ syncAt: syncResult.syncAt });
           this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         },
-        error: (_) => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`)
+        error: () => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`)
       });
   }
 
