@@ -23,9 +23,9 @@ public class CreateRelayProxy : IRequest<RelayProxy>
     }
 }
 
-public class CreateAccessTokenValidator : AbstractValidator<CreateRelayProxy>
+public class CreateRelayProxyValidator : AbstractValidator<CreateRelayProxy>
 {
-    public CreateAccessTokenValidator()
+    public CreateRelayProxyValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
