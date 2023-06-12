@@ -64,7 +64,6 @@ export class IndexComponent implements OnInit {
         };
 
         this.fetchRelayProxiesStatus(this.relayProxies.items);
-        this.isLoading = false;
       },
       error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
     }).add(() => this.isLoading = false);
