@@ -35,6 +35,7 @@ export enum ResourceTypeEnum {
   Account = 'account',
   IAM = 'iam',
   AccessToken = 'access-token',
+  RelayProxy = 'relay-proxy',
   Project = 'project',
   Env = 'env',
   Flag = 'flag',
@@ -64,6 +65,8 @@ export const generalResourceRNPattern = {
   iam: 'iam/*',
   accessToken: 'access-token/*',
   "access-token": 'access-token/*', // this duplicated property is necessary for resource types consisting of multiple words because of access-token-drawer.component.ts line 132
+  relayProxy: 'relay-proxy/*',
+  "relay-proxy": 'relay-proxy/*', // this duplicated property is necessary for resource types consisting of multiple words because of access-token-drawer.component.ts line 132
   project: 'project/*',
   env: 'project/*:env/*',
   flag: 'project/*:env/*:flag/*',
@@ -93,6 +96,13 @@ export const ResourceTypeAccessToken: ResourceType = {
   pattern: generalResourceRNPattern.accessToken,
   displayName: $localize`:@@iam.rsc-type.access-token:Access token`
 };
+
+export const ResourceTypeRelayProxy: ResourceType = {
+  type: ResourceTypeEnum.RelayProxy,
+  pattern: generalResourceRNPattern.relayProxy,
+  displayName: $localize`:@@iam.rsc-type.relay-proxy:Relay proxy`
+};
+
 export const ResourceTypeProject: ResourceType = {
   type: ResourceTypeEnum.Project,
   pattern: 'project/{project}',
@@ -122,6 +132,7 @@ export const resourcesTypes: ResourceType[] = [
   ResourceTypeAccount,
   ResourceTypeIAM,
   ResourceTypeAccessToken,
+  ResourceTypeRelayProxy,
   ResourceTypeProject,
   ResourceTypeEnv,
   ResourceTypeFlag,
@@ -141,6 +152,7 @@ export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[
   [ResourceTypeEnum.Account]: [],
   [ResourceTypeEnum.IAM]: [],
   [ResourceTypeEnum.AccessToken]: [],
+  [ResourceTypeEnum.RelayProxy]: [],
   [ResourceTypeEnum.Project]: [
     {
       val: '',
@@ -370,13 +382,33 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: false
   },
+
+  // relay proxy
+  ListRelayProxies: {
+    id: uuidv4(),
+    name: 'ListRelayProxies',
+    resourceType: ResourceTypeEnum.RelayProxy,
+    displayName: $localize`:@@iam.action.list-relay-proxies:List relay proxies`,
+    description: $localize`:@@iam.action.list-relay-proxies:List relay proxies`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
+  ManageRelayProxies: {
+    id: uuidv4(),
+    name: 'ManageRelayProxies',
+    resourceType: ResourceTypeEnum.RelayProxy,
+    displayName: $localize`:@@iam.action.manage-relay-proxies:Manage relay proxies`,
+    description: $localize`:@@iam.action.manage-relay-proxies:Manage relay proxies`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
 }
 
 // check if the resource is a general resource
 // if returns false, that means the actions which cannot be applied to a specific resource should be hidden
 // ex: ListProjects should not be avaible for a specific project: project/abc
 export function isResourceGeneral(type: ResourceTypeEnum, rn: string): boolean {
-  const generalResourceTypes = [ResourceTypeEnum.All, ResourceTypeEnum.Account, ResourceTypeEnum.IAM, ResourceTypeEnum.AccessToken];
+  const generalResourceTypes = [ResourceTypeEnum.All, ResourceTypeEnum.Account, ResourceTypeEnum.IAM, ResourceTypeEnum.AccessToken, ResourceTypeEnum.RelayProxy];
   if (generalResourceTypes.includes(type)) {
     return true;
   }

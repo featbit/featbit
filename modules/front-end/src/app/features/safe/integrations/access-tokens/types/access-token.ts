@@ -4,7 +4,7 @@ import { IPolicyStatement } from "@shared/policy";
 
 export interface IAccessToken {
   id?: string;
-  type: string;
+  type: AccessTokenTypeEnum;
   creator?: IMember;
   status?: string;
   token?: string;

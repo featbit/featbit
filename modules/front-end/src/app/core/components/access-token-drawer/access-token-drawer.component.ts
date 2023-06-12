@@ -14,7 +14,8 @@ import {
   EffectEnum,
   generalResourceRNPattern,
   permissionActions,
-  ResourceTypeFlag, ResourceTypeSegment
+  ResourceTypeFlag,
+  ResourceTypeSegment
 } from "@shared/policy";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard, uuidv4 } from "@utils/index";
@@ -47,7 +48,11 @@ export class AccessTokenDrawerComponent {
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
       this.permissions = preProcessPermissions(accessToken.permissions);
-      this.title = $localize`:@@integrations.access-token.access-token-drawer.edit-title:Edit Access Token`;
+      if (this.readonly) {
+        this.title = $localize`:@@integrations.access-token.access-token-drawer.view-title:View Access Token`;
+      } else {
+        this.title = $localize`:@@integrations.access-token.access-token-drawer.edit-title:Edit Access Token`;
+      }
     } else {
       accessToken = {name: null, type: AccessTokenTypeEnum.Personal};
       this.setAuthorizedPermissions();
@@ -55,12 +60,15 @@ export class AccessTokenDrawerComponent {
     }
 
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
-    this.patchForm(accessToken);
+    this.initForm(accessToken.name, accessToken.type);
     this._accessToken = accessToken;
     this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
   }
 
   @Input() visible: boolean = false;
+
+  @Input() readonly: boolean = false;
+
   @Output() close: EventEmitter<any> = new EventEmitter();
   title: string = '';
 
@@ -75,13 +83,17 @@ export class AccessTokenDrawerComponent {
     private modal: NzModalService,
     private message: NzMessageService
   ) {
-    this.form = this.fb.group({
-      name: ['', [Validators.required], [this.nameAsyncValidator], 'change'],
-      type: [AccessTokenTypeEnum.Personal, [Validators.required]]
-    });
+    this.initForm('', AccessTokenTypeEnum.Personal);
 
     this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
     this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
+  }
+
+  private initForm(name: string, type: AccessTokenTypeEnum) {
+    this.form = this.fb.group({
+      name: [name, [Validators.required], [this.nameAsyncValidator], 'change'],
+      type: [type, [Validators.required]]
+    });
   }
 
   isServiceAccessToken: boolean = false
@@ -90,13 +102,6 @@ export class AccessTokenDrawerComponent {
 
   get accessToken() {
     return this._accessToken;
-  }
-
-  patchForm(accessToken: Partial<IAccessToken>) {
-    this.form.patchValue({
-      name: accessToken.name,
-      type: accessToken.type,
-    });
   }
 
   onClose() {
@@ -111,7 +116,7 @@ export class AccessTokenDrawerComponent {
   setAuthorizedPermissions() {
     const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
-    let permissions = [];
+    let permissions;
     if (hasOwnerPolicy) {
       permissions = Object.keys(permissionActions)
         .map((property) => {

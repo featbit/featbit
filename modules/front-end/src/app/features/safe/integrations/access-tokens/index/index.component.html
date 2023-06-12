@@ -2,7 +2,7 @@
   <div class="table-search-area">
     <div class="search-inputs">
       <nz-input-group [nzPrefix]="prefixIconSearch">
-        <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" i18n-placeholder="@@integrations.access-tokens.searchNamePlaceholder">
+        <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" i18n-placeholder="@@common.searchNamePlaceholder">
       </nz-input-group>
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="icons:icon-search"></i>
@@ -34,7 +34,7 @@
       </nz-select>
     </div>
 
-    <button *ngIf="canTakeActionOnPersonalAccessToken || canTakeActionOnServiceAccessToken" nz-button nzType="primary" (click)="creatOrEdit()">
+    <button *ngIf="canTakeActionOnPersonalAccessToken || canTakeActionOnServiceAccessToken" nz-button nzType="primary" (click)="showDetailDrawer()">
       <i nz-icon nzType="icons:icon-add"></i>
       <ng-container i18n="@@common.add">Add</ng-container>
     </button>
@@ -85,12 +85,15 @@
         <td>{{ item.lastUsedAt | date: 'YYYY-MM-dd HH:mm'}}</td>
         <td>{{ item.token }}</td>
         <td style="text-align: center">
-          <ng-container *ngIf="(item.type === AccessTokenTypePersonal && canTakeActionOnPersonalAccessToken) || (item.type === AccessTokenTypeService && canTakeActionOnServiceAccessToken)">
+          <ng-container *ngIf="canTakeActionOnAccessToken(item.type)">
             <i class="options" nzPlacement="bottomCenter" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold;" nzType="ellipsis" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
+          </ng-container>
+          <ng-container *ngIf="!canTakeActionOnAccessToken(item.type)">
+            <a style="color: #23AD7F" (click)="showDetailDrawer(item, true)" i18n="@@common.view">View</a>
           </ng-container>
           <nz-dropdown-menu #options="nzDropdownMenu">
             <ul nz-menu nzSelectable style="min-width: 120px;">
-              <li nz-menu-item (click)="creatOrEdit(item)">
+              <li nz-menu-item (click)="showDetailDrawer(item)">
                 <ng-container i18n="@@common.edit">Edit</ng-container>
               </li>
               <li nz-menu-item (click)="toggleStatus(item)" *ngIf="item.status === AccessTokenStatusInactive">
@@ -109,8 +112,8 @@
               </li>
               <li nz-menu-item
                   nz-popconfirm
-                  i18n-nzPopconfirmTitle="@@integrations.access-tokens.deactivate-access-token-confirm"
-                  nzPopconfirmTitle="Deactivate this access token? You can't use an inactive access token to make API calls but you can activate it again later."
+                  i18n-nzPopconfirmTitle="@@common.remove-confirm"
+                  nzPopconfirmTitle="This operation cannot be reverted, are you sure to remove it?"
                   nzPopconfirmPlacement="bottomRight"
                   [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                   (nzOnConfirm)="delete(item)"
@@ -129,5 +132,5 @@
   </div>
 </div>
 
-<access-token-drawer [visible]="accessTokenDrawerVisible" (close)="accessTokenDrawerClosed($event)" [accessToken]="currentAccessToken"></access-token-drawer>
+<access-token-drawer [readonly]="isDetailDrawerReadonly" [visible]="accessTokenDrawerVisible" (close)="accessTokenDrawerClosed($event)" [accessToken]="currentAccessToken"></access-token-drawer>
 

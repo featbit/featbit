@@ -41,6 +41,14 @@ public class Resource
         Rn = "access-token/*",
         Type = ResourceTypes.AccessToken
     };
+    
+    public static readonly Resource AllRelayProxies = new()
+    {
+        Id = new Guid("fef122fb-0b20-4556-b830-5863850e8092"),
+        Name = "relay-proxy",
+        Rn = "relay-proxy/*",
+        Type = ResourceTypes.RelayProxy
+    };
 
     public static readonly Resource AllProject = new()
     {

@@ -1,0 +1,25 @@
+@import "variables";
+
+section.body-container {
+  nz-input-group.query {
+    width: 520px;
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .proxy-healthy {
+      color: @primary-color;
+    }
+
+    .proxy-sick {
+      color: @yellow55-color;
+    }
+
+    .proxy-unhealthy {
+      color: @red50-color;
+    }
+  }
+}

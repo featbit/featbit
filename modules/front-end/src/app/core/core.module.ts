@@ -84,6 +84,7 @@ import { AccessTokenStatusPipe } from "@core/pipes/access-token-status.pipe";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { GuideComponent } from "@core/components/guide/guide.component";
 import { PrismComponent } from './components/prism/prism.component';
+import { RelayProxyDrawerComponent } from "@core/components/relay-proxy-drawer/relay-proxy-drawer.component";
 
 @NgModule({
   declarations: [
@@ -124,6 +125,7 @@ import { PrismComponent } from './components/prism/prism.component';
     ChangeListComponent,
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
+    RelayProxyDrawerComponent,
     PrismComponent
   ],
   imports: [
@@ -213,6 +215,7 @@ import { PrismComponent } from './components/prism/prism.component';
     ChangeListComponent,
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
+    RelayProxyDrawerComponent,
     PrismComponent
   ]
 })

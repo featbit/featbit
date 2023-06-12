@@ -26,8 +26,8 @@ export class IAMGuard implements CanActivate {
     const isGranted = this.permissionsService.isGranted(generalResourceRNPattern.iam, permissionActions.CanManageIAM);
 
     if (!isGranted) {
-      this.message.warning(this.permissionsService.genericDenyMessage);
-      return this.router.parseUrl('/');
+      this.message.warning($localize`:@@permissions.no-permissions-to-visit-iam-page:You don't have permissions to visit IAM, please contact the admin to grant you the necessary permissions`);
+      return false;
     }
 
     return isGranted;

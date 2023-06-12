@@ -73,6 +73,11 @@ export class SafeComponent implements OnInit {
         path: '/organizations'
       },
       {
+        title: $localize `:@@menu.relay-proxies:Relay Proxies`,
+        icon: 'icons:icon-relay-proxy',
+        path: '/relay-proxies'
+      },
+      {
         title: $localize `:@@menu.iam:IAM`,
         icon: 'icons:icon-user-permission',
         path: '/iam/team',
