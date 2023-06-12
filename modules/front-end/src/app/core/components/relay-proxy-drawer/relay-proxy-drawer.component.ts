@@ -186,12 +186,12 @@ export class RelayProxyDrawerComponent implements OnInit {
 
     return new Promise((resolve, reject) => {
       this.relayProxyService.getAgentStatus(this._relayProxy.id, host).subscribe({
-        next: (res) => {
-          this.agentStatusDict[agentId] = res.type;
-          this.agentStatus = JSON.stringify(res, null, 2);
+        next: (status) => {
+          this.agentStatusDict[agentId] = status.type;
+          this.agentStatus = JSON.stringify(status, null, 2);
           resolve(null);
         },
-        error: (_) => {
+        error: () => {
           this.agentStatusDict[agentId] = AgentStatusEnum.None;
           this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
           reject();
@@ -303,30 +303,23 @@ export class RelayProxyDrawerComponent implements OnInit {
           this.close.emit({isEditing: false});
           this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         },
-        error: (_) => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),
+        error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),
       })
     } else {
       this.relayProxyService.create(payload).subscribe({
-        next: (res) => {
+        next: (relayProxy) => {
           this.isCreationConfirmModalVisible = true;
-          this._relayProxy = res;
+          this._relayProxy = relayProxy;
           this.close.emit({isEditing: false});
           this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         },
-        error: (_) => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),
+        error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`),
       })
     }
   }
 
-  private _visible: boolean = false;
-
   @Input()
-  set visible(visible: boolean) {
-    this._visible = visible;
-  }
-  get visible() {
-    return this._visible;
-  }
+  visible: boolean = false;
 
   agentStatusModalVisible: boolean = false;
   closeAgentStatusModal() {
