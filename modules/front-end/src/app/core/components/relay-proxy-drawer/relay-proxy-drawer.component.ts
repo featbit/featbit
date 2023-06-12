@@ -17,16 +17,10 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
   styleUrls: ['./relay-proxy-drawer.component.less']
 })
 export class RelayProxyDrawerComponent implements OnInit {
-  private _relayProxy: RelayProxy;
-
   form: FormGroup;
-
   isEditing: boolean = false;
 
-  agentStatusHealthy = AgentStatusEnum.Healthy;
-  agentStatusUnhealthy = AgentStatusEnum.Unhealthy;
-  agentStatusLoading = AgentStatusEnum.Loading;
-  agentStatusNone = AgentStatusEnum.None;
+  protected readonly AgentStatusEnum = AgentStatusEnum;
 
   agentStatusDict: {[id: string]: AgentStatusEnum} = {};
   // indicate if the agent is synchronizing
@@ -36,6 +30,7 @@ export class RelayProxyDrawerComponent implements OnInit {
 
   @Input() readonly: boolean = false;
 
+  _relayProxy: RelayProxy;
   @Input()
   set relayProxy(relayProxy: RelayProxy) {
     this.isEditing = relayProxy && !!relayProxy.id;
@@ -305,7 +300,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     payload.agents = payload.agents.map((agent) => ({...agent, syncAt: agent.syncAt || null}));
     if (this.isEditing) {
       this.relayProxyService.update({...payload, id: this._relayProxy.id}).subscribe({
-        next: (res) => {
+        next: () => {
           this.close.emit({isEditing: false});
           this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         },
