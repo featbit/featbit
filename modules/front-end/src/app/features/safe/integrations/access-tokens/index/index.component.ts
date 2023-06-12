@@ -87,12 +87,9 @@ export class IndexComponent implements OnInit {
   getAccessTokens() {
     this.isLoading = true;
     this.accessTokenService.getList(this.filter).subscribe({
-      next: (accessTokens) => {
-        this.accessTokens = accessTokens;
-      },
+      next: (accessTokens) => this.accessTokens = accessTokens,
       error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
-      complete: () => this.isLoading = false
-    });
+    }).add(() => this.isLoading = false);
   }
 
   doSearch(resetPage?: boolean) {
