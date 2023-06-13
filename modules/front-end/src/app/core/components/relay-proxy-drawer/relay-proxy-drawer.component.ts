@@ -238,12 +238,11 @@ export class RelayProxyDrawerComponent implements OnInit {
   cancel() {
     const { agents } = this.form.value;
 
-    if (this.isEditing) {
-      this.close.emit({ isEditing: this.isEditing, ...this._relayProxy, agents: agents});
-      return;
-    }
+    let data = this.isEditing
+      ? { isEditing: true, ...this._relayProxy, agents: agents }
+      : null;
 
-    this.close.emit();
+    this.close.emit(data);
   }
 
   doSubmit() {
