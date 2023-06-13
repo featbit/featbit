@@ -477,7 +477,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">251</context>
+          <context context-type="linenumber">250</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/permissions.service.ts</context>
@@ -533,15 +533,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">315</context>
+          <context context-type="linenumber">314</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">325</context>
+          <context context-type="linenumber">324</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">355</context>
+          <context context-type="linenumber">354</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
@@ -729,11 +729,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">317</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">327</context>
+          <context context-type="linenumber">326</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
@@ -817,7 +817,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">364</context>
+          <context context-type="linenumber">363</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -1517,7 +1517,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">357</context>
+          <context context-type="linenumber">356</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
@@ -3812,7 +3812,7 @@
         <source>At least one environment scope is required</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">295</context>
+          <context context-type="linenumber">294</context>
         </context-group>
         <target>请添加至少一个环境</target>
       </trans-unit>
@@ -3820,7 +3820,7 @@
         <source>At least one agent is required</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">300</context>
+          <context context-type="linenumber">299</context>
         </context-group>
         <target>请设置至少一个代理</target>
       </trans-unit>
