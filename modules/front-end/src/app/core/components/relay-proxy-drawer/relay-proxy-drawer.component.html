@@ -110,7 +110,13 @@
                   <th nzWidth="290px" i18n="@@common.host">Host</th>
                   <th nzWidth="100px" nzAlign="center">
                     <ng-container i18n="@@common.status">Status</ng-container>
-                    <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@relay-proxy.click-status-icon-to-refresh-and-view-status-detail" nz-tooltip="The status of the agent, click icon to refresh and view the status detail"></i>
+                    <i [nz-tooltip]="statusTooltip" style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline">
+                      <ng-template #statusTooltip>
+                        <ng-container i18n="@@relay-proxy.click-status-icon-to-refresh-and-view-status-detail">The status of the agent, click icon to refresh and view the status detail</ng-container>
+                        <br>
+                        <a target="_blank" href="https://docs.featbit.co/docs/relay-proxy/relay-proxy#agent-status" i18n="@@common.check-the-repo">Check the status meaning</a>
+                      </ng-template>
+                    </i>
                   </th>
                   <th nzWidth="120px" nzAlign="center" i18n="@@common.last-sync">Last Sync</th>
                   <th nzWidth="200px" nzAlign="center" i18n="@@common.actions">Actions</th>
@@ -142,12 +148,24 @@
                         <i nz-icon nzType="issues-close"></i>
                         <span i18n="@@common.unhealthy">Unhealthy</span>
                       </div>
+                      <div class="status-wrapper"
+                           *ngIf="agentStatusDict[agent.value['id']] === AgentStatusEnum.Unreachable"
+                           (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
+                        <i nz-icon nzType="close-circle"></i>
+                        <span i18n="@@common.unreachable">Unreachable</span>
+                      </div>
+                      <div class="status-wrapper"
+                           *ngIf="agentStatusDict[agent.value['id']] === AgentStatusEnum.Unauthorized"
+                           (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
+                        <i nz-icon nzType="stop"></i>
+                        <span i18n="@@common.unauthorized">Unauthorized</span>
+                      </div>
                       <div class="status-wrapper" *ngIf="agentStatusDict[agent.value['id']] === AgentStatusEnum.Loading">
                         <i nz-icon nzType="loading" i18n-nz-tooltip="@@common.loading" nz-tooltip="Loading..."></i>
                       </div>
                       <button class="status-wrapper" nz-button nzSize="small" nzType="link"
                            [disabled]="agent.value['host'] === ''"
-                           *ngIf="isEditing && agentStatusDict[agent.value['id']] === AgentStatusEnum.None"
+                           *ngIf="isEditing && agentStatusDict[agent.value['id']] === AgentStatusEnum.Unknown"
                            (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
                         <span i18n="@@common.check">Check</span>
                       </button>

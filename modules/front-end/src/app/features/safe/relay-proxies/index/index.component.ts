@@ -60,7 +60,7 @@ export class IndexComponent implements OnInit {
               proxy.description,
               proxy.isAllEnvs,
               proxy.scopes,
-              proxy.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.None })),
+              proxy.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.Unknown })),
               proxy.key
             ))
           };
@@ -79,7 +79,7 @@ export class IndexComponent implements OnInit {
             agent.status = res.type;
           },
           error: (_) => {
-            agent.status = AgentStatusEnum.None;
+            agent.status = AgentStatusEnum.Unknown;
           }
         })
       })
@@ -129,7 +129,7 @@ export class IndexComponent implements OnInit {
             data.description,
             data.isAllEnvs,
             data.scopes,
-            data.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.None })),
+            data.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.Unknown })),
             rp.key);
 
           this.fetchRelayProxiesStatus([result]);

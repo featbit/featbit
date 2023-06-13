@@ -99,7 +99,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     let agentArrayForm: FormArray<any> = this.fb.array([]);
     if (relayProxy.agents.length > 0) {
       agentArrayForm = this.fb.array(relayProxy.agents.map((agent) => {
-        this.agentStatusDict[agent.id] = AgentStatusEnum.None;
+        this.agentStatusDict[agent.id] = AgentStatusEnum.Unknown;
         this.getAgentStatusInfoAsync(agent.id, agent.host);
         return this.fb.group({
           id: [agent.id, Validators.required],
@@ -150,7 +150,7 @@ export class RelayProxyDrawerComponent implements OnInit {
       isNew: [true, Validators.required], // this is only for UI to display, the value won't be posted to server
     });
 
-    this.agentStatusDict[agentId] = AgentStatusEnum.None;
+    this.agentStatusDict[agentId] = AgentStatusEnum.Unknown;
     this.agents.push(agentForm);
     this.refreshFormArray('agents');
   }
@@ -192,7 +192,7 @@ export class RelayProxyDrawerComponent implements OnInit {
           resolve(null);
         },
         error: () => {
-          this.agentStatusDict[agentId] = AgentStatusEnum.None;
+          this.agentStatusDict[agentId] = AgentStatusEnum.Unknown;
           this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
           reject();
         }

@@ -1,4 +1,6 @@
-﻿using Domain.RelayProxies;
+﻿using System.Net;
+using Domain.RelayProxies;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.RelayProxies;
 
@@ -24,7 +26,16 @@ public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, AgentStatus
     {
         var relayProxy = await _relayProxyService.GetAsync(request.RelayProxyId);
 
-        var status = await _agentService.GetStatusAsync(request.Host, relayProxy.Key);
-        return status;
+        try
+        {
+            var status = await _agentService.GetStatusAsync(request.Host, relayProxy.Key);
+            return status;
+        }
+        catch (HttpRequestException ex)
+        {
+            return ex.StatusCode == HttpStatusCode.Unauthorized ? 
+                AgentStatus.Unauthorized() : 
+                AgentStatus.Unreachable();
+        }
     }
 }
