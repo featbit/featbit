@@ -3626,10 +3626,6 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">94,96</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">117,118</context>
-        </context-group>
         <target>查看项目仓库</target>
       </trans-unit>
       <trans-unit id="common.host" datatype="html">
@@ -3671,6 +3667,14 @@
           <context context-type="linenumber">115,117</context>
         </context-group>
         <target>代理状态，点击图标以刷新和查看详细状态信息</target>
+      </trans-unit>
+      <trans-unit id="common.check-status-definition" datatype="html">
+        <source>Check the status definition</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">117,119</context>
+        </context-group>
+        <target>查看定义</target>
       </trans-unit>
       <trans-unit id="common.last-sync" datatype="html">
         <source>Last Sync</source>
