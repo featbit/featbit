@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using Domain.RelayProxies;
-using Microsoft.AspNetCore.Http;
 
 namespace Application.RelayProxies;
 
@@ -33,9 +32,9 @@ public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, AgentStatus
         }
         catch (HttpRequestException ex)
         {
-            return ex.StatusCode == HttpStatusCode.Unauthorized ? 
-                AgentStatus.Unauthorized() : 
-                AgentStatus.Unreachable();
+            return ex.StatusCode == HttpStatusCode.Unauthorized
+                ? AgentStatus.Unauthorized()
+                : AgentStatus.Unreachable();
         }
     }
 }
