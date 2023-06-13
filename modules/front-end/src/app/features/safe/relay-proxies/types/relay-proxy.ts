@@ -21,7 +21,9 @@ export interface IPagedRelayProxy {
 export enum AgentStatusEnum {
   Healthy = 'healthy',
   Unhealthy = 'unhealthy',
-  None = 'none',
+  Unknown = 'unknown',
+  Unreachable = 'unreachable',
+  Unauthorized = 'unauthorized',
   Loading = 'loading'
 }
 

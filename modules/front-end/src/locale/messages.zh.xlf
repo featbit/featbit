@@ -81,7 +81,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">130</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
@@ -381,7 +381,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">184,185</context>
+          <context context-type="linenumber">202,203</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -433,11 +433,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">207,209</context>
+          <context context-type="linenumber">225,227</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">239,240</context>
+          <context context-type="linenumber">257,258</context>
         </context-group>
         <target>OK</target>
       </trans-unit>
@@ -477,7 +477,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">240</context>
+          <context context-type="linenumber">250</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/permissions.service.ts</context>
@@ -533,15 +533,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">304</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
           <context context-type="linenumber">314</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">344</context>
+          <context context-type="linenumber">324</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
+          <context context-type="linenumber">354</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
@@ -729,11 +729,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">306</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">316</context>
+          <context context-type="linenumber">326</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
@@ -817,7 +817,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">353</context>
+          <context context-type="linenumber">363</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -985,7 +985,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">146,147</context>
+          <context context-type="linenumber">164,165</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -1517,7 +1517,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">346</context>
+          <context context-type="linenumber">356</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
@@ -3169,7 +3169,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">116,117</context>
+          <context context-type="linenumber">122,123</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
@@ -3357,7 +3357,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">172,173</context>
+          <context context-type="linenumber">190,191</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -3636,7 +3636,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>地址</target>
       </trans-unit>
@@ -3664,15 +3664,23 @@
         <source>The status of the agent, click icon to refresh and view the status detail</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">113,115</context>
+          <context context-type="linenumber">115,117</context>
         </context-group>
         <target>代理状态，点击图标以刷新和查看详细状态信息</target>
+      </trans-unit>
+      <trans-unit id="common.check-status-definition" datatype="html">
+        <source>Check the status definition</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">117,119</context>
+        </context-group>
+        <target>查看定义</target>
       </trans-unit>
       <trans-unit id="common.last-sync" datatype="html">
         <source>Last Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">115,116</context>
+          <context context-type="linenumber">121,122</context>
         </context-group>
         <target>上次同步时间</target>
       </trans-unit>
@@ -3680,7 +3688,7 @@
         <source>Healthy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">137,138</context>
+          <context context-type="linenumber">143,144</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -3692,15 +3700,31 @@
         <source>Unhealthy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">143,144</context>
+          <context context-type="linenumber">149,150</context>
         </context-group>
         <target>不健康</target>
+      </trans-unit>
+      <trans-unit id="common.unreachable" datatype="html">
+        <source>Unreachable</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">155,156</context>
+        </context-group>
+        <target>无法连接</target>
+      </trans-unit>
+      <trans-unit id="common.unauthorized" datatype="html">
+        <source>Unauthorized</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">161,162</context>
+        </context-group>
+        <target>未授权</target>
       </trans-unit>
       <trans-unit id="common.check" datatype="html">
         <source>Check</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">152,153</context>
+          <context context-type="linenumber">170,171</context>
         </context-group>
         <target>查看</target>
       </trans-unit>
@@ -3708,7 +3732,7 @@
         <source>The agent setting must be saved to enable the synchronization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">163,164</context>
+          <context context-type="linenumber">181,182</context>
         </context-group>
         <target>保存修改后才能进行同步</target>
       </trans-unit>
@@ -3716,7 +3740,7 @@
         <source>Synchronize the flags and segments within the scopes to FeatBit agent</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">170,171</context>
+          <context context-type="linenumber">188,189</context>
         </context-group>
         <target>将所选环境中的开关和用户组同步到 FeatBit 代理</target>
       </trans-unit>
@@ -3724,7 +3748,7 @@
         <source>Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">170,171</context>
+          <context context-type="linenumber">188,189</context>
         </context-group>
         <target>同步</target>
       </trans-unit>
@@ -3732,7 +3756,7 @@
         <source>Agent status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">200,202</context>
+          <context context-type="linenumber">218,220</context>
         </context-group>
         <target>状态</target>
       </trans-unit>
@@ -3740,7 +3764,7 @@
         <source>Relay proxy created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">215,216</context>
+          <context context-type="linenumber">233,234</context>
         </context-group>
         <target>代理创建成功</target>
       </trans-unit>
@@ -3748,7 +3772,7 @@
         <source>Copy and save this key now, the key will be masked once you leave the page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">224,226</context>
+          <context context-type="linenumber">242,244</context>
         </context-group>
         <target>请复制并保存 Key，一旦离开该页面后，该 Key 将会被隐藏。</target>
       </trans-unit>
@@ -3788,7 +3812,7 @@
         <source>At least one environment scope is required</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">284</context>
+          <context context-type="linenumber">294</context>
         </context-group>
         <target>请添加至少一个环境</target>
       </trans-unit>
@@ -3796,7 +3820,7 @@
         <source>At least one agent is required</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">289</context>
+          <context context-type="linenumber">299</context>
         </context-group>
         <target>请设置至少一个代理</target>
       </trans-unit>

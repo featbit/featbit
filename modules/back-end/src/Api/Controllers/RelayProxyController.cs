@@ -34,8 +34,8 @@ public class RelayProxyController : ApiControllerBase
     {
         request.Id = id;
 
-        var relayProxy = await Mediator.Send(request);
-        return Ok(relayProxy);
+        var updated = await Mediator.Send(request);
+        return Ok(updated);
     }
 
     [HttpGet("is-name-used")]
