@@ -1,0 +1,70 @@
+# Validate the api-server and evaluation-server when code changed
+# API Server
+# Evaluation Server
+
+name: FeatBit API & Evaluation server change validations
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/back-end/**'
+      - 'modules/evaluation-server/**'
+      - '.github/api-evaluation-validations.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'modules/back-end/**'
+      - 'modules/evaluation-server/**'
+      - '.github/api-evaluation-validations.yml'
+
+jobs:
+  validate-api-server:
+    name: Validate API Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name:  Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore dependencies
+        working-directory: ./modules/back-end
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ./modules/back-end
+        run: dotnet build --no-restore
+
+      - name: Test
+        working-directory: ./modules/back-end
+        run: dotnet test --no-build --verbosity normal
+
+  validate-evaluation-server:
+    name: Validate Evaluation Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name:  Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore dependencies
+        working-directory: ./modules/evaluation-server
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ./modules/evaluation-server
+        run: dotnet build --no-restore
+
+      - name: Test
+        working-directory: ./modules/evaluation-server
+        run: dotnet test --no-build --verbosity normal
