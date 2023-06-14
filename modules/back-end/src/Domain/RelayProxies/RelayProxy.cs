@@ -4,6 +4,7 @@ public class RelayProxy : AuditedEntity
 {
     public Guid OrganizationId { get; set; }
 
+    
     public string Name { get; set; }
 
     public string Key { get; set; }
