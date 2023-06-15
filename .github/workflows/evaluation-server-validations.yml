@@ -1,0 +1,51 @@
+# Validate the evaluation-server when code changes
+
+name: Evaluation-Server change validations
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/evaluation-server/**'
+      - '.github/evaluation-server-validations.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'modules/evaluation-server/**'
+      - '.github/evaluation-server-validations.yml'
+
+jobs:
+
+  validate:
+    name: Validate Evaluation-Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name:  Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore dependencies
+        working-directory: ./modules/evaluation-server
+        run: dotnet restore
+
+      - name: Build
+        working-directory: ./modules/evaluation-server
+        run: dotnet build --no-restore
+
+      - name: Test
+        working-directory: ./modules/evaluation-server
+        run: dotnet test --no-build --verbosity normal
+      
+      - name: Build - Evaluation-Server
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/evaluation-server"
+          file: ./deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: false
