@@ -46,5 +46,5 @@ jobs:
         with:
           context: "{{defaultContext}}:modules/back-end"
           file: ./deploy/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: false
