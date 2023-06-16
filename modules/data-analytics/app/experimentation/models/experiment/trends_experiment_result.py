@@ -73,7 +73,7 @@ class TrendsExperimentResult:
                           'conversionRate': format_float_positional(variation.mean) if variation.mean is not None else None
                           }
             return {**output,
-                    'changeToBaseline': change_to_baseline if change_to_baseline is not None else None,
+                    'changeToBaseline': change_to_baseline,
                     'confidenceInterval': variation.confidence_interval,
                     'pValue': format_float_positional(p_value) if p_value is not None else None,
                     'isBaseline': variation.key == baseline,
@@ -166,4 +166,4 @@ class TrendsExperimentResult:
                 sorted_valid_results[0]['isWinner'] = True
             elif sorted_valid_results[-1]['changeToBaseline'] > 0:
                 sorted_valid_results[-1]['isWinner'] = True
-        return sorted(map(lambda r: {**r, 'changeToBaseline': format_float_positional(r['changeToBaseline'])}, sorted_valid_results + invalid_results), key=lambda r: r['variationId'])
+        return sorted(map(lambda r: {**r, 'changeToBaseline': format_float_positional(r['changeToBaseline'])}, sorted_valid_results + invalid_results), key=lambda r: r['variationId'])  # type: ignore

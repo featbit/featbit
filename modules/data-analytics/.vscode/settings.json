@@ -20,5 +20,6 @@
         ".vscode-test": true,
         ".vscode test": true
     },
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "editor.formatOnSave": true
 }
