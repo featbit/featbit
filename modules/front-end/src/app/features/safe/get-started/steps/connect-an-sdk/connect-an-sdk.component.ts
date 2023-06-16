@@ -19,7 +19,7 @@ export class ConnectAnSdkComponent implements OnChanges {
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
 
-  sdkEndpoint: string = environment.evaluationUrl;
+  streamingURL: string = environment.evaluationUrl;
   streamingEndpoint: string = environment.evaluationUrl?.replace(/^http/, 'ws');
   apiHost: string = environment.url;
 
@@ -86,7 +86,7 @@ import fbClient from 'featbit-js-client-sdk';
 
 const option = {
   secret: '${this.secret}',
-  api: '${this.sdkEndpoint}',
+  api: '${this.streamingURL}',
   user: {
     name: '${this.tester.name}',
     keyId: '${this.tester.id}',
@@ -119,7 +119,7 @@ from fbclient import get, set_config
 from fbclient.config import Config
 
 env_secret = '${this.secret}'
-event_url = '${this.sdkEndpoint}'
+event_url = '${this.streamingURL}'
 streaming_url = '${this.streamingEndpoint}'
 
 set_config(Config(env_secret, event_url, streaming_url))
@@ -152,7 +152,7 @@ import java.io.IOException;
 class Main {
     public static void main(String[] args) throws IOException {
         String envSecret = "${this.secret}";
-        String eventUrl = "${this.sdkEndpoint}";
+        String eventUrl = "${this.streamingURL}";
         String streamUrl = "${this.streamingEndpoint}";
 
         FBConfig config = new FBConfig.Builder()
@@ -195,7 +195,7 @@ using FeatBit.Sdk.Server.Options;
 
 // setup sdk options
 var options = new FbOptionsBuilder("${this.secret}")
-    .Event(new Uri("${this.sdkEndpoint}"))
+    .Event(new Uri("${this.streamingURL}"))
     .Steaming(new Uri("${this.streamingEndpoint}"))
     .Build();
 
@@ -246,7 +246,7 @@ import (
 
 func main() {
     envSecret := "${this.secret}"
-    eventUrl := "${this.sdkEndpoint}"
+    eventUrl := "${this.streamingURL}"
     streamingUrl := "${this.streamingEndpoint}"
 
     client, err := featbit.NewFBClient(envSecret, streamingUrl, eventUrl)

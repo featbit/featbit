@@ -6124,13 +6124,13 @@
         </context-group>
         <target>SDK 配置</target>
       </trans-unit>
-      <trans-unit id="get-started.sdk-endpoint" datatype="html">
-        <source>SDK Endpoint</source>
+      <trans-unit id="get-started.streaming-url" datatype="html">
+        <source>Streaming URL</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
-        <target>SDK 端点</target>
+        <target>Streaming URL</target>
       </trans-unit>
       <trans-unit id="get-started.open-api-endpoint" datatype="html">
         <source>Open API Endpoint</source>
