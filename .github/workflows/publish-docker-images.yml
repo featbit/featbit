@@ -47,44 +47,44 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      # - name: Build and push - UI
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     context: "{{defaultContext}}:modules/front-end"
-      #     file: ./Dockerfile
-      #     platforms: linux/amd64,linux/arm64
-      #     push: true
-      #     tags: |
-      #       ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
-      #       ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.LATEST_TAG }}
-      #     cache-from: type=gha
-      #     cache-to: type=gha,mode=max
+      - name: Build and push - UI
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/front-end"
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      # - name: Build and push - API-Server
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     context: "{{defaultContext}}:modules/back-end"
-      #     file: ./deploy/Dockerfile
-      #     platforms: linux/amd64,linux/arm64
-      #     push: true
-      #     tags: |
-      #       ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
-      #       ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.LATEST_TAG }}
-      #     cache-from: type=gha
-      #     cache-to: type=gha,mode=max
+      - name: Build and push - API-Server
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/back-end"
+          file: ./deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      # - name: Build and push - Data-Analytics-Server
-      #   uses: docker/build-push-action@v3
-      #   with:
-      #     context: "{{defaultContext}}:modules/data-analytics"
-      #     file: ./Dockerfile
-      #     platforms: linux/amd64,linux/arm64
-      #     push: true
-      #     tags: |
-      #       ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.VERSION_TAG }}
-      #       ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.LATEST_TAG }}
-      #     cache-from: type=gha
-      #     cache-to: type=gha,mode=max
+      - name: Build and push - Data-Analytics-Server
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/data-analytics"
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.VERSION_TAG }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push - Evaluation-Server
         uses: docker/build-push-action@v3
@@ -99,17 +99,17 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # - name: Inspect image
-      #   run: |
-      #     docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}
 
-      # - name: Inspect image
-      #   run: |
-      #     docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}
 
-      # - name: Inspect image
-      #   run: |
-      #     docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}
 
       - name: Inspect image
         run: |
