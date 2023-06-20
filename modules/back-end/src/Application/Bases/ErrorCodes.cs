@@ -55,6 +55,7 @@ public static class ErrorCodes
     public const string InvalidTo = nameof(InvalidTo);
     public const string InvalidFlagKeyFormat = nameof(InvalidFlagKeyFormat);
     public const string InvalidSecretType = nameof(InvalidSecretType);
+    public const string FeatureFlagKeyHasBeenUsed = nameof(FeatureFlagKeyHasBeenUsed);
 
     // triggers
     public const string InvalidTriggerType = nameof(InvalidTriggerType);

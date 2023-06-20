@@ -2,6 +2,7 @@ using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
+using Application.Bases.Exceptions;
 
 namespace Application.FeatureFlags;
 
@@ -50,6 +51,12 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
 
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
+        var isKeyBeenUsed = await _service.IsFeatureFlagKeyUsedAsync(request.EnvId, request.Key);
+        if (isKeyBeenUsed)
+        {
+            throw new BusinessException(ErrorCodes.FeatureFlagKeyHasBeenUsed);
+        }
+
         var flag = new FeatureFlag(request.EnvId, request.Name, request.Description, request.Key, _currentUser.Id);
         await _service.AddOneAsync(flag);
 

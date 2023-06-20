@@ -3,6 +3,7 @@ using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Infrastructure.FeatureFlags;
 
@@ -75,6 +76,11 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
         }
 
         return flag;
+    }
+
+    public async Task<bool> IsFeatureFlagKeyUsedAsync(Guid envId, string key)
+    {
+        return await Queryable.AnyAsync(x => x.EnvId == envId && x.Key == key);
     }
 
     public async Task DeleteAsync(Guid id)
