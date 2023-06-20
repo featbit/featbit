@@ -219,7 +219,7 @@
 
   <ng-template #modalFooter>
     <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="featureFlagForm.invalid" (click)="create()" i18n="@@common.save">Save</button>
+    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!featureFlagForm.valid" (click)="create()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>
 
