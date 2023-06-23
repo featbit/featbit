@@ -50,7 +50,7 @@ export class ServeComponent implements OnChanges {
 
   setUp(): void {
     if (isNotPercentageRollout(this.ruleVariations) && this.selectedVariationId !== '-1') {
-      this.selectedVariationId = this.ruleVariations[0]?.id ?? (this.selectedVariationId !== '-1' ? this.selectedVariationId : undefined);
+      this.selectedVariationId = this.ruleVariations[0]?.id ?? this.selectedVariationId;
       this.ruleVariationValues = this.availableVariations.map((v, idx) => ({
         rollout: [0, idx === 0 ? 1 : 0],
         id: v.id,
