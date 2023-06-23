@@ -27,6 +27,7 @@ public class DataSyncController : ApiControllerBase
     [RequestSizeLimit(510 * 1024 * 1024)]
     // single file max size: 500MB 
     [RequestFormLimits(ValueLengthLimit = 500 * 1024 * 1024)]
+    [Consumes("multipart/form-data")]
     public async Task<ApiResponse<bool>> UploadAsync(Guid envId, IFormFile? file)
     {
         if (file is not { Length: > 0 })
