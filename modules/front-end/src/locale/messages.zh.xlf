@@ -1199,7 +1199,7 @@
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
           <context context-type="linenumber">22,24</context>
         </context-group>
-        <target>预览</target>
+        <target>预览并保存</target>
       </trans-unit>
       <trans-unit id="ff.targeting.the-following-changes-may-affect-insights" datatype="html">
         <source>The following changes may affects the insights data</source>

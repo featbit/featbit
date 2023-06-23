@@ -130,9 +130,25 @@ export class TargetingComponent implements OnInit {
     this.isLoading = true;
     this.route.paramMap.subscribe(paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.loadData());
+      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
       this.loadData();
     });
+  }
+
+  async refreshFeatureFlag() {
+    this.featureFlagService.getByKey(this.key).subscribe({
+      next: (result: IFeatureFlag) => {
+        this.featureFlag.variations = this.featureFlag.variations.map((v) => {
+          const resultVariation = result.variations.find((rv) => rv.id === v.id);
+
+          return {
+            ...v,
+            value: resultVariation.value
+          };
+        });
+      },
+      error: (err) => console.log('Error', err)
+    })
   }
 
   async loadData() {
