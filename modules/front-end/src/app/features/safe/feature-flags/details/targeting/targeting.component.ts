@@ -139,6 +139,7 @@ export class TargetingComponent implements OnInit {
     this.featureFlagService.getByKey(this.key).subscribe({
       next: (result: IFeatureFlag) => {
         this.featureFlag.variations = [...result.variations];
+        this.featureFlag.originalData.variations = [...result.variations];
         this.featureFlag.variations.forEach(v => {
           this.targetingUsersByVariation[v.id] = this.targetingUsersByVariation[v.id] ?? [];
         });
