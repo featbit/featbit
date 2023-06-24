@@ -69,7 +69,7 @@ public class Insight
                 type = metric.Type,
                 eventName = metric.EventName,
                 numericValue = metric.NumericValue,
-                user = User!,
+                user = new { keyId = User!.KeyId, name = User!.Name },
                 applicationType = metric.AppType,
                 projectId = string.Empty,
                 envId = envId.ToString(),
