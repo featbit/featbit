@@ -64,11 +64,21 @@ export class TargetingComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe( paramMap => {
       this.id = decodeURIComponent(paramMap.get('id'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.loadData());
+      this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.refreshData());
       this.loadData();
       this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
         this.flagReferences = [...flags];
       });
+    })
+  }
+
+  private async refreshData() {
+    return this.segmentService.getSegment(this.id).subscribe((result: ISegment) => {
+      if (result) {
+        const { name, description } = result;
+        this.segmentDetail.name = name;
+        this.segmentDetail.description = description;
+      }
     })
   }
 

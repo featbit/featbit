@@ -135,7 +135,7 @@ export class TargetingComponent implements OnInit {
     });
   }
 
-  async refreshFeatureFlag() {
+  private async refreshFeatureFlag() {
     this.featureFlagService.getByKey(this.key).subscribe({
       next: (result: IFeatureFlag) => {
         this.featureFlag.variations = [...result.variations];
