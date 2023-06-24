@@ -1,5 +1,7 @@
 from typing import Any, Dict, List
 
+import pandas as pd
+
 from app.clickhouse.models.event.sql import event_table_name
 from app.mongodb.models.event.util import get_events_sample_from_mongod
 
@@ -120,7 +122,10 @@ def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], props_test: bo
     if df_ff_events.empty:
         return []
     df_metric_events = get_events_sample_from_mongod(_query_metric_events_sample_from_mongod(query_params), cols=['user_key', 'weight'])
-    if props_test and not df_metric_events.empty:
+    if df_metric_events.empty:
+        df_metric_events = pd.DataFrame({'user_key': pd.Series(dtype='str'),
+                                         'weight': pd.Series(dtype='float')})
+    elif props_test:
         df_metric_events["weight"] = 1.0
 
     df = df_ff_events.merge(df_metric_events, on='user_key', how='left') \

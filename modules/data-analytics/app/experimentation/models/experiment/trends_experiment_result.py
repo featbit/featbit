@@ -89,7 +89,7 @@ class TrendsExperimentResult:
                 output.append(standard_output(variation, self._expt.baseline, None, None, False, True))
         else:
             for variation in variations.values():
-                change_to_baseline = variation.mean - baseline_var.mean if not self._expt.is_numeric_expt else (variation.mean - baseline_var.mean) / baseline_var.mean  # type: ignore
+                change_to_baseline = variation.mean - baseline_var.mean if self._expt.is_numeric_expt else (variation.mean - baseline_var.mean) / baseline_var.mean  # type: ignore
                 p_value = self._p_value(baseline_var, variation) if variation.exposure > 0 else None  # type: ignore
                 is_result_invalid = not self._variation_valid(baseline_var, variation, p_value, alpha=self.default_alpha) if variation.exposure > 0 else True  # type: ignore
                 output.append(standard_output(variation, self._expt.baseline, change_to_baseline, p_value, False, is_result_invalid))
