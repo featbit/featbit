@@ -11,7 +11,7 @@ spec:
     fsGroup: 1001
   initContainers:
     - name: volume-permissions
-      image: bitnami/kafka:3.2.3
+      image: bitnami/kafka:3.4
       command:
         - /bin/bash
       args:
@@ -38,7 +38,7 @@ spec:
           mountPath: /bitnami/kafka
   containers:
     - name: kafka
-      image: bitnami/kafka:3.2.3
+      image: bitnami/kafka:3.4
       ports:
         - containerPort: 9092
         - containerPort: 29092
@@ -77,6 +77,8 @@ spec:
           value: "compact"
         - name: KAFKA_CFG_ZOOKEEPER_CONNECT
           value: zookeeper:2181
+        - name: KAFKA_ENABLE_KRAFT
+          value: 'no'
       resources: 
         requests:
           memory: 1Gi
