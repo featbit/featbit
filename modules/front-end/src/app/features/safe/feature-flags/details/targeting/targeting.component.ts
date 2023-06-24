@@ -130,9 +130,22 @@ export class TargetingComponent implements OnInit {
     this.isLoading = true;
     this.route.paramMap.subscribe(paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.loadData());
+      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
       this.loadData();
     });
+  }
+
+  private async refreshFeatureFlag() {
+    this.featureFlagService.getByKey(this.key).subscribe({
+      next: (result: IFeatureFlag) => {
+        this.featureFlag.variations = [...result.variations];
+        this.featureFlag.originalData.variations = [...result.variations];
+        this.featureFlag.variations.forEach(v => {
+          this.targetingUsersByVariation[v.id] = this.targetingUsersByVariation[v.id] ?? [];
+        });
+      },
+      error: (err) => console.log('Error', err)
+    })
   }
 
   async loadData() {

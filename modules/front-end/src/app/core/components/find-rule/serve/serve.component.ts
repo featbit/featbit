@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { getPercentageFromRolloutPercentageArray } from '@utils/index';
 import { IRuleVariation, isNotPercentageRollout, IVariation} from "@shared/rules";
 import { IUserProp } from "@shared/types";
@@ -14,7 +14,7 @@ interface IRuleVariationValue extends IRuleVariation {
   templateUrl: './serve.component.html',
   styleUrls: ['./serve.component.less']
 })
-export class ServeComponent implements OnInit {
+export class ServeComponent implements OnChanges {
 
   @Input() ruleVariations: IRuleVariation[] = [];
 
@@ -22,8 +22,6 @@ export class ServeComponent implements OnInit {
   @Input()
   set variationOptions(value: IVariation[]) {
     this.availableVariations = [...value];
-
-    this.ngOnInit();
   }
   @Input() dispatchKey: string;
 
@@ -40,15 +38,19 @@ export class ServeComponent implements OnInit {
   @Output() onDispatchKeyChange = new EventEmitter<string>();
   @Output() onPercentageChange = new EventEmitter<IRuleVariation[]>();
 
-  selectedVariationId: string = '-1';
+  selectedVariationId: string = undefined;
   ruleVariationValues: IRuleVariationValue[] = [];
   result: IRuleVariation[] = [];
 
   constructor() { }
 
-  ngOnInit(): void {
-    if (isNotPercentageRollout(this.ruleVariations)) {
-      this.selectedVariationId = this.ruleVariations[0]?.id;
+  ngOnChanges(changes: SimpleChanges) {
+    this.setUp();
+  }
+
+  setUp(): void {
+    if (isNotPercentageRollout(this.ruleVariations) && this.selectedVariationId !== '-1') {
+      this.selectedVariationId = this.ruleVariations[0]?.id ?? this.selectedVariationId;
       this.ruleVariationValues = this.availableVariations.map((v, idx) => ({
         rollout: [0, idx === 0 ? 1 : 0],
         id: v.id,
@@ -57,7 +59,7 @@ export class ServeComponent implements OnInit {
       }));
     } else {
       this.selectedVariationId = '-1';
-      this.ruleVariationValues = this.availableVariations.map(v => {
+      this.ruleVariationValues = this.ruleVariationValues.length !== 0 ? this.ruleVariationValues : this.availableVariations.map(v => {
         const rule = this.ruleVariations.find(x => x.id === v.id);
         const result = {
           rollout: [0, 0],
