@@ -138,13 +138,9 @@ export class TargetingComponent implements OnInit {
   async refreshFeatureFlag() {
     this.featureFlagService.getByKey(this.key).subscribe({
       next: (result: IFeatureFlag) => {
-        this.featureFlag.variations = this.featureFlag.variations.map((v) => {
-          const resultVariation = result.variations.find((rv) => rv.id === v.id);
-
-          return {
-            ...v,
-            value: resultVariation.value
-          };
+        this.featureFlag.variations = [...result.variations];
+        this.featureFlag.variations.forEach(v => {
+          this.targetingUsersByVariation[v.id] = this.targetingUsersByVariation[v.id] ?? [];
         });
       },
       error: (err) => console.log('Error', err)
