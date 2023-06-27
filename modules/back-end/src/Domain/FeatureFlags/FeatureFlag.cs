@@ -38,7 +38,16 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool IsArchived { get; set; }
 
-    public FeatureFlag(Guid envId, string name, string description, string key, Guid currentUserId) : base(currentUserId)
+    public FeatureFlag(
+        Guid envId,
+        string name,
+        string description,
+        string key,
+        string variationType,
+        ICollection<Variation> variations,
+        string disabledVariationId,
+        string enabledVariationId,
+        Guid currentUserId) : base(currentUserId)
     {
         EnvId = envId;
 
@@ -46,20 +55,14 @@ public class FeatureFlag : FullAuditedEntity
         Description = description;
         Key = key;
 
-        var falsyVariationId = Guid.NewGuid().ToString();
-        var truthyVariationId = Guid.NewGuid().ToString();
-        VariationType = VariationTypes.Boolean;
-        Variations = new List<Variation>
-        {
-            new(truthyVariationId, "true"),
-            new(falsyVariationId, "false")
-        };
+        VariationType = variationType;
+        Variations = variations;
 
         TargetUsers = Array.Empty<TargetUser>();
         Rules = Array.Empty<TargetRule>();
 
         IsEnabled = false;
-        DisabledVariationId = falsyVariationId;
+        DisabledVariationId = disabledVariationId;
         Fallthrough = new Fallthrough
         {
             IncludedInExpt = true,
@@ -67,7 +70,7 @@ public class FeatureFlag : FullAuditedEntity
             {
                 new()
                 {
-                    Id = truthyVariationId,
+                    Id = enabledVariationId,
                     Rollout = new double[] { 0, 1 },
                     ExptRollout = 1
                 }

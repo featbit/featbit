@@ -15,6 +15,31 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
     public string Key { get; set; }
 
     public string Description { get; set; }
+
+    public string VariationType { get; set; }
+
+    public ICollection<Variation> Variations { get; set; }
+
+    public string EnabledVariationId { get; set; }
+
+    public string DisabledVariationId { get; set; }
+
+    public FeatureFlag AsFeatureFlag(Guid currentUserId)
+    {
+        var flag = new FeatureFlag(
+            EnvId,
+            Name,
+            Description,
+            Key,
+            VariationType,
+            Variations,
+            DisabledVariationId,
+            EnabledVariationId,
+            currentUserId
+        );
+
+        return flag;
+    }
 }
 
 public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
@@ -27,6 +52,22 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
         RuleFor(x => x.Key)
             .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired)
             .Matches(FeatureFlag.KeyFormat).WithErrorCode(ErrorCodes.InvalidFlagKeyFormat);
+
+        RuleFor(x => x.VariationType)
+            .Must(VariationTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidVariationType);
+
+        RuleFor(x => x.Variations).NotEmpty()
+            .WithErrorCode(ErrorCodes.InvalidParameter("variations"));
+
+        RuleFor(x => x.DisabledVariationId)
+            .NotEmpty()
+            .Must((flag, variationId) => flag.Variations.Any(x => x.Id == variationId))
+            .WithErrorCode(ErrorCodes.InvalidParameter("disabledVariationId"));
+
+        RuleFor(x => x.EnabledVariationId)
+            .NotEmpty()
+            .Must((flag, variationId) => flag.Variations.Any(x => x.Id == variationId))
+            .WithErrorCode(ErrorCodes.InvalidParameter("enabledVariationId"));
     }
 }
 
@@ -57,7 +98,7 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
             throw new BusinessException(ErrorCodes.FeatureFlagKeyHasBeenUsed);
         }
 
-        var flag = new FeatureFlag(request.EnvId, request.Name, request.Description, request.Key, _currentUser.Id);
+        var flag = request.AsFeatureFlag(_currentUser.Id);
         await _service.AddOneAsync(flag);
 
         // write audit log
