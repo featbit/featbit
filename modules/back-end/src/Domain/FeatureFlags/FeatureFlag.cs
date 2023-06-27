@@ -47,6 +47,7 @@ public class FeatureFlag : FullAuditedEntity
         ICollection<Variation> variations,
         string disabledVariationId,
         string enabledVariationId,
+        ICollection<string> tags,
         Guid currentUserId) : base(currentUserId)
     {
         EnvId = envId;
@@ -78,7 +79,7 @@ public class FeatureFlag : FullAuditedEntity
         };
         ExptIncludeAllTargets = true;
 
-        Tags = Array.Empty<string>();
+        Tags = tags ?? Array.Empty<string>();
         IsArchived = false;
     }
 

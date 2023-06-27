@@ -24,6 +24,8 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
 
     public string DisabledVariationId { get; set; }
 
+    public ICollection<string> Tags { get; set; }
+
     public FeatureFlag AsFeatureFlag(Guid currentUserId)
     {
         var flag = new FeatureFlag(
@@ -35,6 +37,7 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
             Variations,
             DisabledVariationId,
             EnabledVariationId,
+            Tags,
             currentUserId
         );
 
