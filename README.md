@@ -46,7 +46,7 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 
 **Ship Code Safely**. Mitigate risks with Production Testing, roll out features to 1% of users initially then expanding progressively, and ensure instant error recovery without redeployment.
 
-**Targeted Experiences**. Giving you control over who sees each feature and when they see it. Release features to specific target users, and continuously measure and improve your buisness. 
+**Targeted Experiences**. Giving you control over who sees each feature and when they see it. Release features to specific target users, and continuously measure and improve your buisness.
 
 **Innovate Faster**. Decouples code deployments from feature releases. Deploy at will, and release any feature immediately upon request from the boss.
 
@@ -152,9 +152,9 @@ FeatBit offers a range of features including:
 
 ## Contribute
 
-Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals. 
+Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals.
 
-[**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ). 
+[**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
 
 ### Contributors
 
@@ -184,6 +184,7 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Shubh8899"><img src="https://avatars.githubusercontent.com/u/63413220?v=4?s=100" width="100px;" alt="Shubham Chauhan"/><br /><sub><b>Shubham Chauhan</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=Shubh8899" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/defqd"><img src="https://avatars.githubusercontent.com/u/104916752?v=4?s=100" width="100px;" alt="defqd"/><br /><sub><b>defqd</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=defqd" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/benirave"><img src="https://avatars.githubusercontent.com/u/23312114?v=4?s=100" width="100px;" alt="Bence Eros"/><br /><sub><b>Bence Eros</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=benirave" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
