@@ -14,6 +14,8 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
 
     public string Key { get; set; }
 
+    public bool IsEnabled { get; set; }
+    
     public string Description { get; set; }
 
     public string VariationType { get; set; }
@@ -33,6 +35,7 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
             Name,
             Description,
             Key,
+            IsEnabled,
             VariationType,
             Variations,
             DisabledVariationId,

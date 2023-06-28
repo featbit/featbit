@@ -109,9 +109,9 @@ export class FeatureFlagService {
     return this.http.get<string[]>(url);
   }
 
-  setTags(flag: IFeatureFlag): Observable<boolean> {
-    const url = `${this.baseUrl}/${flag.key}/tags`;
-    return this.http.put<boolean>(url, flag.tags);
+  setTags(flagKey: string, tags: string[]): Observable<boolean> {
+    const url = `${this.baseUrl}/${flagKey}/tags`;
+    return this.http.put<boolean>(url, tags);
   }
 
   public getInsights(filter: IInsightsFilter): Observable<IInsights[]> {

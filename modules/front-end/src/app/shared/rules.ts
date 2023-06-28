@@ -24,6 +24,7 @@ export interface ICondition {
 
 export interface IVariation {
   id: string,
+  name: string,
   value: string,
 
   // ui only

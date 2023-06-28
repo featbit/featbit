@@ -81,7 +81,7 @@ export class SettingComponent {
 
   onRemoveTag(tag: string) {
     this.featureFlag.removeTag(tag);
-    this.featureFlagService.setTags(this.featureFlag).subscribe(_ => {
+    this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);
     });
   }
@@ -92,7 +92,7 @@ export class SettingComponent {
       : this.selectedTag.trim();
 
     this.featureFlag.addTag(actualTag);
-    this.featureFlagService.setTags(this.featureFlag).subscribe(_ => {
+    this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);
     });
 
@@ -208,6 +208,7 @@ export class SettingComponent {
       ...this.featureFlag.variations,
       {
         id: uuidv4(),
+        name: '',
         value: null
       }
     ];

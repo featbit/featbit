@@ -43,6 +43,7 @@ public class FeatureFlag : FullAuditedEntity
         string name,
         string description,
         string key,
+        bool isEnabled,
         string variationType,
         ICollection<Variation> variations,
         string disabledVariationId,
@@ -62,7 +63,7 @@ public class FeatureFlag : FullAuditedEntity
         TargetUsers = Array.Empty<TargetUser>();
         Rules = Array.Empty<TargetRule>();
 
-        IsEnabled = false;
+        IsEnabled = isEnabled;
         DisabledVariationId = disabledVariationId;
         Fallthrough = new Fallthrough
         {
