@@ -154,11 +154,6 @@ export class FeatureFlagDrawerComponent implements OnInit {
       return;
     }
 
-    if (this.variations.length === 0) {
-      this.addVariation('True', 'true');
-      this.addVariation('False', 'false');
-    }
-
     // enable value inputs
     this.enableVariations();
   }

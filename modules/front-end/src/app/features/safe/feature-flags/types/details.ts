@@ -108,7 +108,6 @@ export interface ISettingPayload {
 
 export interface IVariationsPayload {
   key: string,
-  variationType: VariationTypeEnum,
   variations: IVariation[]
 }
 
