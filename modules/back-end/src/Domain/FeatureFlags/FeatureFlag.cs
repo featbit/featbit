@@ -154,11 +154,10 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public DataChange UpdateVariations(string variationType, ICollection<Variation> variations, Guid currentUserId)
+    public DataChange UpdateVariations(ICollection<Variation> variations, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
-        VariationType = variationType;
         Variations = variations;
 
         UpdatedAt = DateTime.UtcNow;
