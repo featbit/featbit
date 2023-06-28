@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { encodeURIComponentFfc, slugify, uuidv4 } from "@utils/index";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
@@ -18,6 +18,7 @@ import { editor } from "monaco-editor";
 export class FeatureFlagDrawerComponent implements OnInit {
 
   @Input() visible: boolean = false;
+  @Output() onClose = new EventEmitter();
 
   basicForm: FormGroup;
   variationForm: FormGroup;
@@ -233,7 +234,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
   //#endregion
 
   close() {
-    this.visible = false;
+    this.onClose.emit();
   }
 
   doSubmit() {

@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { encodeURIComponentFfc, getQueryParamsFromObject, slugify } from '@shared/utils';
+import { encodeURIComponentFfc, getQueryParamsFromObject } from '@shared/utils';
 import {
   IFeatureFlagListCheckItem,
   IFeatureFlagListFilter,
@@ -242,6 +242,10 @@ export class IndexComponent implements OnInit {
 
   //#region create switch
   creationDrawerVisible: boolean = false;
+
+  closeCreationDrawer() {
+    this.creationDrawerVisible = false;
+  }
 
   //#endregion
   onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {

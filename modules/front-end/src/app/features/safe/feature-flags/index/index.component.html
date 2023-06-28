@@ -170,7 +170,7 @@
   </div>
 </section>
 
-<feature-flag-drawer [visible]="creationDrawerVisible"></feature-flag-drawer>
+<feature-flag-drawer [visible]="creationDrawerVisible" (onClose)="closeCreationDrawer()"></feature-flag-drawer>
 
 <nz-modal
   nzAutofocus="cancel"
