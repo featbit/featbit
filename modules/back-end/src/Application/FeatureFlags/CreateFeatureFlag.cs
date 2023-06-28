@@ -64,6 +64,7 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
 
         RuleFor(x => x.Variations)
             .NotEmpty()
+            .Must(variations => variations.All(variation => variation.IsValid()))
             .WithErrorCode(ErrorCodes.InvalidParameter("variations"));
 
         RuleFor(x => x.DisabledVariationId)
