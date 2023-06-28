@@ -39,6 +39,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
   }
 
   ngOnInit() {
+    console.log('dd');
     this.initForm();
   }
 
@@ -229,6 +230,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
   //#endregion
 
   close() {
+    this.initForm();
     this.onClose.emit();
   }
 
