@@ -39,7 +39,6 @@ export class FeatureFlagDrawerComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log('dd');
     this.initForm();
   }
 
@@ -288,8 +287,6 @@ export class FeatureFlagDrawerComponent implements OnInit {
       variations: this.variations.value,
       ...this.defaultRuleForm.value,
     };
-
-    console.log(payload);
 
     this.featureFlagService.create(payload)
       .pipe(finalize(() => this.creating = false))
