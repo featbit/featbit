@@ -55,17 +55,18 @@ export class FeatureFlagDrawerComponent implements OnInit {
       description: ['', Validators.maxLength(512)]
     });
 
-    this.variationForm = this.fb.group({
-      variationType: ['boolean', Validators.required],
-      variations: this.fb.array([]),
-    });
-    this.setVariations('boolean');
-
     this.defaultRuleForm = this.fb.group({
       isEnabled: [false, Validators.required],
       enabledVariationId: ['', Validators.required],
       disabledVariationId: ['', Validators.required]
     });
+
+    this.variationForm = this.fb.group({
+      variationType: ['boolean', Validators.required],
+      variations: this.fb.array([]),
+    });
+
+    this.setVariations('boolean');
   }
 
   flagKeyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -151,11 +152,20 @@ export class FeatureFlagDrawerComponent implements OnInit {
       this.addVariation('True', 'true', true);
       this.addVariation('False', 'false', true);
 
+      this.setBooleanDefaultVariations();
       return;
     }
 
     // enable value inputs
     this.enableVariations();
+  }
+
+  private setBooleanDefaultVariations() {
+    const trueId = this.variations.at(0).value['id'];
+    const falseId = this.variations.at(1).value['id'];
+
+    this.defaultRuleForm.get('enabledVariationId').setValue(trueId);
+    this.defaultRuleForm.get('disabledVariationId').setValue(falseId);
   }
 
   private enableVariations() {
