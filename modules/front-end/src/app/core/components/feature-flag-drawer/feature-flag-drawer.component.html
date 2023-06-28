@@ -41,12 +41,6 @@
         </nz-form-item>
       </div>
       <nz-form-item>
-        <nz-form-label i18n="@@common.enable-by-default">Enable by default</nz-form-label>
-        <nz-form-control nzHasFeedback>
-          <nz-switch formControlName="isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
         <nz-form-label i18n="@@common.description">Description</nz-form-label>
         <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@common.description.cannot-exceed-512-characters">
           <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
@@ -146,6 +140,12 @@
     </nz-divider>
 
     <form nz-form [formGroup]="defaultRuleForm" nzLayout="vertical" class="form">
+      <nz-form-item>
+        <nz-form-label i18n="@@common.enable-by-default">Enable by default</nz-form-label>
+        <nz-form-control nzHasFeedback>
+          <nz-switch formControlName="isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
+        </nz-form-control>
+      </nz-form-item>
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.serve-if-enabled">If the flag is Enabled, serve</nz-form-label>
         <nz-form-control>

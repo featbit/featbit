@@ -51,7 +51,6 @@ export class FeatureFlagDrawerComponent implements OnInit {
     this.basicForm = this.fb.group({
       name: ['', Validators.required],
       key: ['', Validators.required, this.flagKeyAsyncValidator],
-      isEnabled: [false, Validators.required],
       description: ['', Validators.maxLength(512)]
     });
 
@@ -62,6 +61,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
     this.setVariations('boolean');
 
     this.defaultRuleForm = this.fb.group({
+      isEnabled: [false, Validators.required],
       enabledVariationId: ['', Validators.required],
       disabledVariationId: ['', Validators.required]
     });
