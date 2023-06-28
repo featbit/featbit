@@ -62,7 +62,7 @@
         <div *ngIf="isTargetUsersActive" style="margin-left: -12px;margin-top: 16px">
           <div class="content" *ngFor="let variation of featureFlag.variations; let i = index">
             <target-user
-              [type]="variation.value"
+              [type]="variation.name"
               [tipIdx]="i"
               [userList]="userList"
               [selectedUserDetailList]="targetingUsersByVariation[variation.id]"

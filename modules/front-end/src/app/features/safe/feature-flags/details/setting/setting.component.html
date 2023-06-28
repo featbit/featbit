@@ -65,8 +65,8 @@
           (ngModelChange)="onChangeDisabledVariation()"
           i18n-nzPlaceHolder="@@ff.select-variation"
           nzPlaceHolder="Select variation">
-          <nz-option *ngFor="let variation of lastSavedVariations" nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.value">
-            {{variation.value}}
+          <nz-option *ngFor="let variation of lastSavedVariations" nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.name">
+            {{variation.name}}
           </nz-option>
         </nz-select>
       </div>

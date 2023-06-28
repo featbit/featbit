@@ -405,7 +405,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">174,176</context>
+          <context context-type="linenumber">169,171</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -1025,7 +1025,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">146,147</context>
+          <context context-type="linenumber">141,142</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -1297,7 +1297,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">172,173</context>
+          <context context-type="linenumber">167,168</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
@@ -1497,7 +1497,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">212,213</context>
+          <context context-type="linenumber">207,208</context>
         </context-group>
         <target>基准特性</target>
       </trans-unit>
@@ -2181,7 +2181,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">168,170</context>
+          <context context-type="linenumber">163,165</context>
         </context-group>
         <target>格式化</target>
       </trans-unit>
@@ -2426,7 +2426,7 @@
         <target>所有选项数</target>
       </trans-unit>
       <trans-unit id="core.components.findrule.serve" datatype="html">
-        <source>serve</source>
+        <source>Serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/serve/serve.component.html</context>
           <context context-type="linenumber">3</context>
@@ -3437,7 +3437,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">214,216</context>
+          <context context-type="linenumber">209,211</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -3537,7 +3537,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">109</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -4280,11 +4280,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">171,172</context>
+          <context context-type="linenumber">166,167</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">242,243</context>
+          <context context-type="linenumber">237,238</context>
         </context-group>
         <target>关闭</target>
       </trans-unit>
@@ -4952,7 +4952,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">211,212</context>
+          <context context-type="linenumber">206,207</context>
         </context-group>
         <target>Metric 名称</target>
       </trans-unit>
@@ -4972,7 +4972,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">213,214</context>
+          <context context-type="linenumber">208,209</context>
         </context-group>
         <target>状态</target>
       </trans-unit>
@@ -4984,7 +4984,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">232,235</context>
+          <context context-type="linenumber">227,230</context>
         </context-group>
         <note priority="1" from="description">expt.overview.check-experiment</note>
         <target>查看实验</target>
@@ -5841,7 +5841,7 @@
         <source>number, boolean, null and empty string are all valid JSON</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <target>number, boolean, null 以及空字符串都是合法 JSON</target>
       </trans-unit>
@@ -5849,7 +5849,7 @@
         <source>Removing variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">188</context>
+          <context context-type="linenumber">183</context>
         </context-group>
         <target>删除返回值</target>
       </trans-unit>
@@ -5857,7 +5857,7 @@
         <source>This variation is used by <x id="INTERPOLATION" equiv-text="{{variationExptReferences.length}}"/> experiment(s), remove all references before the variation can be safely removed!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">196,197</context>
+          <context context-type="linenumber">191,192</context>
         </context-group>
         <target>该返回值正在被 <x id="INTERPOLATION" equiv-text="{{variationExptReferences.length}}"/> 个实验所引用，在删除该返回值之前需要先移除这些引用！</target>
       </trans-unit>

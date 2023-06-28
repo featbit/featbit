@@ -7,6 +7,6 @@ export class RuleVariationValuePipe implements PipeTransform {
   }
 
   transform(variationId: string, variationOptions: IVariation[]) {
-    return variationOptions.find(v => v.id === variationId)?.value || variationId;
+    return variationOptions.find(v => v.id === variationId)?.name || variationId;
   }
 }
