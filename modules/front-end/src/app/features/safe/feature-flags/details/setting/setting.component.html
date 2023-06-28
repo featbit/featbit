@@ -80,18 +80,13 @@
     </div>
     <div class="variation-type">
       <span class="label" i18n="@@common.data-type">Data type</span>
-      <ng-container *ngIf="!isEditingVariations">
-        <div class="value">
-          {{featureFlag.variationType}}
-          <i *ngIf="featureFlag.variationType === 'json'" nz-icon i18n-nz-tooltip="@@common.valid-json" nz-tooltip="number, boolean, null and empty string are all valid JSON" nzType="icons:icon-info-outline"></i>
-        </div>
-      </ng-container>
-      <nz-select *ngIf="isEditingVariations" [(ngModel)]="featureFlag.variationType" (ngModelChange)="validateVariationTypes()">
-        <nz-option  nzValue="string" nzLabel="string"></nz-option>
-        <nz-option  nzValue="boolean" nzLabel="boolean"></nz-option>
-        <nz-option  nzValue="number" nzLabel="number"></nz-option>
-        <nz-option  nzValue="json" nzLabel="json"></nz-option>
-      </nz-select>
+      <span class="value">
+        {{featureFlag.variationType}}
+        <i *ngIf="featureFlag.variationType === 'json'"
+           nz-icon
+           i18n-nz-tooltip="@@common.valid-json"
+           nz-tooltip="number, boolean, null and empty string are all valid JSON" nzType="icons:icon-info-outline"></i>
+      </span>
     </div>
     <div class="options">
       <div class="option-line" *ngFor="let variation of featureFlag.variations; let key=index; trackBy: trackById;">
