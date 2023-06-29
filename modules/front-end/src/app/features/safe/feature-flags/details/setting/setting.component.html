@@ -93,16 +93,6 @@
             <span class="variation-tip {{'tip-' + key % 9}}"></span>
             {{variation.name}}
           </div>
-          <!--        TODO: use this-->
-<!--          <ng-container *ngIf="isEditingVariations">-->
-<!--            <nz-input-group *ngIf="['json', 'string'].includes(featureFlag.variationType)" [nzSuffix]="suffixIconButton" [class]="{'invalid': variation.isInvalid}">-->
-<!--              <input type="text" nz-input [(ngModel)]="variation.value" (ngModelChange)="validateVariation(variation)"/>-->
-<!--              <ng-template #suffixIconButton>-->
-<!--                <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(variation)"></i>-->
-<!--              </ng-template>-->
-<!--            </nz-input-group>-->
-<!--            <input *ngIf="!['json', 'string'].includes(featureFlag.variationType)" class="simple" type="text" nz-input [(ngModel)]="variation.value" (ngModelChange)="validateVariation(variation)" [class]="{'invalid': variation.isInvalid}"/>-->
-<!--          </ng-container>-->
         <div class="right">
           <nz-tag nz-tooltip="{{variation.value}}">
             <span class="variation-value">{{variation.value}}</span>
@@ -112,19 +102,8 @@
           </i>
           <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variation.value)"></i>
         </div>
-<!--        TODO: use this-->
-<!--        <div *ngIf="isEditingVariations">-->
-<!--          <span class="delete-icon-wrapper" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariation(variation.id)">-->
-<!--            <i nz-icon nzType="icons:icon-delete"></i>-->
-<!--          </span>-->
-<!--        </div>-->
       </div>
     </div>
-    <!--        TODO: use this-->
-<!--    <div *ngIf="isEditingVariations" class="operations">-->
-<!--      <button nz-button class="cancel-btn" (click)="editVariations(true)">Cancel</button>-->
-<!--      <button nz-button class="save-btn" (click)="saveVariations()">Save</button>-->
-<!--    </div>-->
   </div>
 
   <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
@@ -201,7 +180,7 @@
       <nz-form-item>
         <nz-form-label
           nzRequired
-          nzTooltipTitle="We currently support string, boolean, number and json types, you can modify it in the feature flag detail page later"
+          nzTooltipTitle="We currently support string, boolean, number and json types. Once you have created a feature flag, you cannot change its variation type."
           i18n-nzTooltipTitle="@@common.variation-type-tooltip"
           i18n="@@common.variation-type">Variation type</nz-form-label>
         <nz-form-control>
