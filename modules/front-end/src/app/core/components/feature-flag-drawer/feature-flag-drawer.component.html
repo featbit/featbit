@@ -87,7 +87,9 @@
     <form nz-form [formGroup]="variationForm" nzLayout="vertical" class="form">
       <nz-form-item>
         <nz-form-label i18n-nzTooltipTitle="@@common.variation-type-tooltip"
-                       nzTooltipTitle="We currently support string, boolean, number and json types, you can modify it in the feature flag detail page later" nzRequired i18n="@@common.variation-type">Variation type</nz-form-label>
+                       nzTooltipTitle="We currently support string, boolean, number and json types, you can modify it in the feature flag detail page later"
+                       nzRequired
+                       i18n="@@common.variation-type">Variation type</nz-form-label>
         <nz-form-control>
           <nz-select
             class="variation-type-selector"
@@ -199,7 +201,13 @@
       {{currentEditingVariation.name}}
     </ng-template>
     <ng-template #modalContent>
-      <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentEditingVariation.value" [nzEditorOption]="{ language: variationType, theme: 'vs', minimap: { enabled: false }  }"></nz-code-editor>
+      <nz-code-editor
+        style="height: 400px"
+        class="editor"
+        (nzEditorInitialized)="formatCode($event)"
+        [(ngModel)]="currentEditingVariation.value"
+        [nzEditorOption]="{ language: variationType, theme: 'vs', minimap: { enabled: false }  }">
+      </nz-code-editor>
     </ng-template>
     <ng-template #modalFooter>
       <div style="display: flex;justify-content: space-between">
