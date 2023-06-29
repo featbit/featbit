@@ -190,13 +190,13 @@
 <!-- Edit Variations Modal -->
 <nz-modal
   [(nzVisible)]="editVariationModalVisible"
-  [nzTitle]="editVariationModalTitle"
   (nzOnCancel)="editVariationModalVisible = false"
   (nzOnOk)="saveVariations()">
-  <ng-template #editVariationModalTitle>
+  <div *nzModalTitle>
     <span i18n="@@ff.edit-variations">Edit Variations</span>
-  </ng-template>
-  <ng-container *nzModalContent>
+  </div>
+
+  <div *nzModalContent>
     <form nz-form [formGroup]="variationForm" nzLayout="vertical" class="form">
       <nz-form-item>
         <nz-form-label
@@ -208,12 +208,11 @@
           <nz-select
             i18n-nzPlaceHolder="@@common.variation-type"
             nzPlaceHolder="Variation type"
-            (ngModelChange)="onVariationTypeChanged($event)"
             formControlName="variationType">
-            <nz-option  nzValue="boolean" nzLabel="boolean"></nz-option>
-            <nz-option  nzValue="string" nzLabel="string"></nz-option>
-            <nz-option  nzValue="number" nzLabel="number"></nz-option>
-            <nz-option  nzValue="json" nzLabel="json"></nz-option>
+            <nz-option nzValue="boolean" nzLabel="boolean"></nz-option>
+            <nz-option nzValue="string" nzLabel="string"></nz-option>
+            <nz-option nzValue="number" nzLabel="number"></nz-option>
+            <nz-option nzValue="json" nzLabel="json"></nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>
@@ -240,13 +239,18 @@
           <i nz-icon *ngIf="showDeleteVariationButton" (click)="deleteVariation(i)" nzType="icons:icon-delete"></i>
         </div>
 
-        <button class="add-variation" *ngIf="variationType !== 'boolean'" nz-button nzType="link" (click)="addVariation('', '')">
+        <button class="add-variation" *ngIf="variationType !== 'boolean'" nz-button nzType="link" (click)="newVariation()">
           <span nz-icon nzType="plus" nzTheme="outline"></span>
           <span i18n="@@common.add-variation">Add variation</span>
         </button>
       </div>
     </form>
-  </ng-container>
+  </div>
+
+  <div *nzModalFooter>
+    <button nz-button nzType="default" (click)="editVariationModalVisible = false">Cancel</button>
+    <button nz-button nzType="primary" (click)="saveVariations()" [disabled]="!variationForm.valid">Save</button>
+  </div>
 </nz-modal>
 
 <!-- Expt Reference Modal -->

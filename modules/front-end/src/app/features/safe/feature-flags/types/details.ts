@@ -97,18 +97,10 @@ export enum VariationTypeEnum {
 }
 
 export interface ISettingPayload {
-  key:string,
   name: string;
   description: string;
   isEnabled: boolean;
-  variationType: VariationTypeEnum;
   disabledVariationId: string;
-  variations: IVariation[];
-}
-
-export interface IVariationsPayload {
-  key: string,
-  variations: IVariation[]
 }
 
 

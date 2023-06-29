@@ -12,10 +12,10 @@ import { catchError } from "rxjs/operators";
 import {
   IFeatureFlag,
   IFeatureFlagTargeting,
-  ISettingPayload,
-  IVariationsPayload
+  ISettingPayload
 } from "@features/safe/feature-flags/types/details";
 import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
+import { IVariation } from "@shared/rules";
 
 @Injectable({
   providedIn: 'root'
@@ -55,14 +55,14 @@ export class FeatureFlagService {
     );
   }
 
-  updateSetting(payload: ISettingPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.key}/settings`;
+  updateSetting(key: string, payload: ISettingPayload): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/settings`;
 
     return this.http.put<boolean>(url, payload);
   }
 
-  updateVariations(payload: IVariationsPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.key}/variations`;
+  updateVariations(key: string, payload: IVariation[]): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/variations`;
 
     return this.http.put<boolean>(url, payload);
   }
