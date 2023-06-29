@@ -166,7 +166,7 @@ export class SettingComponent {
     this.isEditingDescription = !this.isEditingDescription;
   }
 
-  //#region variations
+  //#region variations form
 
   variationForm: FormGroup;
 
@@ -192,10 +192,11 @@ export class SettingComponent {
 
     this.variationForm = this.formBuilder.group({
       variationType: [{ value: variationType, disabled: true }],
-      variations: this.formBuilder.array(
-        variations.map(variation => this.createVariationFormGroup(variation, variationType))
-      )
+      variations: this.formBuilder.array([])
     });
+
+    // init variations
+    variations.forEach(variation => this.variations.push(this.createVariationFormGroup(variation, variationType)));
 
     this.editVariationModalVisible = true;
   }
