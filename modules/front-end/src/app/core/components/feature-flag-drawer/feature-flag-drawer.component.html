@@ -78,7 +78,11 @@
       </div>
     </div>
 
-    <nz-divider i18n-nzText="@@common.variation-settings" nzText="Variation settings"></nz-divider>
+    <nz-divider [nzText]="variationSettings">
+      <ng-template #variationSettings>
+        <label i18n="@@common.variation-settings">Variation settings</label>
+      </ng-template>
+    </nz-divider>
 
     <form nz-form [formGroup]="variationForm" nzLayout="vertical" class="form">
       <nz-form-item>
@@ -128,7 +132,7 @@
       </div>
     </form>
 
-    <nz-divider i18n-nzText="@@common.default-rules" [nzText]="defaultRules">
+    <nz-divider [nzText]="defaultRules">
       <ng-template #defaultRules>
         <label i18n="@@common.default-rule">Default rule</label>
         <i [nz-tooltip]="defaultRuleTooltip" nz-icon nzType="icons:icon-info-outline">
