@@ -2193,16 +2193,16 @@
         </context-group>
         <target>设置当开关被打开或关闭时用户将默认接收到的返回值</target>
       </trans-unit>
-      <trans-unit id="common.enable-by-default" datatype="html">
-        <source>Enable by default</source>
+      <trans-unit id="common.on-off-status" datatype="html">
+        <source>ON/OFF Status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">154,155</context>
         </context-group>
-        <target>默认打开开关</target>
+        <target>开关状态</target>
       </trans-unit>
-      <trans-unit id="common.serve-if-enabled" datatype="html">
-        <source>If the flag is Enabled, serve</source>
+      <trans-unit id="common.serve-if-on" datatype="html">
+        <source>If the flag is ON, serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">160,161</context>
@@ -2211,7 +2211,7 @@
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">100</context>
         </context-group>
-        <target>如果开关被打开时，返回</target>
+        <target>开关打开时，返回</target>
       </trans-unit>
       <trans-unit id="common.select-variation" datatype="html">
         <source>Select variation</source>
@@ -2225,8 +2225,8 @@
         </context-group>
         <target>选择返回值</target>
       </trans-unit>
-      <trans-unit id="common.serve-if-disabled" datatype="html">
-        <source>If the flag is Disabled, serve</source>
+      <trans-unit id="common.serve-if-off" datatype="html">
+        <source>If the flag is OFF, serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">174,175</context>
@@ -2235,7 +2235,7 @@
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">104</context>
         </context-group>
-        <target>如果开关被关闭时，返回</target>
+        <target>开关关闭时，返回</target>
       </trans-unit>
       <trans-unit id="common.format" datatype="html">
         <source>Format</source>

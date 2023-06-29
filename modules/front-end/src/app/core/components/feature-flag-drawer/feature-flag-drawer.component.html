@@ -149,15 +149,15 @@
       </ng-template>
     </nz-divider>
 
-    <form nz-form [formGroup]="defaultRuleForm" nzLayout="vertical" class="form">
+    <form nz-form [formGroup]="defaultRuleForm" nzLayout="horizontal" class="form">
       <nz-form-item>
-        <nz-form-label i18n="@@common.enable-by-default">Enable by default</nz-form-label>
-        <nz-form-control nzHasFeedback>
+        <nz-form-label i18n="@@common.on-off-status">ON/OFF Status</nz-form-label>
+        <nz-form-control>
           <nz-switch formControlName="isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.serve-if-enabled">If the flag is Enabled, serve</nz-form-label>
+        <nz-form-label nzRequired i18n="@@common.serve-if-on">If the flag is ON, serve</nz-form-label>&nbsp;&nbsp;
         <nz-form-control>
           <nz-select
             class="default-rule-selector"
@@ -171,7 +171,7 @@
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.serve-if-disabled">If the flag is Disabled, serve</nz-form-label>
+        <nz-form-label nzRequired i18n="@@common.serve-if-off">If the flag is OFF, serve</nz-form-label>
         <nz-form-control>
           <nz-select
             class="default-rule-selector"
