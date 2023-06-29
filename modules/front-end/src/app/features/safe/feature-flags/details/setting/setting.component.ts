@@ -252,14 +252,14 @@ export class SettingComponent {
       return;
     }
 
-    const payload = this.variations.getRawValue();
-    // TODO: validate variation types
-
-    this.featureFlagService.updateVariations(this.key, payload).subscribe({
+    const variations = this.variations.getRawValue();
+    this.featureFlagService.updateVariations(this.key, variations).subscribe({
       next: () => {
+        this.featureFlag.variations = variations;
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
+        this.editVariationModalVisible = false;
+
         this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.isEditingTitle = false;
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
       },
       error: err => this.message.error(err.error)
     });

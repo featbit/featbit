@@ -61,10 +61,10 @@ export class FeatureFlagService {
     return this.http.put<boolean>(url, payload);
   }
 
-  updateVariations(key: string, payload: IVariation[]): Observable<boolean> {
+  updateVariations(key: string, variations: IVariation[]): Observable<boolean> {
     const url = `${this.baseUrl}/${key}/variations`;
 
-    return this.http.put<boolean>(url, payload);
+    return this.http.put<boolean>(url, { variations });
   }
 
   delete(key: string): Observable<boolean> {
