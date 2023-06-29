@@ -1,5 +1,5 @@
 import { IRule, IRuleVariation, IVariation } from "@shared/rules";
-import {deepCopy} from "@utils/index";
+import { deepCopy, isNumeric, tryParseJSONObject } from "@utils/index";
 
 export class FeatureFlag implements IFeatureFlag {
   originalData: IFeatureFlag;
@@ -103,4 +103,18 @@ export interface ISettingPayload {
   disabledVariationId: string;
 }
 
+export function isVariationValueValid(variationType: string, variationValue: string): boolean {
+  switch (variationType) {
+    case VariationTypeEnum.string:
+      return variationValue.trim().length > 0;
+    case VariationTypeEnum.boolean:
+      return variationValue === 'true' || variationValue === 'false';
+    case VariationTypeEnum.number:
+      return isNumeric(variationValue);
+    case VariationTypeEnum.json:
+      return tryParseJSONObject(variationValue);
+    default:
+      return false;
+  }
+}
 

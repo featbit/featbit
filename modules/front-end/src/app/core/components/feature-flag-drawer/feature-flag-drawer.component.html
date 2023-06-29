@@ -108,7 +108,7 @@
         <div class="variation-wrapper" [class]="{'with-extra-options': showDeleteVariationButton}" *ngFor="let variation of variations.controls; let i = index" [formGroupName]="i">
           <nz-form-item>
             <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-            <nz-form-control>
+            <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
               <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
             </nz-form-control>
           </nz-form-item>

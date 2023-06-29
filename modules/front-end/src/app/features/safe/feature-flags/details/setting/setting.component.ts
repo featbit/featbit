@@ -11,13 +11,14 @@ import {
   FeatureFlag,
   IFeatureFlag,
   ISettingPayload,
+  isVariationValueValid,
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
 import { IVariation } from "@shared/rules";
 import { ExperimentService } from "@services/experiment.service";
 import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
-import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 
 @Component({
   selector: 'ff-setting',
@@ -188,12 +189,11 @@ export class SettingComponent {
   editVariationModalVisible: boolean = false;
   editVariations(): void {
     const { variationType, variations } = this.featureFlag;
-    const isValueDisabled = variationType === VariationTypeEnum.boolean;
 
     this.variationForm = this.formBuilder.group({
       variationType: [{ value: variationType, disabled: true }],
       variations: this.formBuilder.array(
-        variations.map(variation => this.createVariationFormGroup(variation, isValueDisabled))
+        variations.map(variation => this.createVariationFormGroup(variation, variationType))
       )
     });
 
@@ -207,7 +207,7 @@ export class SettingComponent {
       value: ''
     };
 
-    const formGroup = this.createVariationFormGroup(newVariation);
+    const formGroup = this.createVariationFormGroup(newVariation, this.variationType);
     this.variations.push(formGroup);
   }
 
@@ -253,13 +253,7 @@ export class SettingComponent {
     }
 
     const payload = this.variations.getRawValue();
-    console.log(payload);
-
     // TODO: validate variation types
-    if (true) {
-      this.message.error($localize`:@@ff.variation.type-value-not-match:The type and value of the variation don't match`);
-      return;
-    }
 
     this.featureFlagService.updateVariations(this.key, payload).subscribe({
       next: () => {
@@ -294,7 +288,8 @@ export class SettingComponent {
   }
 
   // private methods
-  private createVariationFormGroup(variation: IVariation, isValueDisabled: boolean = false): FormGroup {
+  private createVariationFormGroup(variation: IVariation, variationType: string): FormGroup {
+    const isValueDisabled = variationType == VariationTypeEnum.boolean;
     return this.formBuilder.group({
       id: [variation.id, Validators.required],
       name: [variation.name, Validators.required],
@@ -303,10 +298,14 @@ export class SettingComponent {
           value: variation.value,
           disabled: isValueDisabled
         },
-        Validators.required
+        [Validators.required, this.variationValueValidator]
       ]
     });
   }
+
+  variationValueValidator: ValidatorFn = (control: FormControl) => {
+    return isVariationValueValid(this.variationType, control.value) ? null : { invalid: true };
+  };
 
   //#endregion
 

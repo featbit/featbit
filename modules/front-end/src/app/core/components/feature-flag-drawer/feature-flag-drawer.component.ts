@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { encodeURIComponentFfc, slugify, uuidv4 } from "@utils/index";
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
+import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 import { debounceTime, finalize, first, map, switchMap } from "rxjs/operators";
 import { FeatureFlagService } from "@services/feature-flag.service";
-import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { IFeatureFlag, isVariationValueValid } from "@features/safe/feature-flags/types/details";
 import { Router } from "@angular/router";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { IVariation } from "@shared/rules";
@@ -177,11 +177,15 @@ export class FeatureFlagDrawerComponent implements OnInit {
     const variationForm = this.fb.group({
       id: [id, Validators.required],
       name: [name, Validators.required],
-      value: [{ disabled: valueDisabled, value }, Validators.required]
+      value: [{ disabled: valueDisabled, value }, [Validators.required, this.variationValueValidator]]
     });
 
     this.variations.push(variationForm);
   }
+
+  variationValueValidator: ValidatorFn = (control: FormControl) => {
+    return isVariationValueValid(this.variationType, control.value) ? null : { invalid: true };
+  };
 
   removeVariation(index: number) {
     const { id } = this.variations.at(index).value;
