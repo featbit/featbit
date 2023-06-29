@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { MessageQueueService } from '@services/message-queue.service';
 import { IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from '@utils/localstorage-keys';
-import { copyToClipboard, getPathPrefix, isNumeric, tryParseJSONObject, uuidv4 } from "@utils/index";
+import { copyToClipboard, getPathPrefix, uuidv4 } from "@utils/index";
 import { editor } from "monaco-editor";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import {
@@ -17,7 +17,7 @@ import { IVariation } from "@shared/rules";
 import { ExperimentService } from "@services/experiment.service";
 import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
+import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 @Component({
   selector: 'ff-setting',
@@ -188,12 +188,12 @@ export class SettingComponent {
   editVariationModalVisible: boolean = false;
   editVariations(): void {
     const { variationType, variations } = this.featureFlag;
-    const canEditValue = variationType === VariationTypeEnum.boolean;
+    const isValueDisabled = variationType === VariationTypeEnum.boolean;
 
     this.variationForm = this.formBuilder.group({
       variationType: [{ value: variationType, disabled: true }],
       variations: this.formBuilder.array(
-        variations.map(variation => this.createVariationFormGroup(variation, canEditValue))
+        variations.map(variation => this.createVariationFormGroup(variation, isValueDisabled))
       )
     });
 
@@ -207,7 +207,7 @@ export class SettingComponent {
       value: ''
     };
 
-    const formGroup = this.createVariationFormGroup(newVariation, true);
+    const formGroup = this.createVariationFormGroup(newVariation);
     this.variations.push(formGroup);
   }
 
@@ -294,14 +294,14 @@ export class SettingComponent {
   }
 
   // private methods
-  private createVariationFormGroup(variation: IVariation, canEditValue: boolean): FormGroup {
+  private createVariationFormGroup(variation: IVariation, isValueDisabled: boolean = false): FormGroup {
     return this.formBuilder.group({
       id: [variation.id, Validators.required],
       name: [variation.name, Validators.required],
       value: [
         {
-          disabled: canEditValue,
-          value: variation.value
+          value: variation.value,
+          disabled: isValueDisabled
         },
         Validators.required
       ]
