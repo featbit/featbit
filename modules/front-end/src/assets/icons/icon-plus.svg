@@ -1,4 +1,1 @@
-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M3.106 9.999a1 1 0 0 1 1-1h11.785a1 1 0 1 1 0 2H4.106a1 1 0 0 1-1-1Z" fill="currentColor"/>
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M9.999 3.106a1 1 0 0 1 1 1v11.786a1 1 0 0 1-2 0V4.106a1 1 0 0 1 1-1Z" fill="currentColor"/>
-</svg>
+<?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1688050595374" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2774" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M508.9 926.4c-36.3-1.6-64.6-32.2-64.6-68.6V166.1c0-36.3 28.3-66.9 64.6-68.6 38.8-1.7 70.7 29.2 70.7 67.6v693.7c0 38.4-31.9 69.4-70.7 67.6z" p-id="2775"></path><path d="M858.9 579.6H165.2c-37.4 0-67.6-30.3-67.6-67.6 0-37.4 30.3-67.6 67.6-67.6h693.7c37.4 0 67.6 30.3 67.6 67.6 0 37.4-30.3 67.6-67.6 67.6z" p-id="2776"></path></svg>
