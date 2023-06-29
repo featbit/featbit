@@ -177,13 +177,17 @@ export class FeatureFlagDrawerComponent implements OnInit {
     const variationForm = this.fb.group({
       id: [id, Validators.required],
       name: [name, Validators.required],
-      value: [{ disabled: valueDisabled, value }, [Validators.required, this.variationValueValidator]]
+      value: [{ disabled: valueDisabled, value }, this.variationValueValidator]
     });
 
     this.variations.push(variationForm);
   }
 
   variationValueValidator: ValidatorFn = (control: FormControl) => {
+    if (!control.value) {
+      return { required: true };
+    }
+
     return isVariationValueValid(this.variationType, control.value) ? null : { invalid: true };
   };
 

@@ -299,12 +299,16 @@ export class SettingComponent {
           value: variation.value,
           disabled: isValueDisabled
         },
-        [Validators.required, this.variationValueValidator]
+        this.variationValueValidator
       ]
     });
   }
 
   variationValueValidator: ValidatorFn = (control: FormControl) => {
+    if (!control.value) {
+      return { required: true };
+    }
+
     return isVariationValueValid(this.variationType, control.value) ? null : { invalid: true };
   };
 

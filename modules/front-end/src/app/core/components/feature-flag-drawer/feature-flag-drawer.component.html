@@ -114,7 +114,7 @@
           </nz-form-item>
           <nz-form-item>
             <nz-form-label nzRequired i18n="@@common.value">Value</nz-form-label>
-            <nz-form-control>
+            <nz-form-control nzHasFeedback [nzErrorTip]="valueErrorTpl">
               <input type="text" *ngIf="!showExpandVariationIcon" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
               <nz-input-group *ngIf="showExpandVariationIcon" [nzSuffix]="suffixIconButton">
                 <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
@@ -122,6 +122,10 @@
                   <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(i)"></i>
                 </ng-template>
               </nz-input-group>
+              <ng-template #valueErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')" i18n="@@common.value-cannot-be-empty">Value cannot be empty</ng-container>
+                <ng-container *ngIf="control.hasError('invalid')" i18n="@@common.invalid-value">Invalid value</ng-container>
+              </ng-template>
             </nz-form-control>
           </nz-form-item>
           <i nz-icon *ngIf="showDeleteVariationButton" (click)="removeVariation(i)" nzType="icons:icon-delete"></i>
