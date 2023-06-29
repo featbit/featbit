@@ -65,8 +65,8 @@
           (ngModelChange)="onChangeDisabledVariation()"
           i18n-nzPlaceHolder="@@ff.select-variation"
           nzPlaceHolder="Select variation">
-          <nz-option *ngFor="let variation of lastSavedVariations" nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.value">
-            {{variation.value}}
+          <nz-option *ngFor="let variation of featureFlag.variations" nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.name">
+            {{variation.name}}
           </nz-option>
         </nz-select>
       </div>
@@ -75,51 +75,34 @@
   <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
     <div class="title">
       <span class="text" i18n="@@common.variations">Variations</span>
-      <i *ngIf="!isEditingVariations" class="edit-save" (click)="toggleVariationEditState()" nz-icon nzType="icons:icon-edit"></i>
-      <i *ngIf="isEditingVariations" class="edit-save" (click)="addVariationOption()" nz-icon nzType="icons:icon-add-outline"></i>
+      <i class="edit-save" (click)="editVariations()" nz-icon nzType="icons:icon-edit"></i>
     </div>
     <div class="variation-type">
       <span class="label" i18n="@@common.data-type">Data type</span>
-      <ng-container *ngIf="!isEditingVariations">
-        <div class="value">
-          {{featureFlag.variationType}}
-          <i *ngIf="featureFlag.variationType === 'json'" nz-icon i18n-nz-tooltip="@@common.valid-json" nz-tooltip="number, boolean, null and empty string are all valid JSON" nzType="icons:icon-info-outline"></i>
-        </div>
-      </ng-container>
-      <nz-select *ngIf="isEditingVariations" [(ngModel)]="featureFlag.variationType" (ngModelChange)="validateVariationTypes()">
-        <nz-option  nzValue="string" nzLabel="string"></nz-option>
-        <nz-option  nzValue="boolean" nzLabel="boolean"></nz-option>
-        <nz-option  nzValue="number" nzLabel="number"></nz-option>
-        <nz-option  nzValue="json" nzLabel="json"></nz-option>
-      </nz-select>
+      <span class="value">
+        {{featureFlag.variationType}}
+        <i *ngIf="featureFlag.variationType === 'json'"
+           nz-icon
+           i18n-nz-tooltip="@@common.valid-json"
+           nz-tooltip="number, boolean, null and empty string are all valid JSON" nzType="icons:icon-info-outline"></i>
+      </span>
     </div>
     <div class="options">
       <div class="option-line" *ngFor="let variation of featureFlag.variations; let key=index; trackBy: trackById;">
-        <div class="left">
-          <div class="variation-tip {{'tip-' + key % 9}}"></div>
-          <div class="variation-value" *ngIf="!isEditingVariations">{{variation.value}}</div>
-          <ng-container *ngIf="isEditingVariations">
-            <nz-input-group *ngIf="['json', 'string'].includes(featureFlag.variationType)" [nzSuffix]="suffixIconButton" [class]="{'invalid': variation.isInvalid}">
-              <input type="text" nz-input [(ngModel)]="variation.value" (ngModelChange)="validateVariation(variation)"/>
-              <ng-template #suffixIconButton>
-                <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(variation)"></i>
-              </ng-template>
-            </nz-input-group>
-            <input *ngIf="!['json', 'string'].includes(featureFlag.variationType)" class="simple" type="text" nz-input [(ngModel)]="variation.value" (ngModelChange)="validateVariation(variation)" [class]="{'invalid': variation.isInvalid}"/>
-          </ng-container>
-        </div>
-        <i class="expand-icon" *ngIf="!isEditingVariations && ['json', 'string'].includes(featureFlag.variationType)" nz-icon nzType="expand" (click)="expandVariationOption(variation, true)"></i>
-        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variation.value)"></i>
-        <div *ngIf="isEditingVariations">
-          <span class="delete-icon-wrapper" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteVariation(variation.id)">
-            <i nz-icon nzType="icons:icon-delete"></i>
-          </span>
+          <div class="left">
+            <span class="variation-tip {{'tip-' + key % 9}}"></span>
+            {{variation.name}}
+          </div>
+        <div class="right">
+          <nz-tag nz-tooltip="{{variation.value}}">
+            <span class="variation-value">{{variation.value}}</span>
+          </nz-tag>
+          <i *ngIf="['json', 'string'].includes(featureFlag.variationType)"
+             class="expand-icon" nz-icon nzType="expand" (click)="expandVariation(variation, true)">
+          </i>
+          <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variation.value)"></i>
         </div>
       </div>
-    </div>
-    <div *ngIf="isEditingVariations" class="operations">
-      <button nz-button class="cancel-btn" (click)="toggleVariationEditState(true)">Cancel</button>
-      <button nz-button class="save-btn" (click)="saveVariations()">Save</button>
     </div>
   </div>
 
@@ -161,7 +144,13 @@
   (nzOnCancel)="variationValueExpandVisible=false">
   <ng-template #modalTitle><ng-container i18n="@@common.varation"></ng-container>Variation</ng-template>
   <ng-template #modalContent>
-    <nz-code-editor style="height: 400px" class="editor" (nzEditorInitialized)="formatCode($event)" [(ngModel)]="currentEditingVariation.value" [nzEditorOption]="{ language: featureFlag.variationType, theme: 'vs-dark' }"></nz-code-editor>
+    <nz-code-editor
+      style="height: 400px"
+      class="editor"
+      (nzEditorInitialized)="formatCode($event)"
+      [(ngModel)]="currentEditingVariation.value"
+      [nzEditorOption]="{ language: variationForm ? variationType : featureFlag.variationType, theme: 'vs', minimap: { enabled: false } }">
+    </nz-code-editor>
   </ng-template>
   <ng-template #modalFooter>
     <div style="display: flex;justify-content: space-between">
@@ -171,12 +160,83 @@
           <ng-container *ngIf="expandReadonly" i18n="@@common.close">Close</ng-container>
           <ng-container *ngIf="!expandReadonly" i18n="@@common.cancel">Cancel</ng-container>
         </button>
-        <button *ngIf="!expandReadonly" nz-button nzType="primary" (click)="saveOptionValue()" i18n="@@common.save">Save</button>
+        <button *ngIf="!expandReadonly" nz-button nzType="primary" (click)="updateVariationValue()" i18n="@@common.save">Save</button>
       </div>
     </div>
   </ng-template>
 </nz-modal>
 
+<!-- Edit Variations Modal -->
+<nz-modal
+  [(nzVisible)]="editVariationModalVisible"
+  (nzOnCancel)="editVariationModalVisible = false"
+  (nzOnOk)="saveVariations()">
+  <div *nzModalTitle>
+    <span i18n="@@ff.edit-variations">Edit Variations</span>
+  </div>
+
+  <div *nzModalContent>
+    <form nz-form [formGroup]="variationForm" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label
+          nzRequired
+          nzTooltipTitle="We currently support string, boolean, number and json types. Once you have created a feature flag, you cannot change its variation type."
+          i18n-nzTooltipTitle="@@common.variation-type-tooltip"
+          i18n="@@common.variation-type">Variation type</nz-form-label>
+        <nz-form-control>
+          <nz-select
+            i18n-nzPlaceHolder="@@common.variation-type"
+            nzPlaceHolder="Variation type"
+            formControlName="variationType">
+            <nz-option nzValue="boolean" nzLabel="boolean"></nz-option>
+            <nz-option nzValue="string" nzLabel="string"></nz-option>
+            <nz-option nzValue="number" nzLabel="number"></nz-option>
+            <nz-option nzValue="json" nzLabel="json"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <div class="variations-wrapper" formArrayName="variations">
+        <div class="variation-wrapper" [class]="{'with-extra-options': showDeleteVariationButton}" *ngFor="let variation of variations.controls; let i = index" [formGroupName]="i">
+          <nz-form-item>
+            <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+            <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
+              <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzRequired i18n="@@common.value">Value</nz-form-label>
+            <nz-form-control nzHasFeedback [nzErrorTip]="valueErrorTpl">
+              <input type="text" *ngIf="!showExpandVariationIcon" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
+              <nz-input-group *ngIf="showExpandVariationIcon" [nzSuffix]="suffixIconButton">
+                <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
+                <ng-template #suffixIconButton>
+                  <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariation(this.variations.at(i).value)"></i>
+                </ng-template>
+              </nz-input-group>
+              <ng-template #valueErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')" i18n="@@common.value-cannot-be-empty">Value cannot be empty</ng-container>
+                <ng-container *ngIf="control.hasError('invalid')" i18n="@@common.invalid-value">Invalid value</ng-container>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+          <i nz-icon *ngIf="showDeleteVariationButton" (click)="deleteVariation(i)" nzType="icons:icon-delete"></i>
+        </div>
+
+        <button class="add-variation" *ngIf="variationType !== 'boolean'" nz-button nzType="link" (click)="newVariation()">
+          <span nz-icon nzType="icons:icon-plus"></span>
+          <span i18n="@@common.add-variation">Add variation</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div *nzModalFooter>
+    <button nz-button nzType="default" (click)="editVariationModalVisible = false">Cancel</button>
+    <button nz-button nzType="primary" (click)="saveVariations()" [disabled]="!variationForm.valid">Save</button>
+  </div>
+</nz-modal>
+
+<!-- Expt Reference Modal -->
 <nz-modal
   nzWidth="792"
   [(nzVisible)]="exptReferenceModalVisible"

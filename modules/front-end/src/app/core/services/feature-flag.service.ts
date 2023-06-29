@@ -12,10 +12,10 @@ import { catchError } from "rxjs/operators";
 import {
   IFeatureFlag,
   IFeatureFlagTargeting,
-  ISettingPayload,
-  IVariationsPayload
+  ISettingPayload
 } from "@features/safe/feature-flags/types/details";
 import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
+import { IVariation } from "@shared/rules";
 
 @Injectable({
   providedIn: 'root'
@@ -55,16 +55,16 @@ export class FeatureFlagService {
     );
   }
 
-  updateSetting(payload: ISettingPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.key}/settings`;
+  updateSetting(key: string, payload: ISettingPayload): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/settings`;
 
     return this.http.put<boolean>(url, payload);
   }
 
-  updateVariations(payload: IVariationsPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.key}/variations`;
+  updateVariations(key: string, variations: IVariation[]): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/variations`;
 
-    return this.http.put<boolean>(url, payload);
+    return this.http.put<boolean>(url, { variations });
   }
 
   delete(key: string): Observable<boolean> {
@@ -109,9 +109,9 @@ export class FeatureFlagService {
     return this.http.get<string[]>(url);
   }
 
-  setTags(flag: IFeatureFlag): Observable<boolean> {
-    const url = `${this.baseUrl}/${flag.key}/tags`;
-    return this.http.put<boolean>(url, flag.tags);
+  setTags(flagKey: string, tags: string[]): Observable<boolean> {
+    const url = `${this.baseUrl}/${flagKey}/tags`;
+    return this.http.put<boolean>(url, tags);
   }
 
   public getInsights(filter: IInsightsFilter): Observable<IInsights[]> {

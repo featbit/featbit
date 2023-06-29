@@ -4,19 +4,21 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { MessageQueueService } from '@services/message-queue.service';
 import { IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from '@utils/localstorage-keys';
-import { getPathPrefix, isNumeric, tryParseJSONObject, uuidv4, copyToClipboard } from "@utils/index";
+import { copyToClipboard, getPathPrefix, uuidv4 } from "@utils/index";
 import { editor } from "monaco-editor";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import {
   FeatureFlag,
   IFeatureFlag,
-  ISettingPayload, IVariationsPayload,
+  ISettingPayload,
+  isVariationValueValid,
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
 import { IVariation } from "@shared/rules";
 import { ExperimentService } from "@services/experiment.service";
 import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
+import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 
 @Component({
   selector: 'ff-setting',
@@ -43,16 +45,10 @@ export class SettingComponent {
     );
   }
 
-  lastSavedVariations: IVariation[];
-  setLastSavedVariations() {
-    this.lastSavedVariations = JSON.parse(JSON.stringify(this.featureFlag.variations));
-  }
-
   featureFlag: FeatureFlag = {} as FeatureFlag;
   isLoading = true;
   isEditingTitle = false;
   isEditingDescription = false;
-  isEditingVariations = false;
   key: string = null;
   currentProjectEnv: IProjectEnv = null;
 
@@ -81,7 +77,7 @@ export class SettingComponent {
 
   onRemoveTag(tag: string) {
     this.featureFlag.removeTag(tag);
-    this.featureFlagService.setTags(this.featureFlag).subscribe(_ => {
+    this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);
     });
   }
@@ -92,7 +88,7 @@ export class SettingComponent {
       : this.selectedTag.trim();
 
     this.featureFlag.addTag(actualTag);
-    this.featureFlagService.setTags(this.featureFlag).subscribe(_ => {
+    this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);
     });
 
@@ -108,6 +104,7 @@ export class SettingComponent {
     private experimentService: ExperimentService,
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
+    private formBuilder: FormBuilder,
     private router: Router
   ) {
     this.isLoading = true;
@@ -144,7 +141,6 @@ export class SettingComponent {
   private loadData() {
     this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
       this.featureFlag = new FeatureFlag(result);
-      this.setLastSavedVariations();
       this.isLoading = false;
     }, () => this.isLoading = false)
   }
@@ -170,65 +166,153 @@ export class SettingComponent {
     this.isEditingDescription = !this.isEditingDescription;
   }
 
-  toggleVariationEditState(resetVariations: boolean = false): void {
-    this.isEditingVariations = !this.isEditingVariations;
+  //#region variations form
 
-    if (resetVariations) {
-      this.featureFlag.variations = JSON.parse(JSON.stringify(this.lastSavedVariations));
+  variationForm: FormGroup;
+
+  get variations(): FormArray {
+    return this.variationForm.get('variations') as FormArray;
+  }
+
+  get variationType(): string {
+    return this.variationForm.get('variationType')!.value;
+  }
+
+  get showDeleteVariationButton(): boolean {
+    return this.variationType !== VariationTypeEnum.boolean && this.variations.length > 1;
+  }
+
+  get showExpandVariationIcon(): boolean {
+    return ['json', 'string'].includes(this.variationType);
+  }
+
+  editVariationModalVisible: boolean = false;
+  editVariations(): void {
+    const { variationType, variations } = this.featureFlag;
+
+    this.variationForm = this.formBuilder.group({
+      variationType: [{ value: variationType, disabled: true }],
+      variations: this.formBuilder.array([])
+    });
+
+    // init variations
+    variations.forEach(variation => this.variations.push(this.createVariationFormGroup(variation, variationType)));
+
+    this.editVariationModalVisible = true;
+  }
+
+  newVariation() {
+    const newVariation = {
+      id: uuidv4(),
+      name: '',
+      value: ''
+    };
+
+    const formGroup = this.createVariationFormGroup(newVariation, this.variationType);
+    this.variations.push(formGroup);
+  }
+
+  deleteVariation(index: number): void {
+    const { id } = this.variations.at(index).value;
+
+    if (this.featureFlag.targetUsers?.find(x => x.variationId === id)?.keyIds?.length > 0) {
+      this.message.warning($localize`:@@ff.variation-used-by-targeting-users:This variation is used by targeting users, remove the reference before it can be safely removed`);
+      return;
     }
+
+    if (this.featureFlag.rules.length > 0 && this.featureFlag.rules.find(x => x.variations.find(y => y.id === id))) {
+      this.message.warning($localize`:@@ff.variation-used-by-rules:This variation is used by rules, remove the reference before it can be safely removed`);
+      return;
+    }
+
+    if (this.featureFlag.fallthrough.variations.length > 0 && this.featureFlag.fallthrough.variations.find(x => x.id === id)) {
+      this.message.warning($localize`:@@ff.variation-used-by-default-rule:This variation is used by default rule, remove the reference before it can be safely removed`);
+      return;
+    }
+
+    if (this.featureFlag.disabledVariationId === id) {
+      this.message.warning($localize`:@@ff.variation-used-by-off:This variation is used by the value returned when the feature flag is OFF, remove the reference before it can be safely removed`);
+      return;
+    }
+
+    this.experimentService.getFeatureFlagVariationReferences(this.featureFlag.id, id).subscribe({
+      next: (res) => {
+        if (res.length === 0) {
+          this.variations.removeAt(index);
+        } else {
+          this.variationExptReferences = [...res];
+          this.exptReferenceModalVisible = true;
+        }
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
+    });
   }
 
   saveVariations() {
-    if (!this.validateVariationTypes()) {
-      this.message.error($localize `:@@ff.variation.type-value-not-match:The type and value of the variation don't match`);
+    if (!this.variationForm.valid) {
       return;
     }
-    this.toggleVariationEditState();
 
-    const { key, variationType, variations } = this.featureFlag;
-    const payload: IVariationsPayload = {
-      key,
-      variationType: variationType || VariationTypeEnum.string,
-      variations: variations.filter(v => !v.isInvalid)
-    };
-
-    this.featureFlagService.updateVariations(payload).subscribe({
+    const variations = this.variations.getRawValue();
+    this.featureFlagService.updateVariations(this.key, variations).subscribe({
       next: () => {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-        this.isEditingTitle = false;
-        this.setLastSavedVariations();
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
+        this.featureFlag.variations = variations;
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
+        this.editVariationModalVisible = false;
+
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
       },
       error: err => this.message.error(err.error)
     });
   }
 
-  addVariationOption(): void {
-    this.featureFlag.variations = [
-      ...this.featureFlag.variations,
-      {
-        id: uuidv4(),
-        value: null
-      }
-    ];
-  }
-
   currentEditingVariation: IVariation = null;
   variationValueExpandVisible = false;
   expandReadonly = true;
-  expandVariationOption(v: IVariation, readonly: boolean = false) {
-    this.currentEditingVariation = {...v};
+
+  expandVariation(variation: IVariation, readonly: boolean = false) {
+    this.currentEditingVariation = { ...variation };
     this.variationValueExpandVisible = true;
     this.expandReadonly = readonly;
   }
 
-  saveOptionValue() {
-    this.featureFlag.variations = this.featureFlag.variations.map(v => {
-      return v.id === this.currentEditingVariation.id ? {...this.currentEditingVariation} : v
-    });
+  updateVariationValue() {
+    for (const control of this.variations.controls) {
+      let formGroup = control as FormGroup;
+      if (formGroup.controls.id.value === this.currentEditingVariation.id) {
+        formGroup.controls.value.setValue(this.currentEditingVariation.value);
+        break;
+      }
+    }
 
     this.variationValueExpandVisible = false;
   }
+
+  // private methods
+  private createVariationFormGroup(variation: IVariation, variationType: string): FormGroup {
+    const isValueDisabled = variationType == VariationTypeEnum.boolean;
+    return this.formBuilder.group({
+      id: [variation.id, Validators.required],
+      name: [variation.name, Validators.required],
+      value: [
+        {
+          value: variation.value,
+          disabled: isValueDisabled
+        },
+        this.variationValueValidator
+      ]
+    });
+  }
+
+  variationValueValidator: ValidatorFn = (control: FormControl) => {
+    if (!control.value) {
+      return { required: true };
+    }
+
+    return isVariationValueValid(this.variationType, control.value) ? null : { invalid: true };
+  };
+
+  //#endregion
 
   exptStatusNotStarted: ExperimentStatus = ExperimentStatus.NotStarted;
   exptStatusPaused: ExperimentStatus = ExperimentStatus.Paused;
@@ -249,82 +333,16 @@ export class SettingComponent {
     this.exptReferenceModalVisible = false;
   }
 
-  deleteVariation(id: string): void {
-    if(this.featureFlag.targetUsers?.find(x => x.variationId === id)?.keyIds?.length > 0) {
-      this.message.warning($localize `:@@ff.variation-used-by-targeting-users:This variation is used by targeting users, remove the reference before it can be safely removed`);
-      return;
-    }
-
-    if(this.featureFlag.rules.length > 0 && this.featureFlag.rules.find(x => x.variations.find(y => y.id === id))) {
-      this.message.warning($localize `:@@ff.variation-used-by-rules:This variation is used by rules, remove the reference before it can be safely removed`);
-      return;
-    }
-
-    if(this.featureFlag.fallthrough.variations.length > 0 && this.featureFlag.fallthrough.variations.find(x => x.id === id)) {
-      this.message.warning($localize `:@@ff.variation-used-by-default-rule:This variation is used by default rule, remove the reference before it can be safely removed`);
-      return;
-    }
-
-    if(this.featureFlag.disabledVariationId === id) {
-      this.message.warning($localize `:@@ff.variation-used-by-off:This variation is used by the value returned when the feature flag is OFF, remove the reference before it can be safely removed`);
-      return;
-    }
-
-    this.experimentService.getFeatureFlagVariationReferences(this.featureFlag.id, id).subscribe(res => {
-      if (res.length === 0) {
-        this.featureFlag.variations = this.featureFlag.variations.filter(d => d.id !== id);
-      } else {
-        this.variationExptReferences = [...res];
-        this.exptReferenceModalVisible = true;
-      }
-    }, () => {
-      this.message.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
-    })
-  }
-
-  isValidVariationOption(v: IVariation): boolean {
-    return !!v && v.value !== null && v.value.trim() !== '' && this.validateVariationDataType(v.value);
-  }
-
-  validateVariationTypes(): boolean {
-      this.featureFlag.variations = this.featureFlag.variations.map(v => ({...v, isInvalid: !this.isValidVariationOption(v)}));
-      return !this.featureFlag.variations.some(v => v.isInvalid);
-  }
-
-  validateVariation(variation: IVariation) {
-    variation.isInvalid = !this.validateVariationDataType(variation.value);
-  }
-
-  //!isNaN(parseFloat(num)) && isFinite(num);
-  validateVariationDataType(value: string): boolean {
-    switch (this.featureFlag.variationType) {
-      case VariationTypeEnum.string:
-        // the real value is always string
-        return value.trim().length > 0;
-      case VariationTypeEnum.boolean:
-        return value === 'true' || value === 'false';
-      case VariationTypeEnum.number:
-        return isNumeric(value);
-      case VariationTypeEnum.json:
-        return tryParseJSONObject(value);
-      default:
-        return false;
-    }
-  }
-
   onSaveSettings(cb?: Function) {
-    const { key, name, description, isEnabled, variationType, disabledVariationId, variations } = this.featureFlag;
+    const { name, description, isEnabled, disabledVariationId } = this.featureFlag;
     const payload: ISettingPayload = {
-      key,
       name,
       description,
       isEnabled,
-      variationType: variationType || VariationTypeEnum.string,
       disabledVariationId,
-      variations: variations.filter(v => !v.isInvalid)
     };
 
-    this.featureFlagService.updateSetting(payload).subscribe({
+    this.featureFlagService.updateSetting(this.key, payload).subscribe({
       next: () => {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
