@@ -79,19 +79,13 @@
     </div>
     <div class="variation-type">
       <span class="label" i18n="@@common.data-type">Data type</span>
-      <span class="value">
-        {{featureFlag.variationType}}
-        <i *ngIf="featureFlag.variationType === 'json'"
-           nz-icon
-           i18n-nz-tooltip="@@common.valid-json"
-           nz-tooltip="number, boolean, null and empty string are all valid JSON" nzType="icons:icon-info-outline"></i>
-      </span>
+      <span class="value">{{featureFlag.variationType}}</span>
     </div>
     <div class="options">
       <div class="option-line" *ngFor="let variation of featureFlag.variations; let key=index; trackBy: trackById;">
           <div class="left">
             <span class="variation-tip {{'tip-' + key % 9}}"></span>
-            {{variation.name}}
+            <span class="name">{{variation.name}}</span>
           </div>
         <div class="right">
           <nz-tag nz-tooltip="{{variation.value}}">
