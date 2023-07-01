@@ -299,8 +299,12 @@ export class FeatureFlagDrawerComponent implements OnInit {
     // enable value inputs, so we can get the variaton values for boolean variation type
     this.enableVariations();
 
+    const { name, key, description } = this.basicForm.value;
+
     const payload: IFeatureFlagCreationPayload = {
-      ...this.basicForm.value,
+      name,
+      key,
+      description,
       tags: this.selectedTags,
       variationType: this.variationType,
       variations: this.variations.value,

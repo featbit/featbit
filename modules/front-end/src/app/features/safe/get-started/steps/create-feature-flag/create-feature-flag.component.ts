@@ -175,8 +175,12 @@ export class CreateFeatureFlagComponent implements OnInit {
     if (this.isCreatingFlag) {
       const truthyVariationId = uuidv4();
       const falsyVariationId = uuidv4();
+      const { name, key, description } = this.form.value;
+
       const payload: IFeatureFlagCreationPayload = {
-        ...this.form.value,
+        name,
+        key,
+        description,
         variationType: this.variationTypeBoolean,
         isEnabled: false,
         variations: [{id: truthyVariationId, name: 'True', value: 'true'}, {id: falsyVariationId, name: 'False', value: 'false'}],
