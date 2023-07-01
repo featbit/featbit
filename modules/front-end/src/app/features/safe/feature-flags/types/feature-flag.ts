@@ -1,4 +1,6 @@
-﻿export interface IFeatureFlagListModel {
+﻿import { IVariation } from "@shared/rules";
+
+export interface IFeatureFlagListModel {
   items: IFeatureFlagListItem[];
   totalCount: number;
 }
@@ -56,4 +58,16 @@ export class IFeatureFlagListFilter {
     this.pageIndex = pageIndex;
     this.pageSize = pageSize;
   }
+}
+
+export interface IFeatureFlagCreationPayload {
+  name: string;
+  key: string;
+  description: string;
+  tags?: string[];
+  isEnabled: boolean;
+  variationType: string;
+  enabledVariationId: string;
+  disabledVariationId: string;
+  variations: IVariation[];
 }
