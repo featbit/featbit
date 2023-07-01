@@ -70,7 +70,7 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
         RuleFor(x => x.DisabledVariationId)
             .Must((flag, variationId) => flag.Variations?.Any(x => x.Id == variationId) ?? false)
             .WithErrorCode(ErrorCodes.InvalidParameter("disabledVariationId"));
-        
+
         RuleFor(x => x.EnabledVariationId)
             .Must((flag, variationId) => flag.Variations?.Any(x => x.Id == variationId) ?? false)
             .WithErrorCode(ErrorCodes.InvalidParameter("enabledVariationId"));
