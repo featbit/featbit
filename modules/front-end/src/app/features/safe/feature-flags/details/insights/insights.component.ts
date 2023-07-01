@@ -55,7 +55,7 @@ export class InsightsComponent implements OnInit {
     this.route.paramMap.subscribe(paramMap => {
       this.filter = new InsightsFilter(decodeURIComponent(paramMap.get('key')));
       this.featureFlagService.getByKey(this.filter.featureFlagKey).subscribe((res) => {
-        this.variations = [{ id: this.featureFlagVariationAllId, name: '', value: $localize `:@@common.all:All`}, ...res.variations];
+        this.variations = [{ id: this.featureFlagVariationAllId, name: $localize `:@@common.all:All`, value: $localize `:@@common.all:All`}, ...res.variations];
         this.filter.variationId = this.featureFlagVariationAllId;
         this.setIntervalTypes();
         this.filterChanged();
