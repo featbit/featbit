@@ -36,7 +36,7 @@
               <i nz-icon nzType="icons:icon-search"></i>
             </ng-template>
             <nz-select class="variation-filter" [(ngModel)]="filter.variationId" (ngModelChange)="endUserFilterChanged()">
-              <nz-option *ngFor="let variation of variations" [nzValue]="variation.id" [nzLabel]="variation.value"></nz-option>
+              <nz-option *ngFor="let variation of variations" [nzValue]="variation.id" [nzLabel]="variation.name"></nz-option>
             </nz-select>
           </div>
         </div>

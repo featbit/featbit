@@ -61,7 +61,7 @@ public class
         var items = stats.Items
             .Select(it => new FeatureFlagEndUserStatsVm
             {
-                Variation = featureFlag.Variations.FirstOrDefault(v => v.Id == it.VariationId)?.Value ?? it.VariationId,
+                Variation = featureFlag.Variations.FirstOrDefault(v => v.Id == it.VariationId)?.Name ?? it.VariationId,
                 KeyId = it.KeyId,
                 Name = it.Name,
                 LastEvaluatedAt = it.LastEvaluatedAt
