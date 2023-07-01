@@ -300,6 +300,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
     this.enableVariations();
 
     const { name, key, description } = this.basicForm.value;
+    const { isEnabled, enabledVariationId, disabledVariationId } = this.defaultRuleForm.value;
 
     const payload: IFeatureFlagCreationPayload = {
       name,
@@ -308,7 +309,9 @@ export class FeatureFlagDrawerComponent implements OnInit {
       tags: this.selectedTags,
       variationType: this.variationType,
       variations: this.variations.value,
-      ...this.defaultRuleForm.value,
+      isEnabled,
+      enabledVariationId,
+      disabledVariationId
     };
 
     this.featureFlagService.create(payload)

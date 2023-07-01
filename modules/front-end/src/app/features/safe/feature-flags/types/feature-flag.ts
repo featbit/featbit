@@ -66,7 +66,6 @@ export interface IFeatureFlagCreationPayload {
   description: string;
   tags?: string[];
   isEnabled: boolean;
-
   variationType: string;
   enabledVariationId: string;
   disabledVariationId: string;
