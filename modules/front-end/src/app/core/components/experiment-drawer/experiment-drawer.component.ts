@@ -6,7 +6,7 @@ import { debounceTime } from 'rxjs/operators';
 import { ExperimentService } from '@services/experiment.service';
 import { MetricService } from '@services/metric.service';
 import {FeatureFlagService} from "@services/feature-flag.service";
-import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
+import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/feature-flag";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {IVariation} from "@shared/rules";
 import {IExpt, IPagedMetric, MetricListFilter} from "@features/safe/experiments/types";

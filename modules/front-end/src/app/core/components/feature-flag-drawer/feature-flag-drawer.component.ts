@@ -9,6 +9,7 @@ import { Router } from "@angular/router";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { IVariation } from "@shared/rules";
 import { editor } from "monaco-editor";
+import { IFeatureFlagCreationPayload } from "@features/safe/feature-flags/types/feature-flag";
 
 @Component({
   selector: 'feature-flag-drawer',
@@ -298,7 +299,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
     // enable value inputs, so we can get the variaton values for boolean variation type
     this.enableVariations();
 
-    const payload = {
+    const payload: IFeatureFlagCreationPayload = {
       ...this.basicForm.value,
       tags: this.selectedTags,
       variationType: this.variationType,

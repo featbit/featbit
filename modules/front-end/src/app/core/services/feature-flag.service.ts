@@ -4,10 +4,10 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { Observable, of } from "rxjs";
 import {
-  ICopyToEnvResult,
+  ICopyToEnvResult, IFeatureFlagCreationPayload,
   IFeatureFlagListFilter,
   IFeatureFlagListModel
-} from "@features/safe/feature-flags/types/switch-index";
+} from "@features/safe/feature-flags/types/feature-flag";
 import { catchError } from "rxjs/operators";
 import {
   IFeatureFlag,
@@ -79,7 +79,7 @@ export class FeatureFlagService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  public create(payload) {
+  public create(payload: IFeatureFlagCreationPayload) {
     return this.http.post(this.baseUrl, payload);
   }
 
