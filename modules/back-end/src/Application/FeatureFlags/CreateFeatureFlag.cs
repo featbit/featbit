@@ -68,13 +68,11 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
             .WithErrorCode(ErrorCodes.InvalidParameter("variations"));
 
         RuleFor(x => x.DisabledVariationId)
-            .NotEmpty()
-            .Must((flag, variationId) => flag.Variations.Any(x => x.Id == variationId))
+            .Must((flag, variationId) => flag.Variations?.Any(x => x.Id == variationId) ?? false)
             .WithErrorCode(ErrorCodes.InvalidParameter("disabledVariationId"));
-
+        
         RuleFor(x => x.EnabledVariationId)
-            .NotEmpty()
-            .Must((flag, variationId) => flag.Variations.Any(x => x.Id == variationId))
+            .Must((flag, variationId) => flag.Variations?.Any(x => x.Id == variationId) ?? false)
             .WithErrorCode(ErrorCodes.InvalidParameter("enabledVariationId"));
     }
 }

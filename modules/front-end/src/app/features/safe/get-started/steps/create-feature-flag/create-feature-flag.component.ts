@@ -172,7 +172,18 @@ export class CreateFeatureFlagComponent implements OnInit {
 
   next() {
     if (this.isCreatingFlag) {
-      this.featureFlagService.create(this.form.value).subscribe({
+      const truthyVariationId = uuidv4();
+      const falsyVariationId = uuidv4();
+      const payload = {
+        ...this.form.value,
+        variationType: this.variationTypeBoolean,
+        isEnabled: false,
+        variations: [{id: truthyVariationId, name: 'True', value: 'true'}, {id: falsyVariationId, name: 'False', value: 'false'}],
+        enabledVariationId: truthyVariationId,
+        disabledVariationId: falsyVariationId
+      };
+
+      this.featureFlagService.create(payload).subscribe({
         next: (result: IFeatureFlag) => {
           this.onComplete.emit(result as any as IFeatureFlagListItem);
         },
