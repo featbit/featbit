@@ -43,9 +43,10 @@ jobs:
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition featbit-prod-ecs-task  | jq -r '.taskDefinition'> task-definition.json
-          aws ecs describe-task-definition --task-definition featbit-prod-ecs-task  | jq -r '.taskDefinition'
+          aws ecs describe-task-definition --task-definition featbit-prod-ui-ecs-task  | jq -r '.taskDefinition'> task-definition.json
+          aws ecs describe-task-definition --task-definition featbit-prod-ui-ecs-task  | jq -r '.taskDefinition'
           ls -al
+          cat task-definition.json
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
