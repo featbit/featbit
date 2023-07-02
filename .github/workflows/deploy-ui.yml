@@ -40,6 +40,7 @@ jobs:
           export DEMO_URL=https://featbit-samples.vercel.app
           export EVALUATION_URL=https://featbit-tio-eu-eval.azurewebsites.net
           envsubst < modules/front-end/src/assets/env.template.js >modules/front-end/src/assets/env.template.js
+          cat modules/front-end/src/assets/env.template.js
 
       - name: Download task definition
         run: |
