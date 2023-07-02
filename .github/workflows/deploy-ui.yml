@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - temporary
     paths:
       - 'modules/front-end/**'
       - '.github/workflows/deploy-ui.yml'
