@@ -1,0 +1,36 @@
+name: UI 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/front-end/**'
+      - '.github/workflows/deploy-ui.yml'
+jobs:
+  deploy-prod:
+    name : Deploy to production
+    runs-on: ubuntu-latest
+    environment : prod
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: cn-northwest-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set parameters
+        run: |
+          export API_URL=https://featbit-tio-eu-api.azurewebsites.net
+          echo "Created env variable: ${API_URL}"
+
+      
