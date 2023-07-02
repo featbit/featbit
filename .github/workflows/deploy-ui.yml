@@ -12,6 +12,11 @@ jobs:
     name : Deploy to production
     runs-on: ubuntu-latest
     environment : prod
+    env:
+      container_name: ui
+      ecs_service: featbit-prod-ui-ecs-service
+      ecs_cluster: featbit-prod-ecs-cluster
+      region: cn-northwest-1
     steps:
 
       - name: Checkout
@@ -22,7 +27,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: cn-northwest-1
+          aws-region: ${{ env.region }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -33,9 +38,37 @@ jobs:
           export API_URL=https://featbit-tio-eu-api.azurewebsites.net
           export DEMO_URL=https://featbit-samples.vercel.app
           export EVALUATION_URL=https://featbit-tio-eu-eval.azurewebsites.net
-          pwd
-          ls -la
           envsubst < modules/front-end/src/assets/env.template.js >modules/front-end/src/assets/env.js
-          cat modules/front-end/src/assets/env.js
 
-      
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition featbit-prod-ecs-task  | jq -r '.taskDefinition'> task-definition.json
+          aws ecs describe-task-definition --task-definition featbit-prod-ecs-task  | jq -r '.taskDefinition'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: featbit-prod-ui-ecr-repo
+          IMAGE_TAG: latest
+        run: |
+          echo $GITHUB_WORKSPACE
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./modules/front-end/Dockerfile ./modules/front-end
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.container_name }}
+          image: ${{ steps.build-image.outputs.image }}
+  
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ecs_service }}
+          cluster: ${{ env.ecs_cluster }}
+          wait-for-service-stability: true
