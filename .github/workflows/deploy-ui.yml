@@ -33,7 +33,8 @@ jobs:
           export API_URL=https://featbit-tio-eu-api.azurewebsites.net
           export DEMO_URL=https://featbit-samples.vercel.app
           export EVALUATION_URL=https://featbit-tio-eu-eval.azurewebsites.net
-          cd featbit
+          pwd
+          ls -la
           envsubst < /modules/front-end/src/assets/env.template.js >/modules/front-end/src/assets/env.js
           cat /modules/front-end/src/assets/env.js
 
