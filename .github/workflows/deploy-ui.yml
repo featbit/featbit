@@ -39,12 +39,13 @@ jobs:
           export API_URL=https://featbit-tio-eu-api.azurewebsites.net
           export DEMO_URL=https://featbit-samples.vercel.app
           export EVALUATION_URL=https://featbit-tio-eu-eval.azurewebsites.net
-          envsubst < modules/front-end/src/assets/env.template.js >modules/front-end/src/assets/env.js
+          envsubst < modules/front-end/src/assets/env.template.js >modules/front-end/src/assets/env.template.js
 
       - name: Download task definition
         run: |
           aws ecs describe-task-definition --task-definition featbit-prod-ecs-task  | jq -r '.taskDefinition'> task-definition.json
           aws ecs describe-task-definition --task-definition featbit-prod-ecs-task  | jq -r '.taskDefinition'
+          ls -al
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
