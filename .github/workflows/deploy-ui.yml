@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     environment : prod
     env:
-      container_name: featbit-prod-ui
+      container_name: ui
       ecr_repository: featbit-prod-ui-ecr-repo
       ecs_service: featbit-prod-ui-ecs-service
       ecs_cluster: featbit-prod-ecs-cluster
