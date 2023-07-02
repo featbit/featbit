@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     environment : prod
     env:
-      container_name: ui
+      container_name: featbit-prod-ui
+      ecr_repository: featbit-prod-ui-ecr-repo
       ecs_service: featbit-prod-ui-ecs-service
       ecs_cluster: featbit-prod-ecs-cluster
       region: cn-northwest-1
@@ -49,7 +50,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: featbit-prod-ui-ecr-repo
+          ECR_REPOSITORY: ${{ env.ecr_repository }}
           IMAGE_TAG: latest
         run: |
           echo $GITHUB_WORKSPACE
