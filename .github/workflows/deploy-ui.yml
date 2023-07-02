@@ -35,7 +35,7 @@ jobs:
           export EVALUATION_URL=https://featbit-tio-eu-eval.azurewebsites.net
           pwd
           ls -la
-          envsubst < /modules/front-end/src/assets/env.template.js >/modules/front-end/src/assets/env.js
-          cat /modules/front-end/src/assets/env.js
+          envsubst < modules/front-end/src/assets/env.template.js >modules/front-end/src/assets/env.js
+          cat modules/front-end/src/assets/env.js
 
       
