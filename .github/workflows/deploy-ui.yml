@@ -17,6 +17,9 @@ jobs:
       ecr_repository: featbit-prod-ui-ecr-repo
       ecs_service: featbit-prod-ui-ecs-service
       ecs_cluster: featbit-prod-ecs-cluster
+      api_url: https://featbit-tio-eu-api.azurewebsites.net
+      demo_url: https://featbit-samples.vercel.app
+      evaluation_url: https://featbit-tio-eu-eval.azurewebsites.net
       region: cn-northwest-1
     steps:
 
@@ -36,13 +39,12 @@ jobs:
 
       - name: Set parameters
         run: |
-          export API_URL=https://featbit-tio-eu-api.azurewebsites.net
-          export DEMO_URL=https://featbit-samples.vercel.app
-          export EVALUATION_URL=https://featbit-tio-eu-eval.azurewebsites.net
+          export API_URL=$api_url
+          export DEMO_URL=$demo_url
+          export EVALUATION_URL=$evaluation_url
           envsubst < modules/front-end/src/assets/env.template.js > modules/front-end/src/assets/env.js
           rm modules/front-end/src/assets/env.template.js
           mv modules/front-end/src/assets/env.js modules/front-end/src/assets/env.template.js
-          cat modules/front-end/src/assets/env.template.js
 
       - name: Download task definition
         run: |
