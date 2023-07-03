@@ -143,7 +143,7 @@
           <td>
             <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag.key)" i18n="@@common.details">Details</a>
             <nz-divider nzType="vertical"></nz-divider>
-            <ng-container *ngIf="featureFlagFilter.isArchived;then archivedOps else unarchivedOps"></ng-container>
+            <ng-container *ngIf="isArchived;then archivedOps else unarchivedOps"></ng-container>
             <ng-template #archivedOps>
               <a style="color: #717D8A"
                  i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
