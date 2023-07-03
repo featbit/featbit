@@ -8,7 +8,7 @@ import {
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel,
-} from "../types/switch-index";
+} from "../types/feature-flag";
 import { debounceTime, map } from 'rxjs/operators';
 import { FormBuilder } from "@angular/forms";
 import { getCurrentProjectEnv } from "@utils/project-env";
