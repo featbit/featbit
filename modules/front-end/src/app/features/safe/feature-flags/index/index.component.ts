@@ -41,6 +41,11 @@ export class IndexComponent implements OnInit {
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
 
+  get isArchived() {
+    const value: any = this.featureFlagFilter.isArchived;
+    return value === 'true' || value === true;
+  }
+
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
       Object.keys(params).forEach((k) => {
