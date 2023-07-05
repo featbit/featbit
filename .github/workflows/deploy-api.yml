@@ -1,4 +1,4 @@
-name: Deploy UI 
+name: Deploy API 
 on:
   workflow_dispatch:
   push:
