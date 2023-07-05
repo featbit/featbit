@@ -73,15 +73,11 @@ jobs:
           IMAGE_TAG: latest
         run: |
           echo $GITHUB_WORKSPACE
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./modules/back-end/deploy/Dockerfile ./modules/back-end
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f /Dockerfile ./modules/back-end
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          cd ./modules/back-end/deploy
+          ls -l
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          cd modules
-          ls -l
-          cd back-end
-          ls -l
-          cd deploy
-          ls -l
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
