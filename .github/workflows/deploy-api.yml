@@ -74,7 +74,7 @@ jobs:
         run: |
           echo $GITHUB_WORKSPACE
           cp ./modules/back-end/deploy/Dockerfile ./modules/back-end/Dockerfile
-          docker build -f ./modules/back-end/deploy/Dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./modules/back-end
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./modules/back-end
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
