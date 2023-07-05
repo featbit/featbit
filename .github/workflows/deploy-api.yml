@@ -73,7 +73,7 @@ jobs:
           IMAGE_TAG: latest
         run: |
           echo $GITHUB_WORKSPACE
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./modules/back-end/deploy/Dockerfile ./modules/back-end
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./modules/back-end/deploy/Dockerfile ./modules/back-end/deploy
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
