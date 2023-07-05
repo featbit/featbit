@@ -9,7 +9,7 @@ COPY ./ /app/
 RUN npm run build:prod
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-FROM nginx:16.17
+FROM nginx:1.23
 
 ENV API_URL \
     DEMO_URL \
