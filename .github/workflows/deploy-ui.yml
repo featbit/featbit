@@ -42,6 +42,7 @@ jobs:
           export API_URL=$api_url
           export DEMO_URL=$demo_url
           export EVALUATION_URL=$evaluation_url
+          
           envsubst < modules/front-end/src/assets/env.template.js > modules/front-end/src/assets/env.js
           rm modules/front-end/src/assets/env.template.js
           mv modules/front-end/src/assets/env.js modules/front-end/src/assets/env.template.js
