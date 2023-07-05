@@ -52,7 +52,6 @@ jobs:
           $a.MongoDb.Database = $env:MongoDbSettings_DatabaseName
 
           $a.OLAP.ServiceHost = $env:OLAP__ServiceHost
-
           $a.Kafka.BootstrapServers = $env:Kafka__BootstrapServers
           $a.Redis.ConnectionString = $env:Redis__ConnectionString
 
