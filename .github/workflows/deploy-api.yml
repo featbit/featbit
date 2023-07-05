@@ -60,12 +60,6 @@ jobs:
 
           ConvertTo-Json $a -depth 100  | set-content $pathToJson
 
-          
-          export EVALUATION_URL=$evaluation_url
-          envsubst < modules/front-end/src/assets/env.template.js > modules/front-end/src/assets/env.js
-          rm modules/front-end/src/assets/env.template.js
-          mv modules/front-end/src/assets/env.js modules/front-end/src/assets/env.template.js
-
       - name: Download task definition
         run: |
           aws ecs describe-task-definition --task-definition featbit-prod-api-ecs-task  | jq -r '.taskDefinition'> task-definition.json
