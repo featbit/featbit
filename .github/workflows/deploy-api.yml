@@ -13,14 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     environment : prod
     env:
-      container_name: ui
-      ecr_repository: featbit-prod-ui-ecr-repo
-      ecs_service: featbit-prod-ui-ecs-service
+      container_name: api
+      ecr_repository: featbit-prod-api-ecr-repo
+      ecs_service: featbit-prod-api-ecs-service
       ecs_cluster: featbit-prod-ecs-cluster
-      api_url: https://apiv2.featureflag.co
-      demo_url: https://featbit-samples.vercel.app
-      evaluation_url: https://streaming.featureflag.co
       region: cn-northwest-1
+      MongoDbSettings_ConnectionString: mongodb://admin:password@ec2-69-235-147-117.cn-northwest-1.compute.amazonaws.com.cn:27017
+      MongoDbSettings_DatabaseName: featbit
+      OLAP__ServiceHost: https://da.featureflag.co
+      Redis__ConnectionString: ec2-69-235-147-117.cn-northwest-1.compute.amazonaws.com.cn:6379
+      Kafka__BootstrapServers: no-need
+      IS_PRO: false
     steps:
 
       - name: Checkout
@@ -38,9 +41,26 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Set parameters
+        id: setting-env
+        shell: pwsh
         run: |
-          export API_URL=$api_url
-          export DEMO_URL=$demo_url
+          cd modules/back-end/src/Api
+          $pathToJson = "appsettings.json"
+          $a = Get-Content $pathToJson | ConvertFrom-Json
+
+          $a.MongoDb.ConnectionString = $env:MongoDbSettings_ConnectionString
+          $a.MongoDb.Database = $env:MongoDbSettings_DatabaseName
+
+          $a.OLAP.ServiceHost = $env:OLAP__ServiceHost
+
+          $a.Kafka.BootstrapServers = $env:Kafka__BootstrapServers
+          $a.Redis.ConnectionString = $env:Redis__ConnectionString
+
+          $a.IS_PRO = $env:IS_PRO
+
+          ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+          
           export EVALUATION_URL=$evaluation_url
           envsubst < modules/front-end/src/assets/env.template.js > modules/front-end/src/assets/env.js
           rm modules/front-end/src/assets/env.template.js
@@ -48,8 +68,8 @@ jobs:
 
       - name: Download task definition
         run: |
-          aws ecs describe-task-definition --task-definition featbit-prod-ui-ecs-task  | jq -r '.taskDefinition'> task-definition.json
-          aws ecs describe-task-definition --task-definition featbit-prod-ui-ecs-task  | jq -r '.taskDefinition'
+          aws ecs describe-task-definition --task-definition featbit-prod-api-ecs-task  | jq -r '.taskDefinition'> task-definition.json
+          aws ecs describe-task-definition --task-definition featbit-prod-api-ecs-task  | jq -r '.taskDefinition'
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -59,7 +79,7 @@ jobs:
           IMAGE_TAG: latest
         run: |
           echo $GITHUB_WORKSPACE
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./modules/front-end/Dockerfile ./modules/front-end
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./modules/back-end/deploy/Dockerfile ./modules/back-end
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
