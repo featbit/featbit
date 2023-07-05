@@ -1,5 +1,5 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile Angular
-FROM node:20 as build-stage
+FROM node:16.17 as build-stage
 
 WORKDIR /app
 COPY package*.json /app/
@@ -9,7 +9,7 @@ COPY ./ /app/
 RUN npm run build:prod
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-FROM nginx:1.25
+FROM nginx:16.17
 
 ENV API_URL \
     DEMO_URL \
