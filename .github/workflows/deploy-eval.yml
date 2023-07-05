@@ -1,0 +1,92 @@
+name: Deploy Evaluation Server 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - temporary
+    paths:
+      - 'modules/evaluation-server/**'
+      - '.github/workflows/deploy-eval.yml'
+jobs:
+  deploy-prod:
+    name : Deploy to production
+    runs-on: ubuntu-latest
+    environment : prod
+    env:
+      container_name: eval
+      ecr_repository: featbit-prod-eval-ecr-repo
+      ecs_service: featbit-prod-eval-ecs-service
+      ecs_cluster: featbit-prod-ecs-cluster
+      region: cn-northwest-1
+      MongoDbSettings_ConnectionString: mongodb://admin:password@ec2-43-192-150-231.cn-northwest-1.compute.amazonaws.com.cn:27017
+      MongoDbSettings_DatabaseName: featbit
+      Redis__ConnectionString: ec2-43-192-150-231.cn-northwest-1.compute.amazonaws.com.cn:6379
+      Kafka__BootstrapServers: no-need
+      IS_PRO: false
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set parameters
+        id: setting-env
+        shell: pwsh
+        run: |
+          cd modules/evaluation-server/src/Api
+          $pathToJson = "appsettings.json"
+          $a = Get-Content $pathToJson | ConvertFrom-Json
+
+          $a.MongoDb.ConnectionString = $env:MongoDbSettings_ConnectionString
+          $a.MongoDb.Database = $env:MongoDbSettings_DatabaseName
+
+          $a.Kafka.BootstrapServers = $env:Kafka__BootstrapServers
+          $a.Redis.ConnectionString = $env:Redis__ConnectionString
+
+          $a.IS_PRO = $env:IS_PRO
+
+          ConvertTo-Json $a -depth 100  | set-content $pathToJson
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition featbit-prod-eval-ecs-task  | jq -r '.taskDefinition'> task-definition.json
+          aws ecs describe-task-definition --task-definition featbit-prod-eval-ecs-task  | jq -r '.taskDefinition'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ecr_repository }}
+          IMAGE_TAG: latest
+        run: |
+          echo $GITHUB_WORKSPACE
+          cp ./modules/evaluation-server/deploy/Dockerfile ./modules/evaluation-server/Dockerfile
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./modules/evaluation-server
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >>$GITHUB_OUTPUT
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.container_name }}
+          image: ${{ steps.build-image.outputs.image }}
+  
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ecs_service }}
+          cluster: ${{ env.ecs_cluster }}
+          wait-for-service-stability: true

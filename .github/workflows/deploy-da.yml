@@ -1,0 +1,81 @@
+name: Deploy DA Server 
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - temporary
+    paths:
+      - 'modules/data-analytics/**'
+      - '.github/workflows/deploy-da.yml'
+jobs:
+  deploy-prod:
+    name : Deploy to production
+    runs-on: ubuntu-latest
+    environment : prod
+    env:
+      container_name: da
+      ecr_repository: featbit-prod-da-ecr-repo
+      ecs_service: featbit-prod-da-ecs-service
+      ecs_cluster: featbit-prod-ecs-cluster
+      region: cn-northwest-1
+      REDIS_HOST: ec2-43-192-150-231.cn-northwest-1.compute.amazonaws.com.cn
+      REDIS_PORT: 6379
+      MONGO_URI: mongodb://admin:password@ec2-43-192-150-231.cn-northwest-1.compute.amazonaws.com.cn:27017
+      MONGO_INITDB_DATABASE: featbit
+      MONGO_HOST: ec2-43-192-150-231.cn-northwest-1.compute.amazonaws.com.cn
+      IS_PRO: false
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition featbit-prod-eval-ecs-task  | jq -r '.taskDefinition'> task-definition.json
+          aws ecs describe-task-definition --task-definition featbit-prod-eval-ecs-task  | jq -r '.taskDefinition'
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ecr_repository }}
+          IMAGE_TAG: latest
+        run: |
+          echo $GITHUB_WORKSPACE
+          docker build \
+          --build-arg=REDIS_HOST=$env:REDIS_HOST \
+          --build-arg=REDIS_PORT=$env:REDIS_PORT \
+          --build-arg=MONGO_URI=$env:MONGO_URI \
+          --build-arg=MONGO_INITDB_DATABASE=$env:MONGO_INITDB_DATABASE \
+          --build-arg=MONGO_HOST=$env:MONGO_HOST \
+          --build-arg="IS_PRO=$env:IS_PRO \
+          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./modules/evaluation-server
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >>$GITHUB_OUTPUT
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.container_name }}
+          image: ${{ steps.build-image.outputs.image }}
+  
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ecs_service }}
+          cluster: ${{ env.ecs_cluster }}
+          wait-for-service-stability: true
