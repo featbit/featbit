@@ -18,9 +18,9 @@ jobs:
       ecs_service: featbit-prod-eval-ecs-service
       ecs_cluster: featbit-prod-ecs-cluster
       region: cn-northwest-1
-      MongoDbSettings_ConnectionString: mongodb://admin:password@ec2-43-192-150-231.cn-northwest-1.compute.amazonaws.com.cn:27017
+      MongoDbSettings_ConnectionString: mongodb://admin:password@ec2-52-83-237-245.cn-northwest-1.compute.amazonaws.com.cn:27017
       MongoDbSettings_DatabaseName: featbit
-      Redis__ConnectionString: ec2-43-192-150-231.cn-northwest-1.compute.amazonaws.com.cn:6379
+      Redis__ConnectionString: ec2-52-83-237-245.cn-northwest-1.compute.amazonaws.com.cn:6379
       Kafka__BootstrapServers: no-need
       IS_PRO: false
     steps:
