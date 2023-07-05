@@ -42,7 +42,7 @@ jobs:
           export API_URL=$api_url
           export DEMO_URL=$demo_url
           export EVALUATION_URL=$evaluation_url
-          
+
           envsubst < modules/front-end/src/assets/env.template.js > modules/front-end/src/assets/env.js
           rm modules/front-end/src/assets/env.template.js
           mv modules/front-end/src/assets/env.js modules/front-end/src/assets/env.template.js
@@ -60,7 +60,7 @@ jobs:
           IMAGE_TAG: latest
         run: |
           echo $GITHUB_WORKSPACE
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f ./modules/front-end/Dockerfile ./modules/front-end
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./modules/front-end
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
