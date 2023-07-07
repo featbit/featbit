@@ -88,9 +88,7 @@
             <span class="name">{{variation.name}}</span>
           </div>
         <div class="right">
-          <nz-tag nz-tooltip="{{variation.value}}">
-            <span class="variation-value">{{variation.value}}</span>
-          </nz-tag>
+          <nz-tag nz-tooltip="{{variation.value}}">{{variation.value}}</nz-tag>
           <i *ngIf="['json', 'string'].includes(featureFlag.variationType)"
              class="expand-icon" nz-icon nzType="expand" (click)="expandVariation(variation, true)">
           </i>
