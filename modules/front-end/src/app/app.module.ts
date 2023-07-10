@@ -30,7 +30,6 @@ import { AccountProjectEnvResolver } from "@services/account-preject-env-resolve
     NzSelectModule
   ],
   providers: [
-    AccountProjectEnvResolver,
     {
       provide: NZ_I18N,
       useFactory: (localId: string) => {
