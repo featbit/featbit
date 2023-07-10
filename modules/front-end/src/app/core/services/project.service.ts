@@ -52,8 +52,8 @@ export class ProjectService {
         let project, env;
 
         if (localCurrentProjectEnv) {
-          project = projects.find((pro) => pro.id === localCurrentProjectEnv.projectId);
-          env = project.environments.find((env) => env.id === localCurrentProjectEnv.envId);
+          project = projects.find(pro => pro.id === localCurrentProjectEnv.projectId);
+          env = project.environments.find(env => env.id === localCurrentProjectEnv.envId);
         } else {
           project = projects[0];
           env = project.environments[0];
