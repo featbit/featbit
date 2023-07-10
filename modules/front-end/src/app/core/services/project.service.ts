@@ -6,6 +6,7 @@ import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
 import { map } from "rxjs/operators";
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Injectable({
   providedIn: 'root'
@@ -44,16 +45,10 @@ export class ProjectService {
     this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
   }
 
-  // get local project env
-  getLocalCurrentProjectEnv(): IProjectEnv {
-    const projectEnvJson = localStorage.getItem(CURRENT_PROJECT());
-    return projectEnvJson ? JSON.parse(projectEnvJson) : undefined;
-  }
-
   setCurrentProjectEnv(): Observable<IProjectEnv> {
     return this.getList().pipe(
       map((projects: IProject[]) => {
-        const localCurrentProjectEnv = this.getLocalCurrentProjectEnv();
+        const localCurrentProjectEnv = getCurrentProjectEnv();
         let project, env;
 
         if (localCurrentProjectEnv) {
