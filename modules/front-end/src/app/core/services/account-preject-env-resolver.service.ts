@@ -24,7 +24,7 @@ export class AccountProjectEnvResolver implements Resolve<any> {
             return;
           }
 
-          return this.projectService.getCurrentProjectEnv().pipe(
+          return this.projectService.upsertCurrentProjectEnv().pipe(
             take(1),
             mergeMap(() => {
               return of({});

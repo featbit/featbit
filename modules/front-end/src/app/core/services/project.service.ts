@@ -50,7 +50,7 @@ export class ProjectService {
     return projectEnvJson ? JSON.parse(projectEnvJson) : undefined;
   }
 
-  getCurrentProjectEnv(): Observable<IProjectEnv> {
+  upsertCurrentProjectEnv(): Observable<IProjectEnv> {
     return this.getList().pipe(
       map((projects: IProject[]) => {
         const localCurrentProjectEnv = this.getLocalCurrentProjectEnv();
