@@ -12,7 +12,6 @@ import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
 import { NzSelectModule } from "ng-zorro-antd/select";
-import { AccountProjectEnvResolver } from "@services/account-preject-env-resolver.service";
 
 @NgModule({
   declarations: [

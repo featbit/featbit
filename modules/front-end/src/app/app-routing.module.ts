@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { LoginGuard } from "@core/guards/login.guard";
-import {AccountProjectEnvResolver} from "@services/account-preject-env-resolver.service";
-import {AuthGuard} from "@core/guards/auth.guard";
+import { AccountProjectEnvResolver } from "@services/account-preject-env-resolver.service";
+import { AuthGuard } from "@core/guards/auth.guard";
 
 const routes: Routes = [
   {
