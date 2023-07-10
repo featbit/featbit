@@ -17,19 +17,13 @@ export class AccountProjectEnvResolver implements Resolve<any> {
 
   resolve(route: ActivatedRouteSnapshot): Observable<any> {
     return this.accountService.getCurrentOrganization().pipe(
-      take(1),
       mergeMap((account: IOrganization) => {
           if (!account) {
             this.identityService.doLogoutUser(false);
             return;
           }
 
-          return this.projectService.setCurrentProjectEnv().pipe(
-            take(1),
-            mergeMap(() => {
-              return of({});
-            })
-          )
+          return this.projectService.setCurrentProjectEnv();
         }
       )
     );
