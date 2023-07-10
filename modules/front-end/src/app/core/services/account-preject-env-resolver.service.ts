@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { take, mergeMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
 import { IOrganization } from '@shared/types';
