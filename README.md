@@ -16,9 +16,9 @@
     <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join FeatBit on Slack"/>
   </a>
   <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-  <a href="https://join.slack.com/t/kanaries-community/shared_invite/zt-1pcosgbua-E_GBPawQOI79C41dPDyyvw">
-    <img src="https://img.shields.io/badge/all_contributors-18-orange.svg?style=flat-square"/>
-  </a> 
+  <a href="#">
+    <img src="https://img.shields.io/badge/all_contributors-18-orange.svg?color=ee8449&style=flat-square" alt="All Contributors" />
+  </a>
   <!-- ALL-CONTRIBUTORS-BADGE:END -->
   </div>
   <div id="badges">
@@ -29,7 +29,7 @@
     <img src="https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white"/>
   </a>
   <a href="https://angular.io/">
-    <img src="https://img.shields.io/badge/Angular-14.0-DD0031?style=flat-square&logo=angular&logoColor=white"/>
+    <img src="https://img.shields.io/badge/Angular-16.0-DD0031?style=flat-square&logo=angular&logoColor=white"/>
   </a>
 </div>
 </div>
