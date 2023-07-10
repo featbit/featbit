@@ -5,6 +5,8 @@ import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
+import { map } from "rxjs/operators";
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Injectable({
   providedIn: 'root'
@@ -43,38 +45,33 @@ export class ProjectService {
     this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
   }
 
-  // get local project env
-  getLocalCurrentProjectEnv(): IProjectEnv {
-    const projectEnvJson = localStorage.getItem(CURRENT_PROJECT());
-    return projectEnvJson ? JSON.parse(projectEnvJson) : undefined;
-  }
+  setCurrentProjectEnv(): Observable<IProjectEnv> {
+    return this.getList().pipe(
+      map((projects: IProject[]) => {
+        const localCurrentProjectEnv = getCurrentProjectEnv();
+        let project, env;
 
-  // get current project env for account
-  getCurrentProjectEnv(): Observable<IProjectEnv> {
-    return new Observable(observer => {
-      const localCurrentProjectEnv = this.getLocalCurrentProjectEnv();
-      if (localCurrentProjectEnv) {
-        observer.next(localCurrentProjectEnv);
-      } else {
-        this.getList().subscribe(projects => {
-          // chose first project first env as default value
-          const firstProject = projects[0];
-          const firstProjectEnv = firstProject.environments[0];
+        if (localCurrentProjectEnv) {
+          project = projects.find(pro => pro.id === localCurrentProjectEnv.projectId);
+          env = project.environments.find(env => env.id === localCurrentProjectEnv.envId);
+        } else {
+          project = projects[0];
+          env = project.environments[0];
+        }
 
-          const projectEnv: IProjectEnv = {
-            projectId: firstProject.id,
-            projectName: firstProject.name,
-            envId: firstProjectEnv.id,
-            envKey: firstProjectEnv.key,
-            envName: firstProjectEnv.name,
-            envSecret: firstProjectEnv.secrets[0].value
-          };
+        const projectEnv: IProjectEnv = {
+          projectId: project.id,
+          projectName: project.name,
+          envId: env.id,
+          envKey: env.key,
+          envName: env.name,
+          envSecret: env.secrets[0].value
+        };
 
-          this.upsertCurrentProjectEnvLocally(projectEnv);
-          observer.next(projectEnv);
-        });
-      }
-    })
+        this.upsertCurrentProjectEnvLocally(projectEnv);
+        return projectEnv;
+      })
+    );
   };
 
   // reset current project env
