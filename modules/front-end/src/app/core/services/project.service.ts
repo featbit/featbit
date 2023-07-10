@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
+import { map } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -49,17 +50,15 @@ export class ProjectService {
     return projectEnvJson ? JSON.parse(projectEnvJson) : undefined;
   }
 
-  // get current project env for account
   getCurrentProjectEnv(): Observable<IProjectEnv> {
-    return new Observable(observer => {
-      this.getList().subscribe(projects => {
+    return this.getList().pipe(
+      map((projects: IProject[]) => {
         const localCurrentProjectEnv = this.getLocalCurrentProjectEnv();
         let project, env;
 
         if (localCurrentProjectEnv) {
           project = projects.find((pro) => pro.id === localCurrentProjectEnv.projectId);
           env = project.environments.find((env) => env.id === localCurrentProjectEnv.envId);
-
         } else {
           project = projects[0];
           env = project.environments[0];
@@ -75,9 +74,9 @@ export class ProjectService {
         };
 
         this.upsertCurrentProjectEnvLocally(projectEnv);
-        observer.next(projectEnv);
-      });
-    })
+        return projectEnv;
+      })
+    );
   };
 
   // reset current project env
