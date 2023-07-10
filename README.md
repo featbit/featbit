@@ -16,7 +16,7 @@
     <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join FeatBit on Slack"/>
   </a>
   <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-  <a href="#contributors-">
+  <a href="#">
     <img src="https://img.shields.io/badge/all_contributors-18-orange.svg?color=ee8449&style=flat-square" alt="All Contributors" />
   </a>
   <!-- ALL-CONTRIBUTORS-BADGE:END -->
