@@ -1,37 +1,26 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { take, mergeMap } from 'rxjs/operators';
+import { inject } from '@angular/core';
+import { ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot } from '@angular/router';
+import { Observable } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 import { ProjectService } from '@services/project.service';
 import { OrganizationService } from '@services/organization.service';
 import { IOrganization } from '@shared/types';
 import { IdentityService } from "@services/identity.service";
 
-@Injectable()
-export class AccountProjectEnvResolver implements Resolve<any> {
-  constructor(
-    private identityService: IdentityService,
-    private projectService: ProjectService,
-    private accountService: OrganizationService,
-  ) { }
+export const AccountProjectEnvResolver: ResolveFn<any> = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+  identityService: IdentityService = inject(IdentityService),
+  projectService: ProjectService = inject(ProjectService),
+  organizationService: OrganizationService = inject(OrganizationService)
+): Observable<any> => organizationService.getCurrentOrganization().pipe(
+  mergeMap((organization: IOrganization) => {
+      if (!organization) {
+        identityService.doLogoutUser(false);
+        return;
+      }
 
-  resolve(route: ActivatedRouteSnapshot): Observable<any> {
-    return this.accountService.getCurrentOrganization().pipe(
-      take(1),
-      mergeMap((account: IOrganization) => {
-          if (!account) {
-            this.identityService.doLogoutUser(false);
-            return;
-          }
-
-          return this.projectService.setCurrentProjectEnv().pipe(
-            take(1),
-            mergeMap(() => {
-              return of({});
-            })
-          )
-        }
-      )
-    );
-  }
-}
+      return projectService.setCurrentProjectEnv();
+    }
+  )
+);
