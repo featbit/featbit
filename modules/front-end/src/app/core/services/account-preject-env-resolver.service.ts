@@ -12,8 +12,8 @@ export const AccountProjectEnvResolver: ResolveFn<any> = (
   state: RouterStateSnapshot,
   identityService: IdentityService = inject(IdentityService),
   projectService: ProjectService = inject(ProjectService),
-  accountService: OrganizationService = inject(OrganizationService)
-): Observable<any> => accountService.getCurrentOrganization().pipe(
+  organizationService: OrganizationService = inject(OrganizationService)
+): Observable<any> => organizationService.getCurrentOrganization().pipe(
   mergeMap((organization: IOrganization) => {
       if (!organization) {
         identityService.doLogoutUser(false);
