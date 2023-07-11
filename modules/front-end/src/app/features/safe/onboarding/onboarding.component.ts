@@ -29,7 +29,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  async logout() {
-    await this.identityService.doLogoutUser();
+  logout() {
+    this.identityService.doLogoutUser();
   }
 }
