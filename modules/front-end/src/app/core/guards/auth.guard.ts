@@ -4,6 +4,7 @@ import { getAuth } from '@shared/utils';
 import { LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
 import { OrganizationService } from '@services/organization.service';
 import {PermissionsService} from "@services/permissions.service";
+import { getCurrentOrganization } from "@utils/project-env";
 
 @Injectable({
   providedIn: 'root'
@@ -29,8 +30,8 @@ export class AuthGuard implements CanActivate {
 
       // check if organization is initialized
       if (!url.startsWith("/onboarding")) {
-        const orgProj = this.accountService.getCurrentOrganizationProjectEnv();
-        if (orgProj.organization?.initialized === false) {
+        const organization = getCurrentOrganization();
+        if (organization?.initialized === false) {
           return this.router.parseUrl('/onboarding');
         }
       }
