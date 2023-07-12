@@ -1,5 +1,7 @@
 using Api.Middlewares;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Serilog;
+using Serilog.Events;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using OpenApiConstants = Api.Authentication.OpenApiConstants;
 
@@ -49,6 +51,21 @@ public static class MiddlewaresRegister
             options.DocumentTitle = "FeatBit OpenApi Doc";
             options.SpecUrl = $"/swagger/{OpenApiConstants.ApiGroupName}/swagger.json";
             options.ExpandResponses("200");
+        });
+
+        // serilog request logging
+        app.UseSerilogRequestLogging(options =>
+        {
+            options.IncludeQueryInRequestPath = true;
+            options.GetLevel = (ctx, _, ex) =>
+            {
+                if (ex != null || ctx.Response.StatusCode > 499)
+                {
+                    return LogEventLevel.Error;
+                }
+
+                return LogEventLevel.Information;
+            };
         });
 
         // enable cors

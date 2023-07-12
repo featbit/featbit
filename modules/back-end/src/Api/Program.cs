@@ -1,10 +1,12 @@
 using Api.Setup;
 using Serilog;
+using Serilog.Events;
 using Serilog.Formatting.Compact;
 
 try
 {
     Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
         .Enrich.FromLogContext()
         .WriteTo.Console(new CompactJsonFormatter())
         .CreateLogger();
