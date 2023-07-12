@@ -68,8 +68,9 @@ export class OrganizationService {
   getCurrentOrganization(): Observable<IOrganization> {
     return new Observable(observer => {
         this.getList().subscribe(res => {
-          this.organizations = res as IOrganization[];
-            const currentOrg = this.organizations[0];
+            const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
+            this.organizations = res as IOrganization[];
+            const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
             localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrg));
             observer.next(currentOrg);
         });
