@@ -5,7 +5,7 @@ on:
     branches:
       - temporary
     paths:
-      - 'modules/backend-end/**'
+      - 'modules/back-end/**'
       - '.github/workflows/deploy-api.yml'
 jobs:
   deploy-prod:
