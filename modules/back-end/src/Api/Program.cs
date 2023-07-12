@@ -1,11 +1,12 @@
 using Api.Setup;
 using Serilog;
+using Serilog.Formatting.Compact;
 
 try
 {
     Log.Logger = new LoggerConfiguration()
         .Enrich.FromLogContext()
-        .WriteTo.Console()
+        .WriteTo.Console(new CompactJsonFormatter())
         .CreateLogger();
 
     WebApplication.CreateBuilder(args)
