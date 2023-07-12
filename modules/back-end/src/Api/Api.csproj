@@ -20,6 +20,7 @@
 
         <!-- Serilog -->
         <PackageReference Include="Serilog.AspNetCore" Version="6.1.0"/>
+        <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.0.0"/>
     </ItemGroup>
 
     <ItemGroup>

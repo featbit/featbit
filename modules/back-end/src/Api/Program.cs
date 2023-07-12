@@ -8,6 +8,8 @@ try
     Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
         .Enrich.FromLogContext()
+        .Enrich.WithClientIp("X-Forwarded-For")
+        .Enrich.WithRequestHeader("User-Agent")
         .WriteTo.Console(new CompactJsonFormatter())
         .CreateLogger();
 
