@@ -53,6 +53,9 @@ public static class MiddlewaresRegister
             options.ExpandResponses("200");
         });
 
+        // enable cors
+        app.UseCors();
+
         // serilog request logging
         app.UseSerilogRequestLogging(options =>
         {
@@ -67,9 +70,6 @@ public static class MiddlewaresRegister
                 return LogEventLevel.Information;
             };
         });
-
-        // enable cors
-        app.UseCors();
 
         // authentication & authorization
         app.UseAuthentication();
