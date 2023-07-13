@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { LoginGuard } from "@core/guards/login.guard";
-import { AccountProjectEnvResolver } from "@services/account-preject-env-resolver.service";
 import { AuthGuard } from "@core/guards/auth.guard";
 
 const routes: Routes = [
@@ -19,9 +18,6 @@ const routes: Routes = [
     path: '',
     canActivate: [AuthGuard],
     loadChildren: () => import("./features/safe/safe.module").then(m => m.SafeModule),
-    resolve: {
-      _: AccountProjectEnvResolver // Ensure that the current account and project env are loaded before activate the safe module
-    },
   }
 ];
 @NgModule({
