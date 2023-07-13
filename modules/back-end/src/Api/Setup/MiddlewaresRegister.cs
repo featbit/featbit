@@ -67,6 +67,12 @@ public static class MiddlewaresRegister
                     return LogEventLevel.Error;
                 }
 
+                // ignore health check endpoints
+                if (ctx.Request.Path.StartsWithSegments("/health"))
+                {
+                    return LogEventLevel.Debug;
+                }
+
                 return LogEventLevel.Information;
             };
         });
