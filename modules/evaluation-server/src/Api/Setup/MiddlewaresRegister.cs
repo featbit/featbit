@@ -1,7 +1,7 @@
 using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
-namespace Api;
+namespace Api.Setup;
 
 public static class MiddlewaresRegister
 {
