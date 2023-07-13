@@ -3,7 +3,9 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Rout
 import { getAuth } from '@shared/utils';
 import { LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
 import { OrganizationService } from '@services/organization.service';
-import {PermissionsService} from "@services/permissions.service";
+import { PermissionsService } from "@services/permissions.service";
+import { ProjectService } from "@services/project.service";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +14,9 @@ export class AuthGuard implements CanActivate {
 
   constructor(
     private router: Router,
+    private message: NzMessageService,
     private accountService: OrganizationService,
+    private projectService: ProjectService,
     private permissionsService: PermissionsService
   ) { }
 
@@ -22,16 +26,22 @@ export class AuthGuard implements CanActivate {
     return await this.checkLogin(state.url);
   }
 
-  async checkLogin(url: string): Promise<true | UrlTree> {
+  async checkLogin(url: string): Promise<boolean | UrlTree> {
     const auth = getAuth();
     if (auth) {
       await this.permissionsService.fetchPolicies(auth.id);
 
       // check if organization is initialized
       if (!url.startsWith("/onboarding")) {
-        const orgProj = this.accountService.getCurrentOrganizationProjectEnv();
-        if (orgProj.organization?.initialized === false) {
-          return this.router.parseUrl('/onboarding');
+        const currentProjectEnv = await this.projectService.setCurrentProjectEnv();
+        if (currentProjectEnv) {
+          const orgProj = this.accountService.getCurrentOrganizationProjectEnv();
+          if (orgProj.organization.initialized === false) {
+            return this.router.parseUrl('/onboarding');
+          }
+        } else {
+          this.message.error($localize`:@@permissions.need-permissions-to-access-env:You don't have permissions to access any projects and environments, please contact the admin to grant you the necessary permissions`);
+          return false;
         }
       }
 
