@@ -17,5 +17,5 @@ export const iAMGuard = (
     return false;
   }
 
-  return isGranted;
+  return true;
 }

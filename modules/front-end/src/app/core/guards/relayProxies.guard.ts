@@ -17,5 +17,5 @@ export const relayProxiesGuard = (
     return false;
   }
 
-  return isGranted;
+  return true;
 }

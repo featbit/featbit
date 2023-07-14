@@ -17,5 +17,5 @@ export const accessTokensGuard = (
     return false;
   }
 
-  return isGranted;
+  return true;
 }
