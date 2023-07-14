@@ -67,21 +67,13 @@ export class OrganizationService {
 
   getCurrentOrganization(): Observable<IOrganization> {
     return new Observable(observer => {
-      const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
-      if (this.organizations.length === 0 || !orgStr || JSON.parse(orgStr)?.plan === undefined) {
         this.getList().subscribe(res => {
-          this.organizations = res as IOrganization[];
-          if (!orgStr) {
-            const currentOrg = this.organizations[0];
+            const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
+            this.organizations = res as IOrganization[];
+            const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
             localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrg));
             observer.next(currentOrg);
-          } else {
-            observer.next(this.organizations.find(ws => ws.id == JSON.parse(orgStr).id));
-          }
         });
-      } else {
-        observer.next(this.organizations.find(ws => ws.id == JSON.parse(orgStr).id));
-      }
     });
   }
 }
