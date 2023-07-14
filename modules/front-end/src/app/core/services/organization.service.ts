@@ -2,9 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IOrganization, IProjectEnv, IOrganizationProjectEnv } from '@shared/types';
+import { IOrganization } from '@shared/types';
 import { ProjectService } from './project.service';
-import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
+import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 
 @Injectable({
   providedIn: 'root'
@@ -83,14 +83,5 @@ export class OrganizationService {
         observer.next(this.organizations.find(ws => ws.id == JSON.parse(orgStr).id));
       }
     });
-  }
-
-  getCurrentOrganizationProjectEnv(): IOrganizationProjectEnv {
-    const organization: IOrganization = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION())!);
-    const projectEnv: IProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT())!);
-    return {
-      organization,
-      projectEnv
-    };
   }
 }

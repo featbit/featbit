@@ -3,9 +3,7 @@ import {Router} from '@angular/router';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Subject} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
-import {IProjectEnv} from '@shared//types';
 import {ExperimentService} from '@services/experiment.service';
-import {CURRENT_PROJECT} from "@utils/localstorage-keys";
 import {
   CustomEventTrackOption,
   EventType,
@@ -30,8 +28,6 @@ export class OverviewComponent implements OnInit, OnDestroy {
     items: []
   };
 
-  currentProjectEnv: IProjectEnv = null;
-
   customEventType: EventType = EventType.Custom;
   pageViewEventType: EventType = EventType.PageView;
   clickEventType: EventType = EventType.Click;
@@ -50,21 +46,20 @@ export class OverviewComponent implements OnInit, OnDestroy {
     private message: NzMessageService,
     private experimentService: ExperimentService
   ) {
-    this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
-    this.loadStatusCounte();
+    this.loadStatusCount();
   }
 
   ngOnInit(): void {
     this.search$.pipe(
       debounceTime(300)
-    ).subscribe(e => {
+    ).subscribe(() => {
       this.loadExperiments();
     });
 
     this.search$.next(null);
   }
 
-  loadStatusCounte() {
+  loadStatusCount() {
     this.experimentService.getExperimentStatusCount().subscribe(res => {
       this.statusCount = res.reduce((acc, cur) => {
         acc[cur.status] = cur.count;
@@ -99,7 +94,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
   detailViewVisible: boolean = false;
   currentExperiment: IExpt;
   onCreateClick() {
-    this.currentExperiment = { envId: this.currentProjectEnv.envId } as IExpt;
+    this.currentExperiment = { } as IExpt;
     this.detailViewVisible = true;
   }
 
@@ -115,7 +110,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
         this.message.warning($localize `:@@expt.overview.expt-exists:Experiment with the same feature flag and metric exists`);
       }
 
-      this.loadStatusCounte();
+      this.loadStatusCount();
     }
   }
 

@@ -24,7 +24,6 @@ export interface IPagedMetric {
 }
 
 export interface IExptCreation {
-  envId: string,
   featureFlagId: string,
   metricId: string,
   baselineVariationId: string,
