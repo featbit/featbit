@@ -59,7 +59,7 @@ export class ExperimentDrawerComponent implements OnInit {
       this.featureFlagService.getList(new IFeatureFlagListFilter(query)).subscribe((result) => {
         this.featureFlagList = result;
         this.isFeatureFlagsLoading = false;
-      }, error => {
+      }, () => {
         this.isFeatureFlagsLoading = false;
       });
     });
@@ -70,7 +70,7 @@ export class ExperimentDrawerComponent implements OnInit {
       this.metricService.getMetrics(new MetricListFilter(query)).subscribe((result) => {
         this.pagedMetric = result;
         this.isMetricsLoading = false;
-      }, error => {
+      }, () => {
         this.isMetricsLoading = false;
       });
     });
@@ -143,9 +143,7 @@ export class ExperimentDrawerComponent implements OnInit {
       featureFlagId: featureFlag.id,
       metricId: metric.id,
       baselineVariationId: baselineVariationId,
-    })
-      .pipe()
-      .subscribe(
+    }).subscribe(
         res => {
           this.isLoading = false;
           this.close.emit({ isEditing: false, data: {
@@ -160,7 +158,7 @@ export class ExperimentDrawerComponent implements OnInit {
             }
           });
         },
-        err => {
+      () => {
           this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
           this.isLoading = false;
         }
