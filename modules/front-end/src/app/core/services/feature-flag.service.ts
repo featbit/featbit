@@ -5,17 +5,18 @@ import { getCurrentProjectEnv } from "@utils/project-env";
 import { Observable, of } from "rxjs";
 import {
   ICopyToEnvResult,
+  IFeatureFlagCreationPayload,
   IFeatureFlagListFilter,
   IFeatureFlagListModel
-} from "@features/safe/feature-flags/types/switch-index";
+} from "@features/safe/feature-flags/types/feature-flag";
 import { catchError } from "rxjs/operators";
 import {
   IFeatureFlag,
   IFeatureFlagTargeting,
-  ISettingPayload,
-  IVariationsPayload
+  ISettingPayload
 } from "@features/safe/feature-flags/types/details";
 import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
+import { IVariation } from "@shared/rules";
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +31,7 @@ export class FeatureFlagService {
   constructor(private http: HttpClient) {
   }
 
-  public toggleStatus(key: string): Observable<any> {
+  toggleStatus(key: string): Observable<any> {
     const url = `${this.baseUrl}/${key}/toggle`;
     return this.http.put(url, {})
   }
@@ -39,7 +40,7 @@ export class FeatureFlagService {
     return this.http.get<IFeatureFlag>(`${this.baseUrl}/${key}`);
   }
 
-  public getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
+  getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
     const queryParam = {
       name: filter.name ?? '',
       tags: filter.tags ?? [],
@@ -55,16 +56,16 @@ export class FeatureFlagService {
     );
   }
 
-  updateSetting(payload: ISettingPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.key}/settings`;
+  updateSetting(key: string, payload: ISettingPayload): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/settings`;
 
     return this.http.put<boolean>(url, payload);
   }
 
-  updateVariations(payload: IVariationsPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.key}/variations`;
+  updateVariations(key: string, variations: IVariation[]): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/variations`;
 
-    return this.http.put<boolean>(url, payload);
+    return this.http.put<boolean>(url, { variations });
   }
 
   delete(key: string): Observable<boolean> {
@@ -73,33 +74,33 @@ export class FeatureFlagService {
     return this.http.delete<boolean>(url);
   }
 
-  public isKeyUsed(key: string): Observable<boolean> {
+  isKeyUsed(key: string): Observable<boolean> {
     const url = `${this.baseUrl}/is-key-used?key=${key}`;
 
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  public create(payload) {
+  create(payload: IFeatureFlagCreationPayload) {
     return this.http.post(this.baseUrl, payload);
   }
 
-  public copyToEnv(targetEnvId: string, flagIds: string[]): Observable<ICopyToEnvResult> {
+  copyToEnv(targetEnvId: string, flagIds: string[]): Observable<ICopyToEnvResult> {
     const url = `${this.baseUrl}/copy-to-env/${targetEnvId}`;
 
     return this.http.post<ICopyToEnvResult>(url, flagIds);
   }
 
-  public archive(key: string): Observable<any> {
+  archive(key: string): Observable<any> {
     const url = `${this.baseUrl}/${key}/archive`;
     return this.http.put(url, {});
   }
 
-  public restore(key: string): Observable<any> {
+  restore(key: string): Observable<any> {
     const url = `${this.baseUrl}/${key}/restore`;
     return this.http.put(url, {});
   }
 
-  public updateTargeting(payload: IFeatureFlagTargeting): Observable<boolean> {
+  updateTargeting(payload: IFeatureFlagTargeting): Observable<boolean> {
     const url = `${this.baseUrl}/${payload.key}/targeting`;
     return this.http.put<boolean>(url, payload);
   }
@@ -109,12 +110,12 @@ export class FeatureFlagService {
     return this.http.get<string[]>(url);
   }
 
-  setTags(flag: IFeatureFlag): Observable<boolean> {
-    const url = `${this.baseUrl}/${flag.key}/tags`;
-    return this.http.put<boolean>(url, flag.tags);
+  setTags(flagKey: string, tags: string[]): Observable<boolean> {
+    const url = `${this.baseUrl}/${flagKey}/tags`;
+    return this.http.put<boolean>(url, tags);
   }
 
-  public getInsights(filter: IInsightsFilter): Observable<IInsights[]> {
+  getInsights(filter: IInsightsFilter): Observable<IInsights[]> {
     const queryParam = {...filter};
     const url = `${this.baseUrl}/insights`;
     return this.http.get<IInsights[]>(url, {params: new HttpParams({fromObject: queryParam})});

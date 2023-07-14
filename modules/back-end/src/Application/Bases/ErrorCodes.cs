@@ -55,6 +55,7 @@ public static class ErrorCodes
     public const string InvalidTo = nameof(InvalidTo);
     public const string InvalidFlagKeyFormat = nameof(InvalidFlagKeyFormat);
     public const string InvalidSecretType = nameof(InvalidSecretType);
+    public const string FeatureFlagKeyHasBeenUsed = nameof(FeatureFlagKeyHasBeenUsed);
 
     // triggers
     public const string InvalidTriggerType = nameof(InvalidTriggerType);
@@ -71,4 +72,10 @@ public static class ErrorCodes
     // access tokens
     public const string InvalidAccessTokenType = nameof(InvalidAccessTokenType);
     public const string ServiceAccessTokenMustDefinePolicies = nameof(ServiceAccessTokenMustDefinePolicies);
+
+    // relay proxies
+    public const string InvalidRelayProxyScope = nameof(InvalidRelayProxyScope);
+    public const string InvalidRelayProxyAgent = nameof(InvalidRelayProxyAgent);
+
+    public static string InvalidParameter(string parameterName) => $"{parameterName}_is_invalid";
 }

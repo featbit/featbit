@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { OrganizationService } from "@services/organization.service";
 import { IOrganization } from "@shared/types";
+import { getCurrentOrganization } from "@utils/project-env";
 
 @Component({
   selector: 'onboarding-complete',
@@ -9,15 +9,14 @@ import { IOrganization } from "@shared/types";
   styleUrls: ['./complete.component.less']
 })
 export class CompleteComponent implements OnInit {
-  public isVisible: boolean = false;
-  public currentOrg: IOrganization;
+  isVisible: boolean = false;
+  currentOrg: IOrganization;
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
-    private organizationService: OrganizationService
+    private route: ActivatedRoute
   ) {
-    this.currentOrg = this.organizationService.getCurrentOrganizationProjectEnv().organization;
+    this.currentOrg = getCurrentOrganization();
   }
 
   ngOnInit(): void {

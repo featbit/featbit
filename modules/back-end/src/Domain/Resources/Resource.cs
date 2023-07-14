@@ -41,6 +41,14 @@ public class Resource
         Rn = "access-token/*",
         Type = ResourceTypes.AccessToken
     };
+    
+    public static readonly Resource AllRelayProxies = new()
+    {
+        Id = new Guid("fef122fb-0b20-4556-b830-5863850e8092"),
+        Name = "relay-proxy",
+        Rn = "relay-proxy/*",
+        Type = ResourceTypes.RelayProxy
+    };
 
     public static readonly Resource AllProject = new()
     {
@@ -64,5 +72,13 @@ public class Resource
         Name = "flag",
         Rn = "project/*:env/*:flag/*",
         Type = ResourceTypes.FeatureFlag
+    };
+    
+    public static readonly Resource AllSegments = new()
+    {
+        Id = new Guid("f03a822a-047f-11ee-be56-0242ac120002"),
+        Name = "segment",
+        Rn = "project/*:env/*:segment/*",
+        Type = ResourceTypes.Segment
     };
 }

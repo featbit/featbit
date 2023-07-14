@@ -64,11 +64,21 @@ export class TargetingComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe( paramMap => {
       this.id = decodeURIComponent(paramMap.get('id'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.loadData());
+      this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.refreshData());
       this.loadData();
       this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
         this.flagReferences = [...flags];
       });
+    })
+  }
+
+  private async refreshData() {
+    return this.segmentService.getSegment(this.id).subscribe((result: ISegment) => {
+      if (result) {
+        const { name, description } = result;
+        this.segmentDetail.name = name;
+        this.segmentDetail.description = description;
+      }
     })
   }
 
@@ -95,8 +105,8 @@ export class TargetingComponent implements OnInit {
     const userKeyIds = [...segment.included, ...segment.excluded];
     if (userKeyIds.length > 0) {
       this.envUserService.getByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
-        this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId));
-        this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId));
+        this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
+        this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
 
         const targetUsers = [...this.segmentDetail.includedUsers, ...this.segmentDetail.excludedUsers];
         // filter out unique values
@@ -106,6 +116,10 @@ export class TargetingComponent implements OnInit {
     } else {
       this.isLoading = false;
     }
+  }
+
+  private createTemporaryUser(keyId: string): IUserType {
+    return { id: '', keyId, name: keyId };
   }
 
   public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {

@@ -63,17 +63,17 @@ class TrendsExperimentResult:
 
             if self._expt.is_numeric_expt:
                 output = {'variationId': variation.key,
-                          'totalEvents': variation.count,
+                          'totalEvents': int(variation.count) if variation.count is not None else None,
                           'average': format_float_positional(variation.mean) if variation.mean is not None else None
                           }
             else :
                 output = {'variationId': variation.key,
-                          'conversion': variation.exposure,
-                          'uniqueUsers': variation.count,
+                          'conversion': int(variation.exposure) if variation.exposure is not None else None,
+                          'uniqueUsers': int(variation.count) if variation.count is not None else None,
                           'conversionRate': format_float_positional(variation.mean) if variation.mean is not None else None
                           }
             return {**output,
-                    'changeToBaseline': change_to_baseline if change_to_baseline is not None else None,
+                    'changeToBaseline': change_to_baseline,
                     'confidenceInterval': variation.confidence_interval,
                     'pValue': format_float_positional(p_value) if p_value is not None else None,
                     'isBaseline': variation.key == baseline,
@@ -89,7 +89,7 @@ class TrendsExperimentResult:
                 output.append(standard_output(variation, self._expt.baseline, None, None, False, True))
         else:
             for variation in variations.values():
-                change_to_baseline = variation.mean - baseline_var.mean if not self._expt.is_numeric_expt else (variation.mean - baseline_var.mean) / baseline_var.mean  # type: ignore
+                change_to_baseline = variation.mean - baseline_var.mean if self._expt.is_numeric_expt else (variation.mean - baseline_var.mean) / baseline_var.mean  # type: ignore
                 p_value = self._p_value(baseline_var, variation) if variation.exposure > 0 else None  # type: ignore
                 is_result_invalid = not self._variation_valid(baseline_var, variation, p_value, alpha=self.default_alpha) if variation.exposure > 0 else True  # type: ignore
                 output.append(standard_output(variation, self._expt.baseline, change_to_baseline, p_value, False, is_result_invalid))
@@ -166,4 +166,4 @@ class TrendsExperimentResult:
                 sorted_valid_results[0]['isWinner'] = True
             elif sorted_valid_results[-1]['changeToBaseline'] > 0:
                 sorted_valid_results[-1]['isWinner'] = True
-        return sorted(map(lambda r: {**r, 'changeToBaseline': format_float_positional(r['changeToBaseline'])}, sorted_valid_results + invalid_results), key=lambda r: r['variationId'])
+        return sorted(map(lambda r: {**r, 'changeToBaseline': format_float_positional(r['changeToBaseline'])}, sorted_valid_results + invalid_results), key=lambda r: r['variationId'])  # type: ignore

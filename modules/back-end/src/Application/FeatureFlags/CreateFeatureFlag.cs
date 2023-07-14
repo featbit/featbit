@@ -2,6 +2,7 @@ using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
+using Application.Bases.Exceptions;
 
 namespace Application.FeatureFlags;
 
@@ -13,7 +14,38 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
 
     public string Key { get; set; }
 
+    public bool IsEnabled { get; set; }
+    
     public string Description { get; set; }
+
+    public string VariationType { get; set; }
+
+    public ICollection<Variation> Variations { get; set; }
+
+    public string EnabledVariationId { get; set; }
+
+    public string DisabledVariationId { get; set; }
+
+    public ICollection<string> Tags { get; set; }
+
+    public FeatureFlag AsFeatureFlag(Guid currentUserId)
+    {
+        var flag = new FeatureFlag(
+            EnvId,
+            Name,
+            Description,
+            Key,
+            IsEnabled,
+            VariationType,
+            Variations,
+            DisabledVariationId,
+            EnabledVariationId,
+            Tags,
+            currentUserId
+        );
+
+        return flag;
+    }
 }
 
 public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
@@ -26,6 +58,22 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
         RuleFor(x => x.Key)
             .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired)
             .Matches(FeatureFlag.KeyFormat).WithErrorCode(ErrorCodes.InvalidFlagKeyFormat);
+
+        RuleFor(x => x.VariationType)
+            .Must(VariationTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidVariationType);
+
+        RuleFor(x => x.Variations)
+            .NotEmpty()
+            .Must(variations => variations.All(variation => variation.IsValid()))
+            .WithErrorCode(ErrorCodes.InvalidParameter("variations"));
+
+        RuleFor(x => x.DisabledVariationId)
+            .Must((flag, variationId) => flag.Variations?.Any(x => x.Id == variationId) ?? false)
+            .WithErrorCode(ErrorCodes.InvalidParameter("disabledVariationId"));
+
+        RuleFor(x => x.EnabledVariationId)
+            .Must((flag, variationId) => flag.Variations?.Any(x => x.Id == variationId) ?? false)
+            .WithErrorCode(ErrorCodes.InvalidParameter("enabledVariationId"));
     }
 }
 
@@ -50,7 +98,13 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
 
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = new FeatureFlag(request.EnvId, request.Name, request.Description, request.Key, _currentUser.Id);
+        var isKeyBeenUsed = await _service.IsFeatureFlagKeyUsedAsync(request.EnvId, request.Key);
+        if (isKeyBeenUsed)
+        {
+            throw new BusinessException(ErrorCodes.FeatureFlagKeyHasBeenUsed);
+        }
+
+        var flag = request.AsFeatureFlag(_currentUser.Id);
         await _service.AddOneAsync(flag);
 
         // write audit log

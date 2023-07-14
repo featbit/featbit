@@ -1,9 +1,8 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IOrganization, IProjectEnv, IRuleIdDispatchKey } from '@shared/types';
+import { IRuleIdDispatchKey } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { MessageQueueService } from '@services/message-queue.service';
@@ -46,9 +45,6 @@ export class TargetingComponent implements OnInit {
   public key: string;
   public isLoading: boolean = true;
   public isTargetUsersActive: boolean = false;
-
-  currentAccount: IOrganization = null;
-  currentProjectEnv: IProjectEnv = null;
 
   exptRulesVisible = false;
 
@@ -130,15 +126,25 @@ export class TargetingComponent implements OnInit {
     this.isLoading = true;
     this.route.paramMap.subscribe(paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.loadData());
+      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
       this.loadData();
     });
   }
 
-  async loadData() {
-    this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
-    this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
+  private async refreshFeatureFlag() {
+    this.featureFlagService.getByKey(this.key).subscribe({
+      next: (result: IFeatureFlag) => {
+        this.featureFlag.variations = [...result.variations];
+        this.featureFlag.originalData.variations = [...result.variations];
+        this.featureFlag.variations.forEach(v => {
+          this.targetingUsersByVariation[v.id] = this.targetingUsersByVariation[v.id] ?? [];
+        });
+      },
+      error: (err) => console.log('Error', err)
+    })
+  }
 
+  async loadData() {
     await Promise.all([this.loadUserPropsData(), this.loadFeatureFlag()]);
     this.isLoading = false;
   }

@@ -1,0 +1,34 @@
+<Project>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageVersion>2.3.0</PackageVersion>
+        <Authors>FeatBit</Authors>
+        <Owners>FeatBit</Owners>
+        <Company>FeatBit</Company>
+        <Copyright>Copyright 2023 FeatBit</Copyright>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/featbit/featbit</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/featbit/featbit</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryBranch>main</RepositoryBranch>
+        <PackageIcon>icon.png</PackageIcon>
+        <Description>This package is dedicated used by the 100% open-source feature flags management platform [FeatBit](https://github.com/featbit/featbit).</Description>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+        <Deterministic>true</Deterministic>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Include="$(MSBuildThisFileDirectory)icon.png" CopyToOutputDirectory="Always" Pack="true" PackagePath="/"/>
+    </ItemGroup>
+</Project>

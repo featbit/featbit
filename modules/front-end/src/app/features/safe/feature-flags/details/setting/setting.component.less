@@ -77,6 +77,7 @@
     .value {
       display: flex;
       align-items: center;
+      font-size: 14px;
 
       i {
         margin-left: 8px;
@@ -146,7 +147,8 @@
     .selected {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 0;
+      row-gap: 4px;
       border: 1px solid @grey20-color;
       background-color: #ffffff;
       padding: 5px;
@@ -221,17 +223,34 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       width: 100%;
 
-      div.left {
-        width: 75%;
+      .left {
+        width: 30%;
         display: flex;
         align-items: center;
 
-        .variation-value {
-          height: 20px;
-          width: 200px;
+        .variation-tip {
+          flex: 0 0 12px;
+        }
+
+        .name {
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
+      }
+
+      .right {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 2px;
+
+        nz-tag {
+          width: 100px;
+          text-align: center;
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow: hidden;
@@ -431,3 +450,51 @@
   }
 }
 
+.variations-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  i {
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .add-variation {
+    width: 50px;
+    text-align: left;
+  }
+
+  .variation-wrapper {
+    border-radius: 10px;
+    border: 1px solid @grey0-color;
+    padding: 12px 12px 0 12px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    ::ng-deep .ant-input-suffix {
+      padding-left: 6px;
+    }
+
+    nz-input-group {
+      height: 40px;
+      border-radius: 8px;
+      input {
+        height: 100%;
+      }
+    }
+
+    nz-form-control {
+      width: 238px;
+    }
+
+    &.with-extra-options {
+      nz-form-control {
+        width: 218px;
+      }
+    }
+  }
+}

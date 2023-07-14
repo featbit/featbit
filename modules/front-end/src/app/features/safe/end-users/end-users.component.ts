@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'end-user',
-  templateUrl: './end-users.component.html',
-  styleUrls: ['./end-users.component.less']
+  template: `<router-outlet></router-outlet>`
 })
 export class EndUsersComponent implements OnInit {
 

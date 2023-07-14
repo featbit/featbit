@@ -58,7 +58,7 @@ public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<Insig
             Time = s.Time,
             Variations = featureFlag.Variations.Select(v => new VariationInsightsVm
             {
-                Variation = v.Value,
+                Variation = v.Name,
                 Count = s.Variations.FirstOrDefault(x => x.Id == v.Id)?.Val ?? 0
             })
         });

@@ -33,6 +33,14 @@ spec:
           name: da-server
           ports:
             - containerPort: 80
-          resources: {}
+          resources: 
+            requests:
+              memory: 512Mi
+              cpu: 500m
+              ephemeral-storage: 2Gi 
+            limits:
+              memory: 2Gi
+              cpu: 500m
+              ephemeral-storage: 4Gi 
       restartPolicy: Always
 status: {}

@@ -39,7 +39,7 @@ export class SegmentListFilter {
 }
 
 export class Segment {
-  private readonly data: ISegment;
+  private readonly _data: ISegment;
   private _includedUsers: IUserType[] = [];
   private _excludedUsers: IUserType[] = [];
 
@@ -48,21 +48,31 @@ export class Segment {
   constructor(segment: ISegment) {
     this.originalData = deepCopy(segment);
 
-    this.data = {...segment};
+    this._data = {...segment};
 
-    this.data.rules = segment.rules ?? [];
+    this._data.rules = segment.rules ?? [];
   }
 
   get segment() {
-    return {...this.data};
+    return {...this._data};
+  }
+
+  set name(val: string) {
+    this._data.name = val;
+    this.originalData.name = val;
+  }
+
+  set description(val: string) {
+    this._data.description = val;
+    this.originalData.description = val;
   }
 
   get dataToSave() {
     try{
-      this.data.rules = handleRulesBeforeSave(this.data.rules);
+      this._data.rules = handleRulesBeforeSave(this._data.rules);
 
       return {
-        ...this.data,
+        ...this._data,
         included: this._includedUsers.map(u => u.keyId),
         excluded: this._excludedUsers.map(u => u.keyId)
       };
@@ -88,7 +98,7 @@ export class Segment {
   }
 
   get rules(): IRule[] {
-    return this.data.rules;
+    return this._data.rules;
   }
 
   newRule() {

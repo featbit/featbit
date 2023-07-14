@@ -9,7 +9,6 @@ namespace Api.Controllers;
 [Authorize]
 [ApiController]
 [VerifyOpenApiApplicable]
-[Consumes(MediaTypeNames.Application.Json)]
 [Produces(MediaTypeNames.Application.Json)]
 [SwaggerResponse(200)]
 [SwaggerResponse(401)]

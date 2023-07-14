@@ -1,0 +1,226 @@
+<nz-drawer
+  [nzClosable]="false"
+  [nzExtra]="extra"
+  nzPlacement="right"
+  nzTitle="Create feature flag"
+  i18n-nzTitle="@@ff.add-title"
+  [nzBodyStyle]="{'padding-top': '12px'}"
+  [nzWidth]="600"
+  [nzVisible]="visible"
+  (nzOnClose)="close()">
+  <ng-container *nzDrawerContent>
+    <form nz-form [formGroup]="basicForm" nzLayout="vertical" class="form">
+      <div class="name-key-wrapper">
+        <nz-form-item>
+          <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+          <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
+            <input
+              nz-input
+              formControlName="name"
+              placeholder="A human-friendly name for your feature flag"
+              i18n-placeholder="@@common.feature-flag-name"
+              (ngModelChange)="nameChange($event)"
+            />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label
+            nzRequired
+            i18n-nzTooltipTitle="@@common.key-description"
+            nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation">
+            Key
+          </nz-form-label>
+          <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
+            <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name" />
+            <ng-template #keyErrorTpl let-control>
+              <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+              <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
+              <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <nz-form-item>
+        <nz-form-label i18n="@@common.description">Description</nz-form-label>
+        <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@common.description.cannot-exceed-512-characters">
+          <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+
+    <div class="tags-wrapper">
+      <div class="form-label">
+        <label>Tags</label>
+      </div>
+      <div class="tags">
+        <div class="selected" *ngIf="selectedTags.length">
+          <nz-tag *ngFor="let tag of selectedTags" nzMode="closeable" (nzOnClose)="onRemoveTag(tag)">
+            {{ tag }}
+          </nz-tag>
+        </div>
+        <nz-select
+          #tags
+          i18n-nzPlaceHolder="@@common.add-tags"
+          nzPlaceHolder="Add Tags"
+          nzShowSearch
+          [(ngModel)]="selectedTag"
+          (nzOnSearch)="onSearchTag($event)"
+          (ngModelChange)="onAddTag()">
+          <ng-container *ngFor="let tag of currentAllTags">
+            <nz-option *ngIf="!isLoadingTags" [nzValue]="tag" [nzLabel]="tag" [nzHide]="isTagSelected(tag)"></nz-option>
+          </ng-container>
+          <nz-option *ngIf="isLoadingTags" nzDisabled nzCustomContent>
+            <i nz-icon nzType="loading" class="loading-icon"></i>
+            <ng-container i18n="@@common.loading">Loading...</ng-container>
+          </nz-option>
+        </nz-select>
+      </div>
+    </div>
+
+    <nz-divider [nzText]="variationSettings">
+      <ng-template #variationSettings>
+        <label i18n="@@common.variation-settings">Variation settings</label>
+      </ng-template>
+    </nz-divider>
+
+    <form nz-form [formGroup]="variationForm" nzLayout="vertical" class="form">
+      <nz-form-item>
+        <nz-form-label i18n-nzTooltipTitle="@@common.variation-type-tooltip"
+                       nzTooltipTitle="We currently support string, boolean, number and json types. Once you have created a feature flag, you cannot change its variation type."
+                       nzRequired
+                       i18n="@@common.variation-type">Variation type</nz-form-label>
+        <nz-form-control>
+          <nz-select
+            class="variation-type-selector"
+            i18n-nzPlaceHolder="@@common.variation-type"
+            nzPlaceHolder="Variation type"
+            (ngModelChange)="setVariations($event)"
+            formControlName="variationType">
+            <nz-option  nzValue="boolean" nzLabel="boolean"></nz-option>
+            <nz-option  nzValue="string" nzLabel="string"></nz-option>
+            <nz-option  nzValue="number" nzLabel="number"></nz-option>
+            <nz-option  nzValue="json" nzLabel="json"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <div class="variations-wrapper" formArrayName="variations">
+        <div class="variation-wrapper" [class]="{'with-extra-options': showDeleteVariationButton}" *ngFor="let variation of variations.controls; let i = index" [formGroupName]="i">
+          <nz-form-item>
+            <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+            <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
+              <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzRequired i18n="@@common.value">Value</nz-form-label>
+            <nz-form-control nzHasFeedback [nzErrorTip]="valueErrorTpl">
+              <input type="text" *ngIf="!showExpandVariationIcon" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
+              <nz-input-group *ngIf="showExpandVariationIcon" [nzSuffix]="suffixIconButton">
+                <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
+                <ng-template #suffixIconButton>
+                  <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(i)"></i>
+                </ng-template>
+              </nz-input-group>
+              <ng-template #valueErrorTpl let-control>
+                <ng-container *ngIf="control.hasError('required')" i18n="@@common.value-cannot-be-empty">Value cannot be empty</ng-container>
+                <ng-container *ngIf="control.hasError('invalid')" i18n="@@common.invalid-value">Invalid value</ng-container>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+          <i nz-icon *ngIf="showDeleteVariationButton" (click)="removeVariation(i)" nzType="icons:icon-delete"></i>
+        </div>
+
+        <button class="add-variation" *ngIf="variationType !== 'boolean'" nz-button nzType="link" (click)="addVariation('', '')">
+          <span nz-icon nzType="icons:icon-plus" nzTheme="outline"></span>
+          <span i18n="@@common.add-variation">Add variation</span>
+        </button>
+      </div>
+    </form>
+
+    <nz-divider [nzText]="defaultRules">
+      <ng-template #defaultRules>
+        <label i18n="@@common.default-rule">Default rule</label>
+        <i [nz-tooltip]="defaultRuleTooltip" nz-icon nzType="icons:icon-info-outline">
+          <ng-template #defaultRuleTooltip>
+            <ng-container i18n="@@common.default-serve-tooltip">Define which variation users will see by default when the flag is Enabled or Disabled</ng-container>
+          </ng-template>
+        </i>
+      </ng-template>
+    </nz-divider>
+
+    <form nz-form [formGroup]="defaultRuleForm" nzLayout="horizontal" class="form">
+      <nz-form-item>
+        <nz-form-label i18n="@@common.on-off-status">ON/OFF Status</nz-form-label>
+        <nz-form-control>
+          <nz-switch formControlName="isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.serve-if-on">If the flag is ON, serve</nz-form-label>&nbsp;&nbsp;
+        <nz-form-control>
+          <nz-select
+            class="default-rule-selector"
+            i18n-nzPlaceHolder="@@common.select-variation"
+            nzPlaceHolder="Select variation"
+            formControlName="enabledVariationId">
+            <ng-container *ngFor="let variation of variations.controls">
+              <nz-option [nzLabel]="variation.value['name']" [nzValue]="variation.value['id']"></nz-option>
+            </ng-container>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.serve-if-off">If the flag is OFF, serve</nz-form-label>
+        <nz-form-control>
+          <nz-select
+            class="default-rule-selector"
+            i18n-nzPlaceHolder="@@common.select-variation"
+            nzPlaceHolder="Select variation"
+            formControlName="disabledVariationId">
+            <ng-container *ngFor="let variation of variations.controls">
+              <nz-option [nzLabel]="variation.value['name']" [nzValue]="variation.value['id']"></nz-option>
+            </ng-container>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+
+    <button (click)="doSubmit()" [nzLoading]="creating" nz-button class="submit-btn" [nzType]="'primary'" i18n="@@common.save">Save</button>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="close()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+
+  <nz-modal
+    [nzWidth]='800'
+    nzClassName="variation-value-editor"
+    [nzClosable]="true"
+    [nzTitle]="modalTitle"
+    [nzContent]="modalContent"
+    [nzFooter]="modalFooter"
+    [(nzVisible)]="variationValueExpandVisible"
+    (nzOnCancel)="variationValueExpandVisible=false">
+    <ng-template #modalTitle>
+      {{currentEditingVariation.name}}
+    </ng-template>
+    <ng-template #modalContent>
+      <nz-code-editor
+        style="height: 400px"
+        class="editor"
+        (nzEditorInitialized)="formatCode($event)"
+        [(ngModel)]="currentEditingVariation.value"
+        [nzEditorOption]="{ language: variationType, theme: 'vs', minimap: { enabled: false }  }">
+      </nz-code-editor>
+    </ng-template>
+    <ng-template #modalFooter>
+      <div style="display: flex;justify-content: space-between">
+        <button nz-button nzType="default" (click)="formatCode()" i18n="@@common.format">Format</button>
+        <div>
+          <button nz-button nzType="default" i18n="@@common.cancel" (click)="variationValueExpandVisible=false">Cancel</button>
+          <button nz-button nzType="primary" (click)="saveVariationValue()" i18n="@@common.save">Save</button>
+        </div>
+      </div>
+    </ng-template>
+  </nz-modal>
+</nz-drawer>

@@ -124,7 +124,7 @@ services:
       - featbit-network
 
   kafka:
-    image: bitnami/kafka:3.2.3
+    image: bitnami/kafka:3.4
     container_name: kafka
     restart: on-failure
     depends_on:
@@ -141,13 +141,14 @@ services:
       KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
       ALLOW_PLAINTEXT_LISTENER: 'true'
+      KAFKA_ENABLE_KRAFT: 'no'
     networks:
       - featbit-network
     volumes:
       - kafka:/bitnami/kafka
 
   init-kafka-topics:
-    image: bitnami/kafka:3.2.3
+    image: bitnami/kafka:3.4
     depends_on:
       kafka:
         condition: service_started

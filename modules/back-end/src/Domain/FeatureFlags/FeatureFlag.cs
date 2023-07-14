@@ -38,7 +38,18 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool IsArchived { get; set; }
 
-    public FeatureFlag(Guid envId, string name, string description, string key, Guid currentUserId) : base(currentUserId)
+    public FeatureFlag(
+        Guid envId,
+        string name,
+        string description,
+        string key,
+        bool isEnabled,
+        string variationType,
+        ICollection<Variation> variations,
+        string disabledVariationId,
+        string enabledVariationId,
+        ICollection<string> tags,
+        Guid currentUserId) : base(currentUserId)
     {
         EnvId = envId;
 
@@ -46,20 +57,14 @@ public class FeatureFlag : FullAuditedEntity
         Description = description;
         Key = key;
 
-        var falsyVariationId = Guid.NewGuid().ToString();
-        var truthyVariationId = Guid.NewGuid().ToString();
-        VariationType = VariationTypes.Boolean;
-        Variations = new List<Variation>
-        {
-            new(truthyVariationId, "true"),
-            new(falsyVariationId, "false")
-        };
+        VariationType = variationType;
+        Variations = variations;
 
         TargetUsers = Array.Empty<TargetUser>();
         Rules = Array.Empty<TargetRule>();
 
-        IsEnabled = false;
-        DisabledVariationId = falsyVariationId;
+        IsEnabled = isEnabled;
+        DisabledVariationId = disabledVariationId;
         Fallthrough = new Fallthrough
         {
             IncludedInExpt = true,
@@ -67,7 +72,7 @@ public class FeatureFlag : FullAuditedEntity
             {
                 new()
                 {
-                    Id = truthyVariationId,
+                    Id = enabledVariationId,
                     Rollout = new double[] { 0, 1 },
                     ExptRollout = 1
                 }
@@ -75,7 +80,7 @@ public class FeatureFlag : FullAuditedEntity
         };
         ExptIncludeAllTargets = true;
 
-        Tags = Array.Empty<string>();
+        Tags = tags ?? Array.Empty<string>();
         IsArchived = false;
     }
 
@@ -150,11 +155,10 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public DataChange UpdateVariations(string variationType, ICollection<Variation> variations, Guid currentUserId)
+    public DataChange UpdateVariations(ICollection<Variation> variations, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
-        VariationType = variationType;
         Variations = variations;
 
         UpdatedAt = DateTime.UtcNow;

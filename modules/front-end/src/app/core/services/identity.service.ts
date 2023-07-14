@@ -71,7 +71,7 @@ export class IdentityService {
     });
   }
 
-  async doLogoutUser(keepOrgProject: boolean = true) {
+  doLogoutUser(keepOrgProject: boolean = true) {
     const storageToKeep = {
       [CURRENT_LANGUAGE()]: localStorage.getItem(CURRENT_LANGUAGE()),
       [GET_STARTED()]: localStorage.getItem(GET_STARTED()),

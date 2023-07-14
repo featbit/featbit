@@ -18,6 +18,7 @@ using Infrastructure.Organizations;
 using Infrastructure.Policies;
 using Infrastructure.Projects;
 using Infrastructure.Redis;
+using Infrastructure.RelayProxies;
 using Infrastructure.Resources;
 using Infrastructure.Segments;
 using Infrastructure.Targeting;
@@ -61,6 +62,7 @@ public static class ConfigureServices
         {
             httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]);
         });
+        services.AddHttpClient<IAgentService, AgentService>();
 
         // custom services
         services.AddScoped<IUserService, UserService>();
@@ -81,6 +83,7 @@ public static class ConfigureServices
         services.AddTransient<IAuditLogService, AuditLogService>();
         services.AddSingleton<IEvaluator, Evaluator>();
         services.AddTransient<IAccessTokenService, AccessTokenService>();
+        services.AddTransient<IRelayProxyService, RelayProxyService>();
 
         return services;
     }

@@ -1,0 +1,121 @@
+@import "variables";
+
+.form {
+  i {
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  nz-form-label {
+    i {
+      margin-left: 16px;
+    }
+  }
+
+  .name-key-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    nz-form-control {
+      width: 260px;
+    }
+  }
+}
+
+.form-label {
+  font-size: 14px;
+  padding: 0 0 8px;
+  line-height: 1.5715;
+  white-space: initial;
+  text-align: left;
+}
+
+.tags-wrapper {
+  nz-select {
+    width: 100%;
+  }
+
+  .selected {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    row-gap: 4px;
+    border: 1px solid #EAECEE;
+    background-color: #fff;
+    padding: 5px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    margin-bottom: 12px;
+
+    nz-tag {
+      background: #EAECEE;
+      border-radius: 4px;
+      padding: 2px 4px 2px 5px;
+      line-height: 15px;
+      margin-right: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+.variations-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .add-variation {
+    width: 50px;
+    text-align: left;
+  }
+
+  .variation-wrapper {
+    border-radius: 10px;
+    border: 1px solid @grey0-color;
+    padding: 12px 12px 0 12px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    ::ng-deep .ant-input-suffix {
+      padding-left: 6px;
+    }
+
+    nz-input-group {
+      height: 40px;
+      border-radius: 8px;
+      input {
+        height: 100%;
+      }
+    }
+
+    nz-form-control {
+      width: 247px;
+    }
+
+    &.with-extra-options {
+      nz-form-control {
+        width: 225px;
+      }
+    }
+  }
+}
+
+nz-divider {
+  border-top-color: @grey30-color !important;
+
+  i {
+    cursor: pointer;
+    margin-left: 4px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  label {
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.45);
+  }
+}

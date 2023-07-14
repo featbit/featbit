@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IAuthProps, IOrganization, IProject, IEnvironment, IProjectEnv, SecretTypeEnum } from '@shared/types';
-import { OrganizationService } from '@services/organization.service';
 import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
@@ -13,6 +12,7 @@ import { copyToClipboard } from '@utils/index';
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FeedbackService } from "@services/feedback.service";
 import { EnvService } from '@core/services/env.service';
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'app-header',
@@ -24,7 +24,7 @@ export class HeaderComponent implements OnInit {
   @Input() auth: IAuthProps;
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
-  
+
   cannotReadProjectsMsg: string;
   cannotReadEnvsMsg: string;
   currentProjectEnv: IProjectEnv;
@@ -43,7 +43,6 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private organizationService: OrganizationService,
     private projectService: ProjectService,
     private message: NzMessageService,
     private fb: FormBuilder,
@@ -110,13 +109,8 @@ export class HeaderComponent implements OnInit {
   }
 
   envModalConfirm() {
-    const canAccessProjectEnvs = this.permissionsService.isGranted(`project/${this.selectedProject.name}`, permissionActions.AccessEnvs);
     const canAccessEnv = this.permissionsService.isGranted(`project/${this.selectedProject.name}:env/${this.selectedEnv.name}`, permissionActions.AccessEnvs);
-
-    if (
-      (canAccessProjectEnvs === undefined && canAccessEnv === undefined) ||
-      canAccessProjectEnvs === false ||
-      canAccessEnv === false) {
+    if (!canAccessEnv) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
     }
@@ -163,10 +157,8 @@ export class HeaderComponent implements OnInit {
   }
 
   private setSelectedProjectEnv() {
-    const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
-
-    this.currentOrganization = currentOrganizationProjectEnv.organization;
-    this.currentProjectEnv = currentOrganizationProjectEnv.projectEnv;
+    this.currentOrganization = getCurrentOrganization();
+    this.currentProjectEnv = getCurrentProjectEnv();
 
     this.setCurrentEnv();
 

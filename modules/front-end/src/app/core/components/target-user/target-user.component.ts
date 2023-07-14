@@ -2,11 +2,10 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angu
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectComponent } from 'ng-zorro-antd/select';
 import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 
 @Component({
@@ -16,7 +15,6 @@ import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 })
 export class TargetUserComponent implements OnInit {
 
-  private envId;
   public compareWith: (obj1: IUserType, obj2: IUserType) => boolean = (obj1: IUserType, obj2: IUserType) => {
     if(obj1 && obj2) {
       return obj1.id === obj2.id;
@@ -84,7 +82,6 @@ export class TargetUserComponent implements OnInit {
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService) {
-    this.envId = JSON.parse(localStorage.getItem(CURRENT_PROJECT()))?.envId;
     this.debouncer.pipe(
       debounceTime(500),
       distinctUntilChanged()
@@ -149,17 +146,21 @@ export class TargetUserComponent implements OnInit {
     this.saving = true;
     const { keyId, name, customizedProperties } = this.currentEditingUser;
 
-    this.envUserService.upsert({envId: this.envId, keyId, name, customizedProperties }).subscribe((user) => {
-      this.selectedUserDetailList = this.selectedUserDetailList.map(s => s.keyId === user.keyId ? {...user} : s);
-      this.onSelectedUserListChange.next(this.selectedUserDetailList);
-      this.saving = false;
-      this.msg.success($localize `:@@common.save-success:Saved Successfully`);
-      this.closeEditModal();
-    }, _ => {
-      this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`);
-      this.saving = false;
-      this.closeEditModal();
-    });
+    this.envUserService.upsert({ keyId, name, customizedProperties })
+      .pipe(
+        finalize(() => {
+          this.saving = false;
+          this.closeEditModal();
+        })
+      )
+      .subscribe({
+        next: (user) => {
+          this.selectedUserDetailList = this.selectedUserDetailList.map(s => s.keyId === user.keyId ? { ...user } : s);
+          this.onSelectedUserListChange.next(this.selectedUserDetailList);
+          this.msg.success($localize`:@@common.save-success:Saved Successfully`);
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
+      });
   }
 }
 

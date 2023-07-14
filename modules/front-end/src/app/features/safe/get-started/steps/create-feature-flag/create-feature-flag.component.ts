@@ -7,10 +7,11 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { BehaviorSubject } from "rxjs";
 import {
+  IFeatureFlagCreationPayload,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel
-} from "@features/safe/feature-flags/types/switch-index";
+} from "@features/safe/feature-flags/types/feature-flag";
 import { GET_STARTED } from "@utils/localstorage-keys";
 
 @Component({
@@ -172,7 +173,22 @@ export class CreateFeatureFlagComponent implements OnInit {
 
   next() {
     if (this.isCreatingFlag) {
-      this.featureFlagService.create(this.form.value).subscribe({
+      const truthyVariationId = uuidv4();
+      const falsyVariationId = uuidv4();
+      const { name, key, description } = this.form.value;
+
+      const payload: IFeatureFlagCreationPayload = {
+        name,
+        key,
+        description,
+        variationType: this.variationTypeBoolean,
+        isEnabled: false,
+        variations: [{id: truthyVariationId, name: 'True', value: 'true'}, {id: falsyVariationId, name: 'False', value: 'false'}],
+        enabledVariationId: truthyVariationId,
+        disabledVariationId: falsyVariationId
+      };
+
+      this.featureFlagService.create(payload).subscribe({
         next: (result: IFeatureFlag) => {
           this.onComplete.emit(result as any as IFeatureFlagListItem);
         },

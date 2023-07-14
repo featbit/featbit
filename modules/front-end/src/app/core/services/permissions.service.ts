@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { lastValueFrom } from "rxjs";
+import { firstValueFrom } from "rxjs";
 import { IPolicy } from "@features/safe/iam/types/policy";
 import { MemberService } from "@services/member.service";
 import { EffectEnum, IamPolicyAction, IPolicyStatement, ResourceTypeEnum } from "@shared/policy";
@@ -16,8 +16,8 @@ export class PermissionsService {
   constructor(private memberSvc: MemberService) {
   }
 
-  async fetchPolicies(memberId: string) {
-    const policies = await lastValueFrom<IPolicy[]>(this.memberSvc.getAllPolicies(memberId));
+  async initUserPolicies(memberId: string) {
+    const policies = await firstValueFrom<IPolicy[]>(this.memberSvc.getAllPolicies(memberId));
     this.userPolicies = [...policies];
     this.userPermissions = policies.flatMap(p => p.statements);
   }
@@ -62,8 +62,7 @@ export class PermissionsService {
     }
   }
 
-  // if return undefined, that means zero permission is defined on that resource
-  isGranted(rn: string, action: IamPolicyAction): boolean | undefined | any {
+  isGranted(rn: string, action: IamPolicyAction): boolean {
     const matchedPermissions = this.userPermissions.filter(permission => {
       if (permission.resourceType === ResourceTypeEnum.All) {
         return true;

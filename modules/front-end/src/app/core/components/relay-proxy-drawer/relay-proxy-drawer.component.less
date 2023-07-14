@@ -1,0 +1,84 @@
+@import "variables";
+
+.token-wrapper {
+  margin: 32px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.proxy-form {
+  i {
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  nz-form-label {
+    i {
+      margin-left: 16px;
+    }
+  }
+
+  .scope-selectors {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .scope-form-row {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 16px;
+
+      ::ng-deep .ant-select-multiple .ant-select-selection-placeholder {
+        top: 40%;
+      }
+
+      .proj-env-selectors {
+        display: flex;
+        justify-content: flex-start;
+        gap: 16px;
+
+        nz-select {
+          &.project-selector {
+            width: 330px;
+          }
+
+          &.env-selector {
+            width: 540px;
+          }
+        }
+      }
+    }
+  }
+
+  .agents .table-content-area {
+    i {
+      font-size: 13px;
+    }
+
+    .sync-button-new {
+      padding-left: 4px;
+    }
+
+    .status {
+      .status-wrapper {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        align-items: center;
+      }
+
+      &.status-healthy, &.status-loading {
+        color: @green70-color;
+      }
+
+      &.status-unhealthy {
+        color: @yellow55-color;
+      }
+    }
+  }
+}

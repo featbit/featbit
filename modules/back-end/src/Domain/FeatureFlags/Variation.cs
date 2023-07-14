@@ -4,11 +4,13 @@ public class Variation
 {
     public string Id { get; set; }
 
-    public string Value { get; set; }
+    public string Name { get; set; }
 
-    public Variation(string id, string value)
+    public string Value { get; set; }
+    
+    public bool IsValid()
     {
-        Id = id;
-        Value = value;
+        return !string.IsNullOrWhiteSpace(Id) &&
+               !string.IsNullOrWhiteSpace(Name);
     }
 }

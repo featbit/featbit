@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import {
@@ -86,14 +86,12 @@ export class IndexComponent implements OnInit {
 
   getAccessTokens() {
     this.isLoading = true;
-    this.accessTokenService.getList(this.filter).subscribe({
-      next: (accessTokens) => {
-        this.accessTokens = accessTokens;
-
-        this.isLoading = false;
-      },
-      error: () => this.isLoading = false
-    });
+    this.accessTokenService.getList(this.filter)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: (accessTokens) => this.accessTokens = accessTokens,
+        error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
+      });
   }
 
   doSearch(resetPage?: boolean) {
@@ -128,10 +126,13 @@ export class IndexComponent implements OnInit {
 
   currentAccessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []};
 
-  creatOrEdit(accessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []}) {
-    this.currentAccessToken = accessToken;
+  showDetailDrawer(accessToken: IAccessToken = {name: null, type: AccessTokenTypeEnum.Personal, permissions: []}, readonly: boolean = false) {
+    this.currentAccessToken = {...accessToken};
     this.accessTokenDrawerVisible = true;
+    this.isDetailDrawerReadonly = readonly;
   }
+
+  isDetailDrawerReadonly: boolean = false;
 
   delete(accessToken: IAccessToken) {
     this.accessTokenService.delete(accessToken.id).subscribe({
@@ -152,5 +153,9 @@ export class IndexComponent implements OnInit {
       },
       error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
     })
+  }
+
+  canTakeActionOnAccessToken(type: AccessTokenTypeEnum): boolean {
+    return (type === AccessTokenTypeEnum.Personal && this.canTakeActionOnPersonalAccessToken) || (type === AccessTokenTypeEnum.Service && this.canTakeActionOnServiceAccessToken)
   }
 }

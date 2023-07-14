@@ -34,7 +34,7 @@
         <label nz-checkbox [(ngModel)]="featureFlagFilter.isArchived" (ngModelChange)="onSearch(true)" i18n="@@ff.idx.archived">Archived</label>
       </div>
       <div class="middle-btn">
-        <button nz-button nzType="primary" (click)="this.createModalVisible = true">
+        <button nz-button nzType="primary" (click)="creationDrawerVisible = true">
           <i nz-icon nzType="icons:icon-add"></i>
           <ng-container i18n="@@common.add">Add</ng-container>
         </button>
@@ -85,7 +85,7 @@
             [nzChecked]="itemChecked(featureFlag)"
             (nzCheckedChange)="onItemChecked(featureFlag)"
           ></td>
-          <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag)">
+          <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag.key)">
               <span>{{featureFlag.name}}</span>
           </td>
           <td>
@@ -115,26 +115,24 @@
             <div style="min-width: 60px;" >
               <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length === 1">
                 <span class="variation-tip tip-0" style="margin-bottom:2px;"></span>
-                <span style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span nz-tooltip="{{featureFlag.serves.enabledVariations[0]}}" style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves.enabledVariations[0]}}
                 </span>
               </div>
               <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length > 1"
-                   style="cursor: pointer;"
-                   nz-tooltip="{{featureFlag.serves?.enabledVariations?.join(' // ')}}"
-                   >
-                <span *ngFor="let variationValue of featureFlag.serves?.enabledVariations; let key=index; ">
+                   style="cursor: pointer;">
+                <span *ngFor="let _ of featureFlag.serves?.enabledVariations; let key=index; ">
                   <span  class="variation-tip {{'tip-' + key % 9}}" style="margin-right:-3px;margin-bottom:2px;"></span>
                 </span>
-                <span style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span nz-tooltip="{{ getVaritonsWithTitles(featureFlag.serves?.enabledVariations) }}" style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves?.enabledVariations?.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
                 </span>
               </div>
               <div *ngIf="!featureFlag.isEnabled" style="opacity: .5;">
                 <span class="variation-tip tip-9" style="margin-bottom:2px;background-color:darkgray;"></span>
-                <span style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
+                <span nz-tooltip="{{featureFlag.serves.disabledVariation}}" style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
                              height: 18px;margin-top: 2px;overflow: hidden;">
                   {{featureFlag.serves?.disabledVariation}}
                 </span>
@@ -143,9 +141,9 @@
           </td>
           <td>{{getLocalDate(featureFlag.updatedAt) | date: 'YYYY-MM-dd HH:mm'}}</td>
           <td>
-            <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag)" i18n="@@common.details">Details</a>
+            <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag.key)" i18n="@@common.details">Details</a>
             <nz-divider nzType="vertical"></nz-divider>
-            <ng-container *ngIf="featureFlagFilter.isArchived;then archivedOps else unarchivedOps"></ng-container>
+            <ng-container *ngIf="isArchived;then archivedOps else unarchivedOps"></ng-container>
             <ng-template #archivedOps>
               <a style="color: #717D8A"
                  i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
@@ -172,58 +170,7 @@
   </div>
 </section>
 
-<nz-modal [nzVisible]="createModalVisible"
-          [nzTitle]="modalTitle"
-          [nzCentered]="true"
-          [nzContent]="modalContent"
-          [nzFooter]="modalFooter"
-          (nzOnCancel)="this.closeCreateModal()">
-  <ng-template #modalTitle><ng-container i18n="@@ff.idx.new-ff">New feature flag</ng-container></ng-template>
-  <ng-template #modalContent>
-    <form nz-form [formGroup]="featureFlagForm" nzLayout="vertical">
-      <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
-          <input
-            nz-input
-            formControlName="name"
-            placeholder="A human-friendly name for your feature flag"
-            i18n-placeholder="@@ff.feature-flag-name"
-            (ngModelChange)="nameChange($event)"
-          />
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label
-          nzRequired
-          i18n-nzTooltipTitle="@@ff.key-description"
-          nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation">
-          Key
-        </nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
-          <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name" />
-          <ng-template #keyErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
-          </ng-template>
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label i18n="@@common.description">Description</nz-form-label>
-        <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@ff.description.cannot-exceed-512-characters">
-          <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
-          </textarea>
-        </nz-form-control>
-      </nz-form-item>
-    </form>
-  </ng-template>
-
-  <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="featureFlagForm.invalid" (click)="create()" i18n="@@common.save">Save</button>
-  </ng-template>
-</nz-modal>
+<feature-flag-drawer [visible]="creationDrawerVisible" (onClose)="closeCreationDrawer()"></feature-flag-drawer>
 
 <nz-modal
   nzAutofocus="cancel"

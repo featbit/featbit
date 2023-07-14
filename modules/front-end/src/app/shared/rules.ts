@@ -24,10 +24,8 @@ export interface ICondition {
 
 export interface IVariation {
   id: string,
-  value: string,
-
-  // ui only
-  isInvalid?: boolean
+  name: string,
+  value: string
 }
 
 export interface IRuleVariation {

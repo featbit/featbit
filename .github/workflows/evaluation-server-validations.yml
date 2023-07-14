@@ -1,0 +1,37 @@
+# Validate the evaluation-server when code changes
+
+name: Evaluation-Server change validations
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/evaluation-server/**'
+      - '.github/evaluation-server-validations.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'modules/evaluation-server/**'
+      - '.github/evaluation-server-validations.yml'
+
+jobs:
+
+  validate:
+    name: Validate Evaluation-Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build - Evaluation-Server
+        uses: docker/build-push-action@v4
+        with:
+          context: "{{defaultContext}}:modules/evaluation-server"
+          file: ./deploy/Dockerfile
+          platforms: linux/amd64
+          push: false

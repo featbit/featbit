@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from "@angular/router";
-import { IFeatureFlagListItem } from "@features/safe/feature-flags/types/switch-index";
+import { IFeatureFlagListItem } from "@features/safe/feature-flags/types/feature-flag";
 
 @Component({
   selector: 'steps',

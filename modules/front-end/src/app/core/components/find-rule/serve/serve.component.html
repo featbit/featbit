@@ -1,11 +1,11 @@
 <section class="rule-item">
   <div class="rule-serve">
-    <div class="tip" i18n="@@core.components.findrule.serve">serve</div>
+    <div class="tip" i18n="@@core.components.findrule.serve">Serve</div>
     <div class="select">
       <nz-select [(ngModel)]="selectedVariationId" (ngModelChange)="modelChange()"
                  nzPlaceHolder="variation" i18n-nzPlaceHolder="@@app.components.findrule.selectvariation">
-        <nz-option *ngFor="let variationOption of availableVariations; let i = index" nzCustomContent [nzValue]="variationOption.id" [nzLabel]="variationOption.value">
-            {{variationOption.value}}
+        <nz-option *ngFor="let variationOption of availableVariations; let i = index" nzCustomContent [nzValue]="variationOption.id" [nzLabel]="variationOption.name">
+            {{variationOption.name}}
         </nz-option>
         <nz-option *ngIf="availableVariations.length > 1" [nzValue]="'-1'"
                    nzLabel="Rollout percentage"

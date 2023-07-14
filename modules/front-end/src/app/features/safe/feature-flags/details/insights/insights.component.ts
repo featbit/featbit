@@ -1,12 +1,12 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {ChartConfig} from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
-import {FeatureFlagService} from "@services/feature-flag.service";
-import {IVariation} from "@shared/rules";
-import {EnvUserService} from "@services/env-user.service";
-import {Subject} from "rxjs";
-import {debounceTime} from "rxjs/operators";
-import {uuidv4} from "@utils/index";
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { ChartConfig } from "@core/components/g2-chart/g2-line-chart/g2-line-chart";
+import { FeatureFlagService } from "@services/feature-flag.service";
+import { IVariation } from "@shared/rules";
+import { EnvUserService } from "@services/env-user.service";
+import { Subject } from "rxjs";
+import { debounceTime } from "rxjs/operators";
+import { uuidv4 } from "@utils/index";
 import {
   IFeatureFlagEndUserPagedResult,
   IntervalType,
@@ -21,9 +21,9 @@ import {
 })
 export class InsightsComponent implements OnInit {
 
-  public usage: string = '';
+  usage: string = '';
 
-  public isLoading: boolean = true;
+  isLoading: boolean = true;
 
   chartConfig: ChartConfig;
   variations: IVariation[] = [];
@@ -55,7 +55,7 @@ export class InsightsComponent implements OnInit {
     this.route.paramMap.subscribe(paramMap => {
       this.filter = new InsightsFilter(decodeURIComponent(paramMap.get('key')));
       this.featureFlagService.getByKey(this.filter.featureFlagKey).subscribe((res) => {
-        this.variations = [{ id: this.featureFlagVariationAllId, value: $localize `:@@common.all:All`}, ...res.variations];
+        this.variations = [{ id: this.featureFlagVariationAllId, name: $localize `:@@common.all:All`, value: $localize `:@@common.all:All`}, ...res.variations];
         this.filter.variationId = this.featureFlagVariationAllId;
         this.setIntervalTypes();
         this.filterChanged();
@@ -188,14 +188,14 @@ export class InsightsComponent implements OnInit {
     this.$endUserSearch.next();
   }
 
-  public loadFeatureFlagUsage() {
+  loadFeatureFlagUsage() {
     this.isLoading = true;
 
-    this.featureFlagService.getInsights(this.filter.filter)
-      .subscribe((res) => {
-        const source = res.flatMap((stat) => {
+    this.featureFlagService.getInsights(this.filter.filter).subscribe({
+      next: (insights) => {
+        const source = insights.flatMap((stat) => {
           const sum = stat.variations.reduce((acc, cur) => acc + cur.count, 0);
-          return [...stat.variations, { variation: $localize `:@@common.total:Total`, count: sum}].map((v) => {
+          return [...stat.variations, { variation: $localize`:@@common.total:Total`, count: sum }].map((v) => {
             return {
               label: v.variation,
               time: stat.time,
@@ -214,16 +214,16 @@ export class InsightsComponent implements OnInit {
 
         this.chartConfig = {
           xAxis: {
-            name: $localize `:@@common.time:Time`,
+            name: $localize`:@@common.time:Time`,
             field: 'time',
             position: 'end',
-            scale: {type: "timeCat", nice: true, range: [0.05, 0.95], mask: this.getXAxisMask()}
+            scale: { type: "timeCat", nice: true, range: [0.05, 0.95], mask: this.getXAxisMask() }
           },
           yAxis: {
             name: '',
             position: 'end',
             field: 'value',
-            scale: {nice: true}
+            scale: { nice: true }
           },
           source: source as any,
           dataGroupBy: 'label',
@@ -234,7 +234,9 @@ export class InsightsComponent implements OnInit {
 
         // data loaded
         this.isLoading = false;
-      }, () => this.isLoading = false);
+      },
+      error: () => this.isLoading = false
+    });
   }
 
   private getXAxisMask() {

@@ -6,7 +6,7 @@ import { debounceTime } from 'rxjs/operators';
 import { ExperimentService } from '@services/experiment.service';
 import { MetricService } from '@services/metric.service';
 import {FeatureFlagService} from "@services/feature-flag.service";
-import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/switch-index";
+import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/feature-flag";
 import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {IVariation} from "@shared/rules";
 import {IExpt, IPagedMetric, MetricListFilter} from "@features/safe/experiments/types";
@@ -59,7 +59,7 @@ export class ExperimentDrawerComponent implements OnInit {
       this.featureFlagService.getList(new IFeatureFlagListFilter(query)).subscribe((result) => {
         this.featureFlagList = result;
         this.isFeatureFlagsLoading = false;
-      }, error => {
+      }, () => {
         this.isFeatureFlagsLoading = false;
       });
     });
@@ -70,7 +70,7 @@ export class ExperimentDrawerComponent implements OnInit {
       this.metricService.getMetrics(new MetricListFilter(query)).subscribe((result) => {
         this.pagedMetric = result;
         this.isMetricsLoading = false;
-      }, error => {
+      }, () => {
         this.isMetricsLoading = false;
       });
     });
@@ -140,13 +140,10 @@ export class ExperimentDrawerComponent implements OnInit {
 
     const metric = this.pagedMetric.items.find(m => m.id === metricId);
     this.experimentService.createExperiment({
-      envId: this.experiment.envId,
       featureFlagId: featureFlag.id,
       metricId: metric.id,
       baselineVariationId: baselineVariationId,
-    })
-      .pipe()
-      .subscribe(
+    }).subscribe(
         res => {
           this.isLoading = false;
           this.close.emit({ isEditing: false, data: {
@@ -161,7 +158,7 @@ export class ExperimentDrawerComponent implements OnInit {
             }
           });
         },
-        err => {
+      () => {
           this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`);
           this.isLoading = false;
         }

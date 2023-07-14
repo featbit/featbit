@@ -2,21 +2,20 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { encodeURIComponentFfc, getQueryParamsFromObject, slugify } from '@shared/utils';
+import { encodeURIComponentFfc, getQueryParamsFromObject } from '@shared/utils';
 import {
   IFeatureFlagListCheckItem,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel,
-} from "../types/switch-index";
-import { debounceTime, first, map, switchMap } from 'rxjs/operators';
-import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
+} from "../types/feature-flag";
+import { debounceTime, map } from 'rxjs/operators';
+import { FormBuilder } from "@angular/forms";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { ProjectService } from "@services/project.service";
 import { IEnvironment } from "@shared/types";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { FeatureFlagService } from "@services/feature-flag.service";
-import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
 
@@ -38,14 +37,14 @@ export class IndexComponent implements OnInit {
     private notification: NzNotificationService,
     private modal: NzModalService,
   ) {
-    this.featureFlagForm = this.fb.group({
-      name: ['', Validators.required],
-      key: ['', Validators.required, this.flagKeyAsyncValidator],
-      description:['',Validators.maxLength(512)]
-    });
   }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
+
+  get isArchived() {
+    const value: any = this.featureFlagFilter.isArchived;
+    return value === 'true' || value === true;
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
@@ -247,51 +246,10 @@ export class IndexComponent implements OnInit {
   //#endregion
 
   //#region create switch
-  createModalVisible: boolean = false;
-  featureFlagForm: FormGroup;
+  creationDrawerVisible: boolean = false;
 
-  flagKeyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
-    debounceTime(300),
-    switchMap(value => this.featureFlagService.isKeyUsed(value as string)),
-    map(isKeyUsed => {
-      switch (isKeyUsed) {
-        case true:
-          return { error: true, duplicated: true };
-        case undefined:
-          return { error: true, unknown: true };
-        default:
-          return null;
-      }
-    }),
-    first()
-  );
-
-  creating: boolean = false;
-
-  nameChange(name: string) {
-    let keyControl = this.featureFlagForm.get('key')!;
-    keyControl.setValue(slugify(name ?? ''));
-    keyControl.markAsDirty();
-  }
-
-  create() {
-    this.creating = true;
-
-    this.featureFlagService.create(this.featureFlagForm.value).subscribe({
-      next: (result: IFeatureFlag) => {
-        this.navigateToFlagDetail(result);
-        this.creating = false;
-      },
-      error: (err) => {
-        this.msg.error(err.error);
-        this.creating = false;
-      }
-    });
-  }
-
-  closeCreateModal() {
-    this.createModalVisible = false;
-    this.featureFlagForm.reset();
+  closeCreationDrawer() {
+    this.creationDrawerVisible = false;
   }
 
   //#endregion
@@ -314,11 +272,11 @@ export class IndexComponent implements OnInit {
       });
   }
 
-  public navigateToFlagDetail(data: IFeatureFlag) {
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(data.key)}/targeting`).then();
+  navigateToFlagDetail(key: string) {
+    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`).then();
   }
 
-  archive(flag: IFeatureFlag) {
+  archive(flag: IFeatureFlagListItem) {
     let msg = $localize`:@@ff.archive-flag-warning:Flag <strong>${flag.name}</strong> will be archived, and the value defined in your code will be returned for all your users. Remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
 
     this.modal.confirm({
@@ -339,7 +297,7 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  restore(flag: IFeatureFlag) {
+  restore(flag: IFeatureFlagListItem) {
     this.featureFlagService.restore(flag.key).subscribe({
       next: () => {
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -349,7 +307,7 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  delete(flag: IFeatureFlag) {
+  delete(flag: IFeatureFlagListItem) {
     this.featureFlagService.delete(flag.key).subscribe({
       next: () => {
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -368,5 +326,9 @@ export class IndexComponent implements OnInit {
     copyToClipboard(text).then(
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
+  }
+
+  getVaritonsWithTitles(variations: string[]) {
+    return variations.map((v: string, index: number) => (`Variation ${index + 1}: ${v}`)).join(', ')
   }
 }

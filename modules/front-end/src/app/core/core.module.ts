@@ -84,6 +84,9 @@ import { AccessTokenStatusPipe } from "@core/pipes/access-token-status.pipe";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { GuideComponent } from "@core/components/guide/guide.component";
 import { PrismComponent } from './components/prism/prism.component';
+import { RelayProxyDrawerComponent } from "@core/components/relay-proxy-drawer/relay-proxy-drawer.component";
+import { FeatureFlagDrawerComponent } from "@core/components/feature-flag-drawer/feature-flag-drawer.component";
+import { NzSwitchModule } from "ng-zorro-antd/switch";
 
 @NgModule({
   declarations: [
@@ -111,6 +114,7 @@ import { PrismComponent } from './components/prism/prism.component';
     UploadDrawerComponent,
     MetricDrawerComponent,
     ExperimentDrawerComponent,
+    FeatureFlagDrawerComponent,
     G2LineChartComponent,
     ExptRulesDrawerComponent,
     UserSegmentsFlagsDrawerComponent,
@@ -124,6 +128,7 @@ import { PrismComponent } from './components/prism/prism.component';
     ChangeListComponent,
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
+    RelayProxyDrawerComponent,
     PrismComponent
   ],
   imports: [
@@ -170,7 +175,8 @@ import { PrismComponent } from './components/prism/prism.component';
     NzTimelineModule,
     NzBreadCrumbModule,
     NzInputNumberModule,
-    NzCollapseModule
+    NzCollapseModule,
+    NzSwitchModule
   ],
   exports: [
     CommonModule,
@@ -194,6 +200,7 @@ import { PrismComponent } from './components/prism/prism.component';
     EnvDrawerComponent,
     PermissionCheckComponent,
     ProjectDrawerComponent,
+    FeatureFlagDrawerComponent,
     MenuComponent,
     HeaderComponent,
     PropsDrawerComponent,
@@ -213,6 +220,7 @@ import { PrismComponent } from './components/prism/prism.component';
     ChangeListComponent,
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
+    RelayProxyDrawerComponent,
     PrismComponent
   ]
 })
