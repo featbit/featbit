@@ -2,8 +2,6 @@ import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { MessageQueueService } from '@services/message-queue.service';
-import { IProjectEnv } from '@shared/types';
-import { CURRENT_PROJECT } from '@utils/localstorage-keys';
 import { copyToClipboard, getPathPrefix, uuidv4 } from "@utils/index";
 import { editor } from "monaco-editor";
 import { FeatureFlagService } from "@services/feature-flag.service";
@@ -50,7 +48,6 @@ export class SettingComponent {
   isEditingTitle = false;
   isEditingDescription = false;
   key: string = null;
-  currentProjectEnv: IProjectEnv = null;
 
   allTags: string[] = [];
   currentAllTags: string[] = [];
@@ -108,7 +105,6 @@ export class SettingComponent {
     private router: Router
   ) {
     this.isLoading = true;
-    this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
     this.route.paramMap.subscribe( paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
       this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), () => this.loadData());
