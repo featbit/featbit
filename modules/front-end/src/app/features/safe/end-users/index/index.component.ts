@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { OrganizationService } from '@services/organization.service';
 import { debounceTime } from 'rxjs/operators';
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { IUserProp, IUserType } from "@shared/types";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 import { CURRENT_USER_FILTER_ATTRIBUTE } from "@utils/localstorage-keys";
 import { EnvUserService } from "@services/env-user.service";
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 
 @Component({
@@ -19,7 +19,6 @@ export class IndexComponent implements OnInit {
   $search: Subject<void> = new Subject();
 
   currentEnvId: string;
-  currentAccountId: string;
 
   list = [];
   totalCount: number;
@@ -32,11 +31,9 @@ export class IndexComponent implements OnInit {
 
   constructor(
     private envUserService: EnvUserService,
-    private accountService: OrganizationService,
     private envUserPropService: EnvUserPropService,
     private router: Router
-  ) {
-  }
+  ) { }
 
   getCustomizePropertyValue(user: IUserType, propName: string): string {
     const presetValueConfig = this.props.find(p => p.name === propName)?.presetValues || [];
@@ -79,9 +76,7 @@ export class IndexComponent implements OnInit {
 
   isUserPropsLoading: boolean = true;
   ngOnInit(): void {
-    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
-    this.currentAccountId = currentAccountProjectEnv.organization.id;
-    this.currentEnvId = currentAccountProjectEnv.projectEnv.envId;
+    this.currentEnvId = getCurrentProjectEnv().envId;
 
     const filterAndAttributeConfig: any = JSON.parse(localStorage.getItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId)) || '{}');
     this.filter.properties = filterAndAttributeConfig?.properties || [];

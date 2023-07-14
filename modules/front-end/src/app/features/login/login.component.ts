@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { IDENTITY_TOKEN } from "@utils/localstorage-keys";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-login',
@@ -7,9 +9,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LoginComponent implements OnInit {
 
-  constructor() { }
+  constructor(private router: Router) { }
 
-  ngOnInit(): void {
+  async ngOnInit() {
+    const token = localStorage.getItem(IDENTITY_TOKEN);
+    if (token) {
+      await this.router.navigateByUrl('/');
+    }
   }
-
 }
