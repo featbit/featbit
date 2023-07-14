@@ -140,7 +140,6 @@ export class ExperimentDrawerComponent implements OnInit {
 
     const metric = this.pagedMetric.items.find(m => m.id === metricId);
     this.experimentService.createExperiment({
-      envId: this.experiment.envId,
       featureFlagId: featureFlag.id,
       metricId: metric.id,
       baselineVariationId: baselineVariationId,
