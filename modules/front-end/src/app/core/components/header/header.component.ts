@@ -109,13 +109,8 @@ export class HeaderComponent implements OnInit {
   }
 
   envModalConfirm() {
-    const canAccessProjectEnvs = this.permissionsService.isGranted(`project/${this.selectedProject.name}`, permissionActions.AccessEnvs);
     const canAccessEnv = this.permissionsService.isGranted(`project/${this.selectedProject.name}:env/${this.selectedEnv.name}`, permissionActions.AccessEnvs);
-
-    if (
-      (canAccessProjectEnvs === undefined && canAccessEnv === undefined) ||
-      canAccessProjectEnvs === false ||
-      canAccessEnv === false) {
+    if (!canAccessEnv) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
     }

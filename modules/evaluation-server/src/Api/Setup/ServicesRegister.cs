@@ -2,7 +2,7 @@ using Infrastructure.Fakes;
 using Infrastructure.Redis;
 using Streaming.DependencyInjection;
 
-namespace Api;
+namespace Api.Setup;
 
 public static class ServicesRegister
 {
