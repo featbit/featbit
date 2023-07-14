@@ -74,7 +74,7 @@ export class AuthGuard implements CanActivate {
       env = project.environments.find(env => env.id === localProjectEnv.envId);
       canAccessEnv = this.permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.AccessEnvs);
     } else {
-      for (let p of projects) {
+      for (const p of projects) {
         env = p.environments.find((e) => this.permissionsService.isGranted(`project/${p.name}:env/${e.name}`, permissionActions.AccessEnvs));
         if (env) {
           project = p;
