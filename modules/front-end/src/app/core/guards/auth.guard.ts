@@ -9,7 +9,6 @@ import { permissionActions } from "@shared/policy";
 import { IEnvironment, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
-import {OrganizationService} from "@services/organization.service";
 
 export const authGuard = async (
   route: ActivatedRouteSnapshot,
@@ -17,7 +16,6 @@ export const authGuard = async (
   router = inject(Router),
   permissionService = inject(PermissionsService),
   projectService = inject(ProjectService),
-  orgService = inject(OrganizationService),
   identityService = inject(IdentityService),
   notification = inject(NzNotificationService)
 ) => {
@@ -47,7 +45,7 @@ export const authGuard = async (
   // try to set user accessible project and env
   const success = await trySetAccessibleProjectEnv(projectService, permissionService);
   if (!success) {
-    showDenyMessage();
+    showDenyMessage(notification);
     identityService.doLogoutUser(false);
     return false;
   }
@@ -68,11 +66,10 @@ const setProjectEnv = (project: IProject, env: IEnvironment) => {
   localStorage.setItem(CURRENT_PROJECT(), JSON.stringify(projectEnv));
 }
 
-const showDenyMessage = () => {
+const showDenyMessage = (notification: NzNotificationService) => {
   let title = $localize`:@@permissions.permission-denied:Permission Denied`;
   let message = $localize`:@@permissions.need-permissions-to-access-env:You don't have permissions to access any projects and environments, please contact the admin to grant you the necessary permissions`;
 
-  const notification = inject(NzNotificationService);
   notification.remove();
   notification.warning(title, message, { nzDuration: 0 });
 }
