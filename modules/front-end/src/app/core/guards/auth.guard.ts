@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 import { getAuth } from '@shared/utils';
 import { LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
-import { OrganizationService } from '@services/organization.service';
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { getCurrentOrganization } from "@utils/project-env";
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,6 @@ export class AuthGuard implements CanActivate {
   constructor(
     private router: Router,
     private message: NzMessageService,
-    private accountService: OrganizationService,
     private projectService: ProjectService,
     private permissionsService: PermissionsService
   ) { }
@@ -35,8 +34,8 @@ export class AuthGuard implements CanActivate {
       if (!url.startsWith("/onboarding")) {
         const currentProjectEnv = await this.projectService.setCurrentProjectEnv();
         if (currentProjectEnv) {
-          const orgProj = this.accountService.getCurrentOrganizationProjectEnv();
-          if (orgProj.organization.initialized === false) {
+          const organization = getCurrentOrganization();
+          if (organization.initialized === false) {
             return this.router.parseUrl('/onboarding');
           }
         } else {
