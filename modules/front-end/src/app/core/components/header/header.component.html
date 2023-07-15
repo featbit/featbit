@@ -58,7 +58,8 @@
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
         <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"
           *ngFor="let project of availableProjects" (click)="onSelectProject(project)">
-          {{ project.name }} <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
+           {{ project.name }}
+          <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
         </nz-list-item>
         <ng-template #projectHeader>
           <span class="header" i18n="@@common.projects">Projects</span>

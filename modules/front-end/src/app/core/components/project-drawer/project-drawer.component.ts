@@ -126,7 +126,7 @@ export class ProjectDrawerComponent {
 
     this.isLoading = true;
 
-    const {name} = this.projectForm.value;
+    const { name, key } = this.projectForm.value;
 
     if (this.isEditing) {
       this.projectService.update(this.project.id, { name }).subscribe({
@@ -140,7 +140,7 @@ export class ProjectDrawerComponent {
         }
       });
     } else {
-      this.projectService.create({ name }).subscribe({
+      this.projectService.create({ name, key }).subscribe({
         next: createdProject => {
           this.isLoading = false;
           this.close.emit({isEditing: false, project: createdProject});
