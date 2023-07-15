@@ -76,17 +76,6 @@ const showDenyMessage = (notification: NzNotificationService) => {
 
 const trySetAccessibleProjectEnv = async (projectService: ProjectService, permissionsService: PermissionsService): Promise<boolean> => {
   let projects = await projectService.getListAsync();
-  projects = projects.filter((project) => {
-    const rn = permissionsService.getProjectRN(project.name);
-    return permissionsService.isGranted(rn, permissionActions.ListProjects)
-  }).map((project) => {
-    project.environments = project.environments.filter((env) => {
-      const envRN = permissionsService.getEnvRN(project.name, env.name);
-      return !permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
-    });
-
-    return project;
-  }).filter((project) => project.environments.length);
 
   let project: IProject;
   let env: IEnvironment;

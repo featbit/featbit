@@ -64,25 +64,14 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.initForm('', '', true, this.fb.array([]), this.fb.array([]));
   }
 
-  ngOnInit() {
-    this.projectService.getList()
-      .pipe(finalize(() => this.isProjectsLoading = false))
-      .subscribe({
-        next: (projects) => {
-          this.projects = projects.filter((project) => {
-            const rn = this.permissionsService.getProjectRN(project.name);
-            return this.permissionsService.isGranted(rn, permissionActions.ListProjects)
-          }).map((project) => {
-            project.environments = project.environments.filter((env) => {
-              const envRN = this.permissionsService.getEnvRN(project.name, env.name);
-              return !this.permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
-            });
+  async ngOnInit() {
+    try {
+      this.projects = await this.projectService.getListAsync();
+    } catch (_) {
+      this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`)
+    }
 
-            return project;
-          }).filter((project) => project.environments.length);
-        },
-        error: (_) => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`),
-      });
+    this.isProjectsLoading = false;
   }
 
   initForm(name: string, description: string, isAllEnvs: boolean, scopes: FormArray, agents: FormArray) {

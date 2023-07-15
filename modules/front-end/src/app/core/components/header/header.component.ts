@@ -60,12 +60,12 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.setSelectedProjectEnv();
-    this.setAllProjects();
+    await this.setAllProjects();
 
-    this.messageQueueService.subscribe(this.messageQueueService.topics.PROJECT_LIST_CHANGED, () => {
-      this.setAllProjects();
+    this.messageQueueService.subscribe(this.messageQueueService.topics.PROJECT_LIST_CHANGED, async () => {
+      await this.setAllProjects();
       this.setSelectedProjectEnv();
     });
 
@@ -173,14 +173,8 @@ export class HeaderComponent implements OnInit {
     } as IEnvironment;
   }
 
-  private setAllProjects() {
-    this.projectService.getList()
-      .subscribe(projects =>
-        this.allProjects = projects.filter((project) => {
-          const rn = this.permissionsService.getProjectRN(project.name);
-          return this.permissionsService.isGranted(rn, permissionActions.ListProjects)
-        })
-      );
+  private async setAllProjects() {
+    this.allProjects = await this.projectService.getListAsync();
   }
 
   // copy environment key

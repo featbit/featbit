@@ -46,23 +46,9 @@ export class ProjectComponent implements OnInit {
   ) {
   }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.currentProjectEnv = getCurrentProjectEnv();
-    this.projectService
-      .getList()
-      .subscribe(projects => {
-        this.projects = projects.filter((project) => {
-          const rn = this.permissionsService.getProjectRN(project.name);
-          return this.permissionsService.isGranted(rn, permissionActions.ListProjects)
-        }).map((project) => {
-          project.environments = project.environments.filter((env) => {
-            const envRN = this.permissionsService.getEnvRN(project.name, env.name);
-            return !this.permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
-          });
-
-          return project;
-        }).filter((project) => project.environments.length);
-      });
+    this.projects = await this.projectService.getListAsync();
   }
 
   isCurrentProject(project: IProject): boolean {
