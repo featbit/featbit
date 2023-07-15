@@ -56,9 +56,9 @@ export class OrganizationService {
 
   setOrganization(organization: IOrganization) {
     if (!!organization) {
-      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(organization));
       const currentAccount = this.organizations.find(ws => ws.id == organization.id);
       currentAccount.name = organization.name;
+      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentAccount));
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
@@ -68,7 +68,7 @@ export class OrganizationService {
     const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
     this.organizations = await this.getListAsync() as IOrganization[];
     const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
-    localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrg));
+    this.setOrganization(currentOrg);
     return currentOrg;
   }
 }
