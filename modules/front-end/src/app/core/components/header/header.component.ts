@@ -118,6 +118,7 @@ export class HeaderComponent implements OnInit {
     const projectEnv = {
       projectId: this.selectedProject.id,
       projectName: this.selectedProject.name,
+      projectKey: this.selectedProject.key,
       envId: this.selectedEnv.id,
       envKey: this.selectedEnv.key,
       envName: this.selectedEnv.name,

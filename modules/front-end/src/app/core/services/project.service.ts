@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
+import { catchError } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -53,5 +54,11 @@ export class ProjectService {
   // reset current project env
   clearCurrentProjectEnv() {
     localStorage.removeItem(CURRENT_PROJECT());
+  }
+
+  isKeyUsed(key: string): Observable<boolean> {
+    const url = this.baseUrl + `/is-key-used?key=${key}`;
+
+    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 }

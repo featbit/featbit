@@ -26,11 +26,6 @@ public static class ErrorCodes
     public const string NameIsRequired = nameof(NameIsRequired);
     public const string KeyIsRequired = nameof(KeyIsRequired);
 
-    // onboarding
-    public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
-    public const string ProjectNameRequired = nameof(ProjectNameRequired);
-    public const string EnvironmentsRequired = nameof(EnvironmentsRequired);
-
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
 

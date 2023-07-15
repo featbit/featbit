@@ -65,7 +65,7 @@ export class ProjectComponent implements OnInit {
   }
 
   onCreateProjectClick() {
-    this.project = undefined;
+    this.project = {} as IProject;
     this.creatEditProjectFormVisible = true;
   }
 
@@ -128,12 +128,17 @@ export class ProjectComponent implements OnInit {
   projectClosed(data: any) {
     this.creatEditProjectFormVisible = false;
 
+    if (!data) {
+      return;
+    }
+
     // close after edit project name
     if (data.isEditing) {
       const newName = data.project.name;
 
       const oldProject = this.projects.find(item => item.id == data.project.id);
       oldProject.name = newName;
+      this.project = {...this.project, ...data.project};
 
       // if it is editing current project
       if (this.currentProjectEnv.projectId == this.project.id) {
