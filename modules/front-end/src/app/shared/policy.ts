@@ -208,7 +208,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     displayName: $localize`:@@iam.action.list-projects:List projects`,
     description: $localize`:@@iam.action.list-projects:List projects`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: true
   },
   CreateProject: {
     id: uuidv4(),

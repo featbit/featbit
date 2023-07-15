@@ -30,7 +30,7 @@ export class HeaderComponent implements OnInit {
   currentProjectEnv: IProjectEnv;
   currentOrganization: IOrganization;
 
-  allProjects: IProject[];
+  allProjects: IProject[] = [];
   selectedProject: IProject;
   selectedEnv: IEnvironment;
   envModalVisible: boolean = false;
@@ -61,11 +61,6 @@ export class HeaderComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.canListProjects = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListProjects);
-    this.canListEnvs = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListEnvs);
-
-    this.cannotReadProjectsMsg = $localize`You don't have permissions to read project list, please contact the admin to grant you the necessary permissions`;
-    this.cannotReadEnvsMsg = this.canListProjects ? $localize`You don't have permissions to read environment list, please contact the admin to grant you the necessary permissions` : $localize`You don't have permissions to read project and environment list, please contact the admin to grant you the necessary permissions`;
     this.setSelectedProjectEnv();
     this.setAllProjects();
 
@@ -91,17 +86,20 @@ export class HeaderComponent implements OnInit {
     return this.currentProjectEnv?.envId === env.id;
   }
 
-  canListProjects = false;
-
   get availableProjects() {
-    return this.canListProjects ? this.allProjects : [];
+    return this.allProjects;
   }
-
-  canListEnvs = false;
 
   get availableEnvs() {
     const project = this.allProjects.find(x => x.id === this.selectedProject.id);
-    return this.canListEnvs ? project?.environments : [];
+    if (!project) {
+      return [];
+    }
+
+    return project.environments.filter((env) => {
+      const envRN = this.permissionsService.getEnvRN(project.name, env.name);
+      return !this.permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
+    });
   }
 
   envModelCancel() {
@@ -109,7 +107,10 @@ export class HeaderComponent implements OnInit {
   }
 
   envModalConfirm() {
-    const canAccessEnv = this.permissionsService.isGranted(`project/${this.selectedProject.name}:env/${this.selectedEnv.name}`, permissionActions.AccessEnvs);
+    const projectRN = this.permissionsService.getProjectRN(this.selectedProject.name);
+    const envRN = this.permissionsService.getEnvRN(this.selectedProject.name, this.selectedEnv.name);
+
+    const canAccessEnv = this.permissionsService.isGranted(projectRN, permissionActions.ListProjects) && !this.permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
     if (!canAccessEnv) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -148,7 +149,6 @@ export class HeaderComponent implements OnInit {
 
   onSelectProject(project: IProject) {
     this.selectedProject = project;
-    this.canListEnvs = this.permissionsService.isGranted(this.permissionsService.getResourceRN('project', project), permissionActions.ListEnvs);
     this.selectedEnv = project.environments.length > 0 ? project.environments[0] : null;
   }
 
@@ -175,7 +175,12 @@ export class HeaderComponent implements OnInit {
 
   private setAllProjects() {
     this.projectService.getList()
-      .subscribe(projects => this.allProjects = projects);
+      .subscribe(projects =>
+        this.allProjects = projects.filter((project) => {
+          const rn = this.permissionsService.getProjectRN(project.name);
+          return this.permissionsService.isGranted(rn, permissionActions.ListProjects)
+        })
+      );
   }
 
   // copy environment key

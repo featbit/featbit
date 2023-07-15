@@ -75,7 +75,18 @@ const showDenyMessage = (notification: NzNotificationService) => {
 }
 
 const trySetAccessibleProjectEnv = async (projectService: ProjectService, permissionsService: PermissionsService): Promise<boolean> => {
-  const projects = await projectService.getListAsync();
+  let projects = await projectService.getListAsync();
+  projects = projects.filter((project) => {
+    const rn = permissionsService.getProjectRN(project.name);
+    return permissionsService.isGranted(rn, permissionActions.ListProjects)
+  }).map((project) => {
+    project.environments = project.environments.filter((env) => {
+      const envRN = permissionsService.getEnvRN(project.name, env.name);
+      return !permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
+    });
+
+    return project;
+  }).filter((project) => project.environments.length);
 
   let project: IProject;
   let env: IEnvironment;
@@ -84,17 +95,14 @@ const trySetAccessibleProjectEnv = async (projectService: ProjectService, permis
   const localProjectEnv = getCurrentProjectEnv();
   if (localProjectEnv) {
     project = projects.find(pro => pro.id === localProjectEnv.projectId);
-    env = project.environments.find(env => env.id === localProjectEnv.envId);
-    canAccessEnv = permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.AccessEnvs);
+    env = project?.environments?.find(env => env.id === localProjectEnv.envId);
   } else {
-    for (const p of projects) {
-      env = p.environments.find((e) => permissionsService.isGranted(`project/${p.name}:env/${e.name}`, permissionActions.AccessEnvs));
-      if (env) {
-        project = p;
-        canAccessEnv = true;
-        break;
-      }
-    }
+    project = projects[0];
+    env = project?.environments[0];
+  }
+
+  if (env) {
+    canAccessEnv = true;
   }
 
   // set project env if it's accessible

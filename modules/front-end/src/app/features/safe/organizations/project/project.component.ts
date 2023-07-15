@@ -110,7 +110,7 @@ export class ProjectComponent implements OnInit {
   }
 
   onDeleteProjectClick(project: IProject) {
-    const canDelete = this.permissionsService.isGranted(this.permissionsService.getResourceRN(ResourceTypeEnum.Project, project), permissionActions.DeleteProject);
+    const canDelete = this.permissionsService.isGranted(this.permissionsService.getProjectRN(project.name), permissionActions.DeleteProject);
     if (!canDelete) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;

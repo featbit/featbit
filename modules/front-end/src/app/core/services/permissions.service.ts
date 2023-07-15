@@ -53,17 +53,12 @@ export class PermissionsService {
   //   return regex.test(str);
   // }
 
-  getResourceRN(resourceType: string, resource: any) {
-    switch (resourceType) {
-      case ResourceTypeEnum.Project:
-        return `project/${resource.name}`;
-      default:
-        return `resource type ${resourceType} not supported`;
-    }
-  }
+  getProjectRN = (key: string) => `${ResourceTypeEnum.Project}/${key}`;
 
-  isGranted(rn: string, action: IamPolicyAction): boolean {
-    const matchedPermissions = this.userPermissions.filter(permission => {
+  getEnvRN = (projectKey: string, envKey: string) => `${ResourceTypeEnum.Project}/${projectKey}:${ResourceTypeEnum.Env}/${envKey}`;
+
+  private getMatchedPermissions(rn: string, action: IamPolicyAction): IPolicyStatement[] {
+    return this.userPermissions.filter(permission => {
       if (permission.resourceType === ResourceTypeEnum.All) {
         return true;
       }
@@ -71,11 +66,25 @@ export class PermissionsService {
       return permission.resources.some(rsc => this.matchRule(rn, rsc)) &&
         permission.actions.some(act => act === '*' || act === action.name);
     });
+  }
+
+  isGranted(rn: string, action: IamPolicyAction): boolean {
+    const matchedPermissions = this.getMatchedPermissions(rn, action);
 
     if (matchedPermissions.length === 0) {
       return false;
     }
 
     return matchedPermissions.every(s => s.effect === EffectEnum.Allow);
+  }
+
+  isDenied(rn: string, action: IamPolicyAction): boolean {
+    const matchedPermissions = this.getMatchedPermissions(rn, action);
+
+    if (matchedPermissions.length === 0) {
+      return false;
+    }
+
+    return matchedPermissions.some(s => s.effect === EffectEnum.Deny);
   }
 }
