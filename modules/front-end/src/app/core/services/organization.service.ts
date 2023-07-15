@@ -66,7 +66,7 @@ export class OrganizationService {
 
   async initOrganizations(): Promise<IOrganization> {
     const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
-    this.organizations = await this.getListAsync() as IOrganization[];
+    this.organizations = await this.getListAsync();
     const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
     this.setOrganization(currentOrg);
     return currentOrg;

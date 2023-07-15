@@ -10,7 +10,6 @@ import {
   GET_STARTED
 } from "@utils/localstorage-keys";
 import { Router } from "@angular/router";
-import { OrganizationService } from '@services/organization.service';
 import { UserService } from "@services/user.service";
 import { IResponse } from "@shared/types";
 import { Observable } from "rxjs";
@@ -48,24 +47,28 @@ export class IdentityService {
       localStorage.setItem(IDENTITY_TOKEN, token);
 
       // store user profile
-      this.userService.getProfile().subscribe(async (profile: IResponse) => {
-        localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
+      this.userService.getProfile().subscribe({
+        next: async (profile: IResponse) => {
+          localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
 
-        resolve();
-        const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
-        if (redirectUrl) {
-          localStorage.removeItem(LOGIN_REDIRECT_URL);
-          await this.router.navigateByUrl(redirectUrl);
-          return;
-        }
+          resolve();
 
-        if (!localStorage.getItem(GET_STARTED())) {
-          await this.router.navigateByUrl('/get-started');
-          return;
-        }
+          const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
+          if (redirectUrl) {
+            localStorage.removeItem(LOGIN_REDIRECT_URL);
+            await this.router.navigateByUrl(redirectUrl);
+            return;
+          }
 
-        await this.router.navigateByUrl('/');
-      }, () => resolve());
+          if (!localStorage.getItem(GET_STARTED())) {
+            await this.router.navigateByUrl('/get-started');
+            return;
+          }
+
+          await this.router.navigateByUrl('/');
+        },
+        error: () => resolve()
+      });
     });
   }
 
