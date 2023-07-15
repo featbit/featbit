@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IOrganization } from '@shared/types';
 import { ProjectService } from './project.service';
@@ -18,9 +18,8 @@ export class OrganizationService {
     private projectService: ProjectService
   ) { }
 
-  getList(): Observable<any> {
-    const url = this.baseUrl;
-    return this.http.get(url);
+  async getListAsync(): Promise<IOrganization[]> {
+    return firstValueFrom(this.http.get<IOrganization[]>(this.baseUrl));
   }
 
   create(params: any): Observable<any> {
@@ -57,23 +56,19 @@ export class OrganizationService {
 
   setOrganization(organization: IOrganization) {
     if (!!organization) {
-      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(organization));
       const currentAccount = this.organizations.find(ws => ws.id == organization.id);
       currentAccount.name = organization.name;
+      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentAccount));
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
   }
 
-  getCurrentOrganization(): Observable<IOrganization> {
-    return new Observable(observer => {
-        this.getList().subscribe(res => {
-            const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
-            this.organizations = res as IOrganization[];
-            const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
-            localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrg));
-            observer.next(currentOrg);
-        });
-    });
+  async initOrganizations(): Promise<IOrganization> {
+    const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
+    this.organizations = await this.getListAsync();
+    const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
+    this.setOrganization(currentOrg);
+    return currentOrg;
   }
 }

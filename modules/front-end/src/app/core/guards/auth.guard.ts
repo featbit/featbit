@@ -9,6 +9,7 @@ import { permissionActions } from "@shared/policy";
 import { IEnvironment, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
+import { OrganizationService } from "@services/organization.service";
 
 export const authGuard = async (
   route: ActivatedRouteSnapshot,
@@ -16,6 +17,7 @@ export const authGuard = async (
   router = inject(Router),
   permissionService = inject(PermissionsService),
   projectService = inject(ProjectService),
+  organizationService = inject(OrganizationService),
   identityService = inject(IdentityService),
   notification = inject(NzNotificationService)
 ) => {
@@ -27,6 +29,9 @@ export const authGuard = async (
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
     return router.parseUrl('/login');
   }
+
+  // init organizations
+  await organizationService.initOrganizations();
 
   // init user permission
   await permissionService.initUserPolicies(auth.id);
