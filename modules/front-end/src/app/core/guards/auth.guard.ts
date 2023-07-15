@@ -5,7 +5,6 @@ import { CURRENT_PROJECT, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
-import { permissionActions } from "@shared/policy";
 import { IEnvironment, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
@@ -48,7 +47,7 @@ export const authGuard = async (
   }
 
   // try to set user accessible project and env
-  const success = await trySetAccessibleProjectEnv(projectService, permissionService);
+  const success = await trySetAccessibleProjectEnv(projectService);
   if (!success) {
     showDenyMessage(notification);
     identityService.doLogoutUser(false);
@@ -79,8 +78,8 @@ const showDenyMessage = (notification: NzNotificationService) => {
   notification.warning(title, message, { nzDuration: 0 });
 }
 
-const trySetAccessibleProjectEnv = async (projectService: ProjectService, permissionsService: PermissionsService): Promise<boolean> => {
-  let projects = await projectService.getListAsync();
+const trySetAccessibleProjectEnv = async (projectService: ProjectService): Promise<boolean> => {
+  const projects = await projectService.getListAsync();
 
   let project: IProject;
   let env: IEnvironment;

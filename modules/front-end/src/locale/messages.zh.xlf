@@ -838,7 +838,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">181</context>
+          <context context-type="linenumber">169</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/prism/prism.component.ts</context>
@@ -1530,7 +1530,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">143</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
@@ -2922,7 +2922,7 @@
         <source>Thank you for sending us your feedback, we&apos;ll get back to you very soon!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">208</context>
+          <context context-type="linenumber">196</context>
         </context-group>
         <target>感谢您给我们发送反馈，我们会尽快和您联系！</target>
       </trans-unit>
@@ -2930,7 +2930,7 @@
         <source>We were not able to send your feedback, Please try again!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">211</context>
+          <context context-type="linenumber">199</context>
         </context-group>
         <target>反馈发送失败，请稍后重试！</target>
       </trans-unit>
@@ -4345,7 +4345,7 @@
         <source>Permission Denied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">75</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <target>无权访问</target>
       </trans-unit>
@@ -4353,7 +4353,7 @@
         <source>You don&apos;t have permissions to access to the current environment or you don&apos;t have access to any projects and environments, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <target>您没有访问当前项目和环境或者任何项目和环境的权限，请联系管理员授予您所需的权限。</target>
       </trans-unit>

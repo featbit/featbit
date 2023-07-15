@@ -94,26 +94,14 @@ export class HeaderComponent implements OnInit {
       return [];
     }
 
-    return project.environments.filter((env) => {
-      const envRN = this.permissionsService.getEnvRN(project.name, env.name);
-      return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
-    });
+    return project.environments;
   }
 
   envModelCancel() {
     this.envModalVisible = false;
   }
 
-  envModalConfirm() {
-    const projectRN = this.permissionsService.getProjectRN(this.selectedProject.name);
-    const envRN = this.permissionsService.getEnvRN(this.selectedProject.name, this.selectedEnv.name);
-
-    const canAccessEnv = this.permissionsService.isGranted(projectRN, permissionActions.CanAccessProject) && !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
-    if (!canAccessEnv) {
-      this.message.warning(this.permissionsService.genericDenyMessage);
-      return;
-    }
-
+  async envModalConfirm() {
     const projectEnv = {
       projectId: this.selectedProject.id,
       projectName: this.selectedProject.name,
@@ -128,7 +116,7 @@ export class HeaderComponent implements OnInit {
     this.envModalVisible = false;
 
     if (this.router.url.indexOf("/feature-flags") > -1) {
-      this.router.navigateByUrl("/feature-flags");
+      await this.router.navigateByUrl("/feature-flags");
     }
 
     setTimeout(() => window.location.reload(), 200);
