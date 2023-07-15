@@ -26,7 +26,6 @@ export class IdentityService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private accountService: OrganizationService,
     private userService: UserService
   ) { }
 
@@ -49,24 +48,23 @@ export class IdentityService {
       localStorage.setItem(IDENTITY_TOKEN, token);
 
       // store user profile
-      this.userService.getProfile().subscribe((profile: IResponse) => {
+      this.userService.getProfile().subscribe(async (profile: IResponse) => {
         localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
-        this.accountService.getCurrentOrganization().subscribe(() => {
-          resolve();
-          const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
-          if (redirectUrl) {
-            localStorage.removeItem(LOGIN_REDIRECT_URL);
-            this.router.navigateByUrl(redirectUrl);
-            return;
-          }
 
-          if (!localStorage.getItem(GET_STARTED())) {
-            this.router.navigateByUrl('/get-started');
-            return;
-          }
+        resolve();
+        const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
+        if (redirectUrl) {
+          localStorage.removeItem(LOGIN_REDIRECT_URL);
+          await this.router.navigateByUrl(redirectUrl);
+          return;
+        }
 
-          this.router.navigateByUrl('/');
-        }, () => resolve());
+        if (!localStorage.getItem(GET_STARTED())) {
+          await this.router.navigateByUrl('/get-started');
+          return;
+        }
+
+        await this.router.navigateByUrl('/');
       }, () => resolve());
     });
   }

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {firstValueFrom, Observable} from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IOrganization } from '@shared/types';
 import { ProjectService } from './project.service';
@@ -18,9 +18,8 @@ export class OrganizationService {
     private projectService: ProjectService
   ) { }
 
-  getList(): Observable<any> {
-    const url = this.baseUrl;
-    return this.http.get(url);
+  async getListAsync(): Promise<IOrganization[]> {
+    return firstValueFrom(this.http.get<IOrganization[]>(this.baseUrl));
   }
 
   create(params: any): Observable<any> {
@@ -65,15 +64,11 @@ export class OrganizationService {
     }
   }
 
-  getCurrentOrganization(): Observable<IOrganization> {
-    return new Observable(observer => {
-        this.getList().subscribe(res => {
-            const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
-            this.organizations = res as IOrganization[];
-            const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
-            localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrg));
-            observer.next(currentOrg);
-        });
-    });
+  async initOrganizations(): Promise<IOrganization> {
+    const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
+    this.organizations = await this.getListAsync() as IOrganization[];
+    const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
+    localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrg));
+    return currentOrg;
   }
 }
