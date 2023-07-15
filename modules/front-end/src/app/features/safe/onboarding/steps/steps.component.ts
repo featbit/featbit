@@ -31,12 +31,10 @@ export class StepsComponent implements OnDestroy {
       projectName: ['', [Validators.required]]
     });
 
-    this.organizationService.getCurrentOrganization().subscribe(() => {
-      const organization = getCurrentOrganization();
-      this.currentOrganizationId = organization.id;
-      this.step0Form.patchValue({
-        organizationName: organization.name
-      });
+    const organization = getCurrentOrganization();
+    this.currentOrganizationId = organization.id;
+    this.step0Form.patchValue({
+      organizationName: organization.name
     });
   }
 
