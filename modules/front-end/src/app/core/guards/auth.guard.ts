@@ -68,7 +68,7 @@ const setProjectEnv = (project: IProject, env: IEnvironment) => {
 
 const showDenyMessage = (notification: NzNotificationService) => {
   let title = $localize`:@@permissions.permission-denied:Permission Denied`;
-  let message = $localize`:@@permissions.need-permissions-to-access-env:You don't have permissions to access any projects and environments, please contact the admin to grant you the necessary permissions`;
+  let message = $localize`:@@permissions.need-permissions-to-access-env:You don't have permissions to access to the current environment or you don't have access to any projects and environments, please contact the admin to grant you the necessary permissions`;
 
   notification.remove();
   notification.warning(title, message, { nzDuration: 0 });
