@@ -25,11 +25,11 @@ export class ProjectService {
 
     return projects.filter((project) => {
       const rn = this.permissionsService.getProjectRN(project.name);
-      return this.permissionsService.isGranted(rn, permissionActions.ListProjects)
+      return this.permissionsService.isGranted(rn, permissionActions.CanAccessProject)
     }).map((project) => {
       project.environments = project.environments.filter((env) => {
         const envRN = this.permissionsService.getEnvRN(project.name, env.name);
-        return !this.permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
+        return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
       });
 
       return project;

@@ -201,12 +201,12 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: false
   },
-  ListProjects: {
+  CanAccessProject: {
     id: uuidv4(),
-    name: 'ListProjects',
+    name: 'CanAccessProject',
     resourceType: ResourceTypeEnum.Project,
-    displayName: $localize`:@@iam.action.list-projects:List projects`,
-    description: $localize`:@@iam.action.list-projects:List projects`,
+    displayName: $localize`:@@iam.action.can-access-project:Can access project`,
+    description: $localize`:@@iam.action.can-access-project:Can access project`,
     isOpenAPIApplicable: false,
     isSpecificApplicable: true
   },
@@ -237,15 +237,6 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: true
   },
-  ListEnvs: {
-    id: uuidv4(),
-    name: 'ListEnvs',
-    resourceType: ResourceTypeEnum.Project,
-    displayName: $localize`:@@iam.action.list-envs:List environments`,
-    description: $localize`:@@iam.action.list-envs:List environments`,
-    isOpenAPIApplicable: false,
-    isSpecificApplicable: true
-  },
   CreateEnv: {
     id: uuidv4(),
     name: 'CreateEnv',
@@ -255,12 +246,12 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: true
   },
-  AccessEnvs: {
+  CanAccessEnv: {
     id: uuidv4(),
-    name: 'AccessEnvs',
+    name: 'CanAccessEnv',
     resourceType: ResourceTypeEnum.Env,
-    displayName: $localize`:@@iam.action.access-envs:Access environments`,
-    description: $localize`:@@iam.action.access-envs:Access environments`,
+    displayName: $localize`:@@iam.action.can-access-env:Can access environment`,
+    description: $localize`:@@iam.action.can-access-env:Can access environment`,
     isOpenAPIApplicable: false,
     isSpecificApplicable: true
   },
@@ -406,7 +397,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
 
 // check if the resource is a general resource
 // if returns false, that means the actions which cannot be applied to a specific resource should be hidden
-// ex: ListProjects should not be avaible for a specific project: project/abc
+// ex: CreateProject should not be available for a specific project: project/abc
 export function isResourceGeneral(type: ResourceTypeEnum, rn: string): boolean {
   const generalResourceTypes = [ResourceTypeEnum.All, ResourceTypeEnum.Account, ResourceTypeEnum.IAM, ResourceTypeEnum.AccessToken, ResourceTypeEnum.RelayProxy];
   if (generalResourceTypes.includes(type)) {

@@ -98,7 +98,7 @@ export class HeaderComponent implements OnInit {
 
     return project.environments.filter((env) => {
       const envRN = this.permissionsService.getEnvRN(project.name, env.name);
-      return !this.permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
+      return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
     });
   }
 
@@ -110,7 +110,7 @@ export class HeaderComponent implements OnInit {
     const projectRN = this.permissionsService.getProjectRN(this.selectedProject.name);
     const envRN = this.permissionsService.getEnvRN(this.selectedProject.name, this.selectedEnv.name);
 
-    const canAccessEnv = this.permissionsService.isGranted(projectRN, permissionActions.ListProjects) && !this.permissionsService.isDenied(envRN, permissionActions.AccessEnvs);
+    const canAccessEnv = this.permissionsService.isGranted(projectRN, permissionActions.CanAccessProject) && !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
     if (!canAccessEnv) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
