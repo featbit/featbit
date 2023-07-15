@@ -5,8 +5,8 @@ import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
-import {PermissionsService} from "@services/permissions.service";
-import {permissionActions} from "@shared/policy";
+import { PermissionsService } from "@services/permissions.service";
+import { permissionActions } from "@shared/policy";
 
 @Injectable({
   providedIn: 'root'
