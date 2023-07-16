@@ -82,7 +82,7 @@ export class ProjectComponent implements OnInit {
   }
 
   onDeleteEnvClick(project: IProject, env: IEnvironment) {
-    const rn = this.permissionsService.getEnvRN(project.name, env.name);
+    const rn = this.permissionsService.getEnvRN(project, env);
     const canDelete = this.permissionsService.isGranted(rn, permissionActions.DeleteEnv);
     if (!canDelete) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -98,7 +98,7 @@ export class ProjectComponent implements OnInit {
   }
 
   onDeleteProjectClick(project: IProject) {
-    const canDelete = this.permissionsService.isGranted(this.permissionsService.getProjectRN(project.name), permissionActions.DeleteProject);
+    const canDelete = this.permissionsService.isGranted(this.permissionsService.getProjectRN(project), permissionActions.DeleteProject);
     if (!canDelete) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -179,7 +179,7 @@ export class ProjectComponent implements OnInit {
   currentSecretId: string;
 
   createSecret(project: IProject, env: IEnvironment) {
-    const rn = this.permissionsService.getEnvRN(project.name, env.name);
+    const rn = this.permissionsService.getEnvRN(project, env);
     const isAllowed = this.permissionsService.isGranted(rn, permissionActions.CreateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -199,7 +199,7 @@ export class ProjectComponent implements OnInit {
   }
 
   editSecret(project: IProject, env: IEnvironment, secret: ISecret) {
-    const rn = this.permissionsService.getEnvRN(project.name, env.name);
+    const rn = this.permissionsService.getEnvRN(project, env);
     const isAllowed = this.permissionsService.isGranted(rn, permissionActions.UpdateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -228,7 +228,7 @@ export class ProjectComponent implements OnInit {
   }
 
   deleteSecret(project: IProject, env: IEnvironment, secretId: string) {
-    const rn = this.permissionsService.getEnvRN(project.name, env.name);
+    const rn = this.permissionsService.getEnvRN(project, env);
     const isAllowed = this.permissionsService.isGranted(rn, permissionActions.DeleteEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -264,7 +264,7 @@ export class ProjectComponent implements OnInit {
   }
 
   private updateSecret(name: string) {
-    const rn = this.permissionsService.getEnvRN(this.project.name, this.env.name);
+    const rn = this.permissionsService.getEnvRN(this.project, this.env);
     const isAllowed = this.permissionsService.isGranted(rn, permissionActions.UpdateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -290,7 +290,7 @@ export class ProjectComponent implements OnInit {
   }
 
   private addSecret(name: string, type: string) {
-    const rn = this.permissionsService.getEnvRN(this.project.name, this.env.name);
+    const rn = this.permissionsService.getEnvRN(this.project, this.env);
     const isAllowed = this.permissionsService.isGranted(rn, permissionActions.CreateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
@@ -314,7 +314,7 @@ export class ProjectComponent implements OnInit {
       return '';
     }
 
-    return this.permissionsService.getEnvRN(project.name, env.name);
+    return this.permissionsService.getEnvRN(project, env as IEnvironment);
   }
 
   private envSecretsChanged(env: IEnvironment) {

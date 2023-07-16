@@ -24,11 +24,11 @@ export class ProjectService {
     const projects = await firstValueFrom(this.http.get<IProject[]>(this.baseUrl));
 
     return projects.filter((project) => {
-      const rn = this.permissionsService.getProjectRN(project.name);
+      const rn = this.permissionsService.getProjectRN(project);
       return this.permissionsService.isGranted(rn, permissionActions.CanAccessProject)
     }).map((project) => {
       project.environments = project.environments.filter((env) => {
-        const envRN = this.permissionsService.getEnvRN(project.name, env.name);
+        const envRN = this.permissionsService.getEnvRN(project, env);
         return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
       });
 

@@ -3,6 +3,7 @@ import { firstValueFrom } from "rxjs";
 import { IPolicy } from "@features/safe/iam/types/policy";
 import { MemberService } from "@services/member.service";
 import { EffectEnum, IamPolicyAction, IPolicyStatement, ResourceTypeEnum } from "@shared/policy";
+import { IEnvironment, IProject } from "@shared/types";
 
 @Injectable({
   providedIn: 'root'
@@ -53,9 +54,9 @@ export class PermissionsService {
   //   return regex.test(str);
   // }
 
-  getProjectRN = (key: string) => `${ResourceTypeEnum.Project}/${key}`;
+  getProjectRN = (project: IProject) => `${ResourceTypeEnum.Project}/${project.name}`;
 
-  getEnvRN = (projectKey: string, envKey: string) => `${ResourceTypeEnum.Project}/${projectKey}:${ResourceTypeEnum.Env}/${envKey}`;
+  getEnvRN = (project: IProject, env: IEnvironment) => `${ResourceTypeEnum.Project}/${project.name}:${ResourceTypeEnum.Env}/${env.name}`;
 
   private getMatchedPermissions(rn: string, action: IamPolicyAction): IPolicyStatement[] {
     return this.userPermissions.filter(permission => {

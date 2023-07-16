@@ -98,7 +98,7 @@
         <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
       </ng-template>
       <ng-template #extraTemplate>
-        <button class="action-btn" nz-button nzType="default" nzSize="small" permission-check [rn]="permissionsService.getProjectRN(project.name)" [action]="permissionActions.UpdateProjectSettings" (actionIfAllow)="onEditProjectClick(project)">
+        <button class="action-btn" nz-button nzType="default" nzSize="small" permission-check [rn]="permissionsService.getProjectRN(project)" [action]="permissionActions.UpdateProjectSettings" (actionIfAllow)="onEditProjectClick(project)">
           <i nz-icon nzType="icons:icon-edit"></i>
           <ng-container i18n="@@org.project.edit">Edit</ng-container>
         </button>
@@ -112,7 +112,7 @@
           <ng-container i18n="@@common.remove">Remove</ng-container>
         </button>
         <button class="action-btn" nz-button nzType="default" nzSize="small"
-                permission-check [rn]="permissionsService.getProjectRN(project.name)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"
+                permission-check [rn]="permissionsService.getProjectRN(project)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"
                 >
           <i style="color: #3CC798" nz-icon nzType="icons:icon-plus"></i>
           <ng-container i18n="@@org.project.addEnv">Add environment</ng-container>
