@@ -1,129 +1,125 @@
 <div class="standard-div">
-  <permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.ListProjects" i18n-messageIfDeny="@@org.project.projectListPermissionDenied" messageIfDeny="You don't have permissions to read project list, please contact the admin to grant you the necessary permissions">
-    <div class="project-operations">
-      <nz-input-group [nzPrefix]="orgIcon">
-        <input type="text" nz-input placeholder="Filter by name" [(ngModel)]="searchValue" i18n-placeholder="@@org.project.projectFilterPlacehoder"/>
-        <ng-template #orgIcon>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
-      </nz-input-group>
-      <button class="standard-btn" nz-button nzType="primary" permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.CreateProject" (actionIfAllow)="onCreateProjectClick()">
-        <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@common.add">Add</ng-container>
-      </button>
-    </div>
-    <div class="project-list">
-      <div *ngFor="let project of projects | projectFilter: searchValue" class="project">
-        <nz-card nzBorderless>
-          <nz-descriptions [nzTitle]="titleTemplate" [nzExtra]="extraTemplate"></nz-descriptions>
-          <permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.ListEnvs" i18n-messageIfDeny="@@org.project.envListPermissionDenied" messageIfDeny="You don't have permissions to read env list, please contact the admin to grant you the necessary permissions">
-            <div class="env-list">
-              <div *ngFor="let env of project.environments">
-                <div class="env">
-                  <div class="env-basis">
-                    <div>
-                      <div class="desc-name">
-                        <span i18n="@@commoname">Name</span>
-                        <nz-tag nzColor="green" *ngIf="isCurrentEnv(env)" i18n="@@common.current">Current</nz-tag>
-                      </div>
-                      <div class="desc-content">{{env.name}}</div>
+  <div class="project-operations">
+    <nz-input-group [nzPrefix]="orgIcon">
+      <input type="text" nz-input placeholder="Filter by name" [(ngModel)]="searchValue" i18n-placeholder="@@org.project.projectFilterPlacehoder"/>
+      <ng-template #orgIcon>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+    </nz-input-group>
+    <button class="standard-btn" nz-button nzType="primary" permission-check [rn]="generalResourceRNPattern.project" [action]="permissionActions.CreateProject" (actionIfAllow)="onCreateProjectClick()">
+      <i nz-icon nzType="icons:icon-add"></i>
+      <ng-container i18n="@@common.add">Add</ng-container>
+    </button>
+  </div>
+  <div class="project-list">
+    <div *ngFor="let project of projects | projectFilter: searchValue" class="project">
+      <nz-card nzBorderless>
+        <nz-descriptions [nzTitle]="titleTemplate" [nzExtra]="extraTemplate"></nz-descriptions>
+        <div class="env-list">
+            <div *ngFor="let env of project.environments">
+              <div class="env">
+                <div class="env-basis">
+                  <div>
+                    <div class="desc-name">
+                      <span i18n="@@commoname">Name</span>
+                      <nz-tag nzColor="green" *ngIf="isCurrentEnv(env)" i18n="@@common.current">Current</nz-tag>
                     </div>
-                    <div>
-                      <div class="desc-name"><span>Key</span> <i nz-icon i18n-nz-tooltip="@@org.project.env-key-description" nz-tooltip="We use the key to give you friendly URLs. Keys should only contain letters, numbers, ., _ or -." nzType="icons:icon-info-outline"></i></div>
-                      <div class="desc-content">{{env.key}}</div>
-                    </div>
-                    <div>
-                      <div class="desc-name" i18n="@@common.description">Description</div>
-                      <div class="desc-content">{{env.description}}</div>
-                    </div>
+                    <div class="desc-content">{{env.name}}</div>
                   </div>
-                  <div class="env-secret">
-                    <div>
-                      <div class="desc-name">
-                        <span i18n="@@org.project.secrets">Secrets</span>
-                        <i class="edit-save" (click)="createSecret(project, env)" nz-icon nzType="icons:icon-add-outline"></i>
-                      </div>
-                      <div class="desc-content">
-                        <div *ngFor="let secret of env.secrets" class="secret">
-                          <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{secret.name}}</span>
-                          <nz-tag nzColor="geekblue" *ngIf="secret.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
-                          <nz-tag nzColor="cyan" *ngIf="secret.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
-                          <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
-                          <span>
-                            <button nz-button nzSize="small" nzType="link" (click)="editSecret(project, env, secret)">
-                              <i nz-icon nzType="edit" nzTheme="outline"></i>
-                            </button>
-                            <button
-                              i18n-nz-popconfirm="@@org.project.remove-secret-confirm"
-                              nz-popconfirm="This operation cannot be reverted, make sure this secret is removed from all SDKs before removing."
-                              nzPopconfirmPlacement="bottomRight"
-                              [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                              nz-button
-                              nzSize="small"
-                              nzType="link"
-                              nzDanger
-                              (nzOnConfirm)="deleteSecret(project, env, secret.id)">
-                              <i nz-icon nzType="delete" nzTheme="outline"></i>
-                            </button>
-                          </span>
-                        </div>
+                  <div>
+                    <div class="desc-name"><span>Key</span> <i nz-icon i18n-nz-tooltip="@@org.project.env-key-description" nz-tooltip="We use the key to give you friendly URLs. Keys should only contain letters, numbers, ., _ or -." nzType="icons:icon-info-outline"></i></div>
+                    <div class="desc-content">{{env.key}}</div>
+                  </div>
+                  <div>
+                    <div class="desc-name" i18n="@@common.description">Description</div>
+                    <div class="desc-content">{{env.description}}</div>
+                  </div>
+                </div>
+                <div class="env-secret">
+                  <div>
+                    <div class="desc-name">
+                      <span i18n="@@org.project.secrets">Secrets</span>
+                      <i class="edit-save" (click)="createSecret(project, env)" nz-icon nzType="icons:icon-add-outline"></i>
+                    </div>
+                    <div class="desc-content">
+                      <div *ngFor="let secret of env.secrets" class="secret">
+                        <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{secret.name}}</span>
+                        <nz-tag nzColor="geekblue" *ngIf="secret.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
+                        <nz-tag nzColor="cyan" *ngIf="secret.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
+                        <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
+                        <span>
+                          <button nz-button nzSize="small" nzType="link" (click)="editSecret(project, env, secret)">
+                            <i nz-icon nzType="edit" nzTheme="outline"></i>
+                          </button>
+                          <button
+                            i18n-nz-popconfirm="@@org.project.remove-secret-confirm"
+                            nz-popconfirm="This operation cannot be reverted, make sure this secret is removed from all SDKs before removing."
+                            nzPopconfirmPlacement="bottomRight"
+                            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                            nz-button
+                            nzSize="small"
+                            nzType="link"
+                            nzDanger
+                            (nzOnConfirm)="deleteSecret(project, env, secret.id)">
+                            <i nz-icon nzType="delete" nzTheme="outline"></i>
+                          </button>
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <div class="env-operations">
-                    <a permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvSettings" (actionIfAllow)="onEditEnvClick(project, env)">
-                      <span style="color: #23AD7F;" i18n="@@org.project.edit">Edit</span>
-                    </a>
-                    <ng-container *ngIf="!isCurrentEnv(env)">
-                      <nz-divider nzType="vertical"></nz-divider>
-                      <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-                         nzPopconfirmPlacement="bottomRight"
-                         (nzOnConfirm)="onDeleteEnvClick(project, env)" [nzIcon]="iconTplEnv">
-                        <span style="color: #717D8A" i18n="@@common.remove">Remove</span>
-                      </a>
-                    </ng-container>
-                    <ng-template #iconTplEnv>
-                      <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
-                    </ng-template>
+                </div>
+                <div class="env-operations">
+                  <a permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvSettings" (actionIfAllow)="onEditEnvClick(project, env)">
+                    <span style="color: #23AD7F;" i18n="@@org.project.edit">Edit</span>
+                  </a>
+                  <ng-container *ngIf="!isCurrentEnv(env)">
                     <nz-divider nzType="vertical"></nz-divider>
-                    <a (click)="copyText(env.id)" class="copy-id">
-                      <span style="color: #717D8A;" i18n="@@org.project.copy-id">Copy Id</span>
-                      <i style="color: #717D8A;" nz-icon i18n-nz-tooltip="@@org.project.env-id-copy-description" nz-tooltip="Copy Id of the environment, the Id is needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
+                    <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                       nzPopconfirmPlacement="bottomRight"
+                       (nzOnConfirm)="onDeleteEnvClick(project, env)" [nzIcon]="iconTplEnv">
+                      <span style="color: #717D8A" i18n="@@common.remove">Remove</span>
                     </a>
-                  </div>
+                  </ng-container>
+                  <ng-template #iconTplEnv>
+                    <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+                  </ng-template>
+                  <nz-divider nzType="vertical"></nz-divider>
+                  <a (click)="copyText(env.id)" class="copy-id">
+                    <span style="color: #717D8A;" i18n="@@org.project.copy-id">Copy Id</span>
+                    <i style="color: #717D8A;" nz-icon i18n-nz-tooltip="@@org.project.env-id-copy-description" nz-tooltip="Copy Id of the environment, the Id is needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
+                  </a>
                 </div>
               </div>
             </div>
-          </permission-check>
-        </nz-card>
-        <ng-template #titleTemplate>
-          <span>{{project.name}}</span>
-          <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
-        </ng-template>
-        <ng-template #extraTemplate>
-          <button class="action-btn" nz-button nzType="default" nzSize="small" permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.UpdateProjectSettings" (actionIfAllow)="onEditProjectClick(project)">
-            <i nz-icon nzType="icons:icon-edit"></i>
-            <ng-container i18n="@@org.project.edit">Edit</ng-container>
-          </button>
-          <button class="action-btn" nz-button nzType="default" nzSize="small"
-                  *ngIf="currentProjectEnv?.projectId !== project.id"
-                  i18n-nz-popconfirm="@@common.remove-confirm"
-                  nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-                  nzPopconfirmPlacement="bottomRight"
-                  (nzOnConfirm)="onDeleteProjectClick(project)">
-            <i nz-icon nzType="icons:icon-delete"></i>
-            <ng-container i18n="@@common.remove">Remove</ng-container>
-          </button>
-          <button class="action-btn" nz-button nzType="default" nzSize="small"
-                  permission-check [rn]="permissionsService.getResourceRN('project', project)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"
-                  >
-            <i style="color: #3CC798" nz-icon nzType="icons:icon-plus"></i>
-            <ng-container i18n="@@org.project.addEnv">Add environment</ng-container>
-          </button>
-        </ng-template>
-      </div>
+          </div>
+      </nz-card>
+      <ng-template #titleTemplate>
+        <span>{{project.name}}</span>
+        <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
+      </ng-template>
+      <ng-template #extraTemplate>
+        <button class="action-btn" nz-button nzType="default" nzSize="small" permission-check [rn]="permissionsService.getProjectRN(project)" [action]="permissionActions.UpdateProjectSettings" (actionIfAllow)="onEditProjectClick(project)">
+          <i nz-icon nzType="icons:icon-edit"></i>
+          <ng-container i18n="@@org.project.edit">Edit</ng-container>
+        </button>
+        <button class="action-btn" nz-button nzType="default" nzSize="small"
+                *ngIf="currentProjectEnv?.projectId !== project.id"
+                i18n-nz-popconfirm="@@common.remove-confirm"
+                nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                nzPopconfirmPlacement="bottomRight"
+                (nzOnConfirm)="onDeleteProjectClick(project)">
+          <i nz-icon nzType="icons:icon-delete"></i>
+          <ng-container i18n="@@common.remove">Remove</ng-container>
+        </button>
+        <button class="action-btn" nz-button nzType="default" nzSize="small"
+                permission-check [rn]="permissionsService.getProjectRN(project)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"
+                >
+          <i style="color: #3CC798" nz-icon nzType="icons:icon-plus"></i>
+          <ng-container i18n="@@org.project.addEnv">Add environment</ng-container>
+        </button>
+      </ng-template>
     </div>
-  </permission-check>
+  </div>
 </div>
 <nz-modal
   [(nzVisible)]="isSecretModalVisible"

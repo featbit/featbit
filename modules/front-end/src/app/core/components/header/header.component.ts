@@ -4,7 +4,7 @@ import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
 import { PermissionsService } from "@services/permissions.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { permissionActions } from "@shared/policy";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
@@ -25,12 +25,10 @@ export class HeaderComponent implements OnInit {
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
 
-  cannotReadProjectsMsg: string;
-  cannotReadEnvsMsg: string;
   currentProjectEnv: IProjectEnv;
   currentOrganization: IOrganization;
 
-  allProjects: IProject[];
+  allProjects: IProject[] = [];
   selectedProject: IProject;
   selectedEnv: IEnvironment;
   envModalVisible: boolean = false;
@@ -60,17 +58,12 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.canListProjects = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListProjects);
-    this.canListEnvs = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListEnvs);
-
-    this.cannotReadProjectsMsg = $localize`You don't have permissions to read project list, please contact the admin to grant you the necessary permissions`;
-    this.cannotReadEnvsMsg = this.canListProjects ? $localize`You don't have permissions to read environment list, please contact the admin to grant you the necessary permissions` : $localize`You don't have permissions to read project and environment list, please contact the admin to grant you the necessary permissions`;
+  async ngOnInit() {
     this.setSelectedProjectEnv();
-    this.setAllProjects();
+    await this.setAllProjects();
 
-    this.messageQueueService.subscribe(this.messageQueueService.topics.PROJECT_LIST_CHANGED, () => {
-      this.setAllProjects();
+    this.messageQueueService.subscribe(this.messageQueueService.topics.PROJECT_LIST_CHANGED, async () => {
+      await this.setAllProjects();
       this.setSelectedProjectEnv();
     });
 
@@ -91,30 +84,24 @@ export class HeaderComponent implements OnInit {
     return this.currentProjectEnv?.envId === env.id;
   }
 
-  canListProjects = false;
-
   get availableProjects() {
-    return this.canListProjects ? this.allProjects : [];
+    return this.allProjects;
   }
-
-  canListEnvs = false;
 
   get availableEnvs() {
     const project = this.allProjects.find(x => x.id === this.selectedProject.id);
-    return this.canListEnvs ? project?.environments : [];
+    if (!project) {
+      return [];
+    }
+
+    return project.environments;
   }
 
   envModelCancel() {
     this.envModalVisible = false;
   }
 
-  envModalConfirm() {
-    const canAccessEnv = this.permissionsService.isGranted(`project/${this.selectedProject.name}:env/${this.selectedEnv.name}`, permissionActions.AccessEnvs);
-    if (!canAccessEnv) {
-      this.message.warning(this.permissionsService.genericDenyMessage);
-      return;
-    }
-
+  async envModalConfirm() {
     const projectEnv = {
       projectId: this.selectedProject.id,
       projectName: this.selectedProject.name,
@@ -129,7 +116,7 @@ export class HeaderComponent implements OnInit {
     this.envModalVisible = false;
 
     if (this.router.url.indexOf("/feature-flags") > -1) {
-      this.router.navigateByUrl("/feature-flags");
+      await this.router.navigateByUrl("/feature-flags");
     }
 
     setTimeout(() => window.location.reload(), 200);
@@ -148,7 +135,6 @@ export class HeaderComponent implements OnInit {
 
   onSelectProject(project: IProject) {
     this.selectedProject = project;
-    this.canListEnvs = this.permissionsService.isGranted(this.permissionsService.getResourceRN('project', project), permissionActions.ListEnvs);
     this.selectedEnv = project.environments.length > 0 ? project.environments[0] : null;
   }
 
@@ -173,9 +159,8 @@ export class HeaderComponent implements OnInit {
     } as IEnvironment;
   }
 
-  private setAllProjects() {
-    this.projectService.getList()
-      .subscribe(projects => this.allProjects = projects);
+  private async setAllProjects() {
+    this.allProjects = await this.projectService.getListAsync();
   }
 
   // copy environment key

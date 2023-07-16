@@ -80,7 +80,7 @@ export class ProjectDrawerComponent implements OnInit {
     if (!this.isEditing) { // creation
       return this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.CreateProject);
     } else {
-      const rn = this.permissionsService.getResourceRN(ResourceTypeEnum.Project, this.project);
+      const rn = this.permissionsService.getProjectRN(this.project);
       return this.permissionsService.isGranted(rn, permissionActions.UpdateProjectSettings);
     }
   }
