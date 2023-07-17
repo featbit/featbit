@@ -134,11 +134,10 @@ db.Policies.insertOne(
                 resourceType: "project",
                 effect: "allow",
                 actions: [
-                    "ListProjects",
+                    "CanAccessProject",
                     "CreateProject",
                     "DeleteProject",
                     "UpdateProjectSettings",
-                    "ListEnvs",
                     "CreateEnv"
                 ],
                 resources: ["project/*"]
@@ -148,7 +147,6 @@ db.Policies.insertOne(
                 resourceType: "env",
                 effect: "allow",
                 actions: [
-                    "AccessEnvs",
                     "DeleteEnv",
                     "UpdateEnvSettings",
                     "CreateEnvSecret",
@@ -196,19 +194,9 @@ db.Policies.insertOne(
                 resourceType: "project",
                 effect: "allow",
                 actions: [
-                    "ListProjects",
-                    "ListEnvs"
+                    "CanAccessProject"
                 ],
                 resources: ["project/*"]
-            },
-            {
-                _id: getUUIDString(),
-                resourceType: "env",
-                effect: "allow",
-                actions: [
-                    "AccessEnvs"
-                ],
-                resources: ["project/*:env/*"]
             }
         ],
         createdAt: new Date(),

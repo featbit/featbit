@@ -5,7 +5,6 @@ import { CURRENT_PROJECT, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
-import { permissionActions } from "@shared/policy";
 import { IEnvironment, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
@@ -48,7 +47,7 @@ export const authGuard = async (
   }
 
   // try to set user accessible project and env
-  const success = await trySetAccessibleProjectEnv(projectService, permissionService);
+  const success = await trySetAccessibleProjectEnv(projectService);
   if (!success) {
     showDenyMessage(notification);
     identityService.doLogoutUser(false);
@@ -73,13 +72,13 @@ const setProjectEnv = (project: IProject, env: IEnvironment) => {
 
 const showDenyMessage = (notification: NzNotificationService) => {
   let title = $localize`:@@permissions.permission-denied:Permission Denied`;
-  let message = $localize`:@@permissions.need-permissions-to-access-env:You don't have permissions to access any projects and environments, please contact the admin to grant you the necessary permissions`;
+  let message = $localize`:@@permissions.need-permissions-to-access-env:You don't have permissions to access to the current environment or you don't have access to any projects and environments, please contact the admin to grant you the necessary permissions`;
 
   notification.remove();
   notification.warning(title, message, { nzDuration: 0 });
 }
 
-const trySetAccessibleProjectEnv = async (projectService: ProjectService, permissionsService: PermissionsService): Promise<boolean> => {
+const trySetAccessibleProjectEnv = async (projectService: ProjectService): Promise<boolean> => {
   const projects = await projectService.getListAsync();
 
   let project: IProject;
@@ -89,17 +88,14 @@ const trySetAccessibleProjectEnv = async (projectService: ProjectService, permis
   const localProjectEnv = getCurrentProjectEnv();
   if (localProjectEnv) {
     project = projects.find(pro => pro.id === localProjectEnv.projectId);
-    env = project.environments.find(env => env.id === localProjectEnv.envId);
-    canAccessEnv = permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.AccessEnvs);
+    env = project?.environments?.find(env => env.id === localProjectEnv.envId);
   } else {
-    for (const p of projects) {
-      env = p.environments.find((e) => permissionsService.isGranted(`project/${p.name}:env/${e.name}`, permissionActions.AccessEnvs));
-      if (env) {
-        project = p;
-        canAccessEnv = true;
-        break;
-      }
-    }
+    project = projects[0];
+    env = project?.environments[0];
+  }
+
+  if (env) {
+    canAccessEnv = true;
   }
 
   // set project env if it's accessible

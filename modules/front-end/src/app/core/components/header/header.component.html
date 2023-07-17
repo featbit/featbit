@@ -52,8 +52,6 @@
 <nz-modal nzCentered nzWidth="792" [nzVisible]="envModalVisible" [nzFooter]="modalFooter"
   (nzOnCancel)="envModelCancel()" i18n-nzTitle="@@common.change-environment" nzTitle="Change environment">
   <ng-container *nzModalContent>
-    <message *ngIf="!canListProjects" [type]="'warning'" [content]="cannotReadProjectsMsg"></message>
-    <message *ngIf="!canListEnvs" [type]="'warning'" [content]="cannotReadEnvsMsg"></message>
     <div class="project-envs">
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
         <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"

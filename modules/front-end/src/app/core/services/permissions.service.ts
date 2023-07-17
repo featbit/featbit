@@ -3,6 +3,7 @@ import { firstValueFrom } from "rxjs";
 import { IPolicy } from "@features/safe/iam/types/policy";
 import { MemberService } from "@services/member.service";
 import { EffectEnum, IamPolicyAction, IPolicyStatement, ResourceTypeEnum } from "@shared/policy";
+import { IEnvironment, IProject } from "@shared/types";
 
 @Injectable({
   providedIn: 'root'
@@ -53,17 +54,12 @@ export class PermissionsService {
   //   return regex.test(str);
   // }
 
-  getResourceRN(resourceType: string, resource: any) {
-    switch (resourceType) {
-      case ResourceTypeEnum.Project:
-        return `project/${resource.name}`;
-      default:
-        return `resource type ${resourceType} not supported`;
-    }
-  }
+  getProjectRN = (project: IProject) => `${ResourceTypeEnum.Project}/${project.name}`;
 
-  isGranted(rn: string, action: IamPolicyAction): boolean {
-    const matchedPermissions = this.userPermissions.filter(permission => {
+  getEnvRN = (project: IProject, env: IEnvironment) => `${ResourceTypeEnum.Project}/${project.name}:${ResourceTypeEnum.Env}/${env.name}`;
+
+  private getMatchedPermissions(rn: string, action: IamPolicyAction): IPolicyStatement[] {
+    return this.userPermissions.filter(permission => {
       if (permission.resourceType === ResourceTypeEnum.All) {
         return true;
       }
@@ -71,11 +67,25 @@ export class PermissionsService {
       return permission.resources.some(rsc => this.matchRule(rn, rsc)) &&
         permission.actions.some(act => act === '*' || act === action.name);
     });
+  }
+
+  isGranted(rn: string, action: IamPolicyAction): boolean {
+    const matchedPermissions = this.getMatchedPermissions(rn, action);
 
     if (matchedPermissions.length === 0) {
       return false;
     }
 
     return matchedPermissions.every(s => s.effect === EffectEnum.Allow);
+  }
+
+  isDenied(rn: string, action: IamPolicyAction): boolean {
+    const matchedPermissions = this.getMatchedPermissions(rn, action);
+
+    if (matchedPermissions.length === 0) {
+      return false;
+    }
+
+    return matchedPermissions.some(s => s.effect === EffectEnum.Deny);
   }
 }

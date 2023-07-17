@@ -6,6 +6,9 @@ import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
 import { catchError } from "rxjs/operators";
+import { PermissionsService } from "@services/permissions.service";
+import { permissionActions } from "@shared/policy";
+
 
 @Injectable({
   providedIn: 'root'
@@ -15,15 +18,24 @@ export class ProjectService {
 
   constructor(
     private http: HttpClient,
+    private permissionsService: PermissionsService,
     private messageQueueService: MessageQueueService
   ) { }
 
-  getList(): Observable<IProject[]> {
-    return this.http.get<IProject[]>(this.baseUrl);
-  }
-
   async getListAsync(): Promise<IProject[]> {
-    return firstValueFrom(this.getList());
+    const projects = await firstValueFrom(this.http.get<IProject[]>(this.baseUrl));
+
+    return projects.filter((project) => {
+      const rn = this.permissionsService.getProjectRN(project);
+      return this.permissionsService.isGranted(rn, permissionActions.CanAccessProject)
+    }).map((project) => {
+      project.environments = project.environments.filter((env) => {
+        const envRN = this.permissionsService.getEnvRN(project, env);
+        return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
+      });
+
+      return project;
+    }).filter((project) => project.environments.length);
   }
 
   get(projectId: string): Observable<IProject> {
