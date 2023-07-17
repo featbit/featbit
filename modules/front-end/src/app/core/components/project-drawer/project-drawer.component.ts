@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { IProject } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { PermissionsService } from "@services/permissions.service";
-import { ResourceTypeEnum, generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { slugify } from "@utils/index";
 
@@ -53,8 +53,7 @@ export class ProjectDrawerComponent {
     private projectService: ProjectService,
     private message: NzMessageService,
     private permissionsService: PermissionsService
-  ) {
-  }
+  ) { }
 
   initForm(isKeyDisabled: boolean) {
     this.projectForm = this.fb.group({
