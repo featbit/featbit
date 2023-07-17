@@ -9,7 +9,6 @@ import { catchError } from "rxjs/operators";
 import { PermissionsService } from "@services/permissions.service";
 import { permissionActions } from "@shared/policy";
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -39,7 +38,7 @@ export class ProjectService {
   }
 
   get(projectId: string): Observable<IProject> {
-    const url =  `${this.baseUrl}/${projectId}`;
+    const url = `${this.baseUrl}/${projectId}`;
     return this.http.get<IProject>(url);
   }
 
