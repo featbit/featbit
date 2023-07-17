@@ -65,15 +65,15 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
         RuleFor(x => x.Variations)
             .NotEmpty()
             .Must(variations => variations.All(variation => variation.IsValid()))
-            .WithErrorCode(ErrorCodes.InvalidParameter("variations"));
+            .WithErrorCode(ErrorCodes.Invalid("variations"));
 
         RuleFor(x => x.DisabledVariationId)
             .Must((flag, variationId) => flag.Variations?.Any(x => x.Id == variationId) ?? false)
-            .WithErrorCode(ErrorCodes.InvalidParameter("disabledVariationId"));
+            .WithErrorCode(ErrorCodes.Invalid("disabledVariationId"));
 
         RuleFor(x => x.EnabledVariationId)
             .Must((flag, variationId) => flag.Variations?.Any(x => x.Id == variationId) ?? false)
-            .WithErrorCode(ErrorCodes.InvalidParameter("enabledVariationId"));
+            .WithErrorCode(ErrorCodes.Invalid("enabledVariationId"));
     }
 }
 

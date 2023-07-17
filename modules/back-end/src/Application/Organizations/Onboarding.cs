@@ -7,10 +7,12 @@ namespace Application.Organizations;
 public class Onboarding : IRequest<bool>
 {
     public Guid OrganizationId { get; set; }
-    
+
     public string OrganizationName { get; set; }
 
     public string ProjectName { get; set; }
+
+    public string ProjectKey { get; set; }
 
     public ICollection<string> Environments { get; set; }
 }
@@ -20,13 +22,16 @@ public class OnboardingValidator : AbstractValidator<Onboarding>
     public OnboardingValidator()
     {
         RuleFor(x => x.OrganizationName)
-            .NotEmpty().WithErrorCode(ErrorCodes.OrganizationNameRequired);
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("organizationName"));
+
         RuleFor(x => x.ProjectName)
-            .NotEmpty().WithErrorCode(ErrorCodes.ProjectNameRequired);
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("projectName"));
+
+        RuleFor(x => x.ProjectKey)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("projectKey"));
+
         RuleFor(x => x.Environments).NotNull()
-            .NotEmpty().WithErrorCode(ErrorCodes.EnvironmentsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("environments"));
     }
 }
 
@@ -52,7 +57,7 @@ public class OnboardingHandler : IRequestHandler<Onboarding, bool>
         organization.Update(request.OrganizationName, true);
         await _organizationService.UpdateAsync(organization);
 
-        var project = new Project(organization.Id, request.ProjectName);
+        var project = new Project(organization.Id, request.ProjectName, request.ProjectKey);
         await _projectService.AddWithEnvsAsync(project, request.Environments);
 
         return true;

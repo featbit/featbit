@@ -1,17 +1,19 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IProject } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { PermissionsService } from "@services/permissions.service";
-import { ResourceTypeEnum, generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { slugify } from "@utils/index";
 
 @Component({
   selector: 'app-project-drawer',
   templateUrl: './project-drawer.component.html',
   styleUrls: ['./project-drawer.component.less']
 })
-export class ProjectDrawerComponent implements OnInit {
+export class ProjectDrawerComponent {
 
   private _project: IProject;
 
@@ -24,12 +26,14 @@ export class ProjectDrawerComponent implements OnInit {
 
   @Input()
   set project(project: IProject) {
-    this.isEditing = !!project;
+    this.isEditing = project && !!project.id;
     if (this.isEditing) {
       this.title = $localize`:@@org.project.editProject:Edit project`;
+      this.initForm(true);
       this.patchForm(project);
     } else {
       this.title = $localize`:@@org.project.addProject:Add project`;
+      this.initForm(false);
       this.resetForm();
     }
     this._project = project;
@@ -49,22 +53,43 @@ export class ProjectDrawerComponent implements OnInit {
     private projectService: ProjectService,
     private message: NzMessageService,
     private permissionsService: PermissionsService
-  ) {
-  }
+  ) { }
 
-  ngOnInit(): void {
-    this.initForm();
-  }
-
-  initForm() {
+  initForm(isKeyDisabled: boolean) {
     this.projectForm = this.fb.group({
-      name: [null, [Validators.required]]
+      name: [null, [Validators.required]],
+      key: [{disabled: isKeyDisabled, value: null}, Validators.required, this.keyAsyncValidator],
     });
   }
 
+  nameChange(name: string) {
+    if (this.isEditing) return;
+
+    let keyControl = this.projectForm.get('key')!;
+    keyControl.setValue(slugify(name ?? ''));
+    keyControl.markAsDirty();
+  }
+
+  keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+    debounceTime(300),
+    switchMap(value => this.projectService.isKeyUsed(value as string)),
+    map(isKeyUsed => {
+      switch (isKeyUsed) {
+        case true:
+          return {error: true, duplicated: true};
+        case undefined:
+          return {error: true, unknown: true};
+        default:
+          return null;
+      }
+    }),
+    first()
+  );
+
   patchForm(project: Partial<IProject>) {
     this.projectForm.patchValue({
-      name: project.name
+      name: project.name,
+      key: project.key
     });
   }
 
@@ -73,10 +98,10 @@ export class ProjectDrawerComponent implements OnInit {
   }
 
   onClose() {
-    this.close.emit({isEditing: false, project: undefined});
+    this.close.emit();
   }
 
-  canTakeAction() {
+  isGranted() {
     if (!this.isEditing) { // creation
       return this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.CreateProject);
     } else {
@@ -86,7 +111,7 @@ export class ProjectDrawerComponent implements OnInit {
   }
 
   doSubmit() {
-    if (!this.canTakeAction()) {
+    if (!this.isGranted()) {
       return this.message.warning(this.permissionsService.genericDenyMessage);
     }
 
@@ -100,7 +125,7 @@ export class ProjectDrawerComponent implements OnInit {
 
     this.isLoading = true;
 
-    const {name} = this.projectForm.value;
+    const { name, key } = this.projectForm.value;
 
     if (this.isEditing) {
       this.projectService.update(this.project.id, { name }).subscribe({
@@ -114,7 +139,7 @@ export class ProjectDrawerComponent implements OnInit {
         }
       });
     } else {
-      this.projectService.create({ name }).subscribe({
+      this.projectService.create({ name, key }).subscribe({
         next: createdProject => {
           this.isLoading = false;
           this.close.emit({isEditing: false, project: createdProject});

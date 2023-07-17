@@ -26,11 +26,6 @@ public static class ErrorCodes
     public const string NameIsRequired = nameof(NameIsRequired);
     public const string KeyIsRequired = nameof(KeyIsRequired);
 
-    // onboarding
-    public const string OrganizationNameRequired = nameof(OrganizationNameRequired);
-    public const string ProjectNameRequired = nameof(ProjectNameRequired);
-    public const string EnvironmentsRequired = nameof(EnvironmentsRequired);
-
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
 
@@ -77,5 +72,6 @@ public static class ErrorCodes
     public const string InvalidRelayProxyScope = nameof(InvalidRelayProxyScope);
     public const string InvalidRelayProxyAgent = nameof(InvalidRelayProxyAgent);
 
-    public static string InvalidParameter(string parameterName) => $"{parameterName}_is_invalid";
+    public static string Required(string parameterName) => $"{parameterName}_is_required";
+    public static string Invalid(string parameterName) => $"{parameterName}_is_invalid";
 }
