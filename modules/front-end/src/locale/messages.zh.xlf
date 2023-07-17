@@ -3354,7 +3354,7 @@
         <source>Project successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.ts</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>项目更新成功</target>
       </trans-unit>
@@ -3362,7 +3362,7 @@
         <source>Project successfully created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.ts</context>
-          <context context-type="linenumber">147</context>
+          <context context-type="linenumber">146</context>
         </context-group>
         <target>项目创建成功</target>
       </trans-unit>
