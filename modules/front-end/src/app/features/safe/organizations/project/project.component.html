@@ -94,8 +94,11 @@
           </div>
       </nz-card>
       <ng-template #titleTemplate>
-        <span>{{project.name}}</span>
-        <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
+        <div class="project-header">
+          <span>{{project.name}}</span>
+          <nz-tag nzColor="blue">key: {{project.key}}</nz-tag>
+          <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
+        </div>
       </ng-template>
       <ng-template #extraTemplate>
         <button class="action-btn" nz-button nzType="default" nzSize="small" permission-check [rn]="permissionsService.getProjectRN(project)" [action]="permissionActions.UpdateProjectSettings" (actionIfAllow)="onEditProjectClick(project)">
