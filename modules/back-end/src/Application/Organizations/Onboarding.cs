@@ -7,11 +7,11 @@ namespace Application.Organizations;
 public class Onboarding : IRequest<bool>
 {
     public Guid OrganizationId { get; set; }
-    
+
     public string OrganizationName { get; set; }
 
     public string ProjectName { get; set; }
-    
+
     public string ProjectKey { get; set; }
 
     public ICollection<string> Environments { get; set; }
@@ -22,16 +22,16 @@ public class OnboardingValidator : AbstractValidator<Onboarding>
     public OnboardingValidator()
     {
         RuleFor(x => x.OrganizationName)
-            .NotEmpty().WithErrorCode(ErrorCodes.InvalidParameter("organizationName"));
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("organizationName"));
+
         RuleFor(x => x.ProjectName)
-            .NotEmpty().WithErrorCode(ErrorCodes.InvalidParameter("projectName"));
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("projectName"));
+
         RuleFor(x => x.ProjectKey)
-            .NotEmpty().WithErrorCode(ErrorCodes.InvalidParameter("projectKey"));
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("projectKey"));
+
         RuleFor(x => x.Environments).NotNull()
-            .NotEmpty().WithErrorCode(ErrorCodes.InvalidParameter("environments"));
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("environments"));
     }
 }
 

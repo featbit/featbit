@@ -17,10 +17,10 @@ public class CreateProjectValidator : AbstractValidator<CreateProject>
     public CreateProjectValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
+
         RuleFor(x => x.Key)
-            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("key"));
     }
 }
 

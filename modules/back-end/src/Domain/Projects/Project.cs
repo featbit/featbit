@@ -18,7 +18,7 @@ public class Project : AuditedEntity
     public void Update(string name)
     {
         Name = name;
-        
+
         UpdatedAt = DateTime.UtcNow;
     }
 }
