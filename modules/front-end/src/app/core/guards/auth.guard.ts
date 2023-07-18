@@ -29,8 +29,8 @@ export const authGuard = async (
     return router.parseUrl('/login');
   }
 
-  // init organizations
-  const organization = await organizationService.initOrganizations();
+  // set user organizations
+  const organization = await organizationService.setUserOrganizations();
 
   // init user permission
   await permissionService.initUserPolicies(auth.id);
