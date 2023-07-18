@@ -1,32 +1,34 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
 import { IdentityService } from "@services/identity.service";
-import { IAuthProps } from "@shared/types";
-import { getAuth } from "@utils/index";
+import { getCurrentOrganization } from "@utils/project-env";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'onboarding',
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.less']
 })
-export class OnboardingComponent implements OnInit, OnDestroy {
-  public auth: IAuthProps;
-  private destroy$: Subject<void> = new Subject();
-  public menuExtended: boolean = false;
+export class OnboardingComponent implements OnInit {
+
+  constructor(
+    private identityService: IdentityService,
+    private router: Router
+  ) { }
+
+  needOnboarding: boolean = false;
+  async ngOnInit() {
+    let organization = getCurrentOrganization();
+    if (organization.initialized === false) {
+      this.needOnboarding = true;
+    } else {
+      await this.router.navigateByUrl(`/feature-flags`);
+    }
+  }
+
+  menuExtended: boolean = false;
 
   toggleMenu(extended: boolean) {
     this.menuExtended = extended;
-  }
-
-  constructor(private identityService: IdentityService) { }
-
-  ngOnInit(): void {
-    this.auth = getAuth();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   logout() {
