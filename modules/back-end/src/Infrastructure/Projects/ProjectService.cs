@@ -75,6 +75,14 @@ public class ProjectService : MongoDbService<Project>, IProjectService
         };
     }
 
+    public async Task<bool> HasKeyBeenUsedAsync(Guid organizationId, string key)
+    {
+        return await Queryable.AnyAsync(project =>
+            project.OrganizationId == organizationId &&
+            string.Equals(project.Key, key, StringComparison.OrdinalIgnoreCase)
+        );
+    }
+
     public async Task<bool> DeleteAsync(Guid id)
     {
         // delete project

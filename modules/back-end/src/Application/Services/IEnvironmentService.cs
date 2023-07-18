@@ -8,4 +8,6 @@ public interface IEnvironmentService : IService<Environment>
     Task DeleteAsync(Guid id);
 
     Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type);
+
+    Task<bool> HasKeyBeenUsedAsync(Guid projectId, string key);
 }

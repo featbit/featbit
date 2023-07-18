@@ -10,7 +10,7 @@ public interface IFeatureFlagService : IService<FeatureFlag>
 
     Task<FeatureFlag> GetAsync(Guid envId, string key);
 
-    Task<bool> IsFeatureFlagKeyUsedAsync(Guid envId, string key);
+    Task<bool> HasKeyBeenUsedAsync(Guid envId, string key);
 
     Task DeleteAsync(Guid id);
 
