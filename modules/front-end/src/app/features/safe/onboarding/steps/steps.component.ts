@@ -18,7 +18,7 @@ export class StepsComponent implements OnDestroy {
   private destroy$: Subject<void> = new Subject();
   currentStep = 0;
   currentOrganizationId: string;
-  step0Form: FormGroup;
+  form: FormGroup;
 
   constructor(
     private router: Router,
@@ -27,14 +27,19 @@ export class StepsComponent implements OnDestroy {
     private fb: FormBuilder
   ) {
 
-    this.step0Form = this.fb.group({
+    this.form = this.fb.group({
       organizationName: ['', [Validators.required]],
-      projectName: ['', [Validators.required]]
+      projectName: ['', [Validators.required]],
+      projectKey: ['', Validators.required]
+    });
+
+    this.form.get('projectName').valueChanges.subscribe(value => {
+      this.form.get('projectKey').setValue(slugify(value));
     });
 
     const organization = getCurrentOrganization();
     this.currentOrganizationId = organization.id;
-    this.step0Form.patchValue({
+    this.form.patchValue({
       organizationName: organization.name
     });
   }
@@ -53,11 +58,11 @@ export class StepsComponent implements OnDestroy {
   }
 
   done(): void {
-    const { organizationName, projectName } = this.step0Form.value;
+    const { organizationName, projectKey, projectName } = this.form.value;
     const payload = {
       organizationName,
       projectName,
-      projectKey: slugify(projectName),
+      projectKey,
       environments: ['Dev', 'Prod']
     };
 
