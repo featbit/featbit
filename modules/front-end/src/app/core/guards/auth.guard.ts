@@ -37,12 +37,17 @@ export const authGuard = async (
 
   // if we're going to onboarding page
   if (url.startsWith("/onboarding")) {
-    if (organization.initialized === true) {
-      // skip onboarding if organization already initialized
-      return router.parseUrl('/feature-flags');
+    if (organization.initialized === false) {
+      return true;
     }
 
-    return true;
+    // skip onboarding because organization already initialized
+    return router.parseUrl('/feature-flags');
+  }
+
+  // if organization hasn't initialized
+  if (organization.initialized === false) {
+    return router.parseUrl('/onboarding');
   }
 
   // try to set user accessible project and env
