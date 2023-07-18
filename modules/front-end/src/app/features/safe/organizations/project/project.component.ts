@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { IProject, IEnvironment, IProjectEnv, ISecret, SecretTypeEnum } from '@shared/types';
 import { ProjectService } from '@services/project.service';
-import { OrganizationService } from '@services/organization.service';
 import { EnvService } from '@services/env.service';
 import { NzMessageService } from "ng-zorro-antd/message";
 import { PermissionsService } from "@services/permissions.service";
@@ -9,7 +8,8 @@ import { MessageQueueService } from "@services/message-queue.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { EnvSecretService } from "@services/env-secret.service";
 import { copyToClipboard } from '@utils/index';
-import { ResourceTypeEnum, generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'app-project',
@@ -39,7 +39,6 @@ export class ProjectComponent implements OnInit {
     private fb: FormBuilder,
     private messageQueueService: MessageQueueService,
     private projectService: ProjectService,
-    private accountService: OrganizationService,
     private envService: EnvService,
     private envSecretService: EnvSecretService,
     private messageService: NzMessageService,
@@ -47,15 +46,9 @@ export class ProjectComponent implements OnInit {
   ) {
   }
 
-  ngOnInit(): void {
-    const currentAccountProjectEnv = this.accountService.getCurrentOrganizationProjectEnv();
-    this.currentProjectEnv = currentAccountProjectEnv.projectEnv;
-    const canListProjects = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListProjects);
-    if (canListProjects) {
-      this.projectService
-        .getList()
-        .subscribe(projects => this.projects = projects);
-    }
+  async ngOnInit() {
+    this.currentProjectEnv = getCurrentProjectEnv();
+    this.projects = await this.projectService.getListAsync();
   }
 
   isCurrentProject(project: IProject): boolean {
@@ -67,7 +60,7 @@ export class ProjectComponent implements OnInit {
   }
 
   onCreateProjectClick() {
-    this.project = undefined;
+    this.project = {} as IProject;
     this.creatEditProjectFormVisible = true;
   }
 
@@ -82,14 +75,6 @@ export class ProjectComponent implements OnInit {
     this.creatEditProjectFormVisible = true;
   }
 
-  getEnvRN(project: IProject, env: Partial<IEnvironment>): string {
-    if (!project || !env) {
-      return '';
-    }
-
-    return `project/${project.name}:env/${env.name}`;
-  }
-
   onEditEnvClick(project: IProject, env: IEnvironment) {
     this.project = project;
     this.env = env;
@@ -97,7 +82,8 @@ export class ProjectComponent implements OnInit {
   }
 
   onDeleteEnvClick(project: IProject, env: IEnvironment) {
-    const canDelete = this.permissionsService.isGranted(this.getEnvRN(project, env), permissionActions.DeleteEnv);
+    const rn = this.permissionsService.getEnvRN(project, env);
+    const canDelete = this.permissionsService.isGranted(rn, permissionActions.DeleteEnv);
     if (!canDelete) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -112,7 +98,7 @@ export class ProjectComponent implements OnInit {
   }
 
   onDeleteProjectClick(project: IProject) {
-    const canDelete = this.permissionsService.isGranted(this.permissionsService.getResourceRN(ResourceTypeEnum.Project, project), permissionActions.DeleteProject);
+    const canDelete = this.permissionsService.isGranted(this.permissionsService.getProjectRN(project), permissionActions.DeleteProject);
     if (!canDelete) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -130,14 +116,19 @@ export class ProjectComponent implements OnInit {
   projectClosed(data: any) {
     this.creatEditProjectFormVisible = false;
 
+    if (!data) {
+      return;
+    }
+
     // close after edit project name
     if (data.isEditing) {
       const newName = data.project.name;
 
       const oldProject = this.projects.find(item => item.id == data.project.id);
       oldProject.name = newName;
+      this.project = {...this.project, ...data.project};
 
-      // if is editing current project
+      // if it is editing current project
       if (this.currentProjectEnv.projectId == this.project.id) {
         this.currentProjectEnv.projectName = newName;
         this.projectService.upsertCurrentProjectEnvLocally(this.currentProjectEnv);
@@ -168,7 +159,7 @@ export class ProjectComponent implements OnInit {
       this.project.environments.push(data.env);
     }
 
-    // if is editing current env
+    // if it is editing current env
     if (data.isEditing && this.currentProjectEnv.envId == this.env.id) {
       this.currentProjectEnv.envName = data.env.name;
       this.projectService.upsertCurrentProjectEnvLocally(this.currentProjectEnv);
@@ -193,7 +184,8 @@ export class ProjectComponent implements OnInit {
   currentSecretId: string;
 
   createSecret(project: IProject, env: IEnvironment) {
-    const isAllowed = this.permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.CreateEnvSecret);
+    const rn = this.permissionsService.getEnvRN(project, env);
+    const isAllowed = this.permissionsService.isGranted(rn, permissionActions.CreateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -212,7 +204,8 @@ export class ProjectComponent implements OnInit {
   }
 
   editSecret(project: IProject, env: IEnvironment, secret: ISecret) {
-    const isAllowed = this.permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.UpdateEnvSecret);
+    const rn = this.permissionsService.getEnvRN(project, env);
+    const isAllowed = this.permissionsService.isGranted(rn, permissionActions.UpdateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -240,7 +233,8 @@ export class ProjectComponent implements OnInit {
   }
 
   deleteSecret(project: IProject, env: IEnvironment, secretId: string) {
-    const isAllowed = this.permissionsService.isGranted(`project/${project.name}:env/${env.name}`, permissionActions.DeleteEnvSecret);
+    const rn = this.permissionsService.getEnvRN(project, env);
+    const isAllowed = this.permissionsService.isGranted(rn, permissionActions.DeleteEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -275,7 +269,8 @@ export class ProjectComponent implements OnInit {
   }
 
   private updateSecret(name: string) {
-    const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.UpdateEnvSecret);
+    const rn = this.permissionsService.getEnvRN(this.project, this.env);
+    const isAllowed = this.permissionsService.isGranted(rn, permissionActions.UpdateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -300,7 +295,8 @@ export class ProjectComponent implements OnInit {
   }
 
   private addSecret(name: string, type: string) {
-    const isAllowed = this.permissionsService.isGranted(`project/${this.project.name}:env/${this.env.name}`, permissionActions.CreateEnvSecret);
+    const rn = this.permissionsService.getEnvRN(this.project, this.env);
+    const isAllowed = this.permissionsService.isGranted(rn, permissionActions.CreateEnvSecret);
     if (!isAllowed) {
       this.messageService.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -316,6 +312,14 @@ export class ProjectComponent implements OnInit {
         this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
       }
     });
+  }
+
+  getEnvRN(project: IProject, env: Partial<IEnvironment>): string {
+    if (!project || !env) {
+      return '';
+    }
+
+    return this.permissionsService.getEnvRN(project, env as IEnvironment);
   }
 
   private envSecretsChanged(env: IEnvironment) {

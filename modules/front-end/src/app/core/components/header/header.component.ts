@@ -1,11 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IAuthProps, IOrganization, IProject, IEnvironment, IProjectEnv, SecretTypeEnum } from '@shared/types';
-import { OrganizationService } from '@services/organization.service';
 import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
 import { PermissionsService } from "@services/permissions.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { permissionActions } from "@shared/policy";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
@@ -13,6 +12,7 @@ import { copyToClipboard } from '@utils/index';
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FeedbackService } from "@services/feedback.service";
 import { EnvService } from '@core/services/env.service';
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'app-header',
@@ -24,13 +24,11 @@ export class HeaderComponent implements OnInit {
   @Input() auth: IAuthProps;
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
-  
-  cannotReadProjectsMsg: string;
-  cannotReadEnvsMsg: string;
+
   currentProjectEnv: IProjectEnv;
   currentOrganization: IOrganization;
 
-  allProjects: IProject[];
+  allProjects: IProject[] = [];
   selectedProject: IProject;
   selectedEnv: IEnvironment;
   envModalVisible: boolean = false;
@@ -43,7 +41,6 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private organizationService: OrganizationService,
     private projectService: ProjectService,
     private message: NzMessageService,
     private fb: FormBuilder,
@@ -61,17 +58,12 @@ export class HeaderComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.canListProjects = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListProjects);
-    this.canListEnvs = this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.ListEnvs);
-
-    this.cannotReadProjectsMsg = $localize`You don't have permissions to read project list, please contact the admin to grant you the necessary permissions`;
-    this.cannotReadEnvsMsg = this.canListProjects ? $localize`You don't have permissions to read environment list, please contact the admin to grant you the necessary permissions` : $localize`You don't have permissions to read project and environment list, please contact the admin to grant you the necessary permissions`;
+  async ngOnInit() {
     this.setSelectedProjectEnv();
-    this.setAllProjects();
+    await this.setAllProjects();
 
-    this.messageQueueService.subscribe(this.messageQueueService.topics.PROJECT_LIST_CHANGED, () => {
-      this.setAllProjects();
+    this.messageQueueService.subscribe(this.messageQueueService.topics.PROJECT_LIST_CHANGED, async () => {
+      await this.setAllProjects();
       this.setSelectedProjectEnv();
     });
 
@@ -92,38 +84,28 @@ export class HeaderComponent implements OnInit {
     return this.currentProjectEnv?.envId === env.id;
   }
 
-  canListProjects = false;
-
   get availableProjects() {
-    return this.canListProjects ? this.allProjects : [];
+    return this.allProjects;
   }
-
-  canListEnvs = false;
 
   get availableEnvs() {
     const project = this.allProjects.find(x => x.id === this.selectedProject.id);
-    return this.canListEnvs ? project?.environments : [];
+    if (!project) {
+      return [];
+    }
+
+    return project.environments;
   }
 
   envModelCancel() {
     this.envModalVisible = false;
   }
 
-  envModalConfirm() {
-    const canAccessProjectEnvs = this.permissionsService.isGranted(`project/${this.selectedProject.name}`, permissionActions.AccessEnvs);
-    const canAccessEnv = this.permissionsService.isGranted(`project/${this.selectedProject.name}:env/${this.selectedEnv.name}`, permissionActions.AccessEnvs);
-
-    if (
-      (canAccessProjectEnvs === undefined && canAccessEnv === undefined) ||
-      canAccessProjectEnvs === false ||
-      canAccessEnv === false) {
-      this.message.warning(this.permissionsService.genericDenyMessage);
-      return;
-    }
-
+  async envModalConfirm() {
     const projectEnv = {
       projectId: this.selectedProject.id,
       projectName: this.selectedProject.name,
+      projectKey: this.selectedProject.key,
       envId: this.selectedEnv.id,
       envKey: this.selectedEnv.key,
       envName: this.selectedEnv.name,
@@ -135,7 +117,7 @@ export class HeaderComponent implements OnInit {
     this.envModalVisible = false;
 
     if (this.router.url.indexOf("/feature-flags") > -1) {
-      this.router.navigateByUrl("/feature-flags");
+      await this.router.navigateByUrl("/feature-flags");
     }
 
     setTimeout(() => window.location.reload(), 200);
@@ -154,7 +136,6 @@ export class HeaderComponent implements OnInit {
 
   onSelectProject(project: IProject) {
     this.selectedProject = project;
-    this.canListEnvs = this.permissionsService.isGranted(this.permissionsService.getResourceRN('project', project), permissionActions.ListEnvs);
     this.selectedEnv = project.environments.length > 0 ? project.environments[0] : null;
   }
 
@@ -163,10 +144,8 @@ export class HeaderComponent implements OnInit {
   }
 
   private setSelectedProjectEnv() {
-    const currentOrganizationProjectEnv = this.organizationService.getCurrentOrganizationProjectEnv();
-
-    this.currentOrganization = currentOrganizationProjectEnv.organization;
-    this.currentProjectEnv = currentOrganizationProjectEnv.projectEnv;
+    this.currentOrganization = getCurrentOrganization();
+    this.currentProjectEnv = getCurrentProjectEnv();
 
     this.setCurrentEnv();
 
@@ -181,9 +160,8 @@ export class HeaderComponent implements OnInit {
     } as IEnvironment;
   }
 
-  private setAllProjects() {
-    this.projectService.getList()
-      .subscribe(projects => this.allProjects = projects);
+  private async setAllProjects() {
+    this.allProjects = await this.projectService.getListAsync();
   }
 
   // copy environment key

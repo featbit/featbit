@@ -60,6 +60,7 @@ export interface IOrganizationProjectEnv {
 export interface IProjectEnv {
   projectId: string,
   projectName: string,
+  projectKey: string,
   envId: string,
   envKey: string,
   envName: string,
@@ -69,6 +70,7 @@ export interface IProjectEnv {
 export interface IProject {
   id: string,
   name: string,
+  key: string,
   environments: IEnvironment[]
 }
 

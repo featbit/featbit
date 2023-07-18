@@ -21,7 +21,7 @@ public class UpdateVariationsValidator : AbstractValidator<UpdateVariations>
         RuleFor(x => x.Variations)
             .NotEmpty()
             .Must(variations => variations.All(variation => variation.IsValid()))
-            .WithErrorCode(ErrorCodes.InvalidParameter("variations"));
+            .WithErrorCode(ErrorCodes.Invalid("variations"));
     }
 }
 

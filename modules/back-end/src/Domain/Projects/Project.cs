@@ -6,16 +6,19 @@ public class Project : AuditedEntity
 
     public string Name { get; set; }
 
-    public Project(Guid organizationId, string name)
+    public string Key { get; set; }
+
+    public Project(Guid organizationId, string name, string key)
     {
         OrganizationId = organizationId;
         Name = name;
+        Key = key;
     }
 
     public void Update(string name)
     {
         Name = name;
-        
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

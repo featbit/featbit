@@ -12,6 +12,7 @@ import { NzLayoutModule } from "ng-zorro-antd/layout";
 import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
 import { NzSelectModule } from "ng-zorro-antd/select";
+import { NzNotificationModule } from "ng-zorro-antd/notification";
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { NzSelectModule } from "ng-zorro-antd/select";
     IconsProviderModule,
     NzLayoutModule,
     NzMessageModule,
+    NzNotificationModule,
     NzSelectModule
   ],
   providers: [

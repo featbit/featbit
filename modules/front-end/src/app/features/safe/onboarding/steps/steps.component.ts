@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import {OrganizationService} from "@services/organization.service";
 import { GET_STARTED } from "@utils/localstorage-keys";
+import { getCurrentOrganization } from "@utils/project-env";
 
 @Component({
   selector: 'init-steps',
@@ -30,12 +31,10 @@ export class StepsComponent implements OnDestroy {
       projectName: ['', [Validators.required]]
     });
 
-    this.organizationService.getCurrentOrganization().subscribe(() => {
-      const { organization } = this.organizationService.getCurrentOrganizationProjectEnv();
-      this.currentOrganizationId = organization.id;
-      this.step0Form.patchValue({
-        organizationName: organization.name
-      });
+    const organization = getCurrentOrganization();
+    this.currentOrganizationId = organization.id;
+    this.step0Form.patchValue({
+      organizationName: organization.name
     });
   }
 

@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
-import { map } from "rxjs/operators";
-import { getCurrentProjectEnv } from "@utils/project-env";
+import { catchError } from "rxjs/operators";
+import { PermissionsService } from "@services/permissions.service";
+import { permissionActions } from "@shared/policy";
 
 @Injectable({
   providedIn: 'root'
@@ -14,14 +15,30 @@ import { getCurrentProjectEnv } from "@utils/project-env";
 export class ProjectService {
   baseUrl = `${environment.url}/api/v1/projects`;
 
-  constructor(private http: HttpClient, private messageQueueService: MessageQueueService,) { }
+  constructor(
+    private http: HttpClient,
+    private permissionsService: PermissionsService,
+    private messageQueueService: MessageQueueService
+  ) { }
 
-  getList(): Observable<IProject[]> {
-    return this.http.get<IProject[]>(this.baseUrl);
+  async getListAsync(): Promise<IProject[]> {
+    const projects = await firstValueFrom(this.http.get<IProject[]>(this.baseUrl));
+
+    return projects.filter((project) => {
+      const rn = this.permissionsService.getProjectRN(project);
+      return this.permissionsService.isGranted(rn, permissionActions.CanAccessProject)
+    }).map((project) => {
+      project.environments = project.environments.filter((env) => {
+        const envRN = this.permissionsService.getEnvRN(project, env);
+        return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
+      });
+
+      return project;
+    }).filter((project) => project.environments.length);
   }
 
   get(projectId: string): Observable<IProject> {
-    const url =  `${this.baseUrl}/${projectId}`;
+    const url = `${this.baseUrl}/${projectId}`;
     return this.http.get<IProject>(url);
   }
 
@@ -45,37 +62,14 @@ export class ProjectService {
     this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
   }
 
-  setCurrentProjectEnv(): Observable<IProjectEnv> {
-    return this.getList().pipe(
-      map((projects: IProject[]) => {
-        const localCurrentProjectEnv = getCurrentProjectEnv();
-        let project, env;
-
-        if (localCurrentProjectEnv) {
-          project = projects.find(pro => pro.id === localCurrentProjectEnv.projectId);
-          env = project.environments.find(env => env.id === localCurrentProjectEnv.envId);
-        } else {
-          project = projects[0];
-          env = project.environments[0];
-        }
-
-        const projectEnv: IProjectEnv = {
-          projectId: project.id,
-          projectName: project.name,
-          envId: env.id,
-          envKey: env.key,
-          envName: env.name,
-          envSecret: env.secrets[0].value
-        };
-
-        this.upsertCurrentProjectEnvLocally(projectEnv);
-        return projectEnv;
-      })
-    );
-  };
-
   // reset current project env
   clearCurrentProjectEnv() {
     localStorage.removeItem(CURRENT_PROJECT());
+  }
+
+  isKeyUsed(key: string): Observable<boolean> {
+    const url = this.baseUrl + `/is-key-used?key=${key}`;
+
+    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 }

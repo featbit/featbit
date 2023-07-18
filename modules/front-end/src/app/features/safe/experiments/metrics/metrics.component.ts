@@ -3,9 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { IOrganization, IProjectEnv } from '@shared/types';
+import { IProjectEnv } from '@shared/types';
 import { MetricService } from '@services/metric.service';
-import { CURRENT_ORGANIZATION, CURRENT_PROJECT } from "@utils/localstorage-keys";
 import {
   IPagedMetric,
   MetricListFilter,
@@ -14,6 +13,7 @@ import {
   EventType,
   IMetric
 } from "@features/safe/experiments/types";
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'experiments-metrics',
@@ -31,7 +31,6 @@ export class MetricsComponent implements OnInit, OnDestroy {
     items: []
   };
   currentProjectEnv: IProjectEnv = null;
-  currentAccount: IOrganization = null;
 
   currentMetric: IMetric;
 
@@ -48,8 +47,7 @@ export class MetricsComponent implements OnInit, OnDestroy {
     private message: NzMessageService,
     private metricService: MetricService
   ) {
-    this.currentProjectEnv = JSON.parse(localStorage.getItem(CURRENT_PROJECT()));
-    this.currentAccount = JSON.parse(localStorage.getItem(CURRENT_ORGANIZATION()));
+    this.currentProjectEnv = getCurrentProjectEnv();
   }
 
   ngOnInit(): void {

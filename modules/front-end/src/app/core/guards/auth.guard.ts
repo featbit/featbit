@@ -1,44 +1,107 @@
-import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { getAuth } from '@shared/utils';
-import { LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
-import { OrganizationService } from '@services/organization.service';
-import {PermissionsService} from "@services/permissions.service";
+import { CURRENT_PROJECT, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
+import { PermissionsService } from "@services/permissions.service";
+import { ProjectService } from "@services/project.service";
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { IEnvironment, IProject } from "@shared/types";
+import { IdentityService } from "@services/identity.service";
+import { NzNotificationService } from "ng-zorro-antd/notification";
+import { OrganizationService } from "@services/organization.service";
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthGuard implements CanActivate {
+export const authGuard = async (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+  router = inject(Router),
+  permissionService = inject(PermissionsService),
+  projectService = inject(ProjectService),
+  organizationService = inject(OrganizationService),
+  identityService = inject(IdentityService),
+  notification = inject(NzNotificationService)
+) => {
+  const auth = getAuth();
+  const url = state.url;
 
-  constructor(
-    private router: Router,
-    private accountService: OrganizationService,
-    private permissionsService: PermissionsService
-  ) { }
-
-  async canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Promise<boolean | UrlTree> {
-    return await this.checkLogin(state.url);
-  }
-
-  async checkLogin(url: string): Promise<true | UrlTree> {
-    const auth = getAuth();
-    if (auth) {
-      await this.permissionsService.fetchPolicies(auth.id);
-
-      // check if organization is initialized
-      if (!url.startsWith("/onboarding")) {
-        const orgProj = this.accountService.getCurrentOrganizationProjectEnv();
-        if (orgProj.organization?.initialized === false) {
-          return this.router.parseUrl('/onboarding');
-        }
-      }
-
-      return true;
-    }
-
+  // if no auth token, redirect to login page
+  if (!auth) {
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
-    return this.router.parseUrl('/login');
+    return router.parseUrl('/login');
   }
+
+  // init organizations
+  await organizationService.initOrganizations();
+
+  // init user permission
+  await permissionService.initUserPolicies(auth.id);
+
+  // if we're in onboarding page
+  if (url.startsWith("/onboarding")) {
+    return true;
+  }
+
+  // if organization hasn't initialized
+  const organization = getCurrentOrganization();
+  if (organization.initialized === false) {
+    return router.parseUrl('/onboarding');
+  }
+
+  // try to set user accessible project and env
+  const success = await trySetAccessibleProjectEnv(projectService);
+  if (!success) {
+    showDenyMessage(notification);
+    identityService.doLogoutUser(false);
+    return false;
+  }
+
+  return true;
+}
+
+const setProjectEnv = (project: IProject, env: IEnvironment) => {
+  const projectEnv = {
+    projectId: project.id,
+    projectName: project.name,
+    envId: env.id,
+    envKey: env.key,
+    envName: env.name,
+    envSecret: env.secrets[0].value
+  };
+
+  localStorage.setItem(CURRENT_PROJECT(), JSON.stringify(projectEnv));
+}
+
+const showDenyMessage = (notification: NzNotificationService) => {
+  let title = $localize`:@@permissions.permission-denied:Permission Denied`;
+  let message = $localize`:@@permissions.need-permissions-to-access-env:You don't have permissions to access to the current environment or you don't have access to any projects and environments, please contact the admin to grant you the necessary permissions`;
+
+  notification.remove();
+  notification.warning(title, message, { nzDuration: 0 });
+}
+
+const trySetAccessibleProjectEnv = async (projectService: ProjectService): Promise<boolean> => {
+  const projects = await projectService.getListAsync();
+
+  let project: IProject;
+  let env: IEnvironment;
+  let canAccessEnv: boolean = false;
+
+  const localProjectEnv = getCurrentProjectEnv();
+  if (localProjectEnv) {
+    project = projects.find(pro => pro.id === localProjectEnv.projectId);
+    env = project?.environments?.find(env => env.id === localProjectEnv.envId);
+  } else {
+    project = projects[0];
+    env = project?.environments[0];
+  }
+
+  if (env) {
+    canAccessEnv = true;
+  }
+
+  // set project env if it's accessible
+  if (canAccessEnv) {
+    setProjectEnv(project, env);
+  }
+
+  return canAccessEnv;
 }

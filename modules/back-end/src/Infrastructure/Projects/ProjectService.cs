@@ -26,6 +26,7 @@ public class ProjectService : MongoDbService<Project>, IProjectService
             {
                 Id = project.Id,
                 Name = project.Name,
+                Key = project.Key,
                 Environments = allEnvs
             };
 
@@ -47,6 +48,7 @@ public class ProjectService : MongoDbService<Project>, IProjectService
             {
                 Id = project.Id,
                 Name = project.Name,
+                Key = project.Key,
                 Environments = allEnvs
             };
 
@@ -68,6 +70,7 @@ public class ProjectService : MongoDbService<Project>, IProjectService
         {
             Id = project.Id,
             Name = project.Name,
+            Key = project.Key,
             Environments = envs
         };
     }
