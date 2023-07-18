@@ -78,9 +78,12 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
         return flag;
     }
 
-    public async Task<bool> IsFeatureFlagKeyUsedAsync(Guid envId, string key)
+    public async Task<bool> HasKeyBeenUsedAsync(Guid envId, string key)
     {
-        return await Queryable.AnyAsync(x => x.EnvId == envId && x.Key == key);
+        return await Queryable.AnyAsync(flag =>
+            flag.EnvId == envId &&
+            string.Equals(flag.Key, key, StringComparison.OrdinalIgnoreCase)
+        );
     }
 
     public async Task DeleteAsync(Guid id)

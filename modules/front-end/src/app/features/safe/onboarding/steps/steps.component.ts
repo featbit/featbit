@@ -1,9 +1,8 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import {OrganizationService} from "@services/organization.service";
+import { OrganizationService } from "@services/organization.service";
 import { GET_STARTED } from "@utils/localstorage-keys";
 import { getCurrentOrganization } from "@utils/project-env";
 import { slugify } from "@utils/index";
@@ -13,9 +12,8 @@ import { slugify } from "@utils/index";
   templateUrl: './steps.component.html',
   styleUrls: ['./steps.component.less']
 })
-export class StepsComponent implements OnDestroy {
+export class StepsComponent implements OnInit {
 
-  private destroy$: Subject<void> = new Subject();
   currentStep = 0;
   currentOrganizationId: string;
   form: FormGroup;
@@ -25,8 +23,9 @@ export class StepsComponent implements OnDestroy {
     private organizationService: OrganizationService,
     private msg: NzMessageService,
     private fb: FormBuilder
-  ) {
+  ) { }
 
+  ngOnInit() {
     this.form = this.fb.group({
       organizationName: ['', [Validators.required]],
       projectName: ['', [Validators.required]],
@@ -42,19 +41,6 @@ export class StepsComponent implements OnDestroy {
     this.form.patchValue({
       organizationName: organization.name
     });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  pre(): void {
-    this.currentStep -= 1;
-  }
-
-  next(): void {
-    this.currentStep += 1;
   }
 
   done(): void {

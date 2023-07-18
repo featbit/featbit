@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Environment = Domain.Environments.Environment;
 
 namespace Application.Environments;
@@ -41,6 +42,12 @@ public class CreateEnvironmentHandler : IRequestHandler<CreateEnvironment, Envir
 
     public async Task<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
     {
+        var keyHasBeenUsed = await _service.HasKeyBeenUsedAsync(request.ProjectId, request.Key);
+        if (keyHasBeenUsed)
+        {
+            throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
+        }
+
         var env = new Environment(request.ProjectId, request.Name, request.Key, request.Description);
         await _service.AddOneAsync(env);
 

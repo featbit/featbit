@@ -25,6 +25,7 @@ public static class ErrorCodes
     // common
     public const string NameIsRequired = nameof(NameIsRequired);
     public const string KeyIsRequired = nameof(KeyIsRequired);
+    public const string KeyHasBeenUsed = nameof(KeyHasBeenUsed);
 
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
@@ -50,7 +51,6 @@ public static class ErrorCodes
     public const string InvalidTo = nameof(InvalidTo);
     public const string InvalidFlagKeyFormat = nameof(InvalidFlagKeyFormat);
     public const string InvalidSecretType = nameof(InvalidSecretType);
-    public const string FeatureFlagKeyHasBeenUsed = nameof(FeatureFlagKeyHasBeenUsed);
 
     // triggers
     public const string InvalidTriggerType = nameof(InvalidTriggerType);

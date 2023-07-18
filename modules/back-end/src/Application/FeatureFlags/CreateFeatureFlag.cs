@@ -15,7 +15,7 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
     public string Key { get; set; }
 
     public bool IsEnabled { get; set; }
-    
+
     public string Description { get; set; }
 
     public string VariationType { get; set; }
@@ -56,8 +56,7 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 
         RuleFor(x => x.Key)
-            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired)
-            .Matches(FeatureFlag.KeyFormat).WithErrorCode(ErrorCodes.InvalidFlagKeyFormat);
+            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
 
         RuleFor(x => x.VariationType)
             .Must(VariationTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidVariationType);
@@ -98,10 +97,10 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
 
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
-        var isKeyBeenUsed = await _service.IsFeatureFlagKeyUsedAsync(request.EnvId, request.Key);
-        if (isKeyBeenUsed)
+        var hasKeyBeenUsed = await _service.HasKeyBeenUsedAsync(request.EnvId, request.Key);
+        if (hasKeyBeenUsed)
         {
-            throw new BusinessException(ErrorCodes.FeatureFlagKeyHasBeenUsed);
+            throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
         }
 
         var flag = request.AsFeatureFlag(_currentUser.Id);
