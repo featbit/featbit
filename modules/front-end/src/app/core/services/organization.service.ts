@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { IOrganization } from '@shared/types';
+import { IOnboarding, IOrganization } from '@shared/types';
 import { ProjectService } from './project.service';
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 
@@ -36,9 +36,9 @@ export class OrganizationService {
     return this.http.post<boolean>(url, params);
   }
 
-  onboarding(params: any): Observable<any> {
+  onboarding(payload: IOnboarding): Observable<any> {
     const url = `${this.baseUrl}/onboarding`;
-    return this.http.post(url, params);
+    return this.http.post(url, payload);
   }
 
   switchOrganization(account: IOrganization) {

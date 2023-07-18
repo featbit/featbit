@@ -52,9 +52,11 @@ export interface IOrganization {
   name: string
 }
 
-export interface IOrganizationProjectEnv {
-  organization: IOrganization,
-  projectEnv: IProjectEnv
+export interface IOnboarding {
+  organizationName: string,
+  projectName: string,
+  projectKey: string,
+  environments: string[]
 }
 
 export interface IProjectEnv {
