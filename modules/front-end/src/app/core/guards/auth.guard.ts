@@ -4,7 +4,7 @@ import { getAuth } from '@shared/utils';
 import { CURRENT_PROJECT, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
-import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentProjectEnv } from "@utils/project-env";
 import { IEnvironment, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
@@ -30,20 +30,19 @@ export const authGuard = async (
   }
 
   // init organizations
-  await organizationService.initOrganizations();
+  const organization = await organizationService.initOrganizations();
 
   // init user permission
   await permissionService.initUserPolicies(auth.id);
 
-  // if we're in onboarding page
+  // if we're going to onboarding page
   if (url.startsWith("/onboarding")) {
-    return true;
-  }
+    if (organization.initialized === true) {
+      // skip onboarding if organization already initialized
+      return router.parseUrl('/feature-flags');
+    }
 
-  // if organization hasn't initialized
-  const organization = getCurrentOrganization();
-  if (organization.initialized === false) {
-    return router.parseUrl('/onboarding');
+    return true;
   }
 
   // try to set user accessible project and env
