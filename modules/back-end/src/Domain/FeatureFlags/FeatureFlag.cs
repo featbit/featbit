@@ -5,11 +5,6 @@ namespace Domain.FeatureFlags;
 
 public class FeatureFlag : FullAuditedEntity
 {
-    // ^(?!-): key cannot starts with '-' character
-    // (\w+-?)+: key consists of one or more words, and words connected with one '-' character
-    // (?<!-)$: key cannot ends with '-' character
-    public const string KeyFormat = @"^(?!-)(\w+-?)+(?<!-)$";
-
     public Guid EnvId { get; set; }
 
     public string Name { get; set; }
