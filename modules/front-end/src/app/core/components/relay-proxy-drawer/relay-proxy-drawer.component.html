@@ -95,7 +95,7 @@
               </ng-template>
             </i>
             <i *ngIf="!readonly" nz-icon (click)="addAgent()" nzType="icons:icon-add-outline"></i>
-            <a nz-button nzType="link" i18n="@@common.sync-all" [disabled]="isSyncAllBtnDisabled" (click)="syncAll()">Sync all</a>
+            <a nz-button nzType="link" i18n="@@common.sync-all" [nzLoading]="isSyncingAll" [disabled]="isSyncAllBtnDisabled" (click)="syncAll()">Sync all</a>
           </nz-form-label>
           <div class="table-content-area">
             <div class="table-wrapper">

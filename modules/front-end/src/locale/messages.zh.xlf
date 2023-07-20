@@ -850,7 +850,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">399</context>
+          <context context-type="linenumber">446</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -4113,39 +4113,31 @@
         <source>Synchronization to all agents</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">357</context>
+          <context context-type="linenumber">359</context>
         </context-group>
         <target>同步到所有代理</target>
       </trans-unit>
-      <trans-unit id="common.sync-to-all-agents-succeeded" datatype="html">
-        <source>Synchronization to all agents succeeded</source>
+      <trans-unit id="common.success-sync-agents" datatype="html">
+        <source>Successfully synchronized to the following agents:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">359</context>
+          <context context-type="linenumber">381</context>
         </context-group>
-        <target>成功同步到所有代理</target>
+        <target>成功同步到以下代理：</target>
       </trans-unit>
-      <trans-unit id="common.sync-to-all-agents-failed" datatype="html">
-        <source>Synchronization to all agents failed</source>
+      <trans-unit id="common.fail-sync-agents" datatype="html">
+        <source>Failed to synchronize to the following agents:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">361</context>
+          <context context-type="linenumber">393</context>
         </context-group>
-        <target>所有同步全部失败</target>
-      </trans-unit>
-      <trans-unit id="common.sync-to-all-agents-partially-succeeded" datatype="html">
-        <source>Synchronization to all agents partially succeeded</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">363</context>
-        </context-group>
-        <target>同步到所有代理操作部分成功</target>
+        <target>同步到以下代理失败：</target>
       </trans-unit>
       <trans-unit id="common.operation-success-for-agent" datatype="html">
         <source>Operation succeeded for <x id="PH" equiv-text="name + &apos; : &apos; + host"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">380</context>
+          <context context-type="linenumber">419</context>
         </context-group>
         <target>成功同步到以下代理</target>
       </trans-unit>
@@ -4153,11 +4145,11 @@
         <source>Error occurred while synchronizing <x id="PH" equiv-text="name + &apos; : &apos; + host"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">383</context>
+          <context context-type="linenumber">425</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">388</context>
+          <context context-type="linenumber">433</context>
         </context-group>
         <target>同步到以下代理时发生错误</target>
       </trans-unit>
