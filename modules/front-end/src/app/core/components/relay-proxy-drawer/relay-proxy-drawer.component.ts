@@ -97,9 +97,9 @@ export class RelayProxyDrawerComponent implements OnInit {
 
     let agentArrayForm: FormArray = this.fb.array([]);
     if (relayProxy.agents.length > 0) {
-      agentArrayForm = this.fb.array(relayProxy.agents.map(async (agent) => {
+      agentArrayForm = this.fb.array(relayProxy.agents.map((agent) => {
         this.agentStatusDict[agent.id] = AgentStatusEnum.Unknown;
-        await this.getAgentStatusInfoAsync(agent.id, agent.host);
+        this.getAgentStatusInfoAsync(agent.id, agent.host);
         return this.fb.group({
           id: [agent.id, Validators.required],
           name: [agent.name, Validators.required],
@@ -393,10 +393,12 @@ export class RelayProxyDrawerComponent implements OnInit {
     }
 
     this.isSyncingAll = false;
-    if (groups.fail.length) {
+    if (groups.fail.length === 0) {
+      this.notification.success(title, msg, { nzDuration: 50000 });
+    } else if (groups.success.length === 0){
       this.notification.error(title, msg, { nzDuration: 50000 });
     } else {
-      this.notification.success(title, msg, { nzDuration: 50000 });
+      this.notification.warning(title, msg, { nzDuration: 50000 });
     }
   }
 

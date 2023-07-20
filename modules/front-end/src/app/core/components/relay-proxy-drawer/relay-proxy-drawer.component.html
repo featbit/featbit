@@ -99,7 +99,8 @@
           </nz-form-label>
           <div class="table-content-area">
             <div class="table-wrapper">
-              <nz-table #agentTable
+              <nz-spin [nzSpinning]="isSyncingAll">
+                <nz-table #agentTable
                         nzTableLayout="fixed"
                         nzSize="small"
                         [nzFrontPagination]="false"
@@ -181,7 +182,7 @@
                              nz-tooltip="The agent setting must be saved to enable the synchronization"></i>
                           <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
                                   (click)="sync(agent)"
-                                  [nzLoading]="false"
+                                  [nzLoading]="agentSyncProcessingDic[agent.value['id']]"
                                   [disabled]="agent.value['isNew'] || agent.controls['host'].dirty"
                                   i18n="@@common.sync"
                                   i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
@@ -194,6 +195,7 @@
                 </ng-container>
                 </tbody>
               </nz-table>
+              </nz-spin>
             </div>
           </div>
         </ng-container>
