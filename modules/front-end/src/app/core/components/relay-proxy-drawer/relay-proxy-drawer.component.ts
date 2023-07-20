@@ -8,8 +8,9 @@ import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { RelayProxyService } from "@services/relay-proxy.service";
 import { AgentStatusEnum, RelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
-import { debounceTime, finalize, first, map, switchMap } from "rxjs/operators";
+import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { NzNotificationService } from "ng-zorro-antd/notification";
+import { firstValueFrom } from "rxjs";
 
 @Component({
   selector: 'relay-proxy-drawer',
@@ -341,7 +342,7 @@ export class RelayProxyDrawerComponent implements OnInit {
   }
 
   private getSynchronizableAgents(): any[] {
-    return this.agents.controls.filter((agent: any) => !agent.value['isNew'] && !agent.controls['host'].dirty);
+    return this.agents.controls.filter((agent: FormGroup) => !agent.value['isNew'] && !agent.controls['host'].dirty);
   }
 
   get isSyncAllBtnDisabled() {
@@ -351,23 +352,22 @@ export class RelayProxyDrawerComponent implements OnInit {
   isSyncingAll = false;
   async syncAll() {
     this.isSyncingAll = true;
-    const promises = this.getSynchronizableAgents().map((agent) => this.sync(agent, false));
-    const results = await Promise.allSettled(promises);
+    const promises = this.getSynchronizableAgents().map(agent => this.syncInternal(agent));
+    const results = await Promise.all(promises);
 
     const title = $localize`:@@common.sync-to-all-agents:Synchronization to all agents`;
 
     const groups = results.reduce((acc, cur) => {
-      if (cur.status === 'fulfilled') {
-        acc.success.push(cur.value);
+      if (cur.success) {
+        acc.success.push(cur);
       } else {
-        acc.fail.push(cur.reason);
+        acc.fail.push(cur);
       }
 
       return acc;
-    }, {success: [], fail: []});
+    }, { success: [], fail: [] });
 
     let msg = '';
-
     if (groups.success.length) {
       const successList = groups.success.reduce((acc, cur) => {
         const { name, host } = cur;
@@ -376,7 +376,7 @@ export class RelayProxyDrawerComponent implements OnInit {
         return acc;
       }, ``);
 
-      msg += $localize `:@@common.success-sync-agents:Successfully synchronized to the following agents:`
+      msg += $localize`:@@common.success-sync-agents:Successfully synchronized to the following agents:`
         + `<ul>${successList}</ul>`;
     }
 
@@ -388,56 +388,49 @@ export class RelayProxyDrawerComponent implements OnInit {
         return acc;
       }, ``);
 
-      msg += $localize `:@@common.fail-sync-agents:Failed to synchronize to the following agents:`
+      msg += $localize`:@@common.fail-sync-agents:Failed to synchronize to the following agents:`
         + `<ul>${failList}</ul>`;
     }
 
     this.isSyncingAll = false;
     if (groups.fail.length === 0) {
       this.notification.success(title, msg, { nzDuration: 50000 });
-    } else if (groups.success.length === 0){
+    } else if (groups.success.length === 0) {
       this.notification.error(title, msg, { nzDuration: 50000 });
     } else {
       this.notification.warning(title, msg, { nzDuration: 50000 });
     }
   }
 
-  sync(agent: any, displayMessage = true) {
+  async sync(agent) {
+    const syncResult = await this.syncInternal(agent);
+
+    const { success, name, host } = syncResult;
+    if (success) {
+      this.message.success($localize`:@@common.operation-success-for-agent:Operation succeeded for ${name + ' : ' + host}`);
+    } else {
+      this.message.error($localize`:@@common.error-occurred-for-agent:Error occurred while synchronizing ${name + ' : ' + host}`);
+    }
+  }
+
+  async syncInternal(agent): Promise<{ id: string, host: string, name: string, success: boolean }> {
     const { id, host, name } = agent.value;
     this.agentSyncProcessingDic[id] = true;
 
-    return new Promise((resolve, reject) => {
-      this.relayProxyService.syncToAgent(this._relayProxy.id, id)
-        .pipe(finalize(() => {
-          this.agentSyncProcessingDic[id] = false;
-        }))
-        .subscribe({
-          next: (syncResult) => {
-            if (syncResult.success) {
-              agent.patchValue({ syncAt: syncResult.syncAt });
-              if (displayMessage) {
-                this.message.success($localize`:@@common.operation-success-for-agent:Operation succeeded for ${name + ' : ' + host}`);
-              }
+    let success: boolean;
+    try {
+      const syncResult = await firstValueFrom(this.relayProxyService.syncToAgent(this._relayProxy.id, id));
+      if (syncResult.success) {
+        agent.patchValue({ syncAt: syncResult.syncAt });
+      }
 
-              resolve({id, name, host});
-            } else {
-              if (displayMessage) {
-                this.message.error($localize`:@@common.error-occurred-for-agent:Error occurred while synchronizing ${name + ' : ' + host}`);
-              }
+      success = syncResult.success;
+    } catch {
+      success = false;
+    }
 
-              reject({id, name, host});
-            }
-          },
-          error: () => {
-            if (displayMessage) {
-              this.message.error($localize`:@@common.error-occurred-for-agent:Error occurred while synchronizing ${name + ' : ' + host}`);
-            }
-
-            reject({id, name, host});
-          }
-        });
-    })
-
+    this.agentSyncProcessingDic[id] = false;
+    return { id, host, name, success };
   }
 
   isCreationConfirmModalVisible = false;
