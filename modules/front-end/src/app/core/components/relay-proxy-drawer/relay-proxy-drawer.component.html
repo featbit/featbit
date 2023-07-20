@@ -86,16 +86,16 @@
       <nz-form-item class="agents">
         <ng-container formArrayName="agents">
           <nz-form-label nzRequired>
-              <span i18n="@@common.agents">Agents</span>
-              <i [nz-tooltip]="agentsTooltip" nz-icon nzType="icons:icon-info-outline">
-                <ng-template #agentsTooltip>
-                  <ng-container i18n="@@relay-proxy.agents-tooltip">A relay proxy agent is the server running the FeatBit agent program</ng-container>
-                  <br>
-                  <a target="_blank" href="https://github.com/featbit/featbit-agent" i18n="@@common.check-the-repo">Check the repo</a>
-                </ng-template>
-              </i>
-              <i *ngIf="!readonly" nz-icon (click)="addAgent()" nzType="icons:icon-add-outline"></i>
-              <a nz-button nzType="link" i18n="@@common.sync-all" [disabled]="isSyncAllBtnDisabled" (click)="syncAll()">Sync all</a>
+            <span i18n="@@common.agents">Agents</span>
+            <i [nz-tooltip]="agentsTooltip" nz-icon nzType="icons:icon-info-outline">
+              <ng-template #agentsTooltip>
+                <ng-container i18n="@@relay-proxy.agents-tooltip">A relay proxy agent is the server running the FeatBit agent program</ng-container>
+                <br>
+                <a target="_blank" href="https://github.com/featbit/featbit-agent" i18n="@@common.check-the-repo">Check the repo</a>
+              </ng-template>
+            </i>
+            <i *ngIf="!readonly" nz-icon (click)="addAgent()" nzType="icons:icon-add-outline"></i>
+            <a nz-button nzType="link" i18n="@@common.sync-all" [disabled]="isSyncAllBtnDisabled" (click)="syncAll()">Sync all</a>
           </nz-form-label>
           <div class="table-content-area">
             <div class="table-wrapper">
