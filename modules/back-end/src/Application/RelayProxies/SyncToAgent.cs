@@ -33,13 +33,6 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
 
     public async Task<SyncResult> Handle(SyncToAgent request, CancellationToken cancellationToken)
     {
-        Random rnd = new Random();
-        int month  = rnd.Next(1, 10);
-        if (month <= 5)
-        {
-            return SyncResult.Ok(DateTime.Now);
-        }
-
         var relayProxy = await _relayProxyService.GetAsync(request.RelayProxyId);
 
         var agent = relayProxy.Agents.FirstOrDefault(agent => agent.Id == request.AgentId);
