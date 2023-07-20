@@ -5,11 +5,12 @@ import { copyToClipboard, uuidv4 } from "@utils/index";
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { PermissionsService } from "@services/permissions.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { ProjectService } from "@services/project.service";
 import { RelayProxyService } from "@services/relay-proxy.service";
 import { AgentStatusEnum, RelayProxy } from "@features/safe/relay-proxies/types/relay-proxy";
-import { debounceTime, finalize, first, map, switchMap } from "rxjs/operators";
+import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { NzNotificationService } from "ng-zorro-antd/notification";
+import { firstValueFrom } from "rxjs";
 
 @Component({
   selector: 'relay-proxy-drawer',
@@ -59,6 +60,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     private relayProxyService: RelayProxyService,
     private fb: FormBuilder,
     private message: NzMessageService,
+    private notification: NzNotificationService,
     public permissionsService: PermissionsService,
   ) {
     this.initForm('', '', true, this.fb.array([]), this.fb.array([]));
@@ -85,7 +87,7 @@ export class RelayProxyDrawerComponent implements OnInit {
   }
 
   patchForm(relayProxy: Partial<RelayProxy>) {
-    let scopeArrayForm: FormArray<any> = this.fb.array([]);
+    let scopeArrayForm: FormArray = this.fb.array([]);
     if (relayProxy.scopes.length > 0) {
       scopeArrayForm = this.fb.array(relayProxy.scopes.map(x => this.fb.group({
         id: [x.id, Validators.required],
@@ -94,7 +96,7 @@ export class RelayProxyDrawerComponent implements OnInit {
       })));
     }
 
-    let agentArrayForm: FormArray<any> = this.fb.array([]);
+    let agentArrayForm: FormArray = this.fb.array([]);
     if (relayProxy.agents.length > 0) {
       agentArrayForm = this.fb.array(relayProxy.agents.map((agent) => {
         this.agentStatusDict[agent.id] = AgentStatusEnum.Unknown;
@@ -339,20 +341,96 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.agentStatusModalVisible = true;
   }
 
-  sync(index: number) {
-    const agent = this.agents.at(index);
-    const { id } = agent.value;
+  private getSynchronizableAgents(): any[] {
+    return this.agents.controls.filter((agent: FormGroup) => !agent.value['isNew'] && !agent.controls['host'].dirty);
+  }
+
+  get isSyncAllBtnDisabled() {
+    return this.getSynchronizableAgents().length === 0;
+  }
+
+  isSyncingAll = false;
+  async syncAll() {
+    this.isSyncingAll = true;
+    const promises = this.getSynchronizableAgents().map(agent => this.syncInternal(agent));
+    const results = await Promise.all(promises);
+
+    const title = $localize`:@@common.sync-to-all-agents:Synchronization to all agents`;
+
+    const groups = results.reduce((acc, cur) => {
+      if (cur.success) {
+        acc.success.push(cur);
+      } else {
+        acc.fail.push(cur);
+      }
+
+      return acc;
+    }, { success: [], fail: [] });
+
+    let msg = '';
+    if (groups.success.length) {
+      const successList = groups.success.reduce((acc, cur) => {
+        const { name, host } = cur;
+
+        acc += `<li><strong>${name}</strong>:${host}</li>`;
+        return acc;
+      }, ``);
+
+      msg += $localize`:@@common.success-sync-agents:Successfully synchronized to the following agents:`
+        + `<ul>${successList}</ul>`;
+    }
+
+    if (groups.fail.length) {
+      const failList = groups.fail.reduce((acc, cur) => {
+        const { name, host } = cur;
+
+        acc += `<li><strong>${name}</strong>: ${host}</li>`;
+        return acc;
+      }, ``);
+
+      msg += $localize`:@@common.fail-sync-agents:Failed to synchronize to the following agents:`
+        + `<ul>${failList}</ul>`;
+    }
+
+    this.isSyncingAll = false;
+    if (groups.fail.length === 0) {
+      this.notification.success(title, msg, { nzDuration: 50000 });
+    } else if (groups.success.length === 0) {
+      this.notification.error(title, msg, { nzDuration: 50000 });
+    } else {
+      this.notification.warning(title, msg, { nzDuration: 50000 });
+    }
+  }
+
+  async sync(agent) {
+    const syncResult = await this.syncInternal(agent);
+
+    const { success, name, host } = syncResult;
+    if (success) {
+      this.message.success($localize`:@@common.operation-success-for-agent:Operation succeeded for ${name + ' : ' + host}`);
+    } else {
+      this.message.error($localize`:@@common.error-occurred-for-agent:Error occurred while synchronizing ${name + ' : ' + host}`);
+    }
+  }
+
+  async syncInternal(agent): Promise<{ id: string, host: string, name: string, success: boolean }> {
+    const { id, host, name } = agent.value;
     this.agentSyncProcessingDic[id] = true;
 
-    this.relayProxyService.syncToAgent(this._relayProxy.id, id)
-      .pipe(finalize(() => this.agentSyncProcessingDic[id] = false))
-      .subscribe({
-        next: (syncResult) => {
-          agent.patchValue({ syncAt: syncResult.syncAt });
-          this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-        },
-        error: () => this.message.error($localize`:@@common.error-occurred-try-again:Error occurred, please try again`)
-      });
+    let success: boolean;
+    try {
+      const syncResult = await firstValueFrom(this.relayProxyService.syncToAgent(this._relayProxy.id, id));
+      if (syncResult.success) {
+        agent.patchValue({ syncAt: syncResult.syncAt });
+      }
+
+      success = syncResult.success;
+    } catch {
+      success = false;
+    }
+
+    this.agentSyncProcessingDic[id] = false;
+    return { id, host, name, success };
   }
 
   isCreationConfirmModalVisible = false;
