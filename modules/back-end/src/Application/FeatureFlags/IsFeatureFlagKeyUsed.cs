@@ -18,6 +18,6 @@ public class IsFeatureFlagKeyUsedHandler : IRequestHandler<IsFeatureFlagKeyUsed,
 
     public async Task<bool> Handle(IsFeatureFlagKeyUsed request, CancellationToken cancellationToken)
     {
-        return await _service.IsFeatureFlagKeyUsedAsync(request.EnvId, request.Key);
+        return await _service.HasKeyBeenUsedAsync(request.EnvId, request.Key);
     }
 }

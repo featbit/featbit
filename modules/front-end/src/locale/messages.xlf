@@ -90,11 +90,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">130</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
@@ -407,7 +407,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">204</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -456,11 +456,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">225</context>
+          <context context-type="linenumber">227</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">257</context>
+          <context context-type="linenumber">259</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.access-token.access-token-drawer.view-title" datatype="html">
@@ -492,11 +492,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">169</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">248</context>
+          <context context-type="linenumber">250</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/permissions.service.ts</context>
@@ -551,15 +551,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">312</context>
+          <context context-type="linenumber">314</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">322</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">352</context>
+          <context context-type="linenumber">324</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
@@ -741,16 +737,20 @@
           <context context-type="linenumber">215</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">321</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
           <context context-type="linenumber">243</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">314</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">324</context>
+          <context context-type="linenumber">326</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
@@ -790,7 +790,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">70</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
@@ -832,7 +832,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">361</context>
+          <context context-type="linenumber">439</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -994,7 +994,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">164</context>
+          <context context-type="linenumber">165</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -1491,15 +1491,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">73</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">194</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">354</context>
+          <context context-type="linenumber">196</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
@@ -3254,7 +3250,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">122</context>
+          <context context-type="linenumber">123</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
@@ -3434,7 +3430,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">190</context>
+          <context context-type="linenumber">191</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -3659,22 +3655,29 @@
           <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="common.sync-all" datatype="html">
+        <source>Sync all</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.host" datatype="html">
         <source>Host</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">135</context>
+          <context context-type="linenumber">136</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.status" datatype="html">
         <source>Status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">113</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -3693,28 +3696,28 @@
         <source>The status of the agent, click icon to refresh and view the status detail</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">115</context>
+          <context context-type="linenumber">116</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.check-status-definition" datatype="html">
         <source>Check the status definition</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">118</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.last-sync" datatype="html">
         <source>Last Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">122</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.healthy" datatype="html">
         <source>Healthy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">143</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -3725,112 +3728,147 @@
         <source>Unhealthy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">149</context>
+          <context context-type="linenumber">150</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.unreachable" datatype="html">
         <source>Unreachable</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">156</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.unauthorized" datatype="html">
         <source>Unauthorized</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">161</context>
+          <context context-type="linenumber">162</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.check" datatype="html">
         <source>Check</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="linenumber">171</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.save-to-sync-to-agent" datatype="html">
         <source>The agent setting must be saved to enable the synchronization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">181</context>
+          <context context-type="linenumber">182</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.sync-to-agent" datatype="html">
         <source>Synchronize the flags and segments within the scopes to FeatBit agent</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">188</context>
+          <context context-type="linenumber">189</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.sync" datatype="html">
         <source>Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">188</context>
+          <context context-type="linenumber">189</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.agent-status" datatype="html">
         <source>Agent status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">218</context>
+          <context context-type="linenumber">220</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.relay-proxy-created" datatype="html">
         <source>Relay proxy created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">233</context>
+          <context context-type="linenumber">235</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.copy-key-warning" datatype="html">
         <source>Copy and save this key now, the key will be masked once you leave the page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">242</context>
+          <context context-type="linenumber">244</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.view-title" datatype="html">
         <source>View Relay Proxy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">40</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.edit-title" datatype="html">
         <source>Edit Relay Proxy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.add-title" datatype="html">
         <source>Add Relay Proxy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">45</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.set-agent-host" datatype="html">
         <source>You need to set the host url to get its status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">176</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.scope-required" datatype="html">
         <source>At least one environment scope is required</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">292</context>
+          <context context-type="linenumber">294</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.agent-required" datatype="html">
         <source>At least one agent is required</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">297</context>
+          <context context-type="linenumber">299</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.sync-to-all-agents" datatype="html">
+        <source>Synchronization to all agents</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
+          <context context-type="linenumber">358</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.success-sync-agents" datatype="html">
+        <source>Successfully synchronized to the following agents:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
+          <context context-type="linenumber">379</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.fail-sync-agents" datatype="html">
+        <source>Failed to synchronize to the following agents:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
+          <context context-type="linenumber">391</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.operation-success-for-agent" datatype="html">
+        <source>Operation succeeded for <x id="PH" equiv-text="name + &apos; : &apos; + host"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
+          <context context-type="linenumber">410</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.error-occurred-for-agent" datatype="html">
+        <source>Error occurred while synchronizing <x id="PH" equiv-text="name + &apos; : &apos; + host"/></source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
+          <context context-type="linenumber">412</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.num-users" datatype="html">
@@ -4080,14 +4118,14 @@
         <source>Permission Denied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">78</context>
         </context-group>
       </trans-unit>
       <trans-unit id="permissions.need-permissions-to-access-env" datatype="html">
         <source>You don&apos;t have permissions to access to the current environment or you don&apos;t have access to any projects and environments, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">75</context>
+          <context context-type="linenumber">79</context>
         </context-group>
       </trans-unit>
       <trans-unit id="permissions.no-permissions-to-visit-iam-page" datatype="html">

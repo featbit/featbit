@@ -317,12 +317,8 @@ export class FeatureFlagDrawerComponent implements OnInit {
     this.featureFlagService.create(payload)
       .pipe(finalize(() => this.creating = false))
       .subscribe({
-        next: (result: IFeatureFlag) => {
-          this.navigateToFlagDetail(result.key);
-        },
-        error: (err) => {
-          this.message.error(err.error);
-        }
+        next: (result: IFeatureFlag) => this.navigateToFlagDetail(result.key),
+        error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
       });
   }
 

@@ -1,5 +1,4 @@
 using Application.Bases;
-using Application.Users;
 using Domain.Projects;
 
 namespace Application.Organizations;
@@ -38,16 +37,11 @@ public class OnboardingValidator : AbstractValidator<Onboarding>
 public class OnboardingHandler : IRequestHandler<Onboarding, bool>
 {
     private readonly IOrganizationService _organizationService;
-    private readonly ICurrentUser _currentUser;
     private readonly IProjectService _projectService;
 
-    public OnboardingHandler(
-        IOrganizationService organizationService,
-        ICurrentUser currentUser,
-        IProjectService projectService)
+    public OnboardingHandler(IOrganizationService organizationService, IProjectService projectService)
     {
         _organizationService = organizationService;
-        _currentUser = currentUser;
         _projectService = projectService;
     }
 

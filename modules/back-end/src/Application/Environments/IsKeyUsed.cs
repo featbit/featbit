@@ -18,9 +18,6 @@ public class IsKeyUsedHandler : IRequestHandler<IsKeyUsed, bool>
 
     public async Task<bool> Handle(IsKeyUsed request, CancellationToken cancellationToken)
     {
-        return await _service.AnyAsync(x =>
-            x.ProjectId == request.ProjectId &&
-            string.Equals(x.Key, request.Key, StringComparison.OrdinalIgnoreCase)
-        );
+        return await _service.HasKeyBeenUsedAsync(request.ProjectId, request.Key);
     }
 }
