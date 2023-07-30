@@ -1,6 +1,5 @@
 <nz-modal [nzWidth]='800' nzClassName="review-modal" [(nzVisible)]="visible"
-          i18n-nzTitle="@@common.review-and-save"
-          nzTitle="Review and save"
+          [nzTitle]="title"
           [nzClosable]="false"
           (nzOnCancel)="closeModal()">
   <ng-container *nzModalContent>
@@ -25,14 +24,43 @@
           <change-list [categories]="changeCategories"></change-list>
         </div>
       </section>
-      <section class="comment">
-        <form nz-form [formGroup]="reviewForm" nzLayout="vertical">
-          <nz-form-item>
+      <section class="form-wraper" >
+        <form nz-form [formGroup]="form" nzLayout="vertical">
+          <nz-form-item *ngIf="kind === reviewModalKindEnum.Review">
             <nz-form-label class="section-title" i18n="@@common.comment">Comment</nz-form-label>
             <nz-form-control>
               <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
             </nz-form-control>
           </nz-form-item>
+          <div class="section-title with-extension-icon">
+            <span i18n="@@common.schedule">Schedule</span>
+            <span *ngIf="!hasSchedule"
+                  (click)="toggleSchedule()" nz-icon nzType="plus" nzTheme="outline"></span>
+            <span *ngIf="hasSchedule"
+                  (click)="toggleSchedule()" nz-icon nzType="minus" nzTheme="outline"></span>
+          </div>
+          <ng-container *ngIf="hasSchedule">
+            <nz-form-item >
+              <nz-form-label i18n="@@common.title">Title</nz-form-label>
+              <nz-form-control nzErrorTip="Required" i18n-nzErrorTip="@@common.required">
+                <input type="text" nz-input formControlName="scheduleTitle" placeholder="Title" i18n-placeholder="@@common.title"/>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
+              <nz-form-control nzErrorTip="Required" i18n-nzErrorTip="@@common.required">
+                <nz-date-picker
+                  nzShowTime
+                  [nzShowNow]="false"
+                  nzFormat="yyyy-MM-dd HH:mm"
+                  formControlName="scheduledTime"
+                  [nzDisabledDate]="disabledDate"
+                  [nzDisabledTime]="disabledDateTime"
+                  [nzShowTime]="{ nzHideDisabledOptions: true, nzDefaultOpenValue: timeDefaultValue, nzFormat: 'HH:mm' }"
+                ></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
+          </ng-container>
         </form>
       </section>
     </div>

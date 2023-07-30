@@ -14,8 +14,9 @@ import { ICondition, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
-import {RefTypeEnum} from "@core/components/audit-log/types";
-import {ISegment} from "@features/safe/segments/types/segments-index";
+import { RefTypeEnum } from "@core/components/audit-log/types";
+import { ISegment } from "@features/safe/segments/types/segments-index";
+import { ReviewModalKindEnum } from "@core/components/change-review/types";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -38,13 +39,13 @@ export class TargetingComponent implements OnInit {
     return rule.id;
   }
 
-  public featureFlag: FeatureFlag = {} as FeatureFlag;
-  public userList: IUserType[] = [];
+  featureFlag: FeatureFlag = {} as FeatureFlag;
+  userList: IUserType[] = [];
 
   userProps: IUserProp[];
-  public key: string;
-  public isLoading: boolean = true;
-  public isTargetUsersActive: boolean = false;
+  key: string;
+  isLoading: boolean = true;
+  isTargetUsersActive: boolean = false;
 
   exptRulesVisible = false;
 
@@ -62,6 +63,8 @@ export class TargetingComponent implements OnInit {
     this.exptRulesVisible = false;
   }
 
+  reviewModalKindEnum = ReviewModalKindEnum;
+  reviewModalKind:ReviewModalKindEnum;
   originalData: string = '{}';
   currentData: string = '{}';
   refType: RefTypeEnum = RefTypeEnum.Flag;
@@ -69,7 +72,7 @@ export class TargetingComponent implements OnInit {
   allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
   segmentIdRefs: ISegment[] = [];
 
-  onReviewChanges(validationErrortpl: TemplateRef<void>) {
+  onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
     this.validationErrors = this.validateFeatureFlag();
 
     if (this.validationErrors.length > 0) {
@@ -77,6 +80,8 @@ export class TargetingComponent implements OnInit {
       this.msg.create('', validationErrortpl, { nzDuration: 5000 });
       return false;
     }
+
+    this.reviewModalKind = modalKind;
 
     this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
 
@@ -149,7 +154,7 @@ export class TargetingComponent implements OnInit {
     this.isLoading = false;
   }
 
-  public targetingUsersByVariation: { [key: string]: IUserType[] } = {}; // {variationId: users}
+  targetingUsersByVariation: { [key: string]: IUserType[] } = {}; // {variationId: users}
 
   loadFeatureFlag() {
     return new Promise((resolve) => {
@@ -220,11 +225,11 @@ export class TargetingComponent implements OnInit {
     });
   }
 
-  public onDeleteRule(ruleId: string) {
+  onDeleteRule(ruleId: string) {
     this.featureFlag.rules = this.featureFlag.rules.filter(rule => rule.id !== ruleId);
   }
 
-  public onAddRule() {
+  onAddRule() {
     this.featureFlag.rules.push({
       id: uuidv4(),
       name: ($localize `:@@common.rule:Rule`) + ' ' + (this.featureFlag.rules.length + 1),
@@ -234,7 +239,7 @@ export class TargetingComponent implements OnInit {
     } as IRule);
   }
 
-  public onRuleConditionChange(conditions: ICondition[], ruleId: string) {
+  onRuleConditionChange(conditions: ICondition[], ruleId: string) {
     this.featureFlag.rules = this.featureFlag.rules.map(rule => {
       if (rule.id === ruleId) {
         rule.conditions = conditions.map(condition => {
@@ -255,7 +260,7 @@ export class TargetingComponent implements OnInit {
     })
   }
 
-  public onSelectedUserListChange(data: IUserType[], variationId: string) {
+  onSelectedUserListChange(data: IUserType[], variationId: string) {
     this.targetingUsersByVariation[variationId] = [...data];
 
     this.allTargetingUsers = [
@@ -375,7 +380,7 @@ export class TargetingComponent implements OnInit {
     return validationErrs.filter((err, idx) => idx === validationErrs.findIndex((it) => it.kind === err.kind && it.ids.sort().join('') === err.ids.sort().join(''))); // return only unique values
   }
 
-  public onRuleVariationsChange(value: IRuleVariation[], ruleId: string) {
+  onRuleVariationsChange(value: IRuleVariation[], ruleId: string) {
     this.featureFlag.rules = this.featureFlag.rules.map(rule => {
       if (rule.id === ruleId) {
         rule.variations = [...value];
@@ -385,7 +390,7 @@ export class TargetingComponent implements OnInit {
     })
   }
 
-  public onDragEnd(event: CdkDragDrop<string[]>) {
+  onDragEnd(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.featureFlag.rules, event.previousIndex, event.currentIndex);
   }
 }
