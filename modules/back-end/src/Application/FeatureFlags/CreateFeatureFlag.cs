@@ -108,7 +108,7 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
 
         var flag = request.AsFeatureFlag(_currentUser.Id);
         await _service.AddOneAsync(flag);
-        _flagRevisionService.CreateForFlag(flag, null, _currentUser.Id);
+        await _flagRevisionService.CreateForFlag(flag, null, _currentUser.Id);
 
         // write audit log
         var auditLog = AuditLog.ForCreate(flag, _currentUser.Id);

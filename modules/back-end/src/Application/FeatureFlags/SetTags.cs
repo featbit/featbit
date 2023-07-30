@@ -15,12 +15,18 @@ public class SetTags : IRequest<bool>
 public class SetTagsHandler : IRequestHandler<SetTags, bool>
 {
     private readonly IFeatureFlagService _service;
+    private readonly IFlagRevisionService _flagRevisionService;
     private readonly ICurrentUser _currentUser;
     private readonly IAuditLogService _auditLogService;
 
-    public SetTagsHandler(IFeatureFlagService service, ICurrentUser currentUser, IAuditLogService auditLogService)
+    public SetTagsHandler(
+        IFeatureFlagService service,
+        IFlagRevisionService flagRevisionService,
+        ICurrentUser currentUser,
+        IAuditLogService auditLogService)
     {
         _service = service;
+        _flagRevisionService = flagRevisionService;
         _currentUser = currentUser;
         _auditLogService = auditLogService;
     }
@@ -34,7 +40,10 @@ public class SetTagsHandler : IRequestHandler<SetTags, bool>
         var auditLog = AuditLog.ForUpdate(flag, dataChange, string.Empty, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
 
+        var flagRevision = await _flagRevisionService.CreateForFlag(flag, null, _currentUser.Id);
+        flag.Version = flagRevision.Version;
         await _service.UpdateAsync(flag);
+        
         return true;
     }
 }
