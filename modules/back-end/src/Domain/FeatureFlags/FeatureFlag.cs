@@ -7,6 +7,8 @@ public class FeatureFlag : FullAuditedEntity
 {
     public Guid EnvId { get; set; }
 
+    public int Version { get; set; }
+
     public string Name { get; set; }
 
     public string Description { get; set; }
@@ -46,6 +48,9 @@ public class FeatureFlag : FullAuditedEntity
         ICollection<string> tags,
         Guid currentUserId) : base(currentUserId)
     {
+        // set the initial version to 1
+        Version = 1;
+        
         EnvId = envId;
 
         Name = name;
@@ -78,7 +83,7 @@ public class FeatureFlag : FullAuditedEntity
         Tags = tags ?? Array.Empty<string>();
         IsArchived = false;
     }
-
+    
     public Serves Serves()
     {
         // variations when enabled
