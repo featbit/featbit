@@ -9,6 +9,8 @@ using Infrastructure.Environments;
 using Infrastructure.ExperimentMetrics;
 using Infrastructure.Experiments;
 using Infrastructure.FeatureFlags;
+using Infrastructure.FlagDrafts;
+using Infrastructure.FlagSchedules;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
@@ -84,7 +86,9 @@ public static class ConfigureServices
         services.AddSingleton<IEvaluator, Evaluator>();
         services.AddTransient<IAccessTokenService, AccessTokenService>();
         services.AddTransient<IRelayProxyService, RelayProxyService>();
-
+        services.AddTransient<IFlagDraftService, FlagDraftService>();
+        services.AddTransient<IFlagScheduleService, FlagScheduleService>();
+        
         return services;
     }
 
