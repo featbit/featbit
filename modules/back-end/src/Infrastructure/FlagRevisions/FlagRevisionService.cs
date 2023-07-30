@@ -30,6 +30,6 @@ public class FlagRevisionService : MongoDbService<FlagRevision>, IFlagRevisionSe
             .SortByDescending(flag => flag.Version)
             .FirstOrDefaultAsync();
         
-        return flagRevision != null ? flagRevision.Version : 1;
+        return flagRevision != null ? flagRevision.Version + 1 : 1;
     }
 }
