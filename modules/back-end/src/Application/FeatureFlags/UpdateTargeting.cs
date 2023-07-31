@@ -22,12 +22,8 @@ public class UpdateTargeting : IRequest<bool>
     public bool ExptIncludeAllTargets { get; set; }
 
     public string Comment { get; set; }
-
-    public bool HasSchedule { get; set; }
-
-    public string ScheduleTitle { get; set; }
-
-    public DateTime ScheduledTime { get; set; }
+    
+    public Schedule Schedule { get; set; }
 }
 
 public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
@@ -66,7 +62,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
             _currentUser.Id
         );
         
-        if (request.HasSchedule)
+        if (request.Schedule != null)
         {
             return await CreateScheduleAsync(flag, dataChange, request, cancellationToken);
         }
@@ -81,7 +77,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         await _flagDraftService.AddOneAsync(flagDraft);
         
         // create schedule
-        var flagSchedule = FlagSchedule.WaitingForExecution(request.EnvId, flagDraft.Id, flag.Id, request.ScheduleTitle, request.ScheduledTime, _currentUser.Id);
+        var flagSchedule = FlagSchedule.WaitingForExecution(request.EnvId, flagDraft.Id, flag.Id, request.Schedule.Title, request.Schedule.ScheduledTime, _currentUser.Id);
         await _flagScheduleService.AddOneAsync(flagSchedule);
         
         return true;

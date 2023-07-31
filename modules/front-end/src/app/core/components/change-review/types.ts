@@ -4,28 +4,12 @@ export enum ReviewModalKindEnum {
   Approval = 2
 }
 
-export interface ChangeReviewResult {
-  comment?: string,
-  hasSchedule: boolean,
-  scheduledTime?: string,
+export interface FlagSchedule {
+  scheduledTime: Date,
+  title: string,
 }
 
-export class ChangeReviewOutput {
-  constructor(
-    public comment: string,
-    public hasSchedule: boolean,
-    public scheduledTime?: Date) {
-  }
-
-  get data() {
-    const result: ChangeReviewResult = { hasSchedule: this.hasSchedule };
-
-    if (this.hasSchedule) {
-      result.scheduledTime = this.scheduledTime.toISOString();
-    } else {
-      result.comment = this.comment;
-    }
-
-    return result;
-  }
+export interface ChangeReviewOutput {
+  comment?: string,
+  schedule?: FlagSchedule,
 }

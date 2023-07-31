@@ -82,9 +82,17 @@ export class ChangeReviewComponent implements OnChanges {
       return;
     }
 
-    const { comment, scheduledTime } = this.form.value;
-    const output = new ChangeReviewOutput(comment, this.hasSchedule, scheduledTime);
-    this.onSave.emit(output.data);
+    const { comment, scheduleTitle, scheduledTime } = this.form.value;
+
+    const output: ChangeReviewOutput = {
+      comment: comment,
+      schedule: this.hasSchedule ? {
+        title: scheduleTitle,
+        scheduledTime: scheduledTime,
+      } : undefined,
+    };
+
+    this.onSave.emit(output);
   }
 
   closeModal() {

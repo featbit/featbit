@@ -17,6 +17,7 @@ import {
 } from "@features/safe/feature-flags/types/details";
 import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
 import { IVariation } from "@shared/rules";
+import { FlagSchedule } from "@core/components/change-review/types";
 
 @Injectable({
   providedIn: 'root'
@@ -100,8 +101,15 @@ export class FeatureFlagService {
     return this.http.put(url, {});
   }
 
-  updateTargeting(payload: IFeatureFlagTargeting): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.key}/targeting`;
+  updateTargeting(targeting: IFeatureFlagTargeting, comment?: string, schedule?: FlagSchedule): Observable<boolean> {
+    const url = `${this.baseUrl}/${targeting.key}/targeting`;
+
+    const payload = {
+      ...targeting,
+      comment,
+      schedule
+    };
+
     return this.http.put<boolean>(url, payload);
   }
 

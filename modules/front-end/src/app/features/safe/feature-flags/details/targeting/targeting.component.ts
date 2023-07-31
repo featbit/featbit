@@ -16,7 +16,7 @@ import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ISegment } from "@features/safe/segments/types/segments-index";
-import { ReviewModalKindEnum } from "@core/components/change-review/types";
+import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -289,13 +289,14 @@ export class TargetingComponent implements OnInit {
 
   validationErrors: IFlagValidationError[] = [];
 
-  onSave(data: any) {
+  onSave(data: ChangeReviewOutput) {
     this.isLoading = true;
 
     const { key, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
     const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
+    const targeting = { key, targetUsers, rules, fallthrough, exptIncludeAllTargets };
 
-    this.featureFlagService.updateTargeting({ key, targetUsers, rules, fallthrough, exptIncludeAllTargets, comment: data.comment }).subscribe({
+    this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule ).subscribe({
       next: () => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
