@@ -51,14 +51,13 @@ public class CopyToEnvHandler : IRequestHandler<CopyToEnv, CopyToEnvResult>
             targetFlag.CopyToEnv(request.TargetEnvId, _currentUser.Id);
 
             await _service.AddOneAsync(targetFlag);
-            await _flagRevisionService.CreateForFlag(targetFlag, null, _currentUser.Id);
 
             // write audit log
             var auditLog = AuditLog.ForCreate(targetFlag, _currentUser.Id);
             await _auditLogService.AddOneAsync(auditLog);
 
             // publish on feature flag change notification
-            await _publisher.Publish(new OnFeatureFlagChanged(targetFlag), cancellationToken);
+            await _publisher.Publish(new OnFeatureFlagChanged(targetFlag, String.Empty), cancellationToken);
         }
 
         var result = new CopyToEnvResult(targetFlags.Length, duplicateKeys);

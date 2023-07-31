@@ -39,10 +39,9 @@ public class SetTagsHandler : IRequestHandler<SetTags, bool>
         // write audit log
         var auditLog = AuditLog.ForUpdate(flag, dataChange, string.Empty, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
-
-        var flagRevision = await _flagRevisionService.CreateForFlag(flag, null, _currentUser.Id);
-        flag.Version = flagRevision.Version;
+        
         await _service.UpdateAsync(flag);
+        await _flagRevisionService.CreateForFlag(flag, string.Empty, _currentUser.Id);
         
         return true;
     }

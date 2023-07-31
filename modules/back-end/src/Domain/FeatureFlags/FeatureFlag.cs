@@ -7,7 +7,7 @@ public class FeatureFlag : FullAuditedEntity
 {
     public Guid EnvId { get; set; }
 
-    public int Version { get; set; }
+    public Guid Revision { get; set; }
 
     public string Name { get; set; }
 
@@ -48,8 +48,7 @@ public class FeatureFlag : FullAuditedEntity
         ICollection<string> tags,
         Guid currentUserId) : base(currentUserId)
     {
-        // set the initial version to 1
-        Version = 1;
+        Revision = Guid.NewGuid();
         
         EnvId = envId;
 
@@ -125,6 +124,7 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
 
+        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -137,6 +137,7 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
 
+        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -152,6 +153,7 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
 
+        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -164,6 +166,7 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
 
+        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -184,6 +187,7 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
 
+        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -204,6 +208,8 @@ public class FeatureFlag : FullAuditedEntity
         CreatorId = currentUserId;
         UpdatedAt = CreatedAt;
         UpdatorId = currentUserId;
+        
+        Revision = Guid.NewGuid();
     }
 
     public DataChange Toggle(Guid currentUserId)
@@ -214,7 +220,8 @@ public class FeatureFlag : FullAuditedEntity
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
-
+        
+        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -234,6 +241,7 @@ public class FeatureFlag : FullAuditedEntity
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
 
+        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 }

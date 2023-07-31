@@ -51,11 +51,9 @@ public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchRe
 
         flag.UpdatorId = _currentUser.Id;
         flag.UpdatedAt = DateTime.UtcNow;
+        flag.Revision = Guid.NewGuid();
 
         dataChange.To(flag);
-        
-        var flagRevision = await _flagRevisionService.CreateForFlag(flag, null, _currentUser.Id);
-        flag.Version = flagRevision.Version;
 
         await _service.UpdateAsync(flag);
 
@@ -64,7 +62,7 @@ public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchRe
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagChanged(flag, String.Empty), cancellationToken);
 
         return PatchResult.Ok();
     }

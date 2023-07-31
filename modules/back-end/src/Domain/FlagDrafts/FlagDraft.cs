@@ -37,7 +37,6 @@ public class FlagDraft : FullAuditedEntity
     public static FlagDraft Pending(
         Guid envId,
         Guid flagId,
-        string status,
         string comment,
         DataChange dataChange,
         Guid currentUserId)

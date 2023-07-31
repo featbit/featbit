@@ -2,7 +2,6 @@ using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.FlagDrafts;
-using Domain.FlagRevisions;
 using Domain.FlagSchedules;
 using Domain.Targeting;
 
@@ -36,7 +35,6 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
     private readonly IFeatureFlagService _flagService;
     private readonly IFlagScheduleService _flagScheduleService;
     private readonly IFlagDraftService _flagDraftService;
-    private readonly IFlagRevisionService _flagRevisionService;
     private readonly IAuditLogService _auditLogService;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
@@ -45,7 +43,6 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         IFeatureFlagService flagService,
         IFlagScheduleService flagScheduleService,
         IFlagDraftService flagDraftService,
-        IFlagRevisionService flagRevisionService,
         IAuditLogService auditLogService,
         ICurrentUser currentUser,
         IPublisher publisher)
@@ -53,7 +50,6 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         _flagService = flagService;
         _flagScheduleService = flagScheduleService;
         _flagDraftService = flagDraftService;
-        _flagRevisionService = flagRevisionService;
         _auditLogService = auditLogService;
         _currentUser = currentUser;
         _publisher = publisher;
@@ -74,14 +70,14 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         {
             return await CreateScheduleAsync(flag, dataChange, request, cancellationToken);
         }
-        
+
         return await UpdateTargetingAsync(flag, dataChange, request, cancellationToken);
     }
 
     private async Task<bool> CreateScheduleAsync(FeatureFlag flag, DataChange dataChange, UpdateTargeting request, CancellationToken cancellationToken)
     {
         // create draft
-        var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, FlagDraftStatus.Pending, request.Comment, dataChange, _currentUser.Id);
+        var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, request.Comment, dataChange, _currentUser.Id);
         await _flagDraftService.AddOneAsync(flagDraft);
         
         // create schedule
@@ -93,10 +89,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 
     private async Task<bool> UpdateTargetingAsync(FeatureFlag flag, DataChange dataChange, UpdateTargeting request, CancellationToken cancellationToken)
     {
-        // create flag revision
-        var flagRevision = await _flagRevisionService.CreateForFlag(flag, request.Comment, _currentUser.Id);
-        flag.Version = flagRevision.Version;
-        
+        flag.Revision = Guid.NewGuid();
         await _flagService.UpdateAsync(flag);
 
         // write audit log
@@ -104,7 +97,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagChanged(flag, request.Comment), cancellationToken);
 
         return true;
     }
