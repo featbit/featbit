@@ -89,7 +89,6 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 
     private async Task<bool> UpdateTargetingAsync(FeatureFlag flag, DataChange dataChange, UpdateTargeting request, CancellationToken cancellationToken)
     {
-        flag.Revision = Guid.NewGuid();
         await _flagService.UpdateAsync(flag);
 
         // write audit log
