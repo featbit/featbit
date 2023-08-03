@@ -94,6 +94,10 @@ export class AccessTokenDrawerComponent {
       name: [name, [Validators.required], [this.nameAsyncValidator], 'change'],
       type: [type, [Validators.required]]
     });
+
+    this.form.get('type').valueChanges.subscribe((newType) => {
+      this.isServiceAccessToken = newType === AccessTokenTypeEnum.Service;
+    });
   }
 
   isServiceAccessToken: boolean = false
@@ -106,11 +110,6 @@ export class AccessTokenDrawerComponent {
 
   onClose() {
     this.close.emit();
-  }
-
-  onTypeChange() {
-    const {type} = this.form.value;
-    this.isServiceAccessToken = type === AccessTokenTypeEnum.Service;
   }
 
   setAuthorizedPermissions() {

@@ -86,6 +86,10 @@ export class ExperimentDrawerComponent implements OnInit {
       metricId: [null, [Validators.required]],
       baselineVariationId: [null, [Validators.required]],
     });
+
+    this.experimentForm.get('featureFlag').valueChanges.subscribe((event) => {
+      this.onFeatureFlagChange(event);
+    })
   }
 
   resetForm() {
