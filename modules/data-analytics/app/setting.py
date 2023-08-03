@@ -34,7 +34,7 @@ CLICKHOUSE_REPLICATION = get_from_env("CLICKHOUSE_REPLICATION", True, type_cast=
 
 CACHE_TYPE = "RedisCache"
 CACHE_KEY_PREFIX = "da-server"
-REDIS_URL = os.getenv("CACHE_REDIS_URL", "redis://localhost:6379/0")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@localhost:27017")
 MONGO_DB = os.getenv("MONGO_INITDB_DATABASE", "featbit")
