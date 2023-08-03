@@ -25,10 +25,8 @@ spec:
               value: "true"
             - name: KAFKA_HOSTS
               value: kafka:9092
-            - name: REDIS_HOST
-              value: redis
-            - name: REDIS_PORT
-              value: "6379"
+            - name: REDIS_URL
+              value: redis://redis:6379/0
           image: featbit/featbit-data-analytics-server:latest
           name: da-server
           ports:
