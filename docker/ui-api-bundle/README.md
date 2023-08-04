@@ -1,5 +1,23 @@
+## Build
+
+To build the ui-api-bundle image:
+
 ```bash
 cd featbit
 docker build --progress plain -f docker/ui-api-bundle/Dockerfile -t featbit/ui-api-bundle:local .
-docker run --name ui-api-bundle featbit/ui-api-bundle:local -p 8080:80
+```
+
+## Run
+
+If you have MongoDB and Redis running as Docker containers, you can use the following command in PowerShell to start the
+application:
+
+```powershell
+docker run -d `
+-p 8080:80 `
+-e MongoDb__ConnectionString="mongodb://admin:password@host.docker.internal:27017" `
+-e MongoDb__Database="featbit" `
+-e Redis__ConnectionString="host.docker.internal:6379" `
+-e OLAP__ServiceHost="http://host.docker.internal:8200" `
+--name ui-api-bundle featbit/ui-api-bundle:local
 ```
