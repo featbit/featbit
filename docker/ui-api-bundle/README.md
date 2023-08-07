@@ -22,3 +22,10 @@ docker run -d `
 -e EVALUATION_URL="http://localhost:5100" `
 --name ui-api-bundle featbit/ui-api-bundle:dev
 ```
+
+## Docker Compose
+
+```powershell
+cd featbit
+docker compose -f ./docker/ui-api-bundle/docker-compose.yml up -d
+```
