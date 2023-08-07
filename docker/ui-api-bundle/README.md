@@ -27,5 +27,5 @@ docker run -d `
 
 ```powershell
 cd featbit
-docker compose -f ./docker/ui-api-bundle/docker-compose.yml up -d
+docker compose -f ./docker/ui-api-bundle/docker-compose-dev.yml up -d
 ```
