@@ -9,7 +9,7 @@ docker build --progress plain -f docker/ui-api-bundle/Dockerfile -t featbit/ui-a
 
 ## Run
 
-If you have MongoDB and Redis running as Docker containers, you can use the following command in PowerShell to start the
+If you have MongoDB, Redis and DA-Server running as Docker containers, you can use the following command in PowerShell to start the
 application:
 
 ```powershell
@@ -19,5 +19,6 @@ docker run -d `
 -e MongoDb__Database="featbit" `
 -e Redis__ConnectionString="host.docker.internal:6379" `
 -e OLAP__ServiceHost="http://host.docker.internal:8200" `
+-e EVALUATION_URL="http://localhost:5100" `
 --name ui-api-bundle featbit/ui-api-bundle:local
 ```
