@@ -56,4 +56,4 @@ ENV ASPNETCORE_URLS=http://localhost:5000
 WORKDIR /app/
 COPY docker/ui-api-bundle/docker-entrypoint.sh .
 RUN chmod +x docker-entrypoint.sh
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "./docker-entrypoint.sh"]
