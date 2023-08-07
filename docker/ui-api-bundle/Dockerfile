@@ -37,18 +37,31 @@ COPY modules/front-end/ .
 RUN npm run build:prod
 
 ### run app
-FROM nginx:1.23
+FROM debian:bullseye-slim
 
-RUN apt-get update -y && apt-get install gettext-base && apt-get install tini
+RUN apt-get update -y &&  \
+    apt-get install -y gettext-base nginx xz-utils && \
+    # forward nginx request and error logs to docker log collector
+    ln -sf /dev/stdout /var/log/nginx/access.log &&  \
+    ln -sf /dev/stderr /var/log/nginx/error.log
 
 COPY --from=frontendBuilder /frontend/dist/featbit/ /app/frontend
 COPY --from=backendBuilder /backend/publish /app/backend
 
-COPY docker/ui-api-bundle/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/ui-api-bundle/nginx.conf /etc/nginx/nginx.conf
 
-ENV ASPNETCORE_CONTENTROOT=/app/backend
-ENV ASPNETCORE_URLS=http://localhost:5000
+ENV ASPNETCORE_CONTENTROOT=/app/backend \
+    ASPNETCORE_URLS=http://localhost:5000 \
+    S6_KEEP_ENV=1
 
-COPY docker/ui-api-bundle/docker-entrypoint.sh /app
-RUN chmod +x /app/docker-entrypoint.sh
-ENTRYPOINT ["/usr/bin/tini", "--", "/app/docker-entrypoint.sh"]
+# use s6-overlay as  process supervisor
+ARG S6_OVERLAY_VERSION=3.1.5.0
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz
+
+# Reference: https://github.com/just-containers/s6-overlay#writing-a-service-script
+COPY docker/ui-api-bundle/services.d /etc/services.d
+
+ENTRYPOINT ["/init"]
