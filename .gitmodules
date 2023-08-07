@@ -1,0 +1,4 @@
+[submodule "modules/oauth-agent/src/oauth-agent-dotnet"]
+	path = modules/oauth-agent/src/oauth-agent-dotnet
+	url = https://github.com/wss-rbrennan/oauth-agent-dotnet.git
+	branch = feature/dev-settings
