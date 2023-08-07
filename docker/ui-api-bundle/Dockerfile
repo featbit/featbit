@@ -43,7 +43,7 @@ RUN npm run build:prod
 # run app
 FROM nginx:1.23
 
-RUN apt-get update -y && apt-get install gettext-base
+RUN apt-get update -y && apt-get install gettext-base && apt-get install tini
 
 COPY --from=frontendBuilder /frontend/dist/featbit/ /app/frontend
 COPY --from=backendBuilder /backend/publish /app/backend
@@ -53,7 +53,6 @@ COPY docker/ui-api-bundle/nginx.conf /etc/nginx/conf.d/default.conf
 ENV ASPNETCORE_CONTENTROOT=/app/backend
 ENV ASPNETCORE_URLS=http://localhost:5000
 
-WORKDIR /app/
-COPY docker/ui-api-bundle/docker-entrypoint.sh .
-RUN chmod +x docker-entrypoint.sh
-ENTRYPOINT ["/bin/bash", "-c", "./docker-entrypoint.sh"]
+COPY docker/ui-api-bundle/docker-entrypoint.sh /app
+RUN chmod +x /app/docker-entrypoint.sh
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/docker-entrypoint.sh"]
