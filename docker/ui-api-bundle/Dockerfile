@@ -1,4 +1,4 @@
-# build backend start
+### build backend
 
 # https://hub.docker.com/_/microsoft-dotnet
 FROM mcr.microsoft.com/dotnet/sdk:6.0 as backendBuilder
@@ -25,9 +25,7 @@ RUN dotnet build -c Release --no-restore && dotnet test
 WORKDIR /backend/src/Api
 RUN dotnet publish -r linux-x64 --self-contained -c Release -o /backend/publish
 
-# build backend end
-
-# build frontend start
+### build frontend
 
 FROM node:16.17 as frontendBuilder
 
@@ -38,9 +36,7 @@ COPY modules/front-end/ .
 
 RUN npm run build:prod
 
-# build frontend end
-
-# run app
+### run app
 FROM nginx:1.23
 
 RUN apt-get update -y && apt-get install gettext-base && apt-get install tini
