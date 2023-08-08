@@ -13,7 +13,7 @@ services:
       - EVALUATION_URL=http://localhost:5100
     depends_on:
       - api-server
-      - demo-dino-game-vue
+      # - demo-dino-game-vue
     ports:
       - "8081:80"
     networks:
@@ -96,21 +96,68 @@ services:
     volumes:
       - redis:/bitnami/redis/data
 
-  demo-dino-game-vue:
-    image: featbit/demo-dino-game-vue:latest
-    container_name: demo-dino-game-vue
+  postgresql:
+    image: docker.io/bitnami/postgresql:latest
+    # container_name: postgresql
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - POSTGRESQL_USERNAME=bn_keycloak
+      - POSTGRESQL_DATABASE=bitnami_keycloak
     networks:
       - featbit-network
+    volumes:
+      - ./infra/postgresql/data:/bitnami/postgresql
+
+  keycloak:
+    image: docker.io/bitnami/keycloak:21.1.2-debian-11-r5
+    container_name: keycloak
     ports:
-      - "5173:80"
+      - "8083:8080"
+      # - "8443:8443"
+    environment:
+      - KEYCLOAK_CREATE_ADMIN_USER=true
+      - KEYCLOAK_ADMIN_USER="admin"
+      - KEYCLOAK_ADMIN_PASSWORD="supersecret"
+      - KEYCLOAK_ENABLE_HTTPS=false
+      # - KEYCLOAK_DATABASE_HOST="postgresql"
+      # - KEYCLOAK_DATABASE_PORT=5432
+      # - KEYCLOAK_DATABASE_NAME="bitnami_keycloak"
+      # - KEYCLOAK_DATABASE_USER="bn_keycloak"
+      # - KEYCLOAK_DATABASE_SCHEMA="public"
+
+    depends_on:
+      - postgresql
+    networks:
+      - featbit-network
+    # volumes:
+    # - /path/to/init-scripts:/docker-entrypoint-initdb.d
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-auth-agent-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    # network_mode: host
+    networks:
+      - featbit-network
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf 
+
+  # demo-dino-game-vue:
+  #   image: featbit/demo-dino-game-vue:latest
+  #   container_name: demo-dino-game-vue
+  #   networks:
+  #     - featbit-network
+  #   ports:
+  #     - "5173:80"
 
 networks:
-  featbit-network:
-    name: featbit-network
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.1.0.0/16
+    featbit-network:
+      driver: bridge
+      ipam:
+        config:
+          - subnet: 172.1.0.0/16
 
 volumes:
   mongodb:
