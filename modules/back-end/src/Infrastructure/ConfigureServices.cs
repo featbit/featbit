@@ -52,6 +52,9 @@ public static class ConfigureServices
         // populating cache
         services.AddHostedService<CachePopulatingHostedService>();
 
+        // flag schedule worker
+        services.AddHostedService<FlagScheduleWorker>();
+
         // messaging services
         AddMessagingServices(services, configuration);
 
