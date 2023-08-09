@@ -17,14 +17,7 @@ public class FlagScheduleWorker : BackgroundService
     {
         while (await _timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
         {
-            try
-            {
-                _logger.LogInformation("Work work...");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while performing flag scheduling.");
-            }
+            await DoWorkAsync(stoppingToken);
         }
     }
 
@@ -37,5 +30,23 @@ public class FlagScheduleWorker : BackgroundService
 
         // This will cancel the stoppingToken and await ExecuteAsync(stoppingToken).
         return base.StopAsync(cancellationToken);
+    }
+
+    private async Task DoWorkAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogInformation("Work work...");
+        }
+        catch (OperationCanceledException)
+        {
+            // ignore operation has been canceled exception
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while performing flag scheduling.");
+        }
+
+        await Task.CompletedTask;
     }
 }
