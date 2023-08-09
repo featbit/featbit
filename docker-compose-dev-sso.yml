@@ -8,9 +8,9 @@ services:
       context: ./modules/front-end
       dockerfile: ./Dockerfile
     environment:
-      - API_URL=http://localhost:5000
-      - DEMO_URL=http://localhost:5173
-      - EVALUATION_URL=http://localhost:5100
+      - API_URL=http://api.featbit.example
+      - DEMO_URL=http://demo.featbit.example
+      - EVALUATION_URL=http://eval.featbit.example
     depends_on:
       - api-server
       # - demo-dino-game-vue
@@ -33,6 +33,9 @@ services:
       - "5000:5000"
     networks:
       - featbit-network
+      # featbit-network:
+      #   aliases:
+      #     - api.featbit.example
 
   evaluation-server:
     image: featbit/evaluation-server:dev
@@ -50,7 +53,7 @@ services:
 
   da-server:
     image: featbit/data-analytics-server:dev
-    container_name: data-analytics-server
+    container_name: da-server
     build:
       context: ./modules/data-analytics
       dockerfile: ./Dockerfile
@@ -66,6 +69,15 @@ services:
       MONGO_URI: mongodb://admin:password@mongodb:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: mongodb
+      CHECK_DB_LIVNESS: false
+
+  demo-dino-game-vue:
+    image: featbit/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "5173:80"      
 
   mongodb:
     image: mongo:5.0.14
@@ -144,13 +156,29 @@ services:
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf 
 
-  # demo-dino-game-vue:
-  #   image: featbit/demo-dino-game-vue:latest
-  #   container_name: demo-dino-game-vue
-  #   networks:
-  #     - featbit-network
-  #   ports:
-  #     - "5173:80"
+  dnsmasq_out:
+    image: featbit/dnsmasq_out:dev
+    container_name: dnsmasq_out
+    build:
+      context: ./infra/dnsmasq
+      dockerfile: ./Dockerfile
+    ports:
+    - 172.25.96.148:53:53
+    - 172.25.96.148:53:53/udp
+    command: dnsmasq -u root --no-daemon --log-queries --address=/.example/172.25.96.148
+    networks:
+      - featbit-network
+
+  dnsmasq_in:
+    image: featbit/dnsmasq_in:dev
+    container_name: dnsmasq_in
+    build: ./infra/dnsmasq
+    networks:
+      - featbit-network
+    ports:
+      - 172.25.96.148:5353:53
+      - 172.25.96.148:5353:53/udp
+    command: dnsmasq -u root --no-daemon --log-queries
 
 networks:
     featbit-network:

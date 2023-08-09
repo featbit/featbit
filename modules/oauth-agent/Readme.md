@@ -24,6 +24,19 @@ Should this solution prove fruitful, It would be best for the featbit project to
 Developing this part of the solution requires that the development environment have properly functioning DNS, a reverse proxy, and a trusted SSL certificate or certificates.  These requirments are discussed below in their own sections.
 
 ### DNS
+Note: systemd-resovled may need to be disabled in wsl in order for this to work if you've enabled systemd for wsl
+
+```
+systemctl status systemd-resolved
+systemctl stop systemd-resolved
+```
+
+or in Rancher Desktop
+
+```
+rc-service host-resolver status
+rc-service host-resolver stop
+```
 
 OIDC and specifically the backend-for-frontend pattern relies on DNS to function properly
 
@@ -34,7 +47,7 @@ On wsl or linux a top level domain can be created by adding
 
 ```
 #use the ip address of your docker host which may be different depending on your dev environment
-sudo bash -c 'echo "nameserver 192.168.99.100" > /etc/resolver/00'
+sudo bash -c 'echo "nameserver 192.168.99.100" > /etc/resolver/example'
 ```
 
 On Windows you would need to all the tld to your hosts file
@@ -64,7 +77,11 @@ The entry would be something like
 
 
 127.0.0.1       localhost
-192.168.99.100  featbit.local
+127.0.0.1       featbit.example
+127.0.0.1       keycloak.featbit.example
+127.0.0.1       api.featbit.example
+127.0.0.1       demo.featbit.example
+127.0.0.1       eval.featbit.example
 ```
 
 ### SSL
@@ -75,5 +92,10 @@ This also requires a reverse proxy to appear to the browser as a first party coo
 
 
 
+#### Notes:
 
+Useful command for checking dns and network issues
+```
+docker run -it --network featbit-dev_featbit-network busybox /bin/sh
+```
 
