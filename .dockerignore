@@ -1,0 +1,34 @@
+# common
+docker-compose*
+**/.dockerignore
+**/.gitignore
+**/*.md
+
+# root directory
+kubernetes/
+benchmark/
+.git/
+.github/
+llm/
+infra/
+
+# ui
+**/node_modules/
+**/dist/
+**/.angular/cache
+
+# api & evaluation server
+**/bin/
+**/obj/
+**/TestResult/
+**/out/
+**/nupkgs/
+
+# da-server
+**/venv/
+**/__pycache__/
+
+# ide
+**/.idea/
+**/.vs/
+**/.vscode/

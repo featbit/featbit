@@ -1,41 +1,31 @@
-name: featbit
+name: featbit-bundle-dev
 version: "3"
 services:
-  ui:
-    image: featbit/featbit-ui:latest
+  ui-api-bundle:
+    image: featbit/ui-api-bundle:dev
+    container_name: ui-api-bundle
+    build:
+      context: ../../
+      dockerfile: ./docker/ui-api-bundle/Dockerfile
     environment:
-      - API_URL=http://localhost:5000
-      - DEMO_URL=https://featbit-samples.vercel.app
+      - DEMO_URL=http://localhost:5173
       - EVALUATION_URL=http://localhost:5100
     depends_on:
-      - api-server
+      - mongodb
+      - redis
+      - da-server
+      - demo-dino-game-vue
     ports:
       - "8081:80"
     networks:
       - featbit-network
 
-  api-server:
-    image: featbit/featbit-api-server:latest
-    environment:
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
-      - Redis__ConnectionString=redis:6379
-      - OLAP__ServiceHost=http://da-server
-    depends_on:
-      - mongodb
-      - redis
-      - da-server
-    ports:
-      - "5000:5000"
-    networks:
-      - featbit-network
-
   evaluation-server:
-    image: featbit/featbit-evaluation-server:latest
-    environment:
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
-      - Redis__ConnectionString=redis:6379
+    image: featbit/evaluation-server:dev
+    container_name: evaluation-server
+    build:
+      context: ../../modules/evaluation-server
+      dockerfile: ./deploy/Dockerfile
     depends_on:
       - mongodb
       - redis
@@ -45,7 +35,11 @@ services:
       - featbit-network
 
   da-server:
-    image: featbit/featbit-data-analytics-server:latest
+    image: featbit/data-analytics-server:dev
+    container_name: data-analytics-server
+    build:
+      context: ../../modules/data-analytics
+      dockerfile: ./Dockerfile
     depends_on:
       - mongodb
       - redis
@@ -61,6 +55,7 @@ services:
 
   mongodb:
     image: mongo:5.0.14
+    container_name: mongodb
     restart: on-failure
     ports:
       - "27017:27017"
@@ -70,12 +65,13 @@ services:
       - MONGO_INITDB_DATABASE=featbit
     volumes:
       - mongodb:/data/db
-      - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - ../../infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
       - featbit-network
 
   redis:
     image: bitnami/redis:6.2.10
+    container_name: redis
     restart: on-failure
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
@@ -84,7 +80,15 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis:/data
+      - redis:/bitnami/redis/data
+
+  demo-dino-game-vue:
+    image: featbit/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "5173:80"
 
 networks:
   featbit-network:
@@ -92,7 +96,7 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.10.0.0/16
+        - subnet: 172.1.0.0/16
 
 volumes:
   mongodb:

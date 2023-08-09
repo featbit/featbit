@@ -17,7 +17,7 @@
   </a>
   <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
   <a href="#">
-    <img src="https://img.shields.io/badge/all_contributors-18-orange.svg?color=ee8449&style=flat-square" alt="All Contributors" />
+    <img src="https://img.shields.io/badge/all_contributors-19-orange.svg?color=ee8449&style=flat-square" alt="All Contributors" />
   </a>
   <!-- ALL-CONTRIBUTORS-BADGE:END -->
   </div>
@@ -186,6 +186,7 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/defqd"><img src="https://avatars.githubusercontent.com/u/104916752?v=4?s=100" width="100px;" alt="defqd"/><br /><sub><b>defqd</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=defqd" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/benirave"><img src="https://avatars.githubusercontent.com/u/23312114?v=4?s=100" width="100px;" alt="Bence Eros"/><br /><sub><b>Bence Eros</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=benirave" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/LeeBingler"><img src="https://avatars.githubusercontent.com/u/98109693?v=4?s=100" width="100px;" alt="Bingler Lee"/><br /><sub><b>Bingler Lee</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=LeeBingler" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Erik247ts"><img src="https://avatars.githubusercontent.com/u/141305198?v=4?s=100" width="100px;" alt="Erik247ts"/><br /><sub><b>Erik247ts</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=Erik247ts" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
