@@ -11,6 +11,8 @@ services:
       - API_URL=http://api.featbit.example
       - DEMO_URL=http://demo.featbit.example
       - EVALUATION_URL=http://eval.featbit.example
+      - VIRTUAL_HOST=featbit.example
+      - VIRTUAL_PORT=8081
     depends_on:
       - api-server
       # - demo-dino-game-vue
@@ -31,6 +33,9 @@ services:
       - da-server
     ports:
       - "5000:5000"
+    environment:
+      - VIRTUAL_HOST=api.featbit.example
+      - VIRTUAL_PORT=5000
     networks:
       - featbit-network
       # featbit-network:
@@ -48,6 +53,9 @@ services:
       - redis
     ports:
       - "5100:5100"
+    environment:
+      - VIRTUAL_HOST=eval.featbit.example
+      - VIRTUAL_PORT=5100
     networks:
       - featbit-network
 
@@ -77,7 +85,10 @@ services:
     networks:
       - featbit-network
     ports:
-      - "5173:80"      
+      - "5173:80"
+    environment:
+      - VIRTUAL_HOST=demo.featbit.example
+      - VIRTUAL_PORT=5173
 
   mongodb:
     image: mongo:5.0.14
@@ -131,6 +142,8 @@ services:
       - KEYCLOAK_ADMIN_USER="admin"
       - KEYCLOAK_ADMIN_PASSWORD="supersecret"
       - KEYCLOAK_ENABLE_HTTPS=false
+      - VIRTUAL_HOST=keycloak.featbit.example
+      - VIRTUAL_PORT=8083
       # - KEYCLOAK_DATABASE_HOST="postgresql"
       # - KEYCLOAK_DATABASE_PORT=5432
       # - KEYCLOAK_DATABASE_NAME="bitnami_keycloak"
@@ -155,30 +168,6 @@ services:
       - featbit-network
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf 
-
-  dnsmasq_out:
-    image: featbit/dnsmasq_out:dev
-    container_name: dnsmasq_out
-    build:
-      context: ./infra/dnsmasq
-      dockerfile: ./Dockerfile
-    ports:
-    - 172.25.96.148:53:53
-    - 172.25.96.148:53:53/udp
-    command: dnsmasq -u root --no-daemon --log-queries --address=/.example/172.25.96.148
-    networks:
-      - featbit-network
-
-  dnsmasq_in:
-    image: featbit/dnsmasq_in:dev
-    container_name: dnsmasq_in
-    build: ./infra/dnsmasq
-    networks:
-      - featbit-network
-    ports:
-      - 172.25.96.148:5353:53
-      - 172.25.96.148:5353:53/udp
-    command: dnsmasq -u root --no-daemon --log-queries
 
 networks:
     featbit-network:

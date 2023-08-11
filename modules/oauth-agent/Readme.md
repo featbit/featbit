@@ -24,36 +24,11 @@ Should this solution prove fruitful, It would be best for the featbit project to
 Developing this part of the solution requires that the development environment have properly functioning DNS, a reverse proxy, and a trusted SSL certificate or certificates.  These requirments are discussed below in their own sections.
 
 ### DNS
-Note: systemd-resovled may need to be disabled in wsl in order for this to work if you've enabled systemd for wsl
 
-```
-systemctl status systemd-resolved
-systemctl stop systemd-resolved
-```
+If developing on windows and you don't have access to a dns server the easiest way to fake dns names is by editing you
+host file, the same can be done on linux machines
 
-or in Rancher Desktop
-
-```
-rc-service host-resolver status
-rc-service host-resolver stop
-```
-
-OIDC and specifically the backend-for-frontend pattern relies on DNS to function properly
-
-As such I've included dnsmasq as described here to handle dns for development purposes.
-https://github.com/hiroshi/docker-dns-proxy
-
-On wsl or linux a top level domain can be created by adding 
-
-```
-#use the ip address of your docker host which may be different depending on your dev environment
-sudo bash -c 'echo "nameserver 192.168.99.100" > /etc/resolver/example'
-```
-
-On Windows you would need to all the tld to your hosts file
-in C:\Windows\System32\Drivers\Etc\hosts
-
-The entry would be something like 
+The entry would be something like this on windows
 
 ```
 # Copyright (c) 1993-1999 Microsoft Corp.
