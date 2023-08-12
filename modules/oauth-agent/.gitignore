@@ -457,3 +457,8 @@ $RECYCLE.BIN/
 ## Verified files
 ## 
 *.received.*
+
+##
+## Certificates
+##
+certs/

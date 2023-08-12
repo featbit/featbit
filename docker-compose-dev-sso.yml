@@ -11,11 +11,10 @@ services:
       - API_URL=http://api.featbit.example
       - DEMO_URL=http://demo.featbit.example
       - EVALUATION_URL=http://eval.featbit.example
-      - VIRTUAL_HOST=featbit.example
-      - VIRTUAL_PORT=8081
     depends_on:
       - api-server
-      # - demo-dino-game-vue
+      - demo-dino-game-vue
+      - evaluation-server      
     ports:
       - "8081:80"
     networks:
@@ -33,9 +32,6 @@ services:
       - da-server
     ports:
       - "5000:5000"
-    environment:
-      - VIRTUAL_HOST=api.featbit.example
-      - VIRTUAL_PORT=5000
     networks:
       - featbit-network
       # featbit-network:
@@ -53,9 +49,6 @@ services:
       - redis
     ports:
       - "5100:5100"
-    environment:
-      - VIRTUAL_HOST=eval.featbit.example
-      - VIRTUAL_PORT=5100
     networks:
       - featbit-network
 
@@ -93,7 +86,6 @@ services:
   mongodb:
     image: mongo:5.0.14
     container_name: mongodb
-    restart: on-failure
     ports:
       - "27017:27017"
     environment:
@@ -109,7 +101,6 @@ services:
   redis:
     image: bitnami/redis:6.2.10
     container_name: redis
-    restart: on-failure
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
