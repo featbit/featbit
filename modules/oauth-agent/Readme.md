@@ -61,6 +61,23 @@ The entry would be something like this on windows
 
 ### SSL
 
+Generate CA and Wildcard SSL certificate using these instructions using wsl or linux
+https://www.brainbytez.nl/tutorials/linux-tutorials/create-a-self-signed-wildcard-ssl-certificate-openssl/
+
+Copy certs to modules/oauth-agent/certs if using wsl this is can be done the executing the following in the folder taht contains the certificates and then copy like any other files in File Explorer
+```
+explorer.exe .
+```
+
+After copying the cert and bringing up the compose stack, navigate to https://featbit.example at this stage you'll get a self signed certificate warning, you could allow anyway in the browser, but it's better to export the cert and the add it to the trusted root and trusted CAs in your OS as all other subdomains will have the same issue will the self signed certificate.
+
+follow these instructions on windows
+https://techcommunity.microsoft.com/t5/windows-server-essentials-and/installing-a-self-signed-certificate-as-a-trusted-root-ca-in/ba-p/396105
+
+or these
+
+https://support.kaspersky.com/CyberTrace/3.1/en-US/174127.htm
+
 
 ### NGINX Reverse Proxy
 This also requires a reverse proxy to appear to the browser as a first party cookie, for that purpose nginx in reverse proxy mode is included.

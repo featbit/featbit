@@ -8,9 +8,9 @@ services:
       context: ./modules/front-end
       dockerfile: ./Dockerfile
     environment:
-      - API_URL=http://api.featbit.example
-      - DEMO_URL=http://demo.featbit.example
-      - EVALUATION_URL=http://eval.featbit.example
+      - API_URL=https://api.featbit.example
+      - DEMO_URL=https://demo.featbit.example
+      - EVALUATION_URL=https://eval.featbit.example
     depends_on:
       - api-server
       - demo-dino-game-vue
@@ -125,16 +125,21 @@ services:
   keycloak:
     image: docker.io/bitnami/keycloak:21.1.2-debian-11-r5
     container_name: keycloak
+    hostname: keycloak
+    domainname: featbit.example
     ports:
-      - "8083:8080"
-      # - "8443:8443"
+      # - "8080:8080"
+      - "8443:8443"
     environment:
       - KEYCLOAK_CREATE_ADMIN_USER=true
-      - KEYCLOAK_ADMIN_USER="admin"
-      - KEYCLOAK_ADMIN_PASSWORD="supersecret"
-      - KEYCLOAK_ENABLE_HTTPS=false
-      - VIRTUAL_HOST=keycloak.featbit.example
-      - VIRTUAL_PORT=8083
+      # - KEYCLOAK_ADMIN_USER="admin"
+      # - KEYCLOAK_ADMIN_PASSWORD="supersecret"
+      - KEYCLOAK_ENABLE_HTTPS=true
+      - KEYCLOAK_HTTPS_USE_PEM=true
+      - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
+      - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
+      # - VIRTUAL_HOST=keycloak.featbit.example
+      # - VIRTUAL_PORT=8083
       # - KEYCLOAK_DATABASE_HOST="postgresql"
       # - KEYCLOAK_DATABASE_PORT=5432
       # - KEYCLOAK_DATABASE_NAME="bitnami_keycloak"
@@ -145,11 +150,13 @@ services:
       - postgresql
     networks:
       - featbit-network
-    # volumes:
+    volumes:
+     - ./modules/oauth-agent/certs:/opt/bitnami/keycloak/certs
+    #  - ./infra/keycloak/keycloak.conf:/opt/bitnami/keycloak/conf/keycloak.conf
     # - /path/to/init-scripts:/docker-entrypoint-initdb.d
 
   nginx:
-    image: nginx:latest
+    image: bitnami/nginx:latest
     container_name: nginx-auth-agent-proxy
     ports:
       - "80:80"
@@ -158,7 +165,8 @@ services:
     networks:
       - featbit-network
     volumes:
-      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf 
+      - ./infra/nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf 
+      - ./modules/oauth-agent/certs:/certs
 
 networks:
     featbit-network:
