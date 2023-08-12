@@ -34,9 +34,6 @@ services:
       - "5000:5000"
     networks:
       - featbit-network
-      # featbit-network:
-      #   aliases:
-      #     - api.featbit.example
 
   evaluation-server:
     image: featbit/evaluation-server:dev
@@ -132,19 +129,11 @@ services:
       - "8443:8443"
     environment:
       - KEYCLOAK_CREATE_ADMIN_USER=true
-      # - KEYCLOAK_ADMIN_USER="admin"
-      # - KEYCLOAK_ADMIN_PASSWORD="supersecret"
       - KEYCLOAK_ENABLE_HTTPS=true
       - KEYCLOAK_HTTPS_USE_PEM=true
       - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
       - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
-      # - VIRTUAL_HOST=keycloak.featbit.example
-      # - VIRTUAL_PORT=8083
-      # - KEYCLOAK_DATABASE_HOST="postgresql"
-      # - KEYCLOAK_DATABASE_PORT=5432
-      # - KEYCLOAK_DATABASE_NAME="bitnami_keycloak"
-      # - KEYCLOAK_DATABASE_USER="bn_keycloak"
-      # - KEYCLOAK_DATABASE_SCHEMA="public"
+      
 
     depends_on:
       - postgresql
@@ -161,7 +150,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    # network_mode: host
     networks:
       - featbit-network
     volumes:
