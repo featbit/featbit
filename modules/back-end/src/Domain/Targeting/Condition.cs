@@ -5,6 +5,8 @@ namespace Domain.Targeting;
 
 public class Condition
 {
+    public string Id { get; set; }
+    
     public string Property { get; set; }
 
     public string Op { get; set; }
