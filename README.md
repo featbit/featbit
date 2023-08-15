@@ -15,11 +15,6 @@
   <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">
     <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join FeatBit on Slack"/>
   </a>
-  <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-  <a href="#">
-    <img src="https://img.shields.io/badge/all_contributors-19-orange.svg?color=ee8449&style=flat-square" alt="All Contributors" />
-  </a>
-  <!-- ALL-CONTRIBUTORS-BADGE:END -->
   </div>
   <div id="badges">
   <a href="https://dotnet.microsoft.com/">
@@ -162,43 +157,13 @@ Building FeatBit is a collaborative effort, and we owe much gratitude to many in
 
 ### Contributors
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/cosmos-explorer"><img src="https://avatars.githubusercontent.com/u/88151306?v=4?s=100" width="100px;" alt="cosmos-explorer"/><br /><sub><b>cosmos-explorer</b></sub></a><br /><a href="#userTesting-cosmos-explorer" title="User Testing">📓</a> <a href="https://github.com/featbit/featbit/commits?author=cosmos-explorer" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/deleteLater"><img src="https://avatars.githubusercontent.com/u/34052208?v=4?s=100" width="100px;" alt="deleteLater"/><br /><sub><b>deleteLater</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=deleteLater" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/dsun0720"><img src="https://avatars.githubusercontent.com/u/38680131?v=4?s=100" width="100px;" alt="s2002a"/><br /><sub><b>s2002a</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=dsun0720" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/FeatBit"><img src="https://avatars.githubusercontent.com/u/68597908?v=4?s=100" width="100px;" alt="Comiscience"/><br /><sub><b>Comiscience</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=cosmic-flood" title="Documentation">📖</a><a href="https://github.com/featbit/featbit/commits?author=cosmic-flood" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/san-ki"><img src="https://avatars.githubusercontent.com/u/66792330?v=4?s=100" width="100px;" alt="Sanket"/><br /><sub><b>Sanket</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=san-ki" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=san-ki" title="Medal">🥇</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/sagar110599"><img src="https://avatars.githubusercontent.com/u/46983757?v=4?s=100" width="100px;" alt="sagar110599"/><br /><sub><b>sagar110599</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=sagar110599" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=sagar110599" title="Medal">🥇</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/DaveFz"><img src="https://avatars.githubusercontent.com/u/47706547?v=4?s=100" width="100px;" alt="Dave"/><br /><sub><b>Dave</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=DaveFz" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=DaveFz" title="Medal">🥇</a></td>
-    </tr>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/kabirhasan/"><img src="https://avatars.githubusercontent.com/u/29860651?v=4?s=100" width="100px;" alt="Kabir Hasan"/><br /><sub><b>Kabir Hasan</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=kabir-webDev" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=kabir-webDev" title="Medal">🥇</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Michaelg22"><img src="https://avatars.githubusercontent.com/u/62085623?v=4?s=100" width="100px;" alt="MikeG"/><br /><sub><b>MikeG</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=Michaelg22" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=Michaelg22" title="Medal">🥇</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://michaelyuhe.zeabur.app/"><img src="https://avatars.githubusercontent.com/u/63531512?v=4?s=100" width="100px;" alt="夏宇航"/><br /><sub><b>夏宇航</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=MichaelYuhe" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=MichaelYuhe" title="Medal">🥇</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://linktr.ee/exilon"><img src="https://avatars.githubusercontent.com/u/80382462?v=4?s=100" width="100px;" alt="Exilon"/><br /><sub><b>Exilon</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=Exilon24" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/fMoro1999"><img src="https://avatars.githubusercontent.com/u/49589241?v=4?s=100" width="100px;" alt="Francesco Moro"/><br /><sub><b>Francesco Moro</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=fMoro1999" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://webstaurantstore.com"><img src="https://avatars.githubusercontent.com/u/128187904?v=4?s=100" width="100px;" alt="rbrennan"/><br /><sub><b>rbrennan</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=wss-rbrennan" title="Code">💻</a><a href="https://github.com/featbit/featbit/commits?author=wss-rbrennan" title="Medal">🥇</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/mucoban"><img src="https://avatars.githubusercontent.com/u/80916997?v=4?s=100" width="100px;" alt="Mücahit Çoban"/><br /><sub><b>Mücahit Çoban</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=mucoban" title="Code">💻</a></td>
-    </tr>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Shubh8899"><img src="https://avatars.githubusercontent.com/u/63413220?v=4?s=100" width="100px;" alt="Shubham Chauhan"/><br /><sub><b>Shubham Chauhan</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=Shubh8899" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/defqd"><img src="https://avatars.githubusercontent.com/u/104916752?v=4?s=100" width="100px;" alt="defqd"/><br /><sub><b>defqd</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=defqd" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/benirave"><img src="https://avatars.githubusercontent.com/u/23312114?v=4?s=100" width="100px;" alt="Bence Eros"/><br /><sub><b>Bence Eros</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=benirave" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/LeeBingler"><img src="https://avatars.githubusercontent.com/u/98109693?v=4?s=100" width="100px;" alt="Bingler Lee"/><br /><sub><b>Bingler Lee</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=LeeBingler" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Erik247ts"><img src="https://avatars.githubusercontent.com/u/141305198?v=4?s=100" width="100px;" alt="Erik247ts"/><br /><sub><b>Erik247ts</b></sub></a><br /><a href="https://github.com/featbit/featbit/commits?author=Erik247ts" title="Code">💻</a></td>
-    </tr>
-  </tbody>
-</table>
+We would like to express our gratitude to all the individuals who have already contributed to FeatBit!
 
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
+<a href="https://github.com/featbit/featbit/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=featbit/featbit" />
+</a>
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+Made with [contrib.rocks](https://contrib.rocks).
 
 ## License
 
