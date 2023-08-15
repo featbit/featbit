@@ -1,32 +1,26 @@
 # build stage
 # https://hub.docker.com/_/microsoft-dotnet
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /source
 
-# copy sln
-COPY *.sln .
+COPY src/oauth-agent-dotnet/*.csproj ./
+COPY src/oauth-agent-dotnet/src ./
+COPY src/oauth-agent-dotnet/appsettings.json ./
+COPY src/oauth-agent-dotnet/appsettings-dev.json ./
 
-# copy src project files
-COPY src/*/*.csproj ./
-RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
-
-# copy test project files
-COPY tests/*/*.csproj ./
-RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
+# RUN ls -R ./
 
 RUN dotnet restore
 
-# copy all source, build and test
-COPY . .
-RUN dotnet build -c Release --no-restore && dotnet test
+RUN dotnet build -c Debug --no-restore
 
 # publish stage
 FROM build AS publish
-WORKDIR /source/src/Api
-RUN dotnet publish -c Release --no-build -o /app
+WORKDIR /source
+RUN dotnet publish -c Debug --no-build -o /app
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /app
 COPY --from=publish /app ./
 # ensure we listen on any IP Address

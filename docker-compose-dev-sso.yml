@@ -80,6 +80,35 @@ services:
       - VIRTUAL_HOST=demo.featbit.example
       - VIRTUAL_PORT=5173
 
+  oauth-agent:
+    image: featbit/oauth-agent:dev
+    container_name: oauth-agent
+    build:
+      context: ./modules/oauth-agent
+      dockerfile: ./deploy/Dockerfile
+    networks:
+      - featbit-network
+    ports:
+      - "8082:8082"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - PORT=8082
+      - CLIENT_ID=featbit
+      - CLIENT_SECRET=OD0RpLEYpqU6CmvzisHvUv4XK015gcdn
+      - REDIRECT_URI=https://featbit.example/testauth
+      - POST_LOGOUT_REDIRECT_URI=https://featbit.example/
+      - SCOPE=openid profile email
+      - TRUSTED_WEB_ORIGIN=https://featbit.example
+      - CORS_ENABLED=true
+      - COOKIE_NAME_PREFIX=featbit.example
+      - COOKIE_DOMAIN=featbit.example
+      - COOKIE_ENCRYPTION_KEY=4e4636356d65563e4c73233847503e3b21436e6f7629724950526f4b5e2e4e50
+      - ISSUER=https://keycloak.featbit.example/realms/featbit
+      - AUTHORIZE_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/auth
+      - LOGOUT_ENDPOINT=http://login.example.local:8443/oauth/v2/oauth-session/logout
+      - TOKEN_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/token
+      - USERINFO_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/userinfo
+
   mongodb:
     image: mongo:5.0.14
     container_name: mongodb

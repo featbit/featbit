@@ -69,6 +69,9 @@ Copy certs to modules/oauth-agent/certs if using wsl this is can be done the exe
 explorer.exe .
 ```
 
+
+
+
 After copying the cert and bringing up the compose stack, navigate to https://featbit.example at this stage you'll get a self signed certificate warning, you could allow anyway in the browser, but it's better to export the cert and the add it to the trusted root and trusted CAs in your OS as all other subdomains will have the same issue will the self signed certificate.
 
 follow these instructions on windows
@@ -78,11 +81,16 @@ or these
 
 https://support.kaspersky.com/CyberTrace/3.1/en-US/174127.htm
 
-
+This article is also a great reference
+https://medium.com/@tbusser/creating-a-browser-trusted-self-signed-ssl-certificate-2709ce43fd15
 ### NGINX Reverse Proxy
 This also requires a reverse proxy to appear to the browser as a first party cookie, for that purpose nginx in reverse proxy mode is included.
 
+### Docker Image Build
 
+```
+docker build --no-cache --progress=plain -f .\deploy\Dockerfile . -t featbit/oauth-agent
+```
 
 #### Notes:
 
