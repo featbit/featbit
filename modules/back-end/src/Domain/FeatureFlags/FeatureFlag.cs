@@ -35,6 +35,10 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool IsArchived { get; set; }
 
+    public FeatureFlag()
+    {
+    }
+    
     public FeatureFlag(
         Guid envId,
         string name,

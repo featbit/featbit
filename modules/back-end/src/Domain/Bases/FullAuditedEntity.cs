@@ -6,6 +6,10 @@ public class FullAuditedEntity : AuditedEntity
 
     public Guid UpdatorId { get; set; }
 
+    public FullAuditedEntity()
+    {
+    }
+
     public FullAuditedEntity(Guid creatorId)
     {
         CreatorId = creatorId;
