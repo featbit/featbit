@@ -105,7 +105,7 @@ services:
       - COOKIE_ENCRYPTION_KEY=4e4636356d65563e4c73233847503e3b21436e6f7629724950526f4b5e2e4e50
       - ISSUER=https://keycloak.featbit.example/realms/featbit
       - AUTHORIZE_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/auth
-      - LOGOUT_ENDPOINT=http://login.example.local:8443/oauth/v2/oauth-session/logout
+      - LOGOUT_ENDPOINT=http://login.example.local/oauth/v2/oauth-session/logout
       - TOKEN_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/token
       - USERINFO_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/userinfo
 
@@ -148,26 +148,54 @@ services:
     volumes:
       - ./infra/postgresql/data:/bitnami/postgresql
 
+  ca:
+    image: smallstep/step-ca:0.24.2
+    container_name: step-ca
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+    networks:
+      - featbit-network
+    environment:
+     - DOCKER_STEPCA_INIT_NAME=featbit-dev-ca
+     - DOCKER_STEPCA_INIT_DNS_NAMES=localhost, ca.featbit.example, $(hostname -f)
+     - DOCKER_STEPCA_INIT_REMOTE_MANAGEMENT=true
+     - DOCKER_STEPCA_INIT_PASSWORD=supersecret123
+     - DEFAULT_CERT_VALIDITY=${DEFAULT_CERT_VALIDITY:-720h}
+     - MAX_CERT_VALIDITY=${MAX_CERT_VALIDITY:-2160h}
+    volumes:
+      - ./infra/step-ca/data:/home/step
+
   keycloak:
-    image: docker.io/bitnami/keycloak:21.1.2-debian-11-r5
+    # image: docker.io/bitnami/keycloak:21.1.2-debian-11-r5
+    image: featbit/keycloak:dev
+    build:
+      context: .
+      dockerfile: /infra/keycloak/Dockerfile
     container_name: keycloak
-    hostname: keycloak
-    domainname: featbit.example
+    # hostname: keycloak
+    # domainname: featbit.example
     ports:
       # - "8080:8080"
-      - "8443:8443"
+      - "8443:443"
     environment:
       - KEYCLOAK_CREATE_ADMIN_USER=true
       - KEYCLOAK_ENABLE_HTTPS=true
       - KEYCLOAK_HTTPS_USE_PEM=true
       - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
       - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
+      - KEYCLOAK_HTTP_PORT=80
+      - KEYCLOAK_HTTPS_PORT=443
       
 
     depends_on:
       - postgresql
     networks:
       - featbit-network
+      # featbit-network:
+      #   aliases:
+      #     - keycloak.featbit.example
+      
     volumes:
      - ./modules/oauth-agent/certs:/opt/bitnami/keycloak/certs
     #  - ./infra/keycloak/keycloak.conf:/opt/bitnami/keycloak/conf/keycloak.conf

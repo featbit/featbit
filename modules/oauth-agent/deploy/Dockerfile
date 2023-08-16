@@ -29,6 +29,13 @@ EXPOSE 8082
 
 # health check
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+ADD ./certs/featbit-ca-private-cert.pem /usr/local/share/ca-certificates/featbit-ca-private-cert.pem
+RUN chmod 644 /usr/local/share/ca-certificates/featbit-ca-private-cert.pem && update-ca-certificates
+
+ADD ./certs/featbit-example-wildcard.pem /usr/local/share/ca-certificates/featbit-example-wildcard.pem
+RUN chmod 644 /usr/local/share/ca-certificates/featbit-example-wildcard.pem && update-ca-certificates
+
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD curl --fail --silent http://localhost:8082/health/liveness || exit 1
 
