@@ -66,10 +66,10 @@ public class UpdateConditionInstruction : FlagInstruction
         }
 
         var rule = flag.Rules.FirstOrDefault(r => r.Id == value.RuleId);
-        var @new = value.Condition;
+        var current = value.Condition;
 
-        var existing = rule?.Conditions.FirstOrDefault(c => c.Id == @new.Id);
-        existing?.Assign(@new);
+        var original = rule?.Conditions.FirstOrDefault(c => c.Id == current.Id);
+        original?.Assign(current);
     }
 }
 
