@@ -14,6 +14,19 @@ public abstract class FlagInstruction : Instruction
     public abstract void Apply(FeatureFlag flag);
 }
 
+public class NoopFlagInstruction : FlagInstruction
+{
+    public NoopFlagInstruction() : base(string.Empty, string.Empty)
+    {
+    }
+
+    public override void Apply(FeatureFlag flag)
+    {
+    }
+
+    public static readonly NoopFlagInstruction Instance = new();
+}
+
 public class FlagInstructions : IEnumerable<FlagInstruction>
 {
     private readonly IEnumerable<FlagInstruction> _instructions;

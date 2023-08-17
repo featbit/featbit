@@ -24,4 +24,12 @@ public class Variation
         Name = source.Name;
         Value = source.Value;
     }
+
+    public override bool Equals(object obj)
+    {
+        return obj is Variation variation &&
+               Id == variation.Id &&
+               Name == variation.Name &&
+               Value == variation.Value;
+    }
 }
