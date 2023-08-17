@@ -1,5 +1,6 @@
 using Domain.AuditLogs;
 using Domain.Targeting;
+using Domain.SemanticPatch;
 
 namespace Domain.FeatureFlags;
 
@@ -38,7 +39,7 @@ public class FeatureFlag : FullAuditedEntity
     public FeatureFlag()
     {
     }
-    
+
     public FeatureFlag(
         Guid envId,
         string name,
@@ -53,7 +54,7 @@ public class FeatureFlag : FullAuditedEntity
         Guid currentUserId) : base(currentUserId)
     {
         Revision = Guid.NewGuid();
-        
+
         EnvId = envId;
 
         Name = name;
@@ -86,7 +87,7 @@ public class FeatureFlag : FullAuditedEntity
         Tags = tags ?? Array.Empty<string>();
         IsArchived = false;
     }
-    
+
     public Serves Serves()
     {
         // variations when enabled
@@ -212,7 +213,7 @@ public class FeatureFlag : FullAuditedEntity
         CreatorId = currentUserId;
         UpdatedAt = CreatedAt;
         UpdatorId = currentUserId;
-        
+
         Revision = Guid.NewGuid();
     }
 
@@ -224,7 +225,7 @@ public class FeatureFlag : FullAuditedEntity
 
         UpdatedAt = DateTime.UtcNow;
         UpdatorId = currentUserId;
-        
+
         Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
@@ -247,5 +248,18 @@ public class FeatureFlag : FullAuditedEntity
 
         Revision = Guid.NewGuid();
         return dataChange.To(this);
+    }
+
+    public void ApplyPatches(IEnumerable<FlagInstruction> instructions, Guid updatorId)
+    {
+        foreach (var instruction in instructions)
+        {
+            instruction.Apply(this);
+        }
+
+        UpdatedAt = DateTime.UtcNow;
+        UpdatorId = updatorId;
+
+        Revision = Guid.NewGuid();
     }
 }

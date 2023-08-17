@@ -21,7 +21,7 @@ public class FlagScheduleWorker : BackgroundService
     private readonly ILogger<FlagScheduleWorker> _logger;
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(30));
     private readonly IPublisher _publisher;
-    
+
     public FlagScheduleWorker(
         IFeatureFlagService featureFlagService,
         IFlagScheduleService flagScheduleService,
@@ -36,7 +36,7 @@ public class FlagScheduleWorker : BackgroundService
         _flagDraftService = flagDraftService;
         _logger = logger;
         _publisher = publisher;
-    }  
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -73,11 +73,10 @@ public class FlagScheduleWorker : BackgroundService
                 var instructions = FlagSemanticPatch.GetInstructions(previous, current);
 
                 var flag = await _featureFlagService.GetAsync(current!.Id);
-                
+
                 try
                 {
-                    flag = FlagSemanticPatch.ApplyPatches(flag, instructions);
-                    flag.UpdatedAt = DateTime.UtcNow;
+                    flag.ApplyPatches(instructions, flagDraft.CreatorId);
                     await _featureFlagService.UpdateAsync(flag);
                 }
                 catch (Exception e)
@@ -93,7 +92,7 @@ public class FlagScheduleWorker : BackgroundService
                 schedule.UpdatedAt = DateTime.UtcNow;
                 await _flagDraftService.UpdateAsync(flagDraft);
                 await _flagScheduleService.UpdateAsync(schedule);
-                
+
                 // write audit log
                 var auditLog = AuditLog.ForUpdate(flag, flagDraft.DataChange, flagDraft.Comment, flagDraft.CreatorId);
                 await _auditLogService.AddOneAsync(auditLog);
