@@ -66,18 +66,31 @@ public class FlagScheduleWorker : BackgroundService
             foreach (var schedule in pendingSchedules)
             {
                 var flagDraft = await _flagDraftService.FindOneAsync(x => x.Id == schedule.FlagDraftId);
-                var previous = JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Previous, ReusableJsonSerializerOptions.Web);
-                var current = JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Current, ReusableJsonSerializerOptions.Web);
-                var instructions = FeatureFlagSemanticPatch.GetInstructions(previous, current);
-                
+                var previous = JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Previous,
+                    ReusableJsonSerializerOptions.Web);
+                var current = JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Current,
+                    ReusableJsonSerializerOptions.Web);
+                var instructions = FlagSemanticPatch.GetInstructions(previous, current);
+
                 var flag = await _featureFlagService.GetAsync(current!.Id);
-                flag = FeatureFlagSemanticPatch.ApplyPatches(flag, instructions);
                 
-                await _featureFlagService.UpdateAsync(flag);
+                try
+                {
+                    flag = FlagSemanticPatch.ApplyPatches(flag, instructions);
+                    flag.UpdatedAt = DateTime.UtcNow;
+                    await _featureFlagService.UpdateAsync(flag);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "{ScheduleId}: Error occurred while performing flag scheduling.", schedule.Id);
+                    continue;
+                }
 
                 // set status
                 flagDraft.Status = FlagDraftStatus.Applied;
+                flagDraft.UpdatedAt = DateTime.UtcNow;
                 schedule.Status = FlagScheduleStatus.Executed;
+                schedule.UpdatedAt = DateTime.UtcNow;
                 await _flagDraftService.UpdateAsync(flagDraft);
                 await _flagScheduleService.UpdateAsync(schedule);
                 

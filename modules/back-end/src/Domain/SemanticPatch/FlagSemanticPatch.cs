@@ -4,7 +4,7 @@ using Domain.Targeting;
 
 namespace Domain.SemanticPatch;
 
-public class FeatureFlagSemanticPatch
+public class FlagSemanticPatch
 {
     private delegate Instruction InstructionCreator(string kind, JsonElement value);
     
@@ -140,8 +140,8 @@ public class FeatureFlagSemanticPatch
         
         if (!isFallThroughChanged)
         {
-            var removedVariations = flag1.Fallthrough.Variations.Except(flag2.Fallthrough.Variations, new RolloutVariationComparer());
-            var addedVariations = flag2.Fallthrough.Variations.Except(flag1.Fallthrough.Variations, new RolloutVariationComparer());
+            var removedVariations = flag1.Fallthrough.Variations.ExceptBy(flag2.Fallthrough.Variations.Select( v => v.Id), v => v.Id);
+            var addedVariations = flag2.Fallthrough.Variations.ExceptBy(flag1.Fallthrough.Variations.Select( v => v.Id), v => v.Id);
             
             if (removedVariations.Any() || addedVariations.Any())
             {
@@ -239,8 +239,8 @@ public class FeatureFlagSemanticPatch
             return;
         }
         
-        var addedRules = flag2.Rules.Except(flag1.Rules, new TargetRuleComparer()).ToList();
-        var removedRules = flag1.Rules.Except(flag2.Rules, new TargetRuleComparer()).ToList();
+        var addedRules = flag2.Rules.ExceptBy(flag1.Rules.Select( v => v.Id), v => v.Id).ToList();
+        var removedRules = flag1.Rules.ExceptBy(flag2.Rules.Select( v => v.Id), v => v.Id).ToList();
         var commonRules = flag1.Rules.IntersectBy(flag2.Rules.Select( v => v.Id), v => v.Id);
         
         foreach (var rule in addedRules)
@@ -269,8 +269,8 @@ public class FeatureFlagSemanticPatch
             }
             
             // rule conditions
-            var addedConditions = rule2.Conditions.Except(rule1.Conditions, new RuleConditionComparer()).ToList();
-            var removedConditions = rule1.Conditions.Except(rule2.Conditions, new RuleConditionComparer()).Select(x => x.Id).ToList();
+            var addedConditions = rule2.Conditions.ExceptBy(rule1.Conditions.Select( v => v.Id), v => v.Id).ToList();
+            var removedConditions = rule1.Conditions.ExceptBy(rule2.Conditions.Select( v => v.Id), v => v.Id).Select(x => x.Id).ToList();
             
             if (removedConditions.Any())
             {
@@ -306,8 +306,8 @@ public class FeatureFlagSemanticPatch
             }
             
             // rule rollout
-            var removedRollouts = rule1.Variations.Except(rule2.Variations, new RolloutVariationComparer());
-            var addedRollouts = rule2.Variations.Except(rule1.Variations, new RolloutVariationComparer());
+            var removedRollouts = rule1.Variations.ExceptBy(rule2.Variations.Select( v => v.Id), v => v.Id);
+            var addedRollouts = rule2.Variations.ExceptBy(rule1.Variations.Select( v => v.Id), v => v.Id);
             bool isRolloutsChanged;
             
             if (removedRollouts.Any() || addedRollouts.Any())
@@ -400,8 +400,8 @@ public class FeatureFlagSemanticPatch
     
     private static void AddVariationInstructions(ref List<Instruction> instructions, FeatureFlag flag1, FeatureFlag flag2)
     {
-        var removedVariations = flag1.Variations.Except(flag2.Variations, new VariationComparer());
-        var addedVariations = flag2.Variations.Except(flag1.Variations, new VariationComparer());
+        var removedVariations = flag1.Variations.ExceptBy(flag2.Variations.Select( v => v.Id), v => v.Id);
+        var addedVariations = flag2.Variations.ExceptBy(flag1.Variations.Select( v => v.Id), v => v.Id);
         var commonVariations = flag1.Variations.IntersectBy(flag2.Variations.Select( v => v.Id), v => v.Id);
     
         instructions.AddRange(removedVariations.Select(v => new FlagRemoveVariationInstruction(v.Id)));
