@@ -83,6 +83,32 @@ https://support.kaspersky.com/CyberTrace/3.1/en-US/174127.htm
 
 This article is also a great reference
 https://medium.com/@tbusser/creating-a-browser-trusted-self-signed-ssl-certificate-2709ce43fd15
+
+
+#### step-ca notes
+default admin username is `step`
+
+generate cert
+```
+step ca certificate --kty=RSA --san featbit.example --san *.featbit.example *.featbit.example featbit-example2.crt featbit-example3.key
+```
+
+make sure key is in the right format
+```
+step crypto key format --pem --pkcs8 --out featbit-exmaple3-pkcs-key.pem featbit-example3-key.pem
+```
+
+create https key store file for keycloak
+```
+keytool -importkeystore -srckeystore featbit-example3.p12 -srcstoretype PKCS12 -destkeystore featbit-example3.jks -deststoretype JKS
+```
+
+remove password from certificate key
+```
+openssl pkcs8 -topk8 -nocrypt -in featbit-example3-pkcs-key.enc.pem -out featbit-example3-pkcs-key.pem
+```
+
+create certificate with 
 ### NGINX Reverse Proxy
 This also requires a reverse proxy to appear to the browser as a first party cookie, for that purpose nginx in reverse proxy mode is included.
 

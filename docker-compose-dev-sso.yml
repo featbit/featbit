@@ -181,20 +181,27 @@ services:
     environment:
       - KEYCLOAK_CREATE_ADMIN_USER=true
       - KEYCLOAK_ENABLE_HTTPS=true
-      - KEYCLOAK_HTTPS_USE_PEM=true
-      - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
-      - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
+      # - KEYCLOAK_HTTPS_USE_PEM=true
+      # - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
+      # - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
+      # - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/step-ca/featbit-example3.pem
+      # - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/step-ca/featbit-example3-pkcs-key.pem
+      - KEYCLOAK_HTTPS_TRUST_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example3.jks
+      - KEYCLOAK_HTTPS_TRUST_STORE_PASSWORD=supersecret123
+      - KEYCLOAK_HTTPS_KEY_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example3.jks
+      - KEYCLOAK_HTTPS_KEY_STORE_PASSWORD=supersecret123
       - KEYCLOAK_HTTP_PORT=80
       - KEYCLOAK_HTTPS_PORT=443
-      
+      - KEYCLOAK_EXTRA_ARGS_PREPENDED=--verbose
+    # command: ["tail", "-f", "/dev/null"]
 
     depends_on:
       - postgresql
     networks:
-      - featbit-network
-      # featbit-network:
-      #   aliases:
-      #     - keycloak.featbit.example
+      # - featbit-network
+      featbit-network:
+        aliases:
+          - keycloak.featbit.example
       
     volumes:
      - ./modules/oauth-agent/certs:/opt/bitnami/keycloak/certs
@@ -202,7 +209,10 @@ services:
     # - /path/to/init-scripts:/docker-entrypoint-initdb.d
 
   nginx:
-    image: bitnami/nginx:latest
+    image: featbit/nginx:dev
+    build:
+      context: .
+      dockerfile: /infra/nginx/Dockerfile
     container_name: nginx-auth-agent-proxy
     ports:
       - "80:80"
@@ -211,7 +221,7 @@ services:
       - featbit-network
     volumes:
       - ./infra/nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf 
-      - ./modules/oauth-agent/certs:/certs
+      - ./modules/oauth-agent/certs/step-ca:/certs
 
 networks:
     featbit-network:

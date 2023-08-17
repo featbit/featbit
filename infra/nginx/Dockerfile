@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/keycloak:21.1.2-debian-11-r5
+FROM bitnami/nginx:latest
 
 USER root
 # ADD ./modules/oauth-agent/certs/featbit-ca-private-cert.pem /usr/local/share/ca-certificates/featbit-ca-private-cert.pem
@@ -14,4 +14,3 @@ RUN chmod 644 /usr/local/share/ca-certificates/intermediate_ca.crt && update-ca-
 
 ADD ./modules/oauth-agent/certs/step-ca/featbit-example3.crt /usr/local/share/ca-certificates/featbit-example3.crt
 RUN chmod 644 /usr/local/share/ca-certificates/featbit-example3.crt && update-ca-certificates
-
