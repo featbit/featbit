@@ -150,48 +150,14 @@ public static class FlagComparer
         return instruction;
     }
 
-    // TODO: refactor this method
+    // TODO: need review
     public static IEnumerable<FlagInstruction> CompareFallthrough(Fallthrough original, Fallthrough current)
     {
         var instructions = new List<FlagInstruction>();
 
-        var isFallThroughChanged = original.DispatchKey != current.DispatchKey;
-        if (!isFallThroughChanged && original.Variations.Count != current.Variations.Count)
-        {
-            isFallThroughChanged = true;
-        }
-
-        if (!isFallThroughChanged)
-        {
-            var removedVariations =
-                original.Variations.ExceptBy(current.Variations.Select(v => v.Id), v => v.Id);
-            var addedVariations =
-                current.Variations.ExceptBy(original.Variations.Select(v => v.Id), v => v.Id);
-
-            if (removedVariations.Any() || addedVariations.Any())
-            {
-                isFallThroughChanged = true;
-            }
-            else
-            {
-                const double tolerance = 0.001;
-                isFallThroughChanged = original.Variations.Any(v1 =>
-                {
-                    var isRolloutChanged = false;
-                    foreach (var v2 in current.Variations)
-                    {
-                        if (Math.Abs(v1.Rollout[0] - v2.Rollout[0]) > tolerance ||
-                            Math.Abs(v1.Rollout[1] - v2.Rollout[1]) > tolerance) // rollout is different
-                        {
-                            isRolloutChanged = true;
-                            break;
-                        }
-                    }
-
-                    return isRolloutChanged;
-                });
-            }
-        }
+        var isFallThroughChanged =
+            original.DispatchKey != current.DispatchKey ||
+            CompareRolloutVariations(original.Variations, current.Variations);
 
         if (isFallThroughChanged)
         {
@@ -199,6 +165,25 @@ public static class FlagComparer
         }
 
         return instructions;
+    }
+
+    // TODO: need review
+    public static bool CompareRolloutVariations(
+        ICollection<RolloutVariation> original,
+        ICollection<RolloutVariation> current)
+    {
+        if (original.Count != current.Count)
+        {
+            return false;
+        }
+
+        var differ = original.ExceptBy(current.Select(v => v.Id), v => v.Id);
+        if (differ.Any())
+        {
+            return true;
+        }
+
+        return original.Any(p => current.Any(c => !p.IsRolloutEquals(c)));
     }
 
     // TODO: need review
@@ -359,35 +344,7 @@ public static class FlagComparer
         }
 
         // compare rule rollout
-        var removedRollouts = original.Variations.ExceptBy(current.Variations.Select(v => v.Id), v => v.Id);
-        var addedRollouts = current.Variations.ExceptBy(original.Variations.Select(v => v.Id), v => v.Id);
-
-        bool isRolloutsChanged;
-        if (removedRollouts.Any() || addedRollouts.Any())
-        {
-            isRolloutsChanged = true;
-        }
-        else
-        {
-            const double tolerance = 0.001;
-            isRolloutsChanged = original.Variations.Any(v1 =>
-            {
-                var isRolloutChanged = false;
-                foreach (var v2 in current.Variations)
-                {
-                    // check if rollout is different
-                    if (Math.Abs(v1.Rollout[0] - v2.Rollout[0]) > tolerance ||
-                        Math.Abs(v1.Rollout[1] - v2.Rollout[1]) > tolerance) 
-                    {
-                        isRolloutChanged = true;
-                        break;
-                    }
-                }
-
-                return isRolloutChanged;
-            });
-        }
-
+        var isRolloutsChanged = CompareRolloutVariations(original.Variations, current.Variations);
         if (isRolloutsChanged)
         {
             var variations = new RuleVariations { RuleId = ruleId, RolloutVariations = current.Variations };
