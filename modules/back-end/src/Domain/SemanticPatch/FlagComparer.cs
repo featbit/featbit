@@ -35,6 +35,9 @@ public class FlagComparer
         instructions.AddRange(CompareTargetUsers());
         instructions.AddRange(CompareRules());
 
+        // exclude noop instructions
+        instructions.RemoveAll(x => x.Kind == FlagInstructionKind.Noop);
+
         return instructions;
     }
 

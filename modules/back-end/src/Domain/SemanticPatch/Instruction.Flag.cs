@@ -13,7 +13,7 @@ public abstract class FlagInstruction : Instruction
 
 public class NoopFlagInstruction : FlagInstruction
 {
-    public NoopFlagInstruction() : base(string.Empty, string.Empty)
+    public NoopFlagInstruction() : base(FlagInstructionKind.Noop, string.Empty)
     {
     }
 

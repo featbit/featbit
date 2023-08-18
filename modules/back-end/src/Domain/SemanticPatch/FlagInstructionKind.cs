@@ -58,6 +58,8 @@ public static class FlagInstructionKind
 
     public const string UpdateRuleVariationOrRollouts = nameof(UpdateRuleVariationOrRollouts);
 
+    public const string Noop = nameof(Noop);
+
     public static readonly string[] All =
     {
         TurnFlagOn,
@@ -87,7 +89,8 @@ public static class FlagInstructionKind
         UpdateRuleCondition,
         AddValuesToRuleCondition,
         RemoveValuesFromRuleCondition,
-        UpdateRuleVariationOrRollouts
+        UpdateRuleVariationOrRollouts,
+        Noop
     };
 
     public static bool IsDefined(string type)
