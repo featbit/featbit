@@ -19,7 +19,7 @@ public class RolloutVariation
 
     public bool IsRolloutEquals(RolloutVariation other)
     {
-        const double tolerance = 0.001;
+        const double tolerance = 0.00001;
 
         return Math.Abs(Rollout[0] - other.Rollout[0]) < tolerance &&
                Math.Abs(Rollout[1] - other.Rollout[1]) < tolerance;
