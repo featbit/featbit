@@ -87,6 +87,9 @@ import { PrismComponent } from './components/prism/prism.component';
 import { RelayProxyDrawerComponent } from "@core/components/relay-proxy-drawer/relay-proxy-drawer.component";
 import { FeatureFlagDrawerComponent } from "@core/components/feature-flag-drawer/feature-flag-drawer.component";
 import { NzSwitchModule } from "ng-zorro-antd/switch";
+import {
+  PendingChangesDrawerComponent
+} from "@core/components/pending-changes-drawer/pending-changes-drawer.component";
 
 @NgModule({
   declarations: [
@@ -106,6 +109,7 @@ import { NzSwitchModule } from "ng-zorro-antd/switch";
     PolicyDrawerComponent,
     OrganizationDrawerComponent,
     EnvDrawerComponent,
+    PendingChangesDrawerComponent,
     PermissionCheckComponent,
     ProjectDrawerComponent,
     MenuComponent,
@@ -198,6 +202,7 @@ import { NzSwitchModule } from "ng-zorro-antd/switch";
     PolicyDrawerComponent,
     OrganizationDrawerComponent,
     EnvDrawerComponent,
+    PendingChangesDrawerComponent,
     PermissionCheckComponent,
     ProjectDrawerComponent,
     FeatureFlagDrawerComponent,

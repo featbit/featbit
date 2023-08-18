@@ -1,0 +1,26 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right"
+  [nzWidth]="500"
+  i18n-nzTitle="@@common.pending-changes"
+  nzTitle="Pending changes"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <div class="changes-container">
+      <nz-card *ngFor="let changeCategories of changeCategoriesList">
+        <div class="title">
+          <span nz-icon nzType="clock-circle" nzTheme="outline"></span>
+          <span i18n="@@common.scheduled-for">Scheduled for</span>
+          <span class="scheduled-time">{{ changeCategories.scheduledTime | date: 'YYYY-MM-dd HH:mm' }}</span>
+        </div>
+        <change-list [categories]="changeCategories.changes"></change-list>
+        <div class="creator-creation-time">{{changeCategories.creator}} <span i18n="@@common.created-at">created at</span>: {{ changeCategories.createdAt | date: 'YYYY-MM-dd HH:mm' }}</div>
+      </nz-card>
+    </div>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>

@@ -98,7 +98,7 @@ public class RemoveValuesFromConditionInstruction : FlagInstruction
         {
             return;
         }
-
+        
         var originalValues =
             JsonSerializer.Deserialize<List<string>>(condition.Value, ReusableJsonSerializerOptions.Web);
         originalValues.RemoveAll(v => value.Values.Contains(v));

@@ -8,7 +8,11 @@
         <ng-container i18n="@@ff.components.details.targeting.settings-ineffective-warning">Following settings won't be effective until you turn the flag on</ng-container>
       </div>
       <div class="action-btns">
-        <button nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, reviewModalKindEnum.Review)">
+        <button class="pending-changes" nzType="default" (click)="openPendingChangesDrawer()">
+          <i nz-icon nzType="field-time" nzTheme="outline"></i>
+          <span>{{pendingChangesList.length}}</span>
+        </button>
+        <button class="save" nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, reviewModalKindEnum.Review)">
           <i nz-icon nzType="icons:icon-save"></i>
           <ng-container i18n="@@common.save">Save</ng-container>
         </button>
@@ -143,3 +147,5 @@
 
 <app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
   [featureFlag]="featureFlag"></app-expt-rules-drawer>
+
+<pending-changes-drawer [visible]="pendingChangesDrawerVisible" [pendingChangesList]="pendingChangesList" (close)="onPendingChangesDrawerClosed()"></pending-changes-drawer>

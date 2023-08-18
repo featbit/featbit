@@ -41,14 +41,14 @@
           </div>
           <ng-container *ngIf="hasSchedule">
             <nz-form-item >
-              <nz-form-label i18n="@@common.title">Title</nz-form-label>
-              <nz-form-control nzErrorTip="Required" i18n-nzErrorTip="@@common.required">
+              <nz-form-label nzRequired i18n="@@common.title">Title</nz-form-label>
+              <nz-form-control>
                 <input type="text" nz-input formControlName="scheduleTitle" placeholder="Title" i18n-placeholder="@@common.title"/>
               </nz-form-control>
             </nz-form-item>
             <nz-form-item>
-              <nz-form-label i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
-              <nz-form-control nzErrorTip="Required" i18n-nzErrorTip="@@common.required">
+              <nz-form-label nzRequired i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
+              <nz-form-control>
                 <nz-date-picker
                   nzShowTime
                   [nzShowNow]="false"

@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IRuleIdDispatchKey } from '@shared/types';
+import { IOrganization, IRuleIdDispatchKey } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
@@ -17,6 +17,7 @@ import { SegmentService } from "@services/segment.service";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
+import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -150,11 +151,29 @@ export class TargetingComponent implements OnInit {
   }
 
   async loadData() {
-    await Promise.all([this.loadUserPropsData(), this.loadFeatureFlag()]);
+    await Promise.all([this.loadUserPropsData(), this.loadFeatureFlag(), this.loadPendingChangesList()]);
     this.isLoading = false;
   }
 
   targetingUsersByVariation: { [key: string]: IUserType[] } = {}; // {variationId: users}
+
+  pendingChangesDrawerVisible: boolean = false;
+  pendingChangesList: IPendingChanges[] = [];
+  private async loadPendingChangesList() {
+    try {
+      this.pendingChangesList = await this.featureFlagService.getPendingChanges(this.key);
+    } catch (err) {
+      this.msg.error($localize`:@@common.loading-pending-changes-failed:Loading pending changes failed`);
+    }
+  }
+
+  openPendingChangesDrawer() {
+    this.pendingChangesDrawerVisible = true;
+  }
+
+  onPendingChangesDrawerClosed() {
+    this.pendingChangesDrawerVisible = false;
+  }
 
   loadFeatureFlag() {
     return new Promise((resolve) => {

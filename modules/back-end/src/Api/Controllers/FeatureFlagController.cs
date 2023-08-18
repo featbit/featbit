@@ -6,6 +6,9 @@ using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Domain.SemanticPatch;
+using Domain.Targeting;
+using Domain.Utils;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Swashbuckle.AspNetCore.Filters;
@@ -39,6 +42,25 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
+    /// Get the list of pending changes of a flag
+    /// </summary>
+    /// <remarks>
+    /// Get the list of pending changes of a particular flag
+    /// </remarks>
+    [HttpGet("{key}/pending-changes")]
+    public async Task<ApiResponse<ICollection<PendingChangesVm>>> GetPendingChangesAsync(Guid envId, string key)
+    {
+        var request = new GetPendingChangesList
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var pendingChangesList = await Mediator.Send(request);
+        return Ok(pendingChangesList);
+    }
+
+    /// <summary>
     /// Get a feature flag
     /// </summary>
     /// <remarks>
@@ -57,7 +79,7 @@ public class FeatureFlagController : ApiControllerBase
         var flag = await Mediator.Send(request);
         return Ok(flag);
     }
-
+    
     [HttpGet("is-key-used")]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(Guid envId, string key)
     {
