@@ -71,8 +71,8 @@ public class TagsInstruction : FlagInstruction
 
         flag.Tags = Kind switch
         {
-            FlagInstructionKind.AddTags => flag.Tags.Union(tags).ToArray(),
-            FlagInstructionKind.RemoveTags => flag.Tags.Except(tags).ToArray(),
+            FlagInstructionKind.AddTags => flag.Tags.Union(tags).ToList(),
+            FlagInstructionKind.RemoveTags => flag.Tags.Except(tags).ToList(),
             _ => flag.Tags
         };
     }

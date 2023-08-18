@@ -36,7 +36,7 @@ public class TargetUsersInstruction : FlagInstruction
             var targetUserForRemove = flag.TargetUsers.FirstOrDefault(x => x.VariationId == newTargetUser.VariationId);
             if (targetUserForRemove != null)
             {
-                targetUserForRemove.KeyIds = targetUserForRemove.KeyIds.Except(newTargetUser.KeyIds).ToArray();
+                targetUserForRemove.KeyIds = targetUserForRemove.KeyIds.Except(newTargetUser.KeyIds).ToList();
             }
         }
 
@@ -45,7 +45,7 @@ public class TargetUsersInstruction : FlagInstruction
             var targetUserForAdd = flag.TargetUsers.FirstOrDefault(x => x.VariationId == newTargetUser.VariationId);
             if (targetUserForAdd != null)
             {
-                targetUserForAdd.KeyIds = targetUserForAdd.KeyIds.Union(newTargetUser.KeyIds).ToArray();
+                targetUserForAdd.KeyIds = targetUserForAdd.KeyIds.Union(newTargetUser.KeyIds).ToList();
             }
             else
             {

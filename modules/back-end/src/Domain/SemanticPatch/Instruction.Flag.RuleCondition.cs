@@ -22,7 +22,7 @@ public class RemoveConditionsInstruction : FlagInstruction
             return;
         }
 
-        rule.Conditions = rule.Conditions.Where(c => !conditionsToRemove.ConditionIds.Contains(c.Id)).ToArray();
+        rule.Conditions = rule.Conditions.Where(c => !conditionsToRemove.ConditionIds.Contains(c.Id)).ToList();
     }
 }
 

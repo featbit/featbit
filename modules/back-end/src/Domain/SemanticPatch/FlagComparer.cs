@@ -221,8 +221,8 @@ public static class FlagComparer
 
         var differs = new List<FlagInstruction>();
 
-        var addedKeyIds = current.KeyIds.Except(original.KeyIds ?? Array.Empty<string>()).ToArray();
-        var removedKeyIds = original.KeyIds.Except(current.KeyIds ?? Array.Empty<string>()).ToArray();
+        var addedKeyIds = current.KeyIds.Except(original.KeyIds ?? Array.Empty<string>()).ToList();
+        var removedKeyIds = original.KeyIds.Except(current.KeyIds ?? Array.Empty<string>()).ToList();
 
         if (addedKeyIds.Any())
         {
