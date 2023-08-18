@@ -46,4 +46,10 @@ public class FlagSchedule : FullAuditedEntity
     {
         return new FlagSchedule(envId, flagDraftId, flagId, FlagScheduleStatus.Pending, title, scheduledTime, currentUserId);
     }
+    
+    public void Applied()
+    {
+        Status = FlagScheduleStatus.Applied;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

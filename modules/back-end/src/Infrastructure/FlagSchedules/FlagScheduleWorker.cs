@@ -86,10 +86,8 @@ public class FlagScheduleWorker : BackgroundService
                 }
 
                 // set status
-                flagDraft.Status = FlagDraftStatus.Applied;
-                flagDraft.UpdatedAt = DateTime.UtcNow;
-                schedule.Status = FlagScheduleStatus.Executed;
-                schedule.UpdatedAt = DateTime.UtcNow;
+                flagDraft.Applied();
+                schedule.Applied();
                 await _flagDraftService.UpdateAsync(flagDraft);
                 await _flagScheduleService.UpdateAsync(schedule);
 
