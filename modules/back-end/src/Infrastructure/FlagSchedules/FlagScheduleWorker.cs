@@ -61,7 +61,7 @@ public class FlagScheduleWorker : BackgroundService
     {
         try
         {
-            var pendingSchedules = await _flagScheduleService.FindManyAsync(s => s.Status == FlagScheduleStatus.WaitForExecution && s.ScheduledTime <= DateTime.UtcNow);
+            var pendingSchedules = await _flagScheduleService.FindManyAsync(s => s.Status == FlagScheduleStatus.Pending && s.ScheduledTime <= DateTime.UtcNow);
 
             foreach (var schedule in pendingSchedules)
             {
@@ -70,7 +70,7 @@ public class FlagScheduleWorker : BackgroundService
                     ReusableJsonSerializerOptions.Web);
                 var current = JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Current,
                     ReusableJsonSerializerOptions.Web);
-                var instructions = FlagSemanticPatch.GetInstructions(previous, current);
+                var instructions = FlagComparer.Compare(previous, current);
 
                 var flag = await _featureFlagService.GetAsync(current!.Id);
 

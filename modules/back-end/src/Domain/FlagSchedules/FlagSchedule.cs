@@ -44,6 +44,6 @@ public class FlagSchedule : FullAuditedEntity
         DateTime scheduledTime,
         Guid currentUserId)
     {
-        return new FlagSchedule(envId, flagDraftId, flagId, FlagScheduleStatus.WaitForExecution, title, scheduledTime, currentUserId);
+        return new FlagSchedule(envId, flagDraftId, flagId, FlagScheduleStatus.Pending, title, scheduledTime, currentUserId);
     }
 }
