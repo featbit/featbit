@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Domain.FeatureFlags;
+using Domain.Segments;
 using Domain.Targeting;
 
 namespace Domain.SemanticPatch;
@@ -15,7 +16,7 @@ public class FlagComparer
         _current = current;
     }
 
-    public IEnumerable<FlagInstruction> Compare()
+    public IEnumerable<FlagInstruction> Compare(FeatureFlag original, FeatureFlag current)
     {
         var instructions = new List<FlagInstruction>();
 
@@ -33,7 +34,7 @@ public class FlagComparer
 
         instructions.AddRange(CompareDefaultVariation());
         instructions.AddRange(CompareTargetUsers());
-        instructions.AddRange(CompareRules());
+        instructions.AddRange(CompareRules(original.Rules, current.Rules));
 
         // exclude noop instructions
         instructions.RemoveAll(x => x.Kind == FlagInstructionKind.Noop);
@@ -274,24 +275,27 @@ public class FlagComparer
         }
     }
 
-    public IEnumerable<FlagInstruction> CompareRules()
+    public IEnumerable<FlagInstruction> CompareRules(ICollection<TargetRule> original, ICollection<TargetRule> current)
     {
-        if (!_original.Rules.Any() && !_current.Rules.Any())
+        // if rules are all empty
+        if (!original.Any() && !current.Any())
         {
             return new[] { NoopFlagInstruction.Instance };
         }
 
-        if ((!_original.Rules.Any() && _current.Rules.Any()) || (_original.Rules.Any() && !_current.Rules.Any()))
+        // TODO: need review
+        // if rules are empty for one of them
+        if (!original.Any() || current.Any())
         {
-            var instruction = new SetRulesInstruction(_current.Rules);
+            var instruction = new SetRulesInstruction(current);
             return new FlagInstruction[] { instruction };
         }
 
         var instructions = new List<FlagInstruction>();
 
-        var addedRules = _current.Rules.ExceptBy(_original.Rules.Select(v => v.Id), v => v.Id).ToArray();
-        var removedRules = _original.Rules.ExceptBy(_current.Rules.Select(v => v.Id), v => v.Id).ToArray();
-        var commonRules = _original.Rules.IntersectBy(_current.Rules.Select(v => v.Id), v => v.Id);
+        var addedRules = current.ExceptBy(original.Select(v => v.Id), v => v.Id).ToArray();
+        var removedRules = original.ExceptBy(current.Select(v => v.Id), v => v.Id).ToArray();
+        var commonRules = original.IntersectBy(current.Select(v => v.Id), v => v.Id);
 
         foreach (var rule in addedRules)
         {
@@ -305,120 +309,154 @@ public class FlagComparer
 
         foreach (var rule in commonRules)
         {
-            // TODO: refactor this
-            var rule1 = _original.Rules.First(x => x.Id == rule.Id);
-            var rule2 = _current.Rules.First(x => x.Id == rule.Id);
+            var rule1 = original.First(x => x.Id == rule.Id);
+            var rule2 = current.First(x => x.Id == rule.Id);
 
-            if (rule1.Name != rule2.Name)
+            var ruleInstructions = CompareRule(rule1, rule2);
+            instructions.AddRange(ruleInstructions);
+        }
+
+        return instructions;
+    }
+
+    public IEnumerable<FlagInstruction> CompareRule(TargetRule original, TargetRule current)
+    {
+        var ruleId = original.Id;
+        var instructions = new List<FlagInstruction>();
+
+        // compare name
+        if (original.Name != current.Name)
+        {
+            var value = new RuleName { RuleId = ruleId, Name = current.Name };
+            instructions.Add(new RuleNameInstruction(value));
+        }
+
+        // compare dispatch key
+        if (original.DispatchKey != current.DispatchKey)
+        {
+            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
+            instructions.Add(new RuleDispatchKeyInstruction(value));
+        }
+
+        // compare added/removed conditions
+        var addedConditions = current.Conditions.ExceptBy(original.Conditions.Select(v => v.Id), v => v.Id)
+            .ToArray();
+        var removedConditions = original.Conditions.ExceptBy(current.Conditions.Select(v => v.Id), v => v.Id)
+            .Select(x => x.Id)
+            .ToArray();
+
+        if (removedConditions.Any())
+        {
+            var conditionIds = new RuleConditionIds { RuleId = ruleId, ConditionIds = removedConditions };
+            instructions.Add(new RemoveConditionsInstruction(conditionIds));
+        }
+
+        if (addedConditions.Any())
+        {
+            var conditions = new RuleConditions { RuleId = ruleId, Conditions = addedConditions };
+            instructions.Add(new AddConditionsInstruction(conditions));
+        }
+
+        // compare same id conditions
+        var commonConditions = original.Conditions.IntersectBy(current.Conditions.Select(v => v.Id), v => v.Id);
+        foreach (var condition in commonConditions)
+        {
+            var condition1 = original.Conditions.First(v => v.Id == condition.Id);
+            var condition2 = current.Conditions.First(v => v.Id == condition.Id);
+
+            var conditionInstructions = CompareCondition(ruleId, condition1, condition2);
+            instructions.AddRange(conditionInstructions);
+        }
+
+        // compare rule rollout
+        var removedRollouts = original.Variations.ExceptBy(current.Variations.Select(v => v.Id), v => v.Id);
+        var addedRollouts = current.Variations.ExceptBy(original.Variations.Select(v => v.Id), v => v.Id);
+
+        bool isRolloutsChanged;
+        if (removedRollouts.Any() || addedRollouts.Any())
+        {
+            isRolloutsChanged = true;
+        }
+        else
+        {
+            const double tolerance = 0.001;
+            isRolloutsChanged = original.Variations.Any(v1 =>
             {
-                var value = new RuleName { RuleId = rule2.Id, Name = rule2.Name };
-                instructions.Add(new RuleNameInstruction(value));
-            }
-
-            if (rule1.DispatchKey != rule2.DispatchKey)
-            {
-                var value = new RuleDispatchKey { RuleId = rule2.Id, DispatchKey = rule2.DispatchKey };
-                instructions.Add(new RuleDispatchKeyInstruction(value));
-            }
-
-            // rule conditions
-            var addedConditions = rule2.Conditions.ExceptBy(rule1.Conditions.Select(v => v.Id), v => v.Id).ToList();
-            var removedConditions = rule1.Conditions.ExceptBy(rule2.Conditions.Select(v => v.Id), v => v.Id)
-                .Select(x => x.Id).ToList();
-
-            if (removedConditions.Any())
-            {
-                instructions.Add(new RemoveConditionsInstruction(new RuleConditionIds
-                    { RuleId = rule2.Id, ConditionIds = removedConditions }));
-            }
-
-            if (addedConditions.Any())
-            {
-                instructions.Add(new AddConditionsInstruction(new RuleConditions
-                    { RuleId = rule2.Id, Conditions = addedConditions }));
-            }
-
-            var commonConditions = rule1.Conditions.IntersectBy(rule2.Conditions.Select(v => v.Id), v => v.Id);
-
-            var multiTypeOps = new List<string> { "IsOneOf", "NotOneOf" };
-            foreach (var condition in commonConditions)
-            {
-                var condition1 = rule1.Conditions.First(v => v.Id == condition.Id);
-                var condition2 = rule2.Conditions.First(v => v.Id == condition.Id);
-
-                if (condition1.Property.Equals("User is in segment") &&
-                    condition2.Property.Equals("User is in segment"))
+                var isRolloutChanged = false;
+                foreach (var v2 in current.Variations)
                 {
-                    if (!condition1.Value.Equals(condition2.Value))
+                    // check if rollout is different
+                    if (Math.Abs(v1.Rollout[0] - v2.Rollout[0]) > tolerance ||
+                        Math.Abs(v1.Rollout[1] - v2.Rollout[1]) > tolerance) 
                     {
-                        CompareConditionValues(rule2.Id, condition1, condition2);
+                        isRolloutChanged = true;
+                        break;
                     }
                 }
-                else if (condition1.Property.Equals(condition2.Property) && condition1.Op.Equals(condition2.Op) &&
-                         multiTypeOps.Any(x => x.Equals(condition2.Op)) && !condition1.Value.Equals(condition2.Value))
-                {
-                    CompareConditionValues(rule2.Id, condition1, condition2);
-                }
-                else if (!condition1.Property.Equals(condition2.Property) || !condition1.Op.Equals(condition2.Op) ||
-                         !condition1.Value.Equals(condition2.Value))
-                {
-                    instructions.Add(new UpdateConditionInstruction(new RuleCondition
-                        { RuleId = rule2.Id, Condition = condition2 }));
-                }
-            }
 
-            // rule rollout
-            var removedRollouts = rule1.Variations.ExceptBy(rule2.Variations.Select(v => v.Id), v => v.Id);
-            var addedRollouts = rule2.Variations.ExceptBy(rule1.Variations.Select(v => v.Id), v => v.Id);
-            bool isRolloutsChanged;
+                return isRolloutChanged;
+            });
+        }
 
-            if (removedRollouts.Any() || addedRollouts.Any())
+        if (isRolloutsChanged)
+        {
+            var variations = new RuleVariations { RuleId = ruleId, RolloutVariations = current.Variations };
+            instructions.Add(new UpdateVariationOrRolloutInstruction(variations));
+        }
+
+        return instructions;
+    }
+
+    // TODO: need review
+    public IEnumerable<FlagInstruction> CompareCondition(string ruleId, Condition original, Condition current)
+    {
+        if (original.Equals(current))
+        {
+            return new[] { NoopFlagInstruction.Instance };
+        }
+
+        var instructions = new List<FlagInstruction>();
+
+        var multiValueOps = new[] { OperatorTypes.IsOneOf, OperatorTypes.NotOneOf };
+        if (original.Property == current.Property)
+        {
+            // if is segment condition
+            if (SegmentConsts.ConditionProperties.Contains(original.Property) &&
+                original.Value != current.Value)
             {
-                isRolloutsChanged = true;
-            }
-            else
-            {
-                const double tolerance = 0.001;
-                isRolloutsChanged = rule1.Variations.Any(v1 =>
-                {
-                    var isRolloutChanged = false;
-                    foreach (var v2 in rule2.Variations)
-                    {
-                        if (Math.Abs(v1.Rollout[0] - v2.Rollout[0]) > tolerance ||
-                            Math.Abs(v1.Rollout[1] - v2.Rollout[1]) > tolerance) // rollout is different
-                        {
-                            isRolloutChanged = true;
-                            break;
-                        }
-                    }
-
-                    return isRolloutChanged;
-                });
+                CompareConditionValues();
             }
 
-            if (isRolloutsChanged)
+            // if is multi values condition
+            else if (original.Op == current.Op &&
+                     multiValueOps.Contains(original.Op) &&
+                     original.Value != current.Value)
             {
-                instructions.Add(new UpdateVariationOrRolloutInstruction(new RuleVariations
-                    { RuleId = rule2.Id, RolloutVariations = rule2.Variations }));
+                CompareConditionValues();
             }
+        }
+        else
+        {
+            var condition = new RuleCondition { RuleId = ruleId, Condition = current };
+            instructions.Add(new UpdateConditionInstruction(condition));
         }
 
         return instructions;
 
-        void CompareConditionValues(string ruleId, Condition originalCondition, Condition currentCondition)
+        void CompareConditionValues()
         {
-            var original = JsonSerializer.Deserialize<List<string>>(originalCondition.Value);
-            var current = JsonSerializer.Deserialize<List<string>>(currentCondition.Value);
+            var originalValues = JsonSerializer.Deserialize<List<string>>(original.Value);
+            var currentValues = JsonSerializer.Deserialize<List<string>>(current.Value);
 
-            var removedValues = original.Except(current).ToList();
-            var addedValues = current.Except(original).ToList();
+            var removedValues = originalValues.Except(currentValues).ToArray();
+            var addedValues = currentValues.Except(originalValues).ToArray();
 
             if (removedValues.Any())
             {
                 var conditionValues = new RuleConditionValues
                 {
                     RuleId = ruleId,
-                    ConditionId = currentCondition.Id,
+                    ConditionId = current.Id,
                     Values = removedValues
                 };
 
@@ -431,7 +469,7 @@ public class FlagComparer
                 var conditionValues = new RuleConditionValues
                 {
                     RuleId = ruleId,
-                    ConditionId = currentCondition.Id,
+                    ConditionId = current.Id,
                     Values = addedValues
                 };
 

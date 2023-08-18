@@ -39,4 +39,13 @@ public class Condition
         Op = source.Op;
         Value = source.Value;
     }
+
+    public override bool Equals(object obj)
+    {
+        return obj is Condition condition &&
+               condition.Id == Id &&
+               condition.Property == Property &&
+               condition.Op == Op && 
+               condition.Value == Value;
+    }
 }
