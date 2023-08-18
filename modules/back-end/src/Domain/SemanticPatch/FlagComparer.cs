@@ -28,9 +28,7 @@ public static class FlagComparer
         instructions.AddRange(CompareRules(original.Rules, current.Rules));
 
         // exclude noop instructions
-        instructions.RemoveAll(x => x.Kind == FlagInstructionKind.Noop);
-
-        return instructions;
+        return instructions.Where(x => x.Kind != FlagInstructionKind.Noop);
     }
 
     public static FlagInstruction CompareStatus(bool original, bool current)
@@ -118,12 +116,7 @@ public static class FlagComparer
         var instructions = new List<FlagInstruction>();
 
         instructions.AddRange(removedVariations.Select(v => new RemoveVariationInstruction(v.Id)));
-        instructions.AddRange(addedVariations.Select(v =>
-        {
-            // TODO: Why we need to assign a new id here?
-            v.Id = Guid.NewGuid().ToString();
-            return new AddVariationInstruction(v);
-        }));
+        instructions.AddRange(addedVariations.Select(v => new AddVariationInstruction(v)));
 
         foreach (var variation in commonVariations)
         {
@@ -150,7 +143,6 @@ public static class FlagComparer
         return instruction;
     }
 
-    // TODO: need review
     public static IEnumerable<FlagInstruction> CompareFallthrough(Fallthrough original, Fallthrough current)
     {
         var instructions = new List<FlagInstruction>();
@@ -167,14 +159,13 @@ public static class FlagComparer
         return instructions;
     }
 
-    // TODO: need review
     public static bool CompareRolloutVariations(
         ICollection<RolloutVariation> original,
         ICollection<RolloutVariation> current)
     {
         if (original.Count != current.Count)
         {
-            return false;
+            return true;
         }
 
         var differ = original.ExceptBy(current.Select(v => v.Id), v => v.Id);
@@ -186,7 +177,6 @@ public static class FlagComparer
         return original.Any(p => current.Any(c => !p.IsRolloutEquals(c)));
     }
 
-    // TODO: need review
     public static IEnumerable<FlagInstruction> CompareTargetUsers(
         ICollection<Variation> flagVariations, 
         ICollection<TargetUser> original, 
@@ -206,7 +196,6 @@ public static class FlagComparer
         return instructions;
     }
 
-    // TODO: need review
     public static IEnumerable<FlagInstruction> CompareTargetUser(string variationId, TargetUser original,TargetUser current)
     {
         if (original == null && current == null)
@@ -258,9 +247,8 @@ public static class FlagComparer
             return new[] { NoopFlagInstruction.Instance };
         }
 
-        // TODO: need review
-        // if rules are empty for one of them
-        if (!original.Any() || current.Any())
+        // if rules are empty for only one of them
+        if (!original.Any() || !current.Any())
         {
             var instruction = new SetRulesInstruction(current);
             return new FlagInstruction[] { instruction };
@@ -354,14 +342,8 @@ public static class FlagComparer
         return instructions;
     }
 
-    // TODO: need review
     public static IEnumerable<FlagInstruction> CompareCondition(string ruleId, Condition original, Condition current)
     {
-        if (original.Equals(current))
-        {
-            return new[] { NoopFlagInstruction.Instance };
-        }
-
         var instructions = new List<FlagInstruction>();
 
         var multiValueOps = new[] { OperatorTypes.IsOneOf, OperatorTypes.NotOneOf };
@@ -382,7 +364,7 @@ public static class FlagComparer
                 CompareConditionValues();
             }
         }
-        else
+        else if (!original.Equals(current))
         {
             var condition = new RuleCondition { RuleId = ruleId, Condition = current };
             instructions.Add(new UpdateConditionInstruction(condition));
