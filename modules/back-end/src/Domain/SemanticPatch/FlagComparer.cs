@@ -5,35 +5,26 @@ using Domain.Targeting;
 
 namespace Domain.SemanticPatch;
 
-public class FlagComparer
+public static class FlagComparer
 {
-    private readonly FeatureFlag _original;
-    private readonly FeatureFlag _current;
-
-    public FlagComparer(FeatureFlag original, FeatureFlag current)
-    {
-        _original = original;
-        _current = current;
-    }
-
-    public IEnumerable<FlagInstruction> Compare(FeatureFlag original, FeatureFlag current)
+    public static IEnumerable<FlagInstruction> Compare(FeatureFlag original, FeatureFlag current)
     {
         var instructions = new List<FlagInstruction>();
 
-        instructions.Add(CompareStatus());
-        instructions.Add(CompareArchived());
+        instructions.Add(CompareStatus(original.IsEnabled, current.IsEnabled));
+        instructions.Add(CompareArchived(original.IsArchived, current.IsArchived));
 
-        instructions.Add(CompareName());
-        instructions.Add(CompareDescription());
-        instructions.AddRange(CompareTags());
+        instructions.Add(CompareName(original.Name, current.Name));
+        instructions.Add(CompareDescription(original.Description, current.Description));
+        instructions.AddRange(CompareTags(original.Tags, current.Tags));
 
-        instructions.Add(CompareVariationType());
-        instructions.AddRange(CompareVariations());
+        instructions.Add(CompareVariationType(original.VariationType, current.VariationType));
+        instructions.AddRange(CompareVariations(original.Variations, current.Variations));
 
-        instructions.Add(CompareDisabledVariation());
+        instructions.Add(CompareDisabledVariation(original.DisabledVariationId, current.DisabledVariationId));
 
-        instructions.AddRange(CompareDefaultVariation());
-        instructions.AddRange(CompareTargetUsers());
+        instructions.AddRange(CompareFallthrough(original.Fallthrough, current.Fallthrough));
+        instructions.AddRange(CompareTargetUsers(current.Variations, original.TargetUsers, current.TargetUsers));
         instructions.AddRange(CompareRules(original.Rules, current.Rules));
 
         // exclude noop instructions
@@ -42,56 +33,56 @@ public class FlagComparer
         return instructions;
     }
 
-    public FlagInstruction CompareStatus()
+    public static FlagInstruction CompareStatus(bool original, bool current)
     {
-        if (_original.IsEnabled == _current.IsEnabled)
+        if (original == current)
         {
             return NoopFlagInstruction.Instance;
         }
 
-        var kind = _current.IsEnabled ? FlagInstructionKind.TurnFlagOn : FlagInstructionKind.TurnFlagOff;
+        var kind = current ? FlagInstructionKind.TurnFlagOn : FlagInstructionKind.TurnFlagOff;
         var instruction = new StatusInstruction(kind);
         return instruction;
     }
 
-    public FlagInstruction CompareArchived()
+    public static FlagInstruction CompareArchived(bool original, bool current)
     {
-        if (_original.IsArchived == _current.IsArchived)
+        if (original == current)
         {
             return NoopFlagInstruction.Instance;
         }
 
-        var kind = _current.IsArchived ? FlagInstructionKind.ArchiveFlag : FlagInstructionKind.RestoreFlag;
+        var kind = current ? FlagInstructionKind.ArchiveFlag : FlagInstructionKind.RestoreFlag;
         var instruction = new ArchiveInstruction(kind);
         return instruction;
     }
 
-    public FlagInstruction CompareName()
+    public static FlagInstruction CompareName(string original, string current)
     {
-        if (_original.Name == _current.Name)
+        if (original == current)
         {
             return NoopFlagInstruction.Instance;
         }
 
-        var instruction = new NameInstruction(_current.Name);
+        var instruction = new NameInstruction(current);
         return instruction;
     }
 
-    public FlagInstruction CompareDescription()
+    public static FlagInstruction CompareDescription(string original, string current)
     {
-        if (_original.Description == _current.Description)
+        if (original == current)
         {
             return NoopFlagInstruction.Instance;
         }
 
-        var instruction = new DescriptionInstruction(_current.Description);
+        var instruction = new DescriptionInstruction(current);
         return instruction;
     }
 
-    public IEnumerable<FlagInstruction> CompareTags()
+    public static IEnumerable<FlagInstruction> CompareTags(ICollection<string> original, ICollection<string> current)
     {
-        var removedTags = _original.Tags.Except(_current.Tags).ToArray();
-        var addedTags = _current.Tags.Except(_original.Tags).ToArray();
+        var removedTags = original.Except(current).ToArray();
+        var addedTags = current.Except(original).ToArray();
 
         var instructions = new List<FlagInstruction>();
         if (removedTags.Any())
@@ -107,22 +98,22 @@ public class FlagComparer
         return instructions;
     }
 
-    public FlagInstruction CompareVariationType()
+    public static FlagInstruction CompareVariationType(string original, string current)
     {
-        if (_original.VariationType == _current.VariationType)
+        if (original == current)
         {
             return NoopFlagInstruction.Instance;
         }
 
-        var instruction = new VariationTypeInstruction(_current.VariationType);
+        var instruction = new VariationTypeInstruction(current);
         return instruction;
     }
 
-    public IEnumerable<FlagInstruction> CompareVariations()
+    public static IEnumerable<FlagInstruction> CompareVariations(ICollection<Variation> original, ICollection<Variation> current)
     {
-        var removedVariations = _original.Variations.ExceptBy(_current.Variations.Select(v => v.Id), v => v.Id);
-        var addedVariations = _current.Variations.ExceptBy(_original.Variations.Select(v => v.Id), v => v.Id);
-        var commonVariations = _original.Variations.IntersectBy(_current.Variations.Select(v => v.Id), v => v.Id);
+        var removedVariations = original.ExceptBy(current.Select(v => v.Id), v => v.Id);
+        var addedVariations = current.ExceptBy(original.Select(v => v.Id), v => v.Id);
+        var commonVariations = original.IntersectBy(current.Select(v => v.Id), v => v.Id);
 
         var instructions = new List<FlagInstruction>();
 
@@ -136,8 +127,8 @@ public class FlagComparer
 
         foreach (var variation in commonVariations)
         {
-            var oldVariation = _original.Variations.First(v => v.Id == variation.Id);
-            var newVariation = _current.Variations.First(v => v.Id == variation.Id);
+            var oldVariation = original.First(v => v.Id == variation.Id);
+            var newVariation = current.First(v => v.Id == variation.Id);
 
             if (!oldVariation.Equals(newVariation))
             {
@@ -148,27 +139,24 @@ public class FlagComparer
         return instructions;
     }
 
-    public FlagInstruction CompareDisabledVariation()
+    public static FlagInstruction CompareDisabledVariation(string original, string current)
     {
-        if (_original.DisabledVariationId == _current.DisabledVariationId)
+        if (original == current)
         {
             return NoopFlagInstruction.Instance;
         }
 
-        var instruction = new DisabledVariationInstruction(_current.DisabledVariationId);
+        var instruction = new DisabledVariationInstruction(current);
         return instruction;
     }
 
     // TODO: refactor this method
-    public IEnumerable<FlagInstruction> CompareDefaultVariation()
+    public static IEnumerable<FlagInstruction> CompareFallthrough(Fallthrough original, Fallthrough current)
     {
         var instructions = new List<FlagInstruction>();
 
-        var originalFallthrough = _original.Fallthrough;
-        var currentFallthrough = _current.Fallthrough;
-
-        var isFallThroughChanged = originalFallthrough.DispatchKey != currentFallthrough.DispatchKey;
-        if (!isFallThroughChanged && originalFallthrough.Variations.Count != currentFallthrough.Variations.Count)
+        var isFallThroughChanged = original.DispatchKey != current.DispatchKey;
+        if (!isFallThroughChanged && original.Variations.Count != current.Variations.Count)
         {
             isFallThroughChanged = true;
         }
@@ -176,9 +164,9 @@ public class FlagComparer
         if (!isFallThroughChanged)
         {
             var removedVariations =
-                originalFallthrough.Variations.ExceptBy(currentFallthrough.Variations.Select(v => v.Id), v => v.Id);
+                original.Variations.ExceptBy(current.Variations.Select(v => v.Id), v => v.Id);
             var addedVariations =
-                currentFallthrough.Variations.ExceptBy(originalFallthrough.Variations.Select(v => v.Id), v => v.Id);
+                current.Variations.ExceptBy(original.Variations.Select(v => v.Id), v => v.Id);
 
             if (removedVariations.Any() || addedVariations.Any())
             {
@@ -187,10 +175,10 @@ public class FlagComparer
             else
             {
                 const double tolerance = 0.001;
-                isFallThroughChanged = originalFallthrough.Variations.Any(v1 =>
+                isFallThroughChanged = original.Variations.Any(v1 =>
                 {
                     var isRolloutChanged = false;
-                    foreach (var v2 in currentFallthrough.Variations)
+                    foreach (var v2 in current.Variations)
                     {
                         if (Math.Abs(v1.Rollout[0] - v2.Rollout[0]) > tolerance ||
                             Math.Abs(v1.Rollout[1] - v2.Rollout[1]) > tolerance) // rollout is different
@@ -207,75 +195,77 @@ public class FlagComparer
 
         if (isFallThroughChanged)
         {
-            instructions.Add(new DefaultVariationInstruction(currentFallthrough));
+            instructions.Add(new DefaultVariationInstruction(current));
         }
 
         return instructions;
     }
 
-    public IEnumerable<FlagInstruction> CompareTargetUsers()
+    // TODO: need review
+    public static IEnumerable<FlagInstruction> CompareTargetUsers(
+        ICollection<Variation> flagVariations, 
+        ICollection<TargetUser> original, 
+        ICollection<TargetUser> current)
     {
         var instructions = new List<FlagInstruction>();
 
-        var originalTargetUsers = _original.TargetUsers;
-        var currentTargetUsers = _current.TargetUsers;
-
-        foreach (var variation in _current.Variations)
+        foreach (var variation in flagVariations)
         {
-            var original = originalTargetUsers.FirstOrDefault(x => x.VariationId == variation.Id);
-            var current = currentTargetUsers.FirstOrDefault(x => x.VariationId == variation.Id);
+            var targetUser1 = original.FirstOrDefault(x => x.VariationId == variation.Id);
+            var targetUser2 = current.FirstOrDefault(x => x.VariationId == variation.Id);
 
-            var differs = CompareTargetUser(variation.Id, original, current);
+            var differs = CompareTargetUser(variation.Id, targetUser1, targetUser2);
             instructions.AddRange(differs);
         }
 
         return instructions;
-
-        IEnumerable<FlagInstruction> CompareTargetUser(string variationId, TargetUser original, TargetUser current)
-        {
-            if (original == null && current != null)
-            {
-                var targetUser = new TargetUser { VariationId = variationId, KeyIds = current.KeyIds };
-                var instruction = new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers, targetUser);
-
-                return new FlagInstruction[] { instruction };
-            }
-
-            if (original != null && current == null)
-            {
-                var targetUser = new TargetUser { VariationId = variationId, KeyIds = Array.Empty<string>() };
-                var instruction = new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers, targetUser);
-
-                return new FlagInstruction[] { instruction };
-            }
-
-            if (original != null && current != null)
-            {
-                var differs = new List<FlagInstruction>();
-
-                var addedKeyIds = current.KeyIds.Except(original.KeyIds ?? Array.Empty<string>()).ToArray();
-                var removedKeyIds = original.KeyIds.Except(current.KeyIds ?? Array.Empty<string>()).ToArray();
-
-                if (addedKeyIds.Any())
-                {
-                    var targetUser = new TargetUser { VariationId = variationId, KeyIds = addedKeyIds };
-                    differs.Add(new TargetUsersInstruction(FlagInstructionKind.AddTargetUsers, targetUser));
-                }
-
-                if (removedKeyIds.Any())
-                {
-                    var targetUser = new TargetUser { VariationId = variationId, KeyIds = removedKeyIds };
-                    differs.Add(new TargetUsersInstruction(FlagInstructionKind.RemoveTargetUsers, targetUser));
-                }
-
-                return differs;
-            }
-
-            return new FlagInstruction[] { NoopFlagInstruction.Instance };
-        }
     }
 
-    public IEnumerable<FlagInstruction> CompareRules(ICollection<TargetRule> original, ICollection<TargetRule> current)
+    // TODO: need review
+    public static IEnumerable<FlagInstruction> CompareTargetUser(string variationId, TargetUser original,TargetUser current)
+    {
+        if (original == null && current == null)
+        {
+            return new FlagInstruction[] { NoopFlagInstruction.Instance };
+        }
+
+        if (original == null)
+        {
+            var targetUser = new TargetUser { VariationId = variationId, KeyIds = current.KeyIds };
+            var instruction = new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers, targetUser);
+
+            return new FlagInstruction[] { instruction };
+        }
+
+        if (current == null)
+        {
+            var targetUser = new TargetUser { VariationId = variationId, KeyIds = Array.Empty<string>() };
+            var instruction = new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers, targetUser);
+
+            return new FlagInstruction[] { instruction };
+        }
+
+        var differs = new List<FlagInstruction>();
+
+        var addedKeyIds = current.KeyIds.Except(original.KeyIds ?? Array.Empty<string>()).ToArray();
+        var removedKeyIds = original.KeyIds.Except(current.KeyIds ?? Array.Empty<string>()).ToArray();
+
+        if (addedKeyIds.Any())
+        {
+            var targetUser = new TargetUser { VariationId = variationId, KeyIds = addedKeyIds };
+            differs.Add(new TargetUsersInstruction(FlagInstructionKind.AddTargetUsers, targetUser));
+        }
+
+        if (removedKeyIds.Any())
+        {
+            var targetUser = new TargetUser { VariationId = variationId, KeyIds = removedKeyIds };
+            differs.Add(new TargetUsersInstruction(FlagInstructionKind.RemoveTargetUsers, targetUser));
+        }
+
+        return differs;
+    }
+
+    public static IEnumerable<FlagInstruction> CompareRules(ICollection<TargetRule> original, ICollection<TargetRule> current)
     {
         // if rules are all empty
         if (!original.Any() && !current.Any())
@@ -319,7 +309,7 @@ public class FlagComparer
         return instructions;
     }
 
-    public IEnumerable<FlagInstruction> CompareRule(TargetRule original, TargetRule current)
+    public static IEnumerable<FlagInstruction> CompareRule(TargetRule original, TargetRule current)
     {
         var ruleId = original.Id;
         var instructions = new List<FlagInstruction>();
@@ -408,7 +398,7 @@ public class FlagComparer
     }
 
     // TODO: need review
-    public IEnumerable<FlagInstruction> CompareCondition(string ruleId, Condition original, Condition current)
+    public static IEnumerable<FlagInstruction> CompareCondition(string ruleId, Condition original, Condition current)
     {
         if (original.Equals(current))
         {
