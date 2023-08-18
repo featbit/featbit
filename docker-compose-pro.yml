@@ -53,7 +53,6 @@ services:
   da-server:
     image: featbit/featbit-data-analytics-server:latest
     depends_on:
-      - zookeeper
       - kafka
       - clickhouse-server
     ports:
@@ -94,43 +93,29 @@ services:
     volumes:
       - redis:/data
 
-  zookeeper:
-    image: bitnami/zookeeper:3.8.1
-    restart: on-failure
-    ports:
-      - '2181:2181'
-    volumes:
-      - zookeeper:/bitnami/zookeeper
-    environment:
-      ALLOW_ANONYMOUS_LOGIN: 'true'
-    networks:
-      - featbit-network
-
   kafka:
-    image: bitnami/kafka:3.4
+    image: bitnami/kafka:3.5
     restart: on-failure
-    depends_on:
-      - zookeeper
     ports:
       - '9092:9092'
       - '29092:29092'
     environment:
-      KAFKA_BROKER_ID: 1001
-      KAFKA_CFG_RESERVED_BROKER_MAX_ID: 1001
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
       ALLOW_PLAINTEXT_LISTENER: 'true'
-      KAFKA_ENABLE_KRAFT: 'no'
     networks:
       - featbit-network
     volumes:
       - kafka:/bitnami/kafka
   
   init-kafka-topics:
-    image: bitnami/kafka:3.4
+    image: bitnami/kafka:3.5
     depends_on:
       kafka:
         condition: service_started
@@ -150,10 +135,10 @@ services:
         echo "Seed kafka topic finished."
 
   clickhouse-server:
-    image: clickhouse/clickhouse-server:22.3
+    image: clickhouse/clickhouse-server:23.7
+    container_name: clickhouse-server
     restart: on-failure
     depends_on:
-      - zookeeper
       - kafka
     ports:
       - "8123:8123"
@@ -161,6 +146,7 @@ services:
       - "9000:9000"
       - "9009:9009"
       - "9440:9440"
+      - "9181:9181"
     networks:
       - featbit-network
     volumes:
@@ -181,4 +167,3 @@ volumes:
   redis:
   kafka:
   clickhouse-server:
-  zookeeper:

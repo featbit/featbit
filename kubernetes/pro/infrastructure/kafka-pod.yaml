@@ -11,7 +11,7 @@ spec:
     fsGroup: 1001
   initContainers:
     - name: volume-permissions
-      image: bitnami/kafka:3.4
+      image: bitnami/kafka:3.5
       command:
         - /bin/bash
       args:
@@ -38,47 +38,39 @@ spec:
           mountPath: /bitnami/kafka
   containers:
     - name: kafka
-      image: bitnami/kafka:3.4
+      image: bitnami/kafka:3.5
       ports:
         - containerPort: 9092
         - containerPort: 29092
       env:
         - name: BITNAMI_DEBUG
           value: "yes"
-        - name: KAFKA_ENABLE_KRAFT
-          value: "false"
         - name: ALLOW_PLAINTEXT_LISTENER
           value: "true"
-        - name: KAFKA_ADVERTISED_LISTENERS
+        - name: KAFKA_CFG_ADVERTISED_LISTENERS
           value: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+        - name: KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE
           value: "true"
-        - name: KAFKA_BROKER_ID
-          value: "1001"
-        - name: KAFKA_RESERVED_BROKER_MAX_ID
-          value: "100001"
-        - name: KAFKA_CFG_RESERVED_BROKER_MAX_ID
-          value: "100001"
-        - name: KAFKA_NODE_ID
-          value: "1001"
+        - name: KAFKA_CFG_NODE_ID
+          value: "0"
         - name: KAFKA_DEFAULT_REPLICATION_FACTOR
           value: "1"
-        - name: KAFKA_INTER_BROKER_LISTENER_NAME
-          value: "PLAINTEXT"
-        - name: KAFKA_LISTENERS
-          value: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
-        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
-          value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+        - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+        - name: KAFKA_CFG_LISTENERS
+          value: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
+        - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+          value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
         - name: KAFKA_NUM_PARTITIONS
           value: "1"
         - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
           value: "1"
         - name: KAFKA_LOG_CLEANUP_POLICY
           value: "compact"
-        - name: KAFKA_CFG_ZOOKEEPER_CONNECT
-          value: zookeeper:2181
-        - name: KAFKA_ENABLE_KRAFT
-          value: 'no'
+        - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+          value: 0@kafka:9093
+        - name: KAFKA_CFG_PROCESS_ROLES
+          value: controller,broker
       resources: 
         requests:
           memory: 1Gi
