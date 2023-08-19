@@ -95,11 +95,11 @@ services:
       - PORT=8082
       - CLIENT_ID=featbit
       - CLIENT_SECRET=OD0RpLEYpqU6CmvzisHvUv4XK015gcdn
-      - REDIRECT_URI=https://featbit.example/testauth
+      - REDIRECT_URI=https://featbit.example/spa
       - POST_LOGOUT_REDIRECT_URI=https://featbit.example/
       - SCOPE=openid profile email
       - TRUSTED_WEB_ORIGIN=https://featbit.example
-      - CORS_ENABLED=true
+      - CORS_ENABLED=false
       - COOKIE_NAME_PREFIX=featbit.example
       - COOKIE_DOMAIN=featbit.example
       - COOKIE_ENCRYPTION_KEY=4e4636356d65563e4c73233847503e3b21436e6f7629724950526f4b5e2e4e50
@@ -184,11 +184,9 @@ services:
       # - KEYCLOAK_HTTPS_USE_PEM=true
       # - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
       # - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
-      # - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/step-ca/featbit-example3.pem
-      # - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/step-ca/featbit-example3-pkcs-key.pem
-      - KEYCLOAK_HTTPS_TRUST_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example3.jks
+      - KEYCLOAK_HTTPS_TRUST_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example4.jks
       - KEYCLOAK_HTTPS_TRUST_STORE_PASSWORD=supersecret123
-      - KEYCLOAK_HTTPS_KEY_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example3.jks
+      - KEYCLOAK_HTTPS_KEY_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example4.jks
       - KEYCLOAK_HTTPS_KEY_STORE_PASSWORD=supersecret123
       - KEYCLOAK_HTTP_PORT=80
       - KEYCLOAK_HTTPS_PORT=443
@@ -204,7 +202,7 @@ services:
           - keycloak.featbit.example
       
     volumes:
-     - ./modules/oauth-agent/certs:/opt/bitnami/keycloak/certs
+     - ./modules/oauth-agent/certs/step-ca:/opt/bitnami/keycloak/certs
     #  - ./infra/keycloak/keycloak.conf:/opt/bitnami/keycloak/conf/keycloak.conf
     # - /path/to/init-scripts:/docker-entrypoint-initdb.d
 

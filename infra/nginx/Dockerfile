@@ -6,11 +6,13 @@ USER root
 # RUN chmod 644 /usr/local/share/ca-certificates/featbit-ca-private-cert.pem && update-ca-certificates
 # RUN chmod 644 /usr/local/share/ca-certificates/featbit-example-wildcard.pem && update-ca-certificates
 
+RUN apt-get update && apt-get install -y curl dnsutils && rm -rf /var/lib/apt/lists/*
+
 ADD ./modules/oauth-agent/certs/step-ca/root_ca.crt /usr/local/share/ca-certificates/root_ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/root_ca.crt && update-ca-certificates
 
 ADD ./modules/oauth-agent/certs/step-ca/intermediate_ca.crt /usr/local/share/ca-certificates/intermediate_ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/intermediate_ca.crt && update-ca-certificates
 
-ADD ./modules/oauth-agent/certs/step-ca/featbit-example3.crt /usr/local/share/ca-certificates/featbit-example3.crt
-RUN chmod 644 /usr/local/share/ca-certificates/featbit-example3.crt && update-ca-certificates
+ADD ./modules/oauth-agent/certs/step-ca/featbit-example4.crt /usr/local/share/ca-certificates/featbit-example4.crt
+RUN chmod 644 /usr/local/share/ca-certificates/featbit-example4.crt && update-ca-certificates
