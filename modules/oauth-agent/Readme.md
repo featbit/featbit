@@ -57,6 +57,8 @@ The entry would be something like this on windows
 127.0.0.1       api.featbit.example
 127.0.0.1       demo.featbit.example
 127.0.0.1       eval.featbit.example
+127.0.0.1       nginx-auth-agent-proxy.featbit.example
+127.0.0.1       ca.featbit.example
 ```
 
 ### SSL
@@ -124,4 +126,7 @@ Useful command for checking dns and network issues
 ```
 docker run -it --network featbit-dev_featbit-network busybox /bin/sh
 ```
-
+Useful for rebuilding images
+ID=$(docker images --format="{{.Repository}} {{.ID}}" |  grep "featbit/oauth-agent" |  cut -d' ' -f2) && docker image rm $ID
+ID=$(docker images --format="{{.Repository}} {{.ID}}" |  grep "featbit/keycloak" |  cut -d' ' -f2) && docker image rm $ID
+ID=$(docker images --format="{{.Repository}} {{.ID}}" |  grep "featbit/nginx" |  cut -d' ' -f2) && docker image rm $ID

@@ -42,8 +42,8 @@ RUN chmod 644 /usr/local/share/ca-certificates/root_ca.crt && update-ca-certific
 ADD ./certs/step-ca/intermediate_ca.crt /usr/local/share/ca-certificates/intermediate_ca.crt
 RUN chmod 644 /usr/local/share/ca-certificates/intermediate_ca.crt && update-ca-certificates
 
-ADD ./certs/step-ca/featbit-example3.crt /usr/local/share/ca-certificates/featbit-example3.crt
-RUN chmod 644 /usr/local/share/ca-certificates/featbit-example3.crt && update-ca-certificates
+ADD ./certs/step-ca/featbit-example4.crt /usr/local/share/ca-certificates/featbit-example4.crt
+RUN chmod 644 /usr/local/share/ca-certificates/featbit-example4.crt && update-ca-certificates
 
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD curl --fail --silent http://localhost:8082/health/liveness || exit 1
