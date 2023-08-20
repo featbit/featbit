@@ -47,7 +47,6 @@ public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchRe
         }
 
         flag.MarkAsUpdated(_currentUser.Id);
-
         dataChange.To(flag);
 
         await _service.UpdateAsync(flag);
