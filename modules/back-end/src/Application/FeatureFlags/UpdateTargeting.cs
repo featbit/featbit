@@ -63,36 +63,43 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         );
 
         var result = request.Schedule != null
-            ? await CreateScheduleAsync(flag, dataChange, request, cancellationToken)
-            : await UpdateTargetingAsync(flag, dataChange, request, cancellationToken);
+            ? await CreateScheduleAsync()
+            : await UpdateTargetingAsync();
 
         return result;
-    }
 
-    private async Task<bool> CreateScheduleAsync(FeatureFlag flag, DataChange dataChange, UpdateTargeting request, CancellationToken cancellationToken)
-    {
-        // create draft
-        var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, request.Comment, dataChange, _currentUser.Id);
-        await _flagDraftService.AddOneAsync(flagDraft);
+        async Task<bool> CreateScheduleAsync()
+        {
+            // create draft
+            var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, request.Comment, dataChange, _currentUser.Id);
+            await _flagDraftService.AddOneAsync(flagDraft);
 
-        // create schedule
-        var flagSchedule = FlagSchedule.WaitingForExecution(request.EnvId, flagDraft.Id, flag.Id, request.Schedule.Title, request.Schedule.ScheduledTime, _currentUser.Id);
-        await _flagScheduleService.AddOneAsync(flagSchedule);
+            // create schedule
+            var flagSchedule = FlagSchedule.WaitingForExecution(
+                request.EnvId,
+                flagDraft.Id,
+                flag.Id,
+                request.Schedule.Title,
+                request.Schedule.ScheduledTime,
+                _currentUser.Id
+            );
+            await _flagScheduleService.AddOneAsync(flagSchedule);
 
-        return true;
-    }
+            return true;
+        }
 
-    private async Task<bool> UpdateTargetingAsync(FeatureFlag flag, DataChange dataChange, UpdateTargeting request, CancellationToken cancellationToken)
-    {
-        await _flagService.UpdateAsync(flag);
+        async Task<bool> UpdateTargetingAsync()
+        {
+            await _flagService.UpdateAsync(flag);
 
-        // write audit log
-        var auditLog = AuditLog.ForUpdate(flag, dataChange, request.Comment, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
+            // write audit log
+            var auditLog = AuditLog.ForUpdate(flag, dataChange, request.Comment, _currentUser.Id);
+            await _auditLogService.AddOneAsync(auditLog);
 
-        // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag, request.Comment), cancellationToken);
+            // publish on feature flag change notification
+            await _publisher.Publish(new OnFeatureFlagChanged(flag, request.Comment), cancellationToken);
 
-        return true;
+            return true;
+        }
     }
 }
