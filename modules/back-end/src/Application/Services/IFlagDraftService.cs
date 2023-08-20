@@ -4,5 +4,4 @@ namespace Application.Services;
 
 public interface IFlagDraftService : IService<FlagDraft>
 {
-    
 }

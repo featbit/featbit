@@ -5,13 +5,13 @@ namespace Domain.FlagDrafts;
 public class FlagDraft : FullAuditedEntity
 {
     public Guid EnvId { get; set; }
-    
+
     public Guid FlagId { get; set; }
 
     public string Status { get; set; }
-    
+
     public string Comment { get; set; }
-    
+
     public DataChange DataChange { get; set; }
 
     public FlagDraft(
@@ -26,7 +26,7 @@ public class FlagDraft : FullAuditedEntity
         {
             throw new ArgumentOutOfRangeException(nameof(status));
         }
-        
+
         EnvId = envId;
         FlagId = flagId;
         Status = status;
@@ -43,7 +43,7 @@ public class FlagDraft : FullAuditedEntity
     {
         return new FlagDraft(envId, flagId, FlagDraftStatus.Pending, comment, dataChange, currentUserId);
     }
-    
+
     public void Applied()
     {
         Status = FlagDraftStatus.Applied;
