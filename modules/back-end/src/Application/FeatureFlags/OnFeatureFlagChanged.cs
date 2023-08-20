@@ -10,7 +10,7 @@ public class OnFeatureFlagChanged : INotification
 
     public string Comment { get; set; }
 
-    public OnFeatureFlagChanged(FeatureFlag flag, string comment)
+    public OnFeatureFlagChanged(FeatureFlag flag, string comment = "")
     {
         Flag = flag;
         Comment = comment;
@@ -42,7 +42,7 @@ public class OnFeatureFlagChangedHandler : INotificationHandler<OnFeatureFlagCha
 
         // create flag revision
         await _flagRevisionService.CreateForFlag(flag, notification.Comment, flag.UpdatorId);
-        
+
         // publish feature flag change message
         await _messageProducer.PublishAsync(Topics.FeatureFlagChange, flag);
     }

@@ -6,7 +6,7 @@ namespace Application.FeatureFlags;
 public class ToggleFeatureFlag : IRequest<bool>
 {
     public Guid EnvId { get; set; }
-    
+
     public string Key { get; set; }
 }
 
@@ -33,7 +33,7 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Toggle(_currentUser.Id);
-        
+
         await _service.UpdateAsync(flag);
 
         // write audit log
@@ -41,7 +41,7 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag, String.Empty), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
 
         return true;
     }

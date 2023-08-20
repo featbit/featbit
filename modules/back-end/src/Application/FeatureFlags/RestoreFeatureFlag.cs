@@ -41,7 +41,7 @@ public class UnArchiveFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, b
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag, String.Empty), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
 
         return true;
     }

@@ -111,7 +111,7 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag, string.Empty), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
 
         return flag;
     }
