@@ -48,7 +48,6 @@ public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateVariations(request.Variations, _currentUser.Id);
-
         await _service.UpdateAsync(flag);
 
         // write audit log

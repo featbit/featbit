@@ -33,7 +33,6 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Toggle(_currentUser.Id);
-
         await _service.UpdateAsync(flag);
 
         // write audit log

@@ -10,7 +10,7 @@ namespace Application.FeatureFlags;
 public class UpdateTargeting : IRequest<bool>
 {
     public Guid EnvId { get; set; }
-    
+
     public string Key { get; set; }
 
     public ICollection<TargetUser> TargetUsers { get; set; }
@@ -22,7 +22,7 @@ public class UpdateTargeting : IRequest<bool>
     public bool ExptIncludeAllTargets { get; set; }
 
     public string Comment { get; set; }
-    
+
     public Schedule Schedule { get; set; }
 }
 
@@ -61,13 +61,12 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
             request.ExptIncludeAllTargets,
             _currentUser.Id
         );
-        
-        if (request.Schedule != null)
-        {
-            return await CreateScheduleAsync(flag, dataChange, request, cancellationToken);
-        }
 
-        return await UpdateTargetingAsync(flag, dataChange, request, cancellationToken);
+        var result = request.Schedule != null
+            ? await CreateScheduleAsync(flag, dataChange, request, cancellationToken)
+            : await UpdateTargetingAsync(flag, dataChange, request, cancellationToken);
+
+        return result;
     }
 
     private async Task<bool> CreateScheduleAsync(FeatureFlag flag, DataChange dataChange, UpdateTargeting request, CancellationToken cancellationToken)
@@ -75,11 +74,11 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         // create draft
         var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, request.Comment, dataChange, _currentUser.Id);
         await _flagDraftService.AddOneAsync(flagDraft);
-        
+
         // create schedule
         var flagSchedule = FlagSchedule.WaitingForExecution(request.EnvId, flagDraft.Id, flag.Id, request.Schedule.Title, request.Schedule.ScheduledTime, _currentUser.Id);
         await _flagScheduleService.AddOneAsync(flagSchedule);
-        
+
         return true;
     }
 

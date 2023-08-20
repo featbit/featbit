@@ -46,9 +46,7 @@ public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchRe
             return PatchResult.Fail(error);
         }
 
-        flag.UpdatorId = _currentUser.Id;
-        flag.UpdatedAt = DateTime.UtcNow;
-        flag.Revision = Guid.NewGuid();
+        flag.MarkAsUpdated(_currentUser.Id);
 
         dataChange.To(flag);
 

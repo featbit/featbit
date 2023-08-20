@@ -33,7 +33,6 @@ public class UnArchiveFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, b
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Restore(_currentUser.Id);
-        
         await _service.UpdateAsync(flag);
 
         // write audit log
