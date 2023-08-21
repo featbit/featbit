@@ -1,5 +1,6 @@
 using Application.Caches;
 using Domain.FeatureFlags;
+using Domain.FlagRevisions;
 using Domain.Messages;
 
 namespace Application.FeatureFlags;
@@ -41,7 +42,8 @@ public class OnFeatureFlagChangedHandler : INotificationHandler<OnFeatureFlagCha
         await _cache.UpsertFlagAsync(flag);
 
         // create flag revision
-        await _flagRevisionService.CreateForFlag(flag, notification.Comment, flag.UpdatorId);
+        var revision = new FlagRevision(flag, notification.Comment);
+        await _flagRevisionService.AddOneAsync(revision);
 
         // publish feature flag change message
         await _messageProducer.PublishAsync(Topics.FeatureFlagChange, flag);

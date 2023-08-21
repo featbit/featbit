@@ -1,5 +1,6 @@
 using Application.Users;
 using Domain.AuditLogs;
+using Domain.FlagRevisions;
 
 namespace Application.FeatureFlags;
 
@@ -35,13 +36,15 @@ public class SetTagsHandler : IRequestHandler<SetTags, bool>
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.SetTags(request.Tags, _currentUser.Id);
+        await _service.UpdateAsync(flag);
 
         // write audit log
         var auditLog = AuditLog.ForUpdate(flag, dataChange, string.Empty, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
 
-        await _service.UpdateAsync(flag);
-        await _flagRevisionService.CreateForFlag(flag, string.Empty, _currentUser.Id);
+        // add flag revision
+        var revision = new FlagRevision(flag, string.Empty);
+        await _flagRevisionService.AddOneAsync(revision);
 
         return true;
     }
