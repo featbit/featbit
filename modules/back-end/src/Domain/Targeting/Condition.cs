@@ -40,7 +40,7 @@ public class Condition
         Value = source.Value;
     }
 
-    public override bool Equals(object obj)
+    public bool ValueEquals(object obj)
     {
         return obj is Condition condition &&
                condition.Id == Id &&

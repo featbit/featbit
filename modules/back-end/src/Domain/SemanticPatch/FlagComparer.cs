@@ -123,7 +123,7 @@ public static class FlagComparer
             var oldVariation = original.First(v => v.Id == variation.Id);
             var newVariation = current.First(v => v.Id == variation.Id);
 
-            if (!oldVariation.Equals(newVariation))
+            if (!oldVariation.ValueEquals(newVariation))
             {
                 instructions.Add(new UpdateVariationInstruction(newVariation));
             }
@@ -364,7 +364,7 @@ public static class FlagComparer
                 CompareConditionValues();
             }
         }
-        else if (!original.Equals(current))
+        else if (!original.ValueEquals(current))
         {
             var condition = new RuleCondition { RuleId = ruleId, Condition = current };
             instructions.Add(new UpdateConditionInstruction(condition));
