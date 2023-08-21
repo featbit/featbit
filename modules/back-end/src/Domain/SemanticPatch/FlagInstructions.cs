@@ -25,7 +25,7 @@ public class FlagInstructions : IEnumerable<FlagInstruction>
         { FlagInstructionKind.RemoveVariation, (_, value) => new RemoveVariationInstruction(value.GetString()) },
         { FlagInstructionKind.UpdateVariation, (_, value) => new UpdateVariationInstruction(value.Deserialize<Variation>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.UpdateDisabledVariation, (_, value) => new DisabledVariationInstruction(value.GetString()) },
-        { FlagInstructionKind.UpdateDefaultRuleVariationOrRollouts, (_, value) => new UpdateDefaultRuleVariationOrRolloutInstruction(value.Deserialize<ICollection<RolloutVariation>>(ReusableJsonSerializerOptions.Web)) },
+        { FlagInstructionKind.UpdateDefaultRuleVariationOrRollouts, (_, value) => new UpdateDefaultRuleVariationOrRolloutInstruction(value.Deserialize<DefaultRuleRolloutVariations>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.SetTargetUsers, (kind, value) => new TargetUsersInstruction(kind, value.Deserialize<TargetUser>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.AddTargetUsers, (kind, value) => new TargetUsersInstruction(kind, value.Deserialize<TargetUser>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.RemoveTargetUsers, (kind, value) => new TargetUsersInstruction(kind, value.Deserialize<TargetUser>(ReusableJsonSerializerOptions.Web)) },

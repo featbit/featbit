@@ -151,7 +151,8 @@ public static class FlagComparer
 
         if (isFallThroughChanged)
         {
-            instructions.Add(new UpdateDefaultRuleVariationOrRolloutInstruction(current.Variations));
+            var rolloutVariations = new DefaultRuleRolloutVariations { RolloutVariations = current.Variations };
+            instructions.Add(new UpdateDefaultRuleVariationOrRolloutInstruction(rolloutVariations));
         }
         
         // compare dispatch key

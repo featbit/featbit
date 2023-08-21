@@ -78,15 +78,15 @@ public class DisabledVariationInstruction : FlagInstruction
 
 public class UpdateDefaultRuleVariationOrRolloutInstruction : FlagInstruction
 {
-    public UpdateDefaultRuleVariationOrRolloutInstruction(ICollection<RolloutVariation> value) : base(FlagInstructionKind.UpdateDefaultRuleVariationOrRollouts, value)
+    public UpdateDefaultRuleVariationOrRolloutInstruction(DefaultRuleRolloutVariations value) : base(FlagInstructionKind.UpdateDefaultRuleVariationOrRollouts, value)
     {
     }
 
     public override void Apply(FeatureFlag flag)
     {
-        if (Value is ICollection<RolloutVariation> variations)
+        if (Value is DefaultRuleRolloutVariations value)
         {
-            flag.Fallthrough.Variations = variations;
+            flag.Fallthrough.Variations = value.RolloutVariations;
         }
     }
 }

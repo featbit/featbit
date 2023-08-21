@@ -44,3 +44,8 @@ public class RuleVariations : FlagRuleId
 {
     public ICollection<RolloutVariation> RolloutVariations { get; set; }
 }
+
+public class DefaultRuleRolloutVariations
+{
+    public ICollection<RolloutVariation> RolloutVariations { get; set; }
+}

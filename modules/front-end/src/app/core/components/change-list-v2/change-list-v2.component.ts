@@ -27,6 +27,7 @@ export class ChangeListV2Component {
         instruction.current = param.current;
         return !!i;
       });
+
       return { ...category, instructions };
     }).filter((category: ICategoryInstruction) => category.instructions.length > 0);
   }

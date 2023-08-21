@@ -39,8 +39,11 @@ export interface IRuleConditionValues extends IRuleId {
   values: string[];
 }
 
-export interface IRuleVariations extends IRuleId {
+export interface IRolloutVariations {
   rolloutVariations: IRuleVariation[];
+}
+
+export interface IRuleRolloutVariations extends IRuleId, IRolloutVariations {
 }
 
 export interface IVariationValue {
@@ -77,7 +80,7 @@ export interface IVariationTargetUsers {
   variationId: string;
 }
 
-export type IInstructionValue = string | string[] | IVariationValue | IDefaultVariation | IRule | IVariationTargetUsers | IRuleName | IRuleDispatchKey | IRuleConditionIds | IRuleConditions | IRuleConditionValues | IRuleVariations
+export type IInstructionValue = string | string[] | IVariationValue | IDefaultVariation | IRule | IVariationTargetUsers | IRuleName | IRuleDispatchKey | IRuleConditionIds | IRuleConditions | IRuleConditionValues | IRuleRolloutVariations | IRolloutVariations;
 
 export interface IInstruction {
   kind: string;
@@ -99,5 +102,6 @@ export interface IInstructionKindComponent {
 }
 export interface ICategoryInstruction {
   category: string;
+  label: string;
   instructions: IInstructionKindComponent[];
 }

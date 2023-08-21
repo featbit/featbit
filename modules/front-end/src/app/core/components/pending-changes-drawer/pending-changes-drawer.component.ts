@@ -5,7 +5,7 @@ import { IUserType } from "@shared/types";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { isSegmentCondition } from "@utils/index";
-import { ICondition, IVariation } from "@shared/rules";
+import { ICondition } from "@shared/rules";
 import { lastValueFrom } from "rxjs";
 import { DiffFactoryService } from "@services/diff-factory.service";
 import { SegmentService } from "@services/segment.service";

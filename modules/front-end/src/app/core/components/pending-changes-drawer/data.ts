@@ -65,21 +65,31 @@ export const INSTRUCTIONS = [
     "value": "e834669c-9f1f-4890-b014-9e86226cdbc8"
   },
   {
-    "kind": "UpdateDefaultVariation",
+    "kind": "UpdateDefaultRuleVariationOrRollouts",
     "value": {
-      "dispatchKey": "name",
-      "includedInExpt": false,
-      "variations": [
+      "rolloutVariations": [
         {
-          "id": null,
+          "id": "e834669c-9f1f-4890-b014-9e86226cdbc8",
           "rollout": [
             0,
+            0.98
+          ],
+          "exptRollout": 1
+        },
+        {
+          "id": "e9a52fe4-e7c5-4da2-be6a-cf0321681008",
+          "rollout": [
+            0.98,
             1
           ],
-          "exptRollout": 0
+          "exptRollout": 1
         }
       ]
     }
+  },
+  {
+    "kind": "UpdateDefaultRuleDispatchKey",
+    "value": "ddd"
   },
   {
     "kind": "RemoveTargetUsers",
@@ -127,16 +137,14 @@ export const INSTRUCTIONS = [
           "rollout": [
             0,
             0.5
-          ],
-          "exptRollout": 0
+          ]
         },
         {
           "id": "variation1",
           "rollout": [
             0.5,
             1
-          ],
-          "exptRollout": 0
+          ]
         }
       ]
     }

@@ -37,6 +37,12 @@ import {
 import {
   UpdateOffVariationComponent
 } from "@core/components/change-list-v2/instructions/update-off-variation/update-off-variation.component";
+import {
+  UpdateDefaultRuleDispatchKeyComponent
+} from "@core/components/change-list-v2/instructions/UpdateDefaultRuleDispatchKey/update-default-rule-dispatch-key.component";
+import {
+  UpdateRuleVariationOrRollout
+} from "@core/components/change-list-v2/instructions/UpdateRuleVariationOrRollout/update-rule-variation-or-rollout.component";
 
 @NgModule({
   declarations: [
@@ -57,7 +63,9 @@ import {
     AddVariationComponent,
     RemoveVariationComponent,
     UpdateVariationComponent,
-    UpdateOffVariationComponent
+    UpdateOffVariationComponent,
+    UpdateDefaultRuleDispatchKeyComponent,
+    UpdateRuleVariationOrRollout
   ],
   imports: [
     CommonModule,

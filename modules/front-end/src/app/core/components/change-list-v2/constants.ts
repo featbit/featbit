@@ -28,6 +28,12 @@ import {
 import {
   UpdateOffVariationComponent
 } from "@core/components/change-list-v2/instructions/update-off-variation/update-off-variation.component";
+import {
+  UpdateDefaultRuleDispatchKeyComponent
+} from "@core/components/change-list-v2/instructions/UpdateDefaultRuleDispatchKey/update-default-rule-dispatch-key.component";
+import {
+  UpdateRuleVariationOrRollout
+} from "@core/components/change-list-v2/instructions/UpdateRuleVariationOrRollout/update-rule-variation-or-rollout.component";
 
 export enum InstructionKindEnum {
   // Settings
@@ -52,11 +58,19 @@ export enum InstructionKindEnum {
 
   // Off variation
   UpdateOffVariation = 'UpdateDisabledVariation',
+
+  // Default rule
+  UpdateDefaultRuleDispatchKey = 'UpdateDefaultRuleDispatchKey',
+  UpdateDefaultRuleVariationOrRollouts = 'UpdateDefaultRuleVariationOrRollouts',
+
+  // Rules
+  UpdateRuleDispatchKey = 'UpdateRuleDispatchKey',
 }
 
 export const instructionCategories: ICategoryInstruction[] = [
   {
-    category: $localize`:@@common.settings:Settings`,
+    category: "settings",
+    label: $localize`:@@common.settings:Settings`,
     instructions: [
       { component: TurnFlagOnComponent, kind: InstructionKindEnum.TurnFlagOn },
       { component: TurnFlagOffComponent, kind: InstructionKindEnum.TurnFlagOff },
@@ -69,28 +83,38 @@ export const instructionCategories: ICategoryInstruction[] = [
     ]
   },
   {
-    category: $localize`:@@common.target-users:Individual Targeting`,
+    category: "target-users",
+    label: $localize`:@@common.target-users:Individual Targeting`,
     instructions: [
       { component: RemoveTargetUsersComponent, kind: InstructionKindEnum.RemoveTargetUsers },
       { component: AddTargetUsersComponent, kind: InstructionKindEnum.AddTargetUsers },
     ]
   },
   {
-    category: $localize`:@@common.default-rule:Default rule`,
-    instructions: []
+    category: "default-rule",
+    label: $localize`:@@common.default-rule:Default rule`,
+    instructions: [
+      { component: UpdateRuleVariationOrRollout, kind: InstructionKindEnum.UpdateDefaultRuleVariationOrRollouts },
+      { component: UpdateDefaultRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateDefaultRuleDispatchKey },
+    ]
   },
   {
-    category: $localize`:@@common.off-variation:Off variation`,
+    category: "off-variation",
+    label: $localize`:@@common.off-variation:Off variation`,
     instructions: [
       { component: UpdateOffVariationComponent, kind: InstructionKindEnum.UpdateOffVariation },
     ]
   },
   {
-    category: $localize`:@@common.rules:Rules`,
-    instructions: []
+    category: "rules",
+    label: $localize`:@@common.rules:Rules`,
+    instructions: [
+      { component: UpdateDefaultRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateRuleDispatchKey },
+    ]
   },
   {
-    category: $localize`:@@common.variations:Variations`,
+    category: "variations",
+    label: $localize`:@@common.variations:Variations`,
     instructions: [
       { component: UpdateVariationTypeComponent, kind: InstructionKindEnum.UpdateVariationType },
       { component: AddVariationComponent, kind: InstructionKindEnum.AddVariation },
