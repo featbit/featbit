@@ -146,14 +146,18 @@ public static class FlagComparer
     public static IEnumerable<FlagInstruction> CompareFallthrough(Fallthrough original, Fallthrough current)
     {
         var instructions = new List<FlagInstruction>();
-
-        var isFallThroughChanged =
-            original.DispatchKey != current.DispatchKey ||
-            CompareRolloutVariations(original.Variations, current.Variations);
+        
+        var isFallThroughChanged = CompareRolloutVariations(original.Variations, current.Variations);
 
         if (isFallThroughChanged)
         {
-            instructions.Add(new DefaultVariationInstruction(current));
+            instructions.Add(new UpdateDefaultRuleVariationOrRolloutInstruction(current.Variations));
+        }
+        
+        // compare dispatch key
+        if (original.DispatchKey != current.DispatchKey && current.DispatchKey != null)
+        {
+            instructions.Add(new FallthroughDispatchKeyInstruction(current.DispatchKey));
         }
 
         return instructions;
@@ -294,13 +298,6 @@ public static class FlagComparer
             instructions.Add(new RuleNameInstruction(value));
         }
 
-        // compare dispatch key
-        if (original.DispatchKey != current.DispatchKey)
-        {
-            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
-            instructions.Add(new RuleDispatchKeyInstruction(value));
-        }
-
         // compare added/removed conditions
         var addedConditions = current.Conditions.ExceptBy(original.Conditions.Select(v => v.Id), v => v.Id)
             .ToArray();
@@ -337,6 +334,13 @@ public static class FlagComparer
         {
             var variations = new RuleVariations { RuleId = ruleId, RolloutVariations = current.Variations };
             instructions.Add(new UpdateVariationOrRolloutInstruction(variations));
+        }
+        
+        // compare dispatch key
+        if (original.DispatchKey != current.DispatchKey)
+        {
+            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
+            instructions.Add(new RuleDispatchKeyInstruction(value));
         }
 
         return instructions;

@@ -1,0 +1,11 @@
+<div class="category-list">
+  <ul>
+    <li *ngFor="let category of categories">
+      <span class="category">{{category.category}}</span>
+      <div *ngFor="let instruction of category.instructions">
+        <instruction class="instruction" [instruction]="instruction" ></instruction>
+      </div>
+    </li>
+  </ul>
+</div>
+

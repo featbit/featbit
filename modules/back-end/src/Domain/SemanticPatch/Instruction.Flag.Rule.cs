@@ -99,3 +99,20 @@ public class RuleDispatchKeyInstruction : FlagInstruction
         }
     }
 }
+
+public class FallthroughDispatchKeyInstruction : FlagInstruction
+{
+    public FallthroughDispatchKeyInstruction(string value) : base(FlagInstructionKind.UpdateDefaultRuleDispatchKey, value)
+    {
+    }
+
+    public override void Apply(FeatureFlag flag)
+    {
+        if (Value is not string value)
+        {
+            return;
+        }
+
+        var rule = flag.Fallthrough.DispatchKey = value;
+    }
+}

@@ -91,7 +91,7 @@ public class FlagSemanticPatch
     
         if (isFallThroughChanged)
         {
-            instructions.Add(new DefaultVariationInstruction(flag2.Fallthrough));
+            instructions.Add(new UpdateDefaultRuleVariationOrRolloutInstruction(flag2.Fallthrough.Variations));
         }
     }
     

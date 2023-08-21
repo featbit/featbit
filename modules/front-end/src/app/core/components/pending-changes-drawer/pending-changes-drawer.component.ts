@@ -5,18 +5,21 @@ import { IUserType } from "@shared/types";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { isSegmentCondition } from "@utils/index";
-import { ICondition } from "@shared/rules";
+import { ICondition, IVariation } from "@shared/rules";
 import { lastValueFrom } from "rxjs";
 import { DiffFactoryService } from "@services/diff-factory.service";
 import { SegmentService } from "@services/segment.service";
 import { EnvUserService } from "@services/env-user.service";
-import { ICategory } from "@shared/diff/types";
+import { INSTRUCTIONS } from "@core/components/pending-changes-drawer/data";
+import { IChangeListParam, IInstruction } from "@core/components/change-list-v2/instructions/types";
 
 interface IChangeCategory {
   createdAt: string;
   scheduledTime: string;
   creator: string;
-  changes: ICategory[];
+  instructions: IInstruction[];
+  previous: IFeatureFlag | ISegment;
+  current: IFeatureFlag | ISegment;
 }
 
 @Component({
@@ -25,7 +28,6 @@ interface IChangeCategory {
   styleUrls: ['./pending-changes-drawer.component.less']
 })
 export class PendingChangesDrawerComponent implements OnInit {
-
   private userRefs: IUserType[] = [];
   private segmentRefs: ISegment[] = [];
 
@@ -36,12 +38,16 @@ export class PendingChangesDrawerComponent implements OnInit {
   set pendingChangesList(data: IPendingChanges[]) {
     this.changeCategoriesList = [];
      data.map(async (item: IPendingChanges) => {
-       const diff = await this.calculateHtmlDiff(item);
+       const previous: IFeatureFlag = JSON.parse(item.dataChange.previous);
+       const current: IFeatureFlag = JSON.parse(item.dataChange.current);
+
        this.changeCategoriesList.push({
          createdAt: item.createdAt,
          scheduledTime: item.scheduledTime,
          creator: item.creatorName,
-         changes: diff
+         previous: previous,
+         current: current,
+         instructions: INSTRUCTIONS,
        });
      });
   }
@@ -52,6 +58,8 @@ export class PendingChangesDrawerComponent implements OnInit {
     private segmentService: SegmentService,
     private envUserService: EnvUserService
   ) { }
+
+  param: IChangeListParam;
 
   ngOnInit(): void {
   }

@@ -90,6 +90,7 @@ import { NzSwitchModule } from "ng-zorro-antd/switch";
 import {
   PendingChangesDrawerComponent
 } from "@core/components/pending-changes-drawer/pending-changes-drawer.component";
+import { ChangeListV2Module } from "@core/components/change-list-v2/change-list-v2.module";
 
 @NgModule({
   declarations: [
@@ -180,7 +181,8 @@ import {
     NzBreadCrumbModule,
     NzInputNumberModule,
     NzCollapseModule,
-    NzSwitchModule
+    NzSwitchModule,
+    ChangeListV2Module
   ],
   exports: [
     CommonModule,
