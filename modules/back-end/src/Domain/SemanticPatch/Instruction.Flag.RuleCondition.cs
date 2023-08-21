@@ -98,12 +98,11 @@ public class RemoveValuesFromConditionInstruction : FlagInstruction
         {
             return;
         }
-        
-        var originalValues =
-            JsonSerializer.Deserialize<List<string>>(condition.Value, ReusableJsonSerializerOptions.Web);
+
+        var originalValues = JsonSerializer.Deserialize<List<string>>(condition.Value);
         originalValues.RemoveAll(v => value.Values.Contains(v));
 
-        condition.Value = JsonSerializer.Serialize(originalValues, ReusableJsonSerializerOptions.Web);
+        condition.Value = JsonSerializer.Serialize(originalValues);
     }
 }
 
@@ -133,11 +132,10 @@ public class AddValuesToConditionInstruction : FlagInstruction
             return;
         }
 
-        var originalValues =
-            JsonSerializer.Deserialize<List<string>>(condition.Value, ReusableJsonSerializerOptions.Web);
+        var originalValues = JsonSerializer.Deserialize<List<string>>(condition.Value);
         originalValues.AddRange(value.Values);
 
-        condition.Value = JsonSerializer.Serialize(originalValues, ReusableJsonSerializerOptions.Web);
+        condition.Value = JsonSerializer.Serialize(originalValues);
     }
 }
 
