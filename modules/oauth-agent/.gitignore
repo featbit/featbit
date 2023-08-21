@@ -461,4 +461,4 @@ $RECYCLE.BIN/
 ##
 ## Certificates
 ##
-certs/
+certs/*
