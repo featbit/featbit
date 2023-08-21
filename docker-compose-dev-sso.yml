@@ -191,12 +191,11 @@ services:
       - KEYCLOAK_HTTP_PORT=80
       - KEYCLOAK_HTTPS_PORT=443
       - KEYCLOAK_EXTRA_ARGS_PREPENDED=--verbose
-    # command: ["tail", "-f", "/dev/null"]
+    # command: ["tail", "-f", "/dev/null"] # to keep container running for debugging
 
     depends_on:
       - postgresql
     networks:
-      # - featbit-network
       featbit-network:
         aliases:
           - keycloak.featbit.example

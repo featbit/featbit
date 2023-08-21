@@ -17,7 +17,7 @@ the original repo and be found at
 
 https://github.com/curityio/oauth-agent-dotnet
 
-Should this solution prove fruitful, It would be best for the featbit project to fork the original repo, then use that repo as the sub-module to avoid and license conflicts.  As MIT and Apache 2.0 are compatible licenses, there should be no conflicts but credit to the original developers must be given and the license can't be changed by a downstream project.
+It would be best for the featbit project to fork the original repo, then use that repo as the sub-module to avoid and license conflicts.  As MIT and Apache 2.0 are compatible licenses, there should be no conflicts but credit to the original developers must be given and the license can't be changed by a downstream project.
 
 ## Development Challenges
 
@@ -91,7 +91,11 @@ https://medium.com/@tbusser/creating-a-browser-trusted-self-signed-ssl-certifica
 
 #### step-ca notes 
 
-step-ca has been included in the development stack as a somewhat easy to manage certificate  authority, it is not required and if you are using you own method of generating certificates, it can be commented out of the docker-compose-dev-sso.yml file. In fact, even if it is used, it can be commented out after the necessary certificates have been created.
+step-ca has been included in the development stack as a somewhat easy way to manage a certificate authority and create x509 certificates, it is not required and if you are using you own method of generating certificates, it can be commented out of the docker-compose-dev-sso.yml file. In fact, even if it is used, it can be commented out after the necessary certificates have been created.
+
+Documentation can be found here.
+
+https://hub.docker.com/r/smallstep/step-ca
 
 
 default admin username is `step`
