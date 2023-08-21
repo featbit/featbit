@@ -21,8 +21,7 @@
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
         <nz-form-control nzErrorTip="Environment name is mandatory!" i18n-nzErrorTip="@@org.project.envNameMandatory">
-          <input type="text" nz-input (ngModelChange)="nameChange($event)" formControlName="name" placeholder="Name"
-                 i18n-placeholder="@@common.name"/>
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>

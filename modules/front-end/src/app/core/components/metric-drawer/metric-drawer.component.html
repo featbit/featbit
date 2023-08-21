@@ -49,7 +49,7 @@
       <nz-form-item [ngStyle]="metricForm.value.eventType === customEventType ? { 'margin-bottom': '8px' } : {}">
         <nz-form-label nzRequired i18n="@@expt.overview.event-type">Event type</nz-form-label>
         <nz-form-control i18n-nzErrorTip="@@expt.overview.event-type-cannot-be-empty" nzErrorTip="Event type cannot be empty">
-          <nz-select formControlName="eventType" (ngModelChange)="onEventTypeChange($event)">
+          <nz-select formControlName="eventType">
             <nz-option [nzValue]="customEventType"  nzLabel="Custom"></nz-option>
           </nz-select>
         </nz-form-control>

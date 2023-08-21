@@ -21,7 +21,6 @@
               [compareWith]="compareWith"
               formControlName="featureFlag"
               (nzOnSearch)="onSearchFeatureFlag($event)"
-              (ngModelChange)="onFeatureFlagChange($event)"
               [nzCustomTemplate]="ffTemplate"
             >
               <ng-container *ngFor="let ff of featureFlagList?.items">

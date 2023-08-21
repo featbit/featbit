@@ -63,6 +63,10 @@ export class EnvDrawerComponent {
       key: [{disabled: isKeyDisabled, value: null}, Validators.required, this.keyAsyncValidator],
       description: [null],
     });
+
+    this.envForm.get('name').valueChanges.subscribe((name) => {
+      this.nameChange(name);
+    });
   }
 
   nameChange(name: string) {

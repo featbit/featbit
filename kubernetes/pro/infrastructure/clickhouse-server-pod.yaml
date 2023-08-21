@@ -6,7 +6,7 @@ metadata:
   name: clickhouse-server
 spec:
   containers:
-    - image: clickhouse/clickhouse-server:22.3
+    - image: clickhouse/clickhouse-server:23.7
       name: clickhouse-server
       ports:
         - containerPort: 8123
@@ -14,6 +14,7 @@ spec:
         - containerPort: 9000
         - containerPort: 9009
         - containerPort: 9440
+        - containerPort: 9181
       resources: {}
       volumeMounts:
         - mountPath: /etc/clickhouse-server/config.xml

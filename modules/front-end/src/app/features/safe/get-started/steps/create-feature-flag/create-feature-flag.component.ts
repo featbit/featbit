@@ -118,6 +118,10 @@ export class CreateFeatureFlagComponent implements OnInit {
       key: [key, Validators.required, this.flagKeyAsyncValidator],
       description: [description, Validators.maxLength(512)]
     });
+
+    this.form.get('name').valueChanges.subscribe((event)=>{
+      this.onNameChange(event);
+    })
   }
 
   patchForm() {

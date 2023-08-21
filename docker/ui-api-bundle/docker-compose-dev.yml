@@ -1,0 +1,103 @@
+name: featbit-bundle-dev
+version: "3"
+services:
+  ui-api-bundle:
+    image: featbit/ui-api-bundle:dev
+    container_name: ui-api-bundle
+    build:
+      context: ../../
+      dockerfile: ./docker/ui-api-bundle/Dockerfile
+    environment:
+      - DEMO_URL=http://localhost:5173
+      - EVALUATION_URL=http://localhost:5100
+    depends_on:
+      - mongodb
+      - redis
+      - da-server
+      - demo-dino-game-vue
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
+
+  evaluation-server:
+    image: featbit/evaluation-server:dev
+    container_name: evaluation-server
+    build:
+      context: ../../modules/evaluation-server
+      dockerfile: ./deploy/Dockerfile
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
+
+  da-server:
+    image: featbit/data-analytics-server:dev
+    container_name: data-analytics-server
+    build:
+      context: ../../modules/data-analytics
+      dockerfile: ./Dockerfile
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - "8200:80"
+    networks:
+      - featbit-network
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MONGO_URI: mongodb://admin:password@mongodb:27017
+      MONGO_INITDB_DATABASE: featbit
+      MONGO_HOST: mongodb
+
+  mongodb:
+    image: mongo:5.0.14
+    container_name: mongodb
+    restart: on-failure
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=featbit
+    volumes:
+      - mongodb:/data/db
+      - ../../infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+    networks:
+      - featbit-network
+
+  redis:
+    image: bitnami/redis:6.2.10
+    container_name: redis
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - featbit-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/bitnami/redis/data
+
+  demo-dino-game-vue:
+    image: featbit/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "5173:80"
+
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.1.0.0/16
+
+volumes:
+  mongodb:
+  redis:

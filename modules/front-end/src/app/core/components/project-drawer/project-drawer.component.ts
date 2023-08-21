@@ -60,6 +60,10 @@ export class ProjectDrawerComponent {
       name: [null, [Validators.required]],
       key: [{disabled: isKeyDisabled, value: null}, Validators.required, this.keyAsyncValidator],
     });
+
+    this.projectForm.get('name').valueChanges.subscribe((newName) => {
+      this.nameChange(newName);
+    })
   }
 
   nameChange(name: string) {

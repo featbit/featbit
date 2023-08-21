@@ -29,14 +29,6 @@ kubectl apply -f .\infrastructure\redis-service.yaml
 
 kubectl apply -f .\infrastructure\redis-pod.yaml
 
-kubectl apply -f .\infrastructure\zookeeper-zoo-configmap.yaml
-
-kubectl apply -f .\infrastructure\zookeeper-persistentvolumeclaim.yaml
-
-kubectl apply -f .\infrastructure\zookeeper-service.yaml
-
-kubectl apply -f .\infrastructure\zookeeper-pod.yaml
-
 kubectl apply -f .\infrastructure\clickhouse-configmap-etc.yaml
 
 kubectl apply -f .\infrastructure\clickhouse-server-persistentvolumeclaim.yaml
