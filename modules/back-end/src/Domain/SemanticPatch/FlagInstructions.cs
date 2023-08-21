@@ -64,14 +64,13 @@ public class FlagInstructions : IEnumerable<FlagInstruction>
                 continue;
             }
 
-            JsonElement value = default;
-            if (jsonElement.TryGetProperty("value", out var valueElement))
+            if (!jsonElement.TryGetProperty("value", out var valueElement))
             {
-                value = valueElement;
+                continue;
             }
 
-            var patch = creator.Invoke(kind, value);
-            instructions.Add(patch);
+            var instruction = creator.Invoke(kind, valueElement);
+            instructions.Add(instruction);
         }
 
         _instructions = instructions;
