@@ -2,3 +2,7 @@
 	path = modules/oauth-agent/src/oauth-agent-dotnet
 	url = https://github.com/wss-rbrennan/oauth-agent-dotnet.git
 	branch = feature/dev-settings
+[submodule "modules/oauth-agent/src/spa-using-token-handler"]
+	path = modules/oauth-agent/src/spa-using-token-handler
+	url = https://github.com/wss-rbrennan/spa-using-token-handler.git
+	branch = featbit/oauth
