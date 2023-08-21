@@ -138,7 +138,7 @@ services:
 
   postgresql:
     image: docker.io/bitnami/postgresql:latest
-    # container_name: postgresql
+    container_name: postgresql
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - POSTGRESQL_USERNAME=bn_keycloak
