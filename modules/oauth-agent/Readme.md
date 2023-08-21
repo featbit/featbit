@@ -103,23 +103,23 @@ step ca provisioner update admin --x509-max-dur=12000h
 
 generate cert
 ```
-step ca certificate --kty RSA --not-after 2024-08-17T00:00:00+00:00 --san featbit.example --san *.featbit.example *.featbit.example featbit-example4.crt featbit-example4.key
+step ca certificate --kty RSA --not-after 2024-08-17T00:00:00+00:00 --san featbit.example --san *.featbit.example *.featbit.example featbit-example.crt featbit-example.key
 
 ```
 
 make sure key is in the right format
 ```
-step crypto key format --pem --pkcs8 --out featbit-example4-pkcs-key.pem featbit-example4-key.pem
+step crypto key format --pem --pkcs8 --out featbit-example-pkcs-key.pem featbit-example-key.pem
 ```
 
 create https key store file for keycloak
 ```
-keytool -importkeystore -srckeystore featbit-example4.p12 -srcstoretype PKCS12 -destkeystore featbit-example4.jks -deststoretype JKS
+keytool -importkeystore -srckeystore featbit-example.p12 -srcstoretype PKCS12 -destkeystore featbit-example.jks -deststoretype JKS
 ```
 
 remove password from certificate key
 ```
-openssl pkcs8 -topk8 -nocrypt -in featbit-example4-pkcs-key.enc.pem -out featbit-example4-pkcs-key.pem
+openssl pkcs8 -topk8 -nocrypt -in featbit-example-pkcs-key.enc.pem -out featbit-example-pkcs-key.pem
 ```
 
 create certificate with 

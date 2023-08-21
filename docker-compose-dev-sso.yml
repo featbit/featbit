@@ -184,9 +184,9 @@ services:
       # - KEYCLOAK_HTTPS_USE_PEM=true
       # - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
       # - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
-      - KEYCLOAK_HTTPS_TRUST_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example4.jks
+      - KEYCLOAK_HTTPS_TRUST_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example.jks
       - KEYCLOAK_HTTPS_TRUST_STORE_PASSWORD=supersecret123
-      - KEYCLOAK_HTTPS_KEY_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example4.jks
+      - KEYCLOAK_HTTPS_KEY_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example.jks
       - KEYCLOAK_HTTPS_KEY_STORE_PASSWORD=supersecret123
       - KEYCLOAK_HTTP_PORT=80
       - KEYCLOAK_HTTPS_PORT=443
