@@ -2,7 +2,6 @@ using System.Text.Json;
 using Application.FeatureFlags;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
-using Domain.FlagDrafts;
 using Domain.FlagSchedules;
 using Domain.SemanticPatch;
 using Domain.Utils;
@@ -14,12 +13,13 @@ namespace Infrastructure.FlagSchedules;
 
 public class FlagScheduleWorker : BackgroundService
 {
+    private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(45));
+
     private readonly IFeatureFlagService _featureFlagService;
     private readonly IFlagScheduleService _flagScheduleService;
     private readonly IAuditLogService _auditLogService;
     private readonly IFlagDraftService _flagDraftService;
     private readonly ILogger<FlagScheduleWorker> _logger;
-    private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(30));
     private readonly IPublisher _publisher;
 
     public FlagScheduleWorker(
@@ -61,15 +61,16 @@ public class FlagScheduleWorker : BackgroundService
     {
         try
         {
-            var pendingSchedules = await _flagScheduleService.FindManyAsync(s => s.Status == FlagScheduleStatus.Pending && s.ScheduledTime <= DateTime.UtcNow);
+            var pendingSchedules =
+                await _flagScheduleService.FindManyAsync(s => s.Status == FlagScheduleStatus.Pending && s.ScheduledTime <= DateTime.UtcNow);
 
             foreach (var schedule in pendingSchedules)
             {
                 var flagDraft = await _flagDraftService.FindOneAsync(x => x.Id == schedule.FlagDraftId);
-                var previous = JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Previous,
-                    ReusableJsonSerializerOptions.Web);
-                var current = JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Current,
-                    ReusableJsonSerializerOptions.Web);
+                var previous = 
+                    JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Previous, ReusableJsonSerializerOptions.Web);
+                var current = 
+                    JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Current, ReusableJsonSerializerOptions.Web);
                 var instructions = FlagComparer.Compare(previous, current);
 
                 var flag = await _featureFlagService.GetAsync(current!.Id);
@@ -85,7 +86,7 @@ public class FlagScheduleWorker : BackgroundService
                     continue;
                 }
 
-                // set status
+                // set draft and schedule status
                 flagDraft.Applied();
                 schedule.Applied();
                 await _flagDraftService.UpdateAsync(flagDraft);
