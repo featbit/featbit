@@ -1,11 +1,14 @@
 using Domain.AuditLogs;
 using Domain.Targeting;
+using Domain.SemanticPatch;
 
 namespace Domain.FeatureFlags;
 
 public class FeatureFlag : FullAuditedEntity
 {
     public Guid EnvId { get; set; }
+
+    public Guid Revision { get; set; }
 
     public string Name { get; set; }
 
@@ -33,6 +36,10 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool IsArchived { get; set; }
 
+    public FeatureFlag()
+    {
+    }
+
     public FeatureFlag(
         Guid envId,
         string name,
@@ -46,6 +53,8 @@ public class FeatureFlag : FullAuditedEntity
         ICollection<string> tags,
         Guid currentUserId) : base(currentUserId)
     {
+        Revision = Guid.NewGuid();
+
         EnvId = envId;
 
         Name = name;
@@ -116,9 +125,7 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         IsArchived = true;
-
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
     }
@@ -128,9 +135,7 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         IsArchived = false;
-
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
     }
@@ -143,9 +148,7 @@ public class FeatureFlag : FullAuditedEntity
         Description = description;
         IsEnabled = isEnabled;
         DisabledVariationId = disabledVariationId;
-
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
     }
@@ -155,9 +158,7 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         Variations = variations;
-
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
     }
@@ -175,9 +176,7 @@ public class FeatureFlag : FullAuditedEntity
         Rules = rules;
         Fallthrough = fallthrough;
         ExptIncludeAllTargets = exptIncludeAllTargets;
-
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
     }
@@ -197,8 +196,7 @@ public class FeatureFlag : FullAuditedEntity
         // change audited properties
         CreatedAt = DateTime.UtcNow;
         CreatorId = currentUserId;
-        UpdatedAt = CreatedAt;
-        UpdatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
     }
 
     public DataChange Toggle(Guid currentUserId)
@@ -206,9 +204,7 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         IsEnabled = !IsEnabled;
-
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
     }
@@ -225,10 +221,25 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         Tags = tags ?? Array.Empty<string>();
-
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
+    }
+
+    public void ApplyInstructions(IEnumerable<FlagInstruction> instructions, Guid updatorId)
+    {
+        foreach (var instruction in instructions)
+        {
+            instruction.Apply(this);
+        }
+
+        MarkAsUpdated(updatorId);
+    }
+
+    public override void MarkAsUpdated(Guid updatorId)
+    {
+        Revision = Guid.NewGuid();
+
+        base.MarkAsUpdated(updatorId);
     }
 }

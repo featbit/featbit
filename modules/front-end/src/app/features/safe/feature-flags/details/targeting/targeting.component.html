@@ -1,6 +1,6 @@
 <section class="body-container">
   <div class="detail-body">
-    <div class="banner">
+    <div class="banner" *ngIf="!isLoading">
       <!-- a placeholder, do not delete it -->
       <div *ngIf="featureFlag.isEnabled"></div>
       <div class="warning" *ngIf="!featureFlag.isEnabled">
@@ -8,14 +8,27 @@
         <ng-container i18n="@@ff.components.details.targeting.settings-ineffective-warning">Following settings won't be effective until you turn the flag on</ng-container>
       </div>
       <div class="action-btns">
-        <button nz-button nzType="primary" (click)="onSetExptRulesClick()">
-          <i nz-icon nzType="filter" nzTheme="outline"></i>
-          <ng-container i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</ng-container>
+        <button class="pending-changes" nzType="default" (click)="openPendingChangesDrawer()">
+          <i nz-icon nzType="field-time" nzTheme="outline"></i>
+          <span>{{pendingChangesList.length}}</span>
         </button>
-        <button nz-button nzType="primary" class="save-btn" (click)="onReviewChanges(validationErrorTpl)">
+        <button class="save" nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, reviewModalKindEnum.Review)">
           <i nz-icon nzType="icons:icon-save"></i>
           <ng-container i18n="@@common.save">Save</ng-container>
         </button>
+        <button class="more-action" nzType="primary" nz-dropdown [nzDropdownMenu]="menu">
+          <i nz-icon nzType="icons:icon-menu"></i>
+        </button>
+        <nz-dropdown-menu #menu="nzDropdownMenu">
+          <ul nz-menu>
+            <li nz-menu-item
+                (click)="onReviewChanges(validationErrorTpl, reviewModalKindEnum.Schedule)"
+                i18n="ff.components.details.targeting.schedule-changes">Schedule changes</li>
+            <li nz-menu-item
+                (click)="onSetExptRulesClick()"
+                i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</li>
+          </ul>
+        </nz-dropdown-menu>
       </div>
     </div>
 
@@ -122,6 +135,7 @@
   *ngIf="!isLoading"
   [visible]="reviewModalVisible"
   [refName]="featureFlag.name"
+  [kind]="reviewModalKind"
   [previous]="originalData"
   [current]="currentData"
   [refType]="refType"
@@ -133,3 +147,5 @@
 
 <app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
   [featureFlag]="featureFlag"></app-expt-rules-drawer>
+
+<pending-changes-drawer [visible]="pendingChangesDrawerVisible" [pendingChangesList]="pendingChangesList" (close)="onPendingChangesDrawerClosed()"></pending-changes-drawer>
