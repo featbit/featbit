@@ -226,7 +226,7 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public void ApplyPatches(IEnumerable<FlagInstruction> instructions, Guid updatorId)
+    public void ApplyInstructions(IEnumerable<FlagInstruction> instructions, Guid updatorId)
     {
         foreach (var instruction in instructions)
         {

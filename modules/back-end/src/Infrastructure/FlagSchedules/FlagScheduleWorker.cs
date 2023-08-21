@@ -1,10 +1,6 @@
-using System.Text.Json;
 using Application.FeatureFlags;
 using Domain.AuditLogs;
-using Domain.FeatureFlags;
 using Domain.FlagSchedules;
-using Domain.SemanticPatch;
-using Domain.Utils;
 using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -66,38 +62,15 @@ public class FlagScheduleWorker : BackgroundService
 
             foreach (var schedule in pendingSchedules)
             {
-                var flagDraft = await _flagDraftService.FindOneAsync(x => x.Id == schedule.FlagDraftId);
-                var previous = 
-                    JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Previous, ReusableJsonSerializerOptions.Web);
-                var current = 
-                    JsonSerializer.Deserialize<FeatureFlag>(flagDraft.DataChange.Current, ReusableJsonSerializerOptions.Web);
-                var instructions = FlagComparer.Compare(previous, current);
-
-                var flag = await _featureFlagService.GetAsync(current!.Id);
-
                 try
                 {
-                    flag.ApplyPatches(instructions, flagDraft.CreatorId);
-                    await _featureFlagService.UpdateAsync(flag);
+                    await ApplyScheduleAsync(schedule);
+                    _logger.LogInformation("{ScheduleId}: Flag scheduling has been applied.", schedule.Id);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    _logger.LogError(e, "{ScheduleId}: Error occurred while performing flag scheduling.", schedule.Id);
-                    continue;
+                    _logger.LogError(ex, "{ScheduleId}: Error occurred while applying flag scheduling.", schedule.Id);
                 }
-
-                // set draft and schedule status
-                flagDraft.Applied();
-                schedule.Applied();
-                await _flagDraftService.UpdateAsync(flagDraft);
-                await _flagScheduleService.UpdateAsync(schedule);
-
-                // write audit log
-                var auditLog = AuditLog.ForUpdate(flag, flagDraft.DataChange, flagDraft.Comment, flagDraft.CreatorId);
-                await _auditLogService.AddOneAsync(auditLog);
-
-                // publish on feature flag change notification
-                await _publisher.Publish(new OnFeatureFlagChanged(flag, flagDraft.Comment), cancellationToken);
             }
         }
         catch (OperationCanceledException)
@@ -106,9 +79,33 @@ public class FlagScheduleWorker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while performing flag scheduling.");
+            _logger.LogError(ex, "Error occurred while processing flag scheduling.");
         }
 
-        await Task.CompletedTask;
+        return;
+
+        async Task ApplyScheduleAsync(FlagSchedule schedule)
+        {
+            var flagDraft = await _flagDraftService.FindOneAsync(x => x.Id == schedule.FlagDraftId);
+            var instructions = flagDraft.GetInstructions();
+            var flag = await _featureFlagService.GetAsync(flagDraft.FlagId);
+
+            // apply flag instructions
+            flag.ApplyInstructions(instructions, flagDraft.CreatorId);
+            await _featureFlagService.UpdateAsync(flag);
+
+            // set draft and schedule status
+            flagDraft.Applied();
+            schedule.Applied();
+            await _flagDraftService.UpdateAsync(flagDraft);
+            await _flagScheduleService.UpdateAsync(schedule);
+
+            // write audit log
+            var auditLog = AuditLog.ForUpdate(flag, flagDraft.DataChange, flagDraft.Comment, flagDraft.CreatorId);
+            await _auditLogService.AddOneAsync(auditLog);
+
+            // publish on feature flag change notification
+            await _publisher.Publish(new OnFeatureFlagChanged(flag, flagDraft.Comment), cancellationToken);
+        }
     }
 }

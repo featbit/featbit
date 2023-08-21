@@ -1,4 +1,7 @@
-﻿using Domain.AuditLogs;
+﻿using System.Text.Json;
+using Domain.AuditLogs;
+using Domain.FeatureFlags;
+using Domain.SemanticPatch;
 
 namespace Domain.FlagDrafts;
 
@@ -48,5 +51,15 @@ public class FlagDraft : FullAuditedEntity
     {
         Status = FlagDraftStatus.Applied;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public IEnumerable<FlagInstruction> GetInstructions()
+    {
+        var previous =
+            JsonSerializer.Deserialize<FeatureFlag>(DataChange.Previous, ReusableJsonSerializerOptions.Web);
+        var current =
+            JsonSerializer.Deserialize<FeatureFlag>(DataChange.Current, ReusableJsonSerializerOptions.Web);
+
+        return FlagComparer.Compare(previous, current);
     }
 }
