@@ -17,16 +17,17 @@ the original repo and be found at
 
 https://github.com/curityio/oauth-agent-dotnet
 
-Should this solution prove fruitful, It would be best for the featbit project to fork the original repo, then use that repo as the submodule to avoid and license conflicts.  As MIT and Apache 2.0 are compatible licenses, there should be no conflicts but credit to the original developers must be given and the license can't be changed by a downstream project.
+Should this solution prove fruitful, It would be best for the featbit project to fork the original repo, then use that repo as the sub-module to avoid and license conflicts.  As MIT and Apache 2.0 are compatible licenses, there should be no conflicts but credit to the original developers must be given and the license can't be changed by a downstream project.
 
 ## Development Challenges
 
-Developing this part of the solution requires that the development environment have properly functioning DNS, a reverse proxy, and a trusted SSL certificate or certificates.  These requirments are discussed below in their own sections.
+Developing this part of the solution requires that the development environment have properly functioning DNS, a reverse proxy, and a trusted SSL certificate or certificates.  These requirements are discussed below in their own sections.
+
+
 
 ### DNS
 
-If developing on windows and you don't have access to a dns server the easiest way to fake dns names is by editing you
-host file, the same can be done on linux machines
+If developing on windows and you don't have access to a dns server the easiest way to fake dns names is by editing your host file, the same can be done on linux machines
 
 The entry would be something like this on windows
 
@@ -59,22 +60,23 @@ The entry would be something like this on windows
 127.0.0.1       eval.featbit.example
 127.0.0.1       nginx-auth-agent-proxy.featbit.example
 127.0.0.1       ca.featbit.example
+127.0.0.1       spa.featbit.example
 ```
 
 ### SSL
 
+Developing the SSO solution requires certificates and knowledge of certificate creation and trust relationships.  This section contains is not a set of instructions and is intended to serve as notes for creating the certificates and trust relationships need for the development environment to work properly. It is also assumed that development is being done on windows with a working wsl environment 
+
 Generate CA and Wildcard SSL certificate using these instructions using wsl or linux
 https://www.brainbytez.nl/tutorials/linux-tutorials/create-a-self-signed-wildcard-ssl-certificate-openssl/
 
-Copy certs to modules/oauth-agent/certs if using wsl this is can be done the executing the following in the folder taht contains the certificates and then copy like any other files in File Explorer
+Copy certs to modules/oauth-agent/certs if using wsl this is can be done the executing the following in the folder that contains the certificates and then copy like any other files in File Explorer
 ```
 explorer.exe .
 ```
 
 
-
-
-After copying the cert and bringing up the compose stack, navigate to https://featbit.example at this stage you'll get a self signed certificate warning, you could allow anyway in the browser, but it's better to export the cert and the add it to the trusted root and trusted CAs in your OS as all other subdomains will have the same issue will the self signed certificate.
+After copying the cert and bringing up the compose stack, navigate to https://featbit.example at this stage you'll get a self signed certificate warning, you could allow anyway in the browser, but it's better to export the cert and the add it to the trusted root and trusted CAs in your OS as all other subdomains will have the same issue with the self signed certificate.
 
 follow these instructions on windows
 https://techcommunity.microsoft.com/t5/windows-server-essentials-and/installing-a-self-signed-certificate-as-a-trusted-root-ca-in/ba-p/396105
@@ -87,27 +89,37 @@ This article is also a great reference
 https://medium.com/@tbusser/creating-a-browser-trusted-self-signed-ssl-certificate-2709ce43fd15
 
 
-#### step-ca notes
+#### step-ca notes 
+
+step-ca has been included in the development stack as a somewhat easy to manage certificate  authority, it is not required and if you are using you own method of generating certificates, it can be commented out of the docker-compose-dev-sso.yml file. In fact, even if it is used, it can be commented out after the necessary certificates have been created.
+
+
 default admin username is `step`
+
+extend cert lifetime 
+```
+step ca provisioner update admin --x509-max-dur=12000h
+```
 
 generate cert
 ```
-step ca certificate --kty=RSA --san featbit.example --san *.featbit.example *.featbit.example featbit-example2.crt featbit-example3.key
+step ca certificate --kty RSA --not-after 2024-08-17T00:00:00+00:00 --san featbit.example --san *.featbit.example *.featbit.example featbit-example4.crt featbit-example4.key
+
 ```
 
 make sure key is in the right format
 ```
-step crypto key format --pem --pkcs8 --out featbit-exmaple3-pkcs-key.pem featbit-example3-key.pem
+step crypto key format --pem --pkcs8 --out featbit-example4-pkcs-key.pem featbit-example4-key.pem
 ```
 
 create https key store file for keycloak
 ```
-keytool -importkeystore -srckeystore featbit-example3.p12 -srcstoretype PKCS12 -destkeystore featbit-example3.jks -deststoretype JKS
+keytool -importkeystore -srckeystore featbit-example4.p12 -srcstoretype PKCS12 -destkeystore featbit-example4.jks -deststoretype JKS
 ```
 
 remove password from certificate key
 ```
-openssl pkcs8 -topk8 -nocrypt -in featbit-example3-pkcs-key.enc.pem -out featbit-example3-pkcs-key.pem
+openssl pkcs8 -topk8 -nocrypt -in featbit-example4-pkcs-key.enc.pem -out featbit-example4-pkcs-key.pem
 ```
 
 create certificate with 
