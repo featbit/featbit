@@ -65,11 +65,11 @@ public class FlagScheduleWorker : BackgroundService
                 try
                 {
                     await ApplyScheduleAsync(schedule);
-                    _logger.LogInformation("{ScheduleId}: Flag scheduling has been applied.", schedule.Id);
+                    _logger.LogInformation("{ScheduleId}: Flag schedule has been applied.", schedule.Id);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "{ScheduleId}: Error occurred while applying flag scheduling.", schedule.Id);
+                    _logger.LogError(ex, "{ScheduleId}: Error occurred while applying flag schedule.", schedule.Id);
                 }
             }
         }
@@ -79,7 +79,7 @@ public class FlagScheduleWorker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while processing flag scheduling.");
+            _logger.LogError(ex, "Error occurred while processing flag schedule.");
         }
 
         return;
