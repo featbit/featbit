@@ -33,7 +33,6 @@ public class UnArchiveFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, b
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Restore(_currentUser.Id);
-        
         await _service.UpdateAsync(flag);
 
         // write audit log
@@ -41,7 +40,7 @@ public class UnArchiveFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, b
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag, String.Empty), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
 
         return true;
     }

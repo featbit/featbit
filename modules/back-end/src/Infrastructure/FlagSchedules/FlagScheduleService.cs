@@ -2,7 +2,7 @@
 
 namespace Infrastructure.FlagSchedules;
 
-public class FlagScheduleService : MongoDbService<FlagSchedule>,  IFlagScheduleService
+public class FlagScheduleService : MongoDbService<FlagSchedule>, IFlagScheduleService
 {
     public FlagScheduleService(MongoDbClient mongoDb) : base(mongoDb)
     {

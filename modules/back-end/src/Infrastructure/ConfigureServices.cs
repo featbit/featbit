@@ -93,7 +93,7 @@ public static class ConfigureServices
         services.AddTransient<IFlagDraftService, FlagDraftService>();
         services.AddTransient<IFlagScheduleService, FlagScheduleService>();
         services.AddTransient<IFlagRevisionService, FlagRevisionService>();
-        
+
         return services;
     }
 

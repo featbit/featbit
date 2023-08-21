@@ -125,11 +125,8 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         IsArchived = true;
+        MarkAsUpdated(currentUserId);
 
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
-
-        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -138,11 +135,8 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         IsArchived = false;
+        MarkAsUpdated(currentUserId);
 
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
-
-        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -154,11 +148,8 @@ public class FeatureFlag : FullAuditedEntity
         Description = description;
         IsEnabled = isEnabled;
         DisabledVariationId = disabledVariationId;
+        MarkAsUpdated(currentUserId);
 
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
-
-        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -167,11 +158,8 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         Variations = variations;
+        MarkAsUpdated(currentUserId);
 
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
-
-        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -188,11 +176,8 @@ public class FeatureFlag : FullAuditedEntity
         Rules = rules;
         Fallthrough = fallthrough;
         ExptIncludeAllTargets = exptIncludeAllTargets;
+        MarkAsUpdated(currentUserId);
 
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
-
-        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -211,10 +196,7 @@ public class FeatureFlag : FullAuditedEntity
         // change audited properties
         CreatedAt = DateTime.UtcNow;
         CreatorId = currentUserId;
-        UpdatedAt = CreatedAt;
-        UpdatorId = currentUserId;
-
-        Revision = Guid.NewGuid();
+        MarkAsUpdated(currentUserId);
     }
 
     public DataChange Toggle(Guid currentUserId)
@@ -222,11 +204,8 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         IsEnabled = !IsEnabled;
+        MarkAsUpdated(currentUserId);
 
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
-
-        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
@@ -242,24 +221,25 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         Tags = tags ?? Array.Empty<string>();
+        MarkAsUpdated(currentUserId);
 
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = currentUserId;
-
-        Revision = Guid.NewGuid();
         return dataChange.To(this);
     }
 
-    public void ApplyPatches(IEnumerable<FlagInstruction> instructions, Guid updatorId)
+    public void ApplyInstructions(IEnumerable<FlagInstruction> instructions, Guid updatorId)
     {
         foreach (var instruction in instructions)
         {
             instruction.Apply(this);
         }
 
-        UpdatedAt = DateTime.UtcNow;
-        UpdatorId = updatorId;
+        MarkAsUpdated(updatorId);
+    }
 
+    public override void MarkAsUpdated(Guid updatorId)
+    {
         Revision = Guid.NewGuid();
+
+        base.MarkAsUpdated(updatorId);
     }
 }

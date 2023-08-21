@@ -15,4 +15,10 @@ public class FullAuditedEntity : AuditedEntity
         CreatorId = creatorId;
         UpdatorId = creatorId;
     }
+
+    public virtual void MarkAsUpdated(Guid updatorId)
+    {
+        UpdatorId = updatorId;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

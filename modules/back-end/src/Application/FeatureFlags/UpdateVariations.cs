@@ -48,7 +48,6 @@ public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateVariations(request.Variations, _currentUser.Id);
-        
         await _service.UpdateAsync(flag);
 
         // write audit log
@@ -56,7 +55,7 @@ public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag, string.Empty), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
 
         return true;
     }

@@ -6,7 +6,7 @@ namespace Application.FeatureFlags;
 public class SetTags : IRequest<bool>
 {
     public Guid EnvId { get; set; }
-    
+
     public string Key { get; set; }
 
     public ICollection<string> Tags { get; set; }
@@ -39,10 +39,10 @@ public class SetTagsHandler : IRequestHandler<SetTags, bool>
         // write audit log
         var auditLog = AuditLog.ForUpdate(flag, dataChange, string.Empty, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
-        
+
         await _service.UpdateAsync(flag);
         await _flagRevisionService.CreateForFlag(flag, string.Empty, _currentUser.Id);
-        
+
         return true;
     }
 }

@@ -13,7 +13,7 @@ public class FlagRevisionService : MongoDbService<FlagRevision>, IFlagRevisionSe
     {
         var flagRevision = FlagRevision.FromFlag(flag, comment, currentUserId);
         await AddOneAsync(flagRevision);
-        
+
         return flagRevision;
     }
 }
