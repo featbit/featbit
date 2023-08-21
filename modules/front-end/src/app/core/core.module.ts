@@ -67,7 +67,6 @@ import { NzCardModule } from "ng-zorro-antd/card";
 import { TranslationPipe } from "@core/pipes/translation.pipe";
 import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-variation-value.pipe";
-import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
 import { SlugifyPipe } from "@core/pipes/slugify";
 import { AuditLogComponent } from "@core/components/audit-log/audit-log.component";
 import { ChangeListComponent } from "@core/components/change-list/change-list.component";
@@ -91,17 +90,10 @@ import {
   PendingChangesDrawerComponent
 } from "@core/components/pending-changes-drawer/pending-changes-drawer.component";
 import { ChangeListV2Module } from "@core/components/change-list-v2/change-list-v2.module";
+import { PipesModule } from "@core/pipes/pipes.module";
 
 @NgModule({
   declarations: [
-    SlugifyPipe,
-    PercentagePipe,
-    SafeHtmlPipe,
-    PolicyTypePipe,
-    AccessTokenTypePipe,
-    AccessTokenStatusPipe,
-    TranslationPipe,
-    RuleVariationValuePipe,
     PermissionCheckDirective,
     LocaleSwitcherComponent,
     MemberDrawerComponent,
@@ -142,6 +134,7 @@ import { ChangeListV2Module } from "@core/components/change-list-v2/change-list-
     OverlayModule,
     ReactiveFormsModule,
     RouterModule,
+    PipesModule,
     NzFormModule,
     NzIconModule,
     NzMenuModule,
@@ -185,17 +178,16 @@ import { ChangeListV2Module } from "@core/components/change-list-v2/change-list-
     ChangeListV2Module
   ],
   exports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
     SlugifyPipe,
     PercentagePipe,
-    SafeHtmlPipe,
     PolicyTypePipe,
     AccessTokenTypePipe,
     AccessTokenStatusPipe,
     TranslationPipe,
     RuleVariationValuePipe,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
     PermissionCheckDirective,
     LocaleSwitcherComponent,
     MemberDrawerComponent,

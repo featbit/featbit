@@ -43,6 +43,8 @@ import {
 import {
   UpdateRuleVariationOrRollout
 } from "@core/components/change-list-v2/instructions/UpdateRuleVariationOrRollout/update-rule-variation-or-rollout.component";
+import { CoreModule } from "@core/core.module";
+import { PipesModule } from "@core/pipes/pipes.module";
 
 @NgModule({
   declarations: [
@@ -69,7 +71,8 @@ import {
   ],
   imports: [
     CommonModule,
-    NzTagModule
+    NzTagModule,
+    PipesModule
   ],
   exports: [
     ChangeListV2Component

@@ -68,12 +68,12 @@ export class ChangeListV2Component {
       ];
 
       // udpate rule name
-    
+
       // group remove rule instructions
       const removeRuleStr = $localize`:@@common.remove-rule:Remove rule`;
       const removeRuleInstructions: IRuleInstructionGroup[] = instructions.filter((ins) => ins.kind == InstructionKindEnum.RemoveRule).map((ins) => {
         const ruleId = ins.value as string;
-        const rule = ins.previous.rules.find((r) => r.id === ruleId); 
+        const rule = ins.previous.rules.find((r) => r.id === ruleId);
 
         return {
           label: `${removeRuleStr} <span>${rule.name}</span>`,
@@ -86,7 +86,7 @@ export class ChangeListV2Component {
       const updateRuleStr = $localize`:@@common.update-rule:Update rule`;
       const updateRuleInstructions: IRuleInstructionGroup[] = instructions.filter((ins) => !this.notUpdateRuleInstructions.includes(ins.kind)).map((ins) => {
         const ruleId = ins.value as IRuleId;
-        const rule = ins.previous.rules.find((r) => r.id === ruleId.ruleId); 
+        const rule = ins.previous.rules.find((r) => r.id === ruleId.ruleId);
 
         return {
           label: `${updateRuleStr} <span>${rule.name}</span>`,
@@ -94,13 +94,13 @@ export class ChangeListV2Component {
           instructions: [ins]
         }
       });
-      
+
       return { label, groups: [
         ...addRuleInstructions,
         ...removeRuleInstructions,
         ...updateRuleInstructions
       ]};
-      
-    }).filter((category: ICategoryInstruction) => category.instructions.length > 0);
+
+    }).filter((category: ICategoryInstruction) => category.instructions?.length > 0 || category.groups?.length > 0);
   }
 }
