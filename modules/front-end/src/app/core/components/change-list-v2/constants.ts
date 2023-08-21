@@ -64,12 +64,37 @@ export enum InstructionKindEnum {
   UpdateDefaultRuleVariationOrRollouts = 'UpdateDefaultRuleVariationOrRollouts',
 
   // Rules
+  AddRule = 'AddRule',
+  RemoveRule = 'RemoveRule',
+  SetRules = 'SetRules',
+  UpdateRuleName = 'UpdateRuleName',
   UpdateRuleDispatchKey = 'UpdateRuleDispatchKey',
+  AddRuleConditions = 'AddRuleConditions',
+  RemoveRuleConditions = 'RemoveRuleConditions',
+  UpdateRuleCondition = 'UpdateRuleCondition',
+  AddValuesToRuleCondition = 'AddValuesToRuleCondition',
+  RemoveValuesFromRuleCondition = 'RemoveValuesFromRuleCondition',
+  UpdateRuleVariationOrRollouts = 'UpdateRuleVariationOrRollouts'
+}
+
+export enum CategoryEnum {
+  Settings = 'settings',
+  TargetUsers = 'target-users',
+  DefaultRule = 'default-rule',
+  OffVariation = 'off-variation',
+  Variations = 'variations',
+  Rules = 'rules'
+}
+
+export enum RuleInstructionKinkOpEnum {
+  Create = 1,
+  Remove = 2,
+  Update = 3
 }
 
 export const instructionCategories: ICategoryInstruction[] = [
   {
-    category: "settings",
+    category: CategoryEnum.Settings,
     label: $localize`:@@common.settings:Settings`,
     instructions: [
       { component: TurnFlagOnComponent, kind: InstructionKindEnum.TurnFlagOn },
@@ -83,7 +108,7 @@ export const instructionCategories: ICategoryInstruction[] = [
     ]
   },
   {
-    category: "target-users",
+    category: CategoryEnum.TargetUsers,
     label: $localize`:@@common.target-users:Individual Targeting`,
     instructions: [
       { component: RemoveTargetUsersComponent, kind: InstructionKindEnum.RemoveTargetUsers },
@@ -91,7 +116,7 @@ export const instructionCategories: ICategoryInstruction[] = [
     ]
   },
   {
-    category: "default-rule",
+    category: CategoryEnum.DefaultRule,
     label: $localize`:@@common.default-rule:Default rule`,
     instructions: [
       { component: UpdateRuleVariationOrRollout, kind: InstructionKindEnum.UpdateDefaultRuleVariationOrRollouts },
@@ -99,21 +124,21 @@ export const instructionCategories: ICategoryInstruction[] = [
     ]
   },
   {
-    category: "off-variation",
+    category: CategoryEnum.OffVariation,
     label: $localize`:@@common.off-variation:Off variation`,
     instructions: [
       { component: UpdateOffVariationComponent, kind: InstructionKindEnum.UpdateOffVariation },
     ]
   },
   {
-    category: "rules",
+    category: CategoryEnum.Rules,
     label: $localize`:@@common.rules:Rules`,
     instructions: [
       { component: UpdateDefaultRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateRuleDispatchKey },
     ]
   },
   {
-    category: "variations",
+    category: CategoryEnum.Variations,
     label: $localize`:@@common.variations:Variations`,
     instructions: [
       { component: UpdateVariationTypeComponent, kind: InstructionKindEnum.UpdateVariationType },

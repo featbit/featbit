@@ -1,8 +1,7 @@
 import { Type } from "@angular/core";
-import { InstructionKindEnum } from "@core/components/change-list-v2/constants";
-import { IVariation } from "@shared/rules";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
+import { InstructionKindEnum, RuleInstructionKinkOpEnum } from "../constants";
 
 export interface IInstructionComponentData {
   value: IInstructionValue;
@@ -80,7 +79,7 @@ export interface IVariationTargetUsers {
   variationId: string;
 }
 
-export type IInstructionValue = string | string[] | IVariationValue | IDefaultVariation | IRule | IVariationTargetUsers | IRuleName | IRuleDispatchKey | IRuleConditionIds | IRuleConditions | IRuleConditionValues | IRuleRolloutVariations | IRolloutVariations;
+export type IInstructionValue = string | string[] | IVariationValue | IDefaultVariation | IRule | IRule[] | IVariationTargetUsers | IRuleName | IRuleDispatchKey | IRuleConditionIds | IRuleConditions | IRuleConditionValues | IRuleRolloutVariations | IRolloutVariations;
 
 export interface IInstruction {
   kind: string;
@@ -100,8 +99,16 @@ export interface IInstructionKindComponent {
   previous?: IFeatureFlag | ISegment;
   current?: IFeatureFlag | ISegment;
 }
-export interface ICategoryInstruction {
-  category: string;
+
+export interface IRuleInstructionGroup  {
   label: string;
-  instructions: IInstructionKindComponent[];
+  op: RuleInstructionKinkOpEnum,
+  instructions: IInstructionKindComponent[]
+}
+
+export interface ICategoryInstruction {
+  label: string;
+  category?: string;
+  instructions?: IInstructionKindComponent[];
+  groups?: IRuleInstructionGroup[];
 }

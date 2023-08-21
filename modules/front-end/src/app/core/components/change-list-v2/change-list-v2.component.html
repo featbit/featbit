@@ -2,9 +2,14 @@
   <ul>
     <li *ngFor="let category of categories">
       <span class="category">{{category.label}}</span>
-      <div *ngFor="let instruction of category.instructions">
-        <instruction class="instruction" [instruction]="instruction" ></instruction>
-      </div>
+      <ng-container *ngIf="category.instructions">
+        <instruction *ngFor="let instruction of category.instructions" class="instruction" [instruction]="instruction" ></instruction>
+      </ng-container>
+      <ng-container *ngIf="category.groups">
+        <div *ngFor="let group of category.groups">
+          <instruction *ngFor="let instruction of group.instructions" class="instruction" [instruction]="instruction" ></instruction>
+        </div>
+      </ng-container>
     </li>
   </ul>
 </div>
