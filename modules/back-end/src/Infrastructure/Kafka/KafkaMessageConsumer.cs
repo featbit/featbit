@@ -39,6 +39,11 @@ public partial class KafkaMessageConsumer : BackgroundService
             EnableAutoOffsetStore = false
         };
 
+        // if consumer servers are specificed, use them instead of bootstrap servers
+        if (!String.IsNullOrWhiteSpace(configuration["Kafka:ConsumerServers"])){
+            config.BootstrapServers = configuration["Kafka:ConsumerServers"];
+        }
+
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
     }
 
