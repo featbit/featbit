@@ -357,11 +357,17 @@ public static class FlagComparer
             }
 
             // if is multi values condition
-            else if (original.Op == current.Op &&
-                     multiValueOps.Contains(original.Op) &&
-                     original.Value != current.Value)
+            else if (original.Op != current.Op || original.Value != current.Value)
             {
-                CompareConditionValues();
+                if (multiValueOps.Contains(original.Op))
+                {
+                    CompareConditionValues();
+                }
+                else
+                {
+                    var condition = new RuleCondition { RuleId = ruleId, Condition = current };
+                    instructions.Add(new UpdateConditionInstruction(condition));
+                }
             }
         }
         else if (!original.ValueEquals(current))
