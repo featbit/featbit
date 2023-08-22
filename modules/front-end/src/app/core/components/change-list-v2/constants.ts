@@ -30,10 +30,22 @@ import {
 } from "@core/components/change-list-v2/instructions/update-off-variation/update-off-variation.component";
 import {
   UpdateDefaultRuleDispatchKeyComponent
-} from "@core/components/change-list-v2/instructions/UpdateDefaultRuleDispatchKey/update-default-rule-dispatch-key.component";
+} from "@core/components/change-list-v2/instructions/update-default-rule-dispatch-key/update-default-rule-dispatch-key.component";
 import {
-  UpdateRuleVariationOrRollout
-} from "@core/components/change-list-v2/instructions/UpdateRuleVariationOrRollout/update-rule-variation-or-rollout.component";
+  UpdateRuleVariationOrRolloutComponent
+} from "@core/components/change-list-v2/instructions/update-rule-variation-or-rollout/update-rule-variation-or-rollout.component";
+import {
+  UpdateRuleDispatchKeyComponent
+} from "@core/components/change-list-v2/instructions/update-rule-dispatch-key/update-rule-dispatch-key.component";
+import {
+  UpdateRuleNameComponent
+} from "@core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component";
+import {
+  DescribeRuleComponent
+} from "@core/components/change-list-v2/instructions/describe-rule/describe-rule.component";
+import {
+  AddRuleConditionsComponent
+} from "@core/components/change-list-v2/instructions/add-rule-conditions/add-rule-conditions.component";
 
 export enum InstructionKindEnum {
   // Settings
@@ -64,9 +76,10 @@ export enum InstructionKindEnum {
   UpdateDefaultRuleVariationOrRollouts = 'UpdateDefaultRuleVariationOrRollouts',
 
   // Rules
-  AddRule = 'AddRule',
-  RemoveRule = 'RemoveRule',
-  SetRules = 'SetRules',
+  AddRule = 'AddRule', // DescribeRule would be used finally
+  RemoveRule = 'RemoveRule', // DescribeRule would be used finally
+  SetRules = 'SetRules', // AddRule or RemoveRule would be used finally
+  DescribeRule = 'DescribeRule',
   UpdateRuleName = 'UpdateRuleName',
   UpdateRuleDispatchKey = 'UpdateRuleDispatchKey',
   AddRuleConditions = 'AddRuleConditions',
@@ -119,7 +132,7 @@ export const instructionCategories: ICategoryInstruction[] = [
     category: CategoryEnum.DefaultRule,
     label: $localize`:@@common.default-rule:Default rule`,
     instructions: [
-      { component: UpdateRuleVariationOrRollout, kind: InstructionKindEnum.UpdateDefaultRuleVariationOrRollouts },
+      { component: UpdateRuleVariationOrRolloutComponent, kind: InstructionKindEnum.UpdateDefaultRuleVariationOrRollouts },
       { component: UpdateDefaultRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateDefaultRuleDispatchKey },
     ]
   },
@@ -134,7 +147,13 @@ export const instructionCategories: ICategoryInstruction[] = [
     category: CategoryEnum.Rules,
     label: $localize`:@@common.rules:Rules`,
     instructions: [
-      { component: UpdateDefaultRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateRuleDispatchKey },
+      { component: UpdateRuleNameComponent, kind: InstructionKindEnum.UpdateRuleName },
+      { component: DescribeRuleComponent, kind: InstructionKindEnum.AddRule },
+      { component: DescribeRuleComponent, kind: InstructionKindEnum.RemoveRule },
+      { component: DescribeRuleComponent, kind: InstructionKindEnum.SetRules },
+      { component: AddRuleConditionsComponent, kind: InstructionKindEnum.AddRuleConditions },
+      { component: UpdateRuleVariationOrRolloutComponent, kind: InstructionKindEnum.UpdateRuleVariationOrRollouts },
+      { component: UpdateRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateRuleDispatchKey },
     ]
   },
   {

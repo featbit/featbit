@@ -2,6 +2,7 @@ import { Type } from "@angular/core";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { InstructionKindEnum, RuleInstructionKinkOpEnum } from "../constants";
+import { IRule } from "@shared/rules";
 
 export interface IInstructionComponentData {
   value: IInstructionValue;
@@ -66,12 +67,6 @@ export interface IRuleVariation {
 export interface IDefaultVariation {
   dispatchKey: string;
   variations: IRuleVariation[]
-}
-
-export interface IRule extends IDefaultVariation {
-  id: string;
-  name: string;
-  conditions: ICondition[];
 }
 
 export interface IVariationTargetUsers {

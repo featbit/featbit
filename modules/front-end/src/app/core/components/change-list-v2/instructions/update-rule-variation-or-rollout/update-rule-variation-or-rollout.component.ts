@@ -16,7 +16,7 @@ interface IRuleRollout {
   template: `
     <div class="instruction">
       <span i18n="@@common.update-serve-value-to">Update serve value to </span>
-      <nz-tag *ngFor="let value of values">{{value.label}} ({{value.percentage}})</nz-tag>
+      <nz-tag *ngFor="let value of values">{{value.label}} ({{value.percentage}}%)</nz-tag>
     </div>
   `,
   styles: [`
@@ -29,7 +29,7 @@ interface IRuleRollout {
     }
   `]
 })
-export class UpdateRuleVariationOrRollout implements IInstructionComponent {
+export class UpdateRuleVariationOrRolloutComponent implements IInstructionComponent {
   data: IInstructionComponentData;
 
   get values(): IRuleRollout[] {

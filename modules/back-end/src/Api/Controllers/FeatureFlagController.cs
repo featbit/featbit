@@ -6,6 +6,9 @@ using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Domain.SemanticPatch;
+using Domain.Targeting;
+using Domain.Utils;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Swashbuckle.AspNetCore.Filters;
@@ -56,7 +59,165 @@ public class FeatureFlagController : ApiControllerBase
         var pendingChangesList = await Mediator.Send(request);
         return Ok(pendingChangesList);
     }
+    
+    /// <summary>
+    /// Get a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Get a single feature flag by key.
+    /// </remarks>
+    [OpenApi]
+    [HttpGet("getinstructions")]
+    public async Task<ApiResponse<IEnumerable<FlagInstruction>>> GetInsAsync(Guid envId)
+    {
+        var request = new GetFeatureFlag
+        {
+            EnvId = envId,
+            Key = "gg"
+        };
+        
+        var flag = await Mediator.Send(request);
+        var flag2 = await Mediator.Send(request);
+         flag2.IsEnabled = true;
+         flag2.IsArchived = true;
+         flag2.Name = "";
+         flag2.Description = "abc description";
+        
+         flag2.Tags = new List<string> { "123", "456" };
+        
+         flag2.VariationType = "string";
+        //flag2.Variations.Remove(flag2.Variations.First());
+          var variationToUpdate = flag2.Variations.Last();
+          variationToUpdate.Name = "Updated";
+          variationToUpdate.Value = "false";
+          flag2.Variations.Add(new Variation
+          {
+              Name = "aaaaa",
+              Value = "true"
+          });
+        
+         flag2.DisabledVariationId = flag2.Variations.First().Id;
 
+         flag2.Fallthrough.DispatchKey = "ddd";
+         // flag2.Fallthrough = new Fallthrough
+         // {
+         //     DispatchKey = "newkey",
+         //     Variations = new List<RolloutVariation>{ new RolloutVariation { Id = flag2.Variations.ElementAt(1).Id, Rollout = new double[] { 0, 1 }} }
+         // };
+        
+         var targetUsers1 = flag2.TargetUsers.First();
+         targetUsers1.KeyIds = new List<string> { "user3", "user2" };
+         var targetUsers2 = flag2.TargetUsers.Last();
+         targetUsers2.KeyIds = new List<string> ();
+
+        flag2.Rules = new List<TargetRule>();
+        flag2.Rules.Add(new TargetRule
+        {
+            Id = "87b3ce72-f871-4291-a87d-ee0494ebe855",
+            Name = "rule1233",
+            DispatchKey = "rule1",
+            IncludedInExpt = true,
+            Conditions = new List<Condition>
+            {
+                new Condition
+                {
+                    Id = "0.0125179",
+                    Property = "name",
+                    Op = "IsOneOf",
+                    Value = System.Text.Json.JsonSerializer.Serialize(new List<string> { "ooo", "user1", "user2" }, ReusableJsonSerializerOptions.Web)
+                },
+                new Condition
+                {
+                    Id = "xxxxxxy",
+                    Property = "name",
+                    Op = "Equal",
+                    Value = "abc"
+                },
+                new Condition
+                {
+                    Id = "0.646952",
+                    Property = "keyId",
+                    Op = "IsFalse",
+                    Value = "IsFalse"
+                }
+            },
+            Variations = new List<RolloutVariation>
+            {
+                new RolloutVariation
+                {
+                    Id = "variation1",
+                    Rollout = new double[] { 0, 0.5 }
+                },
+                new RolloutVariation
+                {
+                    Id = "variation1",
+                    Rollout = new double[] { 0.5, 1 }
+                }
+            }
+        });
+        flag2.Rules.Add(new TargetRule
+        {
+            Id = "7dd0b0ab-5b13-4948-9cff-fad39b2272d7",
+            Name = "rule1233",
+            DispatchKey = "rule1",
+            IncludedInExpt = true,
+            Conditions = new List<Condition>
+            {
+                new Condition
+                {
+                    Id = "0.378575",
+                    Property = "keyId",
+                    Op = "IsOneOf",
+                    Value = System.Text.Json.JsonSerializer.Serialize(new List<string> { "user1", "user2" }, ReusableJsonSerializerOptions.Web)
+                },
+                new Condition
+                {
+                    Id = "xxxxxx",
+                    Property = "name",
+                    Op = "Equal",
+                    Value = "abc"
+                }
+            },
+            Variations = new List<RolloutVariation>
+            {
+                new RolloutVariation
+                {
+                    Id = "variation1",
+                    Rollout = new double[] { 0, 0.5 }
+                },
+                new RolloutVariation
+                {
+                    Id = "variation1",
+                    Rollout = new double[] { 0.5, 1 }
+                }
+            }
+        });
+        
+        var result = FlagComparer.Compare(flag, flag2);
+        return Ok(result);
+    }
+    
+    /// <summary>
+    /// Archive a feature flag
+    /// </summary>
+    [OpenApi]
+    [HttpPut("apply-patches")]
+    public async Task<ApiResponse<FeatureFlag>> ApplyAsync(Guid envId, JsonElement json)
+    {
+        var request = new GetFeatureFlag
+        {
+            EnvId = envId,
+            Key = "gg"
+        };
+
+        var flag = await Mediator.Send(request);
+
+        var instructions = new FlagInstructions(json);
+        flag.ApplyInstructions(instructions, CurrentUser.Id);
+        
+        return Ok(flag);
+    }
+    
     /// <summary>
     /// Get a feature flag
     /// </summary>

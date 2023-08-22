@@ -39,12 +39,23 @@ import {
 } from "@core/components/change-list-v2/instructions/update-off-variation/update-off-variation.component";
 import {
   UpdateDefaultRuleDispatchKeyComponent
-} from "@core/components/change-list-v2/instructions/UpdateDefaultRuleDispatchKey/update-default-rule-dispatch-key.component";
+} from "@core/components/change-list-v2/instructions/update-default-rule-dispatch-key/update-default-rule-dispatch-key.component";
 import {
-  UpdateRuleVariationOrRollout
-} from "@core/components/change-list-v2/instructions/UpdateRuleVariationOrRollout/update-rule-variation-or-rollout.component";
-import { CoreModule } from "@core/core.module";
+  UpdateRuleVariationOrRolloutComponent
+} from "@core/components/change-list-v2/instructions/update-rule-variation-or-rollout/update-rule-variation-or-rollout.component";
 import { PipesModule } from "@core/pipes/pipes.module";
+import {
+  UpdateRuleDispatchKeyComponent
+} from "@core/components/change-list-v2/instructions/update-rule-dispatch-key/update-rule-dispatch-key.component";
+import {
+  UpdateRuleNameComponent
+} from "@core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component";
+import {
+  DescribeRuleComponent
+} from "@core/components/change-list-v2/instructions/describe-rule/describe-rule.component";
+import {
+  AddRuleConditionsComponent
+} from "@core/components/change-list-v2/instructions/add-rule-conditions/add-rule-conditions.component";
 
 @NgModule({
   declarations: [
@@ -67,7 +78,11 @@ import { PipesModule } from "@core/pipes/pipes.module";
     UpdateVariationComponent,
     UpdateOffVariationComponent,
     UpdateDefaultRuleDispatchKeyComponent,
-    UpdateRuleVariationOrRollout
+    UpdateRuleVariationOrRolloutComponent,
+    UpdateRuleDispatchKeyComponent,
+    UpdateRuleNameComponent,
+    DescribeRuleComponent,
+    AddRuleConditionsComponent
   ],
   imports: [
     CommonModule,

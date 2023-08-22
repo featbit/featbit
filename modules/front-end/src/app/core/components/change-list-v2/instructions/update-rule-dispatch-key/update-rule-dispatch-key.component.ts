@@ -1,13 +1,13 @@
 import { Component } from "@angular/core";
 import {
   IInstructionComponent,
-  IInstructionComponentData,
+  IInstructionComponentData, IRuleDispatchKey,
 } from "@core/components/change-list-v2/instructions/types";
 @Component({
   selector: 'rule-dispatch-key',
   template: `
     <div class="instruction">
-      <span i18n="@@common.update-dispatch-key-to">Update dispatch key to </span><span class="value">{{data.value}}</span>
+      <span i18n="@@common.update-dispatch-key-to">Update dispatch key to </span><span class="value">{{dispatchKey}}</span>
     </div>
   `,
   styles: [`
@@ -18,4 +18,9 @@ import {
 })
 export class UpdateRuleDispatchKeyComponent implements IInstructionComponent {
   data: IInstructionComponentData;
+
+  get dispatchKey(): string {
+    const value = this.data.value as IRuleDispatchKey;
+    return value.dispatchKey;
+  }
 }

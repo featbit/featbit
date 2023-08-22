@@ -6,8 +6,8 @@ export interface IRule {
 
   // for feature flag
   variations?: IRuleVariation[],
-  includedInExpt: boolean,
-  isNotPercentageRollout: boolean,
+  includedInExpt?: boolean,
+  isNotPercentageRollout?: boolean,
 }
 
 export interface ICondition {
@@ -19,8 +19,8 @@ export interface ICondition {
   // UI only
   multipleValue?: string[];
   type?: string;
-  isSingleOperator: boolean,
-  isSegment: boolean
+  isSingleOperator?: boolean,
+  isSegment?: boolean
 }
 
 export interface IVariation {
