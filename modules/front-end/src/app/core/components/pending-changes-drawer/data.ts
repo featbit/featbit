@@ -17,7 +17,7 @@ export const INSTRUCTIONS = [
   },
   {
     "kind": "UpdateName",
-    "value": "abc"
+    "value": ""
   },
   {
     "kind": "UpdateDescription",

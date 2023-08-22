@@ -19,7 +19,7 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
         <span class="value">{{data.value}}</span>
       </ng-container>
       <ng-container *ngIf="isClear">
-        <span i18n="@@common.clear-description">Clear description</span>
+        <span i18n="@@common.clear-description">Clear name</span>
       </ng-container>
     </div>
   `,
