@@ -1,96 +1,5 @@
 export const INSTRUCTIONS = [
   {
-    "kind": "SetRules",
-    "value": [
-      {
-        "id": "87b3ce72-f871-4291-a87d-ee0494ebe855",
-        "name": "rule1233",
-        "dispatchKey": "rule1",
-        "includedInExpt": true,
-        "conditions": [
-          {
-            "id": "0.0125179",
-            "property": "name",
-            "op": "IsOneOf",
-            "value": "[\"ooo\",\"user1\",\"user2\"]"
-          },
-          {
-            "id": "xxxxxxy",
-            "property": "name",
-            "op": "Equal",
-            "value": "abc"
-          },
-          {
-            "id": "0.646952",
-            "property": "keyId",
-            "op": "IsFalse",
-            "value": "IsFalse"
-          }
-        ],
-        "variations": [
-          {
-            "id": "variation1",
-            "rollout": [
-              0,
-              0.5
-            ],
-            "exptRollout": 0
-          },
-          {
-            "id": "variation1",
-            "rollout": [
-              0.5,
-              1
-            ],
-            "exptRollout": 0
-          }
-        ]
-      },
-      {
-        "id": "7dd0b0ab-5b13-4948-9cff-fad39b2272d7",
-        "name": "468",
-        "dispatchKey": "rule1",
-        "includedInExpt": true,
-        "conditions": [
-          {
-            "id": "0.378575",
-            "property": "keyId",
-            "op": "IsOneOf",
-            "value": "[\"user1\",\"user2\"]"
-          },
-          {
-            "id": "xxxxxx",
-            "property": "name",
-            "op": "Equal",
-            "value": "abc"
-          }
-        ],
-        "variations": [
-          {
-            "id": "variation1",
-            "rollout": [
-              0,
-              0.5
-            ],
-            "exptRollout": 0
-          },
-          {
-            "id": "variation1",
-            "rollout": [
-              0.5,
-              1
-            ],
-            "exptRollout": 0
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "kind": "RemoveRule",
-    "value": "87b3ce72-f871-4291-a87d-ee0494ebe850"
-  },
-  {
     "kind": "RemoveRuleConditions",
     "value": {
       "conditionIds": [
@@ -124,6 +33,30 @@ export const INSTRUCTIONS = [
         }
       ],
       "ruleId": "87b3ce72-f871-4291-a87d-ee0494ebe850"
+    }
+  },
+  {
+    "kind": "UpdateRuleCondition",
+    "value": {
+      "condition": {
+        "id": "1de4137d-4877-457b-a005-a4f08f6c1d20",
+        "property": "keyId",
+        "op": "IsOneOf",
+        "value": "[\"abc\",\"def\"]"
+      },
+      "ruleId": "df830874-2fc2-4809-a419-f5dae9112281"
+    }
+  },
+  {
+    "kind": "UpdateRuleCondition",
+    "value": {
+      "condition": {
+        "id": "7d9b1c05-56d4-4d84-96fd-1fa38662e24d",
+        "property": "name",
+        "op": "IsFalse",
+        "value": "IsFalse"
+      },
+      "ruleId": "df830874-2fc2-4809-a419-f5dae9112281"
     }
   },
   {

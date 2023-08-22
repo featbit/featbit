@@ -56,6 +56,9 @@ import {
 import {
   AddRuleConditionsComponent
 } from "@core/components/change-list-v2/instructions/add-rule-conditions/add-rule-conditions.component";
+import {
+  RemoveRuleConditionsComponent
+} from "@core/components/change-list-v2/instructions/remove-rule-conditions/remove-rule-conditions.component";
 
 @NgModule({
   declarations: [
@@ -82,7 +85,8 @@ import {
     UpdateRuleDispatchKeyComponent,
     UpdateRuleNameComponent,
     DescribeRuleComponent,
-    AddRuleConditionsComponent
+    AddRuleConditionsComponent,
+    RemoveRuleConditionsComponent
   ],
   imports: [
     CommonModule,

@@ -46,6 +46,9 @@ import {
 import {
   AddRuleConditionsComponent
 } from "@core/components/change-list-v2/instructions/add-rule-conditions/add-rule-conditions.component";
+import {
+  RemoveRuleConditionsComponent
+} from "@core/components/change-list-v2/instructions/remove-rule-conditions/remove-rule-conditions.component";
 
 export enum InstructionKindEnum {
   // Settings
@@ -152,6 +155,7 @@ export const instructionCategories: ICategoryInstruction[] = [
       { component: DescribeRuleComponent, kind: InstructionKindEnum.RemoveRule },
       { component: DescribeRuleComponent, kind: InstructionKindEnum.SetRules },
       { component: AddRuleConditionsComponent, kind: InstructionKindEnum.AddRuleConditions },
+      { component: RemoveRuleConditionsComponent, kind: InstructionKindEnum.RemoveRuleConditions },
       { component: UpdateRuleVariationOrRolloutComponent, kind: InstructionKindEnum.UpdateRuleVariationOrRollouts },
       { component: UpdateRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateRuleDispatchKey },
     ]

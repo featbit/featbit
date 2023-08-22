@@ -1,19 +1,20 @@
 import { Component } from "@angular/core";
 import {
   IInstructionComponent,
-  IInstructionComponentData, IRuleConditions,
+  IInstructionComponentData, IRuleConditionIds, IRuleConditions
 } from "@core/components/change-list-v2/instructions/types";
 import { isSegmentCondition } from "@utils/index";
 import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
 import { lastValueFrom } from "rxjs";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { SegmentService } from "@services/segment.service";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Component({
   selector: 'add-rule-conditions',
   template: `
     <div class="instruction">
-      <span i18n="@@common.add-conditions">Add conditions</span>
+      <span i18n="@@common.remove-conditions">Remove conditions</span>
       <div class="clause" *ngFor="let condition of conditions; let idx = index">
         <span *ngIf="idx !==0">And</span>
         <span i18n="@@common.capitalize-if">If</span>
@@ -28,20 +29,23 @@ import { SegmentService } from "@services/segment.service";
       </div>
     </div>
   `,
-  styleUrls: ['./add-rule-conditions.component.less']
+  styleUrls: ['./remove-rule-conditions.component.less']
 })
-export class AddRuleConditionsComponent implements IInstructionComponent {
+export class RemoveRuleConditionsComponent implements IInstructionComponent {
   data: IInstructionComponentData;
 
   constructor(private segmentService: SegmentService) {}
 
   get conditions() {
-    const ruleConditions = this.data.value as IRuleConditions;
+    const ruleConditionIds = this.data.value as IRuleConditionIds;
 
-    const segmentIds = ruleConditions.conditions.filter(isSegmentCondition).flatMap(condition => JSON.parse(condition.value));
+    const previous = this.data.previous as IFeatureFlag | ISegment;
+    const conditions = previous.rules.find(r => r.id === ruleConditionIds.ruleId)?.conditions?.filter(c => ruleConditionIds.conditionIds.includes(c.id)) ?? [];
+
+    const segmentIds = conditions.filter(isSegmentCondition).flatMap(condition => JSON.parse(condition.value));
     this.getSegmentRefs(segmentIds);
 
-    return ruleConditions.conditions.map(condition => {
+    return conditions.map(condition => {
       const isSegment = isSegmentCondition(condition);
 
       if (!isSegment) {
