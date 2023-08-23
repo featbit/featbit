@@ -23,7 +23,10 @@ public partial class KafkaMessageConsumer : BackgroundService
         ConsumerConfig config = new()
         {
             GroupId = "evaluation-server",
-            
+            // if consumer servers are specificed, use them instead of bootstrap servers
+            BootstrapServers = configuration["Kafka:ConsumerServers"] is null
+                               ? configuration["Kafka:BootstrapServers"]
+                               : configuration["Kafka:ConsumerServers"],
 
             // read messages from start if no commit exists
             AutoOffsetReset = AutoOffsetReset.Earliest,
@@ -35,11 +38,6 @@ public partial class KafkaMessageConsumer : BackgroundService
             // disable auto-store of offsets
             EnableAutoOffsetStore = false
         };
-
-        // if consumer servers are specificed, use them instead of bootstrap servers
-        if (!String.IsNullOrWhiteSpace(configuration["Kafka:ConsumerServers"])){
-            config.BootstrapServers = configuration["Kafka:ConsumerServers"];
-        }
 
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
     }
