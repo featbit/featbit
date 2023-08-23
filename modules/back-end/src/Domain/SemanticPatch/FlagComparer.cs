@@ -174,7 +174,19 @@ public static class FlagComparer
             return true;
         }
 
-        return original.Any(p => current.Any(c => !p.IsRolloutEquals(c)));
+        for (var i = 0; i < original.Count; i++)
+        {
+            var rollout1 = original.ElementAt(i);
+            var rollout2 = current.ElementAt(i);
+
+            var isRolloutEquals = rollout1.IsRolloutEquals(rollout2);
+            if (!isRolloutEquals)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static IEnumerable<FlagInstruction> CompareTargetUsers(
