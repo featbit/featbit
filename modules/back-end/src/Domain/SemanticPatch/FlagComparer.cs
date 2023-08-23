@@ -346,25 +346,28 @@ public static class FlagComparer
     {
         var instructions = new List<FlagInstruction>();
 
-        var multiValueOps = new[] { OperatorTypes.IsOneOf, OperatorTypes.NotOneOf };
-        if (original.Property == current.Property)
+        // for segment condition, we just need compare values
+        if (original.Property == current.Property &&
+            SegmentConsts.ConditionProperties.Contains(original.Property) &&
+            original.Value != current.Value)
         {
-            // if is segment condition
-            if (SegmentConsts.ConditionProperties.Contains(original.Property) &&
-                original.Value != current.Value)
-            {
-                CompareConditionValues();
-            }
-
-            // if is multi values condition
-            else if (original.Op == current.Op &&
-                     multiValueOps.Contains(original.Op) &&
-                     original.Value != current.Value)
-            {
-                CompareConditionValues();
-            }
+            CompareConditionValues();
+            return instructions;
         }
-        else if (!original.ValueEquals(current))
+
+        // for multiValueOps, we just need compare values
+        var multiValueOps = new[] { OperatorTypes.IsOneOf, OperatorTypes.NotOneOf };
+        if (original.Property == current.Property &&
+            original.Op == current.Op &&
+            multiValueOps.Contains(original.Op) &&
+            original.Value != current.Value)
+        {
+            CompareConditionValues();
+            return instructions;
+        }
+
+        // for any other changes
+        if (!original.ValueEquals(current))
         {
             var condition = new RuleCondition { RuleId = ruleId, Condition = current };
             instructions.Add(new UpdateConditionInstruction(condition));
