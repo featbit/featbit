@@ -147,13 +147,18 @@ public static class FlagComparer
     {
         var instructions = new List<FlagInstruction>();
 
-        var isFallThroughChanged =
-            original.DispatchKey != current.DispatchKey ||
-            CompareRolloutVariations(original.Variations, current.Variations);
+        var isFallThroughChanged = CompareRolloutVariations(original.Variations, current.Variations);
 
         if (isFallThroughChanged)
         {
-            instructions.Add(new DefaultVariationInstruction(current));
+            var rolloutVariations = new DefaultRuleRolloutVariations { RolloutVariations = current.Variations };
+            instructions.Add(new UpdateDefaultRuleVariationOrRolloutInstruction(rolloutVariations));
+        }
+
+        // compare dispatch key
+        if (original.DispatchKey != current.DispatchKey && current.DispatchKey != null)
+        {
+            instructions.Add(new UpdateDefaultRuleDispatchKeyInstruction(current.DispatchKey));
         }
 
         return instructions;

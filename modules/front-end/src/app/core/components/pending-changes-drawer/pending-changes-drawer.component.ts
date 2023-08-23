@@ -11,7 +11,6 @@ import { DiffFactoryService } from "@services/diff-factory.service";
 import { SegmentService } from "@services/segment.service";
 import { EnvUserService } from "@services/env-user.service";
 import { IChangeListParam, IInstruction } from "@core/components/change-list-v2/instructions/types";
-import { INSTRUCTIONS } from "@core/components/pending-changes-drawer/data";
 
 interface IChangeCategory {
   createdAt: string;
