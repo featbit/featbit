@@ -56,6 +56,10 @@ export class FeatureFlagDrawerComponent implements OnInit {
       description: ['', Validators.maxLength(512)]
     });
 
+    this.basicForm.get('name').valueChanges.subscribe((event)=>{
+      this.nameChange(event);
+    })
+
     this.defaultRuleForm = this.fb.group({
       isEnabled: [false, Validators.required],
       enabledVariationId: ['', Validators.required],
@@ -66,6 +70,10 @@ export class FeatureFlagDrawerComponent implements OnInit {
       variationType: ['boolean', Validators.required],
       variations: this.fb.array([]),
     });
+
+    this.variationForm.get('variationType').valueChanges.subscribe((event)=>{
+      this.setVariations(event);
+    })
 
     this.setVariations('boolean');
   }

@@ -6,8 +6,6 @@
 
 ## Build & Run on local
 
-**DATA-ANALYTICS** depends on other services like: zookeeper, clickhouse, kafka, redis, evaluation-server and UI.
-
 We recommend you to run it via:
 
 ```

@@ -146,19 +146,14 @@ public static class FlagComparer
     public static IEnumerable<FlagInstruction> CompareFallthrough(Fallthrough original, Fallthrough current)
     {
         var instructions = new List<FlagInstruction>();
-        
-        var isFallThroughChanged = CompareRolloutVariations(original.Variations, current.Variations);
+
+        var isFallThroughChanged =
+            original.DispatchKey != current.DispatchKey ||
+            CompareRolloutVariations(original.Variations, current.Variations);
 
         if (isFallThroughChanged)
         {
-            var rolloutVariations = new DefaultRuleRolloutVariations { RolloutVariations = current.Variations };
-            instructions.Add(new UpdateDefaultRuleVariationOrRolloutInstruction(rolloutVariations));
-        }
-        
-        // compare dispatch key
-        if (original.DispatchKey != current.DispatchKey && current.DispatchKey != null)
-        {
-            instructions.Add(new FallthroughDispatchKeyInstruction(current.DispatchKey));
+            instructions.Add(new DefaultVariationInstruction(current));
         }
 
         return instructions;
@@ -179,7 +174,19 @@ public static class FlagComparer
             return true;
         }
 
-        return original.Any(p => current.Any(c => !p.IsRolloutEquals(c)));
+        for (var i = 0; i < original.Count; i++)
+        {
+            var rollout1 = original.ElementAt(i);
+            var rollout2 = current.ElementAt(i);
+
+            var isRolloutEquals = rollout1.IsRolloutEquals(rollout2);
+            if (!isRolloutEquals)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static IEnumerable<FlagInstruction> CompareTargetUsers(
@@ -299,6 +306,13 @@ public static class FlagComparer
             instructions.Add(new RuleNameInstruction(value));
         }
 
+        // compare dispatch key
+        if (original.DispatchKey != current.DispatchKey)
+        {
+            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
+            instructions.Add(new RuleDispatchKeyInstruction(value));
+        }
+
         // compare added/removed conditions
         var addedConditions = current.Conditions.ExceptBy(original.Conditions.Select(v => v.Id), v => v.Id)
             .ToArray();
@@ -336,13 +350,6 @@ public static class FlagComparer
             var variations = new RuleVariations { RuleId = ruleId, RolloutVariations = current.Variations };
             instructions.Add(new UpdateVariationOrRolloutInstruction(variations));
         }
-        
-        // compare dispatch key
-        if (original.DispatchKey != current.DispatchKey)
-        {
-            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
-            instructions.Add(new RuleDispatchKeyInstruction(value));
-        }
 
         return instructions;
     }
@@ -351,25 +358,28 @@ public static class FlagComparer
     {
         var instructions = new List<FlagInstruction>();
 
-        var multiValueOps = new[] { OperatorTypes.IsOneOf, OperatorTypes.NotOneOf };
-        if (original.Property == current.Property)
+        // for segment condition, we just need compare values
+        if (original.Property == current.Property &&
+            SegmentConsts.ConditionProperties.Contains(original.Property) &&
+            original.Value != current.Value)
         {
-            // if is segment condition
-            if (SegmentConsts.ConditionProperties.Contains(original.Property) &&
-                original.Value != current.Value)
-            {
-                CompareConditionValues();
-            }
-
-            // if is multi values condition
-            else if (original.Op == current.Op &&
-                     multiValueOps.Contains(original.Op) &&
-                     original.Value != current.Value)
-            {
-                CompareConditionValues();
-            }
+            CompareConditionValues();
+            return instructions;
         }
-        else if (!original.ValueEquals(current))
+
+        // for multiValueOps, we just need compare values
+        var multiValueOps = new[] { OperatorTypes.IsOneOf, OperatorTypes.NotOneOf };
+        if (original.Property == current.Property &&
+            original.Op == current.Op &&
+            multiValueOps.Contains(original.Op) &&
+            original.Value != current.Value)
+        {
+            CompareConditionValues();
+            return instructions;
+        }
+
+        // for any other changes
+        if (!original.ValueEquals(current))
         {
             var condition = new RuleCondition { RuleId = ruleId, Condition = current };
             instructions.Add(new UpdateConditionInstruction(condition));

@@ -19,7 +19,6 @@
               formControlName="name"
               placeholder="A human-friendly name for your feature flag"
               i18n-placeholder="@@common.feature-flag-name"
-              (ngModelChange)="nameChange($event)"
             />
           </nz-form-control>
         </nz-form-item>
@@ -95,7 +94,6 @@
             class="variation-type-selector"
             i18n-nzPlaceHolder="@@common.variation-type"
             nzPlaceHolder="Variation type"
-            (ngModelChange)="setVariations($event)"
             formControlName="variationType">
             <nz-option  nzValue="boolean" nzLabel="boolean"></nz-option>
             <nz-option  nzValue="string" nzLabel="string"></nz-option>

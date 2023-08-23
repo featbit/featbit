@@ -100,9 +100,9 @@ public class RuleDispatchKeyInstruction : FlagInstruction
     }
 }
 
-public class FallthroughDispatchKeyInstruction : FlagInstruction
+public class UpdateDefaultRuleDispatchKeyInstruction : FlagInstruction
 {
-    public FallthroughDispatchKeyInstruction(string value) : base(FlagInstructionKind.UpdateDefaultRuleDispatchKey, value)
+    public UpdateDefaultRuleDispatchKeyInstruction(string value) : base(FlagInstructionKind.UpdateDefaultRuleDispatchKey, value)
     {
     }
 

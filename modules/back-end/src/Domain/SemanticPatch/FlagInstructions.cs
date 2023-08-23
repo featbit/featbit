@@ -26,6 +26,7 @@ public class FlagInstructions : IEnumerable<FlagInstruction>
         { FlagInstructionKind.UpdateVariation, (_, value) => new UpdateVariationInstruction(value.Deserialize<Variation>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.UpdateDisabledVariation, (_, value) => new DisabledVariationInstruction(value.GetString()) },
         { FlagInstructionKind.UpdateDefaultRuleVariationOrRollouts, (_, value) => new UpdateDefaultRuleVariationOrRolloutInstruction(value.Deserialize<DefaultRuleRolloutVariations>(ReusableJsonSerializerOptions.Web)) },
+        { FlagInstructionKind.UpdateDefaultRuleDispatchKey, (_, value) => new UpdateDefaultRuleDispatchKeyInstruction(value.GetString()) },
         { FlagInstructionKind.SetTargetUsers, (kind, value) => new TargetUsersInstruction(kind, value.Deserialize<TargetUser>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.AddTargetUsers, (kind, value) => new TargetUsersInstruction(kind, value.Deserialize<TargetUser>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.RemoveTargetUsers, (kind, value) => new TargetUsersInstruction(kind, value.Deserialize<TargetUser>(ReusableJsonSerializerOptions.Web)) },
@@ -64,12 +65,13 @@ public class FlagInstructions : IEnumerable<FlagInstruction>
                 continue;
             }
 
-            if (!jsonElement.TryGetProperty("value", out var valueElement))
+            JsonElement value = default;
+            if (jsonElement.TryGetProperty("value", out var valueElement))
             {
-                continue;
+                value = valueElement;
             }
 
-            var instruction = creator.Invoke(kind, valueElement);
+            var instruction = creator.Invoke(kind, value);
             instructions.Add(instruction);
         }
 

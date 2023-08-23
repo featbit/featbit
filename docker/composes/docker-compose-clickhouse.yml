@@ -3,7 +3,7 @@ version: "3"
 services:
 
   clickhouse-server:
-    image: clickhouse/clickhouse-server:22.3
+    image: clickhouse/clickhouse-server:23.7
     restart: on-failure
     ports:
       - "8123:8123"
@@ -11,6 +11,7 @@ services:
       - "9000:9000"
       - "9009:9009"
       - "9440:9440"
+      - "9181:9181"
     networks:
       - featbit-network
     volumes:
