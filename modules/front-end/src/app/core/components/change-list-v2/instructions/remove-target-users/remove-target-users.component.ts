@@ -9,7 +9,7 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   selector: 'remove-target-users',
   template: `
     <div class="instruction">
-      <span i18n="@@common.capitalize-remove">remove</span>
+      <span i18n="@@common.remove-users">Remove user(s)</span>
       <nz-tag *ngFor="let keyId of keyIds">
         {{keyId}}
       </nz-tag>

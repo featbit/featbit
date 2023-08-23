@@ -1,5 +1,23 @@
 export const INSTRUCTIONS = [
   {
+    "kind": "RemoveTargetUsers",
+    "value": {
+      "keyIds": [
+        "user3"
+      ],
+      "variationId": "e834669c-9f1f-4890-b014-9e86226cdbc8"
+    }
+  },
+  {
+    "kind": "AddTargetUsers",
+    "value": {
+      "keyIds": [
+        "user5"
+      ],
+      "variationId": "e834669c-9f1f-4890-b014-9e86226cdbc8"
+    }
+  },
+  {
     "kind": "UpdateRuleCondition",
     "value": {
       "condition": {

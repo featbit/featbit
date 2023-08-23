@@ -9,7 +9,7 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   selector: 'add-target-users',
   template: `
     <div class="instruction">
-      <span i18n="@@common.capitalize-Add">Add</span>
+      <span i18n="@@common.add-users">Add user(s)</span>
       <nz-tag *ngFor="let keyId of keyIds">
         {{keyId}}
       </nz-tag>
