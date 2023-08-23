@@ -25,4 +25,14 @@ public class DataChange
 
         return this;
     }
+    
+    public T DeserializePrevious<T>() where T : class
+    {
+        return string.IsNullOrWhiteSpace(Previous) ? null : JsonSerializer.Deserialize<T>(Previous, ReusableJsonSerializerOptions.Web);
+    }
+    
+    public T DeserializeCurrent<T>() where T : class
+    {
+        return string.IsNullOrWhiteSpace(Current) ? null : JsonSerializer.Deserialize<T>(Previous, ReusableJsonSerializerOptions.Web);
+    }
 }

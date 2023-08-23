@@ -37,19 +37,19 @@ export class PendingChangesDrawerComponent implements OnInit {
   @Input()
   set pendingChangesList(data: IPendingChanges[]) {
     this.changeCategoriesList = [];
-     data.map(async (item: IPendingChanges) => {
-       const previous: IFeatureFlag = JSON.parse(item.dataChange.previous);
-       const current: IFeatureFlag = JSON.parse(item.dataChange.current);
+    data.map(async (item: IPendingChanges) => {
+      const previous: IFeatureFlag = JSON.parse(item.dataChange.previous);
+      const current: IFeatureFlag = JSON.parse(item.dataChange.current);
 
-       this.changeCategoriesList.push({
-         createdAt: item.createdAt,
-         scheduledTime: item.scheduledTime,
-         creator: item.creatorName,
-         previous: previous,
-         current: current,
-         instructions: INSTRUCTIONS,
-       });
-     });
+      this.changeCategoriesList.push({
+        createdAt: item.createdAt,
+        scheduledTime: item.scheduledTime,
+        creator: item.creatorName,
+        previous: previous,
+        current: current,
+        instructions: item.instructions,
+      });
+    });
   }
   @Output() close: EventEmitter<any> = new EventEmitter();
 
