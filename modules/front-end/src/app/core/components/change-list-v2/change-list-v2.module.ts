@@ -61,7 +61,7 @@ import {
 } from "@core/components/change-list-v2/instructions/remove-rule-condition/remove-rule-conditions.component";
 import {
   UpdateRuleConditionComponent
-} from "@core/components/change-list-v2/instructions/update-rule-conditions/update-rule-condition.component";
+} from "@core/components/change-list-v2/instructions/update-rule-condition/update-rule-condition.component";
 import {
   AddValuesToRuleConditionComponent
 } from "@core/components/change-list-v2/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component";

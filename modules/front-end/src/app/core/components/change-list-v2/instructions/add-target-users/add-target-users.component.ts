@@ -9,12 +9,12 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   selector: 'add-target-users',
   template: `
     <div class="instruction">
-      <span i18n="@@common.capitalize-to">To</span>
-      <nz-tag>{{variation}}</nz-tag>
-      <span i18n="@@common.add">add</span>
+      <span i18n="@@common.capitalize-Add">Add</span>
       <nz-tag *ngFor="let keyId of keyIds">
         {{keyId}}
       </nz-tag>
+      <span i18n="@@common.to">to</span>
+      <nz-tag>{{variation}}</nz-tag>
     </div>
   `,
   styles: [`

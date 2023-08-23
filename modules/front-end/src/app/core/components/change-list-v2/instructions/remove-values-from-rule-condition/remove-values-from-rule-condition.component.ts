@@ -14,9 +14,7 @@ import { SegmentService } from "@services/segment.service";
   selector: 'remove-values-from-rule-condition',
   template: `
     <div class="instruction">
-      <span i18n="@@common.capitalize-add">Remove</span>
-      <span i18n="@@common.values-with-surrounding-space" *ngIf="values.length > 1"> values </span>
-      <span i18n="@@common.value-with-surrounding-space" *ngIf="values.length === 1"> value </span>
+      <span i18n="@@common.remove-values">Remove value(s)</span>
       <nz-tag *ngFor="let value of values">
         {{value}}
       </nz-tag>
