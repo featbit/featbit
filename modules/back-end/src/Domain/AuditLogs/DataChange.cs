@@ -33,6 +33,6 @@ public class DataChange
     
     public T DeserializeCurrent<T>() where T : class
     {
-        return string.IsNullOrWhiteSpace(Current) ? null : JsonSerializer.Deserialize<T>(Previous, ReusableJsonSerializerOptions.Web);
+        return string.IsNullOrWhiteSpace(Current) ? null : JsonSerializer.Deserialize<T>(Current, ReusableJsonSerializerOptions.Web);
     }
 }
