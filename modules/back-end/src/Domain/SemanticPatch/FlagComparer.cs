@@ -179,8 +179,8 @@ public static class FlagComparer
             var rollout1 = original.ElementAt(i);
             var rollout2 = current.ElementAt(i);
 
-            var isRolloutNotEquals = !rollout1.IsRolloutEquals(rollout2);
-            if (isRolloutNotEquals)
+            var isRolloutEquals = rollout1.IsRolloutEquals(rollout2);
+            if (!isRolloutEquals)
             {
                 return true;
             }
