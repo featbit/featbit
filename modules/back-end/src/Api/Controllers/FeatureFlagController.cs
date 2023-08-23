@@ -96,14 +96,14 @@ public class FeatureFlagController : ApiControllerBase
             Value = "true"
         });
         
-        flag2.DisabledVariationId = flag2.Variations.First().Id;
+        flag2.DisabledVariationId = variationToUpdate.Id;
 
          flag2.Fallthrough.DispatchKey = "ddd";
-         // flag2.Fallthrough = new Fallthrough
-         // {
-         //     DispatchKey = "newkey",
-         //     Variations = new List<RolloutVariation>{ new RolloutVariation { Id = flag2.Variations.ElementAt(1).Id, Rollout = new double[] { 0, 1 }} }
-         // };
+         flag2.Fallthrough = new Fallthrough
+         {
+             DispatchKey = "newkey",
+             Variations = new List<RolloutVariation>{ new RolloutVariation { Id = flag2.Variations.ElementAt(1).Id, Rollout = new double[] { 0, 1 }} }
+         };
         
          var targetUsers1 = flag2.TargetUsers.First();
          targetUsers1.KeyIds = new List<string> { "user3", "user2" };

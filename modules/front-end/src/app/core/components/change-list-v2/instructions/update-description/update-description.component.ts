@@ -12,10 +12,10 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
       <ng-container *ngIf="!isClear">
         <span i18n="@@common.update-description-with-sufix-space">Update description </span>
         <ng-container *ngIf="previousDescription.length > 0">
-          <span i18n="@@common.from">from</span>
+          <span i18n="@@common.from-description">from</span>
           <span class="value remove-value">{{previousDescription}}</span>
         </ng-container>
-        <span i18n="@@common.to">to</span>
+        <span i18n="@@common.to-description">to</span>
         <span class="value">{{data.value}}</span>
       </ng-container>
       <ng-container *ngIf="isClear">

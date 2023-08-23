@@ -12,10 +12,10 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
       <ng-container *ngIf="!isClear">
         <span i18n="@@common.update-name-with-sufix-space">Update name </span>
         <ng-container *ngIf="previousName.length > 0">
-          <span i18n="@@common.from">from</span>
+          <span i18n="@@common.from-name">from</span>
           <span class="value remove-value">{{previousName}}</span>
         </ng-container>
-        <span i18n="@@common.to">to</span>
+        <span i18n="@@common.to-name">to</span>
         <span class="value">{{value.name}}</span>
       </ng-container>
       <ng-container *ngIf="isClear">

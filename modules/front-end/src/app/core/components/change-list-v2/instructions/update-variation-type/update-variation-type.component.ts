@@ -7,12 +7,16 @@ import {
   selector: 'update-variation-type',
   template: `
     <div class="instruction">
-      <span i18n="@@common.update-variation-type-to">Update variation type to </span><span class="value">{{data.value}}</span>
+      <span i18n="@@common.update-variation-type-to">Update variation type to</span><nz-tag>{{data.value}}</nz-tag>
     </div>
   `,
   styles: [`
-    .value {
-      font-weight: 700;
+    nz-tag {
+      line-height: 12px;
+      height: 19px;
+      border-radius: 5px;
+      margin-left: 2px;
+      margin-right: 2px;
     }
   `]
 })

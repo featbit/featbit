@@ -10,13 +10,9 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   template: `
     <div class="instruction">
       <span i18n="@@common.update-variation">Update variation</span>
-      <nz-tag>{{previous.name}}</nz-tag>
-      <span i18n="@@common.with-value">with value</span>
-      <nz-tag>{{previous.value}}</nz-tag>
+      <nz-tag>{{previous.name}}: {{previous.value}}</nz-tag>
       <span i18n="@@common.to">to</span>
-      <nz-tag>{{current.name}}</nz-tag>
-      <span i18n="@@common.with-value">with value</span>
-      <nz-tag>{{current.value}}</nz-tag>
+      <nz-tag>{{current.name}}:{{current.value}}</nz-tag>
     </div>
   `,
   styles: [`

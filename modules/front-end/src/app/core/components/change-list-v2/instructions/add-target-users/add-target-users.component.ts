@@ -13,7 +13,7 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
       <nz-tag *ngFor="let keyId of keyIds">
         {{keyId}}
       </nz-tag>
-      <span i18n="@@common.to">to</span>
+      <span i18n="@@common.to-variation">to variation</span>
       <nz-tag>{{variation}}</nz-tag>
     </div>
   `,

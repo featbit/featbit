@@ -10,12 +10,8 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   selector: 'update-off-variation',
   template: `
     <div class="instruction">
-      <span i18n="@@common.serve variation">Serve variation</span>
-      <nz-tag>{{variation.name}}</nz-tag>
-      <span i18n="@@common.with-value">with value</span>
-      <nz-tag>{{variation.value}}</nz-tag>
-      <span i18n="@@common.when-flag-is">when the flag is</span>
-      <nz-tag class="off-tag">OFF</nz-tag>
+      <span i18n="@@common.update-to">Update to</span>
+      <nz-tag>{{variation.name}}: {{variation.value}}</nz-tag>
     </div>
   `,
   styleUrls: ['./update-off-variation.component.less']

@@ -1214,26 +1214,10 @@
           <context context-type="linenumber">12</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.to" datatype="html">
-        <source>to</source>
+      <trans-unit id="common.to-variation" datatype="html">
+        <source>to variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users/add-target-users.component.ts</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-description/update-description.component.ts</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-name/update-name.component.ts</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component.ts</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation/update-variation.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
       </trans-unit>
@@ -1264,29 +1248,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">219</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.with-value" datatype="html">
-        <source>with value</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-variation/add-variation.component.ts</context>
-          <context context-type="linenumber">13</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-variation/remove-variation.component.ts</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-off-variation/update-off-variation.component.ts</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation/update-variation.component.ts</context>
-          <context context-type="linenumber">14</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation/update-variation.component.ts</context>
-          <context context-type="linenumber">18</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.archive-flag" datatype="html">
@@ -1343,23 +1304,11 @@
           <context context-type="linenumber">12</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.from" datatype="html">
-        <source>from</source>
+      <trans-unit id="common.from-variation" datatype="html">
+        <source>from variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users/remove-target-users.component.ts</context>
           <context context-type="linenumber">16</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-description/update-description.component.ts</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-name/update-name.component.ts</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component.ts</context>
-          <context context-type="linenumber">15</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.remove-values" datatype="html">
@@ -1422,6 +1371,20 @@
           <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="common.from-description" datatype="html">
+        <source>from</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-description/update-description.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.to-description" datatype="html">
+        <source>to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-description/update-description.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.clear-description" datatype="html">
         <source>Clear description</source>
         <context-group purpose="location">
@@ -1440,6 +1403,28 @@
           <context context-type="linenumber">13</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="common.from-name" datatype="html">
+        <source>from</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-name/update-name.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.to-name" datatype="html">
+        <source>to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-name/update-name.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.clear-name" datatype="html">
         <source>Clear name</source>
         <context-group purpose="location">
@@ -1451,18 +1436,11 @@
           <context context-type="linenumber">22</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.serve variation" datatype="html">
-        <source>Serve variation</source>
+      <trans-unit id="common.update-to" datatype="html">
+        <source>Update to</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-off-variation/update-off-variation.component.ts</context>
           <context context-type="linenumber">13</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.when-flag-is" datatype="html">
-        <source>when the flag is</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-off-variation/update-off-variation.component.ts</context>
-          <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.update-conditions" datatype="html">
@@ -1480,7 +1458,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="common.update-variation-type-to" datatype="html">
-        <source>Update variation type to </source>
+        <source>Update variation type to</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation-type/update-variation-type.component.ts</context>
           <context context-type="linenumber">10</context>
@@ -1491,6 +1469,13 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation/update-variation.component.ts</context>
           <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.to" datatype="html">
+        <source>to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation/update-variation.component.ts</context>
+          <context context-type="linenumber">14</context>
         </context-group>
       </trans-unit>
       <trans-unit id="differ.enabled" datatype="html">
