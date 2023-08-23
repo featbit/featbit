@@ -311,13 +311,6 @@ public static class FlagComparer
             instructions.Add(new RuleNameInstruction(value));
         }
 
-        // compare dispatch key
-        if (original.DispatchKey != current.DispatchKey)
-        {
-            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
-            instructions.Add(new RuleDispatchKeyInstruction(value));
-        }
-
         // compare added/removed conditions
         var addedConditions = current.Conditions.ExceptBy(original.Conditions.Select(v => v.Id), v => v.Id)
             .ToArray();
@@ -354,6 +347,13 @@ public static class FlagComparer
         {
             var variations = new RuleVariations { RuleId = ruleId, RolloutVariations = current.Variations };
             instructions.Add(new UpdateVariationOrRolloutInstruction(variations));
+        }
+        
+        // compare dispatch key
+        if (original.DispatchKey != current.DispatchKey)
+        {
+            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
+            instructions.Add(new RuleDispatchKeyInstruction(value));
         }
 
         return instructions;
