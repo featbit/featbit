@@ -10,7 +10,7 @@ import {
     <div class="instruction">
       <span i18n="@@common.add-variation">Add variation</span>
       <nz-tag>{{variation.name}}</nz-tag>
-      <span i18n="@@common.add">with value</span>
+      <span i18n="@@common.with-value">with value</span>
       <nz-tag>{{variation.value}}</nz-tag>
     </div>
   `,

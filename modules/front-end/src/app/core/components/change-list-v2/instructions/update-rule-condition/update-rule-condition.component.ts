@@ -13,7 +13,7 @@ import { SegmentService } from "@services/segment.service";
   selector: 'update-rule-condition',
   template: `
     <div class="instruction">
-      <span i18n="@@common.remove-conditions">Update condition</span>
+      <span i18n="@@common.update-conditions">Update condition</span>
       <div class="clause">
         <span i18n="@@common.capitalize-if">If</span>
         <span>{{condition.property}}</span>

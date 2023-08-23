@@ -11,11 +11,11 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
     <div class="instruction">
       <span i18n="@@common.update-variation">Update variation</span>
       <nz-tag>{{previous.name}}</nz-tag>
-      <span i18n="@@common.add">with value</span>
+      <span i18n="@@common.with-value">with value</span>
       <nz-tag>{{previous.value}}</nz-tag>
-      <span i18n="@@common.add">to</span>
+      <span i18n="@@common.to">to</span>
       <nz-tag>{{current.name}}</nz-tag>
-      <span i18n="@@common.add">with value</span>
+      <span i18n="@@common.with-value">with value</span>
       <nz-tag>{{current.value}}</nz-tag>
     </div>
   `,

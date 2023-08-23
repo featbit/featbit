@@ -18,7 +18,7 @@ import { SegmentService } from "@services/segment.service";
       <nz-tag *ngFor="let value of values">
         {{value}}
       </nz-tag>
-      <span i18n="@@common.to-condition">from condition</span>
+      <span i18n="@@common.from-condition">from condition</span>
       <div class="clause">
         <span i18n="@@common.capitalize-if">If</span>
         <span>{{condition.property}}</span>

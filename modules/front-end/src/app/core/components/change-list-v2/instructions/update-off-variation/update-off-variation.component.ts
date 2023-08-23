@@ -12,7 +12,7 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
     <div class="instruction">
       <span i18n="@@common.serve variation">Serve variation</span>
       <nz-tag>{{variation.name}}</nz-tag>
-      <span i18n="@@common.add">with value</span>
+      <span i18n="@@common.with-value">with value</span>
       <nz-tag>{{variation.value}}</nz-tag>
       <span i18n="@@common.when-flag-is">when the flag is</span>
       <nz-tag class="off-tag">OFF</nz-tag>
