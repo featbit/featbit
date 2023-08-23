@@ -17,8 +17,8 @@ interface IChangeCategory {
   scheduledTime: string;
   creator: string;
   instructions: IInstruction[];
-  previous: IFeatureFlag | ISegment;
-  current: IFeatureFlag | ISegment;
+  previous: string;
+  current: string;
 }
 
 @Component({
@@ -37,15 +37,12 @@ export class PendingChangesDrawerComponent implements OnInit {
   set pendingChangesList(data: IPendingChanges[]) {
     this.changeCategoriesList = [];
     data.map(async (item: IPendingChanges) => {
-      const previous: IFeatureFlag = JSON.parse(item.dataChange.previous);
-      const current: IFeatureFlag = JSON.parse(item.dataChange.current);
-
       this.changeCategoriesList.push({
         createdAt: item.createdAt,
         scheduledTime: item.scheduledTime,
         creator: item.creatorName,
-        previous: previous,
-        current: current,
+        previous: item.dataChange.previous,
+        current: item.dataChange.current,
         instructions: item.instructions,
       });
     });

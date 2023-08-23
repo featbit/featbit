@@ -8,6 +8,8 @@ import {
 } from "@core/components/change-list-v2/instructions/types";
 import { CategoryEnum, instructionCategories, InstructionKindEnum, RuleInstructionKinkOpEnum } from "@core/components/change-list-v2/constants";
 import { IRule } from "@shared/rules";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { ISegment } from "@features/safe/segments/types/segments-index";
 
 @Component({
   selector: 'change-list-v2',
@@ -28,6 +30,9 @@ export class ChangeListV2Component {
 
   @Input()
   set param (param: IChangeListParam) {
+    const previous = JSON.parse(param.previous) as IFeatureFlag | ISegment;
+    const current = JSON.parse(param.current) as IFeatureFlag | ISegment;
+
     this.categories = instructionCategories.map((category: ICategoryInstruction) => {
       const { label } = category;
 
@@ -39,8 +44,8 @@ export class ChangeListV2Component {
           return {
             ...i,
             value: instruction.value,
-            previous: param.previous,
-            current: param.current
+            previous: previous,
+            current: current
           }
         });
 

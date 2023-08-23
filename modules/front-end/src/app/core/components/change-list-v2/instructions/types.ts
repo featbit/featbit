@@ -87,8 +87,8 @@ export interface IInstruction {
 
 export interface IChangeListParam {
   instructions: IInstruction[];
-  previous: IFeatureFlag | ISegment;
-  current: IFeatureFlag | ISegment;
+  previous: string;
+  current: string;
 }
 
 export interface IInstructionKindComponent {

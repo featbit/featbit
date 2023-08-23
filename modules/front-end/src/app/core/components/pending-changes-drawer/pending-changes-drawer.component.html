@@ -15,7 +15,6 @@
           <span i18n="@@common.scheduled-for">Scheduled for</span>&nbsp;
           <span class="scheduled-time">{{ changeCategories.scheduledTime | date: 'YYYY-MM-dd HH:mm' }}</span>
         </div>
-<!--        <change-list [categories]="changeCategories.changes"></change-list>-->
         <change-list-v2 [param]="{ instructions: changeCategories.instructions, previous: changeCategories.previous, current: changeCategories.current }"></change-list-v2>
         <div class="creator-creation-time">{{changeCategories.creator}} <span i18n="@@common.created-at">created at</span>: {{ changeCategories.createdAt | date: 'YYYY-MM-dd HH:mm' }}</div>
       </nz-card>
