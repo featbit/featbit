@@ -30,13 +30,19 @@ export class ChangeListV2Component {
   set param (param: IChangeListParam) {
     this.categories = instructionCategories.map((category: ICategoryInstruction) => {
       const { label } = category;
-      const instructions = category.instructions.filter((instruction: IInstructionKindComponent) => {
-        const i = param.instructions.find((i: IInstruction) => i.kind === instruction.kind);
-        instruction.value = i?.value;
-        instruction.previous = param.previous;
-        instruction.current = param.current;
-        return !!i;
-      });
+
+      const instructions = param.instructions
+        .filter((instruction: IInstruction) => category.instructions.find((i: IInstructionKindComponent) => i.kind === instruction.kind))
+        .map((instruction: IInstruction) => {
+          const i = category.instructions.find((i: IInstructionKindComponent) => i.kind === instruction.kind);
+
+          return {
+            ...i,
+            value: instruction.value,
+            previous: param.previous,
+            current: param.current
+          }
+        });
 
       if (category.category !== CategoryEnum.Rules) {
         return { label, instructions };

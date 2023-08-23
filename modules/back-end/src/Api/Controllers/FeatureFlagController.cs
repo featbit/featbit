@@ -59,7 +59,7 @@ public class FeatureFlagController : ApiControllerBase
         var pendingChangesList = await Mediator.Send(request);
         return Ok(pendingChangesList);
     }
-    
+
     /// <summary>
     /// Get a feature flag
     /// </summary>
@@ -78,25 +78,25 @@ public class FeatureFlagController : ApiControllerBase
         
         var flag = await Mediator.Send(request);
         var flag2 = await Mediator.Send(request);
-         flag2.IsEnabled = true;
-         flag2.IsArchived = true;
-         flag2.Name = "";
-         flag2.Description = "abc description";
+        flag2.IsEnabled = true;
+        flag2.IsArchived = true;
+        flag2.Name = "";
+        flag2.Description = "abc description";
         
-         flag2.Tags = new List<string> { "123", "456" };
+        flag2.Tags = new List<string> { "123", "456" };
         
-         flag2.VariationType = "string";
+        flag2.VariationType = "string";
         //flag2.Variations.Remove(flag2.Variations.First());
-          var variationToUpdate = flag2.Variations.Last();
-          variationToUpdate.Name = "Updated";
-          variationToUpdate.Value = "false";
-          flag2.Variations.Add(new Variation
-          {
-              Name = "aaaaa",
-              Value = "true"
-          });
+        var variationToUpdate = flag2.Variations.Last();
+        variationToUpdate.Name = "Updated";
+        variationToUpdate.Value = "false";
+        flag2.Variations.Add(new Variation
+        {
+            Name = "aaaaa",
+            Value = "true"
+        });
         
-         flag2.DisabledVariationId = flag2.Variations.First().Id;
+        flag2.DisabledVariationId = flag2.Variations.First().Id;
 
          flag2.Fallthrough.DispatchKey = "ddd";
          // flag2.Fallthrough = new Fallthrough
@@ -110,28 +110,38 @@ public class FeatureFlagController : ApiControllerBase
          var targetUsers2 = flag2.TargetUsers.Last();
          targetUsers2.KeyIds = new List<string> ();
 
+         // var conditions = flag2.Rules.First().Conditions;
+         // var c1 = conditions.First();
+         // var c2 = conditions.Last();
+         // c1.Property = "keyId";
+         // c1.Op = "IsOneOf";
+         // c1.Value = System.Text.Json.JsonSerializer.Serialize(new List<string> { "abc", "def" }, ReusableJsonSerializerOptions.Web);
+         // c2.Property = "name";
+         // c2.Op = "IsFalse";
+         // c2.Value = "IsFalse";
+         
         flag2.Rules = new List<TargetRule>();
         flag2.Rules.Add(new TargetRule
         {
-            Id = "87b3ce72-f871-4291-a87d-ee0494ebe855",
-            Name = "rule1233",
-            DispatchKey = "rule1",
+            Id = "df830874-2fc2-4809-a419-f5dae9112281",
+            Name = "Rule 1",
+            DispatchKey = null,
             IncludedInExpt = true,
             Conditions = new List<Condition>
             {
                 new Condition
                 {
-                    Id = "0.0125179",
+                    Id = "1de4137d-4877-457b-a005-a4f08f6c1d20",
                     Property = "name",
                     Op = "IsOneOf",
-                    Value = System.Text.Json.JsonSerializer.Serialize(new List<string> { "ooo", "user1", "user2" }, ReusableJsonSerializerOptions.Web)
+                    Value = System.Text.Json.JsonSerializer.Serialize(new List<string> { "abc", "def", "ghi", "jkl" }, ReusableJsonSerializerOptions.Web)
                 },
                 new Condition
                 {
-                    Id = "xxxxxxy",
-                    Property = "name",
-                    Op = "Equal",
-                    Value = "abc"
+                    Id = "5a657d61-8b31-429d-aaf1-ef79cdb6d484",
+                    Property = "keyId",
+                    Op = "NotOneOf",
+                    Value = System.Text.Json.JsonSerializer.Serialize(new List<string> { "123" }, ReusableJsonSerializerOptions.Web)
                 },
                 new Condition
                 {
@@ -155,43 +165,43 @@ public class FeatureFlagController : ApiControllerBase
                 }
             }
         });
-        flag2.Rules.Add(new TargetRule
-        {
-            Id = "7dd0b0ab-5b13-4948-9cff-fad39b2272d7",
-            Name = "rule1233",
-            DispatchKey = "rule1",
-            IncludedInExpt = true,
-            Conditions = new List<Condition>
-            {
-                new Condition
-                {
-                    Id = "0.378575",
-                    Property = "keyId",
-                    Op = "IsOneOf",
-                    Value = System.Text.Json.JsonSerializer.Serialize(new List<string> { "user1", "user2" }, ReusableJsonSerializerOptions.Web)
-                },
-                new Condition
-                {
-                    Id = "xxxxxx",
-                    Property = "name",
-                    Op = "Equal",
-                    Value = "abc"
-                }
-            },
-            Variations = new List<RolloutVariation>
-            {
-                new RolloutVariation
-                {
-                    Id = "variation1",
-                    Rollout = new double[] { 0, 0.5 }
-                },
-                new RolloutVariation
-                {
-                    Id = "variation1",
-                    Rollout = new double[] { 0.5, 1 }
-                }
-            }
-        });
+        // flag2.Rules.Add(new TargetRule
+        // {
+        //     Id = "7dd0b0ab-5b13-4948-9cff-fad39b2272d7",
+        //     Name = "rule1233",
+        //     DispatchKey = "rule1",
+        //     IncludedInExpt = true,
+        //     Conditions = new List<Condition>
+        //     {
+        //         new Condition
+        //         {
+        //             Id = "0.378575",
+        //             Property = "keyId",
+        //             Op = "IsOneOf",
+        //             Value = System.Text.Json.JsonSerializer.Serialize(new List<string> { "user1", "user2" }, ReusableJsonSerializerOptions.Web)
+        //         },
+        //         new Condition
+        //         {
+        //             Id = "xxxxxx",
+        //             Property = "name",
+        //             Op = "Equal",
+        //             Value = "abc"
+        //         }
+        //     },
+        //     Variations = new List<RolloutVariation>
+        //     {
+        //         new RolloutVariation
+        //         {
+        //             Id = "variation1",
+        //             Rollout = new double[] { 0, 0.5 }
+        //         },
+        //         new RolloutVariation
+        //         {
+        //             Id = "variation1",
+        //             Rollout = new double[] { 0.5, 1 }
+        //         }
+        //     }
+        // });
         
         var result = FlagComparer.Compare(flag, flag2);
         return Ok(result);
@@ -217,7 +227,7 @@ public class FeatureFlagController : ApiControllerBase
         
         return Ok(flag);
     }
-    
+
     /// <summary>
     /// Get a feature flag
     /// </summary>

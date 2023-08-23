@@ -11,7 +11,7 @@ import { SegmentService } from "@services/segment.service";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Component({
-  selector: 'add-rule-conditions',
+  selector: 'remove-rule-condition',
   template: `
     <div class="instruction">
       <span i18n="@@common.remove-conditions">Remove conditions</span>

@@ -58,7 +58,16 @@ import {
 } from "@core/components/change-list-v2/instructions/add-rule-conditions/add-rule-conditions.component";
 import {
   RemoveRuleConditionsComponent
-} from "@core/components/change-list-v2/instructions/remove-rule-conditions/remove-rule-conditions.component";
+} from "@core/components/change-list-v2/instructions/remove-rule-condition/remove-rule-conditions.component";
+import {
+  UpdateRuleConditionComponent
+} from "@core/components/change-list-v2/instructions/update-rule-conditions/update-rule-condition.component";
+import {
+  AddValuesToRuleConditionComponent
+} from "@core/components/change-list-v2/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component";
+import {
+  RemoveValuesFromRuleConditionComponent
+} from "@core/components/change-list-v2/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component";
 
 @NgModule({
   declarations: [
@@ -86,7 +95,10 @@ import {
     UpdateRuleNameComponent,
     DescribeRuleComponent,
     AddRuleConditionsComponent,
-    RemoveRuleConditionsComponent
+    RemoveRuleConditionsComponent,
+    UpdateRuleConditionComponent,
+    AddValuesToRuleConditionComponent,
+    RemoveValuesFromRuleConditionComponent
   ],
   imports: [
     CommonModule,
