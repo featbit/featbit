@@ -176,13 +176,16 @@ public static class FlagComparer
 
         for (var i = 0; i < original.Count; i++)
         {
-            var isRolloutNotEquals = !original.ElementAt(i).IsRolloutEquals(current.ElementAt(i));
+            var rollout1 = original.ElementAt(i);
+            var rollout2 = current.ElementAt(i);
+
+            var isRolloutNotEquals = !rollout1.IsRolloutEquals(rollout2);
             if (isRolloutNotEquals)
             {
                 return true;
             }
         }
-        
+
         return false;
     }
 
