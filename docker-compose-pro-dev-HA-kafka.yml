@@ -27,6 +27,8 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - IS_PRO=true
+      - KAFKA__BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
     depends_on:
       mongodb:
         condition: service_started
@@ -47,6 +49,8 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - IS_PRO=true
+      - KAFKA__BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
     depends_on:
       mongodb:
         condition: service_started
@@ -76,7 +80,7 @@ services:
       KAFKA_HOSTS: kafka:9092
       REDIS_URL: redis://redis:6379/0
       CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+      CLICKHOUSE_KAFKA_HOSTS: kafka-consumer:9092
       IS_PRO: true
 
   mongodb:
@@ -155,7 +159,12 @@ services:
   mirrormaker:
     image: 'wpietri/mirror-maker:2'
     depends_on:
-      - kafka
+      kafka:
+        condition: service_started
+      kafka-consumer:
+        condition: service_started
+      init-kafka-topics:
+        condition: service_completed_successfully
     environment:
       - SOURCE=kafka:9092
       - DESTINATION=kafka-consumer:9092

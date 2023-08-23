@@ -37,7 +37,7 @@ public partial class KafkaMessageConsumer : BackgroundService
         };
 
         // if consumer servers are specificed, use them instead of bootstrap servers
-        if (configuration["Kafka:ConsumerServers"] != null){
+        if (!String.IsNullOrWhiteSpace(configuration["Kafka:ConsumerServers"])){
             config.BootstrapServers = configuration["Kafka:ConsumerServers"];
         }
 
