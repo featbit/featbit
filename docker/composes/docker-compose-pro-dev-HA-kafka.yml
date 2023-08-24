@@ -1,4 +1,4 @@
-name: featbit-pro-dev
+name: featbit-pro-dev-kafka-ha
 version: "3"
 services:
   ui:
