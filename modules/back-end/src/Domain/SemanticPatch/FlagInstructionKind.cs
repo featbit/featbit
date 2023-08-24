@@ -57,12 +57,6 @@ public static class FlagInstructionKind
     public const string RemoveValuesFromRuleCondition = nameof(RemoveValuesFromRuleCondition);
 
     public const string UpdateRuleVariationOrRollouts = nameof(UpdateRuleVariationOrRollouts);
-    
-    // Segment specific instructions
-    public const string AddTargetUsersToIncluded = nameof(AddTargetUsersToIncluded);
-    public const string RemoveTargetUsersFromIncluded = nameof(RemoveTargetUsersFromIncluded);
-    public const string AddTargetUsersToExcluded = nameof(AddTargetUsersToExcluded);
-    public const string RemoveTargetUsersFromExcluded = nameof(RemoveTargetUsersFromExcluded);
 
     public const string Noop = nameof(Noop);
 
@@ -96,10 +90,6 @@ public static class FlagInstructionKind
         AddValuesToRuleCondition,
         RemoveValuesFromRuleCondition,
         UpdateRuleVariationOrRollouts,
-        AddTargetUsersToIncluded,
-        RemoveTargetUsersFromIncluded,
-        AddTargetUsersToExcluded,
-        RemoveTargetUsersFromExcluded,
         Noop
     };
 
