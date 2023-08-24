@@ -10,5 +10,5 @@ This directory contains these compose files for development purposes, including
 - [docker-compose-clickhouse.yml](docker-compose-clickhouse.yml): Clickhouse for FeatBit
 
 > **Note**
-> You should run these compose files from the root directory, for
-> example: `docker compose -f ./docker/composes/docker-compose-dev.yml up -d`
+> You should run these compose files from the root directory and include the --project-diretory argument, for
+> example: `docker compose --project-directory . -f ./docker/composes/docker-compose-dev.yml up -d`
