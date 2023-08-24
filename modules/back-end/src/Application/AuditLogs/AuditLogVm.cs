@@ -23,4 +23,6 @@ public class AuditLogVm
     public string CreatorEmail { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public IEnumerable<Instruction> Instructions { get; set; }
 }
