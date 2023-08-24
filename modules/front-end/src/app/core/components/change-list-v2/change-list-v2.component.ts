@@ -13,7 +13,8 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
 
 @Component({
   selector: 'change-list-v2',
-  templateUrl: './change-list-v2.component.html'
+  templateUrl: './change-list-v2.component.html',
+  styleUrls: ['./change-list-v2.component.less']
 })
 export class ChangeListV2Component {
 

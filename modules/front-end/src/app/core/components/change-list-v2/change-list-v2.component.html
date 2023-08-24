@@ -1,17 +1,16 @@
-<div class="category-list">
-  <ul>
-    <li *ngFor="let category of categories">
-      <span class="category">{{category.label}}</span>
-      <ng-container *ngIf="category.instructions">
-        <instruction *ngFor="let instruction of category.instructions" class="instruction" [instruction]="instruction" ></instruction>
-      </ng-container>
-      <ng-container *ngIf="category.groups">
-        <div *ngFor="let group of category.groups">
-          <span class="group" [innerHTML]="group.label"></span>
-          <instruction *ngFor="let instruction of group.instructions" class="instruction" [instruction]="instruction" ></instruction>
-        </div>
-      </ng-container>
-    </li>
-  </ul>
-</div>
+<ul class="change-list">
+  <li *ngFor="let category of categories">
+    <div class="category">{{category.label}}</div>
+    <ng-container *ngIf="category.instructions">
+      <instruction *ngFor="let instruction of category.instructions" class="instruction" [instruction]="instruction" ></instruction>
+    </ng-container>
+    <ng-container *ngIf="category.groups">
+      <div *ngFor="let group of category.groups">
+        <span class="group" [innerHTML]="group.label"></span>
+        <instruction *ngFor="let instruction of group.instructions" class="instruction" [instruction]="instruction" ></instruction>
+      </div>
+    </ng-container>
+  </li>
+</ul>
+
 
