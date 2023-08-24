@@ -41,7 +41,7 @@ interface IRuleRollout {
         </div>
         <div class="dispatch-by" *ngIf="rollouts?.length > 1">
           <span i18n="@@differ.dispatch-by">Dispatch by</span>
-          <span class="item">{{rule.dispatchKey}}</span>
+          <nz-tag>{{rule.dispatchKey}}</nz-tag>
         </div>
       </ng-container>
     </div>

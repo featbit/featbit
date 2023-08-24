@@ -1,16 +1,19 @@
-<ul class="change-list">
-  <li *ngFor="let category of categories">
-    <div class="category">{{category.label}}</div>
-    <ng-container *ngIf="category.instructions">
-      <instruction *ngFor="let instruction of category.instructions" class="instruction" [instruction]="instruction" ></instruction>
-    </ng-container>
-    <ng-container *ngIf="category.groups">
+<nz-collapse [nzBordered]="false">
+  <nz-collapse-panel *ngFor="let category of categories; let index=index" [nzHeader]="category.label" [nzActive]="index === 0">
+    <ul class="instructions" *ngIf="category.instructions">
+      <li class="instruction-item" *ngFor="let instruction of category.instructions">
+        <instruction [instruction]="instruction"></instruction>
+      </li>
+    </ul>
+    <div *ngIf="category.groups">
       <div *ngFor="let group of category.groups">
-        <span class="group" [innerHTML]="group.label"></span>
-        <instruction *ngFor="let instruction of group.instructions" class="instruction" [instruction]="instruction" ></instruction>
+        <div class="group-title" [innerHTML]="group.label"></div>
+        <ul class="group-instructions">
+          <li class="instruction-item" *ngFor="let instruction of group.instructions">
+            <instruction [instruction]="instruction"></instruction>
+          </li>
+        </ul>
       </div>
-    </ng-container>
-  </li>
-</ul>
-
-
+    </div>
+  </nz-collapse-panel>
+</nz-collapse>

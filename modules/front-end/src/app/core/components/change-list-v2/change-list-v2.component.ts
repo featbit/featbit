@@ -1,4 +1,4 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, ViewEncapsulation } from "@angular/core";
 import {
   ICategoryInstruction, IChangeListParam,
   IInstruction,
@@ -14,7 +14,8 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
 @Component({
   selector: 'change-list-v2',
   templateUrl: './change-list-v2.component.html',
-  styleUrls: ['./change-list-v2.component.less']
+  styleUrls: ['./change-list-v2.component.less'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class ChangeListV2Component {
 

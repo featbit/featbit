@@ -85,6 +85,47 @@ export const INSTRUCTIONS = [
     }
   },
   {
+    "kind": "AddRule",
+    "value": {
+      "id": "7dd0b0ab-5b13-4948-9cff-fad39b2272d7",
+      "name": "rule1233",
+      "dispatchKey": "rule1",
+      "includedInExpt": true,
+      "conditions": [
+        {
+          "id": "0.378575",
+          "property": "keyId",
+          "op": "IsOneOf",
+          "value": "[\"user1\",\"user2\"]"
+        },
+        {
+          "id": "xxxxxx",
+          "property": "name",
+          "op": "Equal",
+          "value": "abc"
+        }
+      ],
+      "variations": [
+        {
+          "id": "variation1",
+          "rollout": [
+            0,
+            0.5
+          ],
+          "exptRollout": 0
+        },
+        {
+          "id": "variation1",
+          "rollout": [
+            0.5,
+            1
+          ],
+          "exptRollout": 0
+        }
+      ]
+    }
+  },
+  {
     "kind": "AddRuleConditions",
     "value": {
       "conditions": [

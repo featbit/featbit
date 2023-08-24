@@ -68,6 +68,7 @@ import {
 import {
   RemoveValuesFromRuleConditionComponent
 } from "@core/components/change-list-v2/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component";
+import { NzCollapseModule } from "ng-zorro-antd/collapse";
 
 @NgModule({
   declarations: [
@@ -103,7 +104,8 @@ import {
   imports: [
     CommonModule,
     NzTagModule,
-    PipesModule
+    PipesModule,
+    NzCollapseModule
   ],
   exports: [
     ChangeListV2Component
