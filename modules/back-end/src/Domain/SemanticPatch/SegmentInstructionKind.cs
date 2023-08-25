@@ -3,13 +3,13 @@
 public static class SegmentInstructionKind
 {
     public const string Archive = nameof(Archive);
-    
+
     public const string Restore = nameof(Restore);
-    
+
     public const string UpdateName = nameof(UpdateName);
 
     public const string UpdateDescription = nameof(UpdateDescription);
-    
+
     public const string AddRule = nameof(AddRule);
 
     public const string RemoveRule = nameof(RemoveRule);
@@ -27,13 +27,13 @@ public static class SegmentInstructionKind
     public const string AddValuesToRuleCondition = nameof(AddValuesToRuleCondition);
 
     public const string RemoveValuesFromRuleCondition = nameof(RemoveValuesFromRuleCondition);
-    
+
     public const string AddTargetUsersToIncluded = nameof(AddTargetUsersToIncluded);
-    
+
     public const string RemoveTargetUsersFromIncluded = nameof(RemoveTargetUsersFromIncluded);
-    
+
     public const string AddTargetUsersToExcluded = nameof(AddTargetUsersToExcluded);
-    
+
     public const string RemoveTargetUsersFromExcluded = nameof(RemoveTargetUsersFromExcluded);
 
     public const string Noop = nameof(Noop);
