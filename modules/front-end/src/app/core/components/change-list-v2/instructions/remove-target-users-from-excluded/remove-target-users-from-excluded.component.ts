@@ -12,7 +12,8 @@ import {
       <nz-tag *ngFor="let keyId of keyIds">
         {{keyId}}
       </nz-tag>
-      <span i18n="@@common.from-included">from included</span>
+      <span i18n="@@common.from-targeting-users">from</span>
+      <nz-tag i18n="@@common.excluding-users">Excluding users</nz-tag>
     </div>
   `,
   styles: [`
