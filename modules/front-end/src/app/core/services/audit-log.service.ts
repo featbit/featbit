@@ -2,9 +2,11 @@ import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { addDays, startOfDay } from 'date-fns'
-import {AuditLogListFilter, IAuditLogListModel} from "@core/components/audit-log/types";
+import { AuditLogListFilter, IAuditLogListModel, IDataChange } from "@core/components/audit-log/types";
+import { IInstruction } from "@core/components/change-list-v2/instructions/types";
+import { ISegment } from "@features/safe/segments/types/segments-index";
 
 @Injectable({
   providedIn: 'root'
@@ -44,5 +46,16 @@ export class AuditLogService {
       this.baseUrl,
       { params: new HttpParams({ fromObject: queryParam }) }
     );
+  }
+
+  public compare(refType: string, previous: ISegment, current: ISegment): Promise<IInstruction[]> {
+    return firstValueFrom(this.http.post<IInstruction[]>(
+      `${this.baseUrl}/compare-segment`,
+      {
+        refType,
+        previous,
+        current
+      }
+    ));
   }
 }

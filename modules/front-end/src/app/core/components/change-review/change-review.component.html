@@ -18,10 +18,10 @@
         <div class="section-title" i18n="@@common.changes">Changes</div>
         <div class="change">
           <p class="change-count">
-            <span>{{numChanges}} </span>
+            <span>{{instructions.length}} </span>
             <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
           </p>
-          <change-list [categories]="changeCategories"></change-list>
+          <change-list-v2 class="change-list" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list-v2>
         </div>
       </section>
       <section class="form-wraper" >
