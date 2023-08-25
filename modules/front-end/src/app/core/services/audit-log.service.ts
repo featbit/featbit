@@ -49,14 +49,15 @@ export class AuditLogService {
     );
   }
 
-  public compare(refType: string, previous: IFeatureFlag | ISegment, current: IFeatureFlag | ISegment): Promise<IInstruction[]> {
-    const url = `${this.baseUrl}/compare-${refType}`;
+  public compare(refType: string, previous: string, current: string): Promise<IInstruction[]> {
     return firstValueFrom(this.http.post<IInstruction[]>(
-       url,
+      `${this.baseUrl}/compare`,
       {
         refType,
-        previous,
-        current
+        dataChange: {
+          previous,
+          current
+        }
       }
     ));
   }

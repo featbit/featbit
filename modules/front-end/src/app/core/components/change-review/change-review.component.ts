@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
-import { ICategory, IRefType } from "@shared/diff/types";
+import { IRefType } from "@shared/diff/types";
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/forms";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
@@ -67,7 +67,7 @@ export class ChangeReviewComponent implements OnChanges {
       });
 
       try {
-        this.instructions = await this.auditLogService.compare(this.refType, JSON.parse(this.previous), JSON.parse(this.current));
+        this.instructions = await this.auditLogService.compare(this.refType, this.previous, this.current);
       } catch(e) {}
     }
   }

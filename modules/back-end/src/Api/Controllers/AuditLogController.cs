@@ -20,15 +20,8 @@ public class AuditLogController : ApiControllerBase
         return Ok(auditLogs);
     }
     
-    [HttpPost(("compare-segment"))]
-    public async Task<ApiResponse<IEnumerable<Instruction>>> CompareAsync(CompareSegment request)
-    {
-        var instructions = await Mediator.Send(request);
-        return Ok(instructions);
-    }
-    
-    [HttpPost(("compare-featureflag"))]
-    public async Task<ApiResponse<IEnumerable<Instruction>>> CompareAsync(CompareFlag request)
+    [HttpPost(("compare"))]
+    public async Task<ApiResponse<IEnumerable<Instruction>>> CompareAsync(Compare request)
     {
         var instructions = await Mediator.Send(request);
         return Ok(instructions);

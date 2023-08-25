@@ -7,6 +7,12 @@ public class DataChange
     public string Previous { get; set; }
 
     public string Current { get; set; }
+    
+    public DataChange()
+    {
+        Previous = string.Empty;
+        Current = string.Empty;
+    }
 
     public DataChange(object from)
     {
