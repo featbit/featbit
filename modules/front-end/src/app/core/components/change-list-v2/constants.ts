@@ -58,6 +58,18 @@ import {
 import {
   RemoveValuesFromRuleConditionComponent
 } from "@core/components/change-list-v2/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component";
+import {
+  AddTargetUsersToIncludedComponent
+} from "@core/components/change-list-v2/instructions/add-target-users-to-included/add-target-users-to-included.component";
+import {
+  RemoveTargetUsersFromIncludedComponent
+} from "@core/components/change-list-v2/instructions/remove-target-users-from-included/remove-target-users-from-included.component";
+import {
+  RemoveTargetUsersFromExcludedComponent
+} from "@core/components/change-list-v2/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component";
+import {
+  AddTargetUsersToExcludedComponent
+} from "@core/components/change-list-v2/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component";
 
 export enum InstructionKindEnum {
   // Settings
@@ -73,6 +85,10 @@ export enum InstructionKindEnum {
   // Target users
   RemoveTargetUsers = 'RemoveTargetUsers',
   AddTargetUsers = 'AddTargetUsers',
+  RemoveTargetUsersFromIncluded = "RemoveTargetUsersFromIncluded",
+  AddTargetUsersToIncluded = "AddTargetUsersToIncluded",
+  AddTargetUsersToExcluded = "AddTargetUsersToExcluded",
+  RemoveTargetUsersFromExcluded = "RemoveTargetUsersFromExcluded",
 
   // Variations
   UpdateVariationType = 'UpdateVariationType',
@@ -138,6 +154,10 @@ export const instructionCategories: ICategoryInstruction[] = [
     instructions: [
       { component: RemoveTargetUsersComponent, kind: InstructionKindEnum.RemoveTargetUsers },
       { component: AddTargetUsersComponent, kind: InstructionKindEnum.AddTargetUsers },
+      { component: AddTargetUsersToIncludedComponent, kind: InstructionKindEnum.AddTargetUsersToIncluded },
+      { component: RemoveTargetUsersFromIncludedComponent, kind: InstructionKindEnum.RemoveTargetUsersFromIncluded },
+      { component: AddTargetUsersToExcludedComponent, kind: InstructionKindEnum.AddTargetUsersToExcluded },
+      { component: RemoveTargetUsersFromExcludedComponent, kind: InstructionKindEnum.RemoveTargetUsersFromExcluded },
     ]
   },
   {

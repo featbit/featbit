@@ -69,6 +69,18 @@ import {
   RemoveValuesFromRuleConditionComponent
 } from "@core/components/change-list-v2/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
+import {
+  AddTargetUsersToIncludedComponent
+} from "@core/components/change-list-v2/instructions/add-target-users-to-included/add-target-users-to-included.component";
+import {
+  AddTargetUsersToExcludedComponent
+} from "@core/components/change-list-v2/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component";
+import {
+  RemoveTargetUsersFromIncludedComponent
+} from "@core/components/change-list-v2/instructions/remove-target-users-from-included/remove-target-users-from-included.component";
+import {
+  RemoveTargetUsersFromExcludedComponent
+} from "@core/components/change-list-v2/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component";
 
 @NgModule({
   declarations: [
@@ -99,7 +111,11 @@ import { NzCollapseModule } from "ng-zorro-antd/collapse";
     RemoveRuleConditionsComponent,
     UpdateRuleConditionComponent,
     AddValuesToRuleConditionComponent,
-    RemoveValuesFromRuleConditionComponent
+    RemoveValuesFromRuleConditionComponent,
+    AddTargetUsersToIncludedComponent,
+    AddTargetUsersToExcludedComponent,
+    RemoveTargetUsersFromIncludedComponent,
+    RemoveTargetUsersFromExcludedComponent
   ],
   imports: [
     CommonModule,
