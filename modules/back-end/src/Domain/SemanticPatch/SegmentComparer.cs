@@ -14,9 +14,9 @@ public class SegmentComparer
 
         instructions.Add(CompareName(original.Name, current.Name));
         instructions.Add(CompareDescription(original.Description, current.Description));
-        
-        instructions.AddRange(CompareTargetUsers(true, original.Included, current.Included));
-        instructions.AddRange(CompareTargetUsers(false, original.Excluded, current.Excluded));
+
+        instructions.AddRange(CompareTargetUsers("included", original.Included, current.Included));
+        instructions.AddRange(CompareTargetUsers("excluded", original.Excluded, current.Excluded));
         instructions.AddRange(CompareRules(original.Rules, current.Rules));
         
         // exclude noop instructions
@@ -58,35 +58,39 @@ public class SegmentComparer
     }
 
     public static IEnumerable<SegmentInstruction> CompareTargetUsers(
-        bool isIncluded,
-        IEnumerable<string> original,
-        IEnumerable<string> current)
+        string compareType,
+        ICollection<string> original,
+        ICollection<string> current)
     {
         if (!original.Any() && !current.Any())
         {
             return new SegmentInstruction[] { NoopSegmentInstruction.Instance };
         }
-        
+
         var instructions = new List<SegmentInstruction>();
-        
+
         var addedKeyIds = current.Except(original).ToList();
         var removedKeyIds = original.Except(current).ToList();
 
+        var isCompareIncluded = compareType == "included";
         if (addedKeyIds.Any())
         {
-            var kind = isIncluded ? SegmentInstructionKind.AddTargetUsersToIncluded : SegmentInstructionKind.AddTargetUsersToExcluded;
+            var kind = isCompareIncluded
+                ? SegmentInstructionKind.AddTargetUsersToIncluded
+                : SegmentInstructionKind.AddTargetUsersToExcluded;
             instructions.Add(new SegmentTargetUserInstruction(kind, addedKeyIds));
         }
 
         if (removedKeyIds.Any())
         {
-            var kind = isIncluded ? SegmentInstructionKind.RemoveTargetUsersFromIncluded : SegmentInstructionKind.RemoveTargetUsersFromExcluded;
-            instructions.Add(new SegmentTargetUserInstruction(SegmentInstructionKind.RemoveTargetUsersFromIncluded, removedKeyIds));
+            var kind = isCompareIncluded
+                ? SegmentInstructionKind.RemoveTargetUsersFromIncluded
+                : SegmentInstructionKind.RemoveTargetUsersFromExcluded;
+            instructions.Add(new SegmentTargetUserInstruction(kind, removedKeyIds));
         }
-        
+
         return instructions;
     }
-
 
     public static IEnumerable<SegmentInstruction> CompareRules(
         ICollection<MatchRule> original,

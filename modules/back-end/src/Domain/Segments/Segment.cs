@@ -12,9 +12,9 @@ public class Segment : AuditedEntity
 
     public string Description { get; set; }
 
-    public IEnumerable<string> Included { get; set; }
+    public ICollection<string> Included { get; set; }
 
-    public IEnumerable<string> Excluded { get; set; }
+    public ICollection<string> Excluded { get; set; }
 
     public ICollection<MatchRule> Rules { get; set; }
 
@@ -23,8 +23,8 @@ public class Segment : AuditedEntity
     public Segment(
         Guid envId,
         string name,
-        IEnumerable<string> included,
-        IEnumerable<string> excluded,
+        ICollection<string> included,
+        ICollection<string> excluded,
         ICollection<MatchRule> rules,
         string description)
     {
@@ -41,8 +41,8 @@ public class Segment : AuditedEntity
 
     public DataChange Update(
         string name,
-        IEnumerable<string> included,
-        IEnumerable<string> excluded,
+        ICollection<string> included,
+        ICollection<string> excluded,
         ICollection<MatchRule> rules,
         string description)
     {
