@@ -1113,7 +1113,7 @@
       <trans-unit id="common.add-rule" datatype="html">
         <source>Add rule</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/change-list-v2.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
         <target>添加规则</target>
@@ -1121,7 +1121,7 @@
       <trans-unit id="common.remove-rule" datatype="html">
         <source>Remove rule</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/change-list-v2.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.ts</context>
           <context context-type="linenumber">73</context>
         </context-group>
         <target>删除规则</target>
@@ -1129,7 +1129,7 @@
       <trans-unit id="common.update-rule" datatype="html">
         <source>Update rule</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/change-list-v2.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.ts</context>
           <context context-type="linenumber">118</context>
         </context-group>
         <target>更新规则</target>
@@ -1137,7 +1137,7 @@
       <trans-unit id="common.settings" datatype="html">
         <source>Settings</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/constants.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
           <context context-type="linenumber">139</context>
         </context-group>
         <target>设置</target>
@@ -1145,7 +1145,7 @@
       <trans-unit id="common.default-rule" datatype="html">
         <source>Default rule</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/constants.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
           <context context-type="linenumber">153</context>
         </context-group>
         <context-group purpose="location">
@@ -1161,7 +1161,7 @@
       <trans-unit id="common.target-users" datatype="html">
         <source>Individual Targeting</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/constants.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
           <context context-type="linenumber">161</context>
         </context-group>
         <target>目标用户</target>
@@ -1169,7 +1169,7 @@
       <trans-unit id="common.off-variation" datatype="html">
         <source>Off variation</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/constants.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
           <context context-type="linenumber">173</context>
         </context-group>
         <target>开关关闭时的返回值</target>
@@ -1177,7 +1177,7 @@
       <trans-unit id="common.rules" datatype="html">
         <source>Rules</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/constants.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
           <context context-type="linenumber">180</context>
         </context-group>
         <context-group purpose="location">
@@ -1189,7 +1189,7 @@
       <trans-unit id="common.variations" datatype="html">
         <source>Variations</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/constants.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
           <context context-type="linenumber">197</context>
         </context-group>
         <context-group purpose="location">
@@ -1205,7 +1205,7 @@
       <trans-unit id="common.add-conditions" datatype="html">
         <source>Add conditions</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-rule-conditions/add-rule-conditions.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-rule-conditions/add-rule-conditions.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <target>添加条件</target>
@@ -1213,27 +1213,27 @@
       <trans-unit id="common.capitalize-if" datatype="html">
         <source>If</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-rule-conditions/add-rule-conditions.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-rule-conditions/add-rule-conditions.component.ts</context>
           <context context-type="linenumber">19</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/describe-rule/describe-rule.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
           <context context-type="linenumber">25</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-rule-condition/remove-rule-conditions.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-rule-condition/remove-rule-conditions.component.ts</context>
           <context context-type="linenumber">20</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-condition/update-rule-condition.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-condition/update-rule-condition.component.ts</context>
           <context context-type="linenumber">18</context>
         </context-group>
         <target>如果</target>
@@ -1241,7 +1241,7 @@
       <trans-unit id="common.add-tags" datatype="html">
         <source>Add tags</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-tags/add-tags.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-tags/add-tags.component.ts</context>
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
@@ -1253,15 +1253,15 @@
       <trans-unit id="common.add-users" datatype="html">
         <source>Add user(s)</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component.ts</context>
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users-to-included/add-target-users-to-included.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users-to-included/add-target-users-to-included.component.ts</context>
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users/add-target-users.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users/add-target-users.component.ts</context>
           <context context-type="linenumber">12</context>
         </context-group>
         <target>添加用户</target>
@@ -1269,15 +1269,15 @@
       <trans-unit id="common.to" datatype="html">
         <source>to</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component.ts</context>
           <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users-to-included/add-target-users-to-included.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users-to-included/add-target-users-to-included.component.ts</context>
           <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation/update-variation.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-variation/update-variation.component.ts</context>
           <context context-type="linenumber">14</context>
         </context-group>
         <target>到</target>
@@ -1285,11 +1285,11 @@
       <trans-unit id="common.excluding-users" datatype="html">
         <source>Excluding users</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
@@ -1301,11 +1301,11 @@
       <trans-unit id="common.including-users" datatype="html">
         <source>Including users</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users-to-included/add-target-users-to-included.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users-to-included/add-target-users-to-included.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users-from-included/remove-target-users-from-included.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-included/remove-target-users-from-included.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
@@ -1317,7 +1317,7 @@
       <trans-unit id="common.to-variation" datatype="html">
         <source>to variation</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-target-users/add-target-users.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users/add-target-users.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <target>到返回值</target>
@@ -1325,7 +1325,7 @@
       <trans-unit id="common.add-values" datatype="html">
         <source>Add value(s)</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
           <context context-type="linenumber">17</context>
         </context-group>
         <target>将</target>
@@ -1333,7 +1333,7 @@
       <trans-unit id="common.to-condition" datatype="html">
         <source>to condition</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
           <context context-type="linenumber">21</context>
         </context-group>
         <target>添加到条件</target>
@@ -1341,7 +1341,7 @@
       <trans-unit id="common.add-variation" datatype="html">
         <source>Add variation</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/add-variation/add-variation.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-variation/add-variation.component.ts</context>
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
@@ -1357,7 +1357,7 @@
       <trans-unit id="common.archive-flag" datatype="html">
         <source>Archive feature flag</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/archive-flag/archive-flag.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/archive-flag/archive-flag.component.ts</context>
           <context context-type="linenumber">7</context>
         </context-group>
         <target>存档开关</target>
@@ -1365,7 +1365,7 @@
       <trans-unit id="differ.serve" datatype="html">
         <source>Serve</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/describe-rule/describe-rule.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
           <context context-type="linenumber">37</context>
         </context-group>
         <target>返回</target>
@@ -1373,7 +1373,7 @@
       <trans-unit id="differ.dispatch-by" datatype="html">
         <source>Dispatch by</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/describe-rule/describe-rule.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
           <context context-type="linenumber">43</context>
         </context-group>
         <target>基于属性</target>
@@ -1381,7 +1381,7 @@
       <trans-unit id="common.remove-conditions" datatype="html">
         <source>Remove conditions</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-rule-condition/remove-rule-conditions.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-rule-condition/remove-rule-conditions.component.ts</context>
           <context context-type="linenumber">17</context>
         </context-group>
         <target>删除条件</target>
@@ -1389,7 +1389,7 @@
       <trans-unit id="common.remove-tags" datatype="html">
         <source>Remove tags</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-tags/remove-tags.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-tags/remove-tags.component.ts</context>
           <context context-type="linenumber">11</context>
         </context-group>
         <target>删除标签</target>
@@ -1397,15 +1397,15 @@
       <trans-unit id="common.remove-users" datatype="html">
         <source>Remove user(s)</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users-from-included/remove-target-users-from-included.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-included/remove-target-users-from-included.component.ts</context>
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users/remove-target-users.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users/remove-target-users.component.ts</context>
           <context context-type="linenumber">12</context>
         </context-group>
         <target>将用户</target>
@@ -1413,11 +1413,11 @@
       <trans-unit id="common.from-targeting-users" datatype="html">
         <source>from</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
           <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users-from-included/remove-target-users-from-included.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-included/remove-target-users-from-included.component.ts</context>
           <context context-type="linenumber">15</context>
         </context-group>
         <target>移除出</target>
@@ -1425,7 +1425,7 @@
       <trans-unit id="common.from-variation" datatype="html">
         <source>from variation</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-target-users/remove-target-users.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users/remove-target-users.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <target>移除出返回值</target>
@@ -1433,7 +1433,7 @@
       <trans-unit id="common.remove-values" datatype="html">
         <source>Remove value(s)</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
           <context context-type="linenumber">17</context>
         </context-group>
         <target>将值</target>
@@ -1441,7 +1441,7 @@
       <trans-unit id="common.from-condition" datatype="html">
         <source>from condition</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
           <context context-type="linenumber">21</context>
         </context-group>
         <target>从条件中删除</target>
@@ -1449,7 +1449,7 @@
       <trans-unit id="common.remove-variation" datatype="html">
         <source>Remove variation</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/remove-variation/remove-variation.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-variation/remove-variation.component.ts</context>
           <context context-type="linenumber">13</context>
         </context-group>
         <target>删除返回值</target>
@@ -1457,7 +1457,7 @@
       <trans-unit id="common.restore-flag" datatype="html">
         <source>Restore feature flag</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/restore-flag/restore-flag.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/restore-flag/restore-flag.component.ts</context>
           <context context-type="linenumber">7</context>
         </context-group>
         <target>复位开关</target>
@@ -1465,7 +1465,7 @@
       <trans-unit id="common.turn-flag-off" datatype="html">
         <source>Turn feature flag </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/turn-flag-off/turn-flag-off.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/turn-flag-off/turn-flag-off.component.ts</context>
           <context context-type="linenumber">8</context>
         </context-group>
         <target>关闭开关</target>
@@ -1473,7 +1473,7 @@
       <trans-unit id="common.turn-flag-on" datatype="html">
         <source>Turn feature flag </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/turn-flag-on/turn-flag-on.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/turn-flag-on/turn-flag-on.component.ts</context>
           <context context-type="linenumber">8</context>
         </context-group>
         <target>打开开关</target>
@@ -1481,11 +1481,11 @@
       <trans-unit id="common.update-dispatch-key-to" datatype="html">
         <source>Update dispatch key to</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-default-rule-dispatch-key/update-default-rule-dispatch-key.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-default-rule-dispatch-key/update-default-rule-dispatch-key.component.ts</context>
           <context context-type="linenumber">10</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-dispatch-key/update-rule-dispatch-key.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-dispatch-key/update-rule-dispatch-key.component.ts</context>
           <context context-type="linenumber">10</context>
         </context-group>
         <target>设置基于属性值为</target>
@@ -1493,7 +1493,7 @@
       <trans-unit id="common.update-description-with-sufix-space" datatype="html">
         <source>Update description </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-description/update-description.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-description/update-description.component.ts</context>
           <context context-type="linenumber">13</context>
         </context-group>
         <target>将描述</target>
@@ -1501,7 +1501,7 @@
       <trans-unit id="common.from-description" datatype="html">
         <source>from</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-description/update-description.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-description/update-description.component.ts</context>
           <context context-type="linenumber">15</context>
         </context-group>
         <target>从</target>
@@ -1509,7 +1509,7 @@
       <trans-unit id="common.to-description" datatype="html">
         <source>to</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-description/update-description.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-description/update-description.component.ts</context>
           <context context-type="linenumber">18</context>
         </context-group>
         <target>更新为</target>
@@ -1517,7 +1517,7 @@
       <trans-unit id="common.clear-description" datatype="html">
         <source>Clear description</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-description/update-description.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-description/update-description.component.ts</context>
           <context context-type="linenumber">22</context>
         </context-group>
         <target>清除描述</target>
@@ -1525,11 +1525,11 @@
       <trans-unit id="common.update-name-with-sufix-space" datatype="html">
         <source>Update name </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-name/update-name.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-name/update-name.component.ts</context>
           <context context-type="linenumber">13</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-name/update-rule-name.component.ts</context>
           <context context-type="linenumber">13</context>
         </context-group>
         <target>将名称</target>
@@ -1537,11 +1537,11 @@
       <trans-unit id="common.from-name" datatype="html">
         <source>from</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-name/update-name.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-name/update-name.component.ts</context>
           <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-name/update-rule-name.component.ts</context>
           <context context-type="linenumber">15</context>
         </context-group>
         <target>从</target>
@@ -1549,11 +1549,11 @@
       <trans-unit id="common.to-name" datatype="html">
         <source>to</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-name/update-name.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-name/update-name.component.ts</context>
           <context context-type="linenumber">18</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-name/update-rule-name.component.ts</context>
           <context context-type="linenumber">18</context>
         </context-group>
         <target>更新为</target>
@@ -1561,11 +1561,11 @@
       <trans-unit id="common.clear-name" datatype="html">
         <source>Clear name</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-name/update-name.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-name/update-name.component.ts</context>
           <context context-type="linenumber">22</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-name/update-rule-name.component.ts</context>
           <context context-type="linenumber">22</context>
         </context-group>
         <target>清除名称</target>
@@ -1573,7 +1573,7 @@
       <trans-unit id="common.update-to" datatype="html">
         <source>Update to</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-off-variation/update-off-variation.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-off-variation/update-off-variation.component.ts</context>
           <context context-type="linenumber">13</context>
         </context-group>
         <target>更新为</target>
@@ -1581,7 +1581,7 @@
       <trans-unit id="common.update-conditions" datatype="html">
         <source>Update condition</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-condition/update-rule-condition.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-condition/update-rule-condition.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <target>更新条件</target>
@@ -1589,7 +1589,7 @@
       <trans-unit id="common.update-serve-value-to" datatype="html">
         <source>Update serve value to </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-rule-variation-or-rollout/update-rule-variation-or-rollout.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-variation-or-rollout/update-rule-variation-or-rollout.component.ts</context>
           <context context-type="linenumber">18</context>
         </context-group>
         <target>更新返回值为</target>
@@ -1597,7 +1597,7 @@
       <trans-unit id="common.update-variation-type-to" datatype="html">
         <source>Update variation type to</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation-type/update-variation-type.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-variation-type/update-variation-type.component.ts</context>
           <context context-type="linenumber">10</context>
         </context-group>
         <target>更新返回值类型为</target>
@@ -1605,7 +1605,7 @@
       <trans-unit id="common.update-variation" datatype="html">
         <source>Update variation</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list-v2/instructions/update-variation/update-variation.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-variation/update-variation.component.ts</context>
           <context context-type="linenumber">12</context>
         </context-group>
         <target>更新返回值</target>

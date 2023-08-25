@@ -5,7 +5,7 @@ import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change
 import { differenceInCalendarDays, setHours, setSeconds, setMinutes } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
 import { AuditLogService } from "@services/audit-log.service";
-import { IInstruction } from "@core/components/change-list-v2/instructions/types";
+import { IInstruction } from "@core/components/change-list/instructions/types";
 
 @Component({
   selector: 'change-review',

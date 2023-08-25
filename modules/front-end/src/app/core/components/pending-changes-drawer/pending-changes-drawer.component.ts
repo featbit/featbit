@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
-import { IChangeListParam, IInstruction } from "@core/components/change-list-v2/instructions/types";
+import { IChangeListParam, IInstruction } from "@core/components/change-list/instructions/types";
 
 interface IChangeCategory {
   createdAt: string;

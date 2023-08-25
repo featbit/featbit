@@ -1,4 +1,4 @@
-import { IInstruction } from "@core/components/change-list-v2/instructions/types";
+import { IInstruction } from "@core/components/change-list/instructions/types";
 
 export enum AuditLogOpEnum {
   Create = 'Create',

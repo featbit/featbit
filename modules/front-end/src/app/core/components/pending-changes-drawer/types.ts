@@ -1,5 +1,5 @@
 import { IDataChange } from "@core/components/audit-log/types";
-import { IInstruction } from "@core/components/change-list-v2/instructions/types";
+import { IInstruction } from "@core/components/change-list/instructions/types";
 
 export interface IPendingChanges {
   id: string;

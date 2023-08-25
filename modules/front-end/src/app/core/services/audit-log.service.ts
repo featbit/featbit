@@ -5,7 +5,7 @@ import { getCurrentProjectEnv } from "@utils/project-env";
 import { firstValueFrom, Observable } from "rxjs";
 import { addDays, startOfDay } from 'date-fns'
 import { AuditLogListFilter, IAuditLogListModel, IDataChange } from "@core/components/audit-log/types";
-import { IInstruction } from "@core/components/change-list-v2/instructions/types";
+import { IInstruction } from "@core/components/change-list/instructions/types";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 

@@ -88,7 +88,7 @@ import { NzSwitchModule } from "ng-zorro-antd/switch";
 import {
   PendingChangesDrawerComponent
 } from "@core/components/pending-changes-drawer/pending-changes-drawer.component";
-import { ChangeListV2Module } from "@core/components/change-list-v2/change-list-v2.module";
+import { ChangeListModule } from "@core/components/change-list/change-list.module";
 import { PipesModule } from "@core/pipes/pipes.module";
 
 @NgModule({
@@ -173,7 +173,7 @@ import { PipesModule } from "@core/pipes/pipes.module";
     NzInputNumberModule,
     NzCollapseModule,
     NzSwitchModule,
-    ChangeListV2Module
+    ChangeListModule
   ],
   exports: [
     SlugifyPipe,
