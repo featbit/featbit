@@ -37,20 +37,24 @@ public class CompareValidator : AbstractValidator<Compare>
 
 public class CompareHandler : IRequestHandler<Compare, IEnumerable<Instruction>>
 {
-    public async Task<IEnumerable<Instruction>> Handle(Compare request, CancellationToken cancellationToken)
+    public Task<IEnumerable<Instruction>> Handle(Compare request, CancellationToken cancellationToken)
     {
+        IEnumerable<Instruction> instructions = new List<Instruction>();
+        
         switch (request.RefType)
         {
             case AuditLogRefTypes.FeatureFlag:
                 var previousFlag = request.DataChange.DeserializePrevious<FeatureFlag>();
                 var currentFlag = request.DataChange.DeserializeCurrent<FeatureFlag>();
-                return FlagComparer.Compare(previousFlag, currentFlag);
+                instructions = FlagComparer.Compare(previousFlag, currentFlag);
+                break;
             case AuditLogRefTypes.Segment:
                 var previousSegment = request.DataChange.DeserializePrevious<Segment>();
                 var currentSegment = request.DataChange.DeserializeCurrent<Segment>();
-                return SegmentComparer.Compare(previousSegment, currentSegment);
-            default:
-                return new List<Instruction>();
+                instructions = SegmentComparer.Compare(previousSegment, currentSegment);
+                break;
         }
+
+        return Task.FromResult(instructions);
     }
 }
