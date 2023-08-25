@@ -45,6 +45,8 @@ export class ChangeReviewComponent implements OnChanges {
       const error = { required: true };
       control.setErrors(error);
       return error;
+    } else {
+      control.setErrors(null);
     }
 
     return null;
@@ -81,7 +83,9 @@ export class ChangeReviewComponent implements OnChanges {
         }
       });
 
-      return;
+      if (this.form.invalid) {
+        return;
+      }
     }
 
     const { comment, scheduleTitle, scheduledTime } = this.form.value;

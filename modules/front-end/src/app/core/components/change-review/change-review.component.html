@@ -67,7 +67,7 @@
   </ng-container>
   <div *nzModalFooter>
     <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel</button>
-    <button [disabled]="numChanges === 0" nz-button nzType="primary"
+    <button [disabled]="instructions.length === 0" nz-button nzType="primary"
             (click)="onValidate()" i18n="@@common.save">Save</button>
   </div>
 </nz-modal>
