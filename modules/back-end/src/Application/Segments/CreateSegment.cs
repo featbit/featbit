@@ -14,9 +14,9 @@ public class CreateSegment : IRequest<Segment>
 
     public string Description { get; set; }
 
-    public IEnumerable<string> Included { get; set; } = Array.Empty<string>();
+    public ICollection<string> Included { get; set; } = Array.Empty<string>();
 
-    public IEnumerable<string> Excluded { get; set; } = Array.Empty<string>();
+    public ICollection<string> Excluded { get; set; } = Array.Empty<string>();
 
     public ICollection<MatchRule> Rules { get; set; } = Array.Empty<MatchRule>();
 
