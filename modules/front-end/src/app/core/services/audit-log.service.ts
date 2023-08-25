@@ -7,6 +7,7 @@ import { addDays, startOfDay } from 'date-fns'
 import { AuditLogListFilter, IAuditLogListModel, IDataChange } from "@core/components/audit-log/types";
 import { IInstruction } from "@core/components/change-list-v2/instructions/types";
 import { ISegment } from "@features/safe/segments/types/segments-index";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Injectable({
   providedIn: 'root'
@@ -48,9 +49,10 @@ export class AuditLogService {
     );
   }
 
-  public compare(refType: string, previous: ISegment, current: ISegment): Promise<IInstruction[]> {
+  public compare(refType: string, previous: IFeatureFlag | ISegment, current: IFeatureFlag | ISegment): Promise<IInstruction[]> {
+    const url = `${this.baseUrl}/compare-${refType}`;
     return firstValueFrom(this.http.post<IInstruction[]>(
-      `${this.baseUrl}/compare-segment`,
+       url,
       {
         refType,
         previous,

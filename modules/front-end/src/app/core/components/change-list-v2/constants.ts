@@ -149,6 +149,14 @@ export const instructionCategories: ICategoryInstruction[] = [
     ]
   },
   {
+    category: CategoryEnum.DefaultRule,
+    label: $localize`:@@common.default-rule:Default rule`,
+    instructions: [
+      { component: UpdateRuleVariationOrRolloutComponent, kind: InstructionKindEnum.UpdateDefaultRuleVariationOrRollouts },
+      { component: UpdateDefaultRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateDefaultRuleDispatchKey },
+    ]
+  },
+  {
     category: CategoryEnum.TargetUsers,
     label: $localize`:@@common.target-users:Individual Targeting`,
     instructions: [
@@ -158,14 +166,6 @@ export const instructionCategories: ICategoryInstruction[] = [
       { component: RemoveTargetUsersFromIncludedComponent, kind: InstructionKindEnum.RemoveTargetUsersFromIncluded },
       { component: AddTargetUsersToExcludedComponent, kind: InstructionKindEnum.AddTargetUsersToExcluded },
       { component: RemoveTargetUsersFromExcludedComponent, kind: InstructionKindEnum.RemoveTargetUsersFromExcluded },
-    ]
-  },
-  {
-    category: CategoryEnum.DefaultRule,
-    label: $localize`:@@common.default-rule:Default rule`,
-    instructions: [
-      { component: UpdateRuleVariationOrRolloutComponent, kind: InstructionKindEnum.UpdateDefaultRuleVariationOrRollouts },
-      { component: UpdateDefaultRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateDefaultRuleDispatchKey },
     ]
   },
   {

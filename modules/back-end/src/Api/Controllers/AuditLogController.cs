@@ -27,7 +27,7 @@ public class AuditLogController : ApiControllerBase
         return Ok(instructions);
     }
     
-    [HttpPost(("compare-flag"))]
+    [HttpPost(("compare-featureflag"))]
     public async Task<ApiResponse<IEnumerable<Instruction>>> CompareAsync(CompareFlag request)
     {
         var instructions = await Mediator.Send(request);

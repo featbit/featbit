@@ -1,16 +1,15 @@
 using Application.Bases;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
-using Domain.Segments;
 using Domain.SemanticPatch;
 
 namespace Application.AuditLogs;
 
 public class CompareFlag : IRequest<IEnumerable<Instruction>>
 {
-    public Segment Previous { get; set; }
+    public FeatureFlag Previous { get; set; }
     
-    public Segment Current { get; set; }
+    public FeatureFlag Current { get; set; }
 }
 
 public class CompareFlagValidator : AbstractValidator<CompareFlag>
