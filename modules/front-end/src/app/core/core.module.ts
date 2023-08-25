@@ -69,7 +69,6 @@ import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-variation-value.pipe";
 import { SlugifyPipe } from "@core/pipes/slugify";
 import { AuditLogComponent } from "@core/components/audit-log/audit-log.component";
-import { ChangeListComponent } from "@core/components/change-list/change-list.component";
 import { AuditLogsComponent } from "@core/components/audit-logs/audit-logs.component";
 import { NzDatePickerModule } from "ng-zorro-antd/date-picker";
 import { NzEmptyModule } from "ng-zorro-antd/empty";
@@ -122,7 +121,6 @@ import { PipesModule } from "@core/pipes/pipes.module";
     GuideComponent,
     AuditLogsComponent,
     AuditLogComponent,
-    ChangeListComponent,
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
@@ -216,7 +214,6 @@ import { PipesModule } from "@core/pipes/pipes.module";
     GuideComponent,
     AuditLogsComponent,
     AuditLogComponent,
-    ChangeListComponent,
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
