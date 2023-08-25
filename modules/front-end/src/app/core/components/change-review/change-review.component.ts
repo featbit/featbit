@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
-import { IRefType } from "@shared/diff/types";
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/forms";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
@@ -20,7 +19,6 @@ export class ChangeReviewComponent implements OnChanges {
   @Input() previous: string = '{}';
   @Input() current: string = '{}';
   @Input() refType: RefTypeEnum;
-  @Input() refs: IRefType;
   @Output() onSave = new EventEmitter<any>();
   @Output() onCancel = new EventEmitter<any>();
 

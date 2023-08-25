@@ -3,11 +3,12 @@ import { getPercentageFromRolloutPercentageArray } from '@utils/index';
 import { IRuleVariation, isNotPercentageRollout, IVariation} from "@shared/rules";
 import { IUserProp } from "@shared/types";
 import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
-import { DefaultDispatchKey } from "@shared/diff/types";
 
 interface IRuleVariationValue extends IRuleVariation {
   percentageValue: number;
 }
+
+const DefaultDispatchKey = 'keyId';
 
 @Component({
   selector: 'app-serve',
