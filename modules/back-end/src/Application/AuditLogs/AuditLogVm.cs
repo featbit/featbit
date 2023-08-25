@@ -1,4 +1,5 @@
 using Domain.AuditLogs;
+using Domain.SemanticPatch;
 
 namespace Application.AuditLogs;
 

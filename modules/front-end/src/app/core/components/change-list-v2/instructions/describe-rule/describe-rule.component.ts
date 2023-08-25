@@ -91,7 +91,7 @@ export class DescribeRuleComponent implements IInstructionComponent {
   get rollouts(): IRuleRollout[] {
     const current = this.data.current as IFeatureFlag;
 
-    return this.rule.variations.map((rv) => {
+    return this.rule?.variations?.map((rv) => {
       const variation = current.variations.find((v) => v.id === rv.id);
 
       return {
