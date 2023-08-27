@@ -56,7 +56,7 @@ public class FeatureFlagController : ApiControllerBase
         var pendingChangesList = await Mediator.Send(request);
         return Ok(pendingChangesList);
     }
-    
+
     /// <summary>
     /// Get a feature flag
     /// </summary>

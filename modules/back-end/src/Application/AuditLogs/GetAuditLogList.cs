@@ -1,7 +1,5 @@
 using Application.Bases.Models;
 using Domain.AuditLogs;
-using Domain.FeatureFlags;
-using Domain.Segments;
 using Domain.SemanticPatch;
 
 namespace Application.AuditLogs;
@@ -40,27 +38,13 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
         var users = await _userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));
         foreach (var item in logVms.Items)
         {
-            if (!string.IsNullOrWhiteSpace(item.DataChange.Previous) && !string.IsNullOrWhiteSpace(item.DataChange.Current))
+            item.Instructions = item.RefType switch
             {
-                switch (item.RefType)
-                {
-                    case AuditLogRefTypes.FeatureFlag:
-                    {
-                        var previous = item.DataChange.DeserializePrevious<FeatureFlag>();
-                        var current = item.DataChange.DeserializeCurrent<FeatureFlag>();
-                        item.Instructions = FlagComparer.Compare(previous, current);
-                        break;
-                    }
-                    case AuditLogRefTypes.Segment:
-                    {
-                        var previous = item.DataChange.DeserializePrevious<Segment>();
-                        var current = item.DataChange.DeserializeCurrent<Segment>();
-                        item.Instructions = SegmentComparer.Compare(previous, current);
-                        break;
-                    }
-                }
-            }
-            
+                AuditLogRefTypes.FeatureFlag => FlagComparer.Compare(item.DataChange),
+                AuditLogRefTypes.Segment => SegmentComparer.Compare(item.DataChange),
+                _ => Array.Empty<Instruction>()
+            };
+
             var user = users.FirstOrDefault(x => x.Id == item.CreatorId);
             if (user != null)
             {

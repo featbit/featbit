@@ -7,7 +7,7 @@ public class DataChange
     public string Previous { get; set; }
 
     public string Current { get; set; }
-    
+
     public DataChange()
     {
         Previous = string.Empty;
@@ -31,14 +31,6 @@ public class DataChange
 
         return this;
     }
-    
-    public T DeserializePrevious<T>() where T : class
-    {
-        return string.IsNullOrWhiteSpace(Previous) ? null : JsonSerializer.Deserialize<T>(Previous, ReusableJsonSerializerOptions.Web);
-    }
-    
-    public T DeserializeCurrent<T>() where T : class
-    {
-        return string.IsNullOrWhiteSpace(Current) ? null : JsonSerializer.Deserialize<T>(Current, ReusableJsonSerializerOptions.Web);
-    }
+
+    public bool IsCreationOrDeletion() => string.IsNullOrWhiteSpace(Previous) || string.IsNullOrWhiteSpace(Current);
 }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using Domain.Targeting;
@@ -7,6 +8,19 @@ namespace Domain.SemanticPatch;
 
 public static class FlagComparer
 {
+    public static IEnumerable<FlagInstruction> Compare(DataChange change)
+    {
+        if (change.IsCreationOrDeletion())
+        {
+            return Array.Empty<FlagInstruction>();
+        }
+
+        var original = JsonSerializer.Deserialize<FeatureFlag>(change.Previous, ReusableJsonSerializerOptions.Web);
+        var current = JsonSerializer.Deserialize<FeatureFlag>(change.Current, ReusableJsonSerializerOptions.Web);
+
+        return Compare(original, current);
+    }
+
     public static IEnumerable<FlagInstruction> Compare(FeatureFlag original, FeatureFlag current)
     {
         var instructions = new List<FlagInstruction>();
@@ -195,8 +209,8 @@ public static class FlagComparer
     }
 
     public static IEnumerable<FlagInstruction> CompareTargetUsers(
-        ICollection<Variation> flagVariations, 
-        ICollection<TargetUser> original, 
+        ICollection<Variation> flagVariations,
+        ICollection<TargetUser> original,
         ICollection<TargetUser> current)
     {
         var instructions = new List<FlagInstruction>();
@@ -213,7 +227,7 @@ public static class FlagComparer
         return instructions;
     }
 
-    public static IEnumerable<FlagInstruction> CompareTargetUser(string variationId, TargetUser original,TargetUser current)
+    public static IEnumerable<FlagInstruction> CompareTargetUser(string variationId, TargetUser original, TargetUser current)
     {
         if (original == null && current == null)
         {
@@ -256,7 +270,8 @@ public static class FlagComparer
         return differs;
     }
 
-    public static IEnumerable<FlagInstruction> CompareRules(ICollection<TargetRule> original, ICollection<TargetRule> current)
+    public static IEnumerable<FlagInstruction> CompareRules(ICollection<TargetRule> original,
+        ICollection<TargetRule> current)
     {
         // if rules are all empty
         if (!original.Any() && !current.Any())
@@ -348,7 +363,7 @@ public static class FlagComparer
             var variations = new RuleVariations { RuleId = ruleId, RolloutVariations = current.Variations };
             instructions.Add(new UpdateVariationOrRolloutInstruction(variations));
         }
-        
+
         // compare dispatch key
         if (original.DispatchKey != current.DispatchKey)
         {

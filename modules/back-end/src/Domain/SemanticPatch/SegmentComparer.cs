@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Domain.AuditLogs;
 using Domain.Segments;
 using Domain.Targeting;
 
@@ -6,10 +7,23 @@ namespace Domain.SemanticPatch;
 
 public class SegmentComparer
 {
+    public static IEnumerable<SegmentInstruction> Compare(DataChange change)
+    {
+        if (change.IsCreationOrDeletion())
+        {
+            return Array.Empty<SegmentInstruction>();
+        }
+
+        var original = JsonSerializer.Deserialize<Segment>(change.Previous, ReusableJsonSerializerOptions.Web);
+        var current = JsonSerializer.Deserialize<Segment>(change.Current, ReusableJsonSerializerOptions.Web);
+
+        return Compare(original, current);
+    }
+
     public static IEnumerable<SegmentInstruction> Compare(Segment original, Segment current)
     {
         var instructions = new List<SegmentInstruction>();
-        
+
         instructions.Add(CompareArchived(original.IsArchived, current.IsArchived));
 
         instructions.Add(CompareName(original.Name, current.Name));
@@ -18,11 +32,11 @@ public class SegmentComparer
         instructions.AddRange(CompareTargetUsers("included", original.Included, current.Included));
         instructions.AddRange(CompareTargetUsers("excluded", original.Excluded, current.Excluded));
         instructions.AddRange(CompareRules(original.Rules, current.Rules));
-        
+
         // exclude noop instructions
         return instructions.Where(x => x.Kind != SegmentInstructionKind.Noop);
     }
-    
+
     public static SegmentInstruction CompareArchived(bool original, bool current)
     {
         if (original == current)
@@ -34,7 +48,7 @@ public class SegmentComparer
         var instruction = new SegmentArchiveInstruction(kind);
         return instruction;
     }
-    
+
     public static SegmentInstruction CompareName(string original, string current)
     {
         if (original == current)
@@ -108,23 +122,23 @@ public class SegmentComparer
             var instruction = new SetSegmentRulesInstruction(current);
             return new SegmentInstruction[] { instruction };
         }
-        
+
         var instructions = new List<SegmentInstruction>();
 
         var addedRules = current.ExceptBy(original.Select(v => v.Id), v => v.Id).ToArray();
         var removedRules = original.ExceptBy(current.Select(v => v.Id), v => v.Id).ToArray();
         var commonRules = original.IntersectBy(current.Select(v => v.Id), v => v.Id);
-        
+
         foreach (var rule in addedRules)
         {
             instructions.Add(new AddSegmentRuleInstruction(rule));
         }
-        
+
         foreach (var rule in removedRules)
         {
             instructions.Add(new RemoveSegmentRuleInstruction(rule.Id));
         }
-        
+
         foreach (var rule in commonRules)
         {
             var rule1 = original.First(x => x.Id == rule.Id);
@@ -136,7 +150,7 @@ public class SegmentComparer
 
         return instructions;
     }
-    
+
     public static IEnumerable<SegmentInstruction> CompareRule(MatchRule original, MatchRule current)
     {
         var ruleId = original.Id;
@@ -181,7 +195,7 @@ public class SegmentComparer
 
         return instructions;
     }
-    
+
     public static IEnumerable<SegmentInstruction> CompareCondition(string ruleId, Condition original, Condition current)
     {
         var instructions = new List<SegmentInstruction>();
