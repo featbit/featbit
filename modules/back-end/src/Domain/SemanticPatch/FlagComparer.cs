@@ -270,8 +270,7 @@ public static class FlagComparer
         return differs;
     }
 
-    public static IEnumerable<FlagInstruction> CompareRules(ICollection<TargetRule> original,
-        ICollection<TargetRule> current)
+    public static IEnumerable<FlagInstruction> CompareRules(ICollection<TargetRule> original, ICollection<TargetRule> current)
     {
         // if rules are all empty
         if (!original.Any() && !current.Any())

@@ -113,6 +113,6 @@ public class UpdateDefaultRuleDispatchKeyInstruction : FlagInstruction
             return;
         }
 
-        var rule = flag.Fallthrough.DispatchKey = value;
+        flag.Fallthrough.DispatchKey = value;
     }
 }
