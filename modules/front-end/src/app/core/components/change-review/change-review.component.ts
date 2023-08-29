@@ -24,7 +24,6 @@ export class ChangeReviewComponent implements OnChanges {
 
   title: string;
   reviewModalKindEnum = ReviewModalKindEnum;
-  numChanges = 0;
   instructions: IInstruction[] = [];
   form: FormGroup;
 
