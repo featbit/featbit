@@ -19,7 +19,7 @@ public class AuditLogController : ApiControllerBase
         var auditLogs = await Mediator.Send(request);
         return Ok(auditLogs);
     }
-    
+
     [HttpPost(("compare"))]
     public async Task<ApiResponse<IEnumerable<Instruction>>> CompareAsync(Compare request)
     {
