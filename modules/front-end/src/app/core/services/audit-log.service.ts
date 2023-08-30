@@ -4,10 +4,8 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { firstValueFrom, Observable } from "rxjs";
 import { addDays, startOfDay } from 'date-fns'
-import { AuditLogListFilter, IAuditLogListModel, IDataChange } from "@core/components/audit-log/types";
+import { AuditLogListFilter, IAuditLogListModel } from "@core/components/audit-log/types";
 import { IInstruction } from "@core/components/change-list/instructions/types";
-import { ISegment } from "@features/safe/segments/types/segments-index";
-import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +20,7 @@ export class AuditLogService {
   constructor(private http: HttpClient) {
   }
 
-  public getList(filter: AuditLogListFilter = new AuditLogListFilter()): Observable<IAuditLogListModel> {
+  getList(filter: AuditLogListFilter = new AuditLogListFilter()): Observable<IAuditLogListModel> {
     let from = '';
     let to = '';
     if (filter.range[0]) {
@@ -49,7 +47,7 @@ export class AuditLogService {
     );
   }
 
-  public compare(refType: string, previous: string, current: string): Promise<IInstruction[]> {
+  compare(refType: string, previous: string, current: string): Promise<IInstruction[]> {
     return firstValueFrom(this.http.post<IInstruction[]>(
       `${this.baseUrl}/compare`,
       {
