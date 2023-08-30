@@ -364,7 +364,7 @@ public static class FlagComparer
         }
 
         // compare dispatch key
-        if (original.DispatchKey != current.DispatchKey)
+        if (original.DispatchKey != current.DispatchKey && current.DispatchKey != null)
         {
             var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
             instructions.Add(new RuleDispatchKeyInstruction(value));

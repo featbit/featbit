@@ -1,8 +1,5 @@
 import { Component } from "@angular/core";
-import {
-  IInstructionComponent,
-  IInstructionComponentData, IRolloutVariations,
-} from "@core/components/change-list/instructions/types";
+import { IInstructionComponent, IInstructionComponentData } from "@core/components/change-list/instructions/types";
 import { getPercentageFromRolloutPercentageArray, isSegmentCondition } from "@utils/index";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { IRule } from "@shared/rules";
