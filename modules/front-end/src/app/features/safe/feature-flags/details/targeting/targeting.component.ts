@@ -338,8 +338,8 @@ export class TargetingComponent implements OnInit {
     this.featureFlag.rules.filter(f => f.conditions.length > 0).forEach((rule: IRule) => {
       const invalidCondition = rule.conditions.some((condition) =>
         condition.property?.length === 0 || // property must be set
-        (isSegmentCondition(condition) && JSON.parse(condition.value).length === 0) || // segment condition's value must be set
-        (!isSegmentCondition(condition) && condition.op?.length === 0) || // non segment condition's operation must be set if not segment
+        (isSegmentCondition(condition.property) && JSON.parse(condition.value).length === 0) || // segment condition's value must be set
+        (!isSegmentCondition(condition.property) && condition.op?.length === 0) || // non segment condition's operation must be set if not segment
         (!isSingleOperator(condition.op) && (condition.type === 'multi' ? JSON.parse(condition.value).length === 0 : condition.value?.length === 0)) // value must be set for non-single operator
       );
 

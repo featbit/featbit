@@ -80,10 +80,10 @@ export function encodeURIComponentFfc(url: string): string {
   return encodeURIComponent(url).replace(/\(/g, "%28").replace(/\)/g, '%29');
 }
 
-export function isSegmentCondition(condition: ICondition): boolean {
+export function isSegmentCondition(conditionProperty: string): boolean {
   const segmentRuleProperties = [USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT];
 
-  return segmentRuleProperties.includes(condition.property);
+  return segmentRuleProperties.includes(conditionProperty);
 }
 
 // determine if a rule operation is single operater

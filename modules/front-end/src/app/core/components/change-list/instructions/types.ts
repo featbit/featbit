@@ -31,11 +31,11 @@ export interface IRuleConditionIds extends IRuleId {
 }
 
 export interface IRuleConditions extends IRuleId {
-  conditions: ICondition[];
+  conditions: IInstructionCondition[];
 }
 
 export interface IRuleCondition extends IRuleId {
-  condition: ICondition;
+  condition: IInstructionCondition;
 }
 
 export interface IRuleConditionValues extends IRuleId {
@@ -56,11 +56,16 @@ export interface IVariationValue {
   name: string;
 }
 
-export interface ICondition {
-  id: string;
+export interface IInstructionCondition {
+  id?: string;
   property: string;
   op: string;
   value: string;
+
+  // UI only
+  opLabel?: string;
+  displayValue?: boolean;
+  isMultiValue?: boolean;
 }
 
 export interface IRuleVariation {

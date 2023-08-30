@@ -1,19 +1,18 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import {
   IInstructionComponent,
-  IInstructionComponentData, IRuleConditionValues
+  IInstructionComponentData, IInstructionCondition, IRuleConditionValues
 } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
-import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
-import { lastValueFrom } from "rxjs";
 import { SegmentService } from "@services/segment.service";
+import { getSegmentRefs, mapToIConstructionCondition } from "@core/components/change-list/instructions/utils";
 
 @Component({
   selector: 'remove-values-from-rule-condition',
   template: `
-    <div class="instruction">
+    <div class="instruction" *ngIf="!isLoading">
       <span i18n="@@common.remove-values">Remove value(s)</span>
       <nz-tag *ngFor="let value of values">
         {{value}}
@@ -34,59 +33,45 @@ import { SegmentService } from "@services/segment.service";
   `,
   styleUrls: ['./remove-values-from-rule-condition.component.less']
 })
-export class RemoveValuesFromRuleConditionComponent implements IInstructionComponent {
+export class RemoveValuesFromRuleConditionComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;
+
+  isLoading: boolean = true;
+  condition: IInstructionCondition;
+  values: string[];
 
   constructor(private segmentService: SegmentService) {}
 
-  get condition() {
+  async ngOnInit() {
+    await this.getCondition();
+    await this.getValues();
+    this.isLoading = false;
+  }
+
+  async getCondition() {
     const previous = this.data.previous as IFeatureFlag | ISegment;
     const ruleConditionValues = this.data.value as IRuleConditionValues;
     const condition = previous.rules.find(r => r.id === ruleConditionValues.ruleId)?.conditions?.find(c => c.id === ruleConditionValues.conditionId);
+    const isSegment = isSegmentCondition(condition.property);
 
-    const isSegment = isSegmentCondition(condition);
-
-    if (!isSegment) {
-      const ruleOpIdx = findIndex(condition.op);
-      const isMultiValue = ruleOps[ruleOpIdx].type === 'multi';
-
-      return {
-        property: condition.property,
-        op: condition.op,
-        opLabel: ruleOps[ruleOpIdx].label,
-        displayValue: !['IsTrue', 'IsFalse'].includes(condition.op),
-        value: isMultiValue ? JSON.parse(condition.value) : condition.value,
-        isMultiValue
-      }
-    } else {
-      this.getSegmentRefs(JSON.parse(condition.value));
-
-      return {
-        property: condition.property,
-        op: null,
-        displayValue: !['IsTrue', 'IsFalse'].includes(condition.op),
-        value: JSON.parse(condition.value).map((segmentId) => this.segmentRefs[segmentId]?.name ?? segmentId),
-        isMultiValue: true
-      }
+    let segmentRefs = {};
+    if (isSegment) {
+      segmentRefs = await getSegmentRefs(this.segmentService, JSON.parse(condition.value));
     }
+
+    this.condition = mapToIConstructionCondition(condition, segmentRefs);
   }
 
-  get values() {
+  async getValues() {
     const ruleConditionValues = this.data.value as IRuleConditionValues;
-    return ruleConditionValues.values;
-  }
+    const previous = this.data.previous as IFeatureFlag | ISegment;
+    const condition = previous.rules.find(r => r.id === ruleConditionValues.ruleId)?.conditions?.find(c => c.id === ruleConditionValues.conditionId);
+    const isSegment = isSegmentCondition(condition.property);
+    if (!isSegment) {
+      ruleConditionValues.values
+    }
 
-  segmentRefs: {[key: string]: ISegment } = {};
-  private async getSegmentRefs(segmentIds: string[]) {
-    const missingKeyIds = segmentIds.filter((id) => !this.segmentRefs[id]);
-    const segments = missingKeyIds.length === 0 ? [] : await lastValueFrom(this.segmentService.getByIds(missingKeyIds));
-
-    this.segmentRefs = {
-      ...this.segmentRefs,
-      ...segments.reduce((acc, cur) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, {})
-    };
+    const segmentRefs: {[key: string]: ISegment } = await getSegmentRefs(this.segmentService, ruleConditionValues.values);
+    this.values = Object.values(segmentRefs).map(x => x.name);
   }
 }

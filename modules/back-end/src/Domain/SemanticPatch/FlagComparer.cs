@@ -229,7 +229,7 @@ public static class FlagComparer
 
     public static IEnumerable<FlagInstruction> CompareTargetUser(string variationId, TargetUser original, TargetUser current)
     {
-        if (original == null && current == null)
+        if (TargetUser.IsNullOrEmpty(original) && TargetUser.IsNullOrEmpty(current))
         {
             return new FlagInstruction[] { NoopFlagInstruction.Instance };
         }
@@ -364,7 +364,7 @@ public static class FlagComparer
         }
 
         // compare dispatch key
-        if (original.DispatchKey != current.DispatchKey)
+        if (current.DispatchKey != null && original.DispatchKey != current.DispatchKey)
         {
             var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
             instructions.Add(new RuleDispatchKeyInstruction(value));

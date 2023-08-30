@@ -1,18 +1,17 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import {
   IInstructionComponent,
-  IInstructionComponentData, IRuleCondition
+  IInstructionComponentData, IInstructionCondition, IRuleCondition, IRuleConditionValues
 } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
-import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
-import { lastValueFrom } from "rxjs";
-import { ISegment } from "@features/safe/segments/types/segments-index";
 import { SegmentService } from "@services/segment.service";
+import { getSegmentRefs, mapToIConstructionCondition } from "@core/components/change-list/instructions/utils";
+import { ICondition } from "@shared/rules";
 
 @Component({
   selector: 'update-rule-condition',
   template: `
-    <div class="instruction">
+    <div class="instruction" *ngIf="!isLoading">
       <span i18n="@@common.update-conditions">Update condition</span>
       <div class="clause">
         <span i18n="@@common.capitalize-if">If</span>
@@ -29,51 +28,28 @@ import { SegmentService } from "@services/segment.service";
   `,
   styleUrls: ['./update-rule-condition.component.less']
 })
-export class UpdateRuleConditionComponent implements IInstructionComponent {
+export class UpdateRuleConditionComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;
+
+  isLoading: boolean = true;
+  condition: IInstructionCondition;
 
   constructor(private segmentService: SegmentService) {}
 
-  get condition() {
-    const ruleCondition = this.data.value as IRuleCondition;
-    const isSegment = isSegmentCondition(ruleCondition.condition);
-
-    if (!isSegment) {
-      const ruleOpIdx = findIndex(ruleCondition.condition.op);
-      const isMultiValue = ruleOps[ruleOpIdx].type === 'multi';
-
-      return {
-        property: ruleCondition.condition.property,
-        op: ruleCondition.condition.op,
-        opLabel: ruleOps[ruleOpIdx].label,
-        displayValue: !['IsTrue', 'IsFalse'].includes(ruleCondition.condition.op),
-        value: isMultiValue ? JSON.parse(ruleCondition.condition.value) : ruleCondition.condition.value,
-        isMultiValue
-      }
-    } else {
-      this.getSegmentRefs(JSON.parse(ruleCondition.condition.value));
-
-      return {
-        property: ruleCondition.condition.property,
-        op: null,
-        displayValue: !['IsTrue', 'IsFalse'].includes(ruleCondition.condition.op),
-        value: JSON.parse(ruleCondition.condition.value).map((segmentId) => this.segmentRefs[segmentId]?.name ?? segmentId),
-        isMultiValue: true
-      }
-    }
+  async ngOnInit() {
+    await this.getCondition();
+    this.isLoading = false;
   }
 
-  segmentRefs: {[key: string]: ISegment } = {};
-  private async getSegmentRefs(segmentIds: string[]) {
-    const missingKeyIds = segmentIds.filter((id) => !this.segmentRefs[id]);
-    const segments = missingKeyIds.length === 0 ? [] : await lastValueFrom(this.segmentService.getByIds(missingKeyIds));
+  async getCondition() {
+    const ruleCondition = this.data.value as IRuleCondition;
+    const isSegment = isSegmentCondition(ruleCondition.condition.property);
 
-    this.segmentRefs = {
-      ...this.segmentRefs,
-      ...segments.reduce((acc, cur) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, {})
-    };
+    let segmentRefs = {};
+    if (isSegment) {
+      segmentRefs = await getSegmentRefs(this.segmentService, JSON.parse(ruleCondition.condition.value));
+    }
+
+    this.condition = mapToIConstructionCondition(ruleCondition.condition as ICondition, segmentRefs);
   }
 }

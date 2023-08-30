@@ -1,15 +1,17 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import {
+  IInstructionCondition,
   IInstructionComponent,
-  IInstructionComponentData, IRolloutVariations,
+  IInstructionComponentData,
 } from "@core/components/change-list/instructions/types";
 import { getPercentageFromRolloutPercentageArray, isSegmentCondition } from "@utils/index";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { IRule } from "@shared/rules";
-import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
-import { lastValueFrom } from "rxjs";
 import { SegmentService } from "@services/segment.service";
-import { ISegment } from "@features/safe/segments/types/segments-index";
+import {
+  getSegmentRefs,
+  mapToIConstructionCondition
+} from "@core/components/change-list/instructions/utils";
 
 interface IRuleRollout {
   label: string;
@@ -19,7 +21,7 @@ interface IRuleRollout {
 @Component({
   selector: 'describe-rule',
   template: `
-    <div class="instruction">
+    <div class="instruction" *ngIf="!isLoading">
       <div class="clause" *ngFor="let condition of conditions; let idx = index">
         <span *ngIf="idx !==0">And</span>
         <span i18n="@@common.capitalize-if">If</span>
@@ -48,8 +50,11 @@ interface IRuleRollout {
   `,
   styleUrls: ['./describe-rule.component.less']
 })
-export class DescribeRuleComponent implements IInstructionComponent {
+export class DescribeRuleComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;
+
+  isLoading: boolean = true;
+  conditions: IInstructionCondition[];
 
   constructor(private segmentService: SegmentService) {}
 
@@ -57,35 +62,8 @@ export class DescribeRuleComponent implements IInstructionComponent {
     return this.data.value as IRule;
   }
 
-  get conditions() {
-    const segmentIds = this.rule.conditions.filter(isSegmentCondition).flatMap(condition => JSON.parse(condition.value));
-    this.getSegmentRefs(segmentIds);
-
-    return this.rule.conditions.map(condition => {
-      const isSegment = isSegmentCondition(condition);
-
-      if (!isSegment) {
-        const ruleOpIdx = findIndex(condition.op);
-        const isMultiValue = ruleOps[ruleOpIdx].type === 'multi';
-
-        return {
-          property: condition.property,
-          op: condition.op,
-          opLabel: ruleOps[ruleOpIdx].label,
-          displayValue: !['IsTrue', 'IsFalse'].includes(condition.op),
-          value: isMultiValue ? JSON.parse(condition.value) : condition.value,
-          isMultiValue
-        }
-      } else {
-        return {
-          property: condition.property,
-          op: null,
-          displayValue: !['IsTrue', 'IsFalse'].includes(condition.op),
-          value: JSON.parse(condition.value).map((segmentId) => this.segmentRefs[segmentId]?.name ?? segmentId),
-          isMultiValue: true
-        }
-      }
-    });
+  ngOnInit(): void {
+    this.getConditions();
   }
 
   get rollouts(): IRuleRollout[] {
@@ -101,18 +79,15 @@ export class DescribeRuleComponent implements IInstructionComponent {
     })
   }
 
-  segmentRefs: {[key: string]: ISegment } = {};
+  async getConditions() {
 
-  private async getSegmentRefs(segmentIds: string[]) {
-    const missingKeyIds = segmentIds.filter((id) => !this.segmentRefs[id]);
-    const segments = missingKeyIds.length === 0 ? [] : await lastValueFrom(this.segmentService.getByIds(missingKeyIds));
+    const segmentIds = this.rule.conditions.filter(({ property }) => isSegmentCondition(property))
+      .flatMap(condition => JSON.parse(condition.value))
 
-    this.segmentRefs = {
-      ...this.segmentRefs,
-      ...segments.reduce((acc, cur) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, {})
-    };
+    const segmentRefs = await getSegmentRefs(this.segmentService, segmentIds);
+
+    this.conditions = this.rule.conditions.map((condition) => mapToIConstructionCondition(condition, segmentRefs));
+
+    this.isLoading = false;
   }
 }

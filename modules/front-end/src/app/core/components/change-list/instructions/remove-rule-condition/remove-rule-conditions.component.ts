@@ -1,19 +1,20 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import {
+  IInstructionCondition,
   IInstructionComponent,
-  IInstructionComponentData, IRuleConditionIds, IRuleConditions
+  IInstructionComponentData, IRuleConditionIds
 } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
 import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
-import { lastValueFrom } from "rxjs";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { SegmentService } from "@services/segment.service";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { getSegmentRefs } from "@core/components/change-list/instructions/utils";
 
 @Component({
   selector: 'remove-rule-condition',
   template: `
-    <div class="instruction">
+    <div class="instruction" *ngIf="!isLoading">
       <span i18n="@@common.remove-conditions">Remove conditions</span>
       <div class="clause" *ngFor="let condition of conditions; let idx = index">
         <span *ngIf="idx !==0">And</span>
@@ -31,22 +32,30 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   `,
   styleUrls: ['./remove-rule-conditions.component.less']
 })
-export class RemoveRuleConditionsComponent implements IInstructionComponent {
+export class RemoveRuleConditionsComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;
+
+  isLoading: boolean = true;
+  conditions: IInstructionCondition[];
 
   constructor(private segmentService: SegmentService) {}
 
-  get conditions() {
+  ngOnInit(): void {
+    this.getConditions();
+  }
+
+  async getConditions() {
     const ruleConditionIds = this.data.value as IRuleConditionIds;
 
     const previous = this.data.previous as IFeatureFlag | ISegment;
     const conditions = previous.rules.find(r => r.id === ruleConditionIds.ruleId)?.conditions?.filter(c => ruleConditionIds.conditionIds.includes(c.id)) ?? [];
 
-    const segmentIds = conditions.filter(isSegmentCondition).flatMap(condition => JSON.parse(condition.value));
-    this.getSegmentRefs(segmentIds);
+    const segmentIds = conditions.filter(({ property }) => isSegmentCondition(property)).flatMap(condition => JSON.parse(condition.value));
 
-    return conditions.map(condition => {
-      const isSegment = isSegmentCondition(condition);
+    const segmentRefs = await getSegmentRefs(this.segmentService, segmentIds);
+
+    this.conditions = conditions.map(condition => {
+      const isSegment = isSegmentCondition(condition.property);
 
       if (!isSegment) {
         const ruleOpIdx = findIndex(condition.op);
@@ -65,24 +74,12 @@ export class RemoveRuleConditionsComponent implements IInstructionComponent {
           property: condition.property,
           op: null,
           displayValue: !['IsTrue', 'IsFalse'].includes(condition.op),
-          value: JSON.parse(condition.value).map((segmentId) => this.segmentRefs[segmentId]?.name ?? segmentId),
+          value: JSON.parse(condition.value).map((segmentId) => segmentRefs[segmentId]?.name ?? segmentId),
           isMultiValue: true
         }
       }
     });
-  }
 
-  segmentRefs: {[key: string]: ISegment } = {};
-  private async getSegmentRefs(segmentIds: string[]) {
-    const missingKeyIds = segmentIds.filter((id) => !this.segmentRefs[id]);
-    const segments = missingKeyIds.length === 0 ? [] : await lastValueFrom(this.segmentService.getByIds(missingKeyIds));
-
-    this.segmentRefs = {
-      ...this.segmentRefs,
-      ...segments.reduce((acc, cur) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, {})
-    };
+    this.isLoading = false;
   }
 }
