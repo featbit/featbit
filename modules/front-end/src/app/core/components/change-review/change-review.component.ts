@@ -34,8 +34,7 @@ export class ChangeReviewComponent implements OnChanges {
   constructor(
     private fb: FormBuilder,
     private auditLogService: AuditLogService
-  ) {
-  }
+  ) { }
 
   scheduleValidator: ValidatorFn = (control: AbstractControl) => {
     if (this.hasSchedule && !control.value) {

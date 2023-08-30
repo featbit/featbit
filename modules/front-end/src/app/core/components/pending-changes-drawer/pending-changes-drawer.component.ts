@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
-import { IChangeListParam, IInstruction } from "@core/components/change-list/instructions/types";
+import { IInstruction } from "@core/components/change-list/instructions/types";
 
 interface IChangeCategory {
   createdAt: string;
@@ -16,14 +16,13 @@ interface IChangeCategory {
   templateUrl: './pending-changes-drawer.component.html',
   styleUrls: ['./pending-changes-drawer.component.less']
 })
-export class PendingChangesDrawerComponent implements OnInit {
+export class PendingChangesDrawerComponent {
   changeCategoriesList: IChangeCategory[] = [];
 
   @Input() visible: boolean = false;
   @Input()
   set pendingChangesList(data: IPendingChanges[]) {
-    this.changeCategoriesList = [];
-    data.map(async (item: IPendingChanges) => {
+    data.map((item: IPendingChanges) => {
       this.changeCategoriesList.push({
         createdAt: item.createdAt,
         scheduledTime: item.scheduledTime,
@@ -35,11 +34,6 @@ export class PendingChangesDrawerComponent implements OnInit {
     });
   }
   @Output() close: EventEmitter<any> = new EventEmitter();
-
-  param: IChangeListParam;
-
-  ngOnInit(): void {
-  }
 
   onClose() {
     this.close.emit();
