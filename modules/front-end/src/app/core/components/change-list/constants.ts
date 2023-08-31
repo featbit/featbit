@@ -53,11 +53,8 @@ import {
   UpdateRuleConditionComponent
 } from "@core/components/change-list/instructions/update-rule-condition/update-rule-condition.component";
 import {
-  AddValuesToRuleConditionComponent
-} from "@core/components/change-list/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component";
-import {
-  RemoveValuesFromRuleConditionComponent
-} from "@core/components/change-list/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component";
+  UpdateValuesOfRuleConditionComponent
+} from "@core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component";
 import {
   AddTargetUsersToIncludedComponent
 } from "@core/components/change-list/instructions/add-target-users-to-included/add-target-users-to-included.component";
@@ -186,8 +183,8 @@ export const instructionCategories: ICategoryInstruction[] = [
       { component: AddRuleConditionsComponent, kind: InstructionKindEnum.AddRuleConditions },
       { component: RemoveRuleConditionsComponent, kind: InstructionKindEnum.RemoveRuleConditions },
       { component: UpdateRuleConditionComponent, kind: InstructionKindEnum.UpdateRuleCondition },
-      { component: AddValuesToRuleConditionComponent, kind: InstructionKindEnum.AddValuesToRuleCondition },
-      { component: RemoveValuesFromRuleConditionComponent, kind: InstructionKindEnum.RemoveValuesFromRuleCondition },
+      { component: UpdateValuesOfRuleConditionComponent, kind: InstructionKindEnum.AddValuesToRuleCondition },
+      { component: UpdateValuesOfRuleConditionComponent, kind: InstructionKindEnum.RemoveValuesFromRuleCondition },
       { component: UpdateRuleVariationOrRolloutComponent, kind: InstructionKindEnum.UpdateRuleVariationOrRollouts },
       { component: UpdateRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateRuleDispatchKey },
     ]

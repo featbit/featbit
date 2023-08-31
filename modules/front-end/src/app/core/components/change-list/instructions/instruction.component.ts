@@ -14,8 +14,8 @@ export class InstructionComponent {
   @Input()
   set instruction(ins: IInstructionKindComponent) {
     const componentRef = this.instructionRef.viewContainerRef.createComponent<IInstructionComponent>(ins.component);
-    const { value, previous, current } = ins;
-    componentRef.instance.data = { value, previous, current };
+    const { kind, value, previous, current } = ins;
+    componentRef.instance.data = { kind, value, previous, current };
   }
 
   constructor() {

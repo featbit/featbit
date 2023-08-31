@@ -8,16 +8,19 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { SegmentService } from "@services/segment.service";
 import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/change-list/instructions/utils";
+import { InstructionKindEnum } from "@core/components/change-list/constants";
 
 @Component({
-  selector: 'add-values-to-rule-condition',
+  selector: 'update-values-of-rule-condition',
   template: `
     <div class="instruction" *ngIf="!isLoading">
-      <span i18n="@@common.add-values">Add value(s)</span>
+      <span i18n="@@common.add-values" *ngIf="isAddingValue">Add value(s)</span>
+      <span i18n="@@common.remove-values" *ngIf="!isAddingValue">Remove value(s)</span>
       <nz-tag *ngFor="let value of values">
         {{value}}
       </nz-tag>
-      <span i18n="@@common.to-condition">to condition</span>
+      <span i18n="@@common.to-condition" *ngIf="isAddingValue">to condition</span>
+      <span i18n="@@common.from-condition" *ngIf="!isAddingValue">from condition</span>
       <div class="clause">
         <span i18n="@@common.capitalize-if">If</span>
         <span>{{condition.property}}</span>
@@ -31,9 +34,9 @@ import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/cha
       </div>
     </div>
   `,
-  styleUrls: ['./add-values-to-rule-condition.component.less']
+  styleUrls: ['./update-values-of-rule-condition.component.less']
 })
-export class AddValuesToRuleConditionComponent implements IInstructionComponent, OnInit {
+export class UpdateValuesOfRuleConditionComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;
 
   isLoading: boolean = true;
@@ -46,6 +49,10 @@ export class AddValuesToRuleConditionComponent implements IInstructionComponent,
     await this.getCondition();
     await this.getValues();
     this.isLoading = false;
+  }
+
+  get isAddingValue() {
+    return this.data.kind === InstructionKindEnum.AddValuesToRuleCondition;
   }
 
   async getCondition() {

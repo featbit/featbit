@@ -5,6 +5,7 @@ import { InstructionKindEnum, RuleInstructionKinkOpEnum } from "../constants";
 import { IRule } from "@shared/rules";
 
 export interface IInstructionComponentData {
+  kind: InstructionKindEnum;
   value: IInstructionValue;
   previous: IFeatureFlag | ISegment;
   current: IFeatureFlag | ISegment;

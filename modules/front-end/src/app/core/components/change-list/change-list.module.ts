@@ -63,11 +63,8 @@ import {
   UpdateRuleConditionComponent
 } from "@core/components/change-list/instructions/update-rule-condition/update-rule-condition.component";
 import {
-  AddValuesToRuleConditionComponent
-} from "@core/components/change-list/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component";
-import {
-  RemoveValuesFromRuleConditionComponent
-} from "@core/components/change-list/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component";
+  UpdateValuesOfRuleConditionComponent
+} from "@core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import {
   AddTargetUsersToIncludedComponent
@@ -110,8 +107,7 @@ import {
     AddRuleConditionsComponent,
     RemoveRuleConditionsComponent,
     UpdateRuleConditionComponent,
-    AddValuesToRuleConditionComponent,
-    RemoveValuesFromRuleConditionComponent,
+    UpdateValuesOfRuleConditionComponent,
     AddTargetUsersToIncludedComponent,
     AddTargetUsersToExcludedComponent,
     RemoveTargetUsersFromIncludedComponent,
