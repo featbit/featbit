@@ -4,12 +4,10 @@ import {
   IInstructionComponentData, IInstructionCondition, IRuleConditionValues
 } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
-import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
-import { lastValueFrom } from "rxjs";
 import { SegmentService } from "@services/segment.service";
-import { getSegmentRefs, mapToIConstructionCondition } from "@core/components/change-list/instructions/utils";
+import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/change-list/instructions/utils";
 
 @Component({
   selector: 'add-values-to-rule-condition',
@@ -61,7 +59,7 @@ export class AddValuesToRuleConditionComponent implements IInstructionComponent,
       segmentRefs = await getSegmentRefs(this.segmentService, JSON.parse(condition.value));
     }
 
-    this.condition = mapToIConstructionCondition(condition, segmentRefs);
+    this.condition = mapToIInstructionCondition(condition, segmentRefs);
   }
 
   async getValues() {

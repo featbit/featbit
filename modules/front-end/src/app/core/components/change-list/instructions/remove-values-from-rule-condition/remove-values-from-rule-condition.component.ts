@@ -7,7 +7,7 @@ import { isSegmentCondition } from "@utils/index";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { SegmentService } from "@services/segment.service";
-import { getSegmentRefs, mapToIConstructionCondition } from "@core/components/change-list/instructions/utils";
+import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/change-list/instructions/utils";
 
 @Component({
   selector: 'remove-values-from-rule-condition',
@@ -59,7 +59,7 @@ export class RemoveValuesFromRuleConditionComponent implements IInstructionCompo
       segmentRefs = await getSegmentRefs(this.segmentService, JSON.parse(condition.value));
     }
 
-    this.condition = mapToIConstructionCondition(condition, segmentRefs);
+    this.condition = mapToIInstructionCondition(condition, segmentRefs);
   }
 
   async getValues() {

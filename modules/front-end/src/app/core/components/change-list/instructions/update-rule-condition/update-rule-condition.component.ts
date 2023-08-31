@@ -1,11 +1,11 @@
 import { Component, OnInit } from "@angular/core";
 import {
   IInstructionComponent,
-  IInstructionComponentData, IInstructionCondition, IRuleCondition, IRuleConditionValues
+  IInstructionComponentData, IInstructionCondition, IRuleCondition
 } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
-import { getSegmentRefs, mapToIConstructionCondition } from "@core/components/change-list/instructions/utils";
+import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/change-list/instructions/utils";
 import { ICondition } from "@shared/rules";
 
 @Component({
@@ -34,7 +34,7 @@ export class UpdateRuleConditionComponent implements IInstructionComponent, OnIn
   isLoading: boolean = true;
   condition: IInstructionCondition;
 
-  constructor(private segmentService: SegmentService) {}
+  constructor(private segmentService: SegmentService) { }
 
   async ngOnInit() {
     await this.getCondition();
@@ -43,13 +43,12 @@ export class UpdateRuleConditionComponent implements IInstructionComponent, OnIn
 
   async getCondition() {
     const ruleCondition = this.data.value as IRuleCondition;
-    const isSegment = isSegmentCondition(ruleCondition.condition.property);
+    let originalCondition = ruleCondition.condition as ICondition;
 
-    let segmentRefs = {};
-    if (isSegment) {
-      segmentRefs = await getSegmentRefs(this.segmentService, JSON.parse(ruleCondition.condition.value));
-    }
+    let segmentRefs = isSegmentCondition(originalCondition.property)
+      ? await getSegmentRefs(this.segmentService, JSON.parse(originalCondition.value))
+      : { };
 
-    this.condition = mapToIConstructionCondition(ruleCondition.condition as ICondition, segmentRefs);
+    this.condition = mapToIInstructionCondition(originalCondition, segmentRefs);
   }
 }

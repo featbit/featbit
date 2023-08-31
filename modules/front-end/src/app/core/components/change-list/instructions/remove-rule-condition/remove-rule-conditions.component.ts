@@ -5,11 +5,10 @@ import {
   IInstructionComponentData, IRuleConditionIds
 } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
-import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { SegmentService } from "@services/segment.service";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
-import { getSegmentRefs } from "@core/components/change-list/instructions/utils";
+import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/change-list/instructions/utils";
 
 @Component({
   selector: 'remove-rule-condition',
@@ -46,40 +45,13 @@ export class RemoveRuleConditionsComponent implements IInstructionComponent, OnI
 
   async getConditions() {
     const ruleConditionIds = this.data.value as IRuleConditionIds;
-
     const previous = this.data.previous as IFeatureFlag | ISegment;
     const conditions = previous.rules.find(r => r.id === ruleConditionIds.ruleId)?.conditions?.filter(c => ruleConditionIds.conditionIds.includes(c.id)) ?? [];
 
     const segmentIds = conditions.filter(({ property }) => isSegmentCondition(property)).flatMap(condition => JSON.parse(condition.value));
-
     const segmentRefs = await getSegmentRefs(this.segmentService, segmentIds);
 
-    this.conditions = conditions.map(condition => {
-      const isSegment = isSegmentCondition(condition.property);
-
-      if (!isSegment) {
-        const ruleOpIdx = findIndex(condition.op);
-        const isMultiValue = ruleOps[ruleOpIdx].type === 'multi';
-
-        return {
-          property: condition.property,
-          op: condition.op,
-          opLabel: ruleOps[ruleOpIdx].label,
-          displayValue: !['IsTrue', 'IsFalse'].includes(condition.op),
-          value: isMultiValue ? JSON.parse(condition.value) : condition.value,
-          isMultiValue
-        }
-      } else {
-        return {
-          property: condition.property,
-          op: null,
-          displayValue: !['IsTrue', 'IsFalse'].includes(condition.op),
-          value: JSON.parse(condition.value).map((segmentId) => segmentRefs[segmentId]?.name ?? segmentId),
-          isMultiValue: true
-        }
-      }
-    });
-
+    this.conditions = conditions.map(condition => mapToIInstructionCondition(condition, segmentRefs));
     this.isLoading = false;
   }
 }

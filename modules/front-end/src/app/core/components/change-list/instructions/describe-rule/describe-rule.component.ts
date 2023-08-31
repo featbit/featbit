@@ -10,7 +10,7 @@ import { IRule } from "@shared/rules";
 import { SegmentService } from "@services/segment.service";
 import {
   getSegmentRefs,
-  mapToIConstructionCondition
+  mapToIInstructionCondition
 } from "@core/components/change-list/instructions/utils";
 
 interface IRuleRollout {
@@ -80,13 +80,12 @@ export class DescribeRuleComponent implements IInstructionComponent, OnInit {
   }
 
   async getConditions() {
-
-    const segmentIds = this.rule.conditions.filter(({ property }) => isSegmentCondition(property))
+    const segmentIds = this.rule.conditions
+      .filter(({ property }) => isSegmentCondition(property))
       .flatMap(condition => JSON.parse(condition.value))
 
     const segmentRefs = await getSegmentRefs(this.segmentService, segmentIds);
-
-    this.conditions = this.rule.conditions.map((condition) => mapToIConstructionCondition(condition, segmentRefs));
+    this.conditions = this.rule.conditions.map((condition) => mapToIInstructionCondition(condition, segmentRefs));
 
     this.isLoading = false;
   }

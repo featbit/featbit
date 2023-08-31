@@ -5,7 +5,7 @@ import {
 } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
-import { getSegmentRefs, mapToIConstructionCondition } from "@core/components/change-list/instructions/utils";
+import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/change-list/instructions/utils";
 import { ICondition } from "@shared/rules";
 
 @Component({
@@ -47,7 +47,7 @@ export class AddRuleConditionsComponent implements IInstructionComponent, OnInit
 
     const segmentRefs = await getSegmentRefs(this.segmentService, segmentIds);
 
-    this.conditions = ruleConditions.conditions.map((condition) => mapToIConstructionCondition(condition as ICondition, segmentRefs));
+    this.conditions = ruleConditions.conditions.map((condition) => mapToIInstructionCondition(condition as ICondition, segmentRefs));
 
     this.isLoading = false;
   }

@@ -19,7 +19,7 @@ export const getSegmentRefs = async (segmentService: SegmentService, segmentIds:
   }, {});
 }
 
-export const mapToIConstructionCondition = (condition: ICondition, segmentRefs: { [key: string]: ISegment }): IInstructionCondition => {
+export const mapToIInstructionCondition = (condition: ICondition, segmentRefs: { [key: string]: ISegment }): IInstructionCondition => {
   const isSegment = isSegmentCondition(condition.property);
 
   if (!isSegment) {
