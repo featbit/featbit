@@ -6,11 +6,6 @@ import { RestoreFlagComponent } from "@core/components/change-list/instructions/
 import { UpdateNameComponent } from "@core/components/change-list/instructions/update-name/update-name.component";
 import { UpdateDescriptionComponent } from "@core/components/change-list/instructions/update-description/update-description.component";
 import {
-  UpdateTargetUsersComponent
-} from "@core/components/change-list/instructions/update-target-users/update-target-users.component";
-import { AddTagsComponent } from "@core/components/change-list/instructions/add-tags/add-tags.component";
-import { RemoveTagsComponent } from "@core/components/change-list/instructions/remove-tags/remove-tags.component";
-import {
   UpdateVariationTypeComponent
 } from "@core/components/change-list/instructions/update-variation-type/update-variation-type.component";
 import {
@@ -55,6 +50,10 @@ import {
 import {
   UpdateTargetUsersForSegmentComponent
 } from "@core/components/change-list/instructions/update-target-users-for-segment/update-target-users-for-segment.component";
+import { UpdateTagsComponent } from "@core/components/change-list/instructions/update-tags/update-tags.component";
+import {
+  UpdateTargetUsersComponent
+} from "@core/components/change-list/instructions/update-target-users/update-target-users.component";
 
 export enum InstructionKindEnum {
   // Settings
@@ -130,8 +129,8 @@ export const instructionCategories: ICategoryInstruction[] = [
       { component: RestoreFlagComponent, kind: InstructionKindEnum.RestoreFlag },
       { component: UpdateNameComponent, kind: InstructionKindEnum.UpdateName },
       { component: UpdateDescriptionComponent, kind: InstructionKindEnum.UpdateDescription },
-      { component: AddTagsComponent, kind: InstructionKindEnum.AddTags },
-      { component: RemoveTagsComponent, kind: InstructionKindEnum.RemoveTags },
+      { component: UpdateTagsComponent, kind: InstructionKindEnum.AddTags },
+      { component: UpdateTagsComponent, kind: InstructionKindEnum.RemoveTags },
     ]
   },
   {
