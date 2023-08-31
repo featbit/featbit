@@ -20,8 +20,7 @@ import {
 import {
   AddTargetUsersComponent
 } from "@core/components/change-list/instructions/add-target-users/add-target-users.component";
-import { AddTagsComponent } from "@core/components/change-list/instructions/add-tags/add-tags.component";
-import { RemoveTagsComponent } from "@core/components/change-list/instructions/remove-tags/remove-tags.component";
+import { UpdateTagsComponent } from "@core/components/change-list/instructions/update-tags/update-tags.component";
 import {
   UpdateVariationTypeComponent
 } from "@core/components/change-list/instructions/update-variation-type/update-variation-type.component";
@@ -90,8 +89,7 @@ import {
     RestoreFlagComponent,
     UpdateNameComponent,
     UpdateDescriptionComponent,
-    AddTagsComponent,
-    RemoveTagsComponent,
+    UpdateTagsComponent,
     RemoveTargetUsersComponent,
     AddTargetUsersComponent,
     UpdateVariationTypeComponent,
