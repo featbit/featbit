@@ -35,7 +35,7 @@ export class RuleComponent  {
 
   @Input("condition")
   set content(data: ICondition) {
-    this.isSegmentRule = isSegmentCondition(data);
+    this.isSegmentRule = isSegmentCondition(data.property);
     this.condition = { ...data };
   }
 
@@ -172,7 +172,7 @@ export class RuleComponent  {
     }
 
     this.condition.property = this.selectedProp.name;
-    this.isSegmentRule = isSegmentCondition(this.condition);
+    this.isSegmentRule = isSegmentCondition(this.condition.property);
 
     let result = findIndex(this.condition.op);
     this.condition.value = this.ruleValueConfig[result]?.default;

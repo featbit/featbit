@@ -71,8 +71,6 @@ export class TargetingComponent implements OnInit {
   currentData: string = '{}';
   refType: RefTypeEnum = RefTypeEnum.Flag;
   reviewModalVisible: boolean = false;
-  allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
-  segmentIdRefs: ISegment[] = [];
 
   onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
     this.validationErrors = this.validateFeatureFlag();
@@ -86,32 +84,10 @@ export class TargetingComponent implements OnInit {
     this.reviewModalKind = modalKind;
 
     this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
-
     this.originalData = JSON.stringify(this.featureFlag.originalData);
     this.currentData = JSON.stringify(this.featureFlag);
 
-    // get all segmentIds from originalData and new Data
-    const previousSegmentIdRefs: string[] = this.featureFlag.originalData.rules.flatMap((rule) => rule.conditions)
-      .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
-      .flatMap((condition: ICondition) => JSON.parse(condition.value))
-      .filter((id) => id !== null && id.length > 0);
-
-    const currentSegmentIdRefs: string[] = this.featureFlag.rules.flatMap((rule) => rule.conditions)
-      .filter((condition) => isSegmentCondition(condition) && condition.value.length > 0)
-      .flatMap((condition: ICondition) => JSON.parse(condition.value))
-      .filter((id) => id !== null && id.length > 0);
-
-    let segmentIdRefs: string[] = [...previousSegmentIdRefs, ...currentSegmentIdRefs];
-    segmentIdRefs = segmentIdRefs.filter((id, idx) => segmentIdRefs.indexOf(id) === idx); // get unique values
-
-    if (segmentIdRefs.length > 0) {
-      this.segmentService.getByIds(segmentIdRefs).subscribe((segments) => {
-        this.segmentIdRefs = segments;
-        this.reviewModalVisible = true;
-      }, _ => this.msg.error($localize `:@@common.operation-failed-try-again:Operation failed, please try again`));
-    } else {
-      this.reviewModalVisible = true;
-    }
+    this.reviewModalVisible = true
   }
 
   onCloseReviewModal() {
@@ -193,8 +169,6 @@ export class TargetingComponent implements OnInit {
               return acc;
             }, {});
 
-            this.allTargetingUsers = Object.values(this.targetingUsersByVariation).flatMap((x) => x);
-
             resolve(null);
           }, () => resolve(null));
         } else {
@@ -202,8 +176,6 @@ export class TargetingComponent implements OnInit {
             acc[cur.id] = [];
             return acc;
           }, {});
-
-          this.allTargetingUsers = Object.values(this.targetingUsersByVariation).flatMap((x) => x);
 
           resolve(null);
         }
@@ -282,11 +254,6 @@ export class TargetingComponent implements OnInit {
 
   onSelectedUserListChange(data: IUserType[], variationId: string) {
     this.targetingUsersByVariation[variationId] = [...data];
-
-    this.allTargetingUsers = [
-      ...this.allTargetingUsers.filter((u) => !data.find((d) => d.keyId === u.keyId)),
-      ...data
-    ];
   }
 
   onFallthroughChange(value: IRuleVariation[]) {
@@ -372,8 +339,8 @@ export class TargetingComponent implements OnInit {
     this.featureFlag.rules.filter(f => f.conditions.length > 0).forEach((rule: IRule) => {
       const invalidCondition = rule.conditions.some((condition) =>
         condition.property?.length === 0 || // property must be set
-        (isSegmentCondition(condition) && JSON.parse(condition.value).length === 0) || // segment condition's value must be set
-        (!isSegmentCondition(condition) && condition.op?.length === 0) || // non segment condition's operation must be set if not segment
+        (isSegmentCondition(condition.property) && JSON.parse(condition.value).length === 0) || // segment condition's value must be set
+        (!isSegmentCondition(condition.property) && condition.op?.length === 0) || // non segment condition's operation must be set if not segment
         (!isSingleOperator(condition.op) && (condition.type === 'multi' ? JSON.parse(condition.value).length === 0 : condition.value?.length === 0)) // value must be set for non-single operator
       );
 

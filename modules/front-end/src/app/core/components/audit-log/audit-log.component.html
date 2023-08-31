@@ -2,5 +2,5 @@
   <div class="audit-log-title">{{titlePrefix}} <a [class]="{'remove-item': auditLog.operation === 'Remove' }" (click)="goToTargetPage()">{{name}}</a></div>
   <div class="audit-log-createdat">{{ auditLog.createdAt | date: "YYYY-MM-dd HH:mm"}}</div>
   <div class="audit-log-comment">{{auditLog.comment}}</div>
-  <change-list [categories]="changeCategories"></change-list>
+  <change-list-v2 class="change-list" [param]="{ instructions: auditLog.instructions, previous: auditLog.dataChange.previous, current: auditLog.dataChange.current }"></change-list-v2>
 </div>

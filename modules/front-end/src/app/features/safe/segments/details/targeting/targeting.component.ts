@@ -32,7 +32,6 @@ export class TargetingComponent implements OnInit {
   currentData: string = '{}';
   refType: RefTypeEnum = RefTypeEnum.Segment;
   reviewModalVisible: boolean = false;
-  allTargetingUsers: IUserType[] = []; // including all users who have been added or removed from the targeting user in the UI, is used by the differ
 
   onReviewChanges() {
     this.originalData = JSON.stringify(this.segmentDetail.originalData);
@@ -108,9 +107,6 @@ export class TargetingComponent implements OnInit {
         this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
         this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
 
-        const targetUsers = [...this.segmentDetail.includedUsers, ...this.segmentDetail.excludedUsers];
-        // filter out unique values
-        this.allTargetingUsers = targetUsers.filter((user, idx) => idx === targetUsers.findIndex((u) => u.keyId === user.keyId));
         this.isLoading = false;
       });
     } else {
@@ -134,11 +130,6 @@ export class TargetingComponent implements OnInit {
     } else {
       this.segmentDetail.excludedUsers = data;
     }
-
-    this.allTargetingUsers = [
-      ...this.allTargetingUsers.filter((u) => !data.find((d) => d.keyId === u.keyId)),
-      ...data
-    ];
   }
 
   public onSave(data: any) {

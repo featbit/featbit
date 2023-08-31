@@ -1,4 +1,5 @@
 import { IDataChange } from "@core/components/audit-log/types";
+import { IInstruction } from "@core/components/change-list/instructions/types";
 
 export interface IPendingChanges {
   id: string;
@@ -8,4 +9,5 @@ export interface IPendingChanges {
   createdAt: string;
   scheduledTime: string;
   dataChange: IDataChange;
+  instructions: IInstruction[];
 }

@@ -76,17 +76,17 @@ public class DisabledVariationInstruction : FlagInstruction
     }
 }
 
-public class DefaultVariationInstruction : FlagInstruction
+public class UpdateDefaultRuleVariationOrRolloutInstruction : FlagInstruction
 {
-    public DefaultVariationInstruction(Fallthrough value) : base(FlagInstructionKind.UpdateDefaultVariation, value)
+    public UpdateDefaultRuleVariationOrRolloutInstruction(DefaultRuleRolloutVariations value) : base(FlagInstructionKind.UpdateDefaultRuleVariationOrRollouts, value)
     {
     }
 
     public override void Apply(FeatureFlag flag)
     {
-        if (Value is Fallthrough fallthrough)
+        if (Value is DefaultRuleRolloutVariations value)
         {
-            flag.Fallthrough = fallthrough;
+            flag.Fallthrough.Variations = value.RolloutVariations;
         }
     }
 }

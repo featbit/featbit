@@ -1,59 +1,19 @@
-@import "variables";
-
-.category-list {
-  border-left: 2px solid @grey40-color;
-  padding: 0 12px;
-
-  & > ul {
-    list-style-type: none;
-    padding: 0;
-
-    li .category {
-      display: inline-block;
-      margin: 4px 0;
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 19.5px;
+nz-collapse {
+  .group-title {
+    .rule-name {
+      font-weight: 600;
     }
   }
 
-  .change-list {
-    list-style: none;
+  .instruction-item {
+    margin-bottom: 5px;
+  }
+
+  .group-instructions {
     padding-left: 20px;
+  }
 
-    .change {
-      &.rule {
-        display: block;
-        margin-bottom: 10px;
-
-        .clause, .serve, .dispatch-by {
-          padding-left: 20px;
-          display: flex;
-          gap: 5px;
-          justify-content: flex-start;
-        }
-
-        .clause, .serve-value {
-          color: #646f7a;
-        }
-      }
-
-      .ant-tag {
-        line-height: 17px;
-        height: 19px;
-        border-radius: 5px;
-        margin-left: 2px;
-        margin-right: 2px;
-      }
-
-      .item {
-        font-weight: 600;
-        margin: 0 2px;
-
-        &.remove-item {
-          text-decoration: line-through;
-        }
-      }
-    }
+  .ant-collapse-content > .ant-collapse-content-box {
+    padding: 4px 16px;
   }
 }
