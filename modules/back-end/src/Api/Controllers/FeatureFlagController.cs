@@ -39,6 +39,25 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
+    /// Get the list of pending changes of a flag
+    /// </summary>
+    /// <remarks>
+    /// Get the list of pending changes of a particular flag
+    /// </remarks>
+    [HttpGet("{key}/pending-changes")]
+    public async Task<ApiResponse<ICollection<PendingChangesVm>>> GetPendingChangesAsync(Guid envId, string key)
+    {
+        var request = new GetPendingChangesList
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var pendingChangesList = await Mediator.Send(request);
+        return Ok(pendingChangesList);
+    }
+
+    /// <summary>
     /// Get a feature flag
     /// </summary>
     /// <remarks>

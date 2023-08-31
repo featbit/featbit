@@ -6,8 +6,7 @@ from flask import Flask
 from app.config import DevelopmentConfig, ProductionConfig
 from app.extensions import get_cache, get_mongodb, get_scheduler
 from app.setting import (CACHE_KEY_PREFIX, CACHE_TYPE, DEFAULT_LOGGING_CONFIG,
-                         IS_PRO, MONGO_URI, REDIS_HOST, REDIS_PASSWORD, REDIS_PORT,
-                         WSGI)
+                         IS_PRO, MONGO_URI, REDIS_URL, WSGI)
 
 CONFIGS = {
     'production': ProductionConfig,
@@ -35,9 +34,7 @@ def _create_app(config_name='default') -> Flask:
     # https://flask-caching.readthedocs.io/en/latest/
     cache = get_cache(config={"CACHE_TYPE": CACHE_TYPE,
                               "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
-                              "CACHE_REDIS_HOST": REDIS_HOST,
-                              "CACHE_REDIS_PORT": REDIS_PORT,
-                              "CACHE_REDIS_PASSWORD": REDIS_PASSWORD})
+                              "CACHE_REDIS_URL": REDIS_URL})
     cache.init_app(__app)
 
     if IS_PRO:

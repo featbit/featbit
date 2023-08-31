@@ -25,7 +25,6 @@
         <nz-form-label nzRequired i18n="@@common.type">Type</nz-form-label>
         <nz-form-control>
           <nz-select
-            (ngModelChange)="onTypeChange()"
             [nzDisabled]="isEditing"
             formControlName="type">
             <ng-container *ngFor="let at of actionTokenTypes">

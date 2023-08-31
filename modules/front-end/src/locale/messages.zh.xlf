@@ -26,11 +26,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">108</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
@@ -234,11 +234,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">35</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
@@ -258,7 +258,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">61</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -318,7 +318,7 @@
         <source>Permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">42</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -334,7 +334,7 @@
         <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -354,19 +354,19 @@
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">76</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">73</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">55</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.html</context>
@@ -374,11 +374,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">189</context>
+          <context context-type="linenumber">187</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">221</context>
+          <context context-type="linenumber">219</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
@@ -390,7 +390,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">59</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
@@ -446,7 +446,7 @@
         <source>Access token created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <target>成功创建访问秘钥</target>
       </trans-unit>
@@ -454,7 +454,7 @@
         <source>Copy and save this token now, the token value will be masked once you leave the page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">95</context>
         </context-group>
         <target>请复制并保存 Token，一旦离开该页面后，该 Token 将会被隐藏。</target>
       </trans-unit>
@@ -462,7 +462,7 @@
         <source>OK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -502,15 +502,15 @@
         <source>You don&apos;t have permissions to take this action, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">171</context>
+          <context context-type="linenumber">174</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">250</context>
+          <context context-type="linenumber">253</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/permissions.service.ts</context>
@@ -522,11 +522,11 @@
         <source>Operation succeeded</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">212</context>
+          <context context-type="linenumber">211</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">227</context>
+          <context context-type="linenumber">226</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
@@ -542,11 +542,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">240</context>
+          <context context-type="linenumber">244</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">257</context>
+          <context context-type="linenumber">261</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.ts</context>
@@ -566,11 +566,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">314</context>
+          <context context-type="linenumber">317</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">324</context>
+          <context context-type="linenumber">327</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
@@ -730,7 +730,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">149</context>
+          <context context-type="linenumber">140</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -750,23 +750,23 @@
         <source>Operation failed, please try again</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">215</context>
+          <context context-type="linenumber">214</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">321</context>
+          <context context-type="linenumber">329</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">243</context>
+          <context context-type="linenumber">247</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">316</context>
+          <context context-type="linenumber">319</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">326</context>
+          <context context-type="linenumber">329</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
@@ -795,10 +795,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">243</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">104</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
@@ -830,7 +826,7 @@
         <source>Policies are mandatory for service type access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">236</context>
+          <context context-type="linenumber">235</context>
         </context-group>
         <target>策略不能为空</target>
       </trans-unit>
@@ -838,7 +834,7 @@
         <source>Copied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">246</context>
+          <context context-type="linenumber">245</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
@@ -850,7 +846,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">439</context>
+          <context context-type="linenumber">442</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.ts</context>
@@ -914,7 +910,7 @@
         <source>created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-log/audit-log.component.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">77</context>
         </context-group>
         <target>创建</target>
       </trans-unit>
@@ -922,7 +918,7 @@
         <source>updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-log/audit-log.component.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <target>更新</target>
       </trans-unit>
@@ -930,7 +926,7 @@
         <source>archived</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-log/audit-log.component.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">83</context>
         </context-group>
         <target>存档</target>
       </trans-unit>
@@ -938,7 +934,7 @@
         <source>restored</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-log/audit-log.component.ts</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <target>复位</target>
       </trans-unit>
@@ -946,7 +942,7 @@
         <source>removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-log/audit-log.component.ts</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <target>删除</target>
       </trans-unit>
@@ -954,7 +950,7 @@
         <source>flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-log/audit-log.component.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <target>开关</target>
       </trans-unit>
@@ -962,7 +958,7 @@
         <source>segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/audit-log/audit-log.component.ts</context>
-          <context context-type="linenumber">115</context>
+          <context context-type="linenumber">100</context>
         </context-group>
         <target>用户组</target>
       </trans-unit>
@@ -990,23 +986,23 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">75</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">55</context>
+          <context context-type="linenumber">53</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
@@ -1114,131 +1110,471 @@
         </context-group>
         <target>加载团队成员失败</target>
       </trans-unit>
-      <trans-unit id="differ.enabled" datatype="html">
-        <source>Enabled </source>
+      <trans-unit id="common.add-rule" datatype="html">
+        <source>Add rule</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">8</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.ts</context>
+          <context context-type="linenumber">59</context>
         </context-group>
-        <target>激活</target>
+        <target>添加规则</target>
       </trans-unit>
-      <trans-unit id="differ.disabled" datatype="html">
-        <source>Disabled </source>
+      <trans-unit id="common.remove-rule" datatype="html">
+        <source>Remove rule</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.ts</context>
+          <context context-type="linenumber">73</context>
         </context-group>
-        <target>关闭</target>
+        <target>删除规则</target>
       </trans-unit>
-      <trans-unit id="differ.archived" datatype="html">
-        <source>Archived </source>
+      <trans-unit id="common.update-rule" datatype="html">
+        <source>Update rule</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.ts</context>
+          <context context-type="linenumber">118</context>
         </context-group>
-        <target>存档</target>
+        <target>更新规则</target>
       </trans-unit>
-      <trans-unit id="differ.unarchived" datatype="html">
-        <source>Unarchived </source>
+      <trans-unit id="common.settings" datatype="html">
+        <source>Settings</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
+          <context context-type="linenumber">121</context>
         </context-group>
-        <target>复位</target>
+        <target>设置</target>
       </trans-unit>
-      <trans-unit id="differ.set" datatype="html">
-        <source>Set </source>
+      <trans-unit id="common.default-rule" datatype="html">
+        <source>Default rule</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
+          <context context-type="linenumber">135</context>
         </context-group>
-        <target>将</target>
-      </trans-unit>
-      <trans-unit id="differ.from" datatype="html">
-        <source> from </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">141</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+        <target>默认规则</target>
+      </trans-unit>
+      <trans-unit id="common.target-users" datatype="html">
+        <source>Individual Targeting</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
+          <context context-type="linenumber">143</context>
+        </context-group>
+        <target>目标用户</target>
+      </trans-unit>
+      <trans-unit id="common.off-variation" datatype="html">
+        <source>Off variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
+          <context context-type="linenumber">156</context>
+        </context-group>
+        <target>开关关闭时的返回值</target>
+      </trans-unit>
+      <trans-unit id="common.rules" datatype="html">
+        <source>Rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
+          <context context-type="linenumber">163</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <target>规则</target>
+      </trans-unit>
+      <trans-unit id="common.variations" datatype="html">
+        <source>Variations</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
+          <context context-type="linenumber">180</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <target>返回值</target>
+      </trans-unit>
+      <trans-unit id="common.add-conditions" datatype="html">
+        <source>Add conditions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-rule-conditions/add-rule-conditions.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>添加条件</target>
+      </trans-unit>
+      <trans-unit id="common.capitalize-if" datatype="html">
+        <source>If</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-rule-conditions/add-rule-conditions.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
           <context context-type="linenumber">27</context>
         </context-group>
-        <target>从</target>
-      </trans-unit>
-      <trans-unit id="differ.to" datatype="html">
-        <source> to </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-rule-condition/remove-rule-conditions.component.ts</context>
+          <context context-type="linenumber">20</context>
         </context-group>
-        <target>设置为</target>
-      </trans-unit>
-      <trans-unit id="differ.added" datatype="html">
-        <source>Added </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">42</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-condition/update-rule-condition.component.ts</context>
+          <context context-type="linenumber">17</context>
         </context-group>
-        <target>添加 </target>
-      </trans-unit>
-      <trans-unit id="differ.add-to" datatype="html">
-        <source> to </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">48</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">25</context>
         </context-group>
-        <target> 到</target>
+        <target>如果</target>
       </trans-unit>
-      <trans-unit id="differ.add-from" datatype="html">
-        <source>From </source>
+      <trans-unit id="common.archive-flag" datatype="html">
+        <source>Archive feature flag</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">54</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/archive-flag/archive-flag.component.ts</context>
+          <context context-type="linenumber">7</context>
         </context-group>
-        <target>从</target>
+        <target>存档开关</target>
       </trans-unit>
-      <trans-unit id="differ.add-removed" datatype="html">
-        <source> removed </source>
+      <trans-unit id="common.add-variation" datatype="html">
+        <source>Add variation</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">57</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/change-variations/change-variations.component.ts</context>
+          <context context-type="linenumber">14</context>
         </context-group>
-        <target>移除</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">134</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">219</context>
+        </context-group>
+        <target>添加返回值</target>
+      </trans-unit>
+      <trans-unit id="common.remove-variation" datatype="html">
+        <source>Remove variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/change-variations/change-variations.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>删除返回值</target>
       </trans-unit>
       <trans-unit id="differ.serve" datatype="html">
         <source>Serve</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">79</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
+          <context context-type="linenumber">39</context>
         </context-group>
         <target>返回</target>
       </trans-unit>
       <trans-unit id="differ.dispatch-by" datatype="html">
         <source>Dispatch by</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/change-list.component.html</context>
-          <context context-type="linenumber">85</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">294</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
+          <context context-type="linenumber">45</context>
         </context-group>
         <target>基于属性</target>
       </trans-unit>
-      <trans-unit id="common.review-and-save" datatype="html">
-        <source>Review and save</source>
+      <trans-unit id="common.remove-conditions" datatype="html">
+        <source>Remove conditions</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">3</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-rule-condition/remove-rule-conditions.component.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <target>删除条件</target>
+      </trans-unit>
+      <trans-unit id="common.restore-flag" datatype="html">
+        <source>Restore feature flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/restore-flag/restore-flag.component.ts</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>复位开关</target>
+      </trans-unit>
+      <trans-unit id="common.turn-flag-off" datatype="html">
+        <source>Turn feature flag </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/turn-flag-off/turn-flag-off.component.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <target>关闭开关</target>
+      </trans-unit>
+      <trans-unit id="common.turn-flag-on" datatype="html">
+        <source>Turn feature flag </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/turn-flag-on/turn-flag-on.component.ts</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <target>打开开关</target>
+      </trans-unit>
+      <trans-unit id="common.update-dispatch-key-to" datatype="html">
+        <source>Update dispatch key to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-default-rule-dispatch-key/update-default-rule-dispatch-key.component.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-dispatch-key/update-rule-dispatch-key.component.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <target>设置基于属性值为</target>
+      </trans-unit>
+      <trans-unit id="common.update-description-with-sufix-space" datatype="html">
+        <source>Update description </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-description/update-description.component.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>将描述</target>
+      </trans-unit>
+      <trans-unit id="common.from-description" datatype="html">
+        <source>from</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-description/update-description.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>从</target>
+      </trans-unit>
+      <trans-unit id="common.to-description" datatype="html">
+        <source>to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-description/update-description.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <target>更新为</target>
+      </trans-unit>
+      <trans-unit id="common.clear-description" datatype="html">
+        <source>Clear description</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-description/update-description.component.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>清除描述</target>
+      </trans-unit>
+      <trans-unit id="common.update-name-with-sufix-space" datatype="html">
+        <source>Update name </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-name/update-name.component.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>将名称</target>
+      </trans-unit>
+      <trans-unit id="common.from-name" datatype="html">
+        <source>from</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-name/update-name.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>从</target>
+      </trans-unit>
+      <trans-unit id="common.to-name" datatype="html">
+        <source>to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-name/update-name.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <target>更新为</target>
+      </trans-unit>
+      <trans-unit id="common.clear-name" datatype="html">
+        <source>Clear name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-name/update-name.component.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-name/update-rule-name.component.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>清除名称</target>
+      </trans-unit>
+      <trans-unit id="common.update-to" datatype="html">
+        <source>Update to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-off-variation/update-off-variation.component.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>更新为</target>
+      </trans-unit>
+      <trans-unit id="common.update-conditions" datatype="html">
+        <source>Update condition</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-condition/update-rule-condition.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>更新条件</target>
+      </trans-unit>
+      <trans-unit id="common.update-serve-value-to" datatype="html">
+        <source>Update serve value to </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-variation-or-rollout/update-rule-variation-or-rollout.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <target>更新返回值为</target>
+      </trans-unit>
+      <trans-unit id="common.add-tags" datatype="html">
+        <source>Add tags</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-tags/update-tags.component.ts</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">64</context>
+        </context-group>
+        <target>添加标签</target>
+      </trans-unit>
+      <trans-unit id="common.remove-tags" datatype="html">
+        <source>Remove tags</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-tags/update-tags.component.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <target>删除标签</target>
+      </trans-unit>
+      <trans-unit id="common.excluding-users" datatype="html">
+        <source>Excluding users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users-for-segment/update-target-users-for-segment.component.ts</context>
+          <context context-type="linenumber">13</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">49</context>
+        </context-group>
+        <target>不包含用户</target>
+      </trans-unit>
+      <trans-unit id="common.including-users" datatype="html">
+        <source>Including users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users-for-segment/update-target-users-for-segment.component.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <target>包含用户</target>
+      </trans-unit>
+      <trans-unit id="common.add-users" datatype="html">
+        <source>Add user(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users-for-segment/update-target-users-for-segment.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
           <context context-type="linenumber">22</context>
         </context-group>
-        <target>预览并保存</target>
+        <target>添加用户</target>
+      </trans-unit>
+      <trans-unit id="common.remove-users" datatype="html">
+        <source>Remove user(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users-for-segment/update-target-users-for-segment.component.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <target>移除用户</target>
+      </trans-unit>
+      <trans-unit id="common.clear-users" datatype="html">
+        <source>Clear user(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>清空用户</target>
+      </trans-unit>
+      <trans-unit id="common.set-users-as" datatype="html">
+        <source>Set user(s) as</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+        <target>将用户设置为</target>
+      </trans-unit>
+      <trans-unit id="common.add-values" datatype="html">
+        <source>Add value(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <target>将</target>
+      </trans-unit>
+      <trans-unit id="common.remove-values" datatype="html">
+        <source>Remove value(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <target>将值</target>
+      </trans-unit>
+      <trans-unit id="common.to-condition" datatype="html">
+        <source>to condition</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>添加到条件</target>
+      </trans-unit>
+      <trans-unit id="common.from-condition" datatype="html">
+        <source>from condition</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <target>从条件中删除</target>
+      </trans-unit>
+      <trans-unit id="common.update-variation-type-to" datatype="html">
+        <source>Update variation type to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-variation-type/update-variation-type.component.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <target>更新返回值类型为</target>
+      </trans-unit>
+      <trans-unit id="common.update-variation" datatype="html">
+        <source>Update variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-variation/update-variation.component.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target>更新返回值</target>
+      </trans-unit>
+      <trans-unit id="common.to" datatype="html">
+        <source>to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-variation/update-variation.component.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <target>到</target>
       </trans-unit>
       <trans-unit id="ff.targeting.the-following-changes-may-affect-insights" datatype="html">
         <source>The following changes may affects the insights data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">15</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <target>以下改动可能会影响到统计数据</target>
       </trans-unit>
@@ -1246,7 +1582,7 @@
         <source>Changes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
@@ -1258,7 +1594,7 @@
         <source>changes to submit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">23</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <target>个待提交改动</target>
       </trans-unit>
@@ -1266,11 +1602,11 @@
         <source>Comment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">30</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
@@ -1286,15 +1622,43 @@
         </context-group>
         <target>备注</target>
       </trans-unit>
+      <trans-unit id="common.schedule" datatype="html">
+        <source>Schedule</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <target>计划变更</target>
+      </trans-unit>
+      <trans-unit id="common.title" datatype="html">
+        <source>Title</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
+          <context context-type="linenumber">45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+        <target>标题</target>
+      </trans-unit>
+      <trans-unit id="common.scheduled-time" datatype="html">
+        <source>Scheduled time</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <target>计划时间</target>
+      </trans-unit>
       <trans-unit id="common.cancel" datatype="html">
         <source>Cancel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">71</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">220</context>
+          <context context-type="linenumber">218</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
@@ -1330,6 +1694,26 @@
         </context-group>
         <target>取消</target>
       </trans-unit>
+      <trans-unit id="common.schedule-changes" datatype="html">
+        <source>Schedule changes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <target>计划变更</target>
+      </trans-unit>
+      <trans-unit id="common.review-and-save" datatype="html">
+        <source>Review and save</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>预览并保存</target>
+      </trans-unit>
       <trans-unit id="org.project.permission-will-become-invalid-if-change-name" datatype="html">
         <source>Permission will become invalid if you change the name</source>
         <context-group purpose="location">
@@ -1354,7 +1738,7 @@
         <source>We use the key to give you friendly URLs. Keys should only contain letters, numbers, ., _ or -.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">32</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
@@ -1370,11 +1754,11 @@
         <source>Key can be auto-generated from name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
@@ -1382,12 +1766,32 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">65</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <target>Key 可以由名称自动生成</target>
       </trans-unit>
       <trans-unit id="common.key-cannot-be-empty" datatype="html">
         <source>Key cannot be empty</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <target>Key 不能为空</target>
+      </trans-unit>
+      <trans-unit id="common.key-has-been-used" datatype="html">
+        <source>This key has been used</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">40</context>
@@ -1398,16 +1802,16 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">39</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">67</context>
         </context-group>
-        <target>Key 不能为空</target>
+        <target>该 Key 已经被使用</target>
       </trans-unit>
-      <trans-unit id="common.key-has-been-used" datatype="html">
-        <source>This key has been used</source>
+      <trans-unit id="common.key-validation-failed" datatype="html">
+        <source>Key validation failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">41</context>
@@ -1418,31 +1822,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">39</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">68</context>
-        </context-group>
-        <target>该 Key 已经被使用</target>
-      </trans-unit>
-      <trans-unit id="common.key-validation-failed" datatype="html">
-        <source>Key validation failed</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">38</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
           <context context-type="linenumber">40</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <target>Key 校验失败</target>
       </trans-unit>
@@ -1450,7 +1834,7 @@
         <source>Description</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">46</context>
         </context-group>
         <target>描述</target>
       </trans-unit>
@@ -1478,7 +1862,7 @@
         <source>Environment successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">132</context>
+          <context context-type="linenumber">136</context>
         </context-group>
         <target>环境更新成功</target>
       </trans-unit>
@@ -1486,7 +1870,7 @@
         <source>Environment successfully created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.ts</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">149</context>
         </context-group>
         <target>环境创建成功</target>
       </trans-unit>
@@ -1522,11 +1906,11 @@
         <source>Baseline</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">73</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
@@ -1542,7 +1926,7 @@
         <source>Select baseline variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">79</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <target>选择基准特性</target>
       </trans-unit>
@@ -1550,7 +1934,7 @@
         <source>Error occurred, please try again</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.ts</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">166</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
@@ -1558,7 +1942,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">260</context>
+          <context context-type="linenumber">264</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
@@ -1566,7 +1950,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">196</context>
+          <context context-type="linenumber">199</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
@@ -1862,7 +2246,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">113</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
@@ -1870,7 +2254,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">146</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -1898,7 +2282,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">109</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -1934,7 +2318,7 @@
         <source>Use key (case-sensitive) in your code to get the feature flag variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>在代码中使用 key （大小写敏感）来获取开关返回值</target>
       </trans-unit>
@@ -1942,11 +2326,11 @@
         <source>Description</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">46</context>
+          <context context-type="linenumber">45</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
@@ -2010,11 +2394,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">73</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">77</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
@@ -2066,7 +2450,7 @@
         <source>Cannot exceed 512 characters</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">45</context>
+          <context context-type="linenumber">44</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -2074,19 +2458,11 @@
         </context-group>
         <target>不可以超过 512 个字符</target>
       </trans-unit>
-      <trans-unit id="common.add-tags" datatype="html">
-        <source>Add Tags</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">65</context>
-        </context-group>
-        <target>添加标签</target>
-      </trans-unit>
       <trans-unit id="common.variation-settings" datatype="html">
         <source>Variation settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">82</context>
         </context-group>
         <target>返回值设置</target>
       </trans-unit>
@@ -2094,7 +2470,7 @@
         <source>We currently support string, boolean, number and json types. Once you have created a feature flag, you cannot change its variation type.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -2102,7 +2478,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <target>我们目前支持 string、boolean、number 和 json 四种数据类型。开关创建后，您将无法更改其数据类型类型。</target>
       </trans-unit>
@@ -2110,11 +2486,11 @@
         <source>Variation type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">97</context>
+          <context context-type="linenumber">96</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -2126,7 +2502,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>返回值类型</target>
       </trans-unit>
@@ -2134,15 +2510,15 @@
         <source>Value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">114</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">116</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">118</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">120</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -2162,7 +2538,7 @@
         <source>Value cannot be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">126</context>
+          <context context-type="linenumber">124</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -2174,7 +2550,7 @@
         <source>Invalid value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">125</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -2182,39 +2558,15 @@
         </context-group>
         <target>不合法的输入值</target>
       </trans-unit>
-      <trans-unit id="common.add-variation" datatype="html">
-        <source>Add variation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">136</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">219</context>
-        </context-group>
-        <target>添加返回值</target>
-      </trans-unit>
-      <trans-unit id="common.default-rule" datatype="html">
-        <source>Default rule</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">143</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">97</context>
-        </context-group>
-        <target>默认规则</target>
-      </trans-unit>
       <trans-unit id="common.default-serve-tooltip" datatype="html">
         <source>Define which variation users will see by default when the flag is Enabled or Disabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">95</context>
         </context-group>
         <target>设置当开关被打开或关闭时用户将默认接收到的返回值</target>
       </trans-unit>
@@ -2222,7 +2574,7 @@
         <source>ON/OFF Status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">154</context>
+          <context context-type="linenumber">152</context>
         </context-group>
         <target>开关状态</target>
       </trans-unit>
@@ -2230,11 +2582,11 @@
         <source>If the flag is ON, serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">160</context>
+          <context context-type="linenumber">158</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="linenumber">99</context>
         </context-group>
         <target>开关打开时，返回</target>
       </trans-unit>
@@ -2242,11 +2594,11 @@
         <source>Select variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">165</context>
+          <context context-type="linenumber">163</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">179</context>
+          <context context-type="linenumber">177</context>
         </context-group>
         <target>选择返回值</target>
       </trans-unit>
@@ -2254,11 +2606,11 @@
         <source>If the flag is OFF, serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">103</context>
         </context-group>
         <target>开关关闭时，返回</target>
       </trans-unit>
@@ -2266,7 +2618,7 @@
         <source>Format</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">218</context>
+          <context context-type="linenumber">216</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
@@ -2282,7 +2634,7 @@
         <source>Create Tag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">97</context>
+          <context context-type="linenumber">105</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
@@ -3298,6 +3650,30 @@
         </context-group>
         <target>机构创建成功</target>
       </trans-unit>
+      <trans-unit id="common.pending-changes" datatype="html">
+        <source>Pending changes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/pending-changes-drawer/pending-changes-drawer.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <target>待定变更</target>
+      </trans-unit>
+      <trans-unit id="common.scheduled-for" datatype="html">
+        <source>Scheduled for</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/pending-changes-drawer/pending-changes-drawer.component.html</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <target>变更执行时间</target>
+      </trans-unit>
+      <trans-unit id="common.created-at" datatype="html">
+        <source>created at</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/pending-changes-drawer/pending-changes-drawer.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <target>创建于</target>
+      </trans-unit>
       <trans-unit id="iam.policies.policy-drawer.title" datatype="html">
         <source>Add policy</source>
         <context-group purpose="location">
@@ -3350,7 +3726,7 @@
         <source>Project successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.ts</context>
-          <context context-type="linenumber">135</context>
+          <context context-type="linenumber">139</context>
         </context-group>
         <target>项目更新成功</target>
       </trans-unit>
@@ -3358,7 +3734,7 @@
         <source>Project successfully created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.ts</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <target>项目创建成功</target>
       </trans-unit>
@@ -4089,7 +4465,7 @@
         <source>You need to set the host url to get its status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">176</context>
+          <context context-type="linenumber">179</context>
         </context-group>
         <target>需要设置 Host 才能获取其状态</target>
       </trans-unit>
@@ -4097,7 +4473,7 @@
         <source>At least one environment scope is required</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">294</context>
+          <context context-type="linenumber">297</context>
         </context-group>
         <target>请添加至少一个环境</target>
       </trans-unit>
@@ -4105,7 +4481,7 @@
         <source>At least one agent is required</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">299</context>
+          <context context-type="linenumber">302</context>
         </context-group>
         <target>请设置至少一个代理</target>
       </trans-unit>
@@ -4113,7 +4489,7 @@
         <source>Synchronization to all agents</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">358</context>
+          <context context-type="linenumber">361</context>
         </context-group>
         <target>同步到所有代理</target>
       </trans-unit>
@@ -4121,7 +4497,7 @@
         <source>Successfully synchronized to the following agents:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">379</context>
+          <context context-type="linenumber">382</context>
         </context-group>
         <target>成功同步到以下代理：</target>
       </trans-unit>
@@ -4129,7 +4505,7 @@
         <source>Failed to synchronize to the following agents:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">391</context>
+          <context context-type="linenumber">394</context>
         </context-group>
         <target>同步到以下代理失败：</target>
       </trans-unit>
@@ -4137,7 +4513,7 @@
         <source>Operation succeeded for <x id="PH" equiv-text="name + &apos; : &apos; + host"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">410</context>
+          <context context-type="linenumber">413</context>
         </context-group>
         <target>成功同步到以下代理</target>
       </trans-unit>
@@ -4145,7 +4521,7 @@
         <source>Error occurred while synchronizing <x id="PH" equiv-text="name + &apos; : &apos; + host"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">412</context>
+          <context context-type="linenumber">415</context>
         </context-group>
         <target>同步到以下代理时发生错误</target>
       </trans-unit>
@@ -4193,7 +4569,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">296</context>
+          <context context-type="linenumber">288</context>
         </context-group>
         <target>保存与更新成功</target>
       </trans-unit>
@@ -5009,7 +5385,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">204</context>
+          <context context-type="linenumber">200</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
@@ -5870,7 +6246,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <target>在代码中使用 key （大小写敏感）来获取开关返回值</target>
       </trans-unit>
@@ -5950,18 +6326,6 @@
         </context-group>
         <target>选择返回值</target>
       </trans-unit>
-      <trans-unit id="common.variations" datatype="html">
-        <source>Variations</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">77</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">77</context>
-        </context-group>
-        <target>返回值</target>
-      </trans-unit>
       <trans-unit id="common.data-type" datatype="html">
         <source>Data type</source>
         <context-group purpose="location">
@@ -6034,11 +6398,20 @@
         </context-group>
         <target>以下设定在你开启开关之前不会生效</target>
       </trans-unit>
+      <trans-unit id="2876776314511540380" datatype="html">
+        <source>Schedule changes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <note priority="1" from="description">ff.components.details.targeting.schedule-changes</note>
+        <target>计划变更</target>
+      </trans-unit>
       <trans-unit id="ff.components.details.targeting.setabtestrule" datatype="html">
         <source>Set A/B test rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">13</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>设置AB测试规则</target>
       </trans-unit>
@@ -6046,7 +6419,7 @@
         <source>Default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">25</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <target>默认规则</target>
       </trans-unit>
@@ -6054,7 +6427,7 @@
         <source>Serve a variation if the user doesn&apos;t met Individual targeting or Targeting Rules.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">41</context>
         </context-group>
         <target>设定当用户既不是目标用户也不满足任何匹配规则时的开关返回值</target>
       </trans-unit>
@@ -6062,15 +6435,15 @@
         <source>Check the docs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">71</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">95</context>
         </context-group>
         <target>查阅文档</target>
       </trans-unit>
@@ -6078,7 +6451,7 @@
         <source>Individual targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">48</context>
+          <context context-type="linenumber">61</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -6086,7 +6459,7 @@
         <source>Serve a variation to specific targets based on their key</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>为指定用户设定开关返回值</target>
       </trans-unit>
@@ -6094,7 +6467,7 @@
         <source>Targeting rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <target>匹配规则</target>
       </trans-unit>
@@ -6102,7 +6475,7 @@
         <source>Serve a variation to specific targets based on their attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">93</context>
         </context-group>
         <target>根据用户属性设定相应的开关返回值</target>
       </trans-unit>
@@ -6110,15 +6483,23 @@
         <source>Validation errors</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">127</context>
         </context-group>
         <target>错误</target>
+      </trans-unit>
+      <trans-unit id="common.loading-pending-changes-failed" datatype="html">
+        <source>Loading pending changes failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">142</context>
+        </context-group>
+        <target>加载待定变更时发生错误</target>
       </trans-unit>
       <trans-unit id="common.rule" datatype="html">
         <source>Rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">230</context>
+          <context context-type="linenumber">226</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
@@ -6130,7 +6511,7 @@
         <source>Failed to Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">300</context>
+          <context context-type="linenumber">292</context>
         </context-group>
         <target>保存失败</target>
       </trans-unit>
@@ -6138,7 +6519,7 @@
         <source>Fallthrough rule can not be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">320</context>
+          <context context-type="linenumber">312</context>
         </context-group>
         <target>默认返回值不能为空</target>
       </trans-unit>
@@ -6146,7 +6527,7 @@
         <source>The sum of fallthrough rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">332</context>
+          <context context-type="linenumber">324</context>
         </context-group>
         <target>请确认默认返回值的总百分比必须为100%</target>
       </trans-unit>
@@ -6154,11 +6535,11 @@
         <source>The conditions of each rule must be set</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">334</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">358</context>
+          <context context-type="linenumber">350</context>
         </context-group>
         <target>每条规则的所有条件都不能为空</target>
       </trans-unit>
@@ -6166,7 +6547,7 @@
         <source>The sum of each rule&apos;s rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">370</context>
+          <context context-type="linenumber">362</context>
         </context-group>
         <target>请确认匹配条件中每条规则的总百分比必须为100%！</target>
       </trans-unit>
@@ -6641,7 +7022,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">115</context>
         </context-group>
         <target>下一步</target>
       </trans-unit>
@@ -6693,7 +7074,7 @@
         <source>Cannot exceed 512 characters</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">75</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <target>不能超过512个字符</target>
       </trans-unit>
@@ -7778,7 +8159,7 @@
         <source>Profile successfully updated</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <target>个人信息更新成功</target>
       </trans-unit>
@@ -7786,7 +8167,7 @@
         <source>Reset password success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <target>重置密码成功</target>
       </trans-unit>
@@ -7794,7 +8175,7 @@
         <source>Reset password failed, reason: [reason].</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/profile/profile.component.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>重置密码失败，原因: [reason]。</target>
       </trans-unit>
@@ -8138,30 +8519,6 @@
         </context-group>
         <target>目标用户</target>
       </trans-unit>
-      <trans-unit id="common.including-users" datatype="html">
-        <source>Including users</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">38</context>
-        </context-group>
-        <target>包含用户</target>
-      </trans-unit>
-      <trans-unit id="common.excluding-users" datatype="html">
-        <source>Excluding users</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-        <target>不包含用户</target>
-      </trans-unit>
-      <trans-unit id="common.rules" datatype="html">
-        <source>Rules</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">61</context>
-        </context-group>
-        <target>规则</target>
-      </trans-unit>
       <trans-unit id="segment.idx.filter-by-name" datatype="html">
         <source>Filter by name</source>
         <context-group purpose="location">
@@ -8257,210 +8614,6 @@
           <context context-type="linenumber">131</context>
         </context-group>
         <target>该用户组正在被 <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegmentFlagReferences.length}}"/> 个开关所引用，在操作之前需要先移除这些引用！</target>
-      </trans-unit>
-      <trans-unit id="differ.name" datatype="html">
-        <source>name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">12</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">9</context>
-        </context-group>
-        <target>名称</target>
-      </trans-unit>
-      <trans-unit id="differ.description" datatype="html">
-        <source>description</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">13</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-        <target>描述</target>
-      </trans-unit>
-      <trans-unit id="differ.feature-flag" datatype="html">
-        <source>feature flag</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">37</context>
-        </context-group>
-        <target>开关</target>
-      </trans-unit>
-      <trans-unit id="differ.the-return-value-when-flag-is-disabled" datatype="html">
-        <source>the return value when flag is disabled</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">48</context>
-        </context-group>
-        <target>开关关闭时的返回值</target>
-      </trans-unit>
-      <trans-unit id="differ.settings" datatype="html">
-        <source>Settings</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">65</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">40</context>
-        </context-group>
-        <target>设置</target>
-      </trans-unit>
-      <trans-unit id="differ.tags" datatype="html">
-        <source>Tags</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">105</context>
-        </context-group>
-        <target>标签</target>
-      </trans-unit>
-      <trans-unit id="differ.variation-type" datatype="html">
-        <source>variation type</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">124</context>
-        </context-group>
-        <target>返回值类型</target>
-      </trans-unit>
-      <trans-unit id="differ.variation" datatype="html">
-        <source>variation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">139</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">153</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">163</context>
-        </context-group>
-        <target>返回值</target>
-      </trans-unit>
-      <trans-unit id="differ.variations" datatype="html">
-        <source>Variations</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">174</context>
-        </context-group>
-        <target>返回值</target>
-      </trans-unit>
-      <trans-unit id="differ.updated-rule" datatype="html">
-        <source>Updated rule:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">198</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">130</context>
-        </context-group>
-        <target>更新规则：</target>
-      </trans-unit>
-      <trans-unit id="differ.added-rule" datatype="html">
-        <source>Added rule:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">218</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">145</context>
-        </context-group>
-        <target>添加规则：</target>
-      </trans-unit>
-      <trans-unit id="differ.removed-rule" datatype="html">
-        <source>Removed rule:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">235</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">157</context>
-        </context-group>
-        <target>移除规则：</target>
-      </trans-unit>
-      <trans-unit id="differ.rules" datatype="html">
-        <source>Rules</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">253</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">170</context>
-        </context-group>
-        <target>规则</target>
-      </trans-unit>
-      <trans-unit id="differ.target-users" datatype="html">
-        <source>Individual targeting</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">273</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">82</context>
-        </context-group>
-        <target>目标用户</target>
-      </trans-unit>
-      <trans-unit id="differ.fallthrough-included-in-expt" datatype="html">
-        <source>Send to experiment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">283</context>
-        </context-group>
-        <target>发送到数据实验</target>
-      </trans-unit>
-      <trans-unit id="differ.fallthrough" datatype="html">
-        <source>Default rule</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/feature-flag.differ.ts</context>
-          <context context-type="linenumber">319</context>
-        </context-group>
-        <target>默认规则</target>
-      </trans-unit>
-      <trans-unit id="differ.serve-value" datatype="html">
-        <source>serve value</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/index.ts</context>
-          <context context-type="linenumber">94</context>
-        </context-group>
-        <target>返回值</target>
-      </trans-unit>
-      <trans-unit id="differ.segment" datatype="html">
-        <source>segment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">23</context>
-        </context-group>
-        <target>用户组</target>
-      </trans-unit>
-      <trans-unit id="differ.included-targeting-users" datatype="html">
-        <source>Included targeting users</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">71</context>
-        </context-group>
-        <target>包含用户</target>
-      </trans-unit>
-      <trans-unit id="differ.excluded-targeting-users" datatype="html">
-        <source>Excluded targeting users</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/diff/segment.differ.ts</context>
-          <context context-type="linenumber">76</context>
-        </context-group>
-        <target>不包含用户</target>
       </trans-unit>
       <trans-unit id="iam.rsc-type.all" datatype="html">
         <source>All</source>

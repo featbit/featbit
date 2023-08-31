@@ -21,6 +21,9 @@ spec:
     - name: "9440"
       port: 9440
       targetPort: 9440
+    - name: "9181"
+      port: 9181
+      targetPort: 9181
   selector:
     app: clickhouse-server
 status:

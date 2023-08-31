@@ -26,7 +26,6 @@
               i18n-placeholder="@@iam.team.member-drawer.policy-placeholder"
               nzPlaceHolder="Policy"
               (nzOnSearch)="getPolicies($event)"
-              (ngModelChange)="validatePermissions()"
               formControlName="policyId">
               <ng-container *ngFor="let policy of policies.items">
                 <nz-option nzCustomContent *ngIf="!isPoliciesLoading" [nzLabel]="policy.name" [nzValue]="policy.id">
@@ -46,7 +45,6 @@
               i18n-placeholder="@@iam.team.member-drawer.group-placeholder"
               nzPlaceHolder="Group"
               (nzOnSearch)="getGroups($event)"
-              (ngModelChange)="validatePermissions()"
               formControlName="groupId">
               <ng-container *ngFor="let group of groups.items">
                 <nz-option *ngIf="!isGroupsLoading" [nzLabel]="group.name" [nzValue]="group.id"></nz-option>

@@ -6,7 +6,7 @@ namespace Application.FeatureFlags;
 public class ArchiveFeatureFlag : IRequest<bool>
 {
     public Guid EnvId { get; set; }
-    
+
     public string Key { get; set; }
 }
 
@@ -33,6 +33,7 @@ public class ArchiveFeatureFlagHandler : IRequestHandler<ArchiveFeatureFlag, boo
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.Archive(_currentUser.Id);
+
         await _service.UpdateAsync(flag);
 
         // write audit log

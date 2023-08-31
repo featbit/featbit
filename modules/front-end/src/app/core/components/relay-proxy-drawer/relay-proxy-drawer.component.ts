@@ -84,6 +84,9 @@ export class RelayProxyDrawerComponent implements OnInit {
       scopes: scopes,
       agents: agents
     });
+    this.form.get('isAllEnvs').valueChanges.subscribe((event) => {
+      this.scopeTypeChange(event);
+    })
   }
 
   patchForm(relayProxy: Partial<RelayProxy>) {

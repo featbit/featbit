@@ -35,7 +35,7 @@
           <i *ngIf="!readonly && !form.value.isAllEnvs" nz-icon (click)="addScope()" nzType="icons:icon-add-outline"></i>
         </nz-form-label>
         <nz-form-control>
-          <nz-radio-group formControlName="isAllEnvs" class="custom-scope-type" (ngModelChange)="scopeTypeChange($event)">
+          <nz-radio-group formControlName="isAllEnvs" class="custom-scope-type">
             <label nz-radio [nzValue]="true" i18n="@@common.all-envs">All environments</label>
             <label nz-radio [nzValue]="false" i18n="@@common.customize-envs">Customize environments</label>
           </nz-radio-group>

@@ -1,0 +1,31 @@
+.instruction {
+  display: block;
+
+  .clause, .serve, .dispatch-by {
+    padding-left: 20px;
+    display: flex;
+    gap: 5px;
+    justify-content: flex-start;
+  }
+
+  .clause, .serve-value {
+    color: #646f7a;
+  }
+
+  nz-tag {
+    line-height: 12px;
+    height: 19px;
+    border-radius: 5px;
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+
+  .item {
+    font-weight: 600;
+    margin: 0 2px;
+
+    &.remove-item {
+      text-decoration: line-through;
+    }
+  }
+}

@@ -5,6 +5,8 @@ namespace Domain.Targeting;
 
 public class Condition
 {
+    public string Id { get; set; }
+
     public string Property { get; set; }
 
     public string Op { get; set; }
@@ -24,5 +26,26 @@ public class Condition
 
         var theOperator = Operator.Get(Op);
         return theOperator.IsMatch(userValue, Value);
+    }
+
+    public void Assign(Condition source)
+    {
+        if (source.Id != Id)
+        {
+            return;
+        }
+
+        Property = source.Property;
+        Op = source.Op;
+        Value = source.Value;
+    }
+
+    public bool ValueEquals(object obj)
+    {
+        return obj is Condition condition &&
+               condition.Id == Id &&
+               condition.Property == Property &&
+               condition.Op == Op &&
+               condition.Value == Value;
     }
 }

@@ -26,7 +26,10 @@ public partial class KafkaMessageConsumer : BackgroundService
         ConsumerConfig config = new()
         {
             GroupId = "api",
-            BootstrapServers = configuration["Kafka:BootstrapServers"],
+            // if consumer servers are specificed, use them instead of bootstrap servers
+            BootstrapServers = configuration["Kafka:ConsumerServers"] is null
+                               ? configuration["Kafka:BootstrapServers"]
+                               : configuration["Kafka:ConsumerServers"],
 
             // read messages from start if no commit exists
             AutoOffsetReset = AutoOffsetReset.Earliest,

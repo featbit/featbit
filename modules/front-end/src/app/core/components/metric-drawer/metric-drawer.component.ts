@@ -104,6 +104,10 @@ export class MetricDrawerComponent implements OnInit {
         }),
       ])
     });
+
+    this.metricForm.get('eventType').valueChanges.subscribe((event) => {
+      this.onEventTypeChange(event);
+    })
   }
 
   patchForm(metric: Partial<IMetric>) {

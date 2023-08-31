@@ -19,24 +19,22 @@ KAFKA_PRODUCER_ENABLED = get_from_env("KAFKA_PRODUCER_ENABLED", True, type_cast=
 KAFKA_PREFIX = os.getenv("KAFKA_PREFIX", "")
 
 CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST", "localhost")
+CLICKHOUSE_CLUSTER = os.getenv("CLICKHOUSE_CLUSTER", "featbit_ch_cluster")
 CLICKHOUSE_DATABASE = os.getenv("CLICKHOUSE_DATABASE", "featbit") + SUFFIX
-CLICKHOUSE_SECURE = get_from_env("CLICKHOUSE_VERIFY", False, type_cast=str_to_bool)
+CLICKHOUSE_SECURE = get_from_env("CLICKHOUSE_SECURE", False, type_cast=str_to_bool)
 CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER", "default")
 CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD", "")
 CLICKHOUSE_CA = os.getenv("CLICKHOUSE_CA", None)
 CLICKHOUSE_VERIFY = get_from_env("CLICKHOUSE_VERIFY", True, type_cast=str_to_bool)
 CLICKHOUSE_CONN_POOL_MIN = get_from_env("CLICKHOUSE_CONN_POOL_MIN", 20, type_cast=int)
 CLICKHOUSE_CONN_POOL_MAX = get_from_env("CLICKHOUSE_CONN_POOL_MAX", 1000, type_cast=int)
-CLICKHOUSE_CLUSTER = 'featbit_ch_cluster'
 CLICKHOUSE_ENABLE_STORAGE_POLICY = get_from_env("CLICKHOUSE_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool)
 CLICKHOUSE_KAFKA_HOSTS = os.getenv("CLICKHOUSE_KAFKA_HOSTS", "kafka:9092")
 CLICKHOUSE_REPLICATION = get_from_env("CLICKHOUSE_REPLICATION", True, type_cast=str_to_bool)
 
 CACHE_TYPE = "RedisCache"
 CACHE_KEY_PREFIX = "da-server"
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = os.getenv("REDIS_PORT", "6379")
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@localhost:27017")
 MONGO_DB = os.getenv("MONGO_INITDB_DATABASE", "featbit")

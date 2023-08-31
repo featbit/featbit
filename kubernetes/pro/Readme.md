@@ -16,7 +16,7 @@ A working Kubernetes Cluster such as
 
 - These files use known usernames and passwords as well as very basic configurations to facilitate an easy way to evaluate Featbit Professional on kubernetes, they should be changed for any other uses. DO NOT deploy to a production or otherwise public cluster without customizing them.
 
-- The infrastruture folder contains manifests needed to setup single instances of mongodb, clickhouse, kafka, zookeeper, and redis, with the exception of the *-configMap files which are derived from the configuration files found in featbit/infra/ directory of the repo. These manifests are provided as a convenience, if you have support, installation, maintanance, configuration, clustering, or any other questions regarding infrastructure components, please check with those projects respectively.
+- The infrastructure folder contains manifests needed to setup single instances of mongodb, clickhouse, kafka, and redis, with the exception of the *-configMap files which are derived from the configuration files found in featbit/infra/ directory of the repo. These manifests are provided as a convenience, if you have support, installation, maintanance, configuration, clustering, or any other questions regarding infrastructure components, please check with those projects respectively.
 
 - The manifests in the ingress folder are provided as a convenience and assume that traefik is installed and properly configured.  As such configurations are highly custom, we cannot support your specific configuration.  If you need help with traefik, please seek support from that community and their documentation.
 

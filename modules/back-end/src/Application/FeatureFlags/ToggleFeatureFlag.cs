@@ -6,7 +6,7 @@ namespace Application.FeatureFlags;
 public class ToggleFeatureFlag : IRequest<bool>
 {
     public Guid EnvId { get; set; }
-    
+
     public string Key { get; set; }
 }
 

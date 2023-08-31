@@ -54,27 +54,40 @@
         display: flex;
         justify-content: space-between;
 
-        button {
-          width: 170px;
+        .pending-changes {
+          cursor: pointer;
+          background-color: @white;
+          border: 1px solid @grey30-color;
+          padding: 0 10px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
 
+          i {
+            font-size: 20px;
+          }
+
+          &:hover {
+            background-color: @grey30-color;
+          }
+        }
+
+        button {
           &:not(:first-child) {
             margin-left: 16px;
           }
         }
 
-        .save-btn {
-          background-color: @purple50-color;
-        }
-
-        .approval-btn {
-          background-color: @grey50-color;
+        .save {
+          width: 170px;
         }
 
         .more-action {
           line-height: 40px;
           border: none;
-          background-color: @grey50-color  !important;
-          width: 40px !important;
+          background-color: @grey50-color;
+          width: 40px;
           height: 40px;
           color: white;
           border-radius: 32px;

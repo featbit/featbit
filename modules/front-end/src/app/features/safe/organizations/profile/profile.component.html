@@ -44,7 +44,7 @@
         </i>
       </nz-form-label>
       <nz-form-control nzDisableAutoTips [nzErrorTip]="passwordErrorTpl">
-        <input class="standard-form-input" nz-input type="password" formControlName="newPassword" (ngModelChange)="validateConfirmPassword()"/>
+        <input class="standard-form-input" nz-input type="password" formControlName="newPassword"/>
       </nz-form-control>
       <ng-template #passwordErrorTpl let-control>
         <ng-container *ngIf="control.hasError('required')" i18n="@@org.profile.new-password-is-required">Please input your new password</ng-container>
