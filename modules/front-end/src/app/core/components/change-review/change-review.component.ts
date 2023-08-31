@@ -4,8 +4,9 @@ import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/f
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { DiffFactoryService } from "@services/diff-factory.service";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
-import { differenceInCalendarDays, differenceInHours, setHours, setSeconds, setMinutes } from 'date-fns';
+import { differenceInCalendarDays, setHours, setSeconds, setMinutes } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
+import { environment } from "src/environments/environment";
 
 @Component({
   selector: 'change-review',
@@ -131,4 +132,6 @@ export class ChangeReviewComponent implements OnChanges {
   toggleSchedule() {
     this.hasSchedule = !this.hasSchedule;
   }
+
+  protected readonly environment = environment;
 }

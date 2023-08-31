@@ -32,34 +32,36 @@
               <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
             </nz-form-control>
           </nz-form-item>
-          <div class="section-title with-extension-icon">
-            <span i18n="@@common.schedule">Schedule</span>
-            <span *ngIf="!hasSchedule"
-                  (click)="toggleSchedule()" nz-icon nzType="plus" nzTheme="outline"></span>
-            <span *ngIf="hasSchedule"
-                  (click)="toggleSchedule()" nz-icon nzType="minus" nzTheme="outline"></span>
-          </div>
-          <ng-container *ngIf="hasSchedule">
-            <nz-form-item >
-              <nz-form-label nzRequired i18n="@@common.title">Title</nz-form-label>
-              <nz-form-control>
-                <input type="text" nz-input formControlName="scheduleTitle" placeholder="Title" i18n-placeholder="@@common.title"/>
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label nzRequired i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
-              <nz-form-control>
-                <nz-date-picker
-                  nzShowTime
-                  [nzShowNow]="false"
-                  nzFormat="yyyy-MM-dd HH:mm"
-                  formControlName="scheduledTime"
-                  [nzDisabledDate]="disabledDate"
-                  [nzDisabledTime]="disabledDateTime"
-                  [nzShowTime]="{ nzHideDisabledOptions: true, nzDefaultOpenValue: timeDefaultValue, nzFormat: 'HH:mm' }"
-                ></nz-date-picker>
-              </nz-form-control>
-            </nz-form-item>
+          <ng-container *ngIf="environment.enableSchedule">
+            <div class="section-title with-extension-icon">
+              <span i18n="@@common.schedule">Schedule</span>
+              <span *ngIf="!hasSchedule"
+                    (click)="toggleSchedule()" nz-icon nzType="plus" nzTheme="outline"></span>
+              <span *ngIf="hasSchedule"
+                    (click)="toggleSchedule()" nz-icon nzType="minus" nzTheme="outline"></span>
+            </div>
+            <ng-container *ngIf="hasSchedule">
+              <nz-form-item >
+                <nz-form-label nzRequired i18n="@@common.title">Title</nz-form-label>
+                <nz-form-control>
+                  <input type="text" nz-input formControlName="scheduleTitle" placeholder="Title" i18n-placeholder="@@common.title"/>
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label nzRequired i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
+                <nz-form-control>
+                  <nz-date-picker
+                    nzShowTime
+                    [nzShowNow]="false"
+                    nzFormat="yyyy-MM-dd HH:mm"
+                    formControlName="scheduledTime"
+                    [nzDisabledDate]="disabledDate"
+                    [nzDisabledTime]="disabledDateTime"
+                    [nzShowTime]="{ nzHideDisabledOptions: true, nzDefaultOpenValue: timeDefaultValue, nzFormat: 'HH:mm' }"
+                  ></nz-date-picker>
+                </nz-form-control>
+              </nz-form-item>
+            </ng-container>
           </ng-container>
         </form>
       </section>
