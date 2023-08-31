@@ -67,10 +67,8 @@ import { NzCardModule } from "ng-zorro-antd/card";
 import { TranslationPipe } from "@core/pipes/translation.pipe";
 import { NzTypographyModule } from "ng-zorro-antd/typography";
 import { RuleVariationValuePipe } from "@core/components/find-rule/serve/rule-variation-value.pipe";
-import { SafeHtmlPipe } from "@core/pipes/safe-html.pipe";
 import { SlugifyPipe } from "@core/pipes/slugify";
 import { AuditLogComponent } from "@core/components/audit-log/audit-log.component";
-import { ChangeListComponent } from "@core/components/change-list/change-list.component";
 import { AuditLogsComponent } from "@core/components/audit-logs/audit-logs.component";
 import { NzDatePickerModule } from "ng-zorro-antd/date-picker";
 import { NzEmptyModule } from "ng-zorro-antd/empty";
@@ -90,17 +88,11 @@ import { NzSwitchModule } from "ng-zorro-antd/switch";
 import {
   PendingChangesDrawerComponent
 } from "@core/components/pending-changes-drawer/pending-changes-drawer.component";
+import { ChangeListModule } from "@core/components/change-list/change-list.module";
+import { PipesModule } from "@core/pipes/pipes.module";
 
 @NgModule({
   declarations: [
-    SlugifyPipe,
-    PercentagePipe,
-    SafeHtmlPipe,
-    PolicyTypePipe,
-    AccessTokenTypePipe,
-    AccessTokenStatusPipe,
-    TranslationPipe,
-    RuleVariationValuePipe,
     PermissionCheckDirective,
     LocaleSwitcherComponent,
     MemberDrawerComponent,
@@ -129,7 +121,6 @@ import {
     GuideComponent,
     AuditLogsComponent,
     AuditLogComponent,
-    ChangeListComponent,
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
@@ -141,6 +132,7 @@ import {
     OverlayModule,
     ReactiveFormsModule,
     RouterModule,
+    PipesModule,
     NzFormModule,
     NzIconModule,
     NzMenuModule,
@@ -180,20 +172,20 @@ import {
     NzBreadCrumbModule,
     NzInputNumberModule,
     NzCollapseModule,
-    NzSwitchModule
+    NzSwitchModule,
+    ChangeListModule
   ],
   exports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
     SlugifyPipe,
     PercentagePipe,
-    SafeHtmlPipe,
     PolicyTypePipe,
     AccessTokenTypePipe,
     AccessTokenStatusPipe,
     TranslationPipe,
     RuleVariationValuePipe,
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
     PermissionCheckDirective,
     LocaleSwitcherComponent,
     MemberDrawerComponent,
@@ -222,7 +214,6 @@ import {
     GuideComponent,
     AuditLogsComponent,
     AuditLogComponent,
-    ChangeListComponent,
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,

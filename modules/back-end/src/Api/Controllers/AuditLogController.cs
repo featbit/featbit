@@ -1,5 +1,6 @@
 using Application.AuditLogs;
 using Application.Bases.Models;
+using Domain.SemanticPatch;
 
 namespace Api.Controllers;
 
@@ -17,5 +18,12 @@ public class AuditLogController : ApiControllerBase
 
         var auditLogs = await Mediator.Send(request);
         return Ok(auditLogs);
+    }
+
+    [HttpPost(("compare"))]
+    public async Task<ApiResponse<IEnumerable<Instruction>>> CompareAsync(Compare request)
+    {
+        var instructions = await Mediator.Send(request);
+        return Ok(instructions);
     }
 }

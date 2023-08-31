@@ -51,7 +51,7 @@ export class FindRuleComponent {
       } as ICondition);
     } else {
       const segmentIds = value.conditions.flatMap((item: ICondition) => {
-        const isSegment = isSegmentCondition(item);
+        const isSegment = isSegmentCondition(item.property);
         let opType: string = isSegment ? 'multi': ruleOps.filter((op: IRuleOp) => op.value === item.op)[0].type;
 
         let defaultValue: string;
@@ -118,7 +118,7 @@ export class FindRuleComponent {
 
   onRuleChange(value: ICondition, index: number) {
     const rule = { ...value, ...{multipleValue: [...value.multipleValue]} };
-    if (isSegmentCondition(rule)) {
+    if (isSegmentCondition(rule.property)) {
       rule.op = null;
     }
 

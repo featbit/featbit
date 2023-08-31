@@ -1,4 +1,6 @@
 ﻿using Domain.AuditLogs;
+using Domain.SemanticPatch;
+
 
 namespace Application.FeatureFlags;
 
@@ -17,4 +19,6 @@ public class PendingChangesVm
     public DateTime CreatedAt { get; set; }
 
     public DateTime ScheduledTime { get; set; }
+
+    public IEnumerable<FlagInstruction> Instructions { get; set; }
 }

@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
-import { ICategory, IRefType } from "@shared/diff/types";
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/forms";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { DiffFactoryService } from "@services/diff-factory.service";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
-import { differenceInCalendarDays, differenceInHours, setHours, setSeconds, setMinutes } from 'date-fns';
+import { differenceInCalendarDays, setHours, setSeconds, setMinutes } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
+import { AuditLogService } from "@services/audit-log.service";
+import { IInstruction } from "@core/components/change-list/instructions/types";
 
 @Component({
   selector: 'change-review',
@@ -19,14 +19,12 @@ export class ChangeReviewComponent implements OnChanges {
   @Input() previous: string = '{}';
   @Input() current: string = '{}';
   @Input() refType: RefTypeEnum;
-  @Input() refs: IRefType;
   @Output() onSave = new EventEmitter<any>();
   @Output() onCancel = new EventEmitter<any>();
 
   title: string;
   reviewModalKindEnum = ReviewModalKindEnum;
-  numChanges = 0;
-  changeCategories: ICategory[] = [];
+  instructions: IInstruction[] = [];
   form: FormGroup;
 
   hasSchedule: boolean = false;
@@ -35,21 +33,22 @@ export class ChangeReviewComponent implements OnChanges {
 
   constructor(
     private fb: FormBuilder,
-    private diffFactoryService: DiffFactoryService,
-  ) {
-  }
+    private auditLogService: AuditLogService
+  ) { }
 
   scheduleValidator: ValidatorFn = (control: AbstractControl) => {
     if (this.hasSchedule && !control.value) {
       const error = { required: true };
       control.setErrors(error);
       return error;
+    } else {
+      control.setErrors(null);
     }
 
     return null;
   }
 
-  ngOnChanges() {
+  async ngOnChanges() {
     if (this.visible) {
       if (this.kind === ReviewModalKindEnum.Schedule) {
         this.title = $localize `:@@common.schedule-changes:Schedule changes`;
@@ -59,14 +58,15 @@ export class ChangeReviewComponent implements OnChanges {
         this.hasSchedule = false;
       }
 
-      this.changeCategories = this.diffFactoryService.getDiffer(this.refType).diff(this.previous, this.current, this.refs);
-      this.numChanges = this.changeCategories.flatMap((category) => category.changes).length;
-
       this.form = this.fb.group({
         comment: ['', []],
         scheduleTitle: ['', [this.scheduleValidator]],
         scheduledTime: [null, [this.scheduleValidator]],
       });
+
+      try {
+        this.instructions = await this.auditLogService.compare(this.refType, this.previous, this.current);
+      } catch(e) {}
     }
   }
 
@@ -79,7 +79,9 @@ export class ChangeReviewComponent implements OnChanges {
         }
       });
 
-      return;
+      if (this.form.invalid) {
+        return;
+      }
     }
 
     const { comment, scheduleTitle, scheduledTime } = this.form.value;
@@ -131,4 +133,6 @@ export class ChangeReviewComponent implements OnChanges {
   toggleSchedule() {
     this.hasSchedule = !this.hasSchedule;
   }
+
+  protected readonly RefTypeEnum = RefTypeEnum;
 }

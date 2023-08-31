@@ -8,6 +8,12 @@ public class DataChange
 
     public string Current { get; set; }
 
+    public DataChange()
+    {
+        Previous = string.Empty;
+        Current = string.Empty;
+    }
+
     public DataChange(object from)
     {
         Previous = from == null
@@ -25,4 +31,6 @@ public class DataChange
 
         return this;
     }
+
+    public bool IsCreationOrDeletion() => string.IsNullOrWhiteSpace(Previous) || string.IsNullOrWhiteSpace(Current);
 }

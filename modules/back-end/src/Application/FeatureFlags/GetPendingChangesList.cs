@@ -1,4 +1,5 @@
 using Domain.FlagSchedules;
+using Domain.SemanticPatch;
 
 namespace Application.FeatureFlags;
 
@@ -54,6 +55,7 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
             if (draft != null)
             {
                 vm.DataChange = draft.DataChange;
+                vm.Instructions = FlagComparer.Compare(draft.DataChange);
             }
 
             var user = users.FirstOrDefault(x => x.Id == schedule.CreatorId);

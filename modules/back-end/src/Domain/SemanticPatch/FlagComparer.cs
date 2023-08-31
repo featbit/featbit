@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using Domain.Targeting;
@@ -7,6 +8,19 @@ namespace Domain.SemanticPatch;
 
 public static class FlagComparer
 {
+    public static IEnumerable<FlagInstruction> Compare(DataChange change)
+    {
+        if (change.IsCreationOrDeletion())
+        {
+            return Array.Empty<FlagInstruction>();
+        }
+
+        var original = JsonSerializer.Deserialize<FeatureFlag>(change.Previous, ReusableJsonSerializerOptions.Web);
+        var current = JsonSerializer.Deserialize<FeatureFlag>(change.Current, ReusableJsonSerializerOptions.Web);
+
+        return Compare(original, current);
+    }
+
     public static IEnumerable<FlagInstruction> Compare(FeatureFlag original, FeatureFlag current)
     {
         var instructions = new List<FlagInstruction>();
@@ -147,13 +161,18 @@ public static class FlagComparer
     {
         var instructions = new List<FlagInstruction>();
 
-        var isFallThroughChanged =
-            original.DispatchKey != current.DispatchKey ||
-            CompareRolloutVariations(original.Variations, current.Variations);
+        var isFallThroughChanged = CompareRolloutVariations(original.Variations, current.Variations);
 
         if (isFallThroughChanged)
         {
-            instructions.Add(new DefaultVariationInstruction(current));
+            var rolloutVariations = new DefaultRuleRolloutVariations { RolloutVariations = current.Variations };
+            instructions.Add(new UpdateDefaultRuleVariationOrRolloutInstruction(rolloutVariations));
+        }
+
+        // compare dispatch key
+        if (original.DispatchKey != current.DispatchKey && current.DispatchKey != null)
+        {
+            instructions.Add(new UpdateDefaultRuleDispatchKeyInstruction(current.DispatchKey));
         }
 
         return instructions;
@@ -190,8 +209,8 @@ public static class FlagComparer
     }
 
     public static IEnumerable<FlagInstruction> CompareTargetUsers(
-        ICollection<Variation> flagVariations, 
-        ICollection<TargetUser> original, 
+        ICollection<Variation> flagVariations,
+        ICollection<TargetUser> original,
         ICollection<TargetUser> current)
     {
         var instructions = new List<FlagInstruction>();
@@ -208,14 +227,14 @@ public static class FlagComparer
         return instructions;
     }
 
-    public static IEnumerable<FlagInstruction> CompareTargetUser(string variationId, TargetUser original,TargetUser current)
+    public static IEnumerable<FlagInstruction> CompareTargetUser(string variationId, TargetUser original, TargetUser current)
     {
-        if (original == null && current == null)
+        if (TargetUser.IsNullOrEmpty(original) && TargetUser.IsNullOrEmpty(current))
         {
             return new FlagInstruction[] { NoopFlagInstruction.Instance };
         }
 
-        if (original == null)
+        if (TargetUser.IsNullOrEmpty(original))
         {
             var targetUser = new TargetUser { VariationId = variationId, KeyIds = current.KeyIds };
             var instruction = new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers, targetUser);
@@ -223,7 +242,7 @@ public static class FlagComparer
             return new FlagInstruction[] { instruction };
         }
 
-        if (current == null)
+        if (TargetUser.IsNullOrEmpty(current))
         {
             var targetUser = new TargetUser { VariationId = variationId, KeyIds = Array.Empty<string>() };
             var instruction = new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers, targetUser);
@@ -306,13 +325,6 @@ public static class FlagComparer
             instructions.Add(new RuleNameInstruction(value));
         }
 
-        // compare dispatch key
-        if (original.DispatchKey != current.DispatchKey)
-        {
-            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
-            instructions.Add(new RuleDispatchKeyInstruction(value));
-        }
-
         // compare added/removed conditions
         var addedConditions = current.Conditions.ExceptBy(original.Conditions.Select(v => v.Id), v => v.Id)
             .ToArray();
@@ -349,6 +361,13 @@ public static class FlagComparer
         {
             var variations = new RuleVariations { RuleId = ruleId, RolloutVariations = current.Variations };
             instructions.Add(new UpdateVariationOrRolloutInstruction(variations));
+        }
+
+        // compare dispatch key
+        if (current.DispatchKey != null && original.DispatchKey != current.DispatchKey)
+        {
+            var value = new RuleDispatchKey { RuleId = ruleId, DispatchKey = current.DispatchKey };
+            instructions.Add(new RuleDispatchKeyInstruction(value));
         }
 
         return instructions;
