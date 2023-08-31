@@ -133,4 +133,6 @@ export class ChangeReviewComponent implements OnChanges {
   toggleSchedule() {
     this.hasSchedule = !this.hasSchedule;
   }
+
+  protected readonly RefTypeEnum = RefTypeEnum;
 }
