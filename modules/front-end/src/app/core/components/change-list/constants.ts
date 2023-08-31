@@ -9,11 +9,8 @@ import {
   UpdateVariationTypeComponent
 } from "@core/components/change-list/instructions/update-variation-type/update-variation-type.component";
 import {
-  AddVariationComponent
-} from "@core/components/change-list/instructions/add-variation/add-variation.component";
-import {
-  RemoveVariationComponent
-} from "@core/components/change-list/instructions/remove-variation/remove-variation.component";
+  ChangeVariationsComponent
+} from "@core/components/change-list/instructions/change-variations/change-variations.component";
 import {
   UpdateVariationComponent
 } from "@core/components/change-list/instructions/update-variation/update-variation.component";
@@ -183,8 +180,8 @@ export const instructionCategories: ICategoryInstruction[] = [
     label: $localize`:@@common.variations:Variations`,
     instructions: [
       { component: UpdateVariationTypeComponent, kind: InstructionKindEnum.UpdateVariationType },
-      { component: AddVariationComponent, kind: InstructionKindEnum.AddVariation },
-      { component: RemoveVariationComponent, kind: InstructionKindEnum.RemoveVariation },
+      { component: ChangeVariationsComponent, kind: InstructionKindEnum.AddVariation },
+      { component: ChangeVariationsComponent, kind: InstructionKindEnum.RemoveVariation },
       { component: UpdateVariationComponent, kind: InstructionKindEnum.UpdateVariation },
     ]
   }

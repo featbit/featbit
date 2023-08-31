@@ -22,11 +22,8 @@ import {
   UpdateVariationTypeComponent
 } from "@core/components/change-list/instructions/update-variation-type/update-variation-type.component";
 import {
-  AddVariationComponent
-} from "@core/components/change-list/instructions/add-variation/add-variation.component";
-import {
-  RemoveVariationComponent
-} from "@core/components/change-list/instructions/remove-variation/remove-variation.component";
+  ChangeVariationsComponent
+} from "@core/components/change-list/instructions/change-variations/change-variations.component";
 import {
   UpdateVariationComponent
 } from "@core/components/change-list/instructions/update-variation/update-variation.component";
@@ -80,8 +77,7 @@ import {
     UpdateTargetUsersComponent,
     UpdateTagsComponent,
     UpdateVariationTypeComponent,
-    AddVariationComponent,
-    RemoveVariationComponent,
+    ChangeVariationsComponent,
     UpdateVariationComponent,
     UpdateOffVariationComponent,
     UpdateDefaultRuleDispatchKeyComponent,
