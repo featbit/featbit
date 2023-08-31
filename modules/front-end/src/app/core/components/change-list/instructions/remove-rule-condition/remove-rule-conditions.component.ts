@@ -40,10 +40,10 @@ export class RemoveRuleConditionsComponent implements IInstructionComponent, OnI
   constructor(private segmentService: SegmentService) {}
 
   ngOnInit(): void {
-    this.getConditions();
+    this.setConditions();
   }
 
-  async getConditions() {
+  async setConditions() {
     const ruleConditionIds = this.data.value as IRuleConditionIds;
     const previous = this.data.previous as IFeatureFlag | ISegment;
     const conditions = previous.rules.find(r => r.id === ruleConditionIds.ruleId)?.conditions?.filter(c => ruleConditionIds.conditionIds.includes(c.id)) ?? [];

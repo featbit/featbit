@@ -63,7 +63,7 @@ export class DescribeRuleComponent implements IInstructionComponent, OnInit {
   }
 
   ngOnInit(): void {
-    this.getConditions();
+    this.setConditions();
   }
 
   get rollouts(): IRuleRollout[] {
@@ -79,7 +79,7 @@ export class DescribeRuleComponent implements IInstructionComponent, OnInit {
     })
   }
 
-  async getConditions() {
+  async setConditions() {
     const segmentIds = this.rule.conditions
       .filter(({ property }) => isSegmentCondition(property))
       .flatMap(condition => JSON.parse(condition.value))

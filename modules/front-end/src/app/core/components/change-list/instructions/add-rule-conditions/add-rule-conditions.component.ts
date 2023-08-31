@@ -38,17 +38,16 @@ export class AddRuleConditionsComponent implements IInstructionComponent, OnInit
   constructor(private segmentService: SegmentService) {}
 
   ngOnInit(): void {
-    this.getConditions();
+    this.setConditions();
   }
 
-  async getConditions() {
+  async setConditions() {
     const ruleConditions = this.data.value as IRuleConditions;
     const segmentIds = ruleConditions.conditions.filter(({ property }) => isSegmentCondition(property)).flatMap(condition => JSON.parse(condition.value));
 
     const segmentRefs = await getSegmentRefs(this.segmentService, segmentIds);
 
     this.conditions = ruleConditions.conditions.map((condition) => mapToIInstructionCondition(condition as ICondition, segmentRefs));
-
     this.isLoading = false;
   }
 }
