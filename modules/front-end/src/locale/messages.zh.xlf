@@ -1138,7 +1138,7 @@
         <source>Settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <target>设置</target>
       </trans-unit>
@@ -1146,7 +1146,7 @@
         <source>Default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">150</context>
+          <context context-type="linenumber">148</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
@@ -1162,7 +1162,7 @@
         <source>Individual Targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">158</context>
+          <context context-type="linenumber">156</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -1170,7 +1170,7 @@
         <source>Off variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="linenumber">169</context>
         </context-group>
         <target>开关关闭时的返回值</target>
       </trans-unit>
@@ -1178,7 +1178,7 @@
         <source>Rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">177</context>
+          <context context-type="linenumber">176</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
@@ -1190,7 +1190,7 @@
         <source>Variations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">194</context>
+          <context context-type="linenumber">193</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -1257,8 +1257,8 @@
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users/add-target-users.component.ts</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <target>添加用户</target>
       </trans-unit>
@@ -1309,14 +1309,6 @@
           <context context-type="linenumber">38</context>
         </context-group>
         <target>包含用户</target>
-      </trans-unit>
-      <trans-unit id="common.to-variation" datatype="html">
-        <source>to variation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-target-users/add-target-users.component.ts</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <target>到返回值</target>
       </trans-unit>
       <trans-unit id="common.add-variation" datatype="html">
         <source>Add variation</source>
@@ -1385,8 +1377,8 @@
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users/remove-target-users.component.ts</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">23</context>
         </context-group>
         <target>将用户</target>
       </trans-unit>
@@ -1401,14 +1393,6 @@
           <context context-type="linenumber">15</context>
         </context-group>
         <target>移除出</target>
-      </trans-unit>
-      <trans-unit id="common.from-variation" datatype="html">
-        <source>from variation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users/remove-target-users.component.ts</context>
-          <context context-type="linenumber">16</context>
-        </context-group>
-        <target>移除出返回值</target>
       </trans-unit>
       <trans-unit id="common.remove-variation" datatype="html">
         <source>Remove variation</source>
@@ -1557,6 +1541,46 @@
           <context context-type="linenumber">18</context>
         </context-group>
         <target>更新返回值为</target>
+      </trans-unit>
+      <trans-unit id="common.clear-users-with-space" datatype="html">
+        <source>Clear user(s) </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="common.set-users" datatype="html">
+        <source>Set user(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="common.for-variation" datatype="html">
+        <source>for variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="common.from-variation" datatype="html">
+        <source>from variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <target>移除出返回值</target>
+      </trans-unit>
+      <trans-unit id="common.to-variation" datatype="html">
+        <source>to variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-target-users/update-target-users.component.ts</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <target>到返回值</target>
       </trans-unit>
       <trans-unit id="common.add-values" datatype="html">
         <source>Add value(s)</source>
