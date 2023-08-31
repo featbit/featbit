@@ -1236,7 +1236,7 @@
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/update-target-users-for-segment.component.ts</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
@@ -1312,7 +1312,7 @@
       <trans-unit id="common.remove-users" datatype="html">
         <source>Remove user(s)</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/update-target-users-for-segment.component.ts</context>
           <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
@@ -1327,7 +1327,7 @@
       <trans-unit id="common.from-targeting-users" datatype="html">
         <source>from</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component.ts</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-target-users-from-excluded/update-target-users-for-segment.component.ts</context>
           <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">

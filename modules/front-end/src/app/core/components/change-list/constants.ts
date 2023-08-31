@@ -53,17 +53,8 @@ import {
   UpdateValuesOfRuleConditionComponent
 } from "@core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component";
 import {
-  AddTargetUsersToIncludedComponent
-} from "@core/components/change-list/instructions/add-target-users-to-included/add-target-users-to-included.component";
-import {
-  RemoveTargetUsersFromIncludedComponent
-} from "@core/components/change-list/instructions/remove-target-users-from-included/remove-target-users-from-included.component";
-import {
-  RemoveTargetUsersFromExcludedComponent
-} from "@core/components/change-list/instructions/remove-target-users-from-excluded/remove-target-users-from-excluded.component";
-import {
-  AddTargetUsersToExcludedComponent
-} from "@core/components/change-list/instructions/add-target-users-to-excluded/add-target-users-to-excluded.component";
+  UpdateTargetUsersForSegmentComponent
+} from "@core/components/change-list/instructions/update-target-users-for-segment/update-target-users-for-segment.component";
 
 export enum InstructionKindEnum {
   // Settings
@@ -158,10 +149,10 @@ export const instructionCategories: ICategoryInstruction[] = [
       { component: UpdateTargetUsersComponent, kind: InstructionKindEnum.RemoveTargetUsers },
       { component: UpdateTargetUsersComponent, kind: InstructionKindEnum.AddTargetUsers },
       { component: UpdateTargetUsersComponent, kind: InstructionKindEnum.SetTargetUsers },
-      { component: AddTargetUsersToIncludedComponent, kind: InstructionKindEnum.AddTargetUsersToIncluded },
-      { component: RemoveTargetUsersFromIncludedComponent, kind: InstructionKindEnum.RemoveTargetUsersFromIncluded },
-      { component: AddTargetUsersToExcludedComponent, kind: InstructionKindEnum.AddTargetUsersToExcluded },
-      { component: RemoveTargetUsersFromExcludedComponent, kind: InstructionKindEnum.RemoveTargetUsersFromExcluded },
+      { component: UpdateTargetUsersForSegmentComponent, kind: InstructionKindEnum.AddTargetUsersToIncluded },
+      { component: UpdateTargetUsersForSegmentComponent, kind: InstructionKindEnum.RemoveTargetUsersFromIncluded },
+      { component: UpdateTargetUsersForSegmentComponent, kind: InstructionKindEnum.AddTargetUsersToExcluded },
+      { component: UpdateTargetUsersForSegmentComponent, kind: InstructionKindEnum.RemoveTargetUsersFromExcluded },
     ]
   },
   {
