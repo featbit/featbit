@@ -15,11 +15,8 @@ import {
   UpdateDescriptionComponent
 } from "@core/components/change-list/instructions/update-description/update-description.component";
 import {
-  RemoveTargetUsersComponent
-} from "@core/components/change-list/instructions/remove-target-users/remove-target-users.component";
-import {
-  AddTargetUsersComponent
-} from "@core/components/change-list/instructions/add-target-users/add-target-users.component";
+  UpdateTargetUsersComponent
+} from "@core/components/change-list/instructions/update-target-users/update-target-users.component";
 import { AddTagsComponent } from "@core/components/change-list/instructions/add-tags/add-tags.component";
 import { RemoveTagsComponent } from "@core/components/change-list/instructions/remove-tags/remove-tags.component";
 import {
@@ -92,8 +89,7 @@ import {
     UpdateDescriptionComponent,
     AddTagsComponent,
     RemoveTagsComponent,
-    RemoveTargetUsersComponent,
-    AddTargetUsersComponent,
+    UpdateTargetUsersComponent,
     UpdateVariationTypeComponent,
     AddVariationComponent,
     RemoveVariationComponent,

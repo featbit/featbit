@@ -5,7 +5,7 @@ import {
 } from "@core/components/change-list/instructions/types";
 
 @Component({
-  selector: 'add-target-users',
+  selector: 'update-target-users',
   template: `
     <div class="instruction">
       <span i18n="@@common.add-tags">Add tags</span>

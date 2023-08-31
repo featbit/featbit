@@ -6,11 +6,8 @@ import { RestoreFlagComponent } from "@core/components/change-list/instructions/
 import { UpdateNameComponent } from "@core/components/change-list/instructions/update-name/update-name.component";
 import { UpdateDescriptionComponent } from "@core/components/change-list/instructions/update-description/update-description.component";
 import {
-  RemoveTargetUsersComponent
-} from "@core/components/change-list/instructions/remove-target-users/remove-target-users.component";
-import {
-  AddTargetUsersComponent
-} from "@core/components/change-list/instructions/add-target-users/add-target-users.component";
+  UpdateTargetUsersComponent
+} from "@core/components/change-list/instructions/update-target-users/update-target-users.component";
 import { AddTagsComponent } from "@core/components/change-list/instructions/add-tags/add-tags.component";
 import { RemoveTagsComponent } from "@core/components/change-list/instructions/remove-tags/remove-tags.component";
 import {
@@ -81,6 +78,7 @@ export enum InstructionKindEnum {
 
   // Target users
   RemoveTargetUsers = 'RemoveTargetUsers',
+  SetTargetUsers = 'SetTargetUsers',
   AddTargetUsers = 'AddTargetUsers',
   RemoveTargetUsersFromIncluded = "RemoveTargetUsersFromIncluded",
   AddTargetUsersToIncluded = "AddTargetUsersToIncluded",
@@ -157,8 +155,9 @@ export const instructionCategories: ICategoryInstruction[] = [
     category: CategoryEnum.TargetUsers,
     label: $localize`:@@common.target-users:Individual Targeting`,
     instructions: [
-      { component: RemoveTargetUsersComponent, kind: InstructionKindEnum.RemoveTargetUsers },
-      { component: AddTargetUsersComponent, kind: InstructionKindEnum.AddTargetUsers },
+      { component: UpdateTargetUsersComponent, kind: InstructionKindEnum.RemoveTargetUsers },
+      { component: UpdateTargetUsersComponent, kind: InstructionKindEnum.AddTargetUsers },
+      { component: UpdateTargetUsersComponent, kind: InstructionKindEnum.SetTargetUsers },
       { component: AddTargetUsersToIncludedComponent, kind: InstructionKindEnum.AddTargetUsersToIncluded },
       { component: RemoveTargetUsersFromIncludedComponent, kind: InstructionKindEnum.RemoveTargetUsersFromIncluded },
       { component: AddTargetUsersToExcludedComponent, kind: InstructionKindEnum.AddTargetUsersToExcluded },

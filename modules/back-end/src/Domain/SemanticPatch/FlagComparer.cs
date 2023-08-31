@@ -234,7 +234,7 @@ public static class FlagComparer
             return new FlagInstruction[] { NoopFlagInstruction.Instance };
         }
 
-        if (original == null)
+        if (TargetUser.IsNullOrEmpty(original))
         {
             var targetUser = new TargetUser { VariationId = variationId, KeyIds = current.KeyIds };
             var instruction = new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers, targetUser);
@@ -242,7 +242,7 @@ public static class FlagComparer
             return new FlagInstruction[] { instruction };
         }
 
-        if (current == null)
+        if (TargetUser.IsNullOrEmpty(current))
         {
             var targetUser = new TargetUser { VariationId = variationId, KeyIds = Array.Empty<string>() };
             var instruction = new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers, targetUser);
