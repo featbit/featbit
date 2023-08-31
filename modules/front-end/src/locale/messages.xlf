@@ -419,7 +419,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">17</context>
+          <context context-type="linenumber">13</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -488,7 +488,7 @@
         <source>You don&apos;t have permissions to take this action, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">206</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
@@ -507,11 +507,11 @@
         <source>Operation succeeded</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">216</context>
+          <context context-type="linenumber">211</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">231</context>
+          <context context-type="linenumber">226</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
@@ -523,7 +523,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
@@ -734,7 +734,7 @@
         <source>Operation failed, please try again</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">219</context>
+          <context context-type="linenumber">214</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.ts</context>
@@ -813,14 +813,14 @@
         <source>Policies are mandatory for service type access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">240</context>
+          <context context-type="linenumber">235</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.copy-success" datatype="html">
         <source>Copied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">250</context>
+          <context context-type="linenumber">245</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
@@ -2222,88 +2222,6 @@
           <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="core.components.findrule.if" datatype="html">
-        <source>If</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">2</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.and" datatype="html">
-        <source>and</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">4</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.rule.selectuserproperty" datatype="html">
-        <source>Select property</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.create-with-comma" datatype="html">
-        <source>Create:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">36</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.rule.select-operation" datatype="html">
-        <source>Select operation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.rule.selectvalues" datatype="html">
-        <source>values</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">37</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">70</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.rule.pleaseinput" datatype="html">
-        <source>input string or number</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">50</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.rule.inputnumber" datatype="html">
-        <source>input a number</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">56</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.rule.segments" datatype="html">
-        <source>segments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">90</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.rule.alloptions" datatype="html">
-        <source>total options</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">117</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="core.components.findrule.operators.istrue" datatype="html">
         <source>is true</source>
         <context-group purpose="location">
@@ -2414,6 +2332,88 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
           <context context-type="linenumber">84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.if" datatype="html">
+        <source>If</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">2</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.and" datatype="html">
+        <source>and</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.selectuserproperty" datatype="html">
+        <source>Select property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.create-with-comma" datatype="html">
+        <source>Create:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.select-operation" datatype="html">
+        <source>Select operation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.selectvalues" datatype="html">
+        <source>values</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.pleaseinput" datatype="html">
+        <source>input string or number</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.inputnumber" datatype="html">
+        <source>input a number</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.segments" datatype="html">
+        <source>segments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="core.components.findrule.rule.alloptions" datatype="html">
+        <source>total options</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
+          <context context-type="linenumber">117</context>
         </context-group>
       </trans-unit>
       <trans-unit id="core.components.findrule.serve" datatype="html">
@@ -5615,83 +5615,75 @@
           <context context-type="linenumber">8</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2876776314511540380" datatype="html">
-        <source>Schedule changes</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <note priority="1" from="description">ff.components.details.targeting.schedule-changes</note>
-      </trans-unit>
       <trans-unit id="ff.components.details.targeting.setabtestrule" datatype="html">
         <source>Set A/B test rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.targeting.default" datatype="html">
         <source>Default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">31</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.default-tooltip" datatype="html">
         <source>Serve a variation if the user doesn&apos;t met Individual targeting or Targeting Rules.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.check.the.docs" datatype="html">
         <source>Check the docs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">36</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">88</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.individual" datatype="html">
         <source>Individual targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">54</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.individual-tooltip" datatype="html">
         <source>Serve a variation to specific targets based on their key</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">62</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.rules" datatype="html">
         <source>Targeting rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">83</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.rules-tooltip" datatype="html">
         <source>Serve a variation to specific targets based on their attributes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">86</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.errors" datatype="html">
         <source>Validation errors</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">120</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.loading-pending-changes-failed" datatype="html">
