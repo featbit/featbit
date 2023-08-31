@@ -46,8 +46,8 @@ export class UpdateValuesOfRuleConditionComponent implements IInstructionCompone
   constructor(private segmentService: SegmentService) {}
 
   async ngOnInit() {
-    await this.getCondition();
-    await this.getValues();
+    await this.setCondition();
+    await this.setValues();
     this.isLoading = false;
   }
 
@@ -55,7 +55,7 @@ export class UpdateValuesOfRuleConditionComponent implements IInstructionCompone
     return this.data.kind === InstructionKindEnum.AddValuesToRuleCondition;
   }
 
-  async getCondition() {
+  async setCondition() {
     const previous = this.data.previous as IFeatureFlag | ISegment;
     const ruleConditionValues = this.data.value as IRuleConditionValues;
     const condition = previous.rules.find(r => r.id === ruleConditionValues.ruleId)?.conditions?.find(c => c.id === ruleConditionValues.conditionId);
@@ -69,16 +69,18 @@ export class UpdateValuesOfRuleConditionComponent implements IInstructionCompone
     this.condition = mapToIInstructionCondition(condition, segmentRefs);
   }
 
-  async getValues() {
+  async setValues() {
     const ruleConditionValues = this.data.value as IRuleConditionValues;
     const previous = this.data.previous as IFeatureFlag | ISegment;
     const condition = previous.rules.find(r => r.id === ruleConditionValues.ruleId)?.conditions?.find(c => c.id === ruleConditionValues.conditionId);
+
     const isSegment = isSegmentCondition(condition.property);
-    if (!isSegment) {
-      ruleConditionValues.values
+    if (isSegment) {
+      const segmentRefs: {[key: string]: ISegment } = await getSegmentRefs(this.segmentService, ruleConditionValues.values);
+      this.values = Object.values(segmentRefs).map(x => x.name);
+      return;
     }
 
-    const segmentRefs: {[key: string]: ISegment } = await getSegmentRefs(this.segmentService, ruleConditionValues.values);
-    this.values = Object.values(segmentRefs).map(x => x.name);
+    this.values = ruleConditionValues.values;
   }
 }
