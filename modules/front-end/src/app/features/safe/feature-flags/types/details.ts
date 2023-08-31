@@ -71,8 +71,7 @@ export interface IFeatureFlagTargeting {
   targetUsers: IVariationUser[],
   rules: IRule[],
   fallthrough: IFallthrough,
-  exptIncludeAllTargets: boolean,
-  comment?: string
+  exptIncludeAllTargets: boolean
 }
 
 export interface IFallthrough {

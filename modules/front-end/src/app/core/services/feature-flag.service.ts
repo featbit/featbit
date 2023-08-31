@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { Observable, of } from "rxjs";
+import { firstValueFrom, Observable, of } from "rxjs";
 import {
   ICopyToEnvResult,
   IFeatureFlagCreationPayload,
@@ -17,6 +17,8 @@ import {
 } from "@features/safe/feature-flags/types/details";
 import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
 import { IVariation } from "@shared/rules";
+import { FlagSchedule } from "@core/components/change-review/types";
+import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 
 @Injectable({
   providedIn: 'root'
@@ -54,6 +56,10 @@ export class FeatureFlagService {
       this.baseUrl,
       {params: new HttpParams({fromObject: queryParam})}
     );
+  }
+
+  getPendingChanges(key: string): Promise<IPendingChanges[]> {
+    return firstValueFrom(this.http.get<IPendingChanges[]>(`${this.baseUrl}/${key}/pending-changes`));
   }
 
   updateSetting(key: string, payload: ISettingPayload): Observable<boolean> {
@@ -100,8 +106,15 @@ export class FeatureFlagService {
     return this.http.put(url, {});
   }
 
-  updateTargeting(payload: IFeatureFlagTargeting): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.key}/targeting`;
+  updateTargeting(targeting: IFeatureFlagTargeting, comment?: string, schedule?: FlagSchedule): Observable<boolean> {
+    const url = `${this.baseUrl}/${targeting.key}/targeting`;
+
+    const payload = {
+      ...targeting,
+      comment,
+      schedule
+    };
+
     return this.http.put<boolean>(url, payload);
   }
 

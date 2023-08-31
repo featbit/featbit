@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, } from '@angular/core';
 import { SegmentService } from '@services/segment.service';
-import { isSegmentCondition, trackByFunction } from '@utils/index';
+import { isSegmentCondition, trackByFunction, uuidv4 } from '@utils/index';
 import { IRuleOp, ruleOps } from './ruleConfig';
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IRuleIdDispatchKey, IUserProp } from "@shared/types";
@@ -43,6 +43,7 @@ export class FindRuleComponent {
 
     if(value.conditions.length === 0) {
       this.conditions.push({
+        id: uuidv4(),
         property: '',
         op: '',
         value: '',
@@ -50,7 +51,7 @@ export class FindRuleComponent {
       } as ICondition);
     } else {
       const segmentIds = value.conditions.flatMap((item: ICondition) => {
-        const isSegment = isSegmentCondition(item);
+        const isSegment = isSegmentCondition(item.property);
         let opType: string = isSegment ? 'multi': ruleOps.filter((op: IRuleOp) => op.value === item.op)[0].type;
 
         let defaultValue: string;
@@ -64,6 +65,7 @@ export class FindRuleComponent {
           multipleValue = [];
         }
         this.conditions.push({
+          id: item.id,
           property: item.property,
           op: isSegment ? '': item.op,
           value: defaultValue,
@@ -83,6 +85,7 @@ export class FindRuleComponent {
 
   onAddRule() {
     this.conditions.push({
+      id: uuidv4(),
       property: '',
       op: '',
       value: '',
@@ -101,6 +104,7 @@ export class FindRuleComponent {
   onDeleteRuleItem(index: number) {
     if(this.conditions.length === 1) {
       this.conditions[0] = {
+        id: uuidv4(),
         property: '',
         op: '',
         value: '',
@@ -114,7 +118,7 @@ export class FindRuleComponent {
 
   onRuleChange(value: ICondition, index: number) {
     const rule = { ...value, ...{multipleValue: [...value.multipleValue]} };
-    if (isSegmentCondition(rule)) {
+    if (isSegmentCondition(rule.property)) {
       rule.op = null;
     }
 

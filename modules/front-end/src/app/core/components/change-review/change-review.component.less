@@ -44,21 +44,41 @@
     }
   }
 
-  .change-count {
-    margin-top: 4px;
-  }
-
   .section-title {
+    margin-bottom: 4px;
     font-size: 15px;
     font-weight: 700;
     color: #212529;
+
+    &.with-extension-icon {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      gap: 8px;
+      align-items: center;
+
+      svg {
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+    }
   }
 
-  .comment {
+  .form-wraper {
     margin-top: 8px;
   }
 
   nz-select {
     width: 100%;
+  }
+
+  nz-date-picker {
+    border-radius: 8px;
+
+    input {
+      border: none;
+      height: 24px;
+    }
   }
 }

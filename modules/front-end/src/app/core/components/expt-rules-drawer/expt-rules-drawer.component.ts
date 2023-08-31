@@ -48,7 +48,7 @@ export class ExptRulesDrawerComponent {
         rules: ff.rules.map(rule => {
           const result = {
             conditions: rule.conditions.map(condition => {
-              const isSegment = isSegmentCondition(condition);
+              const isSegment = isSegmentCondition(condition.property);
               let ruleType: string = isSegment ? 'multi': ruleOps.filter((rule: IRuleOp) => rule.value === condition.op)[0].type;
 
               let multipleValue: string[] = [];

@@ -2,9 +2,10 @@ import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { addDays, startOfDay } from 'date-fns'
-import {AuditLogListFilter, IAuditLogListModel} from "@core/components/audit-log/types";
+import { AuditLogListFilter, IAuditLogListModel } from "@core/components/audit-log/types";
+import { IInstruction } from "@core/components/change-list/instructions/types";
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,7 @@ export class AuditLogService {
   constructor(private http: HttpClient) {
   }
 
-  public getList(filter: AuditLogListFilter = new AuditLogListFilter()): Observable<IAuditLogListModel> {
+  getList(filter: AuditLogListFilter = new AuditLogListFilter()): Observable<IAuditLogListModel> {
     let from = '';
     let to = '';
     if (filter.range[0]) {
@@ -44,5 +45,18 @@ export class AuditLogService {
       this.baseUrl,
       { params: new HttpParams({ fromObject: queryParam }) }
     );
+  }
+
+  compare(refType: string, previous: string, current: string): Promise<IInstruction[]> {
+    return firstValueFrom(this.http.post<IInstruction[]>(
+      `${this.baseUrl}/compare`,
+      {
+        refType,
+        dataChange: {
+          previous,
+          current
+        }
+      }
+    ));
   }
 }

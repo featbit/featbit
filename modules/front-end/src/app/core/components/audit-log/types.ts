@@ -1,3 +1,5 @@
+import { IInstruction } from "@core/components/change-list/instructions/types";
+
 export enum AuditLogOpEnum {
   Create = 'Create',
   Update = 'Update',
@@ -22,6 +24,7 @@ export interface IAuditLog {
   createdAt: string;
   comment: string;
   dataChange: IDataChange;
+  instructions: IInstruction[];
 }
 
 export interface IDataChange {

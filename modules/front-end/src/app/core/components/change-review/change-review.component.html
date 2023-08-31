@@ -1,6 +1,5 @@
 <nz-modal [nzWidth]='800' nzClassName="review-modal" [(nzVisible)]="visible"
-          i18n-nzTitle="@@common.review-and-save"
-          nzTitle="Review and save"
+          [nzTitle]="title"
           [nzClosable]="false"
           (nzOnCancel)="closeModal()">
   <ng-container *nzModalContent>
@@ -19,27 +18,58 @@
         <div class="section-title" i18n="@@common.changes">Changes</div>
         <div class="change">
           <p class="change-count">
-            <span>{{numChanges}} </span>
+            <span>{{instructions.length}} </span>
             <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
           </p>
-          <change-list [categories]="changeCategories"></change-list>
+          <change-list-v2 class="change-list" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list-v2>
         </div>
       </section>
-      <section class="comment">
-        <form nz-form [formGroup]="reviewForm" nzLayout="vertical">
-          <nz-form-item>
+      <section class="form-wraper" >
+        <form nz-form [formGroup]="form" nzLayout="vertical">
+          <nz-form-item *ngIf="kind === reviewModalKindEnum.Review">
             <nz-form-label class="section-title" i18n="@@common.comment">Comment</nz-form-label>
             <nz-form-control>
               <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
             </nz-form-control>
           </nz-form-item>
+          <ng-container *ngIf="refType === RefTypeEnum.Flag">
+            <div class="section-title with-extension-icon">
+              <span i18n="@@common.schedule">Schedule</span>
+              <span *ngIf="!hasSchedule"
+                    (click)="toggleSchedule()" nz-icon nzType="plus" nzTheme="outline"></span>
+              <span *ngIf="hasSchedule"
+                    (click)="toggleSchedule()" nz-icon nzType="minus" nzTheme="outline"></span>
+            </div>
+            <ng-container *ngIf="hasSchedule">
+              <nz-form-item >
+                <nz-form-label nzRequired i18n="@@common.title">Title</nz-form-label>
+                <nz-form-control>
+                  <input type="text" nz-input formControlName="scheduleTitle" placeholder="Title" i18n-placeholder="@@common.title"/>
+                </nz-form-control>
+              </nz-form-item>
+              <nz-form-item>
+                <nz-form-label nzRequired i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
+                <nz-form-control>
+                  <nz-date-picker
+                    nzShowTime
+                    [nzShowNow]="false"
+                    nzFormat="yyyy-MM-dd HH:mm"
+                    formControlName="scheduledTime"
+                    [nzDisabledDate]="disabledDate"
+                    [nzDisabledTime]="disabledDateTime"
+                    [nzShowTime]="{ nzHideDisabledOptions: true, nzDefaultOpenValue: timeDefaultValue, nzFormat: 'HH:mm' }"
+                  ></nz-date-picker>
+                </nz-form-control>
+              </nz-form-item>
+            </ng-container>
+          </ng-container>
         </form>
       </section>
     </div>
   </ng-container>
   <div *nzModalFooter>
     <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel</button>
-    <button [disabled]="numChanges === 0" nz-button nzType="primary"
+    <button [disabled]="instructions.length === 0" nz-button nzType="primary"
             (click)="onValidate()" i18n="@@common.save">Save</button>
   </div>
 </nz-modal>

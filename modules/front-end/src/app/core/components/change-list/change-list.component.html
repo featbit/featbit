@@ -1,94 +1,19 @@
-<div class="category-list">
-  <ul>
-    <li *ngFor="let category of categories">
-      <span class="category">{{category.label}}</span>
-      <ul class="change-list">
-        <ng-container *ngFor="let change of category.changes" [ngSwitch]="change.op">
-          <li class="change" *ngSwitchCase="'ENABLE'">
-            <span i18n="@@differ.enabled">Enabled </span>
-            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
+<nz-collapse [nzBordered]="false">
+  <nz-collapse-panel *ngFor="let category of categories; let index=index" [nzHeader]="category.label" [nzActive]="index === 0">
+    <ul class="instructions" *ngIf="category.instructions">
+      <li class="instruction-item" *ngFor="let instruction of category.instructions">
+        <instruction [instruction]="instruction"></instruction>
+      </li>
+    </ul>
+    <div *ngIf="category.groups">
+      <div *ngFor="let group of category.groups">
+        <div class="group-title" [innerHTML]="group.label"></div>
+        <ul class="group-instructions">
+          <li class="instruction-item" *ngFor="let instruction of group.instructions">
+            <instruction [instruction]="instruction"></instruction>
           </li>
-          <li class="change" *ngSwitchCase="'DISABLE'">
-            <span i18n="@@differ.disabled">Disabled </span>
-            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
-          </li>
-          <li class="change" *ngSwitchCase="'ARCHIVE'">
-            <span i18n="@@differ.archived">Archived </span>
-            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
-          </li>
-          <li class="change" *ngSwitchCase="'UNARCHIVED'">
-            <span i18n="@@differ.unarchived">Unarchived </span>
-            <span *ngIf="change.label?.length > 0">{{change.label}}</span>
-          </li>
-          <li class="change" *ngSwitchCase="'UPDATE'">
-            <span i18n="@@differ.set">Set </span>
-            <span class="item" *ngIf="change.label?.length > 0">{{change.label}}</span>
-            <ng-container *ngIf="displayOldValue(change)">
-              <span i18n="@@differ.from"> from </span>
-              <span class="item remove-item" *ngIf="!change.isMultiValue">{{change.oldValue}}</span>
-              <ng-container *ngIf="change.isMultiValue">
-                <span class="ant-tag remove-item" *ngFor="let value of change.oldValue">{{value}}</span>
-              </ng-container>
-            </ng-container>
-            <ng-container *ngIf="displayNewValue(change)">
-              <span i18n="@@differ.to"> to </span>
-              <span class="item" *ngIf="!change.isMultiValue">{{change.value}}</span>
-              <ng-container *ngIf="change.isMultiValue">
-                <span class="ant-tag" *ngFor="let value of change.value">{{value}}</span>
-              </ng-container>
-            </ng-container>
-          </li>
-          <li class="change" *ngSwitchCase="'ADD'">
-            <span i18n="@@differ.added">Added </span>
-            <span class="ant-tag" *ngIf="!change.isMultiValue">{{change.value}}</span>
-            <ng-container *ngIf="change.isMultiValue">
-              <span class="ant-tag" *ngFor="let value of change.value">{{value}}</span>
-            </ng-container>
-            <ng-container *ngIf="change.label">
-              <span i18n="@@differ.add-to"> to </span>
-              <span class="item">{{change.label}}</span>
-            </ng-container>
-          </li>
-          <li class="change" *ngSwitchCase="'REMOVE'">
-            <ng-container *ngIf="change.label">
-              <span i18n="@@differ.add-from">From </span>
-              <span class="item">{{change.label}}</span>
-            </ng-container>
-            <span i18n="@@differ.add-removed"> removed </span>
-            <span class="ant-tag remove-item" *ngIf="!change.isMultiValue">{{change.value}}</span>
-            <ng-container *ngIf="change.isMultiValue">
-              <span class="ant-tag remove-item" *ngFor="let value of change.value">{{value}}</span>
-            </ng-container>
-          </li>
-          <li class="change rule" *ngSwitchCase="'RULE'">
-            <div>{{change.label}}</div>
-            <div class="clause" *ngFor="let condition of change.value.conditions; let idx = index">
-              <span *ngIf="idx !==0">And</span>
-              <span>If</span>
-              <span>{{condition.property}}</span>
-              <span *ngIf="condition.op !== null">{{condition.opLabel}}</span>
-              <ng-container *ngIf="displayRuleClauseValue(condition)">
-                <span class="ant-tag" *ngIf="!condition.isMultiValue">{{condition.value}}</span>
-                <ng-container *ngIf="condition.isMultiValue">
-                  <span class="ant-tag" *ngFor="let value of condition.value">{{value}}</span>
-                </ng-container>
-              </ng-container>
-            </div>
-            <ng-container *ngIf="change.value.variations?.length > 0">
-              <div class="serve">
-                <span i18n="@@differ.serve">Serve</span>
-                <span class="serve-value ant-tag" *ngFor="let variation of change.value.variations">
-                  {{variation.label}} <ng-container *ngIf="change.value.variations.length > 1">({{variation.percentage}}%)</ng-container>
-                </span>
-              </div>
-              <div class="dispatch-by" *ngIf="change.value.variations?.length > 1">
-                <span i18n="@@differ.dispatch-by">Dispatch by</span>
-                <span class="item">{{change.value.dispatchKey}}</span>
-              </div>
-            </ng-container>
-          </li>
-        </ng-container>
-      </ul>
-    </li>
-  </ul>
-</div>
+        </ul>
+      </div>
+    </div>
+  </nz-collapse-panel>
+</nz-collapse>
