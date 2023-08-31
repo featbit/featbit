@@ -10,13 +10,13 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
   selector: 'update-target-users',
   template: `
     <div class="instruction">
+      <span class="variation">{{variation}}</span>:
       <ng-container *ngIf="kind === InstructionKindEnum.SetTargetUsers">
-        <span i18n="@@common.clear-users-with-space" *ngIf="keyIds.length === 0">Clear user(s) </span>
-        <span i18n="@@common.set-users" *ngIf="keyIds.length > 0">Set user(s)</span>
+        <span i18n="@@common.clear-users" *ngIf="keyIds.length === 0">Clear user(s)</span>
+        <span i18n="@@common.set-users-as" *ngIf="keyIds.length > 0">Set user(s) as</span>
         <nz-tag *ngFor="let keyId of keyIds">
           {{keyId}}
         </nz-tag>
-        <span i18n="@@common.for-variation">for variation</span>
       </ng-container>
       <ng-container *ngIf="kind !== InstructionKindEnum.SetTargetUsers">
         <span i18n="@@common.add-users" *ngIf="kind === InstructionKindEnum.AddTargetUsers">Add user(s)</span>
@@ -24,13 +24,14 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
         <nz-tag *ngFor="let keyId of keyIds">
           {{keyId}}
         </nz-tag>
-        <span i18n="@@common.from-variation" *ngIf="kind === InstructionKindEnum.RemoveTargetUsers">from variation</span>
-        <span i18n="@@common.to-variation" *ngIf="kind === InstructionKindEnum.AddTargetUsers">to variation</span>
       </ng-container>
-      <nz-tag>{{variation}}</nz-tag>
     </div>
   `,
   styles: [`
+    .variation {
+      font-weight: 600;
+    }
+
     nz-tag {
       line-height: 12px;
       height: 19px;
