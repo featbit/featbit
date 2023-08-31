@@ -1138,7 +1138,7 @@
         <source>Settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">139</context>
+          <context context-type="linenumber">136</context>
         </context-group>
         <target>设置</target>
       </trans-unit>
@@ -1146,7 +1146,7 @@
         <source>Default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">153</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
@@ -1162,7 +1162,7 @@
         <source>Individual Targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">161</context>
+          <context context-type="linenumber">158</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -1170,7 +1170,7 @@
         <source>Off variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">173</context>
+          <context context-type="linenumber">170</context>
         </context-group>
         <target>开关关闭时的返回值</target>
       </trans-unit>
@@ -1178,7 +1178,7 @@
         <source>Rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">180</context>
+          <context context-type="linenumber">177</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
@@ -1190,7 +1190,7 @@
         <source>Variations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/constants.ts</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">194</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -1206,7 +1206,7 @@
         <source>Add conditions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-rule-conditions/add-rule-conditions.component.ts</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">15</context>
         </context-group>
         <target>添加条件</target>
       </trans-unit>
@@ -1214,27 +1214,23 @@
         <source>If</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-rule-conditions/add-rule-conditions.component.ts</context>
-          <context context-type="linenumber">19</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
-          <context context-type="linenumber">23</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
-          <context context-type="linenumber">25</context>
+          <context context-type="linenumber">27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-rule-condition/remove-rule-conditions.component.ts</context>
           <context context-type="linenumber">20</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
-          <context context-type="linenumber">23</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-condition/update-rule-condition.component.ts</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-condition/update-rule-condition.component.ts</context>
-          <context context-type="linenumber">18</context>
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <target>如果</target>
       </trans-unit>
@@ -1322,22 +1318,6 @@
         </context-group>
         <target>到返回值</target>
       </trans-unit>
-      <trans-unit id="common.add-values" datatype="html">
-        <source>Add value(s)</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
-          <context context-type="linenumber">17</context>
-        </context-group>
-        <target>将</target>
-      </trans-unit>
-      <trans-unit id="common.to-condition" datatype="html">
-        <source>to condition</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/add-values-to-rule-condition/add-values-to-rule-condition.component.ts</context>
-          <context context-type="linenumber">21</context>
-        </context-group>
-        <target>添加到条件</target>
-      </trans-unit>
       <trans-unit id="common.add-variation" datatype="html">
         <source>Add variation</source>
         <context-group purpose="location">
@@ -1366,7 +1346,7 @@
         <source>Serve</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
-          <context context-type="linenumber">37</context>
+          <context context-type="linenumber">39</context>
         </context-group>
         <target>返回</target>
       </trans-unit>
@@ -1374,7 +1354,7 @@
         <source>Dispatch by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/describe-rule/describe-rule.component.ts</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">45</context>
         </context-group>
         <target>基于属性</target>
       </trans-unit>
@@ -1429,22 +1409,6 @@
           <context context-type="linenumber">16</context>
         </context-group>
         <target>移除出返回值</target>
-      </trans-unit>
-      <trans-unit id="common.remove-values" datatype="html">
-        <source>Remove value(s)</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
-          <context context-type="linenumber">17</context>
-        </context-group>
-        <target>将值</target>
-      </trans-unit>
-      <trans-unit id="common.from-condition" datatype="html">
-        <source>from condition</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/change-list/instructions/remove-values-from-rule-condition/remove-values-from-rule-condition.component.ts</context>
-          <context context-type="linenumber">21</context>
-        </context-group>
-        <target>从条件中删除</target>
       </trans-unit>
       <trans-unit id="common.remove-variation" datatype="html">
         <source>Remove variation</source>
@@ -1582,7 +1546,7 @@
         <source>Update condition</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-rule-condition/update-rule-condition.component.ts</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">15</context>
         </context-group>
         <target>更新条件</target>
       </trans-unit>
@@ -1593,6 +1557,38 @@
           <context context-type="linenumber">18</context>
         </context-group>
         <target>更新返回值为</target>
+      </trans-unit>
+      <trans-unit id="common.add-values" datatype="html">
+        <source>Add value(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <target>将</target>
+      </trans-unit>
+      <trans-unit id="common.remove-values" datatype="html">
+        <source>Remove value(s)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <target>将值</target>
+      </trans-unit>
+      <trans-unit id="common.to-condition" datatype="html">
+        <source>to condition</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>添加到条件</target>
+      </trans-unit>
+      <trans-unit id="common.from-condition" datatype="html">
+        <source>from condition</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/change-list/instructions/update-values-of-rule-condition/update-values-of-rule-condition.component.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <target>从条件中删除</target>
       </trans-unit>
       <trans-unit id="common.update-variation-type-to" datatype="html">
         <source>Update variation type to</source>
@@ -1738,7 +1734,7 @@
         <source>Schedule changes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
-          <context context-type="linenumber">56</context>
+          <context context-type="linenumber">54</context>
         </context-group>
         <target>计划变更</target>
       </trans-unit>
@@ -1746,7 +1742,7 @@
         <source>Review and save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
