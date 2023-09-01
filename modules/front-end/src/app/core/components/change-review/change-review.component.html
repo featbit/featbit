@@ -32,7 +32,7 @@
               <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
             </nz-form-control>
           </nz-form-item>
-          <ng-container *ngIf="refType === RefTypeEnum.Flag">
+          <ng-container *ngIf="environment.enableSchedule && refType === RefTypeEnum.Flag">
             <div class="section-title with-extension-icon">
               <span i18n="@@common.schedule">Schedule</span>
               <span *ngIf="!hasSchedule"

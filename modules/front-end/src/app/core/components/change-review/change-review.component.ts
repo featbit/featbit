@@ -4,6 +4,7 @@ import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
 import { differenceInCalendarDays, setHours, setSeconds, setMinutes } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
+import { environment } from "src/environments/environment";
 import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
 
@@ -134,5 +135,6 @@ export class ChangeReviewComponent implements OnChanges {
     this.hasSchedule = !this.hasSchedule;
   }
 
+  protected readonly environment = environment;
   protected readonly RefTypeEnum = RefTypeEnum;
 }
