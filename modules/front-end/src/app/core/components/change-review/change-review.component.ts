@@ -8,7 +8,6 @@ import { environment } from "src/environments/environment";
 import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
 
-
 @Component({
   selector: 'change-review',
   templateUrl: './change-review.component.html',
