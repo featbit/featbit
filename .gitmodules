@@ -1,0 +1,3 @@
+[submodule "modules/oauth-agent"]
+	path = modules/oauth-agent
+	url = https://github.com/featbit/oauth-agent-dotnet
