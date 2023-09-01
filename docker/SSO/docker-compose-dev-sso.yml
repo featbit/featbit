@@ -167,43 +167,31 @@ services:
       - ./infra/step-ca/data:/home/step
 
   keycloak:
-    # image: docker.io/bitnami/keycloak:21.1.2-debian-11-r5
     image: featbit/keycloak:dev
     build:
       context: .
       dockerfile: /infra/keycloak/Dockerfile
     container_name: keycloak
-    # hostname: keycloak
-    # domainname: featbit.example
     ports:
       # - "8080:8080"
       - "8443:443"
     environment:
       - KEYCLOAK_CREATE_ADMIN_USER=true
       - KEYCLOAK_ENABLE_HTTPS=true
-      # - KEYCLOAK_HTTPS_USE_PEM=true
-      # - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
-      # - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
-      - KEYCLOAK_HTTPS_TRUST_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example.jks
-      - KEYCLOAK_HTTPS_TRUST_STORE_PASSWORD=supersecret123
-      - KEYCLOAK_HTTPS_KEY_STORE_FILE=/opt/bitnami/keycloak/certs/featbit-example.jks
-      - KEYCLOAK_HTTPS_KEY_STORE_PASSWORD=supersecret123
+       - KEYCLOAK_HTTPS_USE_PEM=true
+       - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
+       - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
       - KEYCLOAK_HTTP_PORT=80
       - KEYCLOAK_HTTPS_PORT=443
       - KEYCLOAK_EXTRA_ARGS_PREPENDED=--verbose
-    # command: ["tail", "-f", "/dev/null"] # to keep container running for debugging
-
     depends_on:
       - postgresql
     networks:
       featbit-network:
         aliases:
           - keycloak.featbit.example
-      
     volumes:
      - ./modules/oauth-agent/certs/step-ca:/opt/bitnami/keycloak/certs
-    #  - ./infra/keycloak/keycloak.conf:/opt/bitnami/keycloak/conf/keycloak.conf
-    # - /path/to/init-scripts:/docker-entrypoint-initdb.d
 
   nginx:
     image: featbit/nginx:dev
@@ -230,3 +218,4 @@ networks:
 volumes:
   mongodb:
   redis:
+  postgres:
