@@ -8,7 +8,7 @@
         <ng-container i18n="@@ff.components.details.targeting.settings-ineffective-warning">Following settings won't be effective until you turn the flag on</ng-container>
       </div>
       <div class="action-btns">
-        <button class="pending-changes" nzType="default" (click)="openPendingChangesDrawer()">
+        <button class="pending-changes" nzType="default" *ngIf="environment.enableSchedule" (click)="openPendingChangesDrawer()">
           <i nz-icon nzType="field-time" nzTheme="outline"></i>
           <span>{{pendingChangesList.length}}</span>
         </button>
@@ -21,9 +21,9 @@
         </button>
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
-            <li nz-menu-item
+            <li nz-menu-item *ngIf="environment.enableSchedule"
                 (click)="onReviewChanges(validationErrorTpl, reviewModalKindEnum.Schedule)"
-                i18n="ff.components.details.targeting.schedule-changes">Schedule changes</li>
+                i18n="common.schedule-changes">Schedule changes</li>
             <li nz-menu-item
                 (click)="onSetExptRulesClick()"
                 i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</li>
