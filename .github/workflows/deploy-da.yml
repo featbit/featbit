@@ -18,8 +18,7 @@ jobs:
       ecs_service: featbit-prod-da-ecs-service
       ecs_cluster: featbit-prod-ecs-cluster
       region: cn-northwest-1
-      REDIS_HOST: ec2-68-79-9-34.cn-northwest-1.compute.amazonaws.com.cn
-      REDIS_PORT: 6379
+      REDIS_URL: redis://ec2-68-79-9-34.cn-northwest-1.compute.amazonaws.com.cn:6379
       MONGO_URI: mongodb://admin:password@ec2-68-79-9-34.cn-northwest-1.compute.amazonaws.com.cn:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: ec2-68-79-9-34.cn-northwest-1.compute.amazonaws.com.cn
