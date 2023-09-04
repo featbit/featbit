@@ -21,7 +21,7 @@
             <span>{{instructions.length}} </span>
             <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
           </p>
-          <change-list-v2 class="change-list" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list-v2>
+          <change-list class="change-list" *ngIf="instructions.length > 0" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list>
         </div>
       </section>
       <section class="form-wraper" >
