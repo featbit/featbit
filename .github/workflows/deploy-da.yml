@@ -53,8 +53,7 @@ jobs:
         run: |
           echo $GITHUB_WORKSPACE
           docker build \
-          --build-arg=REDIS_HOST=${REDIS_HOST} \
-          --build-arg=REDIS_PORT=${REDIS_PORT} \
+          --build-arg=REDIS_URL=${REDIS_URL} \
           --build-arg=MONGO_URI=${MONGO_URI} \
           --build-arg=MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE} \
           --build-arg=MONGO_HOST=${MONGO_HOST} \
