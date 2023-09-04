@@ -1,0 +1,3 @@
+basicConstraints=CA:FALSE
+subjectAltName=DNS:*.featbit.example
+extendedKeyUsage=serverAuth

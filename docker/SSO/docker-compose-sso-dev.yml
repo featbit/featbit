@@ -146,67 +146,45 @@ services:
     networks:
       - featbit-network
     volumes:
-      - ./infra/postgresql/data:/bitnami/postgresql
-
-  ca:
-    image: smallstep/step-ca:0.24.2
-    container_name: step-ca
-    restart: unless-stopped
-    ports:
-      - 9000:9000
-    networks:
-      - featbit-network
-    environment:
-     - DOCKER_STEPCA_INIT_NAME=featbit-dev-ca
-     - DOCKER_STEPCA_INIT_DNS_NAMES=localhost, ca.featbit.example, $(hostname -f)
-     - DOCKER_STEPCA_INIT_REMOTE_MANAGEMENT=true
-     - DOCKER_STEPCA_INIT_PASSWORD=supersecret123
-     - DEFAULT_CERT_VALIDITY=${DEFAULT_CERT_VALIDITY:-720h}
-     - MAX_CERT_VALIDITY=${MAX_CERT_VALIDITY:-2160h}
-    volumes:
-      - ./infra/step-ca/data:/home/step
+      - postgres:/bitnami/postgresql
 
   keycloak:
-    image: featbit/keycloak:dev
-    build:
-      context: .
-      dockerfile: /infra/keycloak/Dockerfile
+    image: keycloak/keycloak:22.0
     container_name: keycloak
     ports:
-      # - "8080:8080"
-      - "8443:443"
+      - "8080:8080"
     environment:
-      - KEYCLOAK_CREATE_ADMIN_USER=true
-      - KEYCLOAK_ENABLE_HTTPS=true
-       - KEYCLOAK_HTTPS_USE_PEM=true
-       - KEYCLOAK_HTTPS_CERTIFICATE_FILE=/opt/bitnami/keycloak/certs/featbit-example-wildcard.pem
-       - KEYCLOAK_HTTPS_CERTIFICATE_KEY_FILE=/opt/bitnami/keycloak/certs/featbit-private.key
-      - KEYCLOAK_HTTP_PORT=80
-      - KEYCLOAK_HTTPS_PORT=443
-      - KEYCLOAK_EXTRA_ARGS_PREPENDED=--verbose
+      # ref: https://www.keycloak.org/server/all-config
+      - KEYCLOAK_DB=dev-file
+      - KEYCLOAK_CACHE=local
+      - KEYCLOAK_PROXY=edge
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=password
+      - KEYCLOAK_HOSTNAME=keycloak.featbit.example
+      - KEYCLOAK_HTTP_ENABLED=true
+      - KEYCLOAK_HTTP_RELATIVE_PATH=/
+      - KEYCLOAK_HTTP_PORT=8080
+      - KEYCLOAK_HOSTNAME_STRICT=false
+    command:
+      - start-dev
     depends_on:
       - postgresql
     networks:
       featbit-network:
         aliases:
           - keycloak.featbit.example
-    volumes:
-     - ./modules/oauth-agent/certs/step-ca:/opt/bitnami/keycloak/certs
 
   nginx:
-    image: featbit/nginx:dev
-    build:
-      context: .
-      dockerfile: /infra/nginx/Dockerfile
-    container_name: nginx-auth-agent-proxy
+    image: nginx:latest
+    container_name: nginx
     ports:
       - "80:80"
       - "443:443"
     networks:
       - featbit-network
     volumes:
-      - ./infra/nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf 
-      - ./modules/oauth-agent/certs/step-ca:/certs
+      - ./docker/SSO/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf
+      - ./docker/SSO/certs:/certs
 
 networks:
     featbit-network:
