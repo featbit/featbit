@@ -29,7 +29,7 @@ mkdir certs && cd certs
    openssl req -newkey rsa:2048 -nodes -keyout localCA.key -x509 -days 365 -out localCA.crt -subj "/C=lo/ST=local/L=local/O=local-ca/OU=local-ca/CN=FeatBit CA, LLC/emailAddress=featbit@contact.com"
    ```
 2. Generate Server Private Key & CSR
-    ```bash[localCA.srl](certs%2FlocalCA.srl)
+    ```bash
     openssl req -newkey rsa:2048 -nodes -keyout localServer.key -out localServer.csr -extensions v3_ca -subj "/C=lo/ST=local/L=local/O=local-server/OU=local-server/CN=FeatBit, LLC/emailAddress=featbit@contact.com"
     ```
 3. Create an extensions file named: `domain.ext`
