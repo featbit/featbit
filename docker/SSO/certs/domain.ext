@@ -1,0 +1,7 @@
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+subjectAltName = @alt_names
+extendedKeyUsage=serverAuth
+[alt_names]
+DNS.1 = *.featbit.example
+DNS.2 = featbit.example

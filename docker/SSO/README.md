@@ -24,54 +24,39 @@ cd /featbit/docker/SSO
 mkdir certs && cd certs
 ```
 
-Use the following information **while requesting a certificate**
-
-- Country Name: lo
-- State or Province Name: local
-- Locality Name: local
-- Organization Name: local
-- Organizational Unit Name: local
-- Common Name: featbit.example
-- Email Address: featbit@contact.com
-
-1. Create the CA Private Key
-    ```bash
-    openssl genrsa -des3 -out CAPrivate.key 2048
-    ```
-2. Generate the CA Root certificate
-    ```bash
-    openssl req -x509 -new -nodes -key CAPrivate.key -sha256 -days 365 -out CAPrivate.pem
-    ```
-3. Create a Private Key
-    ```bash
-    openssl genrsa -out ServerPrivate.key 2048
-    ```
-4. Generate the CSR
+1. Generate CA Private Key & Certificate
    ```bash
-   openssl req -new -key ServerPrivate.key -extensions v3_ca -out ServerPrivate.csr
+   openssl req -newkey rsa:2048 -nodes -keyout localCA.key -x509 -days 365 -out localCA.crt -subj "/C=lo/ST=local/L=local/O=local-ca/OU=local-ca/CN=FeatBit CA, LLC/emailAddress=featbit@contact.com"
    ```
-5. Create an extensions file named: `openssl.ss.cnf`
+2. Generate Server Private Key & CSR
+    ```bash[localCA.srl](certs%2FlocalCA.srl)
+    openssl req -newkey rsa:2048 -nodes -keyout localServer.key -out localServer.csr -extensions v3_ca -subj "/C=lo/ST=local/L=local/O=local-server/OU=local-server/CN=FeatBit, LLC/emailAddress=featbit@contact.com"
+    ```
+3. Create an extensions file named: `domain.ext`
    ```
+   authorityKeyIdentifier=keyid,issuer
    basicConstraints=CA:FALSE
-   subjectAltName=DNS:*.featbit.example
+   subjectAltName = @alt_names
    extendedKeyUsage=serverAuth
+   [alt_names]
+   DNS.1 = *.featbit.example
+   DNS.2 = featbit.example
    ```
-6. Generate the Certificate using the CSR
+4. Generate the Certificate using the CSR
    ```bash
-   openssl x509 -req -in ServerPrivate.csr -CA CAPrivate.pem -CAkey CAPrivate.key -CAcreateserial -extfile openssl.ss.cnf -out ServerPrivate.crt -days 365 -sha256
+   openssl x509 -req -in localServer.csr -CA localCA.crt -CAkey localCA.key -CAcreateserial -extfile domain.ext -out localServer.crt -days 365 -sha256
    ```
-
 After running these commands, the following files will be created:
 
-- CAPrivate.key
-- CAPrivate.pem
-- CAPrivate.srl
-- openssl.ss.cnf
-- ServerPrivate.crt
-- ServerPrivate.csr
-- ServerPrivate.key
+- localCA.key
+- localCA.crt
+- localCA.srl
+- domain.ext
+- localServer.crt
+- localServer.csr
+- localServer.key
 
-Then you need to **install the CA certificate `CAPrivate.pem` to your system**.
+Then you need to **install the CA certificate `localCA.crt` to your system**.
 
 ## Run
 

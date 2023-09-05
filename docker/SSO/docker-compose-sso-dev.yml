@@ -14,9 +14,9 @@ services:
     depends_on:
       - api-server
       - demo-dino-game-vue
-      - evaluation-server      
-    ports:
-      - "8081:80"
+      - evaluation-server
+    expose:
+      - 80
     networks:
       - featbit-network
 
@@ -30,8 +30,8 @@ services:
       - mongodb
       - redis
       - da-server
-    ports:
-      - "5000:5000"
+    expose:
+      - 5000
     networks:
       - featbit-network
 
@@ -44,8 +44,8 @@ services:
     depends_on:
       - mongodb
       - redis
-    ports:
-      - "5100:5100"
+    expose:
+      - 5100
     networks:
       - featbit-network
 
@@ -58,8 +58,8 @@ services:
     depends_on:
       - mongodb
       - redis
-    ports:
-      - "8200:80"
+    expose:
+      - 80
     networks:
       - featbit-network
     environment:
@@ -74,8 +74,8 @@ services:
     container_name: demo-dino-game-vue
     networks:
       - featbit-network
-    ports:
-      - "5173:80"
+    expose:
+      - 80
     environment:
       - VIRTUAL_HOST=demo.featbit.example
       - VIRTUAL_PORT=5173
@@ -88,8 +88,8 @@ services:
       dockerfile: ./deploy/Dockerfile
     networks:
       - featbit-network
-    ports:
-      - "8082:8082"
+    expose:
+      - 8082
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - PORT=8082
@@ -136,23 +136,11 @@ services:
     volumes:
       - redis:/bitnami/redis/data
 
-  postgresql:
-    image: docker.io/bitnami/postgresql:latest
-    container_name: postgresql
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-      - POSTGRESQL_USERNAME=bn_keycloak
-      - POSTGRESQL_DATABASE=bitnami_keycloak
-    networks:
-      - featbit-network
-    volumes:
-      - postgres:/bitnami/postgresql
-
   keycloak:
     image: keycloak/keycloak:22.0
     container_name: keycloak
-    ports:
-      - "8080:8080"
+    expose:
+      - 8080
     environment:
       # ref: https://www.keycloak.org/server/all-config
       - KEYCLOAK_DB=dev-file
@@ -167,8 +155,6 @@ services:
       - KEYCLOAK_HOSTNAME_STRICT=false
     command:
       - start-dev
-    depends_on:
-      - postgresql
     networks:
       featbit-network:
         aliases:
@@ -183,7 +169,7 @@ services:
     networks:
       - featbit-network
     volumes:
-      - ./docker/SSO/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf
+      - ./docker/SSO/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/SSO/certs:/certs
 
 networks:
@@ -196,4 +182,3 @@ networks:
 volumes:
   mongodb:
   redis:
-  postgres:
