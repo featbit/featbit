@@ -22,16 +22,14 @@ export class PendingChangesDrawerComponent {
   @Input() visible: boolean = false;
   @Input()
   set pendingChangesList(data: IPendingChanges[]) {
-    data.map((item: IPendingChanges) => {
-      this.changeCategoriesList.push({
+    this.changeCategoriesList = data.map((item: IPendingChanges) => ({
         createdAt: item.createdAt,
         scheduledTime: item.scheduledTime,
         creator: item.creatorName,
         previous: item.dataChange.previous,
         current: item.dataChange.current,
         instructions: item.instructions,
-      });
-    });
+    }));
   }
   @Output() close: EventEmitter<any> = new EventEmitter();
 
