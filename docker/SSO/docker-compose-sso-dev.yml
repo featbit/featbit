@@ -142,19 +142,15 @@ services:
     expose:
       - 8080
     environment:
-      # ref: https://www.keycloak.org/server/all-config
-      - KEYCLOAK_DB=dev-file
-      - KEYCLOAK_CACHE=local
-      - KEYCLOAK_PROXY=edge
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=password
-      - KEYCLOAK_HOSTNAME=keycloak.featbit.example
-      - KEYCLOAK_HTTP_ENABLED=true
-      - KEYCLOAK_HTTP_RELATIVE_PATH=/
-      - KEYCLOAK_HTTP_PORT=8080
-      - KEYCLOAK_HOSTNAME_STRICT=false
     command:
+      # ref: https://www.keycloak.org/server/all-config
       - start-dev
+      - --proxy=edge
+      - --hostname=keycloak.featbit.example
+      - --hostname-strict=false
+      - --hostname-strict-https=false
     networks:
       featbit-network:
         aliases:
