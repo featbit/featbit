@@ -3,14 +3,11 @@
 ## Add Hosts
 
 ```
-127.0.0.1       featbit.example
-127.0.0.1       keycloak.featbit.example
-127.0.0.1       api.featbit.example
-127.0.0.1       demo.featbit.example
-127.0.0.1       eval.featbit.example
-127.0.0.1       nginx-auth-agent-proxy.featbit.example
-127.0.0.1       ca.featbit.example
-127.0.0.1       spa.featbit.example
+127.0.0.1 featbit.example
+127.0.0.1 keycloak.featbit.example
+127.0.0.1 api.featbit.example
+127.0.0.1 demo.featbit.example
+127.0.0.1 eval.featbit.example
 ```
 
 ## SSL/TLS
@@ -64,3 +61,7 @@ Then you need to **install the CA certificate `localCA.crt` to your system**.
 cd /featbit
 docker compose --project-directory . -f ./docker/SSO/docker-compose-sso-dev.yml up -d
 ```
+
+## Keycloak
+
+- Create realm `featbit`
