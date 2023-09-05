@@ -1,8 +1,16 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { IInstruction } from "@core/components/change-list/instructions/types";
+import { ActivatedRoute } from "@angular/router";
+import { FeatureFlagService } from "@services/feature-flag.service";
+import { SegmentService } from "@services/segment.service";
+import { EnvUserService } from "@services/env-user.service";
+import { EnvUserPropService } from "@services/env-user-prop.service";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { MessageQueueService } from "@services/message-queue.service";
 
 interface IChangeCategory {
+  id: string;
   createdAt: string;
   scheduledTime: string;
   creator: string;
@@ -23,15 +31,34 @@ export class PendingChangesDrawerComponent {
   @Input()
   set pendingChangesList(data: IPendingChanges[]) {
     this.changeCategoriesList = data.map((item: IPendingChanges) => ({
-        createdAt: item.createdAt,
-        scheduledTime: item.scheduledTime,
-        creator: item.creatorName,
-        previous: item.dataChange.previous,
-        current: item.dataChange.current,
-        instructions: item.instructions,
+      id: item.id,
+      createdAt: item.createdAt,
+      scheduledTime: item.scheduledTime,
+      creator: item.creatorName,
+      previous: item.dataChange.previous,
+      current: item.dataChange.current,
+      instructions: item.instructions,
     }));
   }
   @Output() close: EventEmitter<any> = new EventEmitter();
+  @Output() onItemRemoved: EventEmitter<any> = new EventEmitter();
+  constructor(
+    private featureFlagService: FeatureFlagService,
+    private msg: NzMessageService
+  ) {
+  }
+
+  removeChangeCategory(scheduleId: string) {
+    this.featureFlagService.deleteSchedule(scheduleId).subscribe({
+      next: () => {
+        this.onItemRemoved.emit(scheduleId);
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+      },
+      error: () => {
+        this.msg.error($localize`:@@common.operation-failed:Operation failed`);
+      }
+    });
+  }
 
   onClose() {
     this.close.emit();

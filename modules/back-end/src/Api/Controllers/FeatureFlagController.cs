@@ -56,6 +56,21 @@ public class FeatureFlagController : ApiControllerBase
         var pendingChangesList = await Mediator.Send(request);
         return Ok(pendingChangesList);
     }
+    
+    /// <summary>
+    /// Delete a flag schedule
+    /// </summary>
+    [HttpDelete("schedules/{scheduleId:guid}")]
+    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid scheduleId)
+    {
+        var request = new DeleteFlagSchedule
+        {
+            ScheduleId = scheduleId
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 
     /// <summary>
     /// Get a feature flag
