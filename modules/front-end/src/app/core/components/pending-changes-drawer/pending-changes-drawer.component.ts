@@ -40,8 +40,7 @@ export class PendingChangesDrawerComponent {
   constructor(
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService
-  ) {
-  }
+  ) { }
 
   removeSchedule(scheduleId: string) {
     this.featureFlagService.deleteSchedule(scheduleId).subscribe({
