@@ -8,7 +8,7 @@ public class FlagScheduleService : MongoDbService<FlagSchedule>, IFlagScheduleSe
     public FlagScheduleService(MongoDbClient mongoDb) : base(mongoDb)
     {
     }
-    
+
     public async Task DeleteAsync(Guid id)
     {
         await Collection.DeleteOneAsync(x => x.Id == id);

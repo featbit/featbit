@@ -8,10 +8,8 @@ public class DeleteFlagSchedule : IRequest<bool>
 public class DeleteFlagScheduleHandler : IRequestHandler<DeleteFlagSchedule, bool>
 {
     private readonly IFlagScheduleService _service;
-    
-    public DeleteFlagScheduleHandler(
-        IFlagScheduleService service
-        )
+
+    public DeleteFlagScheduleHandler(IFlagScheduleService service)
     {
         _service = service;
     }
