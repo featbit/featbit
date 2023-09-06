@@ -62,6 +62,6 @@ cd /featbit
 docker compose --project-directory . -f ./docker/SSO/docker-compose-sso-dev.yml up -d
 ```
 
-## Keycloak
+## OAuth Agent
 
-- Create realm `featbit`
+1. Create a test oidc client on keycloak then replace `CLIENT_ID` and `CLIENT_SECRET` environment variable with your own values in `docker-compose-sso-dev.yml` file.

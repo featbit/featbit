@@ -93,10 +93,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - PORT=8082
-      - CLIENT_ID=featbit
-      - CLIENT_SECRET=OD0RpLEYpqU6CmvzisHvUv4XK015gcdn
-      - REDIRECT_URI=https://featbit.example/spa
-      - POST_LOGOUT_REDIRECT_URI=https://featbit.example/
+      - CLIENT_ID=test-oidc-client
+      - CLIENT_SECRET=kxuLTKlMIFL9ticDmWO3kFhzl7oOKqKi
+      - REDIRECT_URI=https://featbit.example
+      - POST_LOGOUT_REDIRECT_URI=https://featbit.example
       - SCOPE=openid profile email
       - TRUSTED_WEB_ORIGIN=https://featbit.example
       - CORS_ENABLED=false
