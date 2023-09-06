@@ -1,13 +1,8 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { IInstruction } from "@core/components/change-list/instructions/types";
-import { ActivatedRoute } from "@angular/router";
 import { FeatureFlagService } from "@services/feature-flag.service";
-import { SegmentService } from "@services/segment.service";
-import { EnvUserService } from "@services/env-user.service";
-import { EnvUserPropService } from "@services/env-user-prop.service";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { MessageQueueService } from "@services/message-queue.service";
 
 interface IChangeCategory {
   id: string;
