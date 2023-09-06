@@ -358,7 +358,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">77</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
@@ -550,7 +550,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/pending-changes-drawer/pending-changes-drawer.component.ts</context>
-          <context context-type="linenumber">55</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.ts</context>
@@ -1578,7 +1578,7 @@
         <source>The following changes may affects the insights data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">14</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <target>以下改动可能会影响到统计数据</target>
       </trans-unit>
@@ -1586,7 +1586,7 @@
         <source>Changes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">18</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
@@ -1598,7 +1598,7 @@
         <source>changes to submit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">22</context>
+          <context context-type="linenumber">26</context>
         </context-group>
         <target>个待提交改动</target>
       </trans-unit>
@@ -1606,11 +1606,11 @@
         <source>Comment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">32</context>
+          <context context-type="linenumber">36</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
@@ -1630,7 +1630,7 @@
         <source>Schedule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">37</context>
+          <context context-type="linenumber">41</context>
         </context-group>
         <target>计划变更</target>
       </trans-unit>
@@ -1638,11 +1638,11 @@
         <source>Title</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">45</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">51</context>
         </context-group>
         <target>标题</target>
       </trans-unit>
@@ -1650,7 +1650,7 @@
         <source>Scheduled time</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">55</context>
         </context-group>
         <target>计划时间</target>
       </trans-unit>
@@ -1658,7 +1658,7 @@
         <source>Cancel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
@@ -2130,7 +2130,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/pending-changes-drawer/pending-changes-drawer.component.ts</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">52</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
