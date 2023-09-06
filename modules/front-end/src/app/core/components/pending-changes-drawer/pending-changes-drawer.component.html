@@ -13,7 +13,7 @@
         <nz-list-item *ngFor="let changeCategories of changeCategoriesList">
           <ng-template #extraTemplate>
             <a
-              style="color: #717D8A"
+              class="remove-item"
               i18n-nz-popconfirm="@@common.simple-remove-confirm"
               nz-popconfirm="Are you sure to remove it?"
               (nzOnConfirm)="removeSchedule(changeCategories.id)"
