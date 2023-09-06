@@ -31,6 +31,10 @@ export const authGuard = async (
 
   // set user organizations
   const organization = await organizationService.setUserOrganizations();
+  if (!organization) {
+    identityService.doLogoutUser(false);
+    return false;
+  }
 
   // init user permission
   await permissionService.initUserPolicies(auth.id);
