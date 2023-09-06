@@ -48,7 +48,7 @@ export class PendingChangesDrawerComponent {
   ) {
   }
 
-  removeChangeCategory(scheduleId: string) {
+  removeSchedule(scheduleId: string) {
     this.featureFlagService.deleteSchedule(scheduleId).subscribe({
       next: () => {
         this.onItemRemoved.emit(scheduleId);

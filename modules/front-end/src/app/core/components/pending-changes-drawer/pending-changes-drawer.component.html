@@ -12,7 +12,17 @@
       <nz-list nzItemLayout="horizontal">
         <nz-list-item *ngFor="let changeCategories of changeCategoriesList">
           <ng-template #extraTemplate>
-            <span class="remove-item" (click)="removeChangeCategory(changeCategories.id)">Remove</span>
+            <a
+              style="color: #717D8A"
+              i18n-nz-popconfirm="@@common.simple-remove-confirm"
+              nz-popconfirm="Are you sure to remove it?"
+              (nzOnConfirm)="removeSchedule(changeCategories.id)"
+              [nzIcon]="iconTplDelete">
+              <ng-container i18n="@@common.remove">Remove</ng-container>
+            </a>
+            <ng-template #iconTplDelete>
+              <span nz-icon nzType="question-circle" nzTheme="fill"></span>
+            </ng-template>
           </ng-template>
           <ng-template #titleTemplate>
             <div class="title">
