@@ -1,7 +1,11 @@
-<nz-modal [nzWidth]='800' nzClassName="review-modal" [(nzVisible)]="visible"
-          [nzTitle]="title"
-          [nzClosable]="false"
-          (nzOnCancel)="closeModal()">
+<nz-modal
+  nzClassName="review-modal"
+  [nzWidth]='800'
+  nzMaskClosable="false"
+  [(nzVisible)]="visible"
+  [nzTitle]="title"
+  [nzClosable]="false"
+  (nzOnCancel)="closeModal()">
   <ng-container *nzModalContent>
     <div class="">
       <section class="context">

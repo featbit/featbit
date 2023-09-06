@@ -147,4 +147,4 @@
 <app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
   [featureFlag]="featureFlag"></app-expt-rules-drawer>
 
-<pending-changes-drawer [visible]="pendingChangesDrawerVisible" [pendingChangesList]="pendingChangesList" (close)="onPendingChangesDrawerClosed()"></pending-changes-drawer>
+<pending-changes-drawer [visible]="pendingChangesDrawerVisible" [pendingChangesList]="pendingChangesList" (onItemRemoved)="onPendingChangesRemoved($event)" (close)="onPendingChangesDrawerClosed()"></pending-changes-drawer>
