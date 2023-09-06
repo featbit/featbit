@@ -144,6 +144,10 @@ export class TargetingComponent implements OnInit {
     }
   }
 
+  onPendingChangesRemoved(scheduleId: string) {
+    this.pendingChangesList = this.pendingChangesList.filter(x => x.id !== scheduleId);
+  }
+
   openPendingChangesDrawer() {
     this.pendingChangesDrawerVisible = true;
   }
