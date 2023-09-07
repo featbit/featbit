@@ -14,14 +14,12 @@ import {Injectable} from "@angular/core";
 import { IDENTITY_TOKEN } from "@utils/localstorage-keys";
 import {IResponse} from "@shared/types";
 import { getCurrentOrganization } from "@utils/project-env";
-import { OauthAgentService } from "@services/oauth-agent.service";
 
 @Injectable()
 export class RequestResponseInterceptor implements HttpInterceptor {
 
   constructor(
     private message: NzMessageService,
-    private oauthAgent: OauthAgentService,
     private router: Router
   ) { }
 
@@ -32,9 +30,6 @@ export class RequestResponseInterceptor implements HttpInterceptor {
     let newHeaders = request.headers
       .set('Authorization', `Bearer ${token}`)
       .set('Organization', currentOrgId);
-
-    // try add anti-forgery token header
-    this.oauthAgent.tryAddAntiForgeryTokenHeader(newHeaders);
 
     const authedReq = request.clone({
       headers: newHeaders
