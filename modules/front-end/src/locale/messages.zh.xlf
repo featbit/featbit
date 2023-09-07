@@ -4929,6 +4929,14 @@
         </context-group>
         <target>密码</target>
       </trans-unit>
+      <trans-unit id="common.login-with-sso" datatype="html">
+        <source>Login with SSO</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <target>使用 SSO 登录</target>
+      </trans-unit>
       <trans-unit id="common.incorrect-email-or-password" datatype="html">
         <source>Email and/or password incorrect</source>
         <context-group purpose="location">
