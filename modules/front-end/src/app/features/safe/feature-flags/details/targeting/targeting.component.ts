@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IOrganization, IRuleIdDispatchKey } from '@shared/types';
+import { IRuleIdDispatchKey } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
@@ -18,6 +18,7 @@ import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
+import { environment } from "src/environments/environment";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -141,6 +142,10 @@ export class TargetingComponent implements OnInit {
     } catch (err) {
       this.msg.error($localize`:@@common.loading-pending-changes-failed:Loading pending changes failed`);
     }
+  }
+
+  onPendingChangesRemoved(scheduleId: string) {
+    this.pendingChangesList = this.pendingChangesList.filter(x => x.id !== scheduleId);
   }
 
   openPendingChangesDrawer() {
@@ -380,4 +385,6 @@ export class TargetingComponent implements OnInit {
   onDragEnd(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.featureFlag.rules, event.previousIndex, event.currentIndex);
   }
+
+  protected readonly environment = environment;
 }

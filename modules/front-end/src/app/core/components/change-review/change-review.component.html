@@ -1,7 +1,11 @@
-<nz-modal [nzWidth]='800' nzClassName="review-modal" [(nzVisible)]="visible"
-          [nzTitle]="title"
-          [nzClosable]="false"
-          (nzOnCancel)="closeModal()">
+<nz-modal
+  nzClassName="review-modal"
+  [nzWidth]='800'
+  nzMaskClosable="false"
+  [(nzVisible)]="visible"
+  [nzTitle]="title"
+  [nzClosable]="false"
+  (nzOnCancel)="closeModal()">
   <ng-container *nzModalContent>
     <div class="">
       <section class="context">
@@ -21,7 +25,7 @@
             <span>{{instructions.length}} </span>
             <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
           </p>
-          <change-list-v2 class="change-list" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list-v2>
+          <change-list class="change-list" *ngIf="instructions.length > 0" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list>
         </div>
       </section>
       <section class="form-wraper" >
@@ -32,7 +36,7 @@
               <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
             </nz-form-control>
           </nz-form-item>
-          <ng-container *ngIf="refType === RefTypeEnum.Flag">
+          <ng-container *ngIf="environment.enableSchedule && refType === RefTypeEnum.Flag">
             <div class="section-title with-extension-icon">
               <span i18n="@@common.schedule">Schedule</span>
               <span *ngIf="!hasSchedule"
