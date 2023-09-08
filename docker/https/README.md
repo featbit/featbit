@@ -4,7 +4,6 @@
 
 ```
 127.0.0.1 featbit.example
-127.0.0.1 keycloak.featbit.example
 127.0.0.1 api.featbit.example
 127.0.0.1 demo.featbit.example
 127.0.0.1 eval.featbit.example
@@ -17,7 +16,7 @@
 Create `certs` folder
 
 ```bash
-cd /featbit/docker/SSO
+cd /featbit/docker/https
 mkdir certs && cd certs
 ```
 
@@ -59,9 +58,5 @@ Then you need to **install the CA certificate `localCA.crt` to your system**.
 
 ```bash
 cd /featbit
-docker compose --project-directory . -f ./docker/SSO/docker-compose-sso-dev.yml up -d
+docker compose --project-directory . -f ./docker/https/docker-compose-dev.yml up -d
 ```
-
-## OAuth Agent
-
-1. Create a test oidc client on keycloak then replace `CLIENT_ID` and `CLIENT_SECRET` environment variable with your own values in `docker-compose-sso-dev.yml` file.

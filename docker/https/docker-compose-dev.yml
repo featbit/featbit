@@ -80,35 +80,6 @@ services:
       - VIRTUAL_HOST=demo.featbit.example
       - VIRTUAL_PORT=5173
 
-  oauth-agent:
-    image: featbit/oauth-agent:dev
-    container_name: oauth-agent
-    build:
-      context: ./modules/oauth-agent
-      dockerfile: ./deploy/Dockerfile
-    networks:
-      - featbit-network
-    expose:
-      - 8082
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - PORT=8082
-      - CLIENT_ID=test-oidc-client
-      - CLIENT_SECRET=kxuLTKlMIFL9ticDmWO3kFhzl7oOKqKi
-      - REDIRECT_URI=https://featbit.example
-      - POST_LOGOUT_REDIRECT_URI=https://featbit.example
-      - SCOPE=openid profile email
-      - TRUSTED_WEB_ORIGIN=https://featbit.example
-      - CORS_ENABLED=false
-      - COOKIE_NAME_PREFIX=featbit
-      - COOKIE_DOMAIN=featbit.example
-      - COOKIE_ENCRYPTION_KEY=4e4636356d65563e4c73233847503e3b21436e6f7629724950526f4b5e2e4e50
-      - ISSUER=https://keycloak.featbit.example/realms/featbit
-      - AUTHORIZE_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/auth
-      - LOGOUT_ENDPOINT=http://login.example.local/oauth/v2/oauth-session/logout
-      - TOKEN_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/token
-      - USERINFO_ENDPOINT=https://keycloak.featbit.example/realms/featbit/protocol/openid-connect/userinfo
-
   mongodb:
     image: mongo:5.0.14
     container_name: mongodb
@@ -136,26 +107,6 @@ services:
     volumes:
       - redis:/bitnami/redis/data
 
-  keycloak:
-    image: keycloak/keycloak:22.0
-    container_name: keycloak
-    expose:
-      - 8080
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=password
-    command:
-      # ref: https://www.keycloak.org/server/all-config
-      - start-dev
-      - --proxy=edge
-      - --hostname=keycloak.featbit.example
-      - --hostname-strict=false
-      - --hostname-strict-https=false
-    networks:
-      featbit-network:
-        aliases:
-          - keycloak.featbit.example
-
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -165,8 +116,8 @@ services:
     networks:
       - featbit-network
     volumes:
-      - ./docker/SSO/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/SSO/certs:/certs
+      - ./docker/https/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/https/certs:/certs
 
 networks:
     featbit-network:
