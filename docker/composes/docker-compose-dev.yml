@@ -79,7 +79,7 @@ services:
       - MONGO_INITDB_DATABASE=featbit
     volumes:
       - mongodb:/data/db
-      - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - ../../infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
       - featbit-network
 

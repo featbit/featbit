@@ -95,7 +95,7 @@ services:
       - MONGO_INITDB_DATABASE=featbit
     volumes:
       - mongodb:/data/db
-      - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - ../../infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
     networks:
       - featbit-network
 
@@ -235,8 +235,8 @@ services:
     networks:
       - featbit-network
     volumes:
-      - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
-      - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
+      - ../../infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
+      - ../../infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-server:/var/lib/clickhouse
 
   demo-dino-game-vue:
