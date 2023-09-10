@@ -9,11 +9,12 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/sso")]
 public class SsoController : ApiControllerBase
 {
+    private readonly bool _isEnabled;
+
     private readonly OidcClient _client;
     private readonly IUserService _userService;
     private readonly IIdentityService _identityService;
     private readonly IOrganizationService _organizationService;
-    private readonly IConfiguration _configuration;
     private readonly ILogger<SsoController> _logger;
 
     public SsoController(
@@ -24,18 +25,19 @@ public class SsoController : ApiControllerBase
         IConfiguration configuration,
         ILogger<SsoController> logger)
     {
+        _isEnabled = "true".Equals(configuration["SSO:enabled"], StringComparison.CurrentCultureIgnoreCase);
+
         _client = client;
         _userService = userService;
         _identityService = identityService;
         _organizationService = organizationService;
-        _configuration = configuration;
         _logger = logger;
     }
 
     [HttpGet("oidc-authorize-url")]
     public IActionResult GetOidcAuthorizeUrl()
     {
-        if (!Enabled())
+        if (!_isEnabled)
         {
             return BadRequest("SSO not enabled");
         }
@@ -47,7 +49,7 @@ public class SsoController : ApiControllerBase
     [HttpGet("oidc/login")]
     public async Task<IActionResult> OidcLoginByCode(string code)
     {
-        if (!Enabled())
+        if (!_isEnabled)
         {
             return BadRequest("SSO not enabled");
         }
@@ -92,6 +94,5 @@ public class SsoController : ApiControllerBase
     }
 
     [HttpGet("check-enabled")]
-    public bool Enabled() =>
-        "true".Equals(_configuration["SSO:enabled"], StringComparison.CurrentCultureIgnoreCase);
+    public ApiResponse<bool> Enabled() => Ok(_isEnabled);
 }

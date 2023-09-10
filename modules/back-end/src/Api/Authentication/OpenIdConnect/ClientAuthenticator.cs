@@ -35,12 +35,7 @@ public class BasicAuthenticator : IClientAuthenticator
         var client = $"{options.ClientId}:{options.ClientSecret}";
         var authorizationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(client));
 
-        var param = new AuthParameters
-        {
-            HttpContent = httpContent,
-            BasicAuthorizationString = authorizationString
-        };
-
+        var param = new AuthParameters(httpContent, authorizationString);
         return param;
     }
 }
@@ -59,12 +54,7 @@ public class PostAuthenticator : IClientAuthenticator
         };
         var httpContent = new FormUrlEncodedContent(kvs);
 
-        var param = new AuthParameters
-        {
-            HttpContent = httpContent,
-            BasicAuthorizationString = string.Empty
-        };
-
+        var param = new AuthParameters(httpContent, string.Empty);
         return param;
     }
 }
@@ -81,12 +71,7 @@ public class NoneAuthenticator : IClientAuthenticator
         };
         var httpContent = new FormUrlEncodedContent(kvs);
 
-        var param = new AuthParameters
-        {
-            HttpContent = httpContent,
-            BasicAuthorizationString = string.Empty
-        };
-
+        var param = new AuthParameters(httpContent, string.Empty);
         return param;
     }
 }
