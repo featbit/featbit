@@ -37,7 +37,14 @@
         </nz-form-control>
       </nz-form-item>
       <button type="submit" nz-button nzType="primary" class="btn submit-btn" [nzLoading]="isLogin" i18n="@@common.login">Login</button>
-      <button nz-button nzType="default" class="btn sso-btn" i18n="@@common.login-with-sso">Login with SSO</button>
     </form>
+    <button
+      *ngIf="isSsoEnabled === true"
+      (click)="ssoLogin()"
+      nz-button
+      nzType="link"
+      class="btn sso-btn"
+      i18n="@@common.login-with-sso">Login with SSO
+    </button>
   </nz-tab>
 </nz-tabset>

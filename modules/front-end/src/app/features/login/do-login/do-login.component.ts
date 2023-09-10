@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
+import { SsoService } from "@services/sso.service";
 
 @Component({
   selector: 'app-do-login',
@@ -16,18 +16,22 @@ export class DoLoginComponent implements OnInit {
   passwordVisible: boolean = false;
   isLogin: boolean = false;
 
+  isSsoEnabled: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private identityService: IdentityService,
-    private router: Router,
+    private ssoService: SsoService,
     private message: NzMessageService
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
       password: ['', [Validators.required]]
     });
+
+    this.isSsoEnabled = await this.ssoService.isEnabled();
   }
 
   passwordLogin() {
@@ -44,11 +48,15 @@ export class DoLoginComponent implements OnInit {
 
     this.isLogin = true;
 
-    const {identity, password} = this.pwdLoginForm.value;
+    const { identity, password } = this.pwdLoginForm.value;
     this.identityService.loginByEmail(identity, password).subscribe(
       response => this.handleResponse(response),
       error => this.handleError(error)
     )
+  }
+
+  ssoLogin() {
+    window.location.href = this.ssoService.authorizeUrl;
   }
 
   async handleResponse(response) {

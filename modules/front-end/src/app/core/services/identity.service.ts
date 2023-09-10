@@ -20,7 +20,9 @@ import { IResetPasswordResult } from "@features/safe/organizations/types/profile
 })
 export class IdentityService {
 
-  baseUrl: string = `${environment.url}/api/v1/identity`
+  get baseUrl() {
+    return `${environment.url}/api/v1/identity`;
+  }
 
   constructor(
     private http: HttpClient,
