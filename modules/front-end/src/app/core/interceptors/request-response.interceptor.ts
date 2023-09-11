@@ -27,12 +27,10 @@ export class RequestResponseInterceptor implements HttpInterceptor {
     const token = localStorage.getItem(IDENTITY_TOKEN);
     const currentOrgId = getCurrentOrganization()?.id ?? '';
 
-    let newHeaders = request.headers
-      .set('Authorization', `Bearer ${token}`)
-      .set('Organization', currentOrgId);
-
     const authedReq = request.clone({
-      headers: newHeaders
+      headers: request.headers
+        .set('Authorization', `Bearer ${token}`)
+        .set('Organization', currentOrgId)
     });
 
     const excludeUrls = ['/login-by-email', '/oidc/login'];
