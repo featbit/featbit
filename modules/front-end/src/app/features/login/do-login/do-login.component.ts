@@ -19,6 +19,7 @@ export class DoLoginComponent implements OnInit {
 
   isSsoEnabled: boolean = false;
   isSpinning: boolean = false;
+  ssoAuthorizeUrl: string;
 
   constructor(
     private fb: FormBuilder,
@@ -35,6 +36,7 @@ export class DoLoginComponent implements OnInit {
     });
 
     this.isSsoEnabled = await this.ssoService.isEnabled();
+    this.ssoAuthorizeUrl = this.ssoService.authorizeUrl;
     this.subscribeSsoLogin();
   }
 
@@ -75,10 +77,6 @@ export class DoLoginComponent implements OnInit {
     this.isLogin = false;
 
     this.message.error($localize `:@@common.login-error:Error occurred, please contact the support.`);
-  }
-
-  ssoLogin() {
-    window.location.href = this.ssoService.authorizeUrl;
   }
 
   subscribeSsoLogin() {

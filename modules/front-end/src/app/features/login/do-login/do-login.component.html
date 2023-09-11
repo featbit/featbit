@@ -1,4 +1,4 @@
-<nz-spin [nzSpinning]="isSpinning" [nzDelay]="500">
+<nz-spin [nzSpinning]="isSpinning">
   <nz-tabset class="no-bottom-line">
     <nz-tab i18n-nzTitle="@@common.login" nzTitle="Login">
       <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
@@ -39,14 +39,14 @@
         </nz-form-item>
         <button type="submit" nz-button nzType="primary" class="btn submit-btn" [nzLoading]="isLogin" i18n="@@common.login">Login</button>
       </form>
-      <button
+      <a
         *ngIf="isSsoEnabled === true"
-        (click)="ssoLogin()"
+        [href]="ssoAuthorizeUrl"
         nz-button
         nzType="link"
         class="btn sso-btn"
         i18n="@@common.login-with-sso">Login with SSO
-      </button>
+      </a>
     </nz-tab>
   </nz-tabset>
 </nz-spin>
