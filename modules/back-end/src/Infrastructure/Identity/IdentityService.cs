@@ -86,7 +86,10 @@ public class IdentityService : IIdentityService
 
     public async Task<RegisterResult> RegisterByEmailAsync(string email, string password)
     {
-        var hashedPwd = _passwordHasher.HashPassword(null!, password);
+        var hashedPwd = string.IsNullOrWhiteSpace(password)
+            ? string.Empty
+            : _passwordHasher.HashPassword(null!, password);
+
         var user = new User(email, hashedPwd);
 
         await _store.AddAsync(user);

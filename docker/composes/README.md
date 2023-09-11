@@ -26,19 +26,19 @@ docker run -d -p 9000:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=ad
 4. Set the client's `Web Origins` to `http://localhost:8081/*`
 5. Enable **Client authentication**
 6. Create a user
-7. Add the following config to your Api projects' appsetting.json
+7. Replace the following config with your own value for Api projects' appsetting.json
   ```json
   "SSO": {
     "enabled": true,
     "OIDC": {
       "clientId": "test-oidc-client",
       "clientSecret": "tr8XwUrWo8U2wdJFb7EZ5HbqVWZEns5V",
-      "redirectUri": "http://localhost:8081/sso",
+      "redirectUri": "http://localhost:4200/login?sso-logged-in=true",
       "tokenEndpoint": "http://localhost:9000/realms/featbit/protocol/openid-connect/token",
-      "tokenEndpointAuthMethod": "client_secret_post",
+      "clientAuthenticationMethod": "client_secret_post",
       "authorizationEndpoint": "http://localhost:9000/realms/featbit/protocol/openid-connect/auth",
       "userEmailClaim": "email",
       "scope": "openid profile email"
     }
-  }
+}
   ```

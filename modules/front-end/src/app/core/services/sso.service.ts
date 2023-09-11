@@ -21,4 +21,8 @@ export class SsoService {
   isEnabled(): Promise<boolean> {
     return firstValueFrom(this.http.get<boolean>(`${this.baseUrl}/check-enabled`));
   }
+
+  oidcLogin(code: string) {
+    return this.http.post(`${this.baseUrl}/oidc/login`, { code });
+  }
 }

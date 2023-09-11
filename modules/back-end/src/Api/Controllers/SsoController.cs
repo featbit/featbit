@@ -1,4 +1,5 @@
 using Api.Authentication.OpenIdConnect;
+using Application.Identity;
 using Application.Services;
 using Domain.Organizations;
 using Domain.Policies;
@@ -46,23 +47,22 @@ public class SsoController : ApiControllerBase
         return Redirect(url);
     }
 
-    [HttpGet("oidc/login")]
-    public async Task<IActionResult> OidcLoginByCode(string code)
+    [HttpPost("oidc/login")]
+    public async Task<ApiResponse<LoginToken>> OidcLoginByCode(LoginByOidcCode request)
     {
         if (!_isEnabled)
         {
-            return BadRequest("SSO not enabled");
+            return Error<LoginToken>("SSO not enabled");
         }
-
-        var success = false;
-        var token = string.Empty;
 
         try
         {
-            var email = await _client.GetEmailAsync(code);
+            string token;
+
+            var email = await _client.GetEmailAsync(request.Code);
             if (string.IsNullOrWhiteSpace(email))
             {
-                return BadRequest("Can not get email from id_token");
+                return Error<LoginToken>("Can not get email from id_token");
             }
 
             var user = await _userService.FindByEmailAsync(email);
@@ -77,20 +77,20 @@ public class SsoController : ApiControllerBase
                 await _organizationService.AddUserAsync(organizationUser, policies: new[] { BuiltInPolicy.Developer });
 
                 token = registerResult.Token;
-                success = true;
             }
             else
             {
                 token = _identityService.IssueToken(user);
-                success = true;
             }
+
+            return Ok(new LoginToken(token));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception occurred when login by oidc code");
-        }
 
-        return new JsonResult(new { success, token });
+            return Error<LoginToken>(ex.Message);
+        }
     }
 
     [HttpGet("check-enabled")]

@@ -1,50 +1,52 @@
-<nz-tabset class="no-bottom-line">
-  <nz-tab i18n-nzTitle="@@common.login" nzTitle="Login">
-    <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
-      <nz-form-item>
-        <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
-          <nz-input-group [nzPrefix]="emailPrefix">
-            <input type="text" nz-input formControlName="identity" i18n-placeholder="@@common.email" placeholder="Email"/>
-          </nz-input-group>
-          <ng-template #emailPrefix>
-            <i nz-icon nzType="icons:icon-email"></i>
-          </ng-template>
-          <ng-template #invalidPhoneNumberOrEmail let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.email-cannot-be-empty">Email is mandatory</ng-container>
-            <ng-container *ngIf="control.hasError('invalid')" i18n="@@common.invalid-email">Invalid Email</ng-container>
-          </ng-template>
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-control i18n-nzErrorTip="@@common.password-mandatory" nzErrorTip="password is mandatory">
-          <nz-input-group [nzPrefix]="passwordPrefix" [nzSuffix]="suffixTemplate">
-            <input
-              i18n-placeholder="@@common.password"
-              formControlName="password"
-              [type]="passwordVisible ? 'text' : 'password'"
-              nz-input
-              placeholder="password"
-            />
-          </nz-input-group>
-          <ng-template #passwordPrefix>
-            <i nz-icon nzType="icons:icon-password">
-            </i>
-          </ng-template>
-          <ng-template #suffixTemplate>
-            <i nz-icon [nzType]="passwordVisible ? 'eye' : 'eye-invisible'" (click)="passwordVisible = !passwordVisible">
-            </i>
-          </ng-template>
-        </nz-form-control>
-      </nz-form-item>
-      <button type="submit" nz-button nzType="primary" class="btn submit-btn" [nzLoading]="isLogin" i18n="@@common.login">Login</button>
-    </form>
-    <button
-      *ngIf="isSsoEnabled === true"
-      (click)="ssoLogin()"
-      nz-button
-      nzType="link"
-      class="btn sso-btn"
-      i18n="@@common.login-with-sso">Login with SSO
-    </button>
-  </nz-tab>
-</nz-tabset>
+<nz-spin [nzSpinning]="isSpinning" [nzDelay]="500">
+  <nz-tabset class="no-bottom-line">
+    <nz-tab i18n-nzTitle="@@common.login" nzTitle="Login">
+      <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
+        <nz-form-item>
+          <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
+            <nz-input-group [nzPrefix]="emailPrefix">
+              <input type="text" nz-input formControlName="identity" i18n-placeholder="@@common.email" placeholder="Email"/>
+            </nz-input-group>
+            <ng-template #emailPrefix>
+              <i nz-icon nzType="icons:icon-email"></i>
+            </ng-template>
+            <ng-template #invalidPhoneNumberOrEmail let-control>
+              <ng-container *ngIf="control.hasError('required')" i18n="@@common.email-cannot-be-empty">Email is mandatory</ng-container>
+              <ng-container *ngIf="control.hasError('invalid')" i18n="@@common.invalid-email">Invalid Email</ng-container>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control i18n-nzErrorTip="@@common.password-mandatory" nzErrorTip="password is mandatory">
+            <nz-input-group [nzPrefix]="passwordPrefix" [nzSuffix]="suffixTemplate">
+              <input
+                i18n-placeholder="@@common.password"
+                formControlName="password"
+                [type]="passwordVisible ? 'text' : 'password'"
+                nz-input
+                placeholder="password"
+              />
+            </nz-input-group>
+            <ng-template #passwordPrefix>
+              <i nz-icon nzType="icons:icon-password">
+              </i>
+            </ng-template>
+            <ng-template #suffixTemplate>
+              <i nz-icon [nzType]="passwordVisible ? 'eye' : 'eye-invisible'" (click)="passwordVisible = !passwordVisible">
+              </i>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+        <button type="submit" nz-button nzType="primary" class="btn submit-btn" [nzLoading]="isLogin" i18n="@@common.login">Login</button>
+      </form>
+      <button
+        *ngIf="isSsoEnabled === true"
+        (click)="ssoLogin()"
+        nz-button
+        nzType="link"
+        class="btn sso-btn"
+        i18n="@@common.login-with-sso">Login with SSO
+      </button>
+    </nz-tab>
+  </nz-tabset>
+</nz-spin>
