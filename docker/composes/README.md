@@ -26,7 +26,7 @@ docker run -d -p 9000:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=ad
 4. Set the client's `Web Origins` to `http://localhost:8081/*`
 5. Enable **Client authentication**
 6. Create a user
-7. Replace the following config with your own value for Api projects' appsetting.json
+7. Replace the following config with your own value for Api projects' appsetting.json, then start Api service locally
   ```json
   "SSO": {
     "enabled": true,
@@ -40,5 +40,4 @@ docker run -d -p 9000:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=ad
       "scope": "openid profile email"
     }
 }
-8. Start Api service locally
   ```
