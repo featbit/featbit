@@ -40,4 +40,5 @@ docker run -d -p 9000:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=ad
       "scope": "openid profile email"
     }
 }
+8. Start Api service locally
   ```
