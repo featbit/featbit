@@ -5,7 +5,7 @@ namespace Domain.Users;
 public class User : AuditedEntity
 {
     public string Name { get; set; }
-    
+
     public string Email { get; set; }
 
     public string Password { get; set; }
@@ -16,7 +16,7 @@ public class User : AuditedEntity
     public User(Guid id, string email, string password, string name = "")
     {
         Id = id;
-        
+
         Email = email;
         Password = password;
         Name = name;
@@ -30,7 +30,7 @@ public class User : AuditedEntity
         Email = email;
         Password = password;
         Name = name;
-        
+
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
@@ -50,7 +50,7 @@ public class User : AuditedEntity
     {
         Email = email;
         Name = name;
-        
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

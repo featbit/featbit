@@ -12,3 +12,32 @@ This directory contains these compose files for development purposes, including
 > **Note**
 > You should run these compose files from the root directory and include the --project-diretory argument, for
 > example: `docker compose --project-directory . -f ./docker/composes/docker-compose-dev.yml up -d`
+
+### SSO Setup
+
+```bash
+docker compose --project-directory . -f ./docker/composes/docker-compose-dev.yml up -d
+docker run -d -p 9000:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin --name=keycloak quay.io/keycloak/keycloak:22.0.1 start-dev
+```
+
+1. Create a realm named `featbit`
+2. Create a OIDC client
+3. Set the client's `Valid Redirect URIs` to `http://localhost:8081/*`
+4. Set the client's `Web Origins` to `http://localhost:8081/*`
+5. Enable **Client authentication**
+6. Create a user
+7. Replace the following config with your own value for Api projects' appsetting.json, then start Api service locally
+  ```json
+  "SSO": {
+    "enabled": true,
+    "OIDC": {
+      "clientId": "test-oidc-client",
+      "clientSecret": "tr8XwUrWo8U2wdJFb7EZ5HbqVWZEns5V",
+      "tokenEndpoint": "http://localhost:9000/realms/featbit/protocol/openid-connect/token",
+      "clientAuthenticationMethod": "client_secret_post",
+      "authorizationEndpoint": "http://localhost:9000/realms/featbit/protocol/openid-connect/auth",
+      "userEmailClaim": "email",
+      "scope": "openid profile email"
+    }
+}
+  ```

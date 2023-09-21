@@ -3238,7 +3238,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">7</context>
+          <context context-type="linenumber">8</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/team/team.component.html</context>
@@ -4909,11 +4909,11 @@
         <source>Login</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">2</context>
+          <context context-type="linenumber">3</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">40</context>
         </context-group>
         <target>登录</target>
       </trans-unit>
@@ -4921,7 +4921,7 @@
         <source>Email is mandatory</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">13</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <target>邮箱不能为空</target>
       </trans-unit>
@@ -4929,7 +4929,7 @@
         <source>Invalid Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">14</context>
+          <context context-type="linenumber">15</context>
         </context-group>
         <target>邮箱名无效</target>
       </trans-unit>
@@ -4937,7 +4937,7 @@
         <source>password is mandatory</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">20</context>
         </context-group>
         <target>密码不能为空</target>
       </trans-unit>
@@ -4945,15 +4945,23 @@
         <source>password</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">26</context>
+          <context context-type="linenumber">27</context>
         </context-group>
         <target>密码</target>
+      </trans-unit>
+      <trans-unit id="common.login-with-sso" datatype="html">
+        <source>Login with SSO </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">48,49</context>
+        </context-group>
+        <target>使用 SSO 登录</target>
       </trans-unit>
       <trans-unit id="common.incorrect-email-or-password" datatype="html">
         <source>Email and/or password incorrect</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <target>邮箱或密码错误</target>
       </trans-unit>
@@ -4961,7 +4969,11 @@
         <source>Login with success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
+          <context context-type="linenumber">103</context>
         </context-group>
         <target>登录成功</target>
       </trans-unit>
@@ -4969,9 +4981,17 @@
         <source>Error occurred, please contact the support.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">79</context>
         </context-group>
         <target>服务错误，请联系运营人员。</target>
+      </trans-unit>
+      <trans-unit id="common.cannot-login-by-oidc-code" datatype="html">
+        <source>Failed to login by OpenID Connect SSO.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <target>通过 OpenID Connect SSO 登录失败。</target>
       </trans-unit>
       <trans-unit id="auditlogs.audit-logs" datatype="html">
         <source>Audit Logs</source>
