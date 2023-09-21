@@ -14,8 +14,12 @@ export class SsoService {
     return `${environment.url}/api/v1/sso`;
   }
 
+  get redirectUri() {
+    return `${location.origin}${location.pathname}?sso-logged-in=true`;
+  }
+
   get authorizeUrl() {
-    return `${this.baseUrl}/oidc-authorize-url?redirect_uri=${location.origin}${location.pathname}?sso-logged-in=true`;
+    return `${this.baseUrl}/oidc-authorize-url?redirect_uri=${this.redirectUri}`;
   }
 
   isEnabled(): Promise<boolean> {
@@ -23,6 +27,6 @@ export class SsoService {
   }
 
   oidcLogin(code: string) {
-    return this.http.post(`${this.baseUrl}/oidc/login`, { code });
+    return this.http.post(`${this.baseUrl}/oidc/login`, { code, redirectUri: this.redirectUri });
   }
 }

@@ -33,7 +33,6 @@ docker run -d -p 9000:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=ad
     "OIDC": {
       "clientId": "test-oidc-client",
       "clientSecret": "tr8XwUrWo8U2wdJFb7EZ5HbqVWZEns5V",
-      "redirectUri": "http://localhost:4200/login?sso-logged-in=true",
       "tokenEndpoint": "http://localhost:9000/realms/featbit/protocol/openid-connect/token",
       "clientAuthenticationMethod": "client_secret_post",
       "authorizationEndpoint": "http://localhost:9000/realms/featbit/protocol/openid-connect/auth",

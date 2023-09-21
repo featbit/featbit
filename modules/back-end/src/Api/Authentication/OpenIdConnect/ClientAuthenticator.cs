@@ -1,10 +1,11 @@
 using System.Text;
+using Application.Identity;
 
 namespace Api.Authentication.OpenIdConnect;
 
 public interface IClientAuthenticator
 {
-    AuthParameters GetAuthParameters(string code, OidcOptions options);
+    AuthParameters GetAuthParameters(LoginByOidcCode request, OidcOptions options);
 }
 
 public static class ClientAuthenticator
@@ -22,13 +23,13 @@ public static class ClientAuthenticator
 
 public class BasicAuthenticator : IClientAuthenticator
 {
-    public AuthParameters GetAuthParameters(string code, OidcOptions options)
+    public AuthParameters GetAuthParameters(LoginByOidcCode request, OidcOptions options)
     {
         var kvs = new List<KeyValuePair<string, string>>
         {
-            new("code", code),
+            new("code", request.Code),
             new("grant_type", "authorization_code"),
-            new("redirect_uri", options.RedirectUri)
+            new("redirect_uri", request.RedirectUri)
         };
         var httpContent = new FormUrlEncodedContent(kvs);
 
@@ -42,13 +43,13 @@ public class BasicAuthenticator : IClientAuthenticator
 
 public class PostAuthenticator : IClientAuthenticator
 {
-    public AuthParameters GetAuthParameters(string code, OidcOptions options)
+    public AuthParameters GetAuthParameters(LoginByOidcCode request, OidcOptions options)
     {
         var kvs = new List<KeyValuePair<string, string>>
         {
-            new("code", code),
+            new("code", request.Code),
             new("grant_type", "authorization_code"),
-            new("redirect_uri", options.RedirectUri),
+            new("redirect_uri", request.RedirectUri),
             new("client_id", options.ClientId),
             new("client_secret", options.ClientSecret),
         };
@@ -61,13 +62,13 @@ public class PostAuthenticator : IClientAuthenticator
 
 public class NoneAuthenticator : IClientAuthenticator
 {
-    public AuthParameters GetAuthParameters(string code, OidcOptions options)
+    public AuthParameters GetAuthParameters(LoginByOidcCode request, OidcOptions options)
     {
         var kvs = new List<KeyValuePair<string, string>>
         {
-            new("code", code),
+            new("code", request.Code),
             new("grant_type", "authorization_code"),
-            new("redirect_uri", options.RedirectUri)
+            new("redirect_uri", request.RedirectUri)
         };
         var httpContent = new FormUrlEncodedContent(kvs);
 

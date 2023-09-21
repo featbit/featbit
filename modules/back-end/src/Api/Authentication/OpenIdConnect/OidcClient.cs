@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using Application.Identity;
 using Microsoft.Extensions.Options;
 
 namespace Api.Authentication.OpenIdConnect;
@@ -16,22 +17,22 @@ public class OidcClient
         _options = options.Value;
     }
 
-    public string GetAuthorizeUrl()
+    public string GetAuthorizeUrl(string? redirectUri)
     {
         var url = $"{_options.AuthorizationEndpoint}?" +
                   $"client_id={_options.ClientId}" +
                   $"&response_type=code" +
                   $"&scope={_options.Scope}" +
-                  $"&redirect_uri={_options.RedirectUri}" +
+                  $"&redirect_uri={redirectUri}" +
                   $"&state={Guid.NewGuid()}";
 
         return url;
     }
 
-    public async Task<string?> GetEmailAsync(string code)
+    public async Task<string?> GetEmailAsync(LoginByOidcCode request)
     {
         // exchange idToken using code
-        var authParams = _options.GetAuthParameters(code);
+        var authParams = _options.GetAuthParameters(request);
 
         var httpclient = _httpClientFactory.CreateClient();
         if (!string.IsNullOrEmpty(authParams.BasicAuthorizationString))

@@ -36,14 +36,14 @@ public class SsoController : ApiControllerBase
     }
 
     [HttpGet("oidc-authorize-url")]
-    public IActionResult GetOidcAuthorizeUrl()
+    public IActionResult GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string? redirectUri = null)
     {
         if (!_isEnabled)
         {
             return BadRequest("SSO not enabled");
         }
 
-        var url = _client.GetAuthorizeUrl();
+        var url = _client.GetAuthorizeUrl(redirectUri);
         return Redirect(url);
     }
 
@@ -59,7 +59,7 @@ public class SsoController : ApiControllerBase
         {
             string token;
 
-            var email = await _client.GetEmailAsync(request.Code);
+            var email = await _client.GetEmailAsync(request);
             if (string.IsNullOrWhiteSpace(email))
             {
                 return Error<LoginToken>("Can not get email from id_token");

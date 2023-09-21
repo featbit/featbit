@@ -1,3 +1,5 @@
+using Application.Identity;
+
 namespace Api.Authentication.OpenIdConnect;
 
 public class OidcOptions
@@ -7,8 +9,6 @@ public class OidcOptions
     public string ClientId { get; set; } = string.Empty;
 
     public string ClientSecret { get; set; } = string.Empty;
-
-    public string RedirectUri { get; set; } = string.Empty;
 
     public string TokenEndpoint { get; set; } = string.Empty;
 
@@ -20,9 +20,9 @@ public class OidcOptions
 
     public string ClientAuthenticationMethod { get; set; } = string.Empty;
 
-    public AuthParameters GetAuthParameters(string code)
+    public AuthParameters GetAuthParameters(LoginByOidcCode request)
     {
         var authenticator = ClientAuthenticator.GetAuthenticator(ClientAuthenticationMethod);
-        return authenticator.GetAuthParameters(code, this);
+        return authenticator.GetAuthParameters(request, this);
     }
 }
