@@ -40,7 +40,7 @@
         <button type="submit" nz-button nzType="primary" class="btn submit-btn" [nzLoading]="isLogin" i18n="@@common.login">Login</button>
       </form>
       <a
-        *ngIf="isSsoEnabled === true"
+        *ngIf="isSsoEnabled"
         [href]="ssoAuthorizeUrl"
         nz-button
         nzType="link"

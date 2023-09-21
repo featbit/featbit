@@ -15,7 +15,7 @@ export class SsoService {
   }
 
   get authorizeUrl() {
-    return `${this.baseUrl}/oidc-authorize-url`;
+    return `${this.baseUrl}/oidc-authorize-url?redirect_uri=${location.origin}${location.pathname}?sso-logged-in=true`;
   }
 
   isEnabled(): Promise<boolean> {
