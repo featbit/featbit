@@ -35,10 +35,11 @@ def _create_app(config_name='default') -> Flask:
 
     # https://flask-caching.readthedocs.io/en/latest/
     if CACHE_TYPE == "RedisClusterCache":
-        options = {"ssl": REDIS_CLUSTER_SSL, "username": REDIS_CLUSTER_USER, "password": REDIS_CLUSTER_PASSWORD}
+        options = {"ssl": REDIS_CLUSTER_SSL, "username": REDIS_CLUSTER_USER}
         cache = get_cache(config={"CACHE_TYPE": "RedisClusterCache",
                                   "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
                                   "CACHE_REDIS_CLUSTER": REDIS_CLUSTER_HOST_PORT_PAIRS,
+                                  "CACHE_REDIS_PASSWORD": REDIS_CLUSTER_PASSWORD,
                                   "CACHE_OPTIONS": options})
     else:
         cache = get_cache(config={"CACHE_TYPE": "RedisCache",

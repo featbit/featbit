@@ -27,7 +27,7 @@ services:
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Redis__ConnectionString=redis-node-5:6379,redis-node-4:6379,redis-node-3:6379,redis-node-2:6379,redis-node-1:6379,redis-node-0:6379
+      - Redis__ConnectionString=redis-node-5:6379,redis-node-4:6379,redis-node-3:6379,redis-node-2:6379,redis-node-1:6379,redis-node-0:6379,ssl=false,password=bitnami
       - OLAP__ServiceHost=http://da-server    
     depends_on:
       - mongodb
@@ -47,7 +47,7 @@ services:
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Redis__ConnectionString=redis-node-5:6379,redis-node-4:6379,redis-node-3:6379,redis-node-2:6379,redis-node-1:6379,redis-node-0:6379
+      - Redis__ConnectionString=redis-node-5:6379,redis-node-4:6379,redis-node-3:6379,redis-node-2:6379,redis-node-1:6379,redis-node-0:6379,ssl=false,password=bitnami
     depends_on:
       - mongodb
       - redis-node-5
@@ -72,6 +72,7 @@ services:
     environment:
       CACHE_TYPE: RedisClusterCache
       REDIS_CLUSTER_HOST_PORT_PAIRS: redis-node-5:6379,redis-node-4:6379,redis-node-3:6379,redis-node-2:6379,redis-node-1:6379,redis-node-0:6379
+      REDIS_CLUSTER_PASSWORD: bitnami
       MONGO_URI: mongodb://admin:password@mongodb:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: mongodb
@@ -102,7 +103,7 @@ services:
     volumes:
       - redis-cluster_data-0:/bitnami/redis/data
     environment:
-      - 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'REDIS_PASSWORD=bitnami'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-1:
@@ -115,7 +116,7 @@ services:
     volumes:
       - redis-cluster_data-1:/bitnami/redis/data
     environment:
-      - 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'REDIS_PASSWORD=bitnami'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-2:
@@ -128,7 +129,7 @@ services:
     volumes:
       - redis-cluster_data-2:/bitnami/redis/data
     environment:
-      - 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'REDIS_PASSWORD=bitnami'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-3:
@@ -141,7 +142,7 @@ services:
     volumes:
       - redis-cluster_data-3:/bitnami/redis/data
     environment:
-      - 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'REDIS_PASSWORD=bitnami'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-4:
@@ -154,7 +155,7 @@ services:
     volumes:
       - redis-cluster_data-4:/bitnami/redis/data
     environment:
-      - 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'REDIS_PASSWORD=bitnami'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-5:
@@ -173,7 +174,8 @@ services:
       - redis-node-3
       - redis-node-4
     environment:
-      - 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'REDIS_PASSWORD=bitnami'
+      - 'REDISCLI_AUTH=bitnami'
       - 'REDIS_CLUSTER_REPLICAS=1'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
       - 'REDIS_CLUSTER_CREATOR=yes'
