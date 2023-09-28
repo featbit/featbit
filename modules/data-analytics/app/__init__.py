@@ -6,7 +6,9 @@ from flask import Flask
 from app.config import DevelopmentConfig, ProductionConfig
 from app.extensions import get_cache, get_mongodb, get_scheduler
 from app.setting import (CACHE_KEY_PREFIX, CACHE_TYPE, DEFAULT_LOGGING_CONFIG,
-                         IS_PRO, MONGO_URI, REDIS_URL, WSGI)
+                         IS_PRO, MONGO_URI, REDIS_CLUSTER_HOST_PORT_PAIRS,
+                         REDIS_CLUSTER_PASSWORD, REDIS_CLUSTER_SSL,
+                         REDIS_CLUSTER_USER, REDIS_URL, WSGI)
 
 CONFIGS = {
     'production': ProductionConfig,
@@ -32,9 +34,17 @@ def _create_app(config_name='default') -> Flask:
     __app.register_blueprint(get_expt_blueprint(), url_prefix='/api/expt')
 
     # https://flask-caching.readthedocs.io/en/latest/
-    cache = get_cache(config={"CACHE_TYPE": CACHE_TYPE,
-                              "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
-                              "CACHE_REDIS_URL": REDIS_URL})
+    if CACHE_TYPE == "RedisClusterCache":
+        options = {"ssl": REDIS_CLUSTER_SSL, "username": REDIS_CLUSTER_USER, "password": REDIS_CLUSTER_PASSWORD}
+        cache = get_cache(config={"CACHE_TYPE": "RedisClusterCache",
+                                  "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
+                                  "CACHE_REDIS_CLUSTER": REDIS_CLUSTER_HOST_PORT_PAIRS,
+                                  "CACHE_OPTIONS": options})
+    else:
+        cache = get_cache(config={"CACHE_TYPE": "RedisCache",
+                                  "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
+                                  "CACHE_REDIS_URL": REDIS_URL})
+
     cache.init_app(__app)
 
     if IS_PRO:
