@@ -13,7 +13,7 @@ statsmodels>0.13
 gunicorn==20.1.0
 infi-clickhouse-orm@ git+https://github.com/PostHog/infi.clickhouse_orm@37722f350f3b449bbcd6564917c436b0d93e796f
 redis > 4.3
-Flask-Caching > 2.0.0
+Flask-Caching >= 2.0.2
 Flask-PyMongo
 Flask-APScheduler
 python-dotenv

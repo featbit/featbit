@@ -32,9 +32,14 @@ CLICKHOUSE_ENABLE_STORAGE_POLICY = get_from_env("CLICKHOUSE_ENABLE_STORAGE_POLIC
 CLICKHOUSE_KAFKA_HOSTS = os.getenv("CLICKHOUSE_KAFKA_HOSTS", "kafka:9092")
 CLICKHOUSE_REPLICATION = get_from_env("CLICKHOUSE_REPLICATION", True, type_cast=str_to_bool)
 
-CACHE_TYPE = "RedisCache"
+CACHE_TYPE = os.getenv("CACHE_TYPE", "RedisCache")
 CACHE_KEY_PREFIX = "da-server"
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+REDIS_CLUSTER_HOST_PORT_PAIRS = os.getenv("REDIS_CLUSTER_HOST_PORT_PAIRS", "localhost:6379")
+REDIS_CLUSTER_USER = os.getenv("REDIS_CLUSTER_USER", None)
+REDIS_CLUSTER_PASSWORD = os.getenv("REDIS_CLUSTER_PASSWORD", None)
+REDIS_CLUSTER_SSL = get_from_env("REDIS_CLUSTER_SSL", False, type_cast=str_to_bool)
+
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@localhost:27017")
 MONGO_DB = os.getenv("MONGO_INITDB_DATABASE", "featbit")
