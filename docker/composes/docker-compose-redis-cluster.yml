@@ -71,8 +71,8 @@ services:
       - featbit-network
     environment:
       CACHE_TYPE: RedisClusterCache
+      REDIS_PASSWORD: bitnami
       REDIS_CLUSTER_HOST_PORT_PAIRS: redis-node-5:6379,redis-node-4:6379,redis-node-3:6379,redis-node-2:6379,redis-node-1:6379,redis-node-0:6379
-      REDIS_CLUSTER_PASSWORD: bitnami
       MONGO_URI: mongodb://admin:password@mongodb:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: mongodb
