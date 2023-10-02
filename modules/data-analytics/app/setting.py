@@ -19,6 +19,9 @@ KAFKA_PRODUCER_ENABLED = get_from_env("KAFKA_PRODUCER_ENABLED", True, type_cast=
 KAFKA_PREFIX = os.getenv("KAFKA_PREFIX", "")
 
 CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST", "localhost")
+CLICKHOUSE_ALT_HOST = os.getenv("CLICKHOUSE_ALT_HOST", None)
+CLICKHOUSE_PORT = get_from_env("CLICKHOUSE_PORT", 9000, type_cast=int)
+CLICKHOUSE_HTTP_PORT = get_from_env("CLICKHOUSE_HTTP_PORT", 8123, type_cast=int)
 CLICKHOUSE_CLUSTER = os.getenv("CLICKHOUSE_CLUSTER", "featbit_ch_cluster")
 CLICKHOUSE_DATABASE = os.getenv("CLICKHOUSE_DATABASE", "featbit") + SUFFIX
 CLICKHOUSE_SECURE = get_from_env("CLICKHOUSE_SECURE", False, type_cast=str_to_bool)

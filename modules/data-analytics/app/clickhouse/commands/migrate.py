@@ -1,12 +1,13 @@
 from textwrap import indent
 
 from flask import current_app
-
-from app.setting import (CLICKHOUSE_CLUSTER, CLICKHOUSE_DATABASE, CLICKHOUSE_HOST,
-                         CLICKHOUSE_PASSWORD, CLICKHOUSE_REPLICATION,
-                         CLICKHOUSE_SECURE, CLICKHOUSE_USER)
 from infi.clickhouse_orm import Database
 from infi.clickhouse_orm.utils import import_submodules
+
+from app.setting import (CLICKHOUSE_CLUSTER, CLICKHOUSE_DATABASE,
+                         CLICKHOUSE_HOST, CLICKHOUSE_HTTP_PORT,
+                         CLICKHOUSE_PASSWORD, CLICKHOUSE_REPLICATION,
+                         CLICKHOUSE_SECURE, CLICKHOUSE_USER)
 
 MIGRATIONS_PACKAGE_NAME = 'app.clickhouse.migrations'
 
@@ -14,10 +15,9 @@ MIGRATIONS_PACKAGE_NAME = 'app.clickhouse.migrations'
 def migrate(upto: int = 9999, check: bool = False, plan: bool = False, print_sql: bool = False) -> None:
 
     clickhouse_http_protocol = "http://"
-    clickhouse_http_port = "8123"
+    clickhouse_http_port = CLICKHOUSE_HTTP_PORT
     if CLICKHOUSE_SECURE:
         clickhouse_http_protocol = "https://"
-        clickhouse_http_port = "8443"
 
     db_url = f"{clickhouse_http_protocol}{CLICKHOUSE_HOST}:{clickhouse_http_port}/"
 
