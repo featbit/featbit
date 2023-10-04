@@ -169,4 +169,4 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ## License
 
-FeatBit is an Open Cour product. The bulk of the code is under permissive MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
+FeatBit is an Open Core product. The bulk of the code is under permissive MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
