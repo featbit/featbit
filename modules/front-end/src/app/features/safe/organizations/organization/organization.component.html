@@ -6,9 +6,9 @@
     </div>
     <div class="row-content">
       <nz-form-item class="extend">
-        <nz-input-group class="row-input-group" [nzPrefix]="licenseIcon">
+        <nz-input-group class="row-input-group" [nzPrefix]="idIcon">
           <input disabled type="text" nz-input [ngModel]="currentOrganization.id" placeholder="License" i18n-placeholder="@org.org.licensePlaceholder"/>
-          <ng-template #licenseIcon>
+          <ng-template #idIcon>
             <i nz-icon nzType="flag" nzTheme="outline"></i>
           </ng-template>
         </nz-input-group>
