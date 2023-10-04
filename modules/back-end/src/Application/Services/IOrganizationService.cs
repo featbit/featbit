@@ -17,4 +17,6 @@ public interface IOrganizationService : IService<Organization>
     Task RemoveUserAsync(Guid organizationId, Guid userId);
 
     Task DeleteAsync(Guid id);
+
+    Task SetLicenseAsync(Guid id, string license);
 }

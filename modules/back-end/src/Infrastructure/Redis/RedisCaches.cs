@@ -1,13 +1,24 @@
+using System.ComponentModel;
+using System.Text;
 using System.Text.Json;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using Domain.Utils;
+using Infrastructure.Organizations;
 using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
 
 public static class RedisCaches
 {
+    public static KeyValuePair<RedisKey, RedisValue> License(Guid orgId, string license)
+    {
+        var key = RedisKeys.License(orgId);
+        var value = license;
+
+        return new KeyValuePair<RedisKey, RedisValue>(key, value);
+    }
+    
     public static KeyValuePair<RedisKey, RedisValue> Flag(FeatureFlag flag)
     {
         var key = RedisKeys.Flag(flag.Id);

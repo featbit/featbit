@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Domain.FeatureFlags;
 using Domain.Segments;
 
@@ -10,4 +11,8 @@ public interface ICacheService
     Task DeleteFlagAsync(Guid envId, Guid flagId);
 
     Task UpsertSegmentAsync(Segment segment);
+
+    Task UpsertLicenseAsync(Guid orgId, string license);
+    
+    Task<string?> GetLicenseAsync(Guid orgId);
 }

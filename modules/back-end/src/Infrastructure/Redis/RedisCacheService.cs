@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Application.Caches;
 using Domain.FeatureFlags;
 using Domain.Segments;
+using Infrastructure.Organizations;
 using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
@@ -12,6 +14,20 @@ public class RedisCacheService : ICacheService
     public RedisCacheService(IRedisClient redis)
     {
         _database = redis.GetDatabase();
+    }
+
+    public async Task<string?> GetLicenseAsync(Guid orgId)
+    {
+        var key = RedisKeys.License(orgId);
+        var value = await _database.StringGetAsync(key);
+        
+        return value.IsNullOrEmpty ? null : value.ToString();
+    }
+    
+    public async Task UpsertLicenseAsync(Guid orgId, string license)
+    {
+        var cache = RedisCaches.License(orgId, license);
+        await _database.StringSetAsync(cache.Key, cache.Value);
     }
 
     public async Task UpsertFlagAsync(FeatureFlag flag)
