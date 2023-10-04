@@ -14,7 +14,14 @@ public class Organization : AuditedEntity
         Initialized = false;
     }
 
-    public void Update(string name)
+    public void UpdateLicense(string license)
+    {
+        License = license;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+    
+    public void UpdateName(string name)
     {
         Name = name;
 

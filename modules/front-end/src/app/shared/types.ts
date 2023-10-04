@@ -49,7 +49,8 @@ export interface IAuthProps {
 export interface IOrganization {
   id: string,
   initialized: boolean,
-  name: string
+  name: string,
+  license?: string
 }
 
 export interface IOnboarding {

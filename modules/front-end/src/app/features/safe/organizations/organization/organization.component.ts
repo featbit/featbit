@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { getAuth } from '@utils/index';
+import { copyToClipboard, getAuth } from '@utils/index';
 import { IOrganization } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { getCurrentOrganization } from "@utils/project-env";
@@ -19,6 +19,7 @@ export class OrganizationComponent implements OnInit {
   creatOrganizationFormVisible: boolean = false;
 
   validateOrgForm!: FormGroup;
+  validateLicenseForm!: FormGroup;
 
   auth = getAuth();
   currentOrganization: IOrganization;
@@ -50,6 +51,10 @@ export class OrganizationComponent implements OnInit {
     this.validateOrgForm = new FormGroup({
       name: new FormControl(this.currentOrganization.name, [Validators.required]),
     });
+
+    this.validateLicenseForm = new FormGroup({
+      license: new FormControl(this.currentOrganization.license, [Validators.required]),
+    });
   }
 
   onCreateAccountClick() {
@@ -68,6 +73,12 @@ export class OrganizationComponent implements OnInit {
     this.organizationService.switchOrganization(this.currentOrganization);
   }
 
+  copyText(text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize`:@@common.copy-success:Copied`)
+    );
+  }
+
   submitOrgForm() {
     if (!this.canUpdateOrgName) {
       this.message.warning(this.permissionsService.genericDenyMessage);
@@ -81,8 +92,8 @@ export class OrganizationComponent implements OnInit {
       }
       return;
     }
-    const {name} = this.validateOrgForm.value;
-    const {id, initialized} = this.currentOrganization;
+    const { name } = this.validateOrgForm.value;
+    const { id, initialized, license} = this.currentOrganization;
 
     this.isLoading = true;
     this.organizationService.update({ name })
@@ -91,7 +102,7 @@ export class OrganizationComponent implements OnInit {
         next: () => {
           this.isLoading = false;
           this.message.success($localize`:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
-          this.organizationService.setOrganization({id, initialized, name});
+          this.organizationService.setOrganization({ id, initialized, name, license });
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
         error: () => {
@@ -100,4 +111,31 @@ export class OrganizationComponent implements OnInit {
       });
   }
 
+  submitLicenseForm() {
+    if (this.validateLicenseForm.invalid) {
+      for (const i in this.validateLicenseForm.controls) {
+        this.validateLicenseForm.controls[i].markAsDirty();
+        this.validateLicenseForm.controls[i].updateValueAndValidity();
+      }
+      return;
+    }
+
+    const { license } = this.validateLicenseForm.value;
+    const { id, initialized, name} = this.currentOrganization;
+
+    this.isLoading = true;
+    this.organizationService.updateLicense({ license })
+      .pipe()
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.message.success($localize`:@@org.org.licenseUpdateSuccess:License updated!`);
+          this.organizationService.setOrganization({ id, initialized, name, license });
+          this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
+        },
+        error: () => {
+          this.isLoading = false;
+        }
+      });
+  }
 }

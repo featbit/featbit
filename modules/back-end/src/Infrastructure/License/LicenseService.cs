@@ -10,22 +10,23 @@ public class LicenseService
 {
     private readonly ICacheService _cacheService;
     private readonly IOrganizationService _organizationService;
-    private RSA? _rsa;
+    private readonly RSA _rsa;
     
     public LicenseService(
         ICacheService cacheService,
         IOrganizationService organizationService,
         IConfiguration configuration)
     {
-        InitRsa(configuration["PublicKey"]);
+        _rsa = RSA.Create();
+        LoadPublicKey(configuration["PublicKey"]);
         
         _cacheService = cacheService;
         _organizationService = organizationService;
     }
 
-    private void InitRsa(string publicKey)
+    private void LoadPublicKey(string publicKey)
     {
-        _rsa = RSA.Create();
+        
         publicKey = publicKey.Replace("-----BEGIN PUBLIC KEY-----", "")
             .Replace("-----END PUBLIC KEY-----", "")
             .Replace(Environment.NewLine, "");
@@ -52,12 +53,10 @@ public class LicenseService
         }
         
         var parts = licenseStr.Split('.');
-        var signature = Convert.FromBase64String(parts[0]);
-        var license = Encoding.UTF8.GetBytes(parts[1]);
-        
+
         var isVerified = _rsa.VerifyData(
-            license,
-            signature,
+            Encoding.UTF8.GetBytes(parts[1]),
+            Convert.FromBase64String(parts[0]),
             HashAlgorithmName.SHA256,
             RSASignaturePadding.Pkcs1);
 

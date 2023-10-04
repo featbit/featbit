@@ -12,11 +12,19 @@
 
 .row {
   .row-title {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 4px;
     font-size: 14px;
     line-height: 150%;
     font-weight: 500;
     margin-bottom: 12px;
     color: @grey70-color;
+
+    i {
+      cursor: pointer;
+    }
   }
 
   .row-content {
@@ -40,6 +48,7 @@
 
   nz-form-item {
     margin-right: 0;
+    margin-bottom: 0;
   }
 
   .extend {
@@ -50,4 +59,14 @@
 .create-org-btn {
   border-color: @purple50-color;
   background-color: @purple50-color;
+}
+
+.update-license-btn {
+  border-color: @yellow55-color;
+  background-color: @yellow55-color;
+}
+
+.copy-id-btn {
+  border-color: @grey50-color;
+  background-color: @grey50-color;
 }
