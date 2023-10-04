@@ -2,7 +2,9 @@ using System.Text;
 using Api.Authentication;
 using Api.Authorization;
 using Api.Swagger;
+using Application.Services;
 using Domain.Identity;
+using Infrastructure.License;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -100,6 +102,7 @@ public static class ServicesRegister
             .AddOpenApi(Schemes.OpenApi);
 
         // authorization
+        builder.Services.AddSingleton<ILicenseService, LicenseService>();
         builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
         builder.Services.AddAuthorization(options =>

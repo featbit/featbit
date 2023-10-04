@@ -36,14 +36,6 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
 
         return await query.ToListAsync();
     }
-    
-    public async Task SetLicenseAsync(Guid id, string license)
-    {
-        await MongoDb.CollectionOf<Organization>().UpdateOneAsync(
-            x => x.Id == id,
-            Builders<Organization>.Update.Set(x => x.License, license)
-        );
-    }
 
     public async Task AddUserAsync(
         OrganizationUser organizationUser,

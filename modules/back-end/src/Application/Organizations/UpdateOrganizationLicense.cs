@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Caches;
 
 namespace Application.Organizations;
 
@@ -21,11 +22,16 @@ public class UpdateOrganizationLicenseValidator : AbstractValidator<UpdateOrgani
 public class UpdateOrganizationLicenseHandler : IRequestHandler<UpdateOrganizationLicense, OrganizationVm>
 {
     private readonly IOrganizationService _service;
+    private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
 
-    public UpdateOrganizationLicenseHandler(IOrganizationService service, IMapper mapper)
+    public UpdateOrganizationLicenseHandler(
+        IOrganizationService service,
+        ICacheService cacheService,
+        IMapper mapper)
     {
         _service = service;
+        _cacheService = cacheService;
         _mapper = mapper;
     }
 
@@ -37,10 +43,13 @@ public class UpdateOrganizationLicenseHandler : IRequestHandler<UpdateOrganizati
             return null;
         }
 
+        // save to database
         organization.UpdateLicense(request.License);
-
+        await _cacheService.UpsertLicenseAsync(organization.Id, organization.License);
+        
+        // save to cache
         await _service.UpdateAsync(organization);
-
+        
         return _mapper.Map<OrganizationVm>(organization);
     }
 }

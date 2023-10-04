@@ -3,6 +3,8 @@ namespace Infrastructure.License;
 public class LicenseItem
 {
     public const string Sso = nameof(Sso);
+    
+    public const string Schedule = nameof(Schedule);
 
     public static readonly string[] All = { Sso };
 

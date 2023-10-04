@@ -2,11 +2,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Application.Caches;
+using Domain.Utils;
 using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.License;
 
-public class LicenseService
+public class LicenseService : ILicenseService
 {
     private readonly ICacheService _cacheService;
     private readonly IOrganizationService _organizationService;
@@ -34,19 +35,16 @@ public class LicenseService
         _rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKey), out _);
     }
 
-    public async Task SetLicenseAsync(Guid orgId, string license)
-    {
-        // save to database
-        await _organizationService.SetLicenseAsync(orgId, license);
-        
-        // save to cache
-        await _cacheService.UpsertLicenseAsync(orgId, license);
-    }
-
     public async Task<bool> VerifyLicenseAsync(Guid orgId, string licenseItem)
     {
         var licenseStr = await _cacheService.GetLicenseAsync(orgId);
-
+        
+        if (string.IsNullOrEmpty(licenseStr))
+        {
+            var org = await _organizationService.GetAsync(orgId);
+            licenseStr = org.License;
+        }
+        
         if (string.IsNullOrEmpty(licenseStr))
         {
             return false;
@@ -65,10 +63,10 @@ public class LicenseService
             return false;
         }
         
-        var licenseData = JsonSerializer.Deserialize<LicenseData>(Encoding.UTF8.GetString(Convert.FromBase64String(parts[1])))!;
+        var licenseData = JsonSerializer.Deserialize<LicenseData>(Encoding.UTF8.GetString(Convert.FromBase64String(parts[1])), ReusableJsonSerializerOptions.Web)!;
 
         // check if license organization matches
-        if (licenseData.Org != orgId)
+        if (licenseData.OrgId != orgId)
         {
             return false;
         }
