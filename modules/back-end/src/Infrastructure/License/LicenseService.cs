@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Application.Caches;
+using Application.License;
 using Domain.Utils;
 using Microsoft.Extensions.Configuration;
 
@@ -35,7 +36,7 @@ public class LicenseService : ILicenseService
         _rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKey), out _);
     }
 
-    public async Task<bool> VerifyLicenseAsync(Guid orgId, string licenseItem)
+    public async Task<LicenseData?> VerifyLicenseAsync(Guid orgId)
     {
         var licenseStr = await _cacheService.GetLicenseAsync(orgId);
         
@@ -47,7 +48,7 @@ public class LicenseService : ILicenseService
         
         if (string.IsNullOrEmpty(licenseStr))
         {
-            return false;
+            return null;
         }
         
         var parts = licenseStr.Split('.');
@@ -60,7 +61,7 @@ public class LicenseService : ILicenseService
 
         if (!isVerified)
         {
-            return false;
+            return null;
         }
         
         var licenseData = JsonSerializer.Deserialize<LicenseData>(Encoding.UTF8.GetString(Convert.FromBase64String(parts[1])), ReusableJsonSerializerOptions.Web)!;
@@ -68,20 +69,15 @@ public class LicenseService : ILicenseService
         // check if license organization matches
         if (licenseData.OrgId != orgId)
         {
-            return false;
+            return null;
         }
         
         // check expiration
         if (DateTimeOffset.FromUnixTimeSeconds(licenseData.Exp) < DateTimeOffset.UtcNow)
         {
-            return false;
+            return null;
         }
-        
-        // check license item
-        return licenseItem switch
-        {
-            LicenseItem.Sso => licenseData.Sso,
-            _ => false
-        };
+
+        return licenseData;
     }
 }

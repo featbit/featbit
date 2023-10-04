@@ -1,4 +1,4 @@
-namespace Infrastructure.License;
+namespace Application.License;
 
 public class LicenseItem
 {
