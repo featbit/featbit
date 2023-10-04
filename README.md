@@ -107,6 +107,8 @@ The above sections show you how to get up and running quickly and easily. When y
 
 [Join our Online Slack Support & Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
 
+Email us at [contact@featbit.co](mailto:contact@featbit.co) if Slack isn't your thing.
+
 [Official Website](https://www.featbit.co)
 
 ## Features
@@ -167,4 +169,4 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ## License
 
-FeatBit is under the MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
+FeatBit is an Open Cour product. The bulk of the code is under permissive MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
