@@ -72,6 +72,9 @@ public static class ErrorCodes
     public const string InvalidRelayProxyScope = nameof(InvalidRelayProxyScope);
     public const string InvalidRelayProxyAgent = nameof(InvalidRelayProxyAgent);
 
+    // license
+    public const string InvalidLicense = nameof(InvalidLicense);
+    
     public static string Required(string parameterName) => $"{parameterName}_is_required";
     public static string Invalid(string parameterName) => $"{parameterName}_is_invalid";
 }

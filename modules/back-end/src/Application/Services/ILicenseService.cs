@@ -8,6 +8,14 @@ public interface ILicenseService
     /// Verify license for organization
     /// </summary>
     /// <param name="orgId"></param>
+    /// <param name="licenseStr"></param>
+    /// <returns>The <see cref="LicenseData"/> if the license is valid or null otherwise. </returns>
+    LicenseData? VerifyLicenseAsync(Guid orgId, string licenseStr);
+    
+    /// <summary>
+    /// Verify license for organization
+    /// </summary>
+    /// <param name="orgId"></param>
     /// <returns> The <see cref="LicenseData"/> if the license is valid or null otherwise. </returns>
     Task<LicenseData?> VerifyLicenseAsync(Guid orgId);
 }

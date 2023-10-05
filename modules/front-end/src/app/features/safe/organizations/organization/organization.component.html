@@ -20,7 +20,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="row-title" i18n="@@org.org.orgName">License</div>
+    <div class="row-title" i18n="@@common.license">License</div>
     <form class="row-content" nz-form [formGroup]="validateLicenseForm" [nzLayout]="'inline'" (ngSubmit)="submitLicenseForm()">
       <nz-form-item class="extend">
         <nz-form-control nzErrorTip="License is mandatory!" i18n-nzErrorTip="@@org.org.orgMandatory">
@@ -31,6 +31,9 @@
             </ng-template>
           </nz-input-group>
         </nz-form-control>
+        <ng-template #licenseData>
+          <license [license]="license"></license>
+        </ng-template>
       </nz-form-item>
       <button nz-button class="update-license-btn" nzType="primary" [nzLoading]="isLoading">
         <i nz-icon nzType="icons:icon-sync"></i>

@@ -1,0 +1,28 @@
+<div class="license">
+  <div>
+    <div class="title" i18n="@@common.license-subject">Issued to</div>
+    <div class="value">{{license?.sub}}</div>
+  </div>
+  <div class="">
+    <div class="title" i18n="@@common.license-iat">Issued at</div>
+    <div class="value">{{getLocalDate(license?.iat) | date: 'YYYY-MM-dd HH:mm'}}</div>
+  </div>
+  <div class="">
+    <div class="title" i18n="@@common.license-exp">Expire at</div>
+    <div class="value">{{getLocalDate(license?.exp) | date: 'YYYY-MM-dd HH:mm'}}</div>
+  </div>
+  <div class="features">
+    <div>Features</div>
+    <div class="feature">
+      <i *ngIf="license.sso" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
+      <i *ngIf="!license.sso" nz-icon nzType="close" nzTheme="outline"></i>
+      <span i18n="@@common.sso">SSO</span>
+    </div>
+    <div class="feature">
+      <i *ngIf="license.schedule" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
+      <i *ngIf="!license.schedule" nz-icon nzType="close" nzTheme="outline"></i>
+      <span i18n="@@common.schedule">Schedule</span>
+    </div>
+  </div>
+</div>
+

@@ -53,6 +53,17 @@ export interface IOrganization {
   license?: string
 }
 
+export interface ILicense {
+  plan: string,
+  sub: string,
+  orgId: string,
+  iat: number,
+  exp: number,
+  issuer: string,
+  sso: boolean,
+  schedule: boolean
+}
+
 export interface IOnboarding {
   organizationName: string,
   projectName: string,

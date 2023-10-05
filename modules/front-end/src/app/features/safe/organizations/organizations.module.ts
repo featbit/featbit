@@ -30,6 +30,7 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { NzTagModule } from "ng-zorro-antd/tag";
 import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
+import { NzPopoverModule } from "ng-zorro-antd/popover";
 
 @NgModule({
   declarations: [
@@ -39,34 +40,35 @@ import { NzToolTipModule } from "ng-zorro-antd/tooltip";
     ProjectComponent,
     ProjectFilterPipe
   ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    CoreModule,
-    NzFormModule,
-    NzTabsModule,
-    NzIconModule,
-    NzInputModule,
-    NzButtonModule,
-    NzMessageModule,
-    NzDividerModule,
-    NzTypographyModule,
-    NzModalModule,
-    NzSelectModule,
-    NzTableModule,
-    NzSpinModule,
-    NzCardModule,
-    NzDescriptionsModule,
-    NzSpaceModule,
-    NzPopconfirmModule,
-    NzRadioModule,
-    NzSkeletonModule,
-    NzTagModule,
-    ScrollingModule,
-    ReactiveFormsModule,
-    OrganizationsRoutingModule,
-    CoreModule,
-    NzToolTipModule
-  ]
+    imports: [
+        CommonModule,
+        FormsModule,
+        CoreModule,
+        NzFormModule,
+        NzTabsModule,
+        NzIconModule,
+        NzInputModule,
+        NzButtonModule,
+        NzMessageModule,
+        NzDividerModule,
+        NzTypographyModule,
+        NzModalModule,
+        NzSelectModule,
+        NzTableModule,
+        NzSpinModule,
+        NzCardModule,
+        NzDescriptionsModule,
+        NzSpaceModule,
+        NzPopconfirmModule,
+        NzRadioModule,
+        NzSkeletonModule,
+        NzTagModule,
+        ScrollingModule,
+        ReactiveFormsModule,
+        OrganizationsRoutingModule,
+        CoreModule,
+        NzToolTipModule,
+        NzPopoverModule
+    ]
 })
 export class OrganizationsModule { }

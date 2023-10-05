@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { copyToClipboard, getAuth } from '@utils/index';
+import { copyToClipboard, getAuth, getLicense } from '@utils/index';
 import { IOrganization } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { getCurrentOrganization } from "@utils/project-env";
@@ -129,11 +129,12 @@ export class OrganizationComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isLoading = false;
-          this.message.success($localize`:@@org.org.licenseUpdateSuccess:License updated!`);
+          this.message.success($localize`:@@org.org.license-update-success:License updated!`);
           this.organizationService.setOrganization({ id, initialized, name, license });
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
         error: () => {
+          this.message.error($localize`:@@org.org.invalid-license:Invalid license, please contact FeatBit team to get a license!`);
           this.isLoading = false;
         }
       });

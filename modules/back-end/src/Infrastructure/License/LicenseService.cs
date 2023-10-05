@@ -36,30 +36,29 @@ public class LicenseService : ILicenseService
         _rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKey), out _);
     }
 
-    public async Task<LicenseData?> VerifyLicenseAsync(Guid orgId)
+    public LicenseData? VerifyLicenseAsync(Guid orgId, string licenseStr)
     {
-        var licenseStr = await _cacheService.GetLicenseAsync(orgId);
-        
-        if (string.IsNullOrEmpty(licenseStr))
-        {
-            var org = await _organizationService.GetAsync(orgId);
-            licenseStr = org.License;
-        }
-        
         if (string.IsNullOrEmpty(licenseStr))
         {
             return null;
         }
-        
+
         var parts = licenseStr.Split('.');
 
-        var isVerified = _rsa.VerifyData(
-            Encoding.UTF8.GetBytes(parts[1]),
-            Convert.FromBase64String(parts[0]),
-            HashAlgorithmName.SHA256,
-            RSASignaturePadding.Pkcs1);
+        try
+        {
+            var isVerified = _rsa.VerifyData(
+                Encoding.UTF8.GetBytes(parts[1]),
+                Convert.FromBase64String(parts[0]),
+                HashAlgorithmName.SHA256,
+                RSASignaturePadding.Pkcs1);
 
-        if (!isVerified)
+            if (!isVerified)
+            {
+                return null;
+            }
+        }
+        catch (Exception)
         {
             return null;
         }
@@ -85,5 +84,18 @@ public class LicenseService : ILicenseService
         }
 
         return licenseData;
+    }
+
+    public async Task<LicenseData?> VerifyLicenseAsync(Guid orgId)
+    {
+        var licenseStr = await _cacheService.GetLicenseAsync(orgId);
+        
+        if (string.IsNullOrEmpty(licenseStr))
+        {
+            var org = await _organizationService.GetAsync(orgId);
+            licenseStr = org.License;
+        }
+
+        return VerifyLicenseAsync(orgId, licenseStr);
     }
 }
