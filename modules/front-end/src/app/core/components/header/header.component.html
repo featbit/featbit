@@ -10,17 +10,15 @@
       <span class="plan-name">{{license.plan}}</span>
       <i nz-icon nzType="crown" nzTheme="outline"></i>
     </div>
-    <div *ngIf="!license" class="license-plan-wrapper" i18n-nz-popover="@@common.upgrade-to-enterprise-license" nz-popover="Upgrade to Enterprise License" [nzPopoverContent]="upgradeLicense" nzPopoverOverlayClassName="upgrade-license-popover" nzPopoverPlacement="bottom">
-      <span i18n="@@common.upgrade-to-enterprise-plan">Upgrade to Enterprise</span>
+    <div *ngIf="!license" class="license-plan-wrapper" nz-popover i18n-nz-popover="@@common.upgrade-to-enterprise" nzPopoverTitle="Upgrade to Enterprise" [nzPopoverContent]="upgradeLicense" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
+      <span i18n="@@common.upgrade-to-enterprise">Upgrade to Enterprise</span>
       <i nz-icon nzType="crown" nzTheme="outline"></i>
     </div>
     <ng-template #licenseData>
       <license [license]="license"></license>
     </ng-template>
     <ng-template #upgradeLicense>
-      <div class="">
-        bbb
-      </div>
+      <div class="">Please contact us to get an Enterprise license.</div>
     </ng-template>
 
     <div class="header-btn feedback" (click)="openFeedbackModal()" i18n="@@common.feedback">Feedback</div>

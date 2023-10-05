@@ -386,7 +386,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">79</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
@@ -842,7 +842,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="linenumber">179</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/prism/prism.component.ts</context>
@@ -903,6 +903,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
           <context context-type="linenumber">92</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
@@ -1632,6 +1636,10 @@
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
           <context context-type="linenumber">41</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
         <target>计划变更</target>
       </trans-unit>
       <trans-unit id="common.title" datatype="html">
@@ -1666,11 +1674,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">93</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">124</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
@@ -1942,7 +1950,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">132</context>
+          <context context-type="linenumber">140</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
@@ -3126,11 +3134,27 @@
         </context-group>
         <target>或者</target>
       </trans-unit>
+      <trans-unit id="common.current-license" datatype="html">
+        <source>Current License</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <target>当前 License</target>
+      </trans-unit>
+      <trans-unit id="common.upgrade-to-enterprise" datatype="html">
+        <source>Upgrade to Enterprise</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <target>升级到企业版</target>
+      </trans-unit>
       <trans-unit id="common.feedback" datatype="html">
         <source>Feedback</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">9</context>
+          <context context-type="linenumber">24</context>
         </context-group>
         <target>反馈</target>
       </trans-unit>
@@ -3138,7 +3162,7 @@
         <source>server</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">35</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -3158,7 +3182,7 @@
         <source>client</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">51</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -3178,7 +3202,7 @@
         <source>Change environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <target>更改环境</target>
       </trans-unit>
@@ -3186,11 +3210,11 @@
         <source>Current</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">60</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">84</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -3206,7 +3230,7 @@
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -3214,7 +3238,7 @@
         <source>Environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -3226,7 +3250,7 @@
         <source>Send feedback</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>发送反馈</target>
       </trans-unit>
@@ -3234,7 +3258,7 @@
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">108</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -3262,7 +3286,7 @@
         <source>Invalid Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">109</context>
         </context-group>
         <target>邮箱地址无效</target>
       </trans-unit>
@@ -3270,7 +3294,7 @@
         <source>Message</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">114</context>
         </context-group>
         <target>信息</target>
       </trans-unit>
@@ -3278,7 +3302,7 @@
         <source>Message is mandatory</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="linenumber">115</context>
         </context-group>
         <target>信息不能为空</target>
       </trans-unit>
@@ -3286,7 +3310,7 @@
         <source>Have you any feedback for us?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <target>反馈信息</target>
       </trans-unit>
@@ -3294,7 +3318,7 @@
         <source>Send</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">125</context>
         </context-group>
         <target>发送</target>
       </trans-unit>
@@ -3302,7 +3326,7 @@
         <source>Thank you for sending us your feedback, we&apos;ll get back to you very soon!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">206</context>
         </context-group>
         <target>感谢您给我们发送反馈，我们会尽快和您联系！</target>
       </trans-unit>
@@ -3310,9 +3334,41 @@
         <source>We were not able to send your feedback, Please try again!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">200</context>
+          <context context-type="linenumber">209</context>
         </context-group>
         <target>反馈发送失败，请稍后重试！</target>
+      </trans-unit>
+      <trans-unit id="common.license-subject" datatype="html">
+        <source>Issued to</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
+          <context context-type="linenumber">3</context>
+        </context-group>
+        <target>颁发给</target>
+      </trans-unit>
+      <trans-unit id="common.license-iat" datatype="html">
+        <source>Issued at</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>颁发时间</target>
+      </trans-unit>
+      <trans-unit id="common.license-exp" datatype="html">
+        <source>Expire at</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <target>过期时间</target>
+      </trans-unit>
+      <trans-unit id="common.sso" datatype="html">
+        <source>SSO</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <target>SSO</target>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.title" datatype="html">
         <source>Add team member</source>
@@ -3646,7 +3702,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
-          <context context-type="linenumber">6</context>
+          <context context-type="linenumber">48</context>
         </context-group>
         <target>机构名称不能为空</target>
       </trans-unit>
@@ -3938,7 +3994,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">71</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -7260,6 +7316,10 @@
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
           <context context-type="linenumber">5</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
         <target>复制</target>
       </trans-unit>
       <trans-unit id="iam.policies.details.resource-type" datatype="html">
@@ -7994,28 +8054,75 @@
         </context-group>
         <target>完成</target>
       </trans-unit>
+      <trans-unit id="org.org.id" datatype="html">
+        <source>Id</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
+          <context context-type="linenumber">4</context>
+        </context-group>
+        <target>Id</target>
+      </trans-unit>
+      <trans-unit id="common.org-id-copy-hint" datatype="html">
+        <source>You will need to provide this Id to generate the license, please contact us to get a license.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <target>颁发 License 时需要提供机构 Id, 请联系我们获取 License</target>
+      </trans-unit>
+      <trans-unit id="common.license" datatype="html">
+        <source>License</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <target>License</target>
+      </trans-unit>
+      <trans-unit id="org.org.license-mandatory" datatype="html">
+        <source>License is mandatory!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <target>License 不可为空</target>
+      </trans-unit>
+      <trans-unit id="org.org.updateLicense" datatype="html">
+        <source>Update</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <target>更新</target>
+      </trans-unit>
       <trans-unit id="org.org.orgName" datatype="html">
         <source>Name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
-          <context context-type="linenumber">3</context>
+          <context context-type="linenumber">45</context>
         </context-group>
         <target>机构名称</target>
       </trans-unit>
-      <trans-unit id="5243233792859835904" datatype="html">
+      <trans-unit id="org.org.orgNamePlaceholder" datatype="html">
         <source>Organization name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
-          <context context-type="linenumber">8</context>
+          <context context-type="linenumber">50</context>
         </context-group>
-        <note priority="1" from="description">@org.org.orgNamePlaceholder</note>
-        <target>机构名称</target>
+        <target>名称</target>
       </trans-unit>
       <trans-unit id="org.org.updateOrgName" datatype="html">
         <source>Update</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
-          <context context-type="linenumber">17</context>
+          <context context-type="linenumber">59</context>
         </context-group>
         <target>更新名称</target>
       </trans-unit>
@@ -8023,7 +8130,7 @@
         <source>Switch organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
-          <context context-type="linenumber">22</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <target>切换机构</target>
       </trans-unit>
@@ -8031,7 +8138,7 @@
         <source>Select organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.html</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="linenumber">66</context>
         </context-group>
         <target>选择机构</target>
       </trans-unit>
@@ -8039,9 +8146,25 @@
         <source>Organization name updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>机构名称更新成功！</target>
+      </trans-unit>
+      <trans-unit id="org.org.license-update-success" datatype="html">
+        <source>License updated!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
+          <context context-type="linenumber">132</context>
+        </context-group>
+        <target>License 更新成功</target>
+      </trans-unit>
+      <trans-unit id="org.org.invalid-license" datatype="html">
+        <source>Invalid license, please contact FeatBit team to get a license!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
+          <context context-type="linenumber">137</context>
+        </context-group>
+        <target>无效 License, 请联系我们获取 License</target>
       </trans-unit>
       <trans-unit id="org.routing.projects" datatype="html">
         <source>Projects</source>
