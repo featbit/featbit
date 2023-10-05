@@ -1,5 +1,4 @@
 using Api.Authentication;
-using Domain.Policies;
 
 namespace Api.Authorization;
 

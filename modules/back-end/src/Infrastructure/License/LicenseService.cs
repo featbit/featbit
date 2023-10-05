@@ -72,6 +72,12 @@ public class LicenseService : ILicenseService
             return null;
         }
         
+        // check issuer
+        if (licenseData.Issuer != "https://www.featbit.co")
+        {
+            return null;
+        }
+        
         // check expiration
         if (DateTimeOffset.FromUnixTimeSeconds(licenseData.Exp) < DateTimeOffset.UtcNow)
         {
