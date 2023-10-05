@@ -17,6 +17,4 @@ public class LicenseData
     public bool Sso { get; set; }
 
     public bool Schedule { get; set; }
-
-    
 }

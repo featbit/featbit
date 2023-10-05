@@ -105,13 +105,25 @@ public static class ServicesRegister
         builder.Services.AddSingleton<ILicenseService, LicenseService>();
         builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
+        builder.Services.AddSingleton<ILicenseChecker, LicenseChecker>();
+        builder.Services.AddSingleton<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>
         {
+            // iam permission check 
             foreach (var permission in Permissions.All)
             {
                 options.AddPolicy(
                     permission,
                     policyBuilder => policyBuilder.AddRequirements(new PermissionRequirement(permission))
+                );
+            }
+            
+            // License check
+            foreach (var licenseItem in LicenseItems.All)
+            {
+                options.AddPolicy(
+                    licenseItem,
+                    policyBuilder => policyBuilder.AddRequirements(new LicenseRequirement(licenseItem))
                 );
             }
         });
