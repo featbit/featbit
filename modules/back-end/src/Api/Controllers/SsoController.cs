@@ -14,6 +14,7 @@ public class SsoController : ApiControllerBase
 
     private readonly OidcClient _client;
     private readonly IUserService _userService;
+    private readonly ILicenseService _licenseService;
     private readonly IIdentityService _identityService;
     private readonly IOrganizationService _organizationService;
     private readonly ILogger<SsoController> _logger;
@@ -21,6 +22,7 @@ public class SsoController : ApiControllerBase
     public SsoController(
         OidcClient client,
         IUserService userService,
+        ILicenseService licenseService,
         IIdentityService identityService,
         IOrganizationService organizationService,
         IConfiguration configuration,
@@ -30,11 +32,13 @@ public class SsoController : ApiControllerBase
 
         _client = client;
         _userService = userService;
+        _licenseService = licenseService;
         _identityService = identityService;
         _organizationService = organizationService;
         _logger = logger;
     }
-
+    
+    
     [HttpGet("oidc-authorize-url")]
     public IActionResult GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string? redirectUri = null)
     {
@@ -46,7 +50,7 @@ public class SsoController : ApiControllerBase
         var url = _client.GetAuthorizeUrl(redirectUri);
         return Redirect(url);
     }
-
+    
     [HttpPost("oidc/login")]
     public async Task<ApiResponse<LoginToken>> OidcLoginByCode(LoginByOidcCode request)
     {
@@ -57,6 +61,13 @@ public class SsoController : ApiControllerBase
 
         try
         {
+            var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
+            var licenseData = await _licenseService.VerifyLicenseAsync(organization.Id);
+            if (licenseData == null)
+            {
+                return Error<LoginToken>("You don't have a license or SSO feature is not granted by your license");
+            }
+            
             string token;
 
             var email = await _client.GetEmailAsync(request);
@@ -72,7 +83,6 @@ public class SsoController : ApiControllerBase
                 var registerResult = await _identityService.RegisterByEmailAsync(email, string.Empty);
 
                 // add user to organization
-                var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
                 var organizationUser = new OrganizationUser(organization.Id, registerResult.UserId);
                 await _organizationService.AddUserAsync(organizationUser, policies: new[] { BuiltInPolicy.Developer });
 
@@ -92,7 +102,7 @@ public class SsoController : ApiControllerBase
             return Error<LoginToken>(ex.Message);
         }
     }
-
+    
     [HttpGet("check-enabled")]
     public ApiResponse<bool> Enabled() => Ok(_isEnabled);
 }

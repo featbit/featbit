@@ -86,16 +86,21 @@ export class DoLoginComponent implements OnInit {
 
         this.ssoService.oidcLogin(params['code']).subscribe({
           next: response => this.handleSsoResponse(response),
-          error: error => this.handleError(error)
+          error: error => this.handleError(error),
+          complete: () => this.isSpinning = false
         })
       }
     });
   }
 
   async handleSsoResponse(response) {
-    console.log(response);
     if (!response.success) {
-      this.message.error($localize`:@@common.cannot-login-by-oidc-code:Failed to login by OpenID Connect SSO.`);
+      if (response.errors) {
+        this.message.error(response.errors[0]);
+      } else {
+        this.message.error($localize`:@@common.cannot-login-by-oidc-code:Failed to login by OpenID Connect SSO.`);
+      }
+
       return;
     }
 
