@@ -13,7 +13,7 @@
           </ng-template>
         </nz-input-group>
       </nz-form-item>
-      <button nz-button class="copy-id-btn" nzType="primary" [nzLoading]="isLoading" (click)="copyText(currentOrganization.id)">
+      <button nz-button class="copy-id-btn" nzType="primary" (click)="copyText(currentOrganization.id)">
         <i nz-icon nzType="icons:icon-copy"></i>
         <ng-container i18n="@@common.copy">Copy</ng-container>
       </button>
@@ -35,7 +35,7 @@
           <license [license]="license"></license>
         </ng-template>
       </nz-form-item>
-      <button nz-button class="update-license-btn" nzType="primary" [nzLoading]="isLoading">
+      <button nz-button class="update-license-btn" nzType="primary" [nzLoading]="isLicenseLoading">
         <i nz-icon nzType="icons:icon-sync"></i>
         <ng-container i18n="@@org.org.updateLicense">Update</ng-container>
       </button>

@@ -28,6 +28,7 @@ export class OrganizationComponent implements OnInit {
   canUpdateOrgName: boolean = false;
 
   isLoading: boolean = false;
+  isLicenseLoading: boolean = false;
 
   constructor(
     private messageQueueService: MessageQueueService,
@@ -123,19 +124,19 @@ export class OrganizationComponent implements OnInit {
     const { license } = this.validateLicenseForm.value;
     const { id, initialized, name} = this.currentOrganization;
 
-    this.isLoading = true;
+    this.isLicenseLoading = true;
     this.organizationService.updateLicense({ license })
       .pipe()
       .subscribe({
         next: () => {
-          this.isLoading = false;
+          this.isLicenseLoading = false;
           this.message.success($localize`:@@org.org.license-update-success:License updated!`);
           this.organizationService.setOrganization({ id, initialized, name, license });
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
         error: () => {
           this.message.error($localize`:@@org.org.invalid-license:Invalid license, please contact FeatBit team to get a license!`);
-          this.isLoading = false;
+          this.isLicenseLoading = false;
         }
       });
   }
