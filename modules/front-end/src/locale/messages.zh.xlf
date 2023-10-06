@@ -6513,7 +6513,7 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target></target>
+        <target>您没有 License，或者你当前的 License 不包括计划变更功能，请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.setabtestrule" datatype="html">
         <source>Set A/B test rule</source>
