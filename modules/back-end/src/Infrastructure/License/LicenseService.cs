@@ -78,7 +78,7 @@ public class LicenseService : ILicenseService
         }
         
         // check expiration
-        if (DateTimeOffset.FromUnixTimeSeconds(licenseData.Exp) < DateTimeOffset.UtcNow)
+        if (DateTimeOffset.FromUnixTimeMilliseconds(licenseData.Exp) < DateTimeOffset.UtcNow)
         {
             return null;
         }
