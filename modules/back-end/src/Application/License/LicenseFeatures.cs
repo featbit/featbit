@@ -1,9 +1,9 @@
-namespace Api.Authorization;
+namespace  Application.License;
 
-public class LicenseItems
+public class LicenseFeatures
 {
-    public const string Sso = nameof(Sso);
-    public const string Schedule = nameof(Schedule);
+    public const string Sso = "sso";
+    public const string Schedule = "schedule";
 
     public static readonly string[] All = { Sso, Schedule };
 

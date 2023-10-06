@@ -1,3 +1,4 @@
+using Application.License;
 using Application.Services;
 
 namespace Api.Authorization;
@@ -27,8 +28,8 @@ public class LicenseChecker : ILicenseChecker
 
         return licenseItem switch
         {
-            LicenseItems.Sso => licenseData.Sso,
-            LicenseItems.Schedule => licenseData.Schedule,
+            LicenseFeatures.Sso => licenseData.IsGranted(LicenseFeatures.Sso),
+            LicenseFeatures.Schedule => licenseData.IsGranted(LicenseFeatures.Schedule),
             _ => false
         };
     }

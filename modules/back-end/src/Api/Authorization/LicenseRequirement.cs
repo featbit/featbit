@@ -1,3 +1,5 @@
+using Application.License;
+
 namespace Api.Authorization;
 
 public class LicenseRequirement : IAuthorizationRequirement
@@ -6,7 +8,7 @@ public class LicenseRequirement : IAuthorizationRequirement
 
     public LicenseRequirement(string licenseItem)
     {
-        if (!LicenseItems.IsDefined(licenseItem))
+        if (!LicenseFeatures.IsDefined(licenseItem))
         {
             throw new ArgumentException($"The item '{licenseItem}' is not defined.", nameof(licenseItem));
         }

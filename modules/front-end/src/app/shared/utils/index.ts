@@ -1,5 +1,5 @@
 import { USER_PROFILE } from "./localstorage-keys";
-import { IAuthProps } from "../types";
+import { IAuthProps, ILicense, LicenseFeatureEnum } from "../types";
 import { USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT } from "@shared/constants";
 import { ICondition } from "@shared/rules";
 
@@ -149,8 +149,4 @@ export const getTimezoneString = () => {
   const offset = - new Date().getTimezoneOffset() / 60;
 
   return encodeURIComponent(`Etc/GMT${offset >= 0 ? '-': '+'}${Math.abs(offset)}`);
-}
-
-export const getLicense = (licenseStr: string) => {
-  return licenseStr ? JSON.parse(atob(licenseStr.split('.')[1])): null;
 }

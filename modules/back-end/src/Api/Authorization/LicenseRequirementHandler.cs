@@ -1,4 +1,5 @@
 using Api.Authentication;
+using Application.License;
 
 namespace Api.Authorization;
 
@@ -20,7 +21,7 @@ public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement
             return;
         }
 
-        if (!LicenseItems.IsDefined(requirement.LicenseItem)) return;
+        if (!LicenseFeatures.IsDefined(requirement.LicenseItem)) return;
 
         if (!httpContext.Request.Headers.TryGetValue(OpenApiConstants.OrgIdHeaderKey, out var orgId)) return;
         

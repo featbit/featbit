@@ -2,6 +2,7 @@ using System.Text;
 using Api.Authentication;
 using Api.Authorization;
 using Api.Swagger;
+using Application.License;
 using Application.Services;
 using Domain.Identity;
 using Infrastructure.License;
@@ -119,7 +120,7 @@ public static class ServicesRegister
             }
             
             // License check
-            foreach (var licenseItem in LicenseItems.All)
+            foreach (var licenseItem in LicenseFeatures.All)
             {
                 options.AddPolicy(
                     licenseItem,

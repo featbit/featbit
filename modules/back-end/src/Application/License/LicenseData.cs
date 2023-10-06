@@ -13,8 +13,11 @@ public class LicenseData
     public long Exp { get; set; }
     
     public string Issuer { get; set; }
-    
-    public bool Sso { get; set; }
 
-    public bool Schedule { get; set; }
+    public ICollection<string> Features { get; set; }
+    
+    public bool IsGranted(string feature)
+    {
+        return Features.Contains(feature);
+    }
 }

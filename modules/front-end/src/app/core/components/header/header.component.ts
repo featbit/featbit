@@ -6,7 +6,7 @@ import {
   IEnvironment,
   IProjectEnv,
   SecretTypeEnum,
-  ILicense
+  ILicense, License
 } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
@@ -15,7 +15,7 @@ import { PermissionsService } from "@services/permissions.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
-import { copyToClipboard, getLicense } from '@utils/index';
+import { copyToClipboard } from '@utils/index';
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FeedbackService } from "@services/feedback.service";
 import { EnvService } from '@core/services/env.service';
@@ -34,7 +34,7 @@ export class HeaderComponent implements OnInit {
 
   currentProjectEnv: IProjectEnv;
   currentOrganization: IOrganization;
-  license?: ILicense;
+  license: License;
 
   allProjects: IProject[] = [];
   selectedProject: IProject;
@@ -154,7 +154,7 @@ export class HeaderComponent implements OnInit {
   private setSelectedProjectEnv() {
     this.currentOrganization = getCurrentOrganization();
     this.currentProjectEnv = getCurrentProjectEnv();
-    this.license = getLicense(this.currentOrganization.license);
+    this.license = new License(this.currentOrganization.license);
 
     this.setCurrentEnv();
 

@@ -1,3 +1,4 @@
+using Application.License;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
@@ -9,6 +10,8 @@ namespace Application.FeatureFlags;
 
 public class UpdateTargeting : IRequest<bool>
 {
+    public Guid OrgId { get; set; }
+    
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
@@ -29,6 +32,7 @@ public class UpdateTargeting : IRequest<bool>
 public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 {
     private readonly IFeatureFlagService _flagService;
+    private readonly ILicenseService _licenseService;
     private readonly IFlagScheduleService _flagScheduleService;
     private readonly IFlagDraftService _flagDraftService;
     private readonly IAuditLogService _auditLogService;
@@ -37,6 +41,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 
     public UpdateTargetingHandler(
         IFeatureFlagService flagService,
+        ILicenseService licenseService,
         IFlagScheduleService flagScheduleService,
         IFlagDraftService flagDraftService,
         IAuditLogService auditLogService,
@@ -44,6 +49,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         IPublisher publisher)
     {
         _flagService = flagService;
+        _licenseService = licenseService;
         _flagScheduleService = flagScheduleService;
         _flagDraftService = flagDraftService;
         _auditLogService = auditLogService;
@@ -62,7 +68,9 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
             _currentUser.Id
         );
 
-        var result = request.Schedule != null
+        var licenseData = await _licenseService.VerifyLicenseAsync(request.OrgId);
+
+        var result = licenseData != null && licenseData.IsGranted(LicenseFeatures.Schedule) && request.Schedule != null
             ? await CreateScheduleAsync()
             : await UpdateTargetingAsync();
 

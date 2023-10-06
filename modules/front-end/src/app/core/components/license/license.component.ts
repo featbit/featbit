@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IAuthProps, ILicense } from "@shared/types";
+import { License, LicenseFeatureEnum } from "@shared/types";
 
 @Component({
   selector: 'license',
@@ -8,11 +8,12 @@ import { IAuthProps, ILicense } from "@shared/types";
 })
 export class LicenseComponent {
 
-  @Input() license: ILicense;
+  @Input() license: License;
 
   getLocalDate(date: number) {
     if (!date) return '';
     return new Date(date);
   }
 
+  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
 }

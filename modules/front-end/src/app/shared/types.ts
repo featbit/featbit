@@ -53,6 +53,11 @@ export interface IOrganization {
   license?: string
 }
 
+export enum LicenseFeatureEnum {
+  Sso = 'sso',
+  Schedule = 'schedule'
+}
+
 export interface ILicense {
   plan: string,
   sub: string,
@@ -60,8 +65,18 @@ export interface ILicense {
   iat: number,
   exp: number,
   issuer: string,
-  sso: boolean,
-  schedule: boolean
+  features: LicenseFeatureEnum[]
+}
+
+export class License {
+  data: ILicense;
+  constructor(private licenseStr: string) {
+    this.data = licenseStr ? JSON.parse(atob(licenseStr.split('.')[1])): null;
+  }
+
+  isGranted(feature: LicenseFeatureEnum): boolean {
+    return this.data?.features?.includes(feature);
+  }
 }
 
 export interface IOnboarding {
