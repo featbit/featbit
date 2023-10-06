@@ -84,6 +84,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 
             // create schedule
             var flagSchedule = FlagSchedule.WaitingForExecution(
+                request.OrgId,
                 request.EnvId,
                 flagDraft.Id,
                 flag.Id,

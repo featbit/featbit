@@ -145,4 +145,5 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
 
   protected readonly environment = environment;
   protected readonly RefTypeEnum = RefTypeEnum;
+  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
 }

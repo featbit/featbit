@@ -1,4 +1,5 @@
 using Application.FeatureFlags;
+using Application.License;
 using Domain.AuditLogs;
 using Domain.FlagSchedules;
 using MediatR;
@@ -12,6 +13,7 @@ public class FlagScheduleWorker : BackgroundService
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(45));
 
     private readonly IFeatureFlagService _featureFlagService;
+    private readonly ILicenseService _licenseService;
     private readonly IFlagScheduleService _flagScheduleService;
     private readonly IAuditLogService _auditLogService;
     private readonly IFlagDraftService _flagDraftService;
@@ -20,6 +22,7 @@ public class FlagScheduleWorker : BackgroundService
 
     public FlagScheduleWorker(
         IFeatureFlagService featureFlagService,
+        ILicenseService licenseService,
         IFlagScheduleService flagScheduleService,
         IAuditLogService auditLogService,
         IFlagDraftService flagDraftService,
@@ -27,6 +30,7 @@ public class FlagScheduleWorker : BackgroundService
         IPublisher publisher)
     {
         _featureFlagService = featureFlagService;
+        _licenseService = licenseService;
         _flagScheduleService = flagScheduleService;
         _auditLogService = auditLogService;
         _flagDraftService = flagDraftService;
@@ -64,6 +68,12 @@ public class FlagScheduleWorker : BackgroundService
             {
                 try
                 {
+                    var licenseData = await _licenseService.VerifyLicenseAsync(schedule.OrgId);
+                    if (licenseData == null || !licenseData.IsGranted(LicenseFeatures.Schedule))
+                    {
+                        continue;
+                    }
+                    
                     await ApplyScheduleAsync(schedule);
                     _logger.LogInformation("{ScheduleId}:{ScheduleTitle}: Flag schedule has been applied.", schedule.Id, schedule.Title);
                 }
