@@ -120,11 +120,11 @@ public static class ServicesRegister
             }
             
             // License check
-            foreach (var licenseItem in LicenseFeatures.All)
+            foreach (var licenseFeature in LicenseFeatures.All)
             {
                 options.AddPolicy(
-                    licenseItem,
-                    policyBuilder => policyBuilder.AddRequirements(new LicenseRequirement(licenseItem))
+                    licenseFeature,
+                    policyBuilder => policyBuilder.AddRequirements(new LicenseRequirement(licenseFeature))
                 );
             }
         });

@@ -119,6 +119,4 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
         await MongoDb.CollectionOf<Project>().DeleteManyAsync(x => projectIds.Contains(x.Id));
         await MongoDb.CollectionOf<Environment>().DeleteManyAsync(x => projectIds.Contains(x.ProjectId));
     }
-    
-    
 }

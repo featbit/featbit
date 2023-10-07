@@ -20,13 +20,13 @@ public class LicenseService : ILicenseService
         IConfiguration configuration)
     {
         _rsa = RSA.Create();
-        LoadPublicKey(configuration["PublicKey"]);
+        ImportPublicKey(configuration["PublicKey"]);
         
         _cacheService = cacheService;
         _organizationService = organizationService;
     }
 
-    private void LoadPublicKey(string publicKey)
+    private void ImportPublicKey(string publicKey)
     {
         
         publicKey = publicKey.Replace("-----BEGIN PUBLIC KEY-----", "")

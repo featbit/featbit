@@ -21,11 +21,11 @@ public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement
             return;
         }
 
-        if (!LicenseFeatures.IsDefined(requirement.LicenseItem)) return;
+        if (!LicenseFeatures.IsDefined(requirement.LicenseFeature)) return;
 
         if (!httpContext.Request.Headers.TryGetValue(OpenApiConstants.OrgIdHeaderKey, out var orgId)) return;
         
-        if (await _licenseChecker.Verify(Guid.Parse(orgId), requirement.LicenseItem))
+        if (await _licenseChecker.Verify(Guid.Parse(orgId), requirement.LicenseFeature))
         {
             context.Succeed(requirement);
         }
