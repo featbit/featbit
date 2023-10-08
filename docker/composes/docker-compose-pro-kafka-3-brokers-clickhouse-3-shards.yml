@@ -130,7 +130,7 @@ services:
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
+      - Kafka__BootstrapServers=kafka-2:9092
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
       - IS_PRO=true
@@ -155,7 +155,7 @@ services:
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
+      - Kafka__BootstrapServers=kafka-1:9092
       - Redis__ConnectionString=redis:6379
       - IS_PRO=true
     depends_on:
@@ -177,25 +177,32 @@ services:
       context: ./modules/data-analytics
       dockerfile: ./Dockerfile
     depends_on:
-      - kafka
-      - clickhouse-blue-1
-      - clickhouse-blue-2
-      - clickhouse-green-1
-      - clickhouse-green-2
-      - clickhouse-orange-1
-      - clickhouse-orange-2
+      init-kafka-topics:
+        condition: service_completed_successfully
+      clickhouse-blue-1:
+        condition: service_started
+      clickhouse-blue-2:
+        condition: service_started
+      clickhouse-green-1:
+        condition: service_started
+      clickhouse-green-2:
+        condition: service_started
+      clickhouse-orange-1:
+        condition: service_started
+      clickhouse-orange-2:
+        condition: service_started
     ports:
       - "8200:80"
     networks:
       - featbit-network
     environment:
-      KAFKA_HOSTS: kafka:9092
+      KAFKA_HOSTS: kafka-0:9092
       REDIS_URL: redis://redis:6379/0
       CLICKHOUSE_HOST: clickhouse-blue-1
       CLICKHOUSE_PORT: '9000'
       CLICKHOUSE_HTTP_PORT: '8123'
       CLICKHOUSE_ALT_HOST: clickhouse-green-1:9000,clickhouse-orange-1:9000
-      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+      CLICKHOUSE_KAFKA_HOSTS: kafka-0:9092
       IS_PRO: true
 
   mongodb:
@@ -227,59 +234,98 @@ services:
     volumes:
       - redis:/bitnami/redis/data
 
-  kafka:
+  kafka-0:
     image: bitnami/kafka:3.5
-    container_name: kafka
+    container_name: kafka-0
     restart: on-failure
     ports:
-      - '9092:9092'
+      - '9092'
       - '29092:29092'
     environment:
+      # KRaft settings
       KAFKA_CFG_NODE_ID: 0
       KAFKA_CFG_PROCESS_ROLES: controller,broker
-      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      KAFKA_KRAFT_CLUSTER_ID: abcdefghijklmnopqrstuv
+      # Listeners
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-0:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
-      ALLOW_PLAINTEXT_LISTENER: 'true'
     networks:
       - featbit-network
     volumes:
-      - kafka:/bitnami/kafka
+      - kafka_0_data:/bitnami/kafka
+  
+  kafka-1:
+    image: bitnami/kafka:3.5
+    container_name: kafka-1
+    restart: on-failure
+    ports:
+      - '9092'
+    environment:
+      # KRaft settings
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      KAFKA_KRAFT_CLUSTER_ID: abcdefghijklmnopqrstuv
+      # Listeners
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - featbit-network
+    volumes:
+      - kafka_1_data:/bitnami/kafka
+  
+  kafka-2:
+    image: bitnami/kafka:3.5
+    container_name: kafka-2
+    restart: on-failure
+    ports:
+      - '9092'
+    environment:
+      # KRaft settings
+      KAFKA_CFG_NODE_ID: 2
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka-0:9093,1@kafka-1:9093,2@kafka-2:9093
+      KAFKA_KRAFT_CLUSTER_ID: abcdefghijklmnopqrstuv
+      # Listeners
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - featbit-network
+    volumes:
+      - kafka_2_data:/bitnami/kafka
+  
 
   init-kafka-topics:
     image: bitnami/kafka:3.5
     depends_on:
-      kafka:
-        condition: service_started
+      - kafka-0
+      - kafka-1
+      - kafka-2
     entrypoint:
       - bash
       - -c
       - |
         echo "Waiting for Kafka to be ready..."
-        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092; do sleep 5; done;
+        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka-0:9092; do sleep 5; done;
         echo "Kafka is ready now, start creating topics."
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-feature-flag-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-segment-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-endusers;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 6 --replication-factor 1 --topic featbit-insights;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-feature-flag-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-segment-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-endusers;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 6 --replication-factor 2 --topic featbit-insights;
         echo "Seed kafka topic finished." 
-    networks:
-      - featbit-network
-
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    ports:
-      - "8080:8080"
-    restart: on-failure
-    depends_on:
-      - kafka
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=featbit-kafka
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
     networks:
       - featbit-network
 
@@ -301,7 +347,9 @@ networks:
 volumes:
   mongodb:
   redis:
-  kafka:
+  kafka_0_data:
+  kafka_1_data:
+  kafka_2_data:
   ch-blue-1-data:
   ch-blue-2-data:
   ch-green-1-data:
