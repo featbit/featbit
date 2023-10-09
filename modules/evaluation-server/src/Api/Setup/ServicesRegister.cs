@@ -1,3 +1,4 @@
+using Confluent.Kafka;
 using Infrastructure.Fakes;
 using Infrastructure.Redis;
 using Streaming.DependencyInjection;
@@ -42,6 +43,14 @@ public static class ServicesRegister
             var isProVersion = configuration["IS_PRO"];
             if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
             {
+                var producerConfig = new ProducerConfig();
+                configuration.GetSection("Kafka:Producer").Bind(producerConfig);
+                services.AddSingleton(producerConfig);
+
+                var consumerConfig = new ConsumerConfig();
+                configuration.GetSection("Kafka:Consumer").Bind(consumerConfig);
+                services.AddSingleton(consumerConfig);
+
                 // use kafka as message queue in pro version
                 streamingBuilder.UseKafkaMessageQueue();
             }
