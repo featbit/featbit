@@ -29,8 +29,8 @@ variables.
 | `Logging__LogLevel__Microsoft_AspNetCore` | aspnet-core logging level                                | `"Warning"`                                |
 | `MongoDb__ConnectionString`               | Mongodb connection string                                | `"mongodb://admin:password@mongodb:27017"` |
 | `MongoDb__Database`                       | Mongodb database name                                    | `"featbit"`                                |
-| `Kafka__Producer__BootstrapServers`       | Kafka Servers used by producers                          | `"kafka:9092"`                             |
-| `Kafka__Consumer__BootstrapServers`       | Kafka Servers used by consumers                          | `"kafka:9092"`                             |
+| `Kafka__Producer__bootstrap.servers`      | Kafka Servers used by producers                          | `"kafka:9092"`                             |
+| `Kafka__Consumer__bootstrap.servers`      | Kafka Servers used by consumers                          | `"kafka:9092"`                             |
 | `Redis__ConnectionString`                 | Redis Connection String                                  | `redis:6379`                               |
 | `AllowedHosts`                            | Hosts allowed to connect to the API                      | `"*"`                                      |
 | `IS_PRO`                                  | If `true` operates in PRO mode with kafka and clickhouse | `"false"`                                  |

@@ -44,8 +44,8 @@ variables.
 | `Jwt__Key`                                | JWT Private Key                                          | `"featbit-identity-key"`                   |
 | `MongoDb__ConnectionString`               | Mongodb connection string                                | `"mongodb://admin:password@mongodb:27017"` |
 | `MongoDb__Database`                       | Mongodb database name                                    | `"featbit"`                                |
-| `Kafka__Producer__BootstrapServers`       | Kafka Servers used by producers                          | `"kafka:9092"`                             |
-| `Kafka__Consumer__BootstrapServers`       | Kafka Servers used by consumers                          | `"kafka:9092"`                             |
+| `Kafka__Producer__bootstrap.servers`      | Kafka Servers used by producers                          | `"kafka:9092"`                             |
+| `Kafka__Consumer__bootstrap.servers`      | Kafka Servers used by consumers                          | `"kafka:9092"`                             |
 | `OLAP__ServiceHost`                       | URI for the data analytics server                        | `"http://da-server"`                       |
 | `Redis__ConnectionString`                 | Redis Connection String                                  | `redis:6379`                               |
 | `AllowedHosts`                            | Hosts allowed to connect to the API                      | `"*"`                                      |

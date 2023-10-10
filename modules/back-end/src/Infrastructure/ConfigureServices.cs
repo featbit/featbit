@@ -103,12 +103,14 @@ public static class ConfigureServices
         var isProVersion = configuration["IS_PRO"];
         if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {
-            var producerConfig = new ProducerConfig();
-            configuration.GetSection("Kafka:Producer").Bind(producerConfig);
+            var producerConfigDictionary = new Dictionary<string, string>();
+            configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
+            var producerConfig = new ProducerConfig(producerConfigDictionary);
             services.AddSingleton(producerConfig);
 
-            var consumerConfig = new ConsumerConfig();
-            configuration.GetSection("Kafka:Consumer").Bind(consumerConfig);
+            var consumerConfigDictionary = new Dictionary<string, string>();
+            configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
+            var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
             services.AddSingleton(consumerConfig);
 
             // use kafka as message queue in pro version
