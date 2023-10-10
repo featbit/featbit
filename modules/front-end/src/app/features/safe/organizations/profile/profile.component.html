@@ -28,7 +28,7 @@
     </button>
   </form>
 </div>
-<div class="standard-div">
+<div class="standard-div" *ngIf="auth.origin === UserOriginEnum.Local">
   <form nz-form [formGroup]="resetPasswordForm" nzLayout="vertical" (ngSubmit)="resetPassword()">
     <nz-form-item>
       <nz-form-label nzRequired i18n="@@org.profile.current-password">Current Password</nz-form-label>

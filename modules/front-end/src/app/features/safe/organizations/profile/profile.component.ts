@@ -5,6 +5,7 @@ import { getAuth } from '@utils/index';
 import { UserService } from "@services/user.service";
 import { IAuthProps } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
+import { UserOriginEnum } from "@features/safe/organizations/types/profiles";
 
 @Component({
   selector: 'app-profile',
@@ -115,4 +116,6 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+
+  protected readonly UserOriginEnum = UserOriginEnum;
 }

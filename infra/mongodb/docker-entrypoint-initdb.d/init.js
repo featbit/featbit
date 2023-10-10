@@ -27,6 +27,7 @@ db.Users.insertOne(
         email: "test@featbit.com",
         password: "AQAAAAEAACcQAAAAELDHEjCrDQrmnAXU5C//mOLvUBJ7lnVFEMMFxNMDIIrF7xK8JDQKUifU3HH4gexNAQ==",
         name: "tester",
+        origin: "Local",
         createAt: new Date(),
         updatedAt: new Date()
     }

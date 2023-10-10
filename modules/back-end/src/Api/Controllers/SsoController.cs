@@ -3,6 +3,7 @@ using Application.Identity;
 using Application.Services;
 using Domain.Organizations;
 using Domain.Policies;
+using Domain.Users;
 
 namespace Api.Controllers;
 
@@ -69,7 +70,7 @@ public class SsoController : ApiControllerBase
             if (user == null)
             {
                 // register user by email
-                var registerResult = await _identityService.RegisterByEmailAsync(email, string.Empty);
+                var registerResult = await _identityService.RegisterByEmailAsync(email, string.Empty, UserOrigin.Sso);
 
                 // add user to organization
                 var organization = await _organizationService.GetDefaultSsoOrganizationAsync();

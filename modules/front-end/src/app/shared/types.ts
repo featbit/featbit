@@ -1,3 +1,5 @@
+import { UserOriginEnum } from "@features/safe/organizations/types/profiles";
+
 export interface IResponse {
   success: boolean,
   errors: string[],
@@ -44,6 +46,7 @@ export interface IAuthProps {
   id: string;
   email: string;
   name: string;
+  origin: UserOriginEnum;
 }
 
 export interface IOrganization {
