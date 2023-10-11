@@ -24,20 +24,15 @@ public class Organization : AuditedEntity
 
     public void UpdateLicense(string license)
     {
-        if (!LicenseVerifier.TryParse(Id, license, out _))
-        {
-            throw new ArgumentException($"The license '{license}' is invalid.", nameof(license));
-        }
-        
         License = license;
 
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Update(string name, bool initialized)
+    public void Initialize(string name)
     {
         Name = name;
-        Initialized = initialized;
+        Initialized = true;
 
         UpdatedAt = DateTime.UtcNow;
     }
