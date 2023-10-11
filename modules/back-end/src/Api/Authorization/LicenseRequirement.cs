@@ -4,20 +4,20 @@ namespace Api.Authorization;
 
 public class LicenseRequirement : IAuthorizationRequirement
 {
-    public string LicenseFeature { get; }
+    public string Feature { get; }
 
-    public LicenseRequirement(string licenseFeature)
+    public LicenseRequirement(string feature)
     {
-        if (!LicenseFeatures.IsDefined(licenseFeature))
+        if (!LicenseFeatures.IsDefined(feature))
         {
-            throw new ArgumentException($"The feature '{licenseFeature}' is not defined.", nameof(licenseFeature));
+            throw new ArgumentException($"The feature '{feature}' is not defined.", nameof(feature));
         }
 
-        LicenseFeature = licenseFeature;
+        Feature = feature;
     }
 
     public override string ToString()
     {
-        return $"LicenseRequirement: {LicenseFeature}";
+        return $"LicenseRequirement: {Feature}";
     }
 }

@@ -37,8 +37,7 @@ public class SsoController : ApiControllerBase
         _organizationService = organizationService;
         _logger = logger;
     }
-    
-    
+
     [HttpGet("oidc-authorize-url")]
     public IActionResult GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string? redirectUri = null)
     {
@@ -50,7 +49,7 @@ public class SsoController : ApiControllerBase
         var url = _client.GetAuthorizeUrl(redirectUri);
         return Redirect(url);
     }
-    
+
     [HttpPost("oidc/login")]
     public async Task<ApiResponse<LoginToken>> OidcLoginByCode(LoginByOidcCode request)
     {
@@ -105,7 +104,7 @@ public class SsoController : ApiControllerBase
             return Error<LoginToken>(ex.Message);
         }
     }
-    
+
     [HttpGet("check-enabled")]
     public ApiResponse<bool> Enabled() => Ok(_isEnabled);
 }
