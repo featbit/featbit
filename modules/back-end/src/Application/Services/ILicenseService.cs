@@ -1,21 +1,9 @@
-using Application.License;
-
 namespace Application.Services;
 
 public interface ILicenseService
 {
     /// <summary>
-    /// Verify license for organization
+    /// Check if the feature is granted for the organization
     /// </summary>
-    /// <param name="orgId"></param>
-    /// <param name="licenseStr"></param>
-    /// <returns>The <see cref="LicenseData"/> if the license is valid or null otherwise. </returns>
-    LicenseData? VerifyLicenseAsync(Guid orgId, string licenseStr);
-    
-    /// <summary>
-    /// Verify license for organization
-    /// </summary>
-    /// <param name="orgId"></param>
-    /// <returns> The <see cref="LicenseData"/> if the license is valid or null otherwise. </returns>
-    Task<LicenseData?> VerifyLicenseAsync(Guid orgId);
+    Task<bool> IsFeatureGrantedAsync(Guid orgId, string feature);
 }

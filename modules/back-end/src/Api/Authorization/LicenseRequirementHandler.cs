@@ -1,15 +1,15 @@
 using Api.Authentication;
-using Application.License;
+using Application.Services;
 
 namespace Api.Authorization;
 
 public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement>
 {
-    private readonly ILicenseChecker _licenseChecker;
+    private readonly ILicenseService _licenseService;
 
-    public LicenseRequirementHandler(ILicenseChecker licenseChecker)
+    public LicenseRequirementHandler(ILicenseService licenseService)
     {
-        _licenseChecker = licenseChecker;
+        _licenseService = licenseService;
     }
 
     protected override async Task HandleRequirementAsync(
@@ -21,11 +21,18 @@ public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement
             return;
         }
 
-        if (!LicenseFeatures.IsDefined(requirement.LicenseFeature)) return;
+        if (!httpContext.Request.Headers.TryGetValue(OpenApiConstants.OrgIdHeaderKey, out var orgIdString))
+        {
+            return;
+        }
 
-        if (!httpContext.Request.Headers.TryGetValue(OpenApiConstants.OrgIdHeaderKey, out var orgId)) return;
-        
-        if (await _licenseChecker.Verify(Guid.Parse(orgId), requirement.LicenseFeature))
+        if (!Guid.TryParse(orgIdString, out var orgId))
+        {
+            return;
+        }
+
+        var isFeatureGranted = await _licenseService.IsFeatureGrantedAsync(orgId, requirement.LicenseFeature);
+        if (isFeatureGranted)
         {
             context.Succeed(requirement);
         }

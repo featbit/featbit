@@ -1,5 +1,6 @@
-using Domain.FeatureFlags;
 using Domain.Segments;
+using Domain.FeatureFlags;
+using Domain.Organizations;
 
 namespace Application.Caches;
 
@@ -11,7 +12,7 @@ public interface ICacheService
 
     Task UpsertSegmentAsync(Segment segment);
 
-    Task UpsertLicenseAsync(Guid orgId, string license);
-    
+    Task UpsertLicenseAsync(Organization organization);
+
     Task<string> GetLicenseAsync(Guid orgId);
 }

@@ -1,6 +1,5 @@
 using Api.Authentication.OpenIdConnect;
 using Application.Identity;
-using Application.License;
 using Application.Services;
 using Domain.Organizations;
 using Domain.Policies;
@@ -63,12 +62,15 @@ public class SsoController : ApiControllerBase
         try
         {
             var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
-            var licenseData = await _licenseService.VerifyLicenseAsync(organization.Id);
-            if (licenseData == null || !licenseData.IsGranted(LicenseFeatures.Sso))
+
+            var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(organization.Id, LicenseFeatures.Sso);
+            if (!isSsoGranted)
             {
-                return Error<LoginToken>("You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license.");
+                return Error<LoginToken>(
+                    "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
+                );
             }
-            
+
             string token;
 
             var email = await _client.GetEmailAsync(request);

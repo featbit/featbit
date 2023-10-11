@@ -68,7 +68,7 @@ public class OrganizationController : ApiControllerBase
         var organization = await Mediator.Send(request);
         return Ok(organization);
     }
-    
+
     [HttpPut("license")]
     public async Task<ApiResponse<OrganizationVm>> UpdateLicenseAsync(UpdateOrganizationLicense request)
     {

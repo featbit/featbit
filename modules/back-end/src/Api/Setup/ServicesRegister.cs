@@ -2,7 +2,7 @@ using System.Text;
 using Api.Authentication;
 using Api.Authorization;
 using Api.Swagger;
-using Application.License;
+using Domain.Organizations;
 using Application.Services;
 using Domain.Identity;
 using Infrastructure.License;
@@ -103,10 +103,10 @@ public static class ServicesRegister
             .AddOpenApi(Schemes.OpenApi);
 
         // authorization
+        LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
         builder.Services.AddSingleton<ILicenseService, LicenseService>();
         builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
-        builder.Services.AddSingleton<ILicenseChecker, LicenseChecker>();
         builder.Services.AddSingleton<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>
         {
@@ -118,13 +118,13 @@ public static class ServicesRegister
                     policyBuilder => policyBuilder.AddRequirements(new PermissionRequirement(permission))
                 );
             }
-            
-            // License check
-            foreach (var licenseFeature in LicenseFeatures.All)
+
+            // license check
+            foreach (var feature in LicenseFeatures.All)
             {
                 options.AddPolicy(
-                    licenseFeature,
-                    policyBuilder => policyBuilder.AddRequirements(new LicenseRequirement(licenseFeature))
+                    feature,
+                    policyBuilder => policyBuilder.AddRequirements(new LicenseRequirement(feature))
                 );
             }
         });

@@ -1,14 +1,14 @@
-namespace  Application.License;
+namespace Domain.Organizations;
 
-public class LicenseFeatures
+public static class LicenseFeatures
 {
     public const string Sso = "sso";
     public const string Schedule = "schedule";
 
     public static readonly string[] All = { Sso, Schedule };
 
-    public static bool IsDefined(string licenseItem)
+    public static bool IsDefined(string feature)
     {
-        return All.Contains(licenseItem);
+        return All.Contains(feature);
     }
 }

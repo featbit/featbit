@@ -1,5 +1,6 @@
 using Application.Caches;
 using Domain.FeatureFlags;
+using Domain.Organizations;
 using Domain.Segments;
 using StackExchange.Redis;
 
@@ -12,20 +13,6 @@ public class RedisCacheService : ICacheService
     public RedisCacheService(IRedisClient redis)
     {
         _database = redis.GetDatabase();
-    }
-
-    public async Task<string> GetLicenseAsync(Guid orgId)
-    {
-        var key = RedisKeys.License(orgId);
-        var value = await _database.StringGetAsync(key);
-        
-        return value.ToString();
-    }
-    
-    public async Task UpsertLicenseAsync(Guid orgId, string license)
-    {
-        var cache = RedisCaches.License(orgId, license);
-        await _database.StringSetAsync(cache.Key, cache.Value);
     }
 
     public async Task UpsertFlagAsync(FeatureFlag flag)
@@ -59,5 +46,21 @@ public class RedisCacheService : ICacheService
         // upsert index
         var index = RedisCaches.SegmentIndex(segment);
         await _database.SortedSetAddAsync(index.Key, index.Member, index.Score);
+    }
+
+    public async Task UpsertLicenseAsync(Organization organization)
+    {
+        var key = RedisKeys.License(organization.Id);
+        var value = organization.License;
+
+        await _database.StringSetAsync(key, value);
+    }
+
+    public async Task<string> GetLicenseAsync(Guid orgId)
+    {
+        var key = RedisKeys.License(orgId);
+        var value = await _database.StringGetAsync(key);
+
+        return value.ToString();
     }
 }

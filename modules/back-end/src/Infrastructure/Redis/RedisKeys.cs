@@ -11,7 +11,7 @@ public static class RedisKeys
     private const string LicensePrefix = "license_";
 
     public static RedisKey License(Guid id) => new($"{LicensePrefix}{id}");
-    
+
     public static RedisKey Flag(Guid id) => new($"{FlagPrefix}{id}");
 
     public static RedisKey FlagIndex(Guid envId) => new($"{FlagIndexPrefix}{envId}");

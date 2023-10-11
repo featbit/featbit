@@ -1,4 +1,4 @@
-using Application.License;
+using Domain.Organizations;
 
 namespace Api.Authorization;
 
@@ -10,7 +10,7 @@ public class LicenseRequirement : IAuthorizationRequirement
     {
         if (!LicenseFeatures.IsDefined(licenseFeature))
         {
-            throw new ArgumentException($"The item '{licenseFeature}' is not defined.", nameof(licenseFeature));
+            throw new ArgumentException($"The feature '{licenseFeature}' is not defined.", nameof(licenseFeature));
         }
 
         LicenseFeature = licenseFeature;

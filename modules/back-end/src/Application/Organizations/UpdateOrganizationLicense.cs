@@ -1,5 +1,5 @@
+using Domain.Organizations;
 using Application.Bases;
-using Application.Bases.Exceptions;
 using Application.Caches;
 
 namespace Application.Organizations;
@@ -16,25 +16,20 @@ public class UpdateOrganizationLicenseValidator : AbstractValidator<UpdateOrgani
     public UpdateOrganizationLicenseValidator()
     {
         RuleFor(x => x.License)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("License"));
+            .Must((request, license) => LicenseVerifier.TryParse(request.Id, license, out _))
+            .WithErrorCode(ErrorCodes.Invalid("license"));
     }
 }
 
 public class UpdateOrganizationLicenseHandler : IRequestHandler<UpdateOrganizationLicense, OrganizationVm>
 {
     private readonly IOrganizationService _service;
-    private readonly ILicenseService _licenseService;
     private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
 
-    public UpdateOrganizationLicenseHandler(
-        IOrganizationService service,
-        ILicenseService licenseService,
-        ICacheService cacheService,
-        IMapper mapper)
+    public UpdateOrganizationLicenseHandler(IOrganizationService service, ICacheService cacheService, IMapper mapper)
     {
         _service = service;
-        _licenseService = licenseService;
         _cacheService = cacheService;
         _mapper = mapper;
     }
@@ -42,25 +37,14 @@ public class UpdateOrganizationLicenseHandler : IRequestHandler<UpdateOrganizati
     public async Task<OrganizationVm> Handle(UpdateOrganizationLicense request, CancellationToken cancellationToken)
     {
         var organization = await _service.GetAsync(request.Id);
-        if (organization == null)
-        {
-            return null;
-        }
-        
-        var licenseData = _licenseService.VerifyLicenseAsync(organization.Id, request.License);
-        
-        if (licenseData == null)
-        {
-            throw new BusinessException(ErrorCodes.InvalidLicense);
-        }
 
         // save to database
         organization.UpdateLicense(request.License);
-        await _cacheService.UpsertLicenseAsync(organization.Id, organization.License);
-        
-        // save to cache
         await _service.UpdateAsync(organization);
-        
+
+        // update license cache
+        await _cacheService.UpsertLicenseAsync(organization);
+
         return _mapper.Map<OrganizationVm>(organization);
     }
 }
