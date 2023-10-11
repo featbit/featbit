@@ -41,5 +41,5 @@ public record License
         return true;
     }
 
-    public bool IsGranted(Guid orgId, string feature) => Features.Contains(feature);
+    public bool IsGranted(string feature) => Features.Contains(feature);
 }

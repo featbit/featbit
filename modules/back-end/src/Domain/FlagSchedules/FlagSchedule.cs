@@ -3,6 +3,7 @@
 public class FlagSchedule : FullAuditedEntity
 {
     public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public Guid FlagDraftId { get; set; }

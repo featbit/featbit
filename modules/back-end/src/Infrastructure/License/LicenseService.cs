@@ -22,7 +22,7 @@ public class LicenseService : ILicenseService
         var licenseString = await _cacheService.GetLicenseAsync(orgId);
         var isGranted =
             LicenseVerifier.TryParse(orgId, licenseString, out var license) &&
-            license.IsGranted(orgId, feature);
+            license.IsGranted(feature);
 
         return isGranted;
     }
