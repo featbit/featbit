@@ -98,7 +98,6 @@ export class OrganizationComponent implements OnInit {
 
     this.isLoading = true;
     this.organizationService.update({ name })
-      .pipe()
       .subscribe({
         next: () => {
           this.isLoading = false;
@@ -106,9 +105,7 @@ export class OrganizationComponent implements OnInit {
           this.organizationService.setOrganization({ id, initialized, name, license });
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
-        error: () => {
-          this.isLoading = false;
-        }
+        error: () => this.isLoading = false
       });
   }
 

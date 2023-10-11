@@ -30,7 +30,6 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { NzTagModule } from "ng-zorro-antd/tag";
 import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
-import { NzPopoverModule } from "ng-zorro-antd/popover";
 
 @NgModule({
   declarations: [
@@ -67,8 +66,7 @@ import { NzPopoverModule } from "ng-zorro-antd/popover";
     ReactiveFormsModule,
     OrganizationsRoutingModule,
     CoreModule,
-    NzToolTipModule,
-    NzPopoverModule
+    NzToolTipModule
   ]
 })
 export class OrganizationsModule { }
