@@ -85,7 +85,6 @@ export class TargetingComponent implements OnInit {
     this.validationErrors = this.validateFeatureFlag();
 
     if (this.validationErrors.length > 0) {
-      console.log(this.validationErrors);
       this.msg.create('', validationErrortpl, { nzDuration: 5000 });
       return false;
     }
