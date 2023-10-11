@@ -125,8 +125,7 @@ export class OrganizationComponent implements OnInit {
     const { id, initialized, name} = this.currentOrganization;
 
     this.isLicenseLoading = true;
-    this.organizationService.updateLicense({ license })
-      .pipe()
+    this.organizationService.updateLicense(license)
       .subscribe({
         next: () => {
           this.isLicenseLoading = false;

@@ -6,12 +6,11 @@ import {
   IEnvironment,
   IProjectEnv,
   SecretTypeEnum,
-  ILicense, License
+  License
 } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
-import { PermissionsService } from "@services/permissions.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
@@ -54,7 +53,6 @@ export class HeaderComponent implements OnInit {
     private fb: FormBuilder,
     private feedbackService: FeedbackService,
     private readonly breadcrumbService: BreadcrumbService,
-    private permissionsService: PermissionsService,
     private messageQueueService: MessageQueueService,
     private envService: EnvService
   ) {

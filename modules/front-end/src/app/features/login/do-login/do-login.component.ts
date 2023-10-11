@@ -5,6 +5,7 @@ import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
+import { finalize } from "rxjs/operators";
 
 @Component({
   selector: 'app-do-login',
@@ -84,11 +85,12 @@ export class DoLoginComponent implements OnInit {
       if (params["sso-logged-in"] && params['code']) {
         this.isSpinning = true;
 
-        this.ssoService.oidcLogin(params['code']).subscribe({
-          next: response => this.handleSsoResponse(response),
-          error: error => this.handleError(error),
-          complete: () => this.isSpinning = false
-        })
+        this.ssoService.oidcLogin(params['code'])
+          .pipe(finalize(() => this.isSpinning = false))
+          .subscribe({
+            next: response => this.handleSsoResponse(response),
+            error: error => this.handleError(error)
+          })
       }
     });
   }

@@ -27,8 +27,8 @@ export class OrganizationService {
     return this.http.post(url, params);
   }
 
-  updateLicense(params: any): Observable<any> {
-    return this.http.put(`${this.baseUrl}/license`, params);
+  updateLicense(license: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/license`, { license });
   }
 
   update(params: any): Observable<any> {
