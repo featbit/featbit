@@ -11,12 +11,7 @@ public static class LicenseVerifier
 
     public static void ImportPublicKey(string key)
     {
-        var content = key.Replace("-----BEGIN PUBLIC KEY-----", "")
-            .Replace("-----END PUBLIC KEY-----", "")
-            .Replace(Environment.NewLine, "");
-
-        Rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(content), out _);
-
+        Rsa.ImportFromPem(key);
         _isInitialized = true;
     }
 
