@@ -2,6 +2,7 @@ using Application.Caches;
 using Domain.FeatureFlags;
 using Domain.Organizations;
 using Domain.Segments;
+using MongoDB.Driver;
 using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
@@ -9,10 +10,12 @@ namespace Infrastructure.Redis;
 public class RedisCacheService : ICacheService
 {
     private readonly IDatabase _database;
+    private readonly MongoDbClient _mongodb;
 
-    public RedisCacheService(IRedisClient redis)
+    public RedisCacheService(IRedisClient redis, MongoDbClient mongodb)
     {
         _database = redis.GetDatabase();
+        _mongodb = mongodb;
     }
 
     public async Task UpsertFlagAsync(FeatureFlag flag)
@@ -59,8 +62,20 @@ public class RedisCacheService : ICacheService
     public async Task<string> GetLicenseAsync(Guid orgId)
     {
         var key = RedisKeys.License(orgId);
-        var value = await _database.StringGetAsync(key);
+        if (await _database.KeyExistsAsync(key))
+        {
+            var value = await _database.StringGetAsync(key);
+            return value.ToString();
+        }
 
-        return value.ToString();
+        // key not exist, get license from mongodb and cache it
+        var license = await _mongodb.CollectionOf<Organization>()
+            .Find(x => x.Id == orgId)
+            .Project(y => y.License)
+            .FirstOrDefaultAsync();
+
+        var licenseCache = license ?? string.Empty;
+        await _database.StringSetAsync(key, licenseCache);
+        return licenseCache;
     }
 }
