@@ -35,18 +35,18 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 These values are typically set in appsettings.json, but are documented here as they can be set using environment
 variables.
 
-| Name                                      | Description                                                 | Value                                      |
-|-------------------------------------------|-------------------------------------------------------------|--------------------------------------------|
-| `Logging__LogLevel__Default`              | Sets the default logging level                              | `"Information"`                            |
-| `Logging__LogLevel__Microsoft_AspNetCore` | aspnet-core logging level                                   | `"Warning"`                                |
-| `Jwt__Issuer`                             | JWT Issuer Name                                             | `"featbit"`                                |
-| `Jwt__Audience`                           | JWT Audience                                                | `"featbit-api"`                            |
-| `Jwt__Key`                                | JWT Private Key                                             | `"featbit-identity-key"`                   |
-| `MongoDb__ConnectionString`               | Mongodb connection string                                   | `"mongodb://admin:password@mongodb:27017"` |
-| `MongoDb__Database`                       | Mongodb database name                                       | `"featbit"`                                |
-| `Kafka__BootstrapServers`                 | Kafka Servers used by producers and consumers               | `"kafka:9092"`                             |
-| `Kafka__ConsumerServers`                  | Optional, if set, overrides Kafka Servers used by consumers | `none`                                     |
-| `OLAP__ServiceHost`                       | URI for the data analytics server                           | `"http://da-server"`                       |
-| `Redis__ConnectionString`                 | Redis Connection String                                     | `redis:6379`                               |
-| `AllowedHosts`                            | Hosts allowed to connect to the API                         | `"*"`                                      |
-| `IS_PRO`                                  | If `true` operates in PRO mode with kafka and clickhouse    | `"false`                                   |
+| Name                                      | Description                                              | Value                                      |
+|-------------------------------------------|----------------------------------------------------------|--------------------------------------------|
+| `Logging__LogLevel__Default`              | Sets the default logging level                           | `"Information"`                            |
+| `Logging__LogLevel__Microsoft_AspNetCore` | aspnet-core logging level                                | `"Warning"`                                |
+| `Jwt__Issuer`                             | JWT Issuer Name                                          | `"featbit"`                                |
+| `Jwt__Audience`                           | JWT Audience                                             | `"featbit-api"`                            |
+| `Jwt__Key`                                | JWT Private Key                                          | `"featbit-identity-key"`                   |
+| `MongoDb__ConnectionString`               | Mongodb connection string                                | `"mongodb://admin:password@mongodb:27017"` |
+| `MongoDb__Database`                       | Mongodb database name                                    | `"featbit"`                                |
+| `Kafka__Producer__bootstrap.servers`      | Kafka Servers used by producers                          | `"kafka:9092"`                             |
+| `Kafka__Consumer__bootstrap.servers`      | Kafka Servers used by consumers                          | `"kafka:9092"`                             |
+| `OLAP__ServiceHost`                       | URI for the data analytics server                        | `"http://da-server"`                       |
+| `Redis__ConnectionString`                 | Redis Connection String                                  | `redis:6379`                               |
+| `AllowedHosts`                            | Hosts allowed to connect to the API                      | `"*"`                                      |
+| `IS_PRO`                                  | If `true` operates in PRO mode with kafka and clickhouse | `"false`                                   |
