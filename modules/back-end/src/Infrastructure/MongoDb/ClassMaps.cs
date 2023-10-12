@@ -1,4 +1,5 @@
 using Domain.FeatureFlags;
+using Domain.Users;
 using MongoDB.Bson.Serialization;
 
 namespace Infrastructure.MongoDb;
@@ -13,6 +14,12 @@ public static class ClassMaps
             {
                 map.AutoMap();
                 map.MapMember(x => x.Tags).SetDefaultValue(Array.Empty<string>());
+            });
+
+            BsonClassMap.RegisterClassMap<User>(map =>
+            {
+                map.AutoMap();
+                map.MapMember(x => x.Origin).SetDefaultValue(UserOrigin.Local);
             });
         }
     }
