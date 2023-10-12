@@ -35,8 +35,7 @@ export class OrganizationComponent implements OnInit {
     private organizationService: OrganizationService,
     private message: NzMessageService,
     private permissionsService: PermissionsService
-  ) {
-  }
+  ) { }
 
   ngOnInit(): void {
     this.canUpdateOrgName = this.permissionsService.isGranted(generalResourceRNPattern.account, permissionActions.UpdateOrgName);

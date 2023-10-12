@@ -3,11 +3,11 @@
     <div class="title" i18n="@@common.license-subject">Issued to</div>
     <div class="value">{{license?.data?.sub}}</div>
   </div>
-  <div class="">
+  <div>
     <div class="title" i18n="@@common.license-iat">Issued at</div>
     <div class="value">{{getLocalDate(license?.data?.iat) | date: 'YYYY-MM-dd HH:mm'}}</div>
   </div>
-  <div class="">
+  <div>
     <div class="title" i18n="@@common.license-exp">Expire at</div>
     <div class="value">{{getLocalDate(license?.data?.exp) | date: 'YYYY-MM-dd HH:mm'}}</div>
   </div>

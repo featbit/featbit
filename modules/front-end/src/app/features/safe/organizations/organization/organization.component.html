@@ -9,7 +9,7 @@
         <nz-input-group class="row-input-group" [nzPrefix]="idIcon">
           <input disabled type="text" nz-input [ngModel]="currentOrganization.id" placeholder="License" i18n-placeholder="@@common.license"/>
           <ng-template #idIcon>
-            <i nz-icon nzType="flag" nzTheme="outline"></i>
+            <i nz-icon nzType="icons:icon-id"></i>
           </ng-template>
         </nz-input-group>
       </nz-form-item>
@@ -27,13 +27,10 @@
           <nz-input-group class="row-input-group" [nzPrefix]="licenseIcon">
             <input type="text" nz-input formControlName="license" placeholder="License" i18n-placeholder="@@common.license"/>
             <ng-template #licenseIcon>
-              <i nz-icon nzType="key" nzTheme="outline"></i>
+              <i nz-icon nzType="icons:icon-license"></i>
             </ng-template>
           </nz-input-group>
         </nz-form-control>
-        <ng-template #licenseData>
-          <license [license]="license"></license>
-        </ng-template>
       </nz-form-item>
       <button nz-button class="update-license-btn" nzType="primary" [nzLoading]="isLicenseLoading">
         <i nz-icon nzType="icons:icon-sync"></i>
