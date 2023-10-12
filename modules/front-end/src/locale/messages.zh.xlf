@@ -3342,12 +3342,16 @@
         </context-group>
         <target>个人信息</target>
       </trans-unit>
-      <trans-unit id="common.logout" datatype="html">
+      <trans-unit id="common.feedback" datatype="html">
         <source>Feedback</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
           <context context-type="linenumber">104</context>
         </context-group>
+        <target>反馈</target>
+      </trans-unit>
+      <trans-unit id="common.logout" datatype="html">
+        <source>Logout</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
           <context context-type="linenumber">108</context>
