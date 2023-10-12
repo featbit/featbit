@@ -2,7 +2,10 @@ using System.Text;
 using Api.Authentication;
 using Api.Authorization;
 using Api.Swagger;
+using Domain.Organizations;
+using Application.Services;
 using Domain.Identity;
+using Infrastructure.License;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -100,15 +103,28 @@ public static class ServicesRegister
             .AddOpenApi(Schemes.OpenApi);
 
         // authorization
+        LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
+        builder.Services.AddSingleton<ILicenseService, LicenseService>();
         builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
+        builder.Services.AddSingleton<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>
         {
+            // iam permission check 
             foreach (var permission in Permissions.All)
             {
                 options.AddPolicy(
                     permission,
                     policyBuilder => policyBuilder.AddRequirements(new PermissionRequirement(permission))
+                );
+            }
+
+            // license check
+            foreach (var feature in LicenseFeatures.All)
+            {
+                options.AddPolicy(
+                    feature,
+                    policyBuilder => policyBuilder.AddRequirements(new LicenseRequirement(feature))
                 );
             }
         });

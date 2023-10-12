@@ -6,23 +6,33 @@ public class Organization : AuditedEntity
 
     public bool Initialized { get; set; }
 
+    public string License { get; set; }
+
     public Organization(string name)
     {
         Name = name;
         Initialized = false;
+        License = string.Empty;
     }
 
-    public void Update(string name)
+    public void UpdateName(string name)
     {
         Name = name;
 
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Update(string name, bool initialized)
+    public void UpdateLicense(string license)
+    {
+        License = license;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Initialize(string name)
     {
         Name = name;
-        Initialized = initialized;
+        Initialized = true;
 
         UpdatedAt = DateTime.UtcNow;
     }

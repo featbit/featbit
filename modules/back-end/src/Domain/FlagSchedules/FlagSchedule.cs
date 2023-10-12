@@ -2,6 +2,8 @@
 
 public class FlagSchedule : FullAuditedEntity
 {
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public Guid FlagDraftId { get; set; }
@@ -15,6 +17,7 @@ public class FlagSchedule : FullAuditedEntity
     public DateTime ScheduledTime { get; set; }
 
     public FlagSchedule(
+        Guid orgId,
         Guid envId,
         Guid flagDraftId,
         Guid flagId,
@@ -28,6 +31,7 @@ public class FlagSchedule : FullAuditedEntity
             throw new ArgumentOutOfRangeException(nameof(status));
         }
 
+        OrgId = orgId;
         EnvId = envId;
         FlagDraftId = flagDraftId;
         FlagId = flagId;
@@ -37,6 +41,7 @@ public class FlagSchedule : FullAuditedEntity
     }
 
     public static FlagSchedule WaitingForExecution(
+        Guid orgId,
         Guid envId,
         Guid flagDraftId,
         Guid flagId,
@@ -44,7 +49,7 @@ public class FlagSchedule : FullAuditedEntity
         DateTime scheduledTime,
         Guid currentUserId)
     {
-        return new FlagSchedule(envId, flagDraftId, flagId, FlagScheduleStatus.Pending, title, scheduledTime, currentUserId);
+        return new FlagSchedule(orgId, envId, flagDraftId, flagId, FlagScheduleStatus.Pending, title, scheduledTime, currentUserId);
     }
 
     public void Applied()

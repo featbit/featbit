@@ -3,12 +3,15 @@ using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.FlagDrafts;
 using Domain.FlagSchedules;
+using Domain.Organizations;
 using Domain.Targeting;
 
 namespace Application.FeatureFlags;
 
 public class UpdateTargeting : IRequest<bool>
 {
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
@@ -31,6 +34,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
     private readonly IFeatureFlagService _flagService;
     private readonly IFlagScheduleService _flagScheduleService;
     private readonly IFlagDraftService _flagDraftService;
+    private readonly ILicenseService _licenseService;
     private readonly IAuditLogService _auditLogService;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
@@ -39,6 +43,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         IFeatureFlagService flagService,
         IFlagScheduleService flagScheduleService,
         IFlagDraftService flagDraftService,
+        ILicenseService licenseService,
         IAuditLogService auditLogService,
         ICurrentUser currentUser,
         IPublisher publisher)
@@ -46,6 +51,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         _flagService = flagService;
         _flagScheduleService = flagScheduleService;
         _flagDraftService = flagDraftService;
+        _licenseService = licenseService;
         _auditLogService = auditLogService;
         _currentUser = currentUser;
         _publisher = publisher;
@@ -62,7 +68,8 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
             _currentUser.Id
         );
 
-        var result = request.Schedule != null
+        var isScheduleGranted = await _licenseService.IsFeatureGrantedAsync(request.OrgId, LicenseFeatures.Schedule);
+        var result = request.Schedule != null && isScheduleGranted
             ? await CreateScheduleAsync()
             : await UpdateTargetingAsync();
 
@@ -76,6 +83,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 
             // create schedule
             var flagSchedule = FlagSchedule.WaitingForExecution(
+                request.OrgId,
                 request.EnvId,
                 flagDraft.Id,
                 flag.Id,

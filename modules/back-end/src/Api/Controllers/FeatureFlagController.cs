@@ -231,6 +231,7 @@ public class FeatureFlagController : ApiControllerBase
     [HttpPut("{key}/targeting")]
     public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
     {
+        request.OrgId = OrgId;
         request.Key = key;
         request.EnvId = envId;
 
