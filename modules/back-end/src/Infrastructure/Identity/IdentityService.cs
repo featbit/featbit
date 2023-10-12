@@ -90,7 +90,7 @@ public class IdentityService : IIdentityService
             ? string.Empty
             : _passwordHasher.HashPassword(null!, password);
 
-        var user = new User(email, hashedPwd, "", origin);
+        var user = new User(email, hashedPwd, origin: origin);
 
         await _store.AddAsync(user);
 

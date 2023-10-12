@@ -9,7 +9,7 @@ public class User : AuditedEntity
     public string Email { get; set; }
 
     public string Password { get; set; }
-    
+
     public string Origin { get; set; }
 
     /// <summary>
