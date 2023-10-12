@@ -9,12 +9,12 @@ namespace Infrastructure.Redis;
 
 public class RedisCacheService : ICacheService
 {
-    private readonly IDatabase _database;
+    private readonly IDatabase _redis;
     private readonly MongoDbClient _mongodb;
 
     public RedisCacheService(IRedisClient redis, MongoDbClient mongodb)
     {
-        _database = redis.GetDatabase();
+        _redis = redis.GetDatabase();
         _mongodb = mongodb;
     }
 
@@ -22,33 +22,33 @@ public class RedisCacheService : ICacheService
     {
         // upsert flag
         var cache = RedisCaches.Flag(flag);
-        await _database.StringSetAsync(cache.Key, cache.Value);
+        await _redis.StringSetAsync(cache.Key, cache.Value);
 
         // upsert index
         var index = RedisCaches.FlagIndex(flag);
-        await _database.SortedSetAddAsync(index.Key, index.Member, index.Score);
+        await _redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
     }
 
     public async Task DeleteFlagAsync(Guid envId, Guid flagId)
     {
         // delete cache
         var cacheKey = RedisKeys.Flag(flagId);
-        await _database.KeyDeleteAsync(cacheKey);
+        await _redis.KeyDeleteAsync(cacheKey);
 
         // delete index
         var index = RedisKeys.FlagIndex(envId);
-        await _database.SortedSetRemoveAsync(index, flagId.ToString());
+        await _redis.SortedSetRemoveAsync(index, flagId.ToString());
     }
 
     public async Task UpsertSegmentAsync(Segment segment)
     {
         // upsert cache
         var cache = RedisCaches.Segment(segment);
-        await _database.StringSetAsync(cache.Key, cache.Value);
+        await _redis.StringSetAsync(cache.Key, cache.Value);
 
         // upsert index
         var index = RedisCaches.SegmentIndex(segment);
-        await _database.SortedSetAddAsync(index.Key, index.Member, index.Score);
+        await _redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
     }
 
     public async Task UpsertLicenseAsync(Organization organization)
@@ -56,15 +56,15 @@ public class RedisCacheService : ICacheService
         var key = RedisKeys.License(organization.Id);
         var value = organization.License;
 
-        await _database.StringSetAsync(key, value);
+        await _redis.StringSetAsync(key, value);
     }
 
     public async Task<string> GetLicenseAsync(Guid orgId)
     {
         var key = RedisKeys.License(orgId);
-        if (await _database.KeyExistsAsync(key))
+        if (await _redis.KeyExistsAsync(key))
         {
-            var value = await _database.StringGetAsync(key);
+            var value = await _redis.StringGetAsync(key);
             return value.ToString();
         }
 
@@ -75,7 +75,7 @@ public class RedisCacheService : ICacheService
             .FirstOrDefaultAsync();
 
         var licenseCache = license ?? string.Empty;
-        await _database.StringSetAsync(key, licenseCache);
+        await _redis.StringSetAsync(key, licenseCache);
         return licenseCache;
     }
 }
