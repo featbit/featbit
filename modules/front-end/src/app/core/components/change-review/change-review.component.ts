@@ -1,19 +1,21 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/forms";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
-import { differenceInCalendarDays, setHours, setSeconds, setMinutes } from 'date-fns';
+import { differenceInCalendarDays, setHours, setMinutes, setSeconds } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
 import { environment } from "src/environments/environment";
 import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
+import { License, LicenseFeatureEnum } from "@shared/types";
+import { getCurrentOrganization } from "@utils/project-env";
 
 @Component({
   selector: 'change-review',
   templateUrl: './change-review.component.html',
   styleUrls: ['./change-review.component.less']
 })
-export class ChangeReviewComponent implements OnChanges {
+export class ChangeReviewComponent implements OnChanges, OnInit {
   @Input() visible = false;
   @Input() refName: string = '';
   @Input() kind: ReviewModalKindEnum = ReviewModalKindEnum.Review;
@@ -28,6 +30,7 @@ export class ChangeReviewComponent implements OnChanges {
   instructions: IInstruction[] = [];
   form: FormGroup;
 
+  license: License;
   hasSchedule: boolean = false;
   today = new Date();
   timeDefaultValue = setSeconds(setMinutes(setHours(new Date(), this.today.getHours()), this.today.getMinutes()), 0);
@@ -37,8 +40,13 @@ export class ChangeReviewComponent implements OnChanges {
     private auditLogService: AuditLogService
   ) { }
 
+  ngOnInit(): void {
+    const currentOrg = getCurrentOrganization();
+    this.license = new License(currentOrg.license);
+  }
+
   scheduleValidator: ValidatorFn = (control: AbstractControl) => {
-    if (this.hasSchedule && !control.value) {
+    if (this.license.isGranted(LicenseFeatureEnum.Schedule) && this.hasSchedule && !control.value) {
       const error = { required: true };
       control.setErrors(error);
       return error;
@@ -89,7 +97,7 @@ export class ChangeReviewComponent implements OnChanges {
 
     const output: ChangeReviewOutput = {
       comment: comment,
-      schedule: this.hasSchedule ? {
+      schedule: this.license.isGranted(LicenseFeatureEnum.Schedule) && this.hasSchedule ? {
         title: scheduleTitle,
         scheduledTime: scheduledTime,
       } : undefined,
@@ -137,4 +145,5 @@ export class ChangeReviewComponent implements OnChanges {
 
   protected readonly environment = environment;
   protected readonly RefTypeEnum = RefTypeEnum;
+  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
 }

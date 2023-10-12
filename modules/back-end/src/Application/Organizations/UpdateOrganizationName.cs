@@ -2,34 +2,34 @@ using Application.Bases;
 
 namespace Application.Organizations;
 
-public class UpdateOrganization : IRequest<OrganizationVm>
+public class UpdateOrganizationName : IRequest<OrganizationVm>
 {
     public Guid Id { get; set; }
 
     public string Name { get; set; }
 }
 
-public class UpdateOrganizationValidator : AbstractValidator<UpdateOrganization>
+public class UpdateOrganizationNameValidator : AbstractValidator<UpdateOrganizationName>
 {
-    public UpdateOrganizationValidator()
+    public UpdateOrganizationNameValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
     }
 }
 
-public class UpdateOrganizationHandler : IRequestHandler<UpdateOrganization, OrganizationVm>
+public class UpdateOrganizationNameHandler : IRequestHandler<UpdateOrganizationName, OrganizationVm>
 {
     private readonly IOrganizationService _service;
     private readonly IMapper _mapper;
 
-    public UpdateOrganizationHandler(IOrganizationService service, IMapper mapper)
+    public UpdateOrganizationNameHandler(IOrganizationService service, IMapper mapper)
     {
         _service = service;
         _mapper = mapper;
     }
 
-    public async Task<OrganizationVm> Handle(UpdateOrganization request, CancellationToken cancellationToken)
+    public async Task<OrganizationVm> Handle(UpdateOrganizationName request, CancellationToken cancellationToken)
     {
         var organization = await _service.GetAsync(request.Id);
         if (organization == null)
@@ -37,7 +37,7 @@ public class UpdateOrganizationHandler : IRequestHandler<UpdateOrganization, Org
             return null;
         }
 
-        organization.Update(request.Name);
+        organization.UpdateName(request.Name);
 
         await _service.UpdateAsync(organization);
 

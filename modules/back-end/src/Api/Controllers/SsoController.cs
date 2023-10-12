@@ -15,6 +15,7 @@ public class SsoController : ApiControllerBase
 
     private readonly OidcClient _client;
     private readonly IUserService _userService;
+    private readonly ILicenseService _licenseService;
     private readonly IIdentityService _identityService;
     private readonly IOrganizationService _organizationService;
     private readonly ILogger<SsoController> _logger;
@@ -22,6 +23,7 @@ public class SsoController : ApiControllerBase
     public SsoController(
         OidcClient client,
         IUserService userService,
+        ILicenseService licenseService,
         IIdentityService identityService,
         IOrganizationService organizationService,
         IConfiguration configuration,
@@ -31,6 +33,7 @@ public class SsoController : ApiControllerBase
 
         _client = client;
         _userService = userService;
+        _licenseService = licenseService;
         _identityService = identityService;
         _organizationService = organizationService;
         _logger = logger;
@@ -58,6 +61,16 @@ public class SsoController : ApiControllerBase
 
         try
         {
+            var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
+
+            var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(organization.Id, LicenseFeatures.Sso);
+            if (!isSsoGranted)
+            {
+                return Error<LoginToken>(
+                    "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
+                );
+            }
+
             string token;
 
             var email = await _client.GetEmailAsync(request);
@@ -73,7 +86,6 @@ public class SsoController : ApiControllerBase
                 var registerResult = await _identityService.RegisterByEmailAsync(email, string.Empty, UserOrigin.Sso);
 
                 // add user to organization
-                var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
                 var organizationUser = new OrganizationUser(organization.Id, registerResult.UserId);
                 await _organizationService.AddUserAsync(organizationUser, policies: new[] { BuiltInPolicy.Developer });
 

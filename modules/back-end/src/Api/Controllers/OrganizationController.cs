@@ -61,7 +61,16 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpPut]
-    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganization request)
+    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganizationName request)
+    {
+        request.Id = OrgId;
+
+        var organization = await Mediator.Send(request);
+        return Ok(organization);
+    }
+
+    [HttpPut("license")]
+    public async Task<ApiResponse<OrganizationVm>> UpdateLicenseAsync(UpdateOrganizationLicense request)
     {
         request.Id = OrgId;
 

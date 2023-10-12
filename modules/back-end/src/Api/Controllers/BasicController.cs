@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Application.Users;
+using Domain.Organizations;
 
 namespace Api.Controllers;
 
@@ -77,6 +78,14 @@ public class BasicController : ApiControllerBase
     public ApiResponse<string> ThrowException()
     {
         throw new Exception("exception message");
+    }
+
+    [HttpGet]
+    [Authorize(LicenseFeatures.Sso)]
+    [Route("license-feature-check")]
+    public ApiResponse<bool> LicenseFeatureCheck()
+    {
+        return Ok(true);
     }
 }
 

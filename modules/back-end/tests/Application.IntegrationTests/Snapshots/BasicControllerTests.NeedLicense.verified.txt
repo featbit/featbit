@@ -1,0 +1,22 @@
+﻿{
+  Version: 1.1,
+  Status: 403 Forbidden,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      data: null,
+      errors: [
+        Forbidden
+      ],
+      success: false
+    }
+  },
+  Request: {
+    Uri: http://localhost/api/v1/basic/license-feature-check,
+    Headers: {
+      Authorization: Bearer [Scrubbed Token]
+    }
+  }
+}

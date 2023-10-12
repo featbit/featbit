@@ -52,7 +52,34 @@ export interface IAuthProps {
 export interface IOrganization {
   id: string,
   initialized: boolean,
-  name: string
+  name: string,
+  license?: string
+}
+
+export enum LicenseFeatureEnum {
+  Sso = 'sso',
+  Schedule = 'schedule'
+}
+
+export interface ILicense {
+  plan: string,
+  sub: string,
+  orgId: string,
+  iat: number,
+  exp: number,
+  issuer: string,
+  features: LicenseFeatureEnum[]
+}
+
+export class License {
+  data: ILicense;
+  constructor(private licenseStr: string) {
+    this.data = licenseStr ? JSON.parse(atob(licenseStr.split('.')[1])): null;
+  }
+
+  isGranted(feature: LicenseFeatureEnum): boolean {
+    return this.data?.features?.includes(feature);
+  }
 }
 
 export interface IOnboarding {

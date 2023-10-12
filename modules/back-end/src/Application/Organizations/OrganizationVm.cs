@@ -7,4 +7,6 @@ public class OrganizationVm
     public string Name { get; set; }
 
     public bool Initialized { get; set; }
+
+    public string License { get; set; }
 }

@@ -1,7 +1,6 @@
 import { USER_PROFILE } from "./localstorage-keys";
 import { IAuthProps } from "../types";
 import { USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT } from "@shared/constants";
-import { ICondition } from "@shared/rules";
 import { UserOriginEnum } from "@features/safe/organizations/types/profiles";
 
 export function getPathPrefix() {
