@@ -21,7 +21,6 @@
       <span i18n="@@common.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license.</span>
     </ng-template>
 
-    <div class="header-btn feedback" (click)="openFeedbackModal()" i18n="@@common.feedback">Feedback</div>
     <a target="_blank" class="header-btn doc-btn" href="https://docs.featbit.co"><span nz-icon nzType="read" nzTheme="outline"></span></a>
     <div class="org-btns">
       <div class="header-info">
@@ -92,36 +91,5 @@
   <ng-template #modalFooter>
     <button nz-button nzType="default" (click)="envModelCancel()" i18n="@@common.cancel">Cancel</button>
     <button nz-button nzType="primary" (click)="envModalConfirm()" i18n="@@common.save">Save</button>
-  </ng-template>
-</nz-modal>
-
-<nz-modal [nzVisible]="feedbackModalVisible"
-          [nzTitle]="feedbackModalTitle"
-          [nzCentered]="true"
-          [nzContent]="feedbackModalContent"
-          [nzFooter]="feedbackModalFooter"
-          (nzOnCancel)="feedbackModalVisible=false">
-  <ng-template #feedbackModalTitle><ng-container i18n="@@common.send-feedback">Send feedback</ng-container></ng-template>
-  <ng-template #feedbackModalContent>
-    <form nz-form [formGroup]="feedbackForm" nzLayout="vertical">
-      <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.email">Email</nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.email-invalid" nzErrorTip="Invalid Email">
-          <input nz-input formControlName="email" />
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.message">Message</nz-form-label>
-        <nz-form-control nzHasFeedback nzErrorTip="Message is mandatory" i18n-nzErrorTip="@@common.message-mandatory">
-          <textarea nz-input formControlName="message" i18n-placeholder="@@common.message-placeholder" placeholder="Have you any feedback for us?">
-          </textarea>
-        </nz-form-control>
-      </nz-form-item>
-    </form>
-  </ng-template>
-
-  <ng-template #feedbackModalFooter>
-    <button nz-button nzType="default" (click)="feedbackModalVisible=false" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="sendingFeedback" [disabled]="feedbackForm.invalid" (click)="sendFeedback()" i18n="@@common.send">Send</button>
   </ng-template>
 </nz-modal>
