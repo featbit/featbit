@@ -12,7 +12,8 @@
       data: {
         email: test@email.com,
         id: Guid_1,
-        name: 
+        name: ,
+        origin: Local
       },
       errors: [],
       success: true
