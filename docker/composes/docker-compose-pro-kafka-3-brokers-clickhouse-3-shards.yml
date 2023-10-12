@@ -130,7 +130,16 @@ services:
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka-2:9092
+      - Kafka__Producer__bootstrap.servers=kafka-2:9092
+      - Kafka__Producer__sasl.username=kafka
+      - Kafka__Producer__sasl.password=bitnami
+      - Kafka__Producer__sasl.mechanism=PLAIN
+      - Kafka__Producer__security.protocol=SASL_PLAINTEXT
+      - Kafka__Consumer__bootstrap.servers=kafka-2:9092
+      - Kafka__Consumer__sasl.username=kafka
+      - Kafka__Consumer__sasl.password=bitnami
+      - Kafka__Consumer__sasl.mechanism=PLAIN
+      - Kafka__Consumer__security.protocol=SASL_PLAINTEXT
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
       - IS_PRO=true
@@ -155,7 +164,16 @@ services:
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka-1:9092
+      - Kafka__Producer__bootstrap.servers=kafka-1:9092
+      - Kafka__Producer__sasl.username=kafka
+      - Kafka__Producer__sasl.password=bitnami
+      - Kafka__Producer__sasl.mechanism=PLAIN
+      - Kafka__Producer__security.protocol=SASL_PLAINTEXT
+      - Kafka__Consumer__bootstrap.servers=kafka-1:9092
+      - Kafka__Consumer__sasl.username=kafka
+      - Kafka__Consumer__sasl.password=bitnami
+      - Kafka__Consumer__sasl.mechanism=PLAIN
+      - Kafka__Consumer__security.protocol=SASL_PLAINTEXT
       - Redis__ConnectionString=redis:6379
       - IS_PRO=true
     depends_on:
@@ -197,6 +215,10 @@ services:
       - featbit-network
     environment:
       KAFKA_HOSTS: kafka-0:9092
+      KAFKA_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      KAFKA_SASL_MECHANISM: PLAIN
+      KAFKA_SASL_USER: kafka
+      KAFKA_SASL_PASSWORD: bitnami
       REDIS_URL: redis://redis:6379/0
       CLICKHOUSE_HOST: clickhouse-blue-1
       CLICKHOUSE_PORT: '9000'
@@ -250,9 +272,17 @@ services:
       # Listeners
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-0:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:SASL_PLAINTEXT,PLAINTEXT_HOST:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT
+      KAFKA_CLIENT_USERS: kafka
+      KAFKA_CLIENT_PASSWORDS: bitnami
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
+      KAFKA_CONTROLLER_USER: kafka
+      KAFKA_CONTROLLER_PASSWORD: bitnami
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_INTER_BROKER_USER: kafka
+      KAFKA_INTER_BROKER_PASSWORD: bitnami
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
     networks:
       - featbit-network
@@ -274,9 +304,17 @@ services:
       # Listeners
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT
+      KAFKA_CLIENT_USERS: kafka
+      KAFKA_CLIENT_PASSWORDS: bitnami
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
+      KAFKA_CONTROLLER_USER: kafka
+      KAFKA_CONTROLLER_PASSWORD: bitnami
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_INTER_BROKER_USER: kafka
+      KAFKA_INTER_BROKER_PASSWORD: bitnami
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
     networks:
       - featbit-network
@@ -298,9 +336,17 @@ services:
       # Listeners
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092
-      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT
+      KAFKA_CLIENT_USERS: kafka
+      KAFKA_CLIENT_PASSWORDS: bitnami
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_SASL_MECHANISM_CONTROLLER_PROTOCOL: PLAIN
+      KAFKA_CONTROLLER_USER: kafka
+      KAFKA_CONTROLLER_PASSWORD: bitnami
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_INTER_BROKER_USER: kafka
+      KAFKA_INTER_BROKER_PASSWORD: bitnami
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
     networks:
       - featbit-network
@@ -319,13 +365,15 @@ services:
       - -c
       - |
         echo "Waiting for Kafka to be ready..."
-        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka-0:9092; do sleep 5; done;
+        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka-0:9092 --command-config /etc/kafka/config.properties; do sleep 5; done;
         echo "Kafka is ready now, start creating topics."
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-feature-flag-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-segment-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-endusers;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 6 --replication-factor 2 --topic featbit-insights;
-        echo "Seed kafka topic finished." 
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-feature-flag-change --command-config /etc/kafka/config.properties;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-segment-change --command-config /etc/kafka/config.properties;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 1 --replication-factor 2 --topic featbit-endusers --command-config /etc/kafka/config.properties;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 6 --replication-factor 2 --topic featbit-insights --command-config /etc/kafka/config.properties;
+        echo "Seed kafka topic finished."
+    volumes:
+      - ./infra/kafka/config.properties:/etc/kafka/config.properties    
     networks:
       - featbit-network
 

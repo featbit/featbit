@@ -9,4 +9,13 @@
         <console>1</console>
     </logger>
     -->
+
+    <!-- Kafka -->
+    <kafka>
+        <security_protocol>sasl_plaintext</security_protocol>
+        <sasl_username>kafka</sasl_username>
+        <sasl_password>bitnami</sasl_password>
+        <sasl_mechanisms>PLAIN</sasl_mechanisms>
+    </kafka>
+    
 </clickhouse>
