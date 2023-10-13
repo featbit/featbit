@@ -4,14 +4,16 @@ from time import perf_counter
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import sqlparse
-from app.setting import (CLICKHOUSE_CA, CLICKHOUSE_CONN_POOL_MAX,
-                         CLICKHOUSE_CONN_POOL_MIN, CLICKHOUSE_DATABASE,
-                         CLICKHOUSE_HOST, CLICKHOUSE_PASSWORD,
-                         CLICKHOUSE_SECURE, CLICKHOUSE_USER, CLICKHOUSE_VERIFY,
-                         SHELL_PLUS_PRINT_SQL, TEST)
 from clickhouse_driver import Client as SyncClient
 from clickhouse_pool import ChPool
 from flask import current_app
+
+from app.setting import (CLICKHOUSE_ALT_HOST, CLICKHOUSE_CA,
+                         CLICKHOUSE_CONN_POOL_MAX, CLICKHOUSE_CONN_POOL_MIN,
+                         CLICKHOUSE_DATABASE, CLICKHOUSE_HOST,
+                         CLICKHOUSE_PASSWORD, CLICKHOUSE_PORT,
+                         CLICKHOUSE_SECURE, CLICKHOUSE_USER, CLICKHOUSE_VERIFY,
+                         SHELL_PLUS_PRINT_SQL, TEST)
 
 InsertParams = Union[List, Tuple, types.GeneratorType]
 NonInsertParams = Dict[str, Any]
@@ -20,10 +22,10 @@ QueryArgs = Optional[Union[InsertParams, NonInsertParams]]
 __ch_pool = None
 
 
-def make_ch_pool(reload=False, **overrides) -> ChPool:
-    global __ch_pool
+def _settings():
     kwargs = {
         "host": CLICKHOUSE_HOST,
+        "port": CLICKHOUSE_PORT,
         "database": CLICKHOUSE_DATABASE,
         "secure": CLICKHOUSE_SECURE,
         "user": CLICKHOUSE_USER,
@@ -33,34 +35,30 @@ def make_ch_pool(reload=False, **overrides) -> ChPool:
         "connections_min": CLICKHOUSE_CONN_POOL_MIN,
         "connections_max": CLICKHOUSE_CONN_POOL_MAX,
         "settings": {"mutations_sync": "1"} if TEST else {},
-        **overrides,
     }
+    if CLICKHOUSE_ALT_HOST and CLICKHOUSE_ALT_HOST.strip():
+        kwargs.update({"alt_hosts": CLICKHOUSE_ALT_HOST, "round_robin": True})
+    return kwargs
+
+
+def make_ch_pool(reload=False, **overrides) -> ChPool:
+    global __ch_pool
+    kwargs = {**_settings(), **overrides}
     if __ch_pool is None or reload:
         __ch_pool = ChPool(**kwargs)
     return __ch_pool
 
 
 def make_ch_client() -> SyncClient:
-    return SyncClient(
-        host=CLICKHOUSE_HOST,
-        database=CLICKHOUSE_DATABASE,
-        secure=CLICKHOUSE_SECURE,
-        user=CLICKHOUSE_USER,
-        password=CLICKHOUSE_PASSWORD,
-        ca_certs=CLICKHOUSE_CA,
-        verify=CLICKHOUSE_VERIFY,
-        settings={"mutations_sync": "1"} if TEST else {},
-    )
+    return SyncClient(**_settings())
 
 
 def sync_execute(query, args=None, settings=None, with_column_types=False):
 
     with make_ch_pool().get_client() as client:
-
         prepared_sql, prepared_args = _prepare_query(client=client, query=query, args=args)
-
+        start_time = perf_counter()
         try:
-            start_time = perf_counter()
             result = client.execute(
                 prepared_sql, params=prepared_args, settings=settings, with_column_types=with_column_types,
             )
@@ -110,7 +108,7 @@ def _prepare_query(client: SyncClient, query: str, args: QueryArgs):
     else:
         # Else perform the substitution so we can perform operations on the raw
         # non-templated SQL
-        rendered_sql = client.substitute_params(query, args)
+        rendered_sql = client.substitute_params(query, args, client.connection.context)
         prepared_args = None
 
     formatted_sql = sqlparse.format(rendered_sql, strip_comments=True)
