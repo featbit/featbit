@@ -26,6 +26,8 @@ public class OrganizationController : ApiControllerBase
     [HttpPost]
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
     {
+        request.OrgId = OrgId;
+        
         var organization = await Mediator.Send(request);
 
         return Ok(organization);

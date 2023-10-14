@@ -68,7 +68,8 @@ export interface ILicense {
   iat: number,
   exp: number,
   issuer: string,
-  features: LicenseFeatureEnum[]
+  features: LicenseFeatureEnum[],
+  canCreateOrg: boolean
 }
 
 export class License {

@@ -18,6 +18,8 @@ public record License
 
     public ICollection<string> Features { get; set; } = Array.Empty<string>();
 
+    public bool CanCreateOrg { get; set; }
+
     public bool IsValid(Guid orgId)
     {
         // check organization
