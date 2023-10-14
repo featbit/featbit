@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { copyToClipboard, getAuth } from '@utils/index';
-import {IOrganization, License} from '@shared/types';
+import {IOrganization, License, LicenseFeatureEnum} from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { getCurrentOrganization } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
@@ -138,4 +138,6 @@ export class OrganizationComponent implements OnInit {
         }
       });
   }
+
+  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
 }

@@ -24,8 +24,8 @@
       <span i18n="@@common.schedule">Schedule</span>
     </div>
     <div class="feature">
-      <i *ngIf="license.data.canCreateOrg" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
-      <i *ngIf="!license.data.canCreateOrg" nz-icon nzType="close" nzTheme="outline"></i>
+      <i *ngIf="license.isGranted(LicenseFeatureEnum.CreateOrg)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
+      <i *ngIf="!license.isGranted(LicenseFeatureEnum.CreateOrg)" nz-icon nzType="close" nzTheme="outline"></i>
       <span i18n="@@common.create-org">Create Organization</span>
     </div>
   </div>

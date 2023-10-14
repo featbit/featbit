@@ -58,7 +58,8 @@ export interface IOrganization {
 
 export enum LicenseFeatureEnum {
   Sso = 'sso',
-  Schedule = 'schedule'
+  Schedule = 'schedule',
+  CreateOrg = 'create-org'
 }
 
 export interface ILicense {
@@ -68,8 +69,7 @@ export interface ILicense {
   iat: number,
   exp: number,
   issuer: string,
-  features: LicenseFeatureEnum[],
-  canCreateOrg: boolean
+  features: LicenseFeatureEnum[]
 }
 
 export class License {

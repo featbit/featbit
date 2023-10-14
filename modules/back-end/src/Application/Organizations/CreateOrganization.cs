@@ -24,15 +24,18 @@ public class CreateOrganizationValidator : AbstractValidator<CreateOrganization>
 public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, OrganizationVm>
 {
     private readonly IOrganizationService _service;
+    private readonly ILicenseService _licenseService;
     private readonly ICurrentUser _currentUser;
     private readonly IMapper _mapper;
 
     public CreateOrganizationHandler(
         IOrganizationService service, 
+        ILicenseService licenseService,
         ICurrentUser currentUser, 
         IMapper mapper)
     {
         _service = service;
+        _licenseService = licenseService;
         _currentUser = currentUser;
         _mapper = mapper;
     }
@@ -40,10 +43,8 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
     public async Task<OrganizationVm> Handle(CreateOrganization request, CancellationToken cancellationToken)
     {
         // check if licence allows to create org
-        var currentOrg = await this._service.GetAsync(request.OrgId);
-        LicenseVerifier.TryParse(request.OrgId, currentOrg.License, out var license);
-
-        if (!license.CanCreateOrg)
+        var isCreateOrgGranted = await _licenseService.IsFeatureGrantedAsync(request.OrgId, LicenseFeatures.CreateOrg);
+        if (!isCreateOrgGranted)
         {
             throw new BusinessException(ErrorCodes.Unauthorized);
         }
