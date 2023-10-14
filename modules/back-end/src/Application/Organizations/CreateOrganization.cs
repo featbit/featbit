@@ -39,7 +39,7 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
     
     public async Task<OrganizationVm> Handle(CreateOrganization request, CancellationToken cancellationToken)
     {
-        // check if licence allows creating org
+        // check if licence allows to create org
         var currentOrg = await this._service.GetAsync(request.OrgId);
         LicenseVerifier.TryParse(request.OrgId, currentOrg.License, out var license);
 
