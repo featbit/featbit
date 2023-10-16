@@ -1,15 +1,15 @@
 <div class="license">
   <div>
-    <div class="title" i18n="@@common.license-subject">Issued to</div>
-    <div class="value">{{license?.data?.sub}}</div>
+    <div class="title" i18n="@@common.license-subject">Issued To</div>
+    <div class="value">{{license.data?.sub}}</div>
   </div>
   <div>
-    <div class="title" i18n="@@common.license-iat">Issued at</div>
-    <div class="value">{{getLocalDate(license?.data?.iat) | date: 'YYYY-MM-dd HH:mm'}}</div>
+    <div class="title" i18n="@@common.license-iat">Issued At</div>
+    <div class="value">{{getLocalDate(license.data?.iat) | date: 'YYYY-MM-dd HH:mm'}}</div>
   </div>
   <div>
-    <div class="title" i18n="@@common.license-exp">Expire at</div>
-    <div class="value">{{getLocalDate(license?.data?.exp) | date: 'YYYY-MM-dd HH:mm'}}</div>
+    <div class="title" i18n="@@common.license-exp">Expire At</div>
+    <div class="value">{{getLocalDate(license.data?.exp) | date: 'YYYY-MM-dd HH:mm'}}</div>
   </div>
   <div class="features">
     <div>Features</div>
@@ -22,6 +22,11 @@
       <i *ngIf="license.isGranted(LicenseFeatureEnum.Schedule)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
       <i *ngIf="!license.isGranted(LicenseFeatureEnum.Schedule)" nz-icon nzType="close" nzTheme="outline"></i>
       <span i18n="@@common.schedule">Schedule</span>
+    </div>
+    <div class="feature">
+      <i *ngIf="license.isGranted(LicenseFeatureEnum.CreateOrg)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
+      <i *ngIf="!license.isGranted(LicenseFeatureEnum.CreateOrg)" nz-icon nzType="close" nzTheme="outline"></i>
+      <span i18n="@@common.create-org">Create Organization</span>
     </div>
   </div>
 </div>

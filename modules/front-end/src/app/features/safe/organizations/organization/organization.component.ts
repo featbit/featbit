@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { copyToClipboard, getAuth } from '@utils/index';
-import { IOrganization } from '@shared/types';
+import {IOrganization, License, LicenseFeatureEnum} from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { getCurrentOrganization } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
@@ -27,6 +27,8 @@ export class OrganizationComponent implements OnInit {
 
   canUpdateOrgName: boolean = false;
 
+  license: License;
+
   isLoading: boolean = false;
   isLicenseLoading: boolean = false;
 
@@ -43,7 +45,7 @@ export class OrganizationComponent implements OnInit {
 
     const currentOrganizationId = getCurrentOrganization().id;
     this.currentOrganization = this.allOrganizations.find(x => x.id == currentOrganizationId);
-
+    this.license = new License(this.currentOrganization.license);
     this.initOrgForm();
   }
 
@@ -125,6 +127,7 @@ export class OrganizationComponent implements OnInit {
       .subscribe({
         next: () => {
           this.isLicenseLoading = false;
+          this.license = new License(license);
           this.message.success($localize`:@@org.org.license-update-success:License updated!`);
           this.organizationService.setOrganization({ id, initialized, name, license });
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
@@ -135,4 +138,6 @@ export class OrganizationComponent implements OnInit {
         }
       });
   }
+
+  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
 }

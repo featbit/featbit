@@ -59,7 +59,8 @@ export class OrganizationDrawerComponent implements OnInit {
           this.close.emit(res);
           this.message.success($localize `:@@org.org.orgCreated:Organization successfully created!`);
         },
-        _ => {
+        err => {
+          this.message.error(err.errors[0]);
           this.isLoading = false;
         }
       );

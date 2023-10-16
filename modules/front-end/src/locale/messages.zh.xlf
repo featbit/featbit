@@ -906,7 +906,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
@@ -3247,7 +3247,7 @@
         <target>环境</target>
       </trans-unit>
       <trans-unit id="common.license-subject" datatype="html">
-        <source>Issued to</source>
+        <source>Issued To</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
           <context context-type="linenumber">3</context>
@@ -3255,7 +3255,7 @@
         <target>颁发给</target>
       </trans-unit>
       <trans-unit id="common.license-iat" datatype="html">
-        <source>Issued at</source>
+        <source>Issued At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
           <context context-type="linenumber">7</context>
@@ -3263,7 +3263,7 @@
         <target>颁发时间</target>
       </trans-unit>
       <trans-unit id="common.license-exp" datatype="html">
-        <source>Expire at</source>
+        <source>Expire At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
           <context context-type="linenumber">11</context>
@@ -3277,6 +3277,14 @@
           <context context-type="linenumber">19</context>
         </context-group>
         <target>SSO</target>
+      </trans-unit>
+      <trans-unit id="common.create-org" datatype="html">
+        <source>Create Organization</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <target>创建机构</target>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.title" datatype="html">
         <source>Add team member</source>
@@ -8166,7 +8174,7 @@
         <source>Organization name updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">105</context>
         </context-group>
         <target>机构名称更新成功！</target>
       </trans-unit>
@@ -8174,7 +8182,7 @@
         <source>License updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <target>License 更新成功</target>
       </trans-unit>
@@ -8182,7 +8190,7 @@
         <source>Invalid license, please contact FeatBit team to get a license!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/organization/organization.component.ts</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">136</context>
         </context-group>
         <target>无效 License, 请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
