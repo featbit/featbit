@@ -28,8 +28,6 @@ public class OrganizationController : ApiControllerBase
     [Authorize(LicenseFeatures.CreateOrg)]
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
     {
-        request.OrgId = OrgId;
-        
         var organization = await Mediator.Send(request);
 
         return Ok(organization);
