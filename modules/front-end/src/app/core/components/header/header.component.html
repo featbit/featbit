@@ -12,7 +12,7 @@
     </div>
     <div *ngIf="!license.data" class="license-plan-wrapper" nz-popover i18n-nz-popover="@@common.upgrade-to-enterprise" nzPopoverTitle="Upgrade to Enterprise" [nzPopoverContent]="upgradeLicense" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
       <span i18n="@@common.upgrade-to-enterprise">Upgrade to Enterprise</span>
-      <i nz-icon nzType="crown" nzTheme="outline"></i>
+      <i nz-icon nzType="icons:icon-medal"></i>
     </div>
     <ng-template #licenseData>
       <license [license]="license"></license>
