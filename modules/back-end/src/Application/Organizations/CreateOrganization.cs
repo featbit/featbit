@@ -42,13 +42,6 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
     
     public async Task<OrganizationVm> Handle(CreateOrganization request, CancellationToken cancellationToken)
     {
-        // check if licence allows to create org
-        var isCreateOrgGranted = await _licenseService.IsFeatureGrantedAsync(request.OrgId, LicenseFeatures.CreateOrg);
-        if (!isCreateOrgGranted)
-        {
-            throw new BusinessException(ErrorCodes.Unauthorized);
-        }
-
         // add new organization
         var organization = new Organization(request.Name);
         await _service.AddOneAsync(organization);

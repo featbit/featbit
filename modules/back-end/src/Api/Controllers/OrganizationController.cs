@@ -1,4 +1,5 @@
 using Application.Organizations;
+using Domain.Organizations;
 
 namespace Api.Controllers;
 
@@ -24,6 +25,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(LicenseFeatures.CreateOrg)]
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
     {
         request.OrgId = OrgId;
