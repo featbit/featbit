@@ -60,7 +60,7 @@ public class TriggerController : ApiControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPut("run/{token}")]
+    [HttpPost("run/{token}")]
     public async Task<ApiResponse<bool>> RunTriggerAsync(string token)
     {
         var request = new RunTrigger
