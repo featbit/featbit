@@ -17,7 +17,7 @@ public record License
     public string Plan { get; set; } = string.Empty;
 
     public ICollection<string> Features { get; set; } = Array.Empty<string>();
-    
+
     public bool IsValid(Guid orgId)
     {
         // check organization
