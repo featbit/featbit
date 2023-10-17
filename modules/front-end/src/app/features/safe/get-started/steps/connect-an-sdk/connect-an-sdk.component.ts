@@ -196,7 +196,7 @@ using FeatBit.Sdk.Server.Options;
 // setup sdk options
 var options = new FbOptionsBuilder("${this.secret}")
     .Event(new Uri("${this.eventURL}"))
-    .Steaming(new Uri("${this.streamingURL}"))
+    .Streaming(new Uri("${this.streamingURL}"))
     .Build();
 
 // creates a new client instance that connects to FeatBit with the custom option.
