@@ -6,6 +6,7 @@ using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Domain.Organizations;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Swashbuckle.AspNetCore.Filters;
@@ -221,6 +222,18 @@ public class FeatureFlagController : ApiControllerBase
     [HttpPut("{key}/variations")]
     public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
     {
+        request.Key = key;
+        request.EnvId = envId;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [Authorize(LicenseFeatures.Schedule)]
+    [HttpPost("{key}/schedule")]
+    public async Task<ApiResponse<bool>> CreateScheduleAsync(Guid envId, string key, CreateFlagSchedule request)
+    {
+        request.OrgId = OrgId;
         request.Key = key;
         request.EnvId = envId;
 

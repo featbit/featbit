@@ -19,6 +19,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
   @Input() visible = false;
   @Input() refName: string = '';
   @Input() kind: ReviewModalKindEnum = ReviewModalKindEnum.Review;
+  @Output() kindChange= new EventEmitter<ReviewModalKindEnum>();
   @Input() previous: string = '{}';
   @Input() current: string = '{}';
   @Input() refType: RefTypeEnum;
@@ -26,12 +27,10 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
   @Output() onCancel = new EventEmitter<any>();
 
   title: string;
-  reviewModalKindEnum = ReviewModalKindEnum;
   instructions: IInstruction[] = [];
   form: FormGroup;
 
   license: License;
-  hasSchedule: boolean = false;
   today = new Date();
   timeDefaultValue = setSeconds(setMinutes(setHours(new Date(), this.today.getHours()), this.today.getMinutes()), 0);
 
@@ -46,7 +45,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
   }
 
   scheduleValidator: ValidatorFn = (control: AbstractControl) => {
-    if (this.license.isGranted(LicenseFeatureEnum.Schedule) && this.hasSchedule && !control.value) {
+    if (this.license.isGranted(LicenseFeatureEnum.Schedule) && this.kind === ReviewModalKindEnum.Schedule && !control.value) {
       const error = { required: true };
       control.setErrors(error);
       return error;
@@ -61,10 +60,8 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     if (this.visible) {
       if (this.kind === ReviewModalKindEnum.Schedule) {
         this.title = $localize `:@@common.schedule-changes:Schedule changes`;
-        this.hasSchedule = true;
       } else {
         this.title =$localize `:@@common.review-and-save:Review and save`;
-        this.hasSchedule = false;
       }
 
       this.form = this.fb.group({
@@ -97,7 +94,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
 
     const output: ChangeReviewOutput = {
       comment: comment,
-      schedule: this.license.isGranted(LicenseFeatureEnum.Schedule) && this.hasSchedule ? {
+      schedule: this.license.isGranted(LicenseFeatureEnum.Schedule) ? {
         title: scheduleTitle,
         scheduledTime: scheduledTime,
       } : undefined,
@@ -139,11 +136,12 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     nzDisabledSeconds: () => []
   });
 
-  toggleSchedule() {
-    this.hasSchedule = !this.hasSchedule;
+  setKind(kind: ReviewModalKindEnum) {
+    this.kindChange.emit(kind);
   }
 
   protected readonly environment = environment;
   protected readonly RefTypeEnum = RefTypeEnum;
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
+  protected readonly ReviewModalKindEnum = ReviewModalKindEnum;
 }

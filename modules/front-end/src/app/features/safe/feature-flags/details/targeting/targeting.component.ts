@@ -65,8 +65,7 @@ export class TargetingComponent implements OnInit {
     this.exptRulesVisible = false;
   }
 
-  reviewModalKindEnum = ReviewModalKindEnum;
-  reviewModalKind:ReviewModalKindEnum;
+  reviewModalKind: ReviewModalKindEnum;
   originalData: string = '{}';
   currentData: string = '{}';
   refType: RefTypeEnum = RefTypeEnum.Flag;
@@ -298,7 +297,7 @@ export class TargetingComponent implements OnInit {
     const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
     const targeting = { key, targetUsers, rules, fallthrough, exptIncludeAllTargets };
 
-    this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule ).subscribe({
+    const observer = {
       next: () => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
@@ -308,7 +307,15 @@ export class TargetingComponent implements OnInit {
         this.msg.error($localize `:@@common.save-fail:Failed to Save`);
         this.isLoading = false;
       }
-    });
+    };
+
+    switch (this.reviewModalKind) {
+      case ReviewModalKindEnum.Review:
+        this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule).subscribe(observer);
+        break;
+      case ReviewModalKindEnum.Schedule:
+        this.featureFlagService.createSchedule(targeting, data.schedule).subscribe(observer);
+    }
 
     this.reviewModalVisible = false;
   }
@@ -399,4 +406,5 @@ export class TargetingComponent implements OnInit {
 
   protected readonly environment = environment;
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
+  protected readonly ReviewModalKindEnum = ReviewModalKindEnum;
 }

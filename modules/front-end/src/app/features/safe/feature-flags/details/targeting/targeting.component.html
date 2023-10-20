@@ -12,7 +12,7 @@
           <i nz-icon nzType="field-time" nzTheme="outline"></i>
           <span>{{pendingChangesList.length}}</span>
         </button>
-        <button class="save" nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, reviewModalKindEnum.Review)">
+        <button class="save" nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, ReviewModalKindEnum.Review)">
           <i nz-icon nzType="icons:icon-save"></i>
           <ng-container i18n="@@common.save">Save</ng-container>
         </button>
@@ -22,7 +22,7 @@
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
             <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.Schedule)}" nz-menu-item
-                (click)="onScheduleClick(validationErrorTpl, reviewModalKindEnum.Schedule)">
+                (click)="onScheduleClick(validationErrorTpl, ReviewModalKindEnum.Schedule)">
               <span *ngIf="license?.isGranted(LicenseFeatureEnum.Schedule)" i18n="common.schedule-changes">Schedule changes</span>
               <span *ngIf="!license?.isGranted(LicenseFeatureEnum.Schedule)" [nz-tooltip]="needLicenseTooltip" i18n="common.schedule-changes">Schedule changes</span>
               <ng-template #needLicenseTooltip>
@@ -140,7 +140,7 @@
   *ngIf="!isLoading"
   [visible]="reviewModalVisible"
   [refName]="featureFlag.name"
-  [kind]="reviewModalKind"
+  [(kind)]="reviewModalKind"
   [previous]="originalData"
   [current]="currentData"
   [refType]="refType"
