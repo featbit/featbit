@@ -1,6 +1,5 @@
 using Confluent.Kafka;
 using Infrastructure.Fakes;
-using Infrastructure.Redis;
 using Streaming.DependencyInjection;
 
 namespace Api.Setup;
@@ -32,13 +31,13 @@ public static class ServicesRegister
 
         // build streaming service
         var streamingBuilder = services.AddStreamingCore();
-        if (builder.Environment.IsEnvironment("IntegrationTests"))
+        if (configuration.GetValue("IntegrationTests", false))
         {
             streamingBuilder.UseStore<FakeStore>().UseNullMessageQueue();
         }
         else
         {
-            streamingBuilder.UseRedisStore(options => configuration.GetSection(RedisOptions.Redis).Bind(options));
+            streamingBuilder.UseHybridStore(configuration);
 
             var isProVersion = configuration["IS_PRO"];
             if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
