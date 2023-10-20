@@ -12,7 +12,7 @@ public class TestApp : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("IntegrationTests");
+        builder.UseSetting("IntegrationTests", "true");
 
         base.ConfigureWebHost(builder);
     }

@@ -1,17 +1,25 @@
+using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
 
-public class RedisClient
+public class RedisClient : IRedisClient
 {
-    private readonly IConnectionMultiplexer _connectionMultiplexer;
+    private readonly Lazy<ConnectionMultiplexer> _lazyConnection;
+    private IConnectionMultiplexer ConnectionMultiplexer => _lazyConnection.Value;
 
-    public RedisClient(RedisOptions options)
+    public RedisClient(IOptions<RedisOptions> options)
     {
-        _connectionMultiplexer = ConnectionMultiplexer.Connect(options.ConnectionString);
+        var value = options.Value;
+
+        _lazyConnection = new Lazy<ConnectionMultiplexer>(
+            () => StackExchange.Redis.ConnectionMultiplexer.Connect(value.ConnectionString)
+        );
     }
 
-    public IDatabase GetDatabase() => _connectionMultiplexer.GetDatabase();
+    public bool IsConnected => ConnectionMultiplexer.IsConnected;
 
-    public ISubscriber GetSubscriber() => _connectionMultiplexer.GetSubscriber();
+    public IDatabase GetDatabase() => ConnectionMultiplexer.GetDatabase();
+
+    public ISubscriber GetSubscriber() => ConnectionMultiplexer.GetSubscriber();
 }

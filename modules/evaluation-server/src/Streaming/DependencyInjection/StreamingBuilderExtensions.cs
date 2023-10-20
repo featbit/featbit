@@ -1,8 +1,10 @@
 using Domain.Messages;
 using Domain.Shared;
-using Infrastructure.Fakes;
 using Infrastructure.Kafka;
+using Infrastructure.MongoDb;
 using Infrastructure.Redis;
+using Infrastructure.Store;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Streaming.Consumers;
@@ -53,15 +55,38 @@ public static class StreamingBuilderExtensions
         return builder;
     }
 
-    public static IStreamingBuilder UseRedisStore(this IStreamingBuilder builder, Action<RedisOptions> configureOptions)
+    public static IStreamingBuilder UseRedisStore(this IStreamingBuilder builder, ConfigurationManager configuration)
     {
-        var options = new RedisOptions();
-        configureOptions(options);
-        var redisClient = new RedisClient(options);
-
         var services = builder.Services;
-        services.TryAddSingleton(redisClient);
+
+        services.Configure<RedisOptions>(configuration.GetSection(RedisOptions.Redis));
+        services.TryAddSingleton<IRedisClient, RedisClient>();
         services.AddSingleton<IStore, RedisStore>();
+
+        return builder;
+    }
+
+    public static IStreamingBuilder UseMongoDbStore(this IStreamingBuilder builder, ConfigurationManager configuration)
+    {
+        var services = builder.Services;
+
+        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
+        services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
+        services.AddSingleton<IStore, MongoDbStore>();
+
+        return builder;
+    }
+
+    public static IStreamingBuilder UseHybridStore(this IStreamingBuilder builder, ConfigurationManager configuration)
+    {
+        var services = builder.Services;
+
+        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
+        services.Configure<RedisOptions>(configuration.GetSection(RedisOptions.Redis));
+
+        services.TryAddSingleton<IRedisClient, RedisClient>();
+        services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
+        services.AddSingleton<IStore, HybridStore>();
 
         return builder;
     }

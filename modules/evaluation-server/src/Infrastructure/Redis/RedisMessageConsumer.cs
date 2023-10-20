@@ -12,7 +12,7 @@ public partial class RedisMessageConsumer : BackgroundService
     private readonly ILogger<RedisMessageConsumer> _logger;
 
     public RedisMessageConsumer(
-        RedisClient redisClient,
+        IRedisClient redisClient,
         IEnumerable<IMessageConsumer> handlers,
         ILogger<RedisMessageConsumer> logger)
     {
@@ -33,6 +33,7 @@ public partial class RedisMessageConsumer : BackgroundService
         );
         // process messages sequentially. ref: https://stackexchange.github.io/StackExchange.Redis/PubSubOrder.html
         queue.OnMessage(HandleMessageAsync);
+        return;
 
         async Task HandleMessageAsync(ChannelMessage channelMessage)
         {
@@ -40,13 +41,13 @@ public partial class RedisMessageConsumer : BackgroundService
 
             try
             {
-                var channel = channelMessage.Channel;
-                if (channel.IsNullOrEmpty)
+                var theChannel = channelMessage.Channel;
+                if (theChannel.IsNullOrEmpty)
                 {
                     return;
                 }
 
-                var topic = channel.ToString();
+                var topic = theChannel.ToString();
                 if (!_handlers.TryGetValue(topic, out var handler))
                 {
                     Log.NoHandlerForTopic(_logger, topic);

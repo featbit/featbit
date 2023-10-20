@@ -4,6 +4,8 @@ namespace Infrastructure.Fakes;
 
 public class FakeStore : IStore
 {
+    public ValueTask<bool> IsAvailableAsync() => ValueTask.FromResult(true);
+
     public Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {
         return Task.FromResult(FakeData.AllFlags);

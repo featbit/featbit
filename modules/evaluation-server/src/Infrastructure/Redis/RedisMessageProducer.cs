@@ -11,7 +11,7 @@ public partial class RedisMessageProducer : IMessageProducer
     private readonly IDatabase _database;
     private readonly ILogger<RedisMessageProducer> _logger;
 
-    public RedisMessageProducer(RedisClient redisClient, ILogger<RedisMessageProducer> logger)
+    public RedisMessageProducer(IRedisClient redisClient, ILogger<RedisMessageProducer> logger)
     {
         _database = redisClient.GetDatabase();
         _logger = logger;
