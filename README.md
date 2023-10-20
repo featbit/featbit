@@ -41,7 +41,7 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 
 **Ship Code Safely**. Mitigate risks with Production Testing, roll out features to 1% of users initially then expanding progressively, and ensure instant error recovery without redeployment.
 
-**Targeted Experiences**. Giving you control over who sees each feature and when they see it. Release features to specific target users, and continuously measure and improve your buisness.
+**Targeted Experiences**. Giving you control over who sees each feature and when they see it. Release features to specific target users, and continuously measure and improve your business.
 
 **Innovate Faster**. Decouples code deployments from feature releases. Deploy at will, and release any feature immediately upon request from the boss.
 
