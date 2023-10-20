@@ -55,6 +55,7 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
             _currentUser.Id
         );
 
+        // create draft
         var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, string.Empty, dataChange, _currentUser.Id);
         await _flagDraftService.AddOneAsync(flagDraft);
 
@@ -68,7 +69,6 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
             request.Schedule.ScheduledTime,
             _currentUser.Id
         );
-        
         await _flagScheduleService.AddOneAsync(flagSchedule);
 
         return true;
