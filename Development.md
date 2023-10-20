@@ -6,7 +6,7 @@ environment, connecting to our code base, and submitting code to the project.
 # Get Started
 
 FeatBit consists of multiple services, to learn more about the architecture, please read
-our [documentation](https://featbit.gitbook.io/docs/tech-stack/architecture).
+our [documentation](https://docs.featbit.co/tech-stack/architecture).
 
 ![Architecture](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2FELW411vbJvKbSu1uG2Z0%2Fimage.png?alt=media&token=4fff2e66-cbca-4c45-b8c0-8fc99d357d13)
 
@@ -21,15 +21,18 @@ launch these two services from the code.
 
 ## Setup dependencies
 
-Open [docker-compose-dev.yml](./docker-compose-dev.yml) and **comment out ui and/or api-server service according to the
-scope of your work**, they are the
-first two services. Then do
-
 ```bash
-docker compose -f docker-compose-dev.yml up -d
+# run mongodb and redis containers
+docker compose up -d mongodb redis
+
+# run ui container if your work focus on Api only
+docker compose up -d ui
+
+# run api container if your work focus on UI only
+docker compose up -d api-server
 ```
 
-Wait until all services are successfully launched, and we're ready to run API and/or UI locally.
+Wait until those services are successfully launched, and we're ready to run API and/or UI locally.
 
 ## Run API
 
