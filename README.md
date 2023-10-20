@@ -170,3 +170,10 @@ Made with [contrib.rocks](https://contrib.rocks).
 ## License
 
 FeatBit is an Open Core product. The bulk of the code is under permissive MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
+
+The following listed features are protected by a commercial license key, please contact us by [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) or [Email](mailto:contact@featbit.co) to get a license key or a trial license key:
+- Schedule
+- Change request
+- SSO
+- Multi-organizations
+
