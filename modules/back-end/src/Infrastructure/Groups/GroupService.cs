@@ -170,7 +170,7 @@ public class GroupService : MongoDbService<Group>, IGroupService
     public async Task AddMemberAsync(Guid organizationId, Guid groupId, Guid memberId)
     {
         var existed = await MongoDb.QueryableOf<GroupMember>()
-            .AnyAsync(x => x.OrganizationId == organizationId && x.GroupId == groupId && x.MemberId == memberId);
+            .CountAsync(x => x.OrganizationId == organizationId && x.GroupId == groupId && x.MemberId == memberId) > 0;
         if (existed)
         {
             return;
@@ -190,7 +190,7 @@ public class GroupService : MongoDbService<Group>, IGroupService
     public async Task AddPolicyAsync(Guid groupId, Guid policyId)
     {
         var existed = await MongoDb.QueryableOf<GroupPolicy>()
-            .AnyAsync(x => x.GroupId == groupId && x.PolicyId == policyId);
+            .CountAsync(x => x.GroupId == groupId && x.PolicyId == policyId) > 0;
         if (existed)
         {
             return;

@@ -1,6 +1,5 @@
 using Domain.Environments;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Environments;
@@ -25,7 +24,7 @@ public class EnvironmentService : MongoDbService<Environment>, IEnvironmentServi
 
     public async Task<bool> HasKeyBeenUsedAsync(Guid projectId, string key)
     {
-        return await Queryable.AnyAsync(environment =>
+        return await AnyAsync(environment =>
             environment.ProjectId == projectId &&
             string.Equals(environment.Key, key, StringComparison.OrdinalIgnoreCase)
         );
