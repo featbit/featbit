@@ -241,6 +241,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPost("{key}/change-request")]
+    public async Task<ApiResponse<bool>> CreateChangeRequestAsync(Guid envId, string key, CreateFlagChangeRequest request)
+    {
+        request.OrgId = OrgId;
+        request.Key = key;
+        request.EnvId = envId;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+    
     [HttpPut("{key}/targeting")]
     public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
     {

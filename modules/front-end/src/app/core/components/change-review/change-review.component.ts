@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from "@angular/core";
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/forms";
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
+import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
 import { differenceInCalendarDays, setHours, setMinutes, setSeconds } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
 import { environment } from "src/environments/environment";
@@ -9,6 +9,9 @@ import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
 import { License, LicenseFeatureEnum } from "@shared/types";
 import { getCurrentOrganization } from "@utils/project-env";
+import { BehaviorSubject } from "rxjs";
+import { debounceTime } from "rxjs/operators";
+import { TeamService } from "@services/team.service";
 
 @Component({
   selector: 'change-review',
@@ -18,7 +21,7 @@ import { getCurrentOrganization } from "@utils/project-env";
 export class ChangeReviewComponent implements OnChanges, OnInit {
   @Input() visible = false;
   @Input() refName: string = '';
-  @Input() kind: ReviewModalKindEnum = ReviewModalKindEnum.Review;
+  @Input() kind: ReviewModalKindEnum = ReviewModalKindEnum.Save;
   @Output() kindChange= new EventEmitter<ReviewModalKindEnum>();
   @Input() previous: string = '{}';
   @Input() current: string = '{}';
@@ -36,12 +39,27 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private teamService: TeamService,
     private auditLogService: AuditLogService
   ) { }
 
   ngOnInit(): void {
     const currentOrg = getCurrentOrganization();
     this.license = new License(currentOrg.license);
+
+    this.memberSearchChange$.pipe(
+      debounceTime(500)
+    ).subscribe(searchText => {
+      this.teamService.search(searchText).subscribe({
+        next: (result) => {
+          this.memberList = result.items;
+          this.isMemberLoading = false;
+        },
+        error: _ => {
+          this.isMemberLoading = false;
+        }
+      });
+    });
   }
 
   scheduleValidator: ValidatorFn = (control: AbstractControl) => {
@@ -56,18 +74,31 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     return null;
   }
 
+  setTitle(kind: ReviewModalKindEnum) {
+    if (!ReviewModalMode.isScheduleEnabled(kind) && !ReviewModalMode.isChangeRequestEnabled(kind)) {
+      this.title = $localize `:@@common.review-and-save:Review and save`;
+      return;
+    }
+
+    if (ReviewModalMode.isChangeRequestEnabled(kind)) {
+      this.title = $localize `:@@common.change-request:Change Request`;
+    }
+
+    if (ReviewModalMode.isScheduleEnabled(kind)) {
+      this.title = $localize `:@@common.schedule-changes:Schedule changes`;
+    }
+  }
+
   async ngOnChanges() {
     if (this.visible) {
-      if (this.kind === ReviewModalKindEnum.Schedule) {
-        this.title = $localize `:@@common.schedule-changes:Schedule changes`;
-      } else {
-        this.title =$localize `:@@common.review-and-save:Review and save`;
-      }
+      this.setTitle(this.kind);
 
       this.form = this.fb.group({
         comment: ['', []],
         scheduleTitle: ['', [this.scheduleValidator]],
         scheduledTime: [null, [this.scheduleValidator]],
+        changeRequestReason: ['', [Validators.required]],
+        reviewerUserIds: [[], [Validators.required]],
       });
 
       try {
@@ -136,12 +167,38 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     nzDisabledSeconds: () => []
   });
 
-  setKind(kind: ReviewModalKindEnum) {
-    this.kindChange.emit(kind);
+  toggleSchedule() {
+    if (ReviewModalMode.isScheduleEnabled(this.kind)) {
+      this.kind = ReviewModalMode.disableSchedule(this.kind);
+    } else {
+      this.kind = ReviewModalMode.enableSchedule(this.kind);
+    }
+
+    this.kindChange.emit(this.kind);
+  }
+
+  toggleChangeRequest() {
+    if (ReviewModalMode.isChangeRequestEnabled(this.kind)) {
+      this.kind = ReviewModalMode.disableChangeRequest(this.kind);
+    } else {
+      this.kind = ReviewModalMode.enableChangeRequest(this.kind);
+    }
+
+    this.kindChange.emit(this.kind);
+  }
+
+  memberSearchChange$ = new BehaviorSubject('');
+  isMemberLoading = false;
+  memberList: any[];
+  onSearchMember(value: string) {
+    if (value.length > 0) {
+      this.isMemberLoading = true;
+      this.memberSearchChange$.next(value);
+    }
   }
 
   protected readonly environment = environment;
   protected readonly RefTypeEnum = RefTypeEnum;
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
-  protected readonly ReviewModalKindEnum = ReviewModalKindEnum;
+  protected readonly ReviewModalMode = ReviewModalMode;
 }

@@ -12,7 +12,7 @@
           <i nz-icon nzType="field-time" nzTheme="outline"></i>
           <span>{{pendingChangesList.length}}</span>
         </button>
-        <button class="save" nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, ReviewModalKindEnum.Review)">
+        <button class="save" nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, ReviewModalKindEnum.Save)">
           <i nz-icon nzType="icons:icon-save"></i>
           <ng-container i18n="@@common.save">Save</ng-container>
         </button>
@@ -21,13 +21,18 @@
         </button>
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
+            <ng-template #needLicenseTooltip>
+              <ng-container i18n="@@common.need-license-for-schedule">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</ng-container>
+            </ng-template>
             <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.Schedule)}" nz-menu-item
-                (click)="onScheduleClick(validationErrorTpl, ReviewModalKindEnum.Schedule)">
+                (click)="onScheduleClick(validationErrorTpl)">
               <span *ngIf="license?.isGranted(LicenseFeatureEnum.Schedule)" i18n="common.schedule-changes">Schedule changes</span>
               <span *ngIf="!license?.isGranted(LicenseFeatureEnum.Schedule)" [nz-tooltip]="needLicenseTooltip" i18n="common.schedule-changes">Schedule changes</span>
-              <ng-template #needLicenseTooltip>
-                <ng-container i18n="@@common.need-license-for-schedule">You don't have a license or your current license doesn't grant the Schedule feature, please contact FeatBit team to get a license.</ng-container>
-              </ng-template>
+            </li>
+            <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.ChangeRequest)}" nz-menu-item
+                (click)="onChangeRequestClick(validationErrorTpl)">
+              <span *ngIf="license?.isGranted(LicenseFeatureEnum.ChangeRequest)" i18n="common.change-request">Change Request</span>
+              <span *ngIf="!license?.isGranted(LicenseFeatureEnum.ChangeRequest)" [nz-tooltip]="needLicenseTooltip" i18n="common.change-request">Change Request</span>
             </li>
             <li nz-menu-item
                 (click)="onSetExptRulesClick()"

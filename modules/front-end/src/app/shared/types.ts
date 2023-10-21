@@ -59,6 +59,7 @@ export interface IOrganization {
 export enum LicenseFeatureEnum {
   Sso = 'sso',
   Schedule = 'schedule',
+  ChangeRequest = 'change-request',
   CreateOrg = 'create-org'
 }
 

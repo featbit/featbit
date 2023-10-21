@@ -72,12 +72,20 @@ export class TargetingComponent implements OnInit {
   reviewModalVisible: boolean = false;
 
 
-  onScheduleClick(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
+  onScheduleClick(validationErrortpl: TemplateRef<void>) {
     if (!this.license.isGranted(LicenseFeatureEnum.Schedule)) {
       return false;
     }
 
-    return this.onReviewChanges(validationErrortpl, modalKind);
+    return this.onReviewChanges(validationErrortpl, ReviewModalKindEnum.Schedule);
+  }
+
+  onChangeRequestClick(validationErrortpl: TemplateRef<void>) {
+    if (!this.license.isGranted(LicenseFeatureEnum.ChangeRequest)) {
+      return false;
+    }
+
+    return this.onReviewChanges(validationErrortpl, ReviewModalKindEnum.ChangeRequest);
   }
 
   onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
@@ -310,7 +318,7 @@ export class TargetingComponent implements OnInit {
     };
 
     switch (this.reviewModalKind) {
-      case ReviewModalKindEnum.Review:
+      case ReviewModalKindEnum.Save:
         this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule).subscribe(observer);
         break;
       case ReviewModalKindEnum.Schedule:
