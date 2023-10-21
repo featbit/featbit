@@ -14,7 +14,7 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
+import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { environment } from "src/environments/environment";
 import { getCurrentOrganization } from "@utils/project-env";
@@ -317,12 +317,14 @@ export class TargetingComponent implements OnInit {
       }
     };
 
-    switch (this.reviewModalKind) {
-      case ReviewModalKindEnum.Save:
-        this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule).subscribe(observer);
-        break;
-      case ReviewModalKindEnum.Schedule:
-        this.featureFlagService.createSchedule(targeting, data.schedule).subscribe(observer);
+    if (!ReviewModalMode.isScheduleEnabled(this.reviewModalKind) && !ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)) {
+      this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule).subscribe(observer);
+    } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind) && ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)) { // schedule with change request
+
+    } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind)) { // schedule only
+      this.featureFlagService.createSchedule(targeting, data.schedule).subscribe(observer);
+    } else { // change request only
+
     }
 
     this.reviewModalVisible = false;

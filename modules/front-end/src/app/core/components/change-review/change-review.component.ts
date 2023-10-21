@@ -98,7 +98,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
         scheduleTitle: ['', [this.scheduleValidator]],
         scheduledTime: [null, [this.scheduleValidator]],
         changeRequestReason: ['', [Validators.required]],
-        reviewerUserIds: [[], [Validators.required]],
+        reviewers: [[], [Validators.required]],
       });
 
       try {
@@ -121,13 +121,17 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
       }
     }
 
-    const { comment, scheduleTitle, scheduledTime } = this.form.value;
+    const { comment, scheduleTitle, scheduledTime, changeRequestReason, reviewers } = this.form.value;
 
     const output: ChangeReviewOutput = {
       comment: comment,
       schedule: this.license.isGranted(LicenseFeatureEnum.Schedule) ? {
         title: scheduleTitle,
         scheduledTime: scheduledTime,
+      } : undefined,
+      changeRequest: this.license.isGranted(LicenseFeatureEnum.ChangeRequest) ? {
+        reason: changeRequestReason,
+        reviewers: reviewers,
       } : undefined,
     };
 

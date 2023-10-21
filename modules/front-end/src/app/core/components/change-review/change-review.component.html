@@ -81,13 +81,12 @@
                 <nz-form-control i18n-nzErrorTip="@@common.reviewers-cannot-be-empty" nzErrorTip="Reviewers cannot be empty">
                   <nz-select
                     nzMode="multiple"
-                    [nzMaxTagCount] = "1"
                     i18n-nzPlaceHolder="@@common.select-reviewers"
                     nzPlaceHolder="Select reviewers"
                     nzAllowClear
                     nzShowSearch
                     nzServerSearch
-                    formControlName="reviewerUserIds"
+                    formControlName="reviewers"
                     (nzOnSearch)="onSearchMember($event)">
                     <ng-container *ngFor="let o of memberList">
                       <nz-option

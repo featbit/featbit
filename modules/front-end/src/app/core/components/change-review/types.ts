@@ -35,7 +35,13 @@ export interface FlagSchedule {
   title: string,
 }
 
+export interface FlagChangeRequest {
+  reason: string,
+  reviewers: string[],
+}
+
 export interface ChangeReviewOutput {
   comment?: string,
   schedule?: FlagSchedule,
+  changeRequest?: FlagChangeRequest
 }
