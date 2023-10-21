@@ -5,12 +5,12 @@ export enum ReviewModalKindEnum {
 }
 
 export const ReviewModalMode = {
-  isScheduleEnabled(option: number){
-    return option & ReviewModalKindEnum.Schedule;
+  isScheduleEnabled(option: number): boolean {
+    return (option & ReviewModalKindEnum.Schedule) === ReviewModalKindEnum.Schedule;
   },
 
   isChangeRequestEnabled(option: number){
-    return option & ReviewModalKindEnum.ChangeRequest;
+    return (option & ReviewModalKindEnum.ChangeRequest) === ReviewModalKindEnum.ChangeRequest;
   },
 
   enableSchedule(option: number){

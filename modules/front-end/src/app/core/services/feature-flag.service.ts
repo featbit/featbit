@@ -112,24 +112,39 @@ export class FeatureFlagService {
     return this.http.put(url, {});
   }
 
-  updateTargeting(targeting: IFeatureFlagTargeting, comment?: string, schedule?: FlagSchedule): Observable<boolean> {
+  updateTargeting(targeting: IFeatureFlagTargeting, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${targeting.key}/targeting`;
 
     const payload = {
-      ...targeting,
-      comment,
-      schedule
+      targeting,
+      comment
     };
 
     return this.http.put<boolean>(url, payload);
   }
 
-  createSchedule(targeting: IFeatureFlagTargeting, schedule?: FlagSchedule): Observable<boolean> {
+  createSchedule(targeting: IFeatureFlagTargeting, scheduledTime: Date, title: string, reviewers: string[], reason: string, withChangeRequest: boolean = false): Observable<boolean> {
     const url = `${this.baseUrl}/${targeting.key}/schedule`;
 
     const payload = {
-      ...targeting,
-      schedule
+      targeting,
+      scheduledTime,
+      title,
+      reason,
+      reviewers,
+      withChangeRequest
+    };
+
+    return this.http.post<boolean>(url, payload);
+  }
+
+  createChangeRequest(targeting: IFeatureFlagTargeting, reviewers: string[], reason: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${targeting.key}/change-request`;
+
+    const payload = {
+      targeting,
+      reviewers,
+      reason
     };
 
     return this.http.post<boolean>(url, payload);

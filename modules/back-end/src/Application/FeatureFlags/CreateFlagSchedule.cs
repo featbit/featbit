@@ -6,23 +6,21 @@ using Domain.Targeting;
 
 namespace Application.FeatureFlags;
 
-public class CreateFlagSchedule : IRequest<bool>
+public class CreateFlagSchedule: IRequest<bool>
 {
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
+    
+    public FlagTargeting Targeting { get; set; }
 
-    public ICollection<TargetUser> TargetUsers { get; set; }
+    public string Title { get; set; }
 
-    public ICollection<TargetRule> Rules { get; set; }
+    public DateTime ScheduledTime { get; set; }
 
-    public Fallthrough Fallthrough { get; set; }
-
-    public bool ExptIncludeAllTargets { get; set; }
-
-    public Schedule Schedule { get; set; }
+    public Guid ChangeRequestId { get; set; }
 }
 
 public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, bool>
@@ -48,10 +46,10 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateTargeting(
-            request.TargetUsers,
-            request.Rules,
-            request.Fallthrough,
-            request.ExptIncludeAllTargets,
+            request.Targeting.TargetUsers,
+            request.Targeting.Rules,
+            request.Targeting.Fallthrough,
+            request.Targeting.ExptIncludeAllTargets,
             _currentUser.Id
         );
 
@@ -65,10 +63,12 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
             request.EnvId,
             flagDraft.Id,
             flag.Id,
-            request.Schedule.Title,
-            request.Schedule.ScheduledTime,
-            _currentUser.Id
+            request.Title,
+            request.ScheduledTime,
+            _currentUser.Id,
+            request.ChangeRequestId
         );
+        
         await _flagScheduleService.AddOneAsync(flagSchedule);
 
         return true;

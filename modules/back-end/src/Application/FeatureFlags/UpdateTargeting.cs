@@ -5,22 +5,16 @@ using Domain.Targeting;
 
 namespace Application.FeatureFlags;
 
-public class UpdateTargeting : IRequest<bool>
+public class UpdateTargeting: IRequest<bool>
 {
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
-
-    public ICollection<TargetUser> TargetUsers { get; set; }
-
-    public ICollection<TargetRule> Rules { get; set; }
-
-    public Fallthrough Fallthrough { get; set; }
-
-    public bool ExptIncludeAllTargets { get; set; }
-
+    
+    public FlagTargeting Targeting { get; set; }
+    
     public string Comment { get; set; }
 }
 
@@ -47,10 +41,10 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateTargeting(
-            request.TargetUsers,
-            request.Rules,
-            request.Fallthrough,
-            request.ExptIncludeAllTargets,
+            request.Targeting.TargetUsers,
+            request.Targeting.Rules,
+            request.Targeting.Fallthrough,
+            request.Targeting.ExptIncludeAllTargets,
             _currentUser.Id
         );
 

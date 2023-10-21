@@ -63,7 +63,19 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
   }
 
   scheduleValidator: ValidatorFn = (control: AbstractControl) => {
-    if (this.license.isGranted(LicenseFeatureEnum.Schedule) && this.kind === ReviewModalKindEnum.Schedule && !control.value) {
+    if (this.license.isGranted(LicenseFeatureEnum.Schedule) && ReviewModalMode.isScheduleEnabled(this.kind) && !control.value) {
+      const error = { required: true };
+      control.setErrors(error);
+      return error;
+    } else {
+      control.setErrors(null);
+    }
+
+    return null;
+  }
+
+  changeRequestValidator: ValidatorFn = (control: AbstractControl) => {
+    if (this.license.isGranted(LicenseFeatureEnum.ChangeRequest) && ReviewModalMode.isChangeRequestEnabled(this.kind) && (!control.value || control.value.length === 0)) {
       const error = { required: true };
       control.setErrors(error);
       return error;
@@ -97,8 +109,8 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
         comment: ['', []],
         scheduleTitle: ['', [this.scheduleValidator]],
         scheduledTime: [null, [this.scheduleValidator]],
-        changeRequestReason: ['', [Validators.required]],
-        reviewers: [[], [Validators.required]],
+        changeRequestReason: ['', [this.changeRequestValidator]],
+        reviewers: [[], [this.changeRequestValidator]],
       });
 
       try {
@@ -125,11 +137,11 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
 
     const output: ChangeReviewOutput = {
       comment: comment,
-      schedule: this.license.isGranted(LicenseFeatureEnum.Schedule) ? {
+      schedule: this.license.isGranted(LicenseFeatureEnum.Schedule) && ReviewModalMode.isScheduleEnabled(this.kind) ? {
         title: scheduleTitle,
         scheduledTime: scheduledTime,
       } : undefined,
-      changeRequest: this.license.isGranted(LicenseFeatureEnum.ChangeRequest) ? {
+      changeRequest: this.license.isGranted(LicenseFeatureEnum.ChangeRequest) && ReviewModalMode.isChangeRequestEnabled(this.kind) ? {
         reason: changeRequestReason,
         reviewers: reviewers,
       } : undefined,

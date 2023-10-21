@@ -318,13 +318,13 @@ export class TargetingComponent implements OnInit {
     };
 
     if (!ReviewModalMode.isScheduleEnabled(this.reviewModalKind) && !ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)) {
-      this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule).subscribe(observer);
-    } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind) && ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)) { // schedule with change request
-
-    } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind)) { // schedule only
-      this.featureFlagService.createSchedule(targeting, data.schedule).subscribe(observer);
-    } else { // change request only
-
+      this.featureFlagService.updateTargeting(targeting, data.comment).subscribe(observer);
+    } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind)) { // schedule (with or without change request)
+      this.featureFlagService.createSchedule(targeting, data.schedule.scheduledTime, data.schedule.title, data.changeRequest?.reviewers, data.changeRequest?.reason, ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)).subscribe(observer);
+    } else if (ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)){ // change request only
+      this.featureFlagService.createChangeRequest(targeting, data.changeRequest.reviewers, data.changeRequest.reason).subscribe(observer);
+    } else {
+      // error
     }
 
     this.reviewModalVisible = false;

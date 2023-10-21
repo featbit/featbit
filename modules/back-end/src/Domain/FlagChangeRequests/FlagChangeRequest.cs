@@ -12,7 +12,7 @@ public class FlagChangeRequest : FullAuditedEntity
 
     public string Status { get; set; }
 
-    public string Description { get; set; }
+    public string Reason { get; set; }
     
     public ICollection<Guid> Reviewers { get; set; }
     
@@ -22,8 +22,8 @@ public class FlagChangeRequest : FullAuditedEntity
         Guid flagDraftId,
         Guid flagId,
         string status,
-        string title,
-        DateTime scheduledTime,
+        string reason,
+        ICollection<Guid> reviewers,
         Guid currentUserId) : base(currentUserId)
     {
         if (!FlagChangeRequestStatus.IsDefined(status))
@@ -36,6 +36,8 @@ public class FlagChangeRequest : FullAuditedEntity
         FlagDraftId = flagDraftId;
         FlagId = flagId;
         Status = status;
+        Reason = reason;
+        Reviewers = reviewers;
     }
     
     public static FlagChangeRequest Pending(
@@ -43,10 +45,10 @@ public class FlagChangeRequest : FullAuditedEntity
         Guid envId,
         Guid flagDraftId,
         Guid flagId,
-        string title,
-        DateTime scheduledTime,
+        string reason,
+        ICollection<Guid> reviewers,
         Guid currentUserId)
     {
-        return new FlagChangeRequest(orgId, envId, flagDraftId, flagId, FlagChangeRequestStatus.Pending, title, scheduledTime, currentUserId);
+        return new FlagChangeRequest(orgId, envId, flagDraftId, flagId, FlagChangeRequestStatus.Pending, reason, reviewers, currentUserId);
     }
 }

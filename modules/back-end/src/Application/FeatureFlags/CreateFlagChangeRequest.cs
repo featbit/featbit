@@ -1,32 +1,25 @@
 ﻿using Application.Users;
-using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
-using Domain.FlagSchedules;
-using Domain.Targeting;
 
 namespace Application.FeatureFlags;
 
-public class CreateFlagChangeRequest : IRequest<bool>
+public class CreateFlagChangeRequest : IRequest<Guid>
 {
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
+    
+    public FlagTargeting Targeting { get; set; }
 
-    public ICollection<TargetUser> TargetUsers { get; set; }
+    public string Reason { get; set; }
 
-    public ICollection<TargetRule> Rules { get; set; }
-
-    public Fallthrough Fallthrough { get; set; }
-
-    public bool ExptIncludeAllTargets { get; set; }
-
-    public Schedule Schedule { get; set; }
+    public ICollection<Guid> Reviewers { get; set; }
 }
 
-public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRequest, bool>
+public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRequest, Guid>
 {
     private readonly IFeatureFlagService _flagService;
     private readonly IFlagChangeRequestService _flagChangeRequestService;
@@ -45,14 +38,14 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
         _currentUser = currentUser;
     }
 
-    public async Task<bool> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateTargeting(
-            request.TargetUsers,
-            request.Rules,
-            request.Fallthrough,
-            request.ExptIncludeAllTargets,
+            request.Targeting.TargetUsers,
+            request.Targeting.Rules,
+            request.Targeting.Fallthrough,
+            request.Targeting.ExptIncludeAllTargets,
             _currentUser.Id
         );
 
@@ -65,13 +58,13 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
             request.EnvId,
             flagDraft.Id,
             flag.Id,
-            request.Schedule.Title,
-            request.Schedule.ScheduledTime,
+            request.Reason,
+            request.Reviewers, 
             _currentUser.Id
         );
         
         await _flagChangeRequestService.AddOneAsync(flagChangeRequest);
 
-        return true;
+        return flagChangeRequest.Id;
     }
 }

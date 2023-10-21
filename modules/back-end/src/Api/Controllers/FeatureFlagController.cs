@@ -5,6 +5,7 @@ using Api.Authorization;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
+using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Organizations;
 using Microsoft.AspNetCore.JsonPatch;
@@ -17,6 +18,12 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/feature-flags")]
 public class FeatureFlagController : ApiControllerBase
 {
+    private readonly ILicenseService _licenseService;
+    public FeatureFlagController(ILicenseService licenseService)
+    {
+        _licenseService = licenseService;
+    }
+
     /// <summary>
     /// Get flag list of an environment
     /// </summary>
@@ -231,13 +238,45 @@ public class FeatureFlagController : ApiControllerBase
 
     [Authorize(LicenseFeatures.Schedule)]
     [HttpPost("{key}/schedule")]
-    public async Task<ApiResponse<bool>> CreateScheduleAsync(Guid envId, string key, CreateFlagSchedule request)
+    public async Task<ApiResponse<bool>> CreateScheduleAsync(Guid envId, string key, ScheduleWithChangeRequestParam param)
     {
-        request.OrgId = OrgId;
-        request.Key = key;
-        request.EnvId = envId;
+        var changeRequestId = Guid.Empty;
+        
+        if (param.WithChangeRequest)
+        {
+            var isChangeRequestGranted =
+                await _licenseService.IsFeatureGrantedAsync(OrgId, LicenseFeatures.ChangeRequest);
 
-        var success = await Mediator.Send(request);
+            if (!isChangeRequestGranted)
+            {
+                return Ok(false);
+            }
+
+            var changeRequest = new CreateFlagChangeRequest
+            {
+                OrgId = OrgId,
+                Key = key,
+                EnvId = envId,
+                Targeting = param.Targeting,
+                Reason = param.Reason,
+                Reviewers = param.Reviewers
+            };
+            
+            changeRequestId = await Mediator.Send(changeRequest);
+        }
+
+        var schedule = new CreateFlagSchedule
+        {
+            OrgId = OrgId,
+            Key = key,
+            EnvId = envId,
+            Title = param.Title,
+            Targeting = param.Targeting,
+            ScheduledTime = param.ScheduledTime,
+            ChangeRequestId = changeRequestId
+        };
+
+        var success = await Mediator.Send(schedule);
         return Ok(success);
     }
 
@@ -250,7 +289,7 @@ public class FeatureFlagController : ApiControllerBase
         request.EnvId = envId;
 
         var success = await Mediator.Send(request);
-        return Ok(success);
+        return Ok(true);
     }
     
     [HttpPut("{key}/targeting")]
