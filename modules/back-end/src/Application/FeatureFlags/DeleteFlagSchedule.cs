@@ -8,10 +8,14 @@ public class DeleteFlagSchedule : IRequest<bool>
 public class DeleteFlagScheduleHandler : IRequestHandler<DeleteFlagSchedule, bool>
 {
     private readonly IFlagScheduleService _service;
+    private readonly IFlagChangeRequestService _flagChangeRequestService;
 
-    public DeleteFlagScheduleHandler(IFlagScheduleService service)
+    public DeleteFlagScheduleHandler(
+        IFlagScheduleService service,
+        IFlagChangeRequestService flagChangeRequestService)
     {
         _service = service;
+        _flagChangeRequestService = flagChangeRequestService;
     }
 
     public async Task<bool> Handle(DeleteFlagSchedule request, CancellationToken cancellationToken)
@@ -23,6 +27,17 @@ public class DeleteFlagScheduleHandler : IRequestHandler<DeleteFlagSchedule, boo
         }
 
         await _service.DeleteAsync(schedule.Id);
+
+        if (!schedule.ChangeRequestId.HasValue)
+        {
+            return true;
+        }
+        
+        var changeRequest = await _flagChangeRequestService.GetAsync(schedule.ChangeRequestId.Value);
+        if (changeRequest != null)
+        {
+            await _flagChangeRequestService.DeleteAsync(changeRequest.Id);
+        }
 
         return true;
     }

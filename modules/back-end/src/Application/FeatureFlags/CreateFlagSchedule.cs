@@ -1,8 +1,10 @@
-﻿using Application.Users;
-using Domain.FeatureFlags;
+﻿using Application.Bases;
+using Application.Bases.Exceptions;
+using Application.Users;
+using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
 using Domain.FlagSchedules;
-using Domain.Targeting;
+using Domain.Organizations;
 
 namespace Application.FeatureFlags;
 
@@ -19,25 +21,35 @@ public class CreateFlagSchedule: IRequest<bool>
     public string Title { get; set; }
 
     public DateTime ScheduledTime { get; set; }
+    
+    public bool WithChangeRequest { get; set; }
+    
+    public string Reason { get; set; }
 
-    public Guid ChangeRequestId { get; set; }
+    public ICollection<Guid> Reviewers { get; set; }
 }
 
 public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, bool>
 {
     private readonly IFeatureFlagService _flagService;
+    private readonly ILicenseService _licenseService;
     private readonly IFlagScheduleService _flagScheduleService;
+    private readonly IFlagChangeRequestService _flagChangeRequestService;
     private readonly IFlagDraftService _flagDraftService;
     private readonly ICurrentUser _currentUser;
 
     public CreateFlagScheduleHandler(
         IFeatureFlagService flagService,
+        ILicenseService licenseService,
         IFlagScheduleService flagScheduleService,
+        IFlagChangeRequestService flagChangeRequestService,
         IFlagDraftService flagDraftService,
         ICurrentUser currentUser)
     {
         _flagService = flagService;
+        _licenseService = licenseService;
         _flagScheduleService = flagScheduleService;
+        _flagChangeRequestService = flagChangeRequestService;
         _flagDraftService = flagDraftService;
         _currentUser = currentUser;
     }
@@ -57,6 +69,35 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
         var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, string.Empty, dataChange, _currentUser.Id);
         await _flagDraftService.AddOneAsync(flagDraft);
 
+        FlagChangeRequest flagChangeRequest = null;
+        
+        if (request.WithChangeRequest)
+        {
+            if (request.WithChangeRequest)
+            {
+                var isChangeRequestGranted =
+                    await _licenseService.IsFeatureGrantedAsync(request.OrgId, LicenseFeatures.ChangeRequest);
+
+                if (!isChangeRequestGranted)
+                {
+                    throw new BusinessException(ErrorCodes.Unauthorized);
+                }
+            }
+            
+            // create change request
+            flagChangeRequest = FlagChangeRequest.Pending(
+                request.OrgId,
+                request.EnvId,
+                flagDraft.Id,
+                flag.Id,
+                request.Reason,
+                request.Reviewers, 
+                _currentUser.Id
+            );
+            
+            await _flagChangeRequestService.AddOneAsync(flagChangeRequest);
+        }
+
         // create schedule
         var flagSchedule = FlagSchedule.WaitingForExecution(
             request.OrgId,
@@ -66,7 +107,7 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
             request.Title,
             request.ScheduledTime,
             _currentUser.Id,
-            request.ChangeRequestId
+            flagChangeRequest?.Id
         );
         
         await _flagScheduleService.AddOneAsync(flagSchedule);

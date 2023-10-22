@@ -147,6 +147,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
       } : undefined,
     };
 
+    this.kindChange.emit(this.kind);
     this.onSave.emit(output);
   }
 
@@ -189,8 +190,6 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     } else {
       this.kind = ReviewModalMode.enableSchedule(this.kind);
     }
-
-    this.kindChange.emit(this.kind);
   }
 
   toggleChangeRequest() {
@@ -199,8 +198,6 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     } else {
       this.kind = ReviewModalMode.enableChangeRequest(this.kind);
     }
-
-    this.kindChange.emit(this.kind);
   }
 
   memberSearchChange$ = new BehaviorSubject('');

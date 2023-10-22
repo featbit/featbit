@@ -19,6 +19,8 @@ public class PendingChangesVm
     public DateTime CreatedAt { get; set; }
 
     public DateTime ScheduledTime { get; set; }
+    
+    public string Type { get; set; }
 
     public IEnumerable<FlagInstruction> Instructions { get; set; }
 }

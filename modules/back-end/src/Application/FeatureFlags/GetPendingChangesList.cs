@@ -1,3 +1,4 @@
+using Domain.FlagChangeRequests;
 using Domain.FlagSchedules;
 using Domain.SemanticPatch;
 
@@ -13,17 +14,20 @@ public class GetPendingChangesList : IRequest<ICollection<PendingChangesVm>>
 public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesList, ICollection<PendingChangesVm>>
 {
     private readonly IFlagScheduleService _flagScheduleService;
+    private readonly IFlagChangeRequestService _flagChangeRequestService;
     private readonly IFlagDraftService _flagDraftService;
     private readonly IUserService _userService;
     private readonly IFeatureFlagService _flagService;
 
     public GetPendingChangesListHandler(
         IFlagScheduleService flagScheduleService,
+        IFlagChangeRequestService flagChangeRequestService,
         IFlagDraftService flagDraftService,
         IUserService userService,
         IFeatureFlagService flagService)
     {
         _flagScheduleService = flagScheduleService;
+        _flagChangeRequestService = flagChangeRequestService;
         _flagDraftService = flagDraftService;
         _userService = userService;
         _flagService = flagService;
@@ -37,6 +41,9 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
             await _flagScheduleService.FindManyAsync(x => x.FlagId == flag.Id && x.Status == FlagScheduleStatus.Pending);
         var drafts =
             await _flagDraftService.FindManyAsync(x => pendingSchedules.Select(s => s.FlagDraftId).Contains(x.Id));
+        
+        var pendingChangeRequests = await _flagChangeRequestService.FindManyAsync(x => x.FlagId == flag.Id && (x.Status == FlagChangeRequestStatus.Pending || x.Status == FlagChangeRequestStatus.Approved));
+        
         var users = await _userService.GetListAsync(pendingSchedules.Select(x => x.CreatorId));
 
         var result = new List<PendingChangesVm>();
@@ -45,6 +52,7 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
         {
             var vm = new PendingChangesVm
             {
+                Type = PendingChangeType.Schedule,
                 Id = schedule.Id,
                 FlagId = schedule.FlagId,
                 CreatedAt = schedule.CreatedAt,
