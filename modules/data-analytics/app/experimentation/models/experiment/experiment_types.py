@@ -1,7 +1,7 @@
-import math
 from datetime import datetime
 from typing import Any, Dict, Iterable, Optional, Tuple
 
+import numpy as np
 import scipy as sp
 
 from utils import format_float_positional, to_UTC_datetime
@@ -15,13 +15,11 @@ def cal_confidence_interval(sample_size: int,
                             mean: float,
                             stdev: float,
                             confidence_level: float = 0.95,
-                            proportions_test: bool = True) -> Optional[Tuple[str, str]]:
-    sterr = stdev / math.sqrt(sample_size)
-    r = sterr * sp.stats.t.ppf((1 + confidence_level) / 2., sample_size - 1)
-    low_bound = mean - r
-    upper_bound = mean + r
-    if math.isnan(low_bound) or math.isnan(upper_bound):
-        return None
+                            proportions_test: bool = True) -> Tuple[Optional[str], Optional[str]]:
+    # https://www.scribbr.com/statistics/confidence-interval/
+    std_error = stdev / np.sqrt(sample_size)
+    margin_of_error = std_error * sp.stats.t.ppf((1 + confidence_level) / 2., sample_size - 1)
+    low_bound, upper_bound = mean - margin_of_error, mean + margin_of_error
     if proportions_test:
         low_bound = 0 if low_bound < 0 else low_bound
         upper_bound = 1 if upper_bound > 1 else upper_bound
@@ -65,7 +63,7 @@ class Variation:
         return self._stdev
 
     @property
-    def confidence_interval(self) -> Optional[Tuple[str, str]]:
+    def confidence_interval(self) -> Optional[Tuple[Optional[str], Optional[str]]]:
         return self._confidence_interval
 
 
@@ -105,10 +103,10 @@ class Experiment:
         self._baseline = baseline
         self._variations = variations
         self._start = to_UTC_datetime(start) if start else datetime.utcnow()
-        self._end = to_UTC_datetime(end) if end else datetime(year=2100, month=1, day=1)
+        self._end = to_UTC_datetime(end) if end else to_UTC_datetime(datetime(year=2100, month=1, day=1))
         self._extra_props = kwargs.copy()
 
-    def extra_prop(self, key: str, default: Any = None) -> Dict[str, Any]:
+    def extra_prop(self, key: str, default: Any = None) -> Any:
         return self._extra_props.get(key, default)
 
     @property
@@ -153,7 +151,7 @@ class Experiment:
 
     @property
     def is_finished(self) -> bool:
-        return self._end < datetime.utcnow()
+        return self._end.timestamp() < datetime.utcnow().timestamp()
 
     @property
     def event_numeric_type(self) -> int:

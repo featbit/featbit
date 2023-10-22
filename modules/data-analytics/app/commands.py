@@ -20,7 +20,8 @@ from app.mongodb.commands import migrate as migrate_mongo
               help="Use with --plan or --check. Also prints SQL for each migration to be applied.")
 @with_appcontext
 def migrate_clickhouse(upto, check, plan, print_sql):
-    return migrate_ch(upto, check, plan, print_sql)
+    migrate_ch(upto, check, plan, print_sql)
+    migrate_mongo()
 
 
 @click.command()
