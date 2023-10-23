@@ -27,7 +27,7 @@ Usually, you should run UI along with all other services by running in the root 
 ```
 docker compose -f ./docker-compse.yml up -d
 ```
-The UI would be available at http://localhost:8081
+The UI will be available at http://localhost:8081
 
 ## Run locally with development mode
 If you already have the API server, Evaluation server and Data analytics server running somewhere, and you want to launch UI on a different machine or want to do some development work on UI,
@@ -50,11 +50,11 @@ Then run
 npm run start
 ```
 
-The UI would be available at http://localhost:4200
+The UI will be available at http://localhost:4200
 
 ## Install with Docker
 
-Three variables could be override by environment variables when running the container:
+Three variables could be overridden by environment variables when running the container:
 - **API_URL**: the url of the API Server, default value is http://localhost:5000, it overrides **url**
 - **DEMO_URL**: set the value if you deploy the [dino-game demo](https://github.com/featbit/featbit-samples/tree/main/samples/dino-game/interactive-demo-vue) on your own server, otherwise it would use our demo deployed on https://featbit-samples.vercel.app. The link doesn't work if you click directly on it, it needs extra parameters. **demoUrl**
 - **EVALUATION_URL**: the url of the evaluation server, this is used by the demo, ignore it if you don't want to run the demo, the default value is http://localhost:5100. It overrides **evaluationUrl**
@@ -79,7 +79,7 @@ Then go to http://localhost:8081
 When you put http://localhost:8081 in your browser, by default, the UI will redirect to the language defined by **accept-language** of the request headers,
 you can manually switch the language with the language switcher in the UI.
 
-As **ng serve** only support one single locale, during development, the locale-switcher component doesn't work. If you want to check different language,
+As **ng serve** only support one single locale, during development, the locale-switcher component doesn't work. If you want to check a different language,
 run the app with one of the following
 ```
 npm run start:en // English, available at localhost:4200
