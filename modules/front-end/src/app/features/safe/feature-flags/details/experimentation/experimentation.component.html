@@ -156,6 +156,7 @@
                           </ng-container>
                           <th style="width: 210px" i18n="@@common.confidence-interval">Confidence interval</th>
                           <th i18n="@@common.changes">Changes</th>
+                          <!-- <th i18n="@@common.effect-size">Effect Size</th> -->
                           <th>
                             <ng-container i18n="@@ff.expt.p-value">P-Value</ng-container>&nbsp;
                             <span [nzTooltipOverlayStyle]="{'max-width': '300px'}"
@@ -252,8 +253,21 @@
                               </td>
                             </ng-container>
 
+                            <!-- <td *ngIf="!data.isBaseline">
+                              <div *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
+                                {{ data.changeToBaseline }}
+                              </div>
+                              <div *ngIf="experiment.metricCustomEventTrackOption === customEventTrackConversion">
+                                {{ data.changeToBaseline | percentage }}
+                              </div>
+                            </td> -->
                             <td *ngIf="!data.isBaseline">
-                              {{ data.changeToBaseline | percentage }}
+                              <!-- <div *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
+                                {{ data.effectSize }}
+                              </div>
+                              <div *ngIf="experiment.metricCustomEventTrackOption === customEventTrackConversion"> -->
+                                {{ data.effectSize | percentage }}
+                              <!-- </div> -->
                             </td>
                             <td>
                               {{ data.pValue }}

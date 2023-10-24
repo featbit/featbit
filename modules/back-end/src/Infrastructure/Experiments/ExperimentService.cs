@@ -396,6 +396,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     MetricCustomEventUnit = metric.CustomEventUnit,
                     Status = expt.Status,
                     MetricCustomEventTrackOption = metric.CustomEventTrackOption,
+                    MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
                     Iterations = expt.Iterations
                 };
 

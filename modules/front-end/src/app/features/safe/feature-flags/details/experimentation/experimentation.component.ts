@@ -90,7 +90,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.refreshIntervalId = setInterval(() => {
       const activeExperimentIteration = this.onGoingExperiments.flatMap(expt => {
         expt.isLoading = true;
-
+        console.log(expt);
         return expt.iterations.filter(it => it.endTime === null || !it.isFinish).map( i =>
           ({
             exptId: expt.id,
@@ -261,6 +261,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     };
 
     this.experimentService.getIterationResults([param]).subscribe(res => {
+      console.log(expt);
       if (res) {
         expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariation.id);
         if (res[0].updatedAt) {
