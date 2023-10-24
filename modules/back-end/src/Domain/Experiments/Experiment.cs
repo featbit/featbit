@@ -45,6 +45,8 @@ public class IterationResult
     public string PValue { get; set; }
     public long? UniqueUsers { get; set; }
     public string VariationId { get; set; }
+    public double EffectSize { get; set; }
+    public string Reason { get; set; }
 }
 
 public class ExptIterationParam
