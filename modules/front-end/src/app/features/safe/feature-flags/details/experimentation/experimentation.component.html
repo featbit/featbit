@@ -253,21 +253,8 @@
                               </td>
                             </ng-container>
 
-                            <!-- <td *ngIf="!data.isBaseline">
-                              <div *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
-                                {{ data.changeToBaseline }}
-                              </div>
-                              <div *ngIf="experiment.metricCustomEventTrackOption === customEventTrackConversion">
-                                {{ data.changeToBaseline | percentage }}
-                              </div>
-                            </td> -->
                             <td *ngIf="!data.isBaseline">
-                              <!-- <div *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
-                                {{ data.effectSize }}
-                              </div>
-                              <div *ngIf="experiment.metricCustomEventTrackOption === customEventTrackConversion"> -->
                                 {{ data.effectSize | percentage }}
-                              <!-- </div> -->
                             </td>
                             <td>
                               {{ data.pValue }}
