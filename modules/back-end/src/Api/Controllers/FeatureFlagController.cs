@@ -61,12 +61,30 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Delete a flag schedule
     /// </summary>
-    [HttpDelete("schedules/{scheduleId:guid}")]
-    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid scheduleId)
+    [Authorize(LicenseFeatures.Schedule)]
+    [HttpDelete("schedules/{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid id)
     {
         var request = new DeleteFlagSchedule
         {
-            ScheduleId = scheduleId
+            OrgId = OrgId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+    
+    /// <summary>
+    /// Delete a flag change request
+    /// </summary>
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpDelete("change-requests/{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteChangeRequestAsync(Guid id)
+    {
+        var request = new DeleteFlagChangeRequest
+        {
+            Id = id
         };
 
         var success = await Mediator.Send(request);
@@ -230,7 +248,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [Authorize(LicenseFeatures.Schedule)]
-    [HttpPost("{key}/schedule")]
+    [HttpPost("{key}/schedules")]
     public async Task<ApiResponse<bool>> CreateScheduleAsync(Guid envId, string key, CreateFlagSchedule request)
     {
         request.OrgId = OrgId;
@@ -242,7 +260,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPost("{key}/change-request")]
+    [HttpPost("{key}/change-requests")]
     public async Task<ApiResponse<bool>> CreateChangeRequestAsync(Guid envId, string key, CreateFlagChangeRequest request)
     {
         request.OrgId = OrgId;

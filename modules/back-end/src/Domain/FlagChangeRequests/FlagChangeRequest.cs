@@ -14,7 +14,7 @@ public class FlagChangeRequest : FullAuditedEntity
 
     public string Reason { get; set; }
     
-    public ICollection<Guid> Reviewers { get; set; }
+    public ICollection<Reviewer> Reviewers { get; set; }
     
     public FlagChangeRequest(
         Guid orgId,
@@ -23,7 +23,7 @@ public class FlagChangeRequest : FullAuditedEntity
         Guid flagId,
         string status,
         string reason,
-        ICollection<Guid> reviewers,
+        ICollection<Reviewer> reviewers,
         Guid currentUserId) : base(currentUserId)
     {
         if (!FlagChangeRequestStatus.IsDefined(status))
@@ -49,6 +49,7 @@ public class FlagChangeRequest : FullAuditedEntity
         ICollection<Guid> reviewers,
         Guid currentUserId)
     {
-        return new FlagChangeRequest(orgId, envId, flagDraftId, flagId, FlagChangeRequestStatus.Pending, reason, reviewers, currentUserId);
+        var reviewerList = reviewers.Select(x => new Reviewer { MemberId = x, Action = string.Empty, TimeStamp = null }).ToList();
+        return new FlagChangeRequest(orgId, envId, flagDraftId, flagId, FlagChangeRequestStatus.Pending, reason, reviewerList, currentUserId);
     }
 }

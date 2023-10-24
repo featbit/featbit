@@ -17,7 +17,6 @@ import {
 } from "@features/safe/feature-flags/types/details";
 import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
 import { IVariation } from "@shared/rules";
-import { FlagSchedule } from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 
 @Injectable({
@@ -62,8 +61,14 @@ export class FeatureFlagService {
     return firstValueFrom(this.http.get<IPendingChanges[]>(`${this.baseUrl}/${key}/pending-changes`));
   }
 
-  deleteSchedule(scheduleId: string): Observable<boolean> {
-    const url = `${this.baseUrl}/schedules/${scheduleId}`;
+  deleteSchedule(id: string): Observable<boolean> {
+    const url = `${this.baseUrl}/schedules/${id}`;
+
+    return this.http.delete<boolean>(url);
+  }
+
+  deleteChangeRequest(id: string): Observable<boolean> {
+    const url = `${this.baseUrl}/change-requests/${id}`;
 
     return this.http.delete<boolean>(url);
   }
@@ -124,7 +129,7 @@ export class FeatureFlagService {
   }
 
   createSchedule(targeting: IFeatureFlagTargeting, scheduledTime: Date, title: string, reviewers: string[], reason: string, withChangeRequest: boolean = false): Observable<boolean> {
-    const url = `${this.baseUrl}/${targeting.key}/schedule`;
+    const url = `${this.baseUrl}/${targeting.key}/schedules`;
 
     const payload = {
       targeting,
@@ -139,7 +144,7 @@ export class FeatureFlagService {
   }
 
   createChangeRequest(targeting: IFeatureFlagTargeting, reviewers: string[], reason: string): Observable<boolean> {
-    const url = `${this.baseUrl}/${targeting.key}/change-request`;
+    const url = `${this.baseUrl}/${targeting.key}/change-requests`;
 
     const payload = {
       targeting,
