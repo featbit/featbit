@@ -26,13 +26,13 @@
             </ng-template>
             <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.Schedule)}" nz-menu-item
                 (click)="onScheduleClick(validationErrorTpl)">
-              <span *ngIf="license?.isGranted(LicenseFeatureEnum.Schedule)" i18n="common.schedule-changes">Schedule changes</span>
-              <span *ngIf="!license?.isGranted(LicenseFeatureEnum.Schedule)" [nz-tooltip]="needLicenseTooltip" i18n="common.schedule-changes">Schedule changes</span>
+              <span *ngIf="license?.isGranted(LicenseFeatureEnum.Schedule)" i18n="@@common.schedule-changes">Schedule changes</span>
+              <span *ngIf="!license?.isGranted(LicenseFeatureEnum.Schedule)" [nz-tooltip]="needLicenseTooltip" i18n="@@common.schedule-changes">Schedule changes</span>
             </li>
             <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.ChangeRequest)}" nz-menu-item
                 (click)="onChangeRequestClick(validationErrorTpl)">
-              <span *ngIf="license?.isGranted(LicenseFeatureEnum.ChangeRequest)" i18n="common.change-request">Change Request</span>
-              <span *ngIf="!license?.isGranted(LicenseFeatureEnum.ChangeRequest)" [nz-tooltip]="needLicenseTooltip" i18n="common.change-request">Change Request</span>
+              <span *ngIf="license?.isGranted(LicenseFeatureEnum.ChangeRequest)" i18n="@@common.change-request">Change Request</span>
+              <span *ngIf="!license?.isGranted(LicenseFeatureEnum.ChangeRequest)" [nz-tooltip]="needLicenseTooltip" i18n="@@common.change-request">Change Request</span>
             </li>
             <li nz-menu-item
                 (click)="onSetExptRulesClick()"
