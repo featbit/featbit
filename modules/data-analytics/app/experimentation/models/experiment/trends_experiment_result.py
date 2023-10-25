@@ -49,17 +49,20 @@ class TrendsExperimentResult:
             'startTime': self._expt.start.strftime(DATE_UTC_FMT),
             'endTime': self._expt.end.strftime(DATE_UTC_FMT) if self._expt.is_finished else None,
             'isFinish': self._expt.is_finished,
+            'alpha': self._expt.extra_prop('alpha', self.default_alpha),
+            'power': self._expt.extra_prop('power', self.default_power),
+            'expectedExperimentEffect': self._expt.extra_prop('expectedExperimentEffect', None),
             'results': output
         }
 
     def _cal_normal_results(self) -> Dict[str, Any]:
 
         def standard_output(variation: Variation,
-                            change_to_baseline: Optional[float],
                             p_value: Optional[float],
+                            effect_size: Optional[float],
                             is_baseline: bool = False,
                             is_winner: bool = False,
-                            result_significant: Tuple[bool, str, Optional[float]] = (False, "", None)) -> Dict[str, Any]:
+                            result_significant: Tuple[bool, str] = (False, "")) -> Dict[str, Any]:
 
             if self._expt.is_numeric_expt:
                 output = {'variationId': variation.key,
@@ -72,42 +75,42 @@ class TrendsExperimentResult:
                           'uniqueUsers': int(variation.count) if variation.count is not None else None,
                           'conversionRate': format_float_positional(variation.mean) if variation.mean is not None else None
                           }
-            is_significant, reason, effect_size = result_significant
+            is_significant, reason = result_significant
             return {**output,
-                    'changeToBaseline': format_float_positional(change_to_baseline),
                     'confidenceInterval': variation.confidence_interval,
-                    'pValue': format_float_positional(p_value) if p_value is not None else None,
+                    'pValue': format_float_positional(p_value),
+                    'effectSize': format_float_positional(effect_size),
                     'isBaseline': is_baseline,
                     'isWinner': is_winner,
                     'isInvalid': not is_significant,
-                    'reason': reason,
-                    'effectSize': effect_size}
+                    'reason': reason}
 
         alpha = self._expt.extra_prop('alpha', self.default_alpha)
         pw = self._expt.extra_prop('power', self.default_power)
         expected_ee = self._expt.extra_prop('expectedExperimentEffect', None)
-        variations: Dict[str, Variation] = self._get_variations(alpha=alpha)
-        output = [standard_output(Variation(var), None, None, self._expt.baseline == var, False, (False, "variation is missing", None))
-                  for var in self._expt.variations if var not in variations.keys()]
-
+        variations: Dict[str, Variation] = self._get_variations(self._expt.variations, alpha=alpha)
         baseline_var = variations.get(self._expt.baseline, None)
+        output = []
+
         if baseline_var is None or baseline_var.mean == 0:
             for variation in variations.values():
-                output.append(standard_output(variation, None, None, self._expt.baseline == variation.key, False, (False, "baseline variation is missing or has no exposure", None)))
+                output.append(standard_output(variation, None, None, self._expt.baseline == variation.key, False, (False, "baseline variation is missing or has no exposure")))
         else:
             for variation in variations.values():
                 is_baseline = variation.key == self._expt.baseline
-                change_to_baseline = variation.mean - baseline_var.mean if self._expt.is_numeric_expt else (variation.mean - baseline_var.mean) / baseline_var.mean  # type: ignore
                 p_value = self._p_value(baseline_var, variation) if variation.exposure > 0 else None  # type: ignore
+                effect_size = self._effect_size(baseline_var, variation) if variation.exposure > 0 else None  # type: ignore
                 result_significant = self._are_results_significant(baseline_var,
-                                                                   variation, p_value,
-                                                                   alpha=alpha, pw=pw,
+                                                                   variation,
+                                                                   p_value,
+                                                                   alpha=alpha,
+                                                                   pw=pw,
                                                                    expected_experiment_effect=expected_ee,
-                                                                   is_baseline=is_baseline) if variation.exposure > 0 else (False, "variation has no exposure", None)  # type: ignore
-                output.append(standard_output(variation, change_to_baseline, p_value, is_baseline, False, result_significant))
+                                                                   is_baseline=is_baseline) if variation.exposure > 0 else (False, "variation has no exposure")  # type: ignore
+                output.append(standard_output(variation, effect_size, p_value, is_baseline, False, result_significant))
         return self._cal_winner_for_each_variation_result(output)  # type: ignore
 
-    def _get_variations(self, alpha=default_alpha) -> Dict[str, Variation]:
+    def _get_variations(self, expt_keys: Iterable[str], alpha: float = default_alpha) -> Dict[str, Variation]:
         props_test = not self._expt.is_numeric_expt
         if IS_PRO:
             sql = GET_PROP_ZTEST_VARS_SQL if props_test else GET_TTEST_VARS_SQL
@@ -115,7 +118,7 @@ class TrendsExperimentResult:
         else:
             rs = cal_experiment_vars_from_mongod(self._query_params, props_test)
         return dict((var_key, Variation(key=var_key, count=count, exposure=exposure, mean_sample=mean_sample, stdev_sample=stdev_sample, alpha=alpha, proportions_test=props_test))
-                    for count, exposure, mean_sample, stdev_sample, var_key in rs)  # type: ignore
+                    for count, exposure, mean_sample, stdev_sample, var_key in rs if var_key in expt_keys)  # type: ignore
 
     def _ztest_p_value(self, baseline_var: Variation, test_var: Variation) -> float:
         _, p_value = proportions_ztest([baseline_var.exposure, test_var.exposure], [baseline_var.count, test_var.count], alternative='two-sided', prop_var=False)
@@ -148,27 +151,27 @@ class TrendsExperimentResult:
     def _are_results_significant(self,
                                  baseline_var: Variation,
                                  test_var: Variation,
-                                 p_value: Optional[float],
+                                 p_value: Optional[float] = None,
+                                 effect_size: Optional[float] = None,
                                  alpha: float = default_alpha,
                                  pw: float = default_power,
                                  expected_experiment_effect: Optional[float] = None,
-                                 is_baseline: bool = False) -> Tuple[bool, str, Optional[float]]:
+                                 is_baseline: bool = False) -> Tuple[bool, str]:
         if baseline_var.count < self.default_sample_threshold or test_var.count < self.default_sample_threshold:  # type: ignore
-            return False, f"sample size is too small < {self.default_sample_threshold}", None
+            return False, f"sample size is too small < {self.default_sample_threshold}"
         # alpha error (type I error:  reject null hypothesis when it should be accepted)
         if p_value is None or p_value >= alpha:
-            return False, "baseline" if is_baseline else f"p-value is too large (>= {alpha})", None
-        effect_size = self._effect_size(baseline_var, test_var)
+            return False, "baseline" if is_baseline else f"p-value is too large (>= {alpha})"
         ratio = baseline_var.count / test_var.count  # type: ignore
         solve_power_func = tt_ind_solve_power if self._expt.is_numeric_expt else zt_ind_solve_power
-        nobs_test = np.ceil(solve_power_func(effect_size=np.abs(effect_size), nobs1=None, alpha=alpha, power=pw, ratio=ratio, alternative='two-sided'))
+        nobs_test = np.ceil(solve_power_func(effect_size=np.abs(effect_size), nobs1=None, alpha=alpha, power=pw, ratio=ratio, alternative='two-sided'))  # type: ignore
         # beta error (type II error: accept null hypothesis when it should be rejected)
         if test_var.count < nobs_test:
-            return False, f"sample size is too small (required {nobs_test})", effect_size,
+            return False, f"sample size is too small (required {nobs_test})"
         # the results are not as expected
-        if expected_experiment_effect is not None and np.abs(effect_size) < np.abs(expected_experiment_effect):
-            return False, f"the results are not as expected (expected {expected_experiment_effect}, actual {effect_size})", effect_size
-        return True, "", effect_size
+        if expected_experiment_effect is not None and np.abs(effect_size) < np.abs(expected_experiment_effect):  # type: ignore
+            return False, f"the results are not as expected (expected {expected_experiment_effect}, actual {effect_size})"  # type: ignore
+        return True, ""
 
     def _cal_winner_for_each_variation_result(self, var_results: Iterable[Dict[str, Any]] = []):
         valid_results, invalid_results = [], []
