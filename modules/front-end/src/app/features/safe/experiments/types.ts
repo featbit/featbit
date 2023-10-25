@@ -92,6 +92,9 @@ export interface IExptIteration {
   // UI only
   invalidVariation?: boolean,
   winnerVariation?: boolean,
+
+  alpha?: number,
+  alphaString?: string
 }
 
 export interface IExptIterationResult {

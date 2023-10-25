@@ -1,4 +1,5 @@
 using Domain.ExperimentMetrics;
+using System.Transactions;
 
 namespace Domain.Experiments;
 
@@ -29,6 +30,7 @@ public class ExperimentIteration
     public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
     public List<IterationResult> Results { get; set; }
     public bool IsFinish { get; set; }
+    public double? Alpha { get; set; }
 }
 
 public class IterationResult
@@ -76,6 +78,7 @@ public class ExptIterationParam
     public long StartExptTime { get; set; } // format "1667489884000000"
 
     public long? EndExptTime { get; set; } // format "1667489884000000"
+    public double? Alpha { get; set; }
 }
 
 public class OlapExptIterationResponse
@@ -97,4 +100,5 @@ public class ExptIterationResult
     public bool IsFinish { get; set; }
     public List<IterationResult> Results { get; set; }
     public DateTime StartTime { get; set; }
+    public double? Alpha { get; set; }
 }

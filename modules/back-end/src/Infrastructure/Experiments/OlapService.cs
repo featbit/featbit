@@ -1,6 +1,6 @@
-﻿using System.Net.Http.Json;
-using Domain.Experiments;
+﻿using Domain.Experiments;
 using Domain.FeatureFlags;
+using System.Net.Http.Json;
 
 namespace Infrastructure.Experiments;
 
@@ -44,7 +44,7 @@ public class OlapService : IOlapService
         {
             param.EndExptTime *= 1000; // milliseconds to microseconds
         }
-        
+
         var response = await _httpClient.PostAsJsonAsync("/api/expt/results", param);
 
         var result = await response.Content.ReadFromJsonAsync<OlapExptIterationResponse>();

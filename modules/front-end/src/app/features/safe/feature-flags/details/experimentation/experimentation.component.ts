@@ -276,6 +276,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
           expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
         }
+        expt.selectedIteration.alphaString = "a" + expt.selectedIteration.alpha;
 
         this.setExptStatus(expt, res[0]);
       }
@@ -316,7 +317,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   private processIteration(iteration: IExptIteration, baselineVariationId: string): IExptIteration {
-    console.log('processIteration', iteration);
     const iterationResults = this.variations.map((option) => {
         const found = iteration.results?.find(r => r.variationId === option.id);
         return !found ? this.createEmptyIterationResult(option, baselineVariationId) : { ...found,

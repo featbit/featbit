@@ -89,6 +89,23 @@
                 </div>
                 <div class="second-line" *ngIf="experiment.status !== exptStatusNotStarted">
                   <div class="action-wrapper">
+                    <div *ngIf="experiment.status === exptStatusPaused">
+                      <ng-container i18n="@@ff.expt.alpha">Alpha : </ng-container>
+                      <span nz-tooltip
+                            nzTooltipTitle="Select an alpha value for your next experiment iteration" [nzTooltipColor]="'cyan'">
+                        <i nz-icon nzType="info-circle" nzTheme="outline" style="padding:5px;"></i>
+                      </span>
+                      <nz-select style="min-width: 80px;"
+                                 [(ngModel)]="experiment.selectedIteration.alphaString"
+                                 [nzDisabled]="experiment.status === exptStatusRecording"
+                      >
+                        <nz-option nzValue="a0.2" nzLabel="0.2"></nz-option>
+                        <nz-option nzValue="a0.1" nzLabel="0.1"></nz-option>
+                        <nz-option nzValue="a0.05" nzLabel="0.05"></nz-option>
+                        <nz-option nzValue="a0.02" nzLabel="0.02"></nz-option>
+                        <nz-option nzValue="a0.01" nzLabel="0.01"></nz-option>
+                      </nz-select>
+                    </div>
                     <button class="status paused" *ngIf="experiment.status === exptStatusPaused" nz-button nzType="default" (click)="onStartIterationClick(experiment)">
                       <i class="status paused" nz-icon nzType="pause-circle" nzTheme="outline"></i>
                       <ng-container i18n="@@ff.expt.restart-experiment">Restart</ng-container>
@@ -112,6 +129,16 @@
                 </div>
                 <div class="third-line" *ngIf="experiment.status !== exptStatusNotStarted">
                   <ul *ngIf="experiment.selectedIteration?.results?.length > 0">
+                    <li>
+                      <i nz-icon nzType="aim" nzTheme="outline"></i>&ngsp;
+                      <ng-container i18n="@@ff.expt.current-iteration-alpha-value">Alpha value of current iteration: </ng-container> 
+                      {{experiment.selectedIteration.alpha}}
+                      
+                      <span nz-tooltip
+                            nzTooltipTitle="Pause the experiment, change the alpha value then restart the service to change the alpha value" [nzTooltipColor]="'cyan'">
+                        <i nz-icon nzType="info-circle" nzTheme="outline" style="padding:5px;"></i>
+                      </span>
+                    </li>
                     <li *ngIf="!experiment.selectedIteration.winnerVariation">
                       <i nz-icon nzType="info-circle" nzTheme="outline"></i>&ngsp;
                       <ng-container i18n="@@ff.expt.need-more-data-to-confirm-expt">Need more data to confirm the results of the experiment</ng-container>
@@ -133,7 +160,8 @@
                   <ng-container i18n="@@ff.expt.start">Start</ng-container>
                 </button>
               </div>
-              <nz-spin [nzSpinning]="experiment.isLoading" i18n-nzTip="@@common.loading" nzTip="Loading..." *ngIf="experiment.status !== exptStatusNotStarted">
+              <nz-spin [nzSpinning]="experiment.isLoading" i18n-nzTip="@@common.loading" nzTip="Loading..." 
+                       *ngIf="experiment.status !== exptStatusNotStarted">
                 <div class="table-content-area" style="padding-bottom: 10px;">
                   <div class="table-wrapper">
                     <nz-table

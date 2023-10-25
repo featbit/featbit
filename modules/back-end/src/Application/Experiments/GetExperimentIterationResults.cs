@@ -25,7 +25,7 @@ public class ExperimentIterationParam
     public long StartTime { get; set; }
     public long? EndTime { get; set; }
     public bool IsFinish { get; set; }
-
+    public double? Alpha { get; set; }
 }
 
 public class GetExperimentIterationResultsHandler : IRequestHandler<GetExperimentIterationResults, IEnumerable<ExperimentIterationResultsVm>>
