@@ -19,20 +19,20 @@ services:
   #   networks:
   #     - featbit-network
 
-  api-server:
-    image: featbit/api:dev
-    container_name: api
-    build:
-      context: ./modules/back-end
-      dockerfile: ./deploy/Dockerfile
-    depends_on:
-      - mongodb
-      - redis
-      - da-server
-    ports:
-      - "5000:5000"
-    networks:
-      - featbit-network
+  # api-server:
+  #   image: featbit/api:dev
+  #   container_name: api
+  #   build:
+  #     context: ./modules/back-end
+  #     dockerfile: ./deploy/Dockerfile
+  #   depends_on:
+  #     - mongodb
+  #     - redis
+  #     - da-server
+  #   ports:
+  #     - "5000:5000"
+  #   networks:
+  #     - featbit-network
 
   evaluation-server:
     image: featbit/evaluation-server:dev

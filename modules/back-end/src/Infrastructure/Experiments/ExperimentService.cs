@@ -51,8 +51,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 CustomEventSuccessCriteria = (int)iteration.CustomEventSuccessCriteria,
                 CustomEventUnit = iteration.CustomEventUnit,
                 StartExptTime = iteration.StartTime.ToUnixTimeMilliseconds(),
-                EndExptTime = iteration.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null,
-                Alpha = iteration.Alpha,
+                EndExptTime = iteration.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null
             };
 
             var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
@@ -99,7 +98,6 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     CustomEventUnit = iteration.CustomEventUnit,
                     StartExptTime = iteration.StartTime.ToUnixTimeMilliseconds(),
                     EndExptTime = iteration.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null,
-                    Alpha = iteration.Alpha
                 };
 
                 var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
@@ -161,8 +159,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 CustomEventSuccessCriteria = (int)it.CustomEventSuccessCriteria,
                 CustomEventUnit = it.CustomEventUnit,
                 StartExptTime = it.StartTime.ToUnixTimeMilliseconds(),
-                EndExptTime = it.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null,
-                Alpha = it.Alpha
+                EndExptTime = it.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null
             };
 
             var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
@@ -211,8 +208,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 CustomEventSuccessCriteria = (int)iteration.CustomEventSuccessCriteria,
                 CustomEventUnit = iteration.CustomEventUnit,
                 StartExptTime = iteration.StartTime.ToUnixTimeMilliseconds(),
-                EndExptTime = iteration.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null,
-                Alpha = iteration.Alpha ?? 0.05
+                EndExptTime = iteration.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null
             };
 
             var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
@@ -234,8 +230,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
             CustomEventTrackOption = metric.CustomEventTrackOption,
             CustomEventUnit = metric.CustomEventUnit,
             EventType = (int)metric.EventType,
-            EventName = metric.EventName,
-            Alpha = 0.05
+            EventName = metric.EventName
         };
 
         experiment.Iterations.Add(newIteration);
@@ -291,7 +286,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 CustomEventUnit = iteration.CustomEventUnit,
                 StartExptTime = iteration.StartTime,
                 EndExptTime = iteration.EndTime,
-                Alpha = iteration.Alpha ?? 0.05
+                Alpha = experiment.Alpha
             };
 
             var olapExptResults = await _olapService.GetExptIterationResultAsync(param);
@@ -357,7 +352,8 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     Status = expt.Status,
                     MetricCustomEventTrackOption = metric.CustomEventTrackOption,
                     MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
-                    Iterations = expt.Iterations
+                    Iterations = expt.Iterations,
+                    Alpha = expt.Alpha ?? 0.05
                 };
 
             var totalCount = await query.CountAsync();

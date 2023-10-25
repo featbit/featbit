@@ -8,6 +8,7 @@ public class CreateExperiment: IRequest<Experiment>
     public Guid FeatureFlagId { get; set; }
     public Guid MetricId { get; set; }
     public string BaseLineVariationId { get; set; }
+    public double? Alpha { get; set; }
 
     public Experiment AsExperiment()
     {
@@ -18,7 +19,8 @@ public class CreateExperiment: IRequest<Experiment>
             FeatureFlagId = FeatureFlagId,
             BaselineVariationId = BaseLineVariationId,
             Status = ExperimentStatus.NotStarted,
-            Iterations = new List<ExperimentIteration>()
+            Iterations = new List<ExperimentIteration>(),
+            Alpha = Alpha ?? 0.05
         };
     }
 }

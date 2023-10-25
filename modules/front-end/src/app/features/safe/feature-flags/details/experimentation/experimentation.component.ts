@@ -276,7 +276,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
           expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
         }
-        expt.selectedIteration.alphaString = "a" + expt.selectedIteration.alpha;
 
         this.setExptStatus(expt, res[0]);
       }

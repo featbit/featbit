@@ -10,10 +10,10 @@ public class Experiment : AuditedEntity
     public Guid FeatureFlagId { get; set; }
     public bool IsArchived { get; set; }
     public string Status { get; set; } // possible values: NotStarted, NotRecording, Recording
-
     public string BaselineVariationId { get; set; }
-
     public List<ExperimentIteration> Iterations { get; set; }
+    public double? Alpha { get; set; }
+    public double? Power { get; set; }
 }
 
 public class ExperimentIteration
@@ -30,7 +30,6 @@ public class ExperimentIteration
     public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
     public List<IterationResult> Results { get; set; }
     public bool IsFinish { get; set; }
-    public double? Alpha { get; set; }
 }
 
 public class IterationResult

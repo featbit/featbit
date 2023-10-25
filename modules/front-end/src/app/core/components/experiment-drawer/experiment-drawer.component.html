@@ -87,6 +87,26 @@
           </nz-input-group>
         </nz-form-control>
       </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@common.default-confidence-level">Default Confidence Level</nz-form-label>
+        <nz-form-control i18n-nzErrorTip="@@common.default-confidence-level" nzErrorTip="Default confidence level">
+          <nz-input-group>
+            <div class="">
+              <nz-select 
+                i18n-nzPlaceHolder="@@expt.overview.select-baseline-variation"
+                nzPlaceHolder="Select default confidence level (e.g 95%)"
+                formControlName="alpha"
+                [ngModel]="'0.05'">
+                <nz-option nzValue="0.2" nzLabel="80%" />
+                <nz-option nzValue="0.1" nzLabel="90%" />
+                <nz-option nzValue="0.05" nzLabel="95%" />
+                <nz-option nzValue="0.02" nzLabel="98%" />
+                <nz-option nzValue="0.01" nzLabel="99%" />
+              </nz-select>
+            </div>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
       <button nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
     </form>
   </ng-container>
