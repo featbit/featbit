@@ -236,18 +236,21 @@
                             </ng-container>
                             <ng-container *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
                               <td *ngIf="!data.isBaseline">
-                                <div  style="width: 200px;box-sizing: border-box;">
+                                <!-- Keep comment below for future graph implementation -->
+                                <!-- <div  style="width: 200px;box-sizing: border-box;">
                                   <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
                                     <div class="BoxChart-whisker"></div>
                                     <div class="BoxChart-box--container">
                                       <div class="BoxChart-box--line"></div>
-                                      <div class="BoxChart-box" [style.left.px]="(data.confidenceInterval[0] - experiment.selectedIteration.numericConfidenceIntervalBoundary[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200">
+                                      <div class="BoxChart-box" 
+                                           [style.left.px]="(data.confidenceInterval[0] - experiment.selectedIteration.numericConfidenceIntervalBoundary[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200" 
+                                           [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200">
                                         <div class="BoxChart-box--median" [style.left.px]="(data.average - data.confidenceInterval[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200"></div>
                                       </div>
                                     </div>
                                     <div class="BoxChart-whisker"></div>
                                   </div>
-                                </div>
+                                </div> -->
                                 <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0]}} {{experiment.metricCustomEventUnit}} - {{data.confidenceInterval[1]}} {{experiment.metricCustomEventUnit}}</div>
                                 <div *ngIf="data.confidenceInterval[0] === -1" class="confidence_interval"> -- </div>
                               </td>

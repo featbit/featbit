@@ -90,7 +90,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.refreshIntervalId = setInterval(() => {
       const activeExperimentIteration = this.onGoingExperiments.flatMap(expt => {
         expt.isLoading = true;
-        console.log(expt);
         return expt.iterations.filter(it => it.endTime === null || !it.isFinish).map( i =>
           ({
             exptId: expt.id,
@@ -261,7 +260,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     };
 
     this.experimentService.getIterationResults([param]).subscribe(res => {
-      console.log(expt);
       if (res) {
         expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariation.id);
         if (res[0].updatedAt) {
@@ -318,6 +316,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   private processIteration(iteration: IExptIteration, baselineVariationId: string): IExptIteration {
+    console.log('processIteration', iteration);
     const iterationResults = this.variations.map((option) => {
         const found = iteration.results?.find(r => r.variationId === option.id);
         return !found ? this.createEmptyIterationResult(option, baselineVariationId) : { ...found,
@@ -330,12 +329,12 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     const invalidVariation = !!iterationResults.find(e => e.isInvalid && !e.isBaseline);
     const winnerVariation = !!iterationResults.find(e => e.isWinner);
 
-    const nowStr = $localize `:@@common.now:Now`;
+    const nowStr = (iteration.isFinish === true) ? "" : "(" + ($localize `:@@common.now:Now`) + ")";
     const startStr = `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')}`;
     const endStr = `${iteration.endTime ?
       moment(iteration.endTime).format('YYYY-MM-DD HH:mm') :
-      moment(new Date()).format('YYYY-MM-DD HH:mm')}  (${nowStr})`
-
+      moment(new Date()).format('YYYY-MM-DD HH:mm')}  ${nowStr}`
+      
     return {
       ...iteration,
       invalidVariation,
