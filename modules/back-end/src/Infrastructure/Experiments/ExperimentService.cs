@@ -399,7 +399,8 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     Status = expt.Status,
                     MetricCustomEventTrackOption = metric.CustomEventTrackOption,
                     MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
-                    Iterations = expt.Iterations
+                    Iterations = expt.Iterations,
+                    Alpha = expt.Alpha
                 };
 
             var totalCount = await query.CountAsync();
