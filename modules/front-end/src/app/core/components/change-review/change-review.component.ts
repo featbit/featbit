@@ -12,6 +12,7 @@ import { getCurrentOrganization } from "@utils/project-env";
 import { BehaviorSubject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { TeamService } from "@services/team.service";
+import { getAuth } from "@utils/index";
 
 @Component({
   selector: 'change-review',
@@ -47,12 +48,13 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     const currentOrg = getCurrentOrganization();
     this.license = new License(currentOrg.license);
 
+    const auth = getAuth();
     this.memberSearchChange$.pipe(
       debounceTime(500)
     ).subscribe(searchText => {
       this.teamService.search(searchText).subscribe({
         next: (result) => {
-          this.memberList = result.items;
+          this.memberList = result.items.filter(itm => itm.id !== auth.id);
           this.isMemberLoading = false;
         },
         error: _ => {
