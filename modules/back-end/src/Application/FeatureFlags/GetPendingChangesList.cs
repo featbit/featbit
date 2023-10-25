@@ -65,6 +65,7 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
             var changeRequest = pendingChangeRequests.FirstOrDefault(cr => cr.Id == schedule.ChangeRequestId);
             if (changeRequest != null)
             {
+                vm.ChangeRequestReason = changeRequest.Reason;
                 vm.ChangeRequestStatus = changeRequest.Status;
             }
 
@@ -89,6 +90,7 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
                 Id = changeRequest.Id,
                 FlagId = changeRequest.FlagId,
                 CreatedAt = changeRequest.CreatedAt,
+                ChangeRequestReason = changeRequest.Reason,
                 ChangeRequestStatus = changeRequest.Status
             };
             

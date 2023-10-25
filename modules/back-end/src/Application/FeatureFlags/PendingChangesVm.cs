@@ -41,5 +41,7 @@ public class PendingChangesVm
     // Change request
     public Guid? ChangeRequestId { get; set; }
     
+    public string ChangeRequestReason { get; set; }
+    
     public string ChangeRequestStatus { get; set; }
 }

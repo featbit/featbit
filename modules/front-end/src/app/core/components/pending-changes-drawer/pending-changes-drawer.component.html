@@ -42,6 +42,7 @@
             </div>
           </ng-template>
           <nz-card [nzTitle]="titleTemplate" [nzExtra]="extraTemplate">
+            <div class="change-request-reason">{{changeCategories.changeRequestReason}}</div>
             <change-list *ngIf="changeCategories.instructions.length > 0" [param]="{ instructions: changeCategories.instructions, previous: changeCategories.previous, current: changeCategories.current }"></change-list>
             <div class="creator-creation-time">{{changeCategories.creator}} <span i18n="@@common.created-at">created at</span>: {{ changeCategories.createdAt | date: 'YYYY-MM-dd HH:mm' }}</div>
           </nz-card>

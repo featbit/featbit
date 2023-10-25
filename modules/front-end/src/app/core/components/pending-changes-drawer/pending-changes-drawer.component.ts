@@ -15,6 +15,7 @@ interface IChangeCategory {
   scheduleTitle: string;
   scheduledTime: string;
   changeRequestId?: string;
+  changeRequestReason?: string;
   changeRequestStatus: string;
 }
 
@@ -55,6 +56,7 @@ export class PendingChangesDrawerComponent {
       instructions: item.instructions,
       scheduleTitle: item.scheduleTitle,
       changeRequestId: item.changeRequestId,
+      changeRequestReason: item.changeRequestReason,
       changeRequestStatus: getChangeRequestStatusTranslation(item.changeRequestStatus)
     }));
   }
