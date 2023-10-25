@@ -79,7 +79,7 @@ class TrendsExperimentResult:
             return {**output,
                     'confidenceInterval': variation.confidence_interval,
                     'pValue': format_float_positional(p_value),
-                    'effectSize': format_float_positional(effect_size),
+                    'effectSize': effect_size,
                     'isBaseline': is_baseline,
                     'isWinner': is_winner,
                     'isInvalid': not is_significant,
