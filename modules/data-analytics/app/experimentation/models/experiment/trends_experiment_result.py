@@ -102,7 +102,8 @@ class TrendsExperimentResult:
                 effect_size = self._effect_size(baseline_var, variation) if variation.exposure > 0 else None  # type: ignore
                 result_significant = self._are_results_significant(baseline_var,
                                                                    variation,
-                                                                   p_value,
+                                                                   p_value=p_value,
+                                                                   effect_size=effect_size,
                                                                    alpha=alpha,
                                                                    pw=pw,
                                                                    expected_experiment_effect=expected_ee,
