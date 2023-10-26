@@ -98,6 +98,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     CustomEventUnit = iteration.CustomEventUnit,
                     StartExptTime = iteration.StartTime.ToUnixTimeMilliseconds(),
                     EndExptTime = iteration.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null,
+                    Alpha = experiment.Alpha
                 };
 
                 var olapExptResult = await _olapService.GetExptIterationResultAsync(param);

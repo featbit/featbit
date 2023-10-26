@@ -1,38 +1,38 @@
 name: featbit-dev
 version: "3"
 services:
-  # ui:
-  #   image: featbit/ui:dev
-  #   container_name: ui
-  #   build:
-  #     context: ./modules/front-end
-  #     dockerfile: ./Dockerfile
-  #   environment:
-  #     - API_URL=http://localhost:5000
-  #     - DEMO_URL=http://localhost:5173
-  #     - EVALUATION_URL=http://localhost:5100
-  #   depends_on:
-  #     - api-server
-  #     - demo-dino-game-vue
-  #   ports:
-  #     - "8081:80"
-  #   networks:
-  #     - featbit-network
+  ui:
+    image: featbit/ui:dev
+    container_name: ui
+    build:
+      context: ./modules/front-end
+      dockerfile: ./Dockerfile
+    environment:
+      - API_URL=http://localhost:5000
+      - DEMO_URL=http://localhost:5173
+      - EVALUATION_URL=http://localhost:5100
+    depends_on:
+      - api-server
+      - demo-dino-game-vue
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
 
-  # api-server:
-  #   image: featbit/api:dev
-  #   container_name: api
-  #   build:
-  #     context: ./modules/back-end
-  #     dockerfile: ./deploy/Dockerfile
-  #   depends_on:
-  #     - mongodb
-  #     - redis
-  #     - da-server
-  #   ports:
-  #     - "5000:5000"
-  #   networks:
-  #     - featbit-network
+  api-server:
+    image: featbit/api:dev
+    container_name: api
+    build:
+      context: ./modules/back-end
+      dockerfile: ./deploy/Dockerfile
+    depends_on:
+      - mongodb
+      - redis
+      - da-server
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
 
   evaluation-server:
     image: featbit/evaluation-server:dev
