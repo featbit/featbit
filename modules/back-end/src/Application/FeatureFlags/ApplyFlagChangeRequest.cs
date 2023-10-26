@@ -64,7 +64,7 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
         await _flagChangeRequestService.UpdateAsync(changeRequest);
 
         // write audit log
-        var auditLog = AuditLog.ForApplyFlagChangeRequest(flag, flagDraft.DataChange, flagDraft.Comment, flagDraft.CreatorId);
+        var auditLog = AuditLog.ForApplyFlagChangeRequest(flag, flagDraft.DataChange, flagDraft.Comment, _currentUser.Id);
         await _auditLogService.AddOneAsync(auditLog);
 
         // publish on feature flag change notification

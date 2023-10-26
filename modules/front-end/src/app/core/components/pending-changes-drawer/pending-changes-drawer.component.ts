@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import {
   ChangeRequestAction,
-  ChangeRequestStatus,
+  PendingChangeStatus,
   IPendingChanges,
   IReviewer,
   PendingChangeType
@@ -12,8 +12,8 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { getAuth } from "@utils/index";
 
 class ChangeCategory {
-  get changeRequestStatusLabel() : string {
-    return this.getChangeRequestStatusTranslation(this.changeRequestStatus);
+  get statusLabel() : string {
+    return this.getStatusTranslation(this.status);
   };
 
   constructor(
@@ -29,7 +29,7 @@ class ChangeCategory {
     public scheduledTime: string,
     public changeRequestId: string,
     public changeRequestReason: string,
-    public changeRequestStatus: string,
+    public status: PendingChangeStatus,
     public reviewers: IReviewer[]) {
     if (this.type === PendingChangeType.ChangeRequest) {
       this.changeRequestId = this.id;
@@ -47,7 +47,7 @@ class ChangeCategory {
 
     const reviewer = this.reviewers.find((item: IReviewer) => item.memberId === currentUserId);
 
-    return reviewer && reviewer?.action !== ChangeRequestAction.Decline && this.changeRequestStatus !== ChangeRequestStatus.Applied;
+    return reviewer && reviewer?.action !== ChangeRequestAction.Decline && this.status !== PendingChangeStatus.Applied;
   }
 
   canApprove(currentUserId: string): boolean {
@@ -57,7 +57,7 @@ class ChangeCategory {
 
     const reviewer = this.reviewers.find((item: IReviewer) => item.memberId === currentUserId);
 
-    return reviewer && reviewer?.action !== ChangeRequestAction.Approve && this.changeRequestStatus !== ChangeRequestStatus.Applied;
+    return reviewer && reviewer?.action !== ChangeRequestAction.Approve && this.status !== PendingChangeStatus.Applied;
   }
 
   canApply(currentUserId: string): boolean {
@@ -65,7 +65,7 @@ class ChangeCategory {
       return false;
     }
 
-    if (this.changeRequestStatus !== ChangeRequestStatus.Approved) {
+    if (this.status !== PendingChangeStatus.Approved) {
       return false;
     }
 
@@ -77,10 +77,12 @@ class ChangeCategory {
     return reviewer?.action === ChangeRequestAction.Approve;
   }
 
-  private getChangeRequestStatusTranslation(status: string) {
+  private getStatusTranslation(status: string) {
     switch (status) {
-      case 'Pending':
-        return $localize`:@@common.pending:Pending review`;
+      case 'PendingReview':
+        return $localize`:@@common.pending-review:Pending Review`;
+      case 'PendingExecution':
+        return $localize`:@@common.pending-execution:Pending Execution`;
       case 'Approved':
         return $localize`:@@common.approved:Approved`;
       case 'Declined':
@@ -118,7 +120,7 @@ export class PendingChangesDrawerComponent {
       item.scheduledTime,
       item.changeRequestId,
       item.changeRequestReason,
-      item.changeRequestStatus,
+      item.status,
       item.reviewers,
     ));
   }
@@ -153,7 +155,7 @@ export class PendingChangesDrawerComponent {
       next: () => {
         const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.currentUser.id);
         reviewer.action = ChangeRequestAction.Decline;
-        param.changeRequestStatus = ChangeRequestStatus.Declined;
+        param.status = PendingChangeStatus.Declined;
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
       },
       error: () => {
@@ -167,7 +169,12 @@ export class PendingChangesDrawerComponent {
       next: () => {
         const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.currentUser.id);
         reviewer.action = ChangeRequestAction.Approve;
-        param.changeRequestStatus = ChangeRequestStatus.Approved;
+        if (param.type === PendingChangeType.ChangeRequest) {
+          param.status = PendingChangeStatus.Approved;
+        } else {
+          param.status = PendingChangeStatus.PendingExecution;
+        }
+
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
       },
       error: () => {
@@ -179,7 +186,7 @@ export class PendingChangesDrawerComponent {
   applyChangeRequest(param: ChangeCategory) {
     this.featureFlagService.applyChangeRequest(param.changeRequestId).subscribe({
       next: () => {
-        param.changeRequestStatus = ChangeRequestStatus.Applied;
+        param.status = PendingChangeStatus.Applied;
         this.msg.success($localize`:@@common.operation-success-and-refresh-page:Operation succeeded, please refresh the page to see the changes`);
       },
       error: () => {
@@ -193,4 +200,5 @@ export class PendingChangesDrawerComponent {
   }
 
   protected readonly PendingChangeType = PendingChangeType;
+  protected readonly PendingChangeStatus = PendingChangeStatus;
 }

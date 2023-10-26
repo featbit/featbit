@@ -44,7 +44,19 @@ public class FlagSchedule : FullAuditedEntity
         ChangeRequestId = changeRequestId;
     }
 
-    public static FlagSchedule WaitingForExecution(
+    public static FlagSchedule PendingExecution(
+        Guid orgId,
+        Guid envId,
+        Guid flagDraftId,
+        Guid flagId,
+        string title,
+        DateTime scheduledTime,
+        Guid currentUserId)
+    {
+        return new FlagSchedule(orgId, envId, flagDraftId, flagId, FlagScheduleStatus.PendingExecution, title, scheduledTime, currentUserId, null);
+    }
+    
+    public static FlagSchedule PendingReview(
         Guid orgId,
         Guid envId,
         Guid flagDraftId,
@@ -54,12 +66,18 @@ public class FlagSchedule : FullAuditedEntity
         Guid currentUserId,
         Guid? changeRequestId)
     {
-        return new FlagSchedule(orgId, envId, flagDraftId, flagId, FlagScheduleStatus.Pending, title, scheduledTime, currentUserId, changeRequestId);
+        return new FlagSchedule(orgId, envId, flagDraftId, flagId, FlagScheduleStatus.PendingReview, title, scheduledTime, currentUserId, changeRequestId);
     }
 
     public void Applied(Guid memberId)
     {
         Status = FlagScheduleStatus.Applied;
+        MarkAsUpdated(memberId);
+    }
+    
+    public void PendingExecution(Guid memberId)
+    {
+        Status = FlagScheduleStatus.PendingExecution;
         MarkAsUpdated(memberId);
     }
 }

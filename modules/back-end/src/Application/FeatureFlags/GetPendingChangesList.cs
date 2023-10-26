@@ -38,7 +38,7 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
 
         var pendingSchedules =
-            await _flagScheduleService.FindManyAsync(x => x.FlagId == flag.Id && x.Status == FlagScheduleStatus.Pending);
+            await _flagScheduleService.FindManyAsync(x => x.FlagId == flag.Id && x.Status != FlagScheduleStatus.Applied);
         
         var pendingChangeRequests = await _flagChangeRequestService.FindManyAsync(x => x.FlagId == flag.Id && x.Status != FlagChangeRequestStatus.Applied);
         
@@ -57,6 +57,7 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
                 Id = schedule.Id,
                 FlagId = schedule.FlagId,
                 CreatedAt = schedule.CreatedAt,
+                Status = schedule.Status,
                 ScheduleTitle = schedule.Title,
                 ScheduledTime = schedule.ScheduledTime,
                 ChangeRequestId = schedule.ChangeRequestId
@@ -66,7 +67,6 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
             if (changeRequest != null)
             {
                 vm.ChangeRequestReason = changeRequest.Reason;
-                vm.ChangeRequestStatus = changeRequest.Status;
                 vm.Reviewers = changeRequest.Reviewers;
             }
 
@@ -91,8 +91,8 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
                 Id = changeRequest.Id,
                 FlagId = changeRequest.FlagId,
                 CreatedAt = changeRequest.CreatedAt,
+                Status = changeRequest.Status,
                 ChangeRequestReason = changeRequest.Reason,
-                ChangeRequestStatus = changeRequest.Status,
                 Reviewers = changeRequest.Reviewers
             };
             

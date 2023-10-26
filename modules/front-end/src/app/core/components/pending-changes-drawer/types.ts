@@ -6,11 +6,12 @@ export enum PendingChangeType {
   ChangeRequest = 'ChangeRequest'
 }
 
-export enum ChangeRequestStatus {
-  Pending = 'Pending',
+export enum PendingChangeStatus {
+  PendingReview = 'PendingReview',
   Approved = 'Approved',
   Declined = 'Declined',
-  Applied = 'Applied'
+  Applied = 'Applied',
+  PendingExecution = 'PendingExecution'
 }
 
 export enum ChangeRequestAction {
@@ -29,6 +30,7 @@ export interface IReviewer {
 export interface IPendingChanges {
   id: string;
   type: PendingChangeType;
+  status: PendingChangeStatus;
   flagId: string;
   creatorId: string;
   creatorName: string;
@@ -39,6 +41,5 @@ export interface IPendingChanges {
   scheduledTime: string;
   changeRequestId?: string;
   changeRequestReason: string;
-  changeRequestStatus: string;
   reviewers: IReviewer[];
 }

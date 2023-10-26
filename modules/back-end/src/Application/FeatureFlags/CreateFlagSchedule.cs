@@ -73,19 +73,16 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
         
         if (request.WithChangeRequest)
         {
-            if (request.WithChangeRequest)
-            {
-                var isChangeRequestGranted =
-                    await _licenseService.IsFeatureGrantedAsync(request.OrgId, LicenseFeatures.ChangeRequest);
+            var isChangeRequestGranted =
+                await _licenseService.IsFeatureGrantedAsync(request.OrgId, LicenseFeatures.ChangeRequest);
 
-                if (!isChangeRequestGranted)
-                {
-                    throw new BusinessException(ErrorCodes.Unauthorized);
-                }
+            if (!isChangeRequestGranted)
+            {
+                throw new BusinessException(ErrorCodes.Unauthorized);
             }
             
             // create change request
-            flagChangeRequest = FlagChangeRequest.Pending(
+            flagChangeRequest = FlagChangeRequest.PendingReview(
                 request.OrgId,
                 request.EnvId,
                 flagDraft.Id,
@@ -97,21 +94,43 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
             
             await _flagChangeRequestService.AddOneAsync(flagChangeRequest);
         }
-
-        // create schedule
-        var flagSchedule = FlagSchedule.WaitingForExecution(
-            request.OrgId,
-            request.EnvId,
-            flagDraft.Id,
-            flag.Id,
-            request.Title,
-            request.ScheduledTime,
-            _currentUser.Id,
-            flagChangeRequest?.Id
-        );
         
-        await _flagScheduleService.AddOneAsync(flagSchedule);
-
+        // create schedule
+        FlagSchedule flagSchedule = null;
+        
+        if (flagChangeRequest != null)
+        {
+            flagSchedule = FlagSchedule.PendingReview(
+                request.OrgId,
+                request.EnvId,
+                flagDraft.Id,
+                flag.Id,
+                request.Title,
+                request.ScheduledTime,
+                _currentUser.Id,
+                flagChangeRequest.Id
+            );
+            
+            await _flagScheduleService.AddOneAsync(flagSchedule);
+            
+            flagChangeRequest.SetScheduleId(flagSchedule.Id, _currentUser.Id);
+            await _flagChangeRequestService.UpdateAsync(flagChangeRequest);
+        }
+        else
+        {
+            flagSchedule = FlagSchedule.PendingExecution(
+                request.OrgId,
+                request.EnvId,
+                flagDraft.Id,
+                flag.Id,
+                request.Title,
+                request.ScheduledTime,
+                _currentUser.Id
+            );
+            
+            await _flagScheduleService.AddOneAsync(flagSchedule);
+        }
+        
         return true;
     }
 }

@@ -62,7 +62,7 @@ public class FlagScheduleWorker : BackgroundService
         try
         {
             var pendingSchedules =
-                await _flagScheduleService.FindManyAsync(s => s.Status == FlagScheduleStatus.Pending && s.ScheduledTime <= DateTime.UtcNow);
+                await _flagScheduleService.FindManyAsync(s => s.Status == FlagScheduleStatus.PendingExecution && s.ScheduledTime <= DateTime.UtcNow);
 
             foreach (var schedule in pendingSchedules)
             {

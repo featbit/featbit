@@ -18,6 +18,8 @@ public class FlagChangeRequest : FullAuditedEntity
     
     public ICollection<Reviewer> Reviewers { get; set; }
     
+    public Guid? ScheduleId { get; set; }
+    
     public FlagChangeRequest(
         Guid orgId,
         Guid envId,
@@ -42,7 +44,14 @@ public class FlagChangeRequest : FullAuditedEntity
         Reviewers = reviewers;
     }
     
-    public static FlagChangeRequest Pending(
+    public void SetScheduleId(Guid scheduleId, Guid memberId)
+    {
+        ScheduleId = scheduleId;
+        
+        MarkAsUpdated(memberId);
+    }
+    
+    public static FlagChangeRequest PendingReview(
         Guid orgId,
         Guid envId,
         Guid flagDraftId,
@@ -52,7 +61,7 @@ public class FlagChangeRequest : FullAuditedEntity
         Guid currentUserId)
     {
         var reviewerList = reviewers.Select(x => new Reviewer { MemberId = x, Action = FlagChangeRequestAction.Empty, Timestamp = null }).ToList();
-        return new FlagChangeRequest(orgId, envId, flagDraftId, flagId, FlagChangeRequestStatus.Pending, reason, reviewerList, currentUserId);
+        return new FlagChangeRequest(orgId, envId, flagDraftId, flagId, FlagChangeRequestStatus.PendingReview, reason, reviewerList, currentUserId);
     }
 
     public bool IsReviewer(Guid memberId)
@@ -104,7 +113,7 @@ public class FlagChangeRequest : FullAuditedEntity
         }
         else
         {
-            Status = FlagChangeRequestStatus.Pending;
+            Status = FlagChangeRequestStatus.PendingReview;
         }
     }
 }

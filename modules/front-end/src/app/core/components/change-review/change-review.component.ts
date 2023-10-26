@@ -206,10 +206,8 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
   isMemberLoading = false;
   memberList: any[];
   onSearchMember(value: string) {
-    if (value.length > 0) {
-      this.isMemberLoading = true;
-      this.memberSearchChange$.next(value);
-    }
+    this.isMemberLoading = true;
+    this.memberSearchChange$.next(value);
   }
 
   protected readonly environment = environment;

@@ -2,7 +2,7 @@
 
 public class FlagChangeRequestStatus
 {
-    public const string Pending = nameof(Pending);
+    public const string PendingReview = nameof(PendingReview);
     
     public const string Approved = nameof(Approved);
     
@@ -10,7 +10,7 @@ public class FlagChangeRequestStatus
 
     public const string Applied = nameof(Applied);
 
-    public static readonly string[] All = { Pending, Approved, Declined, Applied };
+    public static readonly string[] All = { PendingReview, Approved, Declined, Applied };
 
     public static bool IsDefined(string type)
     {

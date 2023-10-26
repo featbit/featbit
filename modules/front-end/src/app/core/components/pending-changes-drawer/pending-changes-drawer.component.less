@@ -12,6 +12,26 @@
     gap: 4px;
     align-items: center;
 
+    i {
+      font-size: 17px;
+    }
+
+    nz-tag {
+      &.approved {
+        background-color: @green70-color;
+        color: @white;
+      }
+
+      &.declined {
+        background-color: @red50-color;
+        color: @white;
+      }
+
+      &.pending-execution {
+        background-color: @yellow55-color;
+        color: @white;
+      }
+    }
   }
 
   .remove-item {
@@ -34,7 +54,7 @@
     text-align: right;
   }
 
-  .change-request-reason {
+  .pending-change-comment {
     color: @grey50-color;
     padding-bottom: 12px;
   }

@@ -53,7 +53,7 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
         await _flagDraftService.AddOneAsync(flagDraft);
 
         // create change request
-        var flagChangeRequest = FlagChangeRequest.Pending(
+        var flagChangeRequest = FlagChangeRequest.PendingReview(
             request.OrgId,
             request.EnvId,
             flagDraft.Id,

@@ -33,7 +33,9 @@ public class PendingChangesVm
     public IEnumerable<FlagInstruction> Instructions { get; set; }
     
     public string Type { get; set; }
-    
+
+    public string Status { get; set; }
+
     // Schedule
     public string ScheduleTitle { get; set; }
     
@@ -43,8 +45,6 @@ public class PendingChangesVm
     public Guid? ChangeRequestId { get; set; }
     
     public string ChangeRequestReason { get; set; }
-    
-    public string ChangeRequestStatus { get; set; }
 
     public IEnumerable<Reviewer> Reviewers { get; set; }
 }
