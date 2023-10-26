@@ -112,7 +112,7 @@ public class FlagScheduleWorker : BackgroundService
             await _flagScheduleService.UpdateAsync(schedule);
 
             // write audit log
-            var auditLog = AuditLog.ForUpdate(flag, flagDraft.DataChange, flagDraft.Comment, flagDraft.CreatorId);
+            var auditLog = AuditLog.ForApplyFlagSchedule(flag, flagDraft.DataChange, flagDraft.Comment, flagDraft.CreatorId);
             await _auditLogService.AddOneAsync(auditLog);
 
             // publish on feature flag change notification

@@ -61,7 +61,7 @@ class ChangeCategory {
   }
 
   canApply(currentUserId: string): boolean {
-    if (!this.hasChangeRequest) {
+    if (this.type !== PendingChangeType.ChangeRequest) {
       return false;
     }
 
@@ -154,6 +154,7 @@ export class PendingChangesDrawerComponent {
         const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.currentUser.id);
         reviewer.action = ChangeRequestAction.Decline;
         param.changeRequestStatus = ChangeRequestStatus.Declined;
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
       },
       error: () => {
         this.msg.error($localize`:@@common.operation-failed:Operation failed`);
@@ -167,6 +168,7 @@ export class PendingChangesDrawerComponent {
         const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.currentUser.id);
         reviewer.action = ChangeRequestAction.Approve;
         param.changeRequestStatus = ChangeRequestStatus.Approved;
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
       },
       error: () => {
         this.msg.error($localize`:@@common.operation-failed:Operation failed`);
@@ -178,6 +180,7 @@ export class PendingChangesDrawerComponent {
     this.featureFlagService.applyChangeRequest(param.changeRequestId).subscribe({
       next: () => {
         param.changeRequestStatus = ChangeRequestStatus.Applied;
+        this.msg.success($localize`:@@common.operation-success-and-refresh-page:Operation succeeded, please refresh the page to see the changes`);
       },
       error: () => {
         this.msg.error($localize`:@@common.operation-failed:Operation failed`);

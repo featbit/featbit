@@ -5,7 +5,10 @@ export enum AuditLogOpEnum {
   Update = 'Update',
   Archive = 'Archive',
   Restore = 'Restore',
-  Remove = 'Remove'
+  Remove = 'Remove',
+  ApplyFlagChangeRequest = 'ApplyFlagChangeRequest',
+  ApplyFlagSchedule = 'ApplyFlagSchedule',
+
 }
 
 export enum RefTypeEnum {

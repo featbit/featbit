@@ -49,10 +49,10 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
             _currentUser.Id
         );
 
-        var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, string.Empty, dataChange, _currentUser.Id);
+        var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, request.Reason, dataChange, _currentUser.Id);
         await _flagDraftService.AddOneAsync(flagDraft);
 
-        // create schedule
+        // create change request
         var flagChangeRequest = FlagChangeRequest.Pending(
             request.OrgId,
             request.EnvId,

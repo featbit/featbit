@@ -120,6 +120,28 @@ public class AuditLog : Entity
 
         return auditLog;
     }
+    
+    public static AuditLog ForApplyFlagChangeRequest(
+        FeatureFlag flag,
+        DataChange dataChange,
+        string comment,
+        Guid creatorId)
+    {
+        var auditLog = For(flag, Operations.ApplyFlagChangeRequest, dataChange, comment, creatorId);
+
+        return auditLog;
+    }
+    
+    public static AuditLog ForApplyFlagSchedule(
+        FeatureFlag flag,
+        DataChange dataChange,
+        string comment,
+        Guid creatorId)
+    {
+        var auditLog = For(flag, Operations.ApplyFlagSchedule, dataChange, comment, creatorId);
+
+        return auditLog;
+    }
 
     #endregion
 

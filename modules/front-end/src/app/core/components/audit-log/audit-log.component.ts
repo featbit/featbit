@@ -88,6 +88,12 @@ export class AuditLogComponent {
       case AuditLogOpEnum.Remove:
         result += ` ${$localize `:@@auditlogs.operation-remove:removed`}`;
         break;
+      case AuditLogOpEnum.ApplyFlagChangeRequest:
+        result += ` ${$localize `:@@auditlogs.operation-apply-flag-change-request:applied change request to`}`;
+        break;
+      case AuditLogOpEnum.ApplyFlagSchedule:
+        result += ` ${$localize `:@@auditlogs.operation-apply-flag-schedule:applied schedule to`}`;
+        break;
       default:
         result += ` ${this.auditLog.operation}`;
     }
