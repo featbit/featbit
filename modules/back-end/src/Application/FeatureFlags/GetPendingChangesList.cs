@@ -75,13 +75,11 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
             {
                 continue;
             }
-            
+
             result.Add(vm);
         }
         
-        var attachedChangeRequestIds =
-            pendingSchedules.Where(s => s.ChangeRequestId != null).Select(s => s.ChangeRequestId);
-        var changeRequestsSolo = pendingChangeRequests.Where(cr => !attachedChangeRequestIds.Contains(cr.Id));
+        var changeRequestsSolo = pendingChangeRequests.Where(cr => !cr.ScheduleId.HasValue);
 
         foreach (var changeRequest in changeRequestsSolo)
         {

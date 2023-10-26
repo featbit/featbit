@@ -14,6 +14,7 @@ public class FlagScheduleWorker : BackgroundService
 
     private readonly IFeatureFlagService _featureFlagService;
     private readonly IFlagScheduleService _flagScheduleService;
+    private readonly IFlagChangeRequestService _flagChangeRequestService;
     private readonly IFlagDraftService _flagDraftService;
     private readonly ILicenseService _licenseService;
     private readonly IAuditLogService _auditLogService;
@@ -23,6 +24,7 @@ public class FlagScheduleWorker : BackgroundService
     public FlagScheduleWorker(
         IFeatureFlagService featureFlagService,
         IFlagScheduleService flagScheduleService,
+        IFlagChangeRequestService flagChangeRequestService,
         IFlagDraftService flagDraftService,
         ILicenseService licenseService,
         IAuditLogService auditLogService,
@@ -31,6 +33,7 @@ public class FlagScheduleWorker : BackgroundService
     {
         _featureFlagService = featureFlagService;
         _flagScheduleService = flagScheduleService;
+        _flagChangeRequestService = flagChangeRequestService;
         _flagDraftService = flagDraftService;
         _licenseService = licenseService;
         _auditLogService = auditLogService;
@@ -110,6 +113,15 @@ public class FlagScheduleWorker : BackgroundService
             schedule.Applied(schedule.CreatorId);
             await _flagDraftService.UpdateAsync(flagDraft);
             await _flagScheduleService.UpdateAsync(schedule);
+            if (schedule.ChangeRequestId.HasValue)
+            {
+                await _flagChangeRequestService.GetAsync(schedule.ChangeRequestId.Value).ContinueWith(async t =>
+                {
+                    var changeRequest = t.Result;
+                    changeRequest.Applied(schedule.CreatorId);
+                    await _flagChangeRequestService.UpdateAsync(changeRequest);
+                });
+            }
 
             // write audit log
             var auditLog = AuditLog.ForApplyFlagSchedule(flag, flagDraft.DataChange, flagDraft.Comment, flagDraft.CreatorId);
