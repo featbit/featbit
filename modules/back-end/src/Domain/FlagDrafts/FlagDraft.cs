@@ -47,10 +47,10 @@ public class FlagDraft : FullAuditedEntity
         return new FlagDraft(envId, flagId, FlagDraftStatus.Pending, comment, dataChange, currentUserId);
     }
 
-    public void Applied()
+    public void Applied(Guid memberId)
     {
         Status = FlagDraftStatus.Applied;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsUpdated(memberId);
     }
 
     public IEnumerable<FlagInstruction> GetInstructions()

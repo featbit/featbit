@@ -1,4 +1,5 @@
 ﻿using Domain.AuditLogs;
+using Domain.FlagChangeRequests;
 using Domain.SemanticPatch;
 
 namespace Application.FeatureFlags;
@@ -44,4 +45,6 @@ public class PendingChangesVm
     public string ChangeRequestReason { get; set; }
     
     public string ChangeRequestStatus { get; set; }
+
+    public IEnumerable<Reviewer> Reviewers { get; set; }
 }

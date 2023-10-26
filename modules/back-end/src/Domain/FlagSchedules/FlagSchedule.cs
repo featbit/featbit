@@ -57,9 +57,9 @@ public class FlagSchedule : FullAuditedEntity
         return new FlagSchedule(orgId, envId, flagDraftId, flagId, FlagScheduleStatus.Pending, title, scheduledTime, currentUserId, changeRequestId);
     }
 
-    public void Applied()
+    public void Applied(Guid memberId)
     {
         Status = FlagScheduleStatus.Applied;
-        UpdatedAt = DateTime.UtcNow;
+        MarkAsUpdated(memberId);
     }
 }

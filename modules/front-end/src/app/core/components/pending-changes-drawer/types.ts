@@ -13,6 +13,19 @@ export enum ChangeRequestStatus {
   Applied = 'Applied'
 }
 
+export enum ChangeRequestAction {
+  Approve = 'Approve',
+  Decline = 'Decline',
+  Apply = 'Apply',
+  Empty = 'Empty'
+}
+
+export interface IReviewer {
+  memberId: string;
+  action: string;
+  timestamp: string;
+}
+
 export interface IPendingChanges {
   id: string;
   type: PendingChangeType;
@@ -27,5 +40,5 @@ export interface IPendingChanges {
   changeRequestId?: string;
   changeRequestReason: string;
   changeRequestStatus: string;
-  reviewers: string[];
+  reviewers: IReviewer[];
 }

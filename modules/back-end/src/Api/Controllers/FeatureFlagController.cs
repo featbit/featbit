@@ -271,6 +271,51 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(true);
     }
     
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPost("change-requests/{id}/apply")]
+    public async Task<ApiResponse<bool>> ApplyChangeRequestAsync(Guid envId, Guid id)
+    {
+        var request = new ApplyFlagChangeRequest
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(true);
+    }
+    
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPost("change-requests/{id}/approve")]
+    public async Task<ApiResponse<bool>> ApproveChangeRequestAsync(Guid envId, Guid id)
+    {
+        var request = new ApproveFlagChangeRequest
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(true);
+    }
+    
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPost("change-requests/{id}/decline")]
+    public async Task<ApiResponse<bool>> DeclineChangeRequestAsync(Guid envId, Guid id)
+    {
+        var request = new DeclineFlagChangeRequest
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(true);
+    }
+    
     [HttpPut("{key}/targeting")]
     public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
     {

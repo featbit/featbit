@@ -73,6 +73,24 @@ export class FeatureFlagService {
     return this.http.delete<boolean>(url);
   }
 
+  declineChangeRequest(id: string): Observable<boolean> {
+    const url = `${this.baseUrl}/change-requests/${id}/decline`;
+
+    return this.http.post<boolean>(url, {});
+  }
+
+  approveChangeRequest(id: string): Observable<boolean> {
+    const url = `${this.baseUrl}/change-requests/${id}/approve`;
+
+    return this.http.post<boolean>(url, {});
+  }
+
+  applyChangeRequest(id: string): Observable<boolean> {
+    const url = `${this.baseUrl}/change-requests/${id}/apply`;
+
+    return this.http.post<boolean>(url, {});
+  }
+
   updateSetting(key: string, payload: ISettingPayload): Observable<boolean> {
     const url = `${this.baseUrl}/${key}/settings`;
 

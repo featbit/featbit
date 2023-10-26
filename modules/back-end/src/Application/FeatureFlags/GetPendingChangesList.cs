@@ -67,6 +67,7 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
             {
                 vm.ChangeRequestReason = changeRequest.Reason;
                 vm.ChangeRequestStatus = changeRequest.Status;
+                vm.Reviewers = changeRequest.Reviewers;
             }
 
             vm = PostProcess(vm, schedule.FlagDraftId, schedule.CreatorId);
@@ -91,7 +92,8 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChangesLis
                 FlagId = changeRequest.FlagId,
                 CreatedAt = changeRequest.CreatedAt,
                 ChangeRequestReason = changeRequest.Reason,
-                ChangeRequestStatus = changeRequest.Status
+                ChangeRequestStatus = changeRequest.Status,
+                Reviewers = changeRequest.Reviewers
             };
             
             vm = PostProcess(vm, changeRequest.FlagDraftId, changeRequest.CreatorId);

@@ -106,8 +106,8 @@ public class FlagScheduleWorker : BackgroundService
             await _featureFlagService.UpdateAsync(flag);
 
             // set draft and schedule status
-            flagDraft.Applied();
-            schedule.Applied();
+            flagDraft.Applied(schedule.CreatorId);
+            schedule.Applied(schedule.CreatorId);
             await _flagDraftService.UpdateAsync(flagDraft);
             await _flagScheduleService.UpdateAsync(schedule);
 

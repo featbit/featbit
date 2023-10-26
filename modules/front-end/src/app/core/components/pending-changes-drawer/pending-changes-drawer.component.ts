@@ -1,36 +1,95 @@
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { IPendingChanges, PendingChangeType } from "@core/components/pending-changes-drawer/types";
+import {
+  ChangeRequestAction,
+  ChangeRequestStatus,
+  IPendingChanges,
+  IReviewer,
+  PendingChangeType
+} from "@core/components/pending-changes-drawer/types";
 import { IInstruction } from "@core/components/change-list/instructions/types";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { getAuth } from "@utils/index";
 
-interface IChangeCategory {
-  id: string;
-  type: PendingChangeType;
-  createdAt: string;
-  creator: string;
-  instructions: IInstruction[];
-  previous: string;
-  current: string;
-  scheduleTitle: string;
-  scheduledTime: string;
-  changeRequestId?: string;
-  changeRequestReason?: string;
-  changeRequestStatus: string;
-}
+class ChangeCategory {
+  get changeRequestStatusLabel() : string {
+    return this.getChangeRequestStatusTranslation(this.changeRequestStatus);
+  };
 
-function getChangeRequestStatusTranslation(status: string) {
-  switch (status) {
-    case 'Pending':
-      return $localize`:@@common.pending:Pending review`;
-    case 'Approved':
-      return $localize`:@@common.approved:Approved`;
-    case 'Declined':
-      return $localize`:@@common.declined:Declined`;
-    case 'Applied':
-      return $localize`:@@common.applied:Applied`;
-    default:
-      return status;
+  constructor(
+    public id: string,
+    public type: PendingChangeType,
+    public createdAt: string,
+    public creatorId: string,
+    public creator: string,
+    public instructions: IInstruction[],
+    public previous: string,
+    public current: string,
+    public scheduleTitle: string,
+    public scheduledTime: string,
+    public changeRequestId: string,
+    public changeRequestReason: string,
+    public changeRequestStatus: string,
+    public reviewers: IReviewer[]) {
+    if (this.type === PendingChangeType.ChangeRequest) {
+      this.changeRequestId = this.id;
+    }
+  }
+
+  get hasChangeRequest(): boolean {
+    return this.changeRequestId !== null || this.type === PendingChangeType.ChangeRequest;
+  }
+
+  canDecline(currentUserId: string): boolean {
+    if (!this.hasChangeRequest) {
+      return false;
+    }
+
+    const reviewer = this.reviewers.find((item: IReviewer) => item.memberId === currentUserId);
+
+    return reviewer && reviewer?.action !== ChangeRequestAction.Decline && this.changeRequestStatus !== ChangeRequestStatus.Applied;
+  }
+
+  canApprove(currentUserId: string): boolean {
+    if (!this.hasChangeRequest) {
+      return false;
+    }
+
+    const reviewer = this.reviewers.find((item: IReviewer) => item.memberId === currentUserId);
+
+    return reviewer && reviewer?.action !== ChangeRequestAction.Approve && this.changeRequestStatus !== ChangeRequestStatus.Applied;
+  }
+
+  canApply(currentUserId: string): boolean {
+    if (!this.hasChangeRequest) {
+      return false;
+    }
+
+    if (this.changeRequestStatus !== ChangeRequestStatus.Approved) {
+      return false;
+    }
+
+    if (currentUserId === this.creatorId) {
+      return true;
+    }
+
+    const reviewer = this.reviewers.find((item: IReviewer) => item.memberId === currentUserId);
+    return reviewer?.action === ChangeRequestAction.Approve;
+  }
+
+  private getChangeRequestStatusTranslation(status: string) {
+    switch (status) {
+      case 'Pending':
+        return $localize`:@@common.pending:Pending review`;
+      case 'Approved':
+        return $localize`:@@common.approved:Approved`;
+      case 'Declined':
+        return $localize`:@@common.declined:Declined`;
+      case 'Applied':
+        return $localize`:@@common.applied:Applied`;
+      default:
+        return status;
+    }
   }
 }
 
@@ -40,25 +99,28 @@ function getChangeRequestStatusTranslation(status: string) {
   styleUrls: ['./pending-changes-drawer.component.less']
 })
 export class PendingChangesDrawerComponent {
-  changeCategoriesList: IChangeCategory[] = [];
+  changeCategoriesList: ChangeCategory[] = [];
+  currentUser = getAuth();
 
   @Input() visible: boolean = false;
   @Input()
   set pendingChangesList(data: IPendingChanges[]) {
-    this.changeCategoriesList = data.map((item: IPendingChanges) => ({
-      id: item.id,
-      type: item.type,
-      createdAt: item.createdAt,
-      scheduledTime: item.scheduledTime,
-      creator: item.creatorName,
-      previous: item.dataChange.previous,
-      current: item.dataChange.current,
-      instructions: item.instructions,
-      scheduleTitle: item.scheduleTitle,
-      changeRequestId: item.changeRequestId,
-      changeRequestReason: item.changeRequestReason,
-      changeRequestStatus: getChangeRequestStatusTranslation(item.changeRequestStatus)
-    }));
+    this.changeCategoriesList = data.map((item: IPendingChanges) => new ChangeCategory(
+      item.id,
+      item.type,
+      item.createdAt,
+      item.creatorId,
+      item.creatorName,
+      item.instructions,
+      item.dataChange.previous,
+      item.dataChange.current,
+      item.scheduleTitle,
+      item.scheduledTime,
+      item.changeRequestId,
+      item.changeRequestReason,
+      item.changeRequestStatus,
+      item.reviewers,
+    ));
   }
 
   @Output() close: EventEmitter<any> = new EventEmitter();
@@ -84,6 +146,43 @@ export class PendingChangesDrawerComponent {
     } else {
       this.featureFlagService.deleteSchedule(id).subscribe(observer);
     }
+  }
+
+  declineChangeRequest(param: ChangeCategory) {
+    this.featureFlagService.declineChangeRequest(param.changeRequestId).subscribe({
+      next: () => {
+        const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.currentUser.id);
+        reviewer.action = ChangeRequestAction.Decline;
+        param.changeRequestStatus = ChangeRequestStatus.Declined;
+      },
+      error: () => {
+        this.msg.error($localize`:@@common.operation-failed:Operation failed`);
+      }
+    });
+  }
+
+  approveChangeRequest(param: ChangeCategory) {
+    this.featureFlagService.approveChangeRequest(param.changeRequestId).subscribe({
+      next: () => {
+        const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.currentUser.id);
+        reviewer.action = ChangeRequestAction.Approve;
+        param.changeRequestStatus = ChangeRequestStatus.Approved;
+      },
+      error: () => {
+        this.msg.error($localize`:@@common.operation-failed:Operation failed`);
+      }
+    });
+  }
+
+  applyChangeRequest(param: ChangeCategory) {
+    this.featureFlagService.applyChangeRequest(param.changeRequestId).subscribe({
+      next: () => {
+        param.changeRequestStatus = ChangeRequestStatus.Applied;
+      },
+      error: () => {
+        this.msg.error($localize`:@@common.operation-failed:Operation failed`);
+      }
+    });
   }
 
   onClose() {

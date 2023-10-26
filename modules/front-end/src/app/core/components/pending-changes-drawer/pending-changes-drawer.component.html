@@ -12,17 +12,37 @@
       <nz-list nzItemLayout="horizontal">
         <nz-list-item *ngFor="let changeCategories of changeCategoriesList">
           <ng-template #extraTemplate>
-            <a
-              class="remove-item"
-              i18n-nz-popconfirm="@@common.simple-remove-confirm"
-              nz-popconfirm="Are you sure to remove it?"
-              (nzOnConfirm)="removeSchedule(changeCategories.id, changeCategories.type)"
-              [nzIcon]="iconTplDelete">
-              <ng-container i18n="@@common.remove">Remove</ng-container>
-            </a>
-            <ng-template #iconTplDelete>
-              <span nz-icon nzType="question-circle" nzTheme="fill"></span>
-            </ng-template>
+            <i class="options" nzPlacement="bottomCenter" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold; margin-left: 20px" nzType="ellipsis" [nzRotate]="90" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
+            <nz-dropdown-menu #options="nzDropdownMenu">
+              <ul nz-menu nzSelectable style="min-width: 150px;">
+                <li nz-menu-item
+                    (click)="declineChangeRequest(changeCategories)"
+                    *ngIf="changeCategories.canDecline(currentUser.id)">
+                  <ng-container i18n="@@common.decline">Decline</ng-container>
+                </li>
+                <li nz-menu-item
+                    (click)="approveChangeRequest(changeCategories)"
+                    *ngIf="changeCategories.canApprove(currentUser.id)">
+                  <ng-container i18n="@@common.approve">Approve</ng-container>
+                </li>
+                <li nz-menu-item
+                    *ngIf="changeCategories.canApply(currentUser.id)"
+                    (click)="applyChangeRequest(changeCategories)">
+                  <ng-container i18n="@@common.apply">Apply</ng-container>
+                </li>
+                <li nz-menu-item
+                    nz-popconfirm
+                    i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
+                    nzPopconfirmTitle="Are you sure to remove it?"
+                    (nzOnConfirm)="removeSchedule(changeCategories.id, changeCategories.type)"
+                    [nzIcon]="iconTplDelete">
+                  <ng-container i18n="@@common.remove">Remove</ng-container>
+                </li>
+              </ul>
+              <ng-template #iconTplDelete>
+                <span nz-icon nzType="question-circle" nzTheme="fill"></span>
+              </ng-template>
+            </nz-dropdown-menu>
           </ng-template>
           <ng-template #titleTemplate>
             <div class="title">
@@ -30,14 +50,14 @@
                 <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
                 <span i18n="@@common.scheduled-for">Scheduled for</span>
                 <span class="scheduled-time"> {{ changeCategories.scheduledTime | date: 'YYYY-MM-dd HH:mm' }}</span>&nbsp;
-                <ng-container *ngIf="changeCategories.changeRequestId">
-                  <nz-tag>{{changeCategories.changeRequestStatus}}</nz-tag>
+                <ng-container *ngIf="changeCategories.hasChangeRequest">
+                  <nz-tag>{{changeCategories.changeRequestStatusLabel}}</nz-tag>
                 </ng-container>
               </ng-container>
               <ng-container *ngIf="changeCategories.type === PendingChangeType.ChangeRequest">
                 <i nz-icon nzType="pull-request" nzTheme="outline"></i>
                 <span i18n="@@common.change-requested">Change requested</span>&nbsp;
-                <nz-tag>{{changeCategories.changeRequestStatus}}</nz-tag>
+                <nz-tag>{{changeCategories.changeRequestStatusLabel}}</nz-tag>
               </ng-container>
             </div>
           </ng-template>
