@@ -1,6 +1,7 @@
 ﻿using Application.Users;
 using Domain.AuditLogs;
 using Domain.FlagChangeRequests;
+using Domain.FlagDrafts;
 
 namespace Application.FeatureFlags;
 
@@ -49,7 +50,14 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
         }
 
         // Apply changes
-        var flagDraft = await _flagDraftService.FindOneAsync(x => x.Id == changeRequest.FlagDraftId);
+        var flagDraft = await _flagDraftService.FindOneAsync(x =>
+            x.Id == changeRequest.FlagDraftId && x.Status == FlagDraftStatus.Pending);
+
+        if (flagDraft == null)
+        {
+            return true;
+        }
+
         var instructions = flagDraft.GetInstructions();
         var flag = await _featureFlagService.GetAsync(flagDraft.FlagId);
         

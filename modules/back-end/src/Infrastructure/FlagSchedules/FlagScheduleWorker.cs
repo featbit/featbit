@@ -1,6 +1,7 @@
 using Application.FeatureFlags;
 using Domain.Organizations;
 using Domain.AuditLogs;
+using Domain.FlagDrafts;
 using Domain.FlagSchedules;
 using MediatR;
 using Microsoft.Extensions.Hosting;
@@ -100,7 +101,12 @@ public class FlagScheduleWorker : BackgroundService
 
         async Task ApplyScheduleAsync(FlagSchedule schedule)
         {
-            var flagDraft = await _flagDraftService.FindOneAsync(x => x.Id == schedule.FlagDraftId);
+            var flagDraft = await _flagDraftService.FindOneAsync(x => x.Id == schedule.FlagDraftId && x.Status == FlagDraftStatus.Pending);
+            if (flagDraft == null)
+            {
+                return;
+            }
+            
             var instructions = flagDraft.GetInstructions();
             var flag = await _featureFlagService.GetAsync(flagDraft.FlagId);
 
