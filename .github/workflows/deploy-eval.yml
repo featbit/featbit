@@ -21,7 +21,6 @@ jobs:
       MongoDbSettings_ConnectionString: mongodb://admin:password@ec2-68-79-9-34.cn-northwest-1.compute.amazonaws.com.cn:27017
       MongoDbSettings_DatabaseName: featbit
       Redis__ConnectionString: ec2-68-79-9-34.cn-northwest-1.compute.amazonaws.com.cn:6379
-      Kafka__BootstrapServers: no-need
       IS_PRO: false
     steps:
 
@@ -50,7 +49,6 @@ jobs:
           $a.MongoDb.ConnectionString = $env:MongoDbSettings_ConnectionString
           $a.MongoDb.Database = $env:MongoDbSettings_DatabaseName
 
-          $a.Kafka.BootstrapServers = $env:Kafka__BootstrapServers
           $a.Redis.ConnectionString = $env:Redis__ConnectionString
 
           $a.IS_PRO = $env:IS_PRO

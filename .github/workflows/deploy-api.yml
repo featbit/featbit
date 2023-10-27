@@ -22,7 +22,6 @@ jobs:
       MongoDbSettings_DatabaseName: featbit
       OLAP__ServiceHost: https://da.featureflag.co
       Redis__ConnectionString: ec2-68-79-9-34.cn-northwest-1.compute.amazonaws.com.cn:6379
-      Kafka__BootstrapServers: no-need
       IS_PRO: false
     steps:
 
@@ -52,7 +51,6 @@ jobs:
           $a.MongoDb.Database = $env:MongoDbSettings_DatabaseName
 
           $a.OLAP.ServiceHost = $env:OLAP__ServiceHost
-          $a.Kafka.BootstrapServers = $env:Kafka__BootstrapServers
           $a.Redis.ConnectionString = $env:Redis__ConnectionString
 
           $a.IS_PRO = $env:IS_PRO
