@@ -1,4 +1,5 @@
 using Application.Organizations;
+using Domain.Organizations;
 
 namespace Api.Controllers;
 
@@ -24,6 +25,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(LicenseFeatures.CreateOrg)]
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
     {
         var organization = await Mediator.Send(request);
@@ -61,7 +63,16 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpPut]
-    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganization request)
+    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganizationName request)
+    {
+        request.Id = OrgId;
+
+        var organization = await Mediator.Send(request);
+        return Ok(organization);
+    }
+
+    [HttpPut("license")]
+    public async Task<ApiResponse<OrganizationVm>> UpdateLicenseAsync(UpdateOrganizationLicense request)
     {
         request.Id = OrgId;
 

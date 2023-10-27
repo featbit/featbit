@@ -8,6 +8,9 @@ public static class RedisKeys
     private const string FlagIndexPrefix = "ff_index_";
     private const string SegmentPrefix = "segment_";
     private const string SegmentIndexPrefix = "segment_index_";
+    private const string LicensePrefix = "license_";
+
+    public static RedisKey License(Guid id) => new($"{LicensePrefix}{id}");
 
     public static RedisKey Flag(Guid id) => new($"{FlagPrefix}{id}");
 

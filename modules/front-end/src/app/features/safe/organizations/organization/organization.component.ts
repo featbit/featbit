@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { getAuth } from '@utils/index';
-import { IOrganization } from '@shared/types';
+import { copyToClipboard, getAuth } from '@utils/index';
+import {IOrganization, License, LicenseFeatureEnum} from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
 import { getCurrentOrganization } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
@@ -19,6 +19,7 @@ export class OrganizationComponent implements OnInit {
   creatOrganizationFormVisible: boolean = false;
 
   validateOrgForm!: FormGroup;
+  validateLicenseForm!: FormGroup;
 
   auth = getAuth();
   currentOrganization: IOrganization;
@@ -26,15 +27,17 @@ export class OrganizationComponent implements OnInit {
 
   canUpdateOrgName: boolean = false;
 
+  license: License;
+
   isLoading: boolean = false;
+  isLicenseLoading: boolean = false;
 
   constructor(
     private messageQueueService: MessageQueueService,
     private organizationService: OrganizationService,
     private message: NzMessageService,
     private permissionsService: PermissionsService
-  ) {
-  }
+  ) { }
 
   ngOnInit(): void {
     this.canUpdateOrgName = this.permissionsService.isGranted(generalResourceRNPattern.account, permissionActions.UpdateOrgName);
@@ -42,13 +45,17 @@ export class OrganizationComponent implements OnInit {
 
     const currentOrganizationId = getCurrentOrganization().id;
     this.currentOrganization = this.allOrganizations.find(x => x.id == currentOrganizationId);
-
+    this.license = new License(this.currentOrganization.license);
     this.initOrgForm();
   }
 
   initOrgForm() {
     this.validateOrgForm = new FormGroup({
       name: new FormControl(this.currentOrganization.name, [Validators.required]),
+    });
+
+    this.validateLicenseForm = new FormGroup({
+      license: new FormControl(this.currentOrganization.license, [Validators.required]),
     });
   }
 
@@ -68,6 +75,12 @@ export class OrganizationComponent implements OnInit {
     this.organizationService.switchOrganization(this.currentOrganization);
   }
 
+  copyText(text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize`:@@common.copy-success:Copied`)
+    );
+  }
+
   submitOrgForm() {
     if (!this.canUpdateOrgName) {
       this.message.warning(this.permissionsService.genericDenyMessage);
@@ -81,23 +94,50 @@ export class OrganizationComponent implements OnInit {
       }
       return;
     }
-    const {name} = this.validateOrgForm.value;
-    const {id, initialized} = this.currentOrganization;
+    const { name } = this.validateOrgForm.value;
+    const { id, initialized, license} = this.currentOrganization;
 
     this.isLoading = true;
     this.organizationService.update({ name })
-      .pipe()
       .subscribe({
         next: () => {
           this.isLoading = false;
           this.message.success($localize`:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
-          this.organizationService.setOrganization({id, initialized, name});
+          this.organizationService.setOrganization({ id, initialized, name, license });
+          this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
+        },
+        error: () => this.isLoading = false
+      });
+  }
+
+  submitLicenseForm() {
+    if (this.validateLicenseForm.invalid) {
+      for (const i in this.validateLicenseForm.controls) {
+        this.validateLicenseForm.controls[i].markAsDirty();
+        this.validateLicenseForm.controls[i].updateValueAndValidity();
+      }
+      return;
+    }
+
+    const { license } = this.validateLicenseForm.value;
+    const { id, initialized, name} = this.currentOrganization;
+
+    this.isLicenseLoading = true;
+    this.organizationService.updateLicense(license)
+      .subscribe({
+        next: () => {
+          this.isLicenseLoading = false;
+          this.license = new License(license);
+          this.message.success($localize`:@@org.org.license-update-success:License updated!`);
+          this.organizationService.setOrganization({ id, initialized, name, license });
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
         error: () => {
-          this.isLoading = false;
+          this.message.error($localize`:@@org.org.invalid-license:Invalid license, please contact FeatBit team to get a license!`);
+          this.isLicenseLoading = false;
         }
       });
   }
 
+  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
 }

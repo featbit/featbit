@@ -90,6 +90,7 @@ import {
 } from "@core/components/pending-changes-drawer/pending-changes-drawer.component";
 import { ChangeListModule } from "@core/components/change-list/change-list.module";
 import { PipesModule } from "@core/pipes/pipes.module";
+import { LicenseComponent } from "@core/components/license/license.component";
 
 @NgModule({
   declarations: [
@@ -124,7 +125,8 @@ import { PipesModule } from "@core/pipes/pipes.module";
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
-    PrismComponent
+    PrismComponent,
+    LicenseComponent
   ],
   imports: [
     CommonModule,
@@ -217,7 +219,8 @@ import { PipesModule } from "@core/pipes/pipes.module";
     ChangeReviewComponent,
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
-    PrismComponent
+    PrismComponent,
+    LicenseComponent
   ]
 })
 export class CoreModule { }

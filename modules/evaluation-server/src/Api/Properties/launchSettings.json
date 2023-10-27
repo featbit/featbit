@@ -4,7 +4,7 @@
     "Api": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "health/liveness",
       "applicationUrl": "http://localhost:5100",
       "environmentVariables": {

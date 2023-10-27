@@ -20,6 +20,7 @@ public static class ErrorCodes
     public const string EmailNotExist = nameof(EmailNotExist);
     public const string PasswordIsRequired = nameof(PasswordIsRequired);
     public const string PasswordMismatch = nameof(PasswordMismatch);
+    public const string ExternalUserCannotChangePassword = nameof(ExternalUserCannotChangePassword);
     public const string PasswordTooShort = nameof(PasswordTooShort);
 
     // common
@@ -49,7 +50,6 @@ public static class ErrorCodes
     public const string InvalidIntervalType = nameof(InvalidIntervalType);
     public const string InvalidFrom = nameof(InvalidFrom);
     public const string InvalidTo = nameof(InvalidTo);
-    public const string InvalidFlagKeyFormat = nameof(InvalidFlagKeyFormat);
     public const string InvalidSecretType = nameof(InvalidSecretType);
 
     // triggers

@@ -124,6 +124,17 @@ export class FeatureFlagService {
     return this.http.put<boolean>(url, payload);
   }
 
+  createSchedule(targeting: IFeatureFlagTargeting, schedule?: FlagSchedule): Observable<boolean> {
+    const url = `${this.baseUrl}/${targeting.key}/schedule`;
+
+    const payload = {
+      ...targeting,
+      schedule
+    };
+
+    return this.http.post<boolean>(url, payload);
+  }
+
   getAllTags(): Observable<string[]> {
     const url = `${this.baseUrl}/all-tags`;
     return this.http.get<string[]>(url);

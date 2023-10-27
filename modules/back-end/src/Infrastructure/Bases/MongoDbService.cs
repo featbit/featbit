@@ -44,7 +44,8 @@ public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
 
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
     {
-        return await Queryable.AnyAsync(predicate);
+        // for improved compatibility with CosmosDB, use CountAsync instead of AnyAsync.
+        return await Queryable.CountAsync(predicate) > 0;
     }
 
     public async Task AddOneAsync(TEntity entity)

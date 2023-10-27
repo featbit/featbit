@@ -9,7 +9,7 @@ public class AddUser : IRequest<bool>
 {
     // possible values: email
     public string Method { get; set; }
-    
+
     public Guid OrganizationId { get; set; }
 
     public string Email { get; set; }
@@ -26,7 +26,7 @@ public class AddUserValidator : AbstractValidator<AddUser>
         RuleFor(x => x.Method)
             .NotEmpty().WithErrorCode(ErrorCodes.MethodIsRequired)
             .Equal(x => "Email").WithErrorCode(ErrorCodes.MethodIsInvalid);
-        
+
         RuleFor(x => x.Email)
             .NotEmpty().WithErrorCode(ErrorCodes.EmailIsRequired)
             .EmailAddress().WithErrorCode(ErrorCodes.EmailIsInvalid);
@@ -55,16 +55,16 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
     public async Task<bool> Handle(AddUser request, CancellationToken cancellationToken)
     {
         var email = request.Email;
-        
+
         string initialPwd;
         Guid userId;
-        
+
         var user = await _userService.FindByEmailAsync(email);
         // automatically register users if they do not exist
         if (user == null)
         {
             initialPwd = PasswordGenerator.New(email);
-            var registerResult = await _identityService.RegisterByEmailAsync(email, initialPwd);
+            var registerResult = await _identityService.RegisterByEmailAsync(email, initialPwd, UserOrigin.Local);
             userId = registerResult.UserId;
         }
         else

@@ -326,10 +326,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         }
       });
 
-    if (iterationResults.length === 0) {
-      console.log('------------- Hello, Did you find what you want?--------------------')
-    }
-
     const invalidVariation = !!iterationResults.find(e => e.isInvalid && !e.isBaseline);
     const winnerVariation = !!iterationResults.find(e => e.isWinner);
 

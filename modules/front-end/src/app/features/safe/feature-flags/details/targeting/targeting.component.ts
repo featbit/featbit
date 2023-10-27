@@ -1,10 +1,9 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IRuleIdDispatchKey } from '@shared/types';
+import { IRuleIdDispatchKey, IUserProp, IUserType, License, LicenseFeatureEnum } from '@shared/types';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { EnvUserService } from '@services/env-user.service';
-import { IUserProp, IUserType } from '@shared/types';
 import { MessageQueueService } from '@services/message-queue.service';
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
@@ -15,10 +14,10 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { ISegment } from "@features/safe/segments/types/segments-index";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { environment } from "src/environments/environment";
+import { getCurrentOrganization } from "@utils/project-env";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -41,6 +40,7 @@ export class TargetingComponent implements OnInit {
     return rule.id;
   }
 
+  license: License;
   featureFlag: FeatureFlag = {} as FeatureFlag;
   userList: IUserType[] = [];
 
@@ -65,18 +65,25 @@ export class TargetingComponent implements OnInit {
     this.exptRulesVisible = false;
   }
 
-  reviewModalKindEnum = ReviewModalKindEnum;
-  reviewModalKind:ReviewModalKindEnum;
+  reviewModalKind: ReviewModalKindEnum;
   originalData: string = '{}';
   currentData: string = '{}';
   refType: RefTypeEnum = RefTypeEnum.Flag;
   reviewModalVisible: boolean = false;
 
+
+  onScheduleClick(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
+    if (!this.license.isGranted(LicenseFeatureEnum.Schedule)) {
+      return false;
+    }
+
+    return this.onReviewChanges(validationErrortpl, modalKind);
+  }
+
   onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
     this.validationErrors = this.validateFeatureFlag();
 
     if (this.validationErrors.length > 0) {
-      console.log(this.validationErrors);
       this.msg.create('', validationErrortpl, { nzDuration: 5000 });
       return false;
     }
@@ -106,6 +113,9 @@ export class TargetingComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const currentOrg = getCurrentOrganization();
+    this.license = new License(currentOrg.license);
+
     this.isLoading = true;
     this.route.paramMap.subscribe(paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
@@ -287,7 +297,7 @@ export class TargetingComponent implements OnInit {
     const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
     const targeting = { key, targetUsers, rules, fallthrough, exptIncludeAllTargets };
 
-    this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule ).subscribe({
+    const observer = {
       next: () => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
@@ -297,7 +307,15 @@ export class TargetingComponent implements OnInit {
         this.msg.error($localize `:@@common.save-fail:Failed to Save`);
         this.isLoading = false;
       }
-    });
+    };
+
+    switch (this.reviewModalKind) {
+      case ReviewModalKindEnum.Review:
+        this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule).subscribe(observer);
+        break;
+      case ReviewModalKindEnum.Schedule:
+        this.featureFlagService.createSchedule(targeting, data.schedule).subscribe(observer);
+    }
 
     this.reviewModalVisible = false;
   }
@@ -387,4 +405,6 @@ export class TargetingComponent implements OnInit {
   }
 
   protected readonly environment = environment;
+  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
+  protected readonly ReviewModalKindEnum = ReviewModalKindEnum;
 }

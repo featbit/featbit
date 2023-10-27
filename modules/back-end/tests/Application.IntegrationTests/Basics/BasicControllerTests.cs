@@ -61,4 +61,12 @@ public class BasicControllerTests
 
         await Verify(response);
     }
+
+    [Fact]
+    public async Task NeedLicense()
+    {
+        var response = await _app.GetAsync("api/v1/basic/license-feature-check");
+
+        await Verify(response);
+    }
 }

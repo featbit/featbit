@@ -1,0 +1,21 @@
+<clickhouse>
+     <!-- Listen wildcard address to allow accepting connections from other containers and host network. -->
+    <listen_host>::</listen_host>
+    <listen_host>0.0.0.0</listen_host>
+    <listen_try>1</listen_try>
+    <max_concurrent_queries>1000</max_concurrent_queries>
+    <!--
+    <logger>
+        <console>1</console>
+    </logger>
+    -->
+
+    <!-- Kafka -->
+    <kafka>
+        <security_protocol>sasl_plaintext</security_protocol>
+        <sasl_username>kafka</sasl_username>
+        <sasl_password>bitnami</sasl_password>
+        <sasl_mechanisms>PLAIN</sasl_mechanisms>
+    </kafka>
+    
+</clickhouse>

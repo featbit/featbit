@@ -1,16 +1,21 @@
 using Domain.Shared;
+using Infrastructure.Redis;
 using StackExchange.Redis;
 
-namespace Infrastructure.Redis;
+namespace Infrastructure.Store;
 
 public class RedisStore : IStore
 {
+    private readonly IRedisClient _redisClient;
     private readonly IDatabase _redis;
 
-    public RedisStore(RedisClient redisClient)
+    public RedisStore(IRedisClient redisClient)
     {
+        _redisClient = redisClient;
         _redis = redisClient.GetDatabase();
     }
+
+    public ValueTask<bool> IsAvailableAsync() => ValueTask.FromResult(_redisClient.IsConnected);
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {

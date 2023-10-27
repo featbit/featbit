@@ -19,7 +19,8 @@ services:
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
+      - Kafka__Producer__bootstrap.servers=kafka:9092
+      - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
       - IS_PRO=true
@@ -38,7 +39,8 @@ services:
     environment:
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
-      - Kafka__BootstrapServers=kafka:9092
+      - Kafka__Producer__bootstrap.servers=kafka:9092
+      - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
       - IS_PRO=true
     depends_on:
@@ -65,6 +67,7 @@ services:
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
       IS_PRO: true
+      CHECK_DB_LIVNESS: true
 
   mongodb:
     image: mongo:5.0.14

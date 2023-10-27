@@ -1,22 +1,25 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/forms";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
-import { differenceInCalendarDays, setHours, setSeconds, setMinutes } from 'date-fns';
+import { differenceInCalendarDays, setHours, setMinutes, setSeconds } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
 import { environment } from "src/environments/environment";
 import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
+import { License, LicenseFeatureEnum } from "@shared/types";
+import { getCurrentOrganization } from "@utils/project-env";
 
 @Component({
   selector: 'change-review',
   templateUrl: './change-review.component.html',
   styleUrls: ['./change-review.component.less']
 })
-export class ChangeReviewComponent implements OnChanges {
+export class ChangeReviewComponent implements OnChanges, OnInit {
   @Input() visible = false;
   @Input() refName: string = '';
   @Input() kind: ReviewModalKindEnum = ReviewModalKindEnum.Review;
+  @Output() kindChange= new EventEmitter<ReviewModalKindEnum>();
   @Input() previous: string = '{}';
   @Input() current: string = '{}';
   @Input() refType: RefTypeEnum;
@@ -24,11 +27,10 @@ export class ChangeReviewComponent implements OnChanges {
   @Output() onCancel = new EventEmitter<any>();
 
   title: string;
-  reviewModalKindEnum = ReviewModalKindEnum;
   instructions: IInstruction[] = [];
   form: FormGroup;
 
-  hasSchedule: boolean = false;
+  license: License;
   today = new Date();
   timeDefaultValue = setSeconds(setMinutes(setHours(new Date(), this.today.getHours()), this.today.getMinutes()), 0);
 
@@ -37,8 +39,13 @@ export class ChangeReviewComponent implements OnChanges {
     private auditLogService: AuditLogService
   ) { }
 
+  ngOnInit(): void {
+    const currentOrg = getCurrentOrganization();
+    this.license = new License(currentOrg.license);
+  }
+
   scheduleValidator: ValidatorFn = (control: AbstractControl) => {
-    if (this.hasSchedule && !control.value) {
+    if (this.license.isGranted(LicenseFeatureEnum.Schedule) && this.kind === ReviewModalKindEnum.Schedule && !control.value) {
       const error = { required: true };
       control.setErrors(error);
       return error;
@@ -53,10 +60,8 @@ export class ChangeReviewComponent implements OnChanges {
     if (this.visible) {
       if (this.kind === ReviewModalKindEnum.Schedule) {
         this.title = $localize `:@@common.schedule-changes:Schedule changes`;
-        this.hasSchedule = true;
       } else {
         this.title =$localize `:@@common.review-and-save:Review and save`;
-        this.hasSchedule = false;
       }
 
       this.form = this.fb.group({
@@ -89,7 +94,7 @@ export class ChangeReviewComponent implements OnChanges {
 
     const output: ChangeReviewOutput = {
       comment: comment,
-      schedule: this.hasSchedule ? {
+      schedule: this.license.isGranted(LicenseFeatureEnum.Schedule) ? {
         title: scheduleTitle,
         scheduledTime: scheduledTime,
       } : undefined,
@@ -131,10 +136,12 @@ export class ChangeReviewComponent implements OnChanges {
     nzDisabledSeconds: () => []
   });
 
-  toggleSchedule() {
-    this.hasSchedule = !this.hasSchedule;
+  setKind(kind: ReviewModalKindEnum) {
+    this.kindChange.emit(kind);
   }
 
   protected readonly environment = environment;
   protected readonly RefTypeEnum = RefTypeEnum;
+  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
+  protected readonly ReviewModalKindEnum = ReviewModalKindEnum;
 }

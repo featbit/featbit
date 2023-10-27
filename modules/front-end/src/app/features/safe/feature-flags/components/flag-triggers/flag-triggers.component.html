@@ -40,7 +40,7 @@
                 <div class="trigger-url">
                   <span>{{getTriggerUrl(trigger.token)}}</span>
                   <i *ngIf="trigger.canCopyToken" (click)="copyText($event, getTriggerUrl(trigger.token))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
-                  <i nz-icon nz-tooltip="curl -X PUT {{ getTriggerUrl(trigger.token) }}" nzType="icons:icon-info-outline"></i>
+                  <i nz-icon nz-tooltip="curl -X POST {{ getTriggerUrl(trigger.token) }}" nzType="icons:icon-info-outline"></i>
                 </div>
                 <div class="warning" *ngIf="trigger.canCopyToken">
                   <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>

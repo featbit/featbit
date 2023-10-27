@@ -48,7 +48,7 @@ public class OnboardingHandler : IRequestHandler<Onboarding, bool>
     public async Task<bool> Handle(Onboarding request, CancellationToken cancellationToken)
     {
         var organization = await _organizationService.GetAsync(request.OrganizationId);
-        organization.Update(request.OrganizationName, true);
+        organization.Initialize(request.OrganizationName);
         await _organizationService.UpdateAsync(organization);
 
         var project = new Project(organization.Id, request.ProjectName, request.ProjectKey);

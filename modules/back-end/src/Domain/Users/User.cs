@@ -5,32 +5,36 @@ namespace Domain.Users;
 public class User : AuditedEntity
 {
     public string Name { get; set; }
-    
+
     public string Email { get; set; }
 
     public string Password { get; set; }
 
+    public string Origin { get; set; }
+
     /// <summary>
     /// for test project use only
     /// </summary>
-    public User(Guid id, string email, string password, string name = "")
+    public User(Guid id, string email, string password, string name = "", string origin = UserOrigin.Local)
     {
         Id = id;
-        
+
         Email = email;
         Password = password;
         Name = name;
+        Origin = origin;
 
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
 
-    public User(string email, string password, string name = "")
+    public User(string email, string password, string name = "", string origin = UserOrigin.Local)
     {
         Email = email;
         Password = password;
         Name = name;
-        
+        Origin = origin;
+
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
@@ -50,7 +54,7 @@ public class User : AuditedEntity
     {
         Email = email;
         Name = name;
-        
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

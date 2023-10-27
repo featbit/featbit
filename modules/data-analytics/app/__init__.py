@@ -1,12 +1,17 @@
 import socket
 from logging.config import dictConfig
+from typing import List, Tuple
 
 from flask import Flask
 
 from app.config import DevelopmentConfig, ProductionConfig
 from app.extensions import get_cache, get_mongodb, get_scheduler
 from app.setting import (CACHE_KEY_PREFIX, CACHE_TYPE, DEFAULT_LOGGING_CONFIG,
-                         IS_PRO, MONGO_URI, REDIS_URL, WSGI)
+                         IS_PRO, MONGO_URI, REDIS_CLUSTER_HOST_PORT_PAIRS,
+                         REDIS_PASSWORD, REDIS_SENTINEL_DB,
+                         REDIS_SENTINEL_HOST_PORT_PAIRS,
+                         REDIS_SENTINEL_MASTER_SET, REDIS_SENTINEL_PASSWORD,
+                         REDIS_SSL, REDIS_URL, REDIS_USER, WSGI)
 
 CONFIGS = {
     'production': ProductionConfig,
@@ -32,9 +37,27 @@ def _create_app(config_name='default') -> Flask:
     __app.register_blueprint(get_expt_blueprint(), url_prefix='/api/expt')
 
     # https://flask-caching.readthedocs.io/en/latest/
-    cache = get_cache(config={"CACHE_TYPE": CACHE_TYPE,
-                              "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
-                              "CACHE_REDIS_URL": REDIS_URL})
+    cache_config = {"CACHE_KEY_PREFIX": CACHE_KEY_PREFIX}
+    cache_options = {"ssl": REDIS_SSL, "username": REDIS_USER}
+    if CACHE_TYPE == "RedisClusterCache":
+        cache_config.update({"CACHE_TYPE": "RedisClusterCache",
+                             "CACHE_REDIS_PASSWORD": REDIS_PASSWORD,
+                             "CACHE_REDIS_CLUSTER": REDIS_CLUSTER_HOST_PORT_PAIRS,
+                             "CACHE_OPTIONS": cache_options, })  # type: ignore
+
+    elif CACHE_TYPE == "RedisSentinelCache":
+        cache_config.update({"CACHE_TYPE": "RedisSentinelCache",
+                             "CACHE_REDIS_PASSWORD": REDIS_PASSWORD,
+                             "CACHE_REDIS_DB": REDIS_SENTINEL_DB,
+                             "CACHE_REDIS_SENTINELS": _parse_redis_sentinel_hosts(REDIS_SENTINEL_HOST_PORT_PAIRS),
+                             "CACHE_REDIS_SENTINEL_PASSWORD": REDIS_SENTINEL_PASSWORD,
+                             "CACHE_REDIS_SENTINEL_MASTER": REDIS_SENTINEL_MASTER_SET,
+                             "CACHE_OPTIONS": cache_options, })  # type: ignore
+    else:
+        cache_config.update({"CACHE_TYPE": "RedisCache",
+                             "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
+                             "CACHE_REDIS_URL": REDIS_URL, })  # type: ignore
+    cache = get_cache(config=cache_config)
     cache.init_app(__app)
 
     if IS_PRO:
@@ -68,3 +91,13 @@ def get_app(config_name='default') -> Flask:
     if __app is None:
         _create_app(config_name)
     return __app  # type: ignore
+
+
+def _parse_redis_sentinel_hosts(hosts: str) -> List[Tuple]:
+    try:
+        if hosts and hosts.strip():
+            nodes = [(node.split(":")) for node in hosts.split(",")]
+            return [(node[0].strip(), int(node[1].strip())) for node in nodes]
+        return [("127.0.0.1", 26379)]
+    except:
+        return [("127.0.0.1", 26379)]

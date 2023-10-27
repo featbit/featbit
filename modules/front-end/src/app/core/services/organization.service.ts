@@ -27,6 +27,10 @@ export class OrganizationService {
     return this.http.post(url, params);
   }
 
+  updateLicense(license: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/license`, { license });
+  }
+
   update(params: any): Observable<any> {
     return this.http.put(this.baseUrl, params);
   }
@@ -58,6 +62,8 @@ export class OrganizationService {
     if (!!organization) {
       const currentAccount = this.organizations.find(ws => ws.id == organization.id);
       currentAccount.name = organization.name;
+      currentAccount.license = organization.license;
+      currentAccount.initialized = organization.initialized;
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentAccount));
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');

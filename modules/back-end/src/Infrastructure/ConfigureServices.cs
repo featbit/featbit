@@ -1,4 +1,5 @@
 using Application.Caches;
+using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
 using Infrastructure.AccessTokens;
@@ -102,6 +103,16 @@ public static class ConfigureServices
         var isProVersion = configuration["IS_PRO"];
         if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {
+            var producerConfigDictionary = new Dictionary<string, string>();
+            configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
+            var producerConfig = new ProducerConfig(producerConfigDictionary);
+            services.AddSingleton(producerConfig);
+
+            var consumerConfigDictionary = new Dictionary<string, string>();
+            configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
+            var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
+            services.AddSingleton(consumerConfig);
+
             // use kafka as message queue in pro version
             services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
             services.AddHostedService<KafkaMessageConsumer>();

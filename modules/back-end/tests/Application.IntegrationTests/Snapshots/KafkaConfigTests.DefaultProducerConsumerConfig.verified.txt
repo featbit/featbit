@@ -1,0 +1,38 @@
+﻿{
+  producerConfig: [
+    {
+      Key: bootstrap.servers,
+      Value: localhost:29092
+    },
+    {
+      Key: linger.ms,
+      Value: 50
+    }
+  ],
+  consumerConfig: [
+    {
+      Key: auto.commit.interval.ms,
+      Value: 5000
+    },
+    {
+      Key: auto.offset.reset,
+      Value: earliest
+    },
+    {
+      Key: bootstrap.servers,
+      Value: localhost:29092
+    },
+    {
+      Key: enable.auto.commit,
+      Value: True
+    },
+    {
+      Key: enable.auto.offset.store,
+      Value: True
+    },
+    {
+      Key: group.id,
+      Value: featbit-api
+    }
+  ]
+}
