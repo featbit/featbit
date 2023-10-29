@@ -1,5 +1,6 @@
 using Application.Bases;
 using Application.Bases.Exceptions;
+using Application.FeatureFlags;
 using Domain.Triggers;
 
 namespace Application.Triggers;
@@ -13,13 +14,16 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
 {
     private readonly ITriggerService _triggerService;
     private readonly IFeatureFlagService _flagService;
+    private readonly IPublisher _publisher;
 
     public RunTriggerHandler(
         ITriggerService triggerService,
-        IFeatureFlagService flagService)
+        IFeatureFlagService flagService,
+        IPublisher publisher)
     {
         _triggerService = triggerService;
         _flagService = flagService;
+        _publisher = publisher;
     }
 
     public async Task<bool> Handle(RunTrigger request, CancellationToken cancellationToken)
@@ -41,6 +45,10 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
             var featureFlag = await _flagService.GetAsync(trigger.TargetId);
             trigger.Run(featureFlag);
             await _flagService.UpdateAsync(featureFlag);
+
+            // publish on feature flag change notification
+            var comment = trigger.Action == TriggerActions.TurnOff ? "Turn off by trigger" : "Turn on by trigger";
+            await _publisher.Publish(new OnFeatureFlagChanged(featureFlag, comment), cancellationToken);
         }
 
         await _triggerService.UpdateAsync(trigger);
