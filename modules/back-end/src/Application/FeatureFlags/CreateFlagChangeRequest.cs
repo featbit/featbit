@@ -4,14 +4,14 @@ using Domain.FlagDrafts;
 
 namespace Application.FeatureFlags;
 
-public class CreateFlagChangeRequest : IRequest<Guid>
+public class CreateFlagChangeRequest : IRequest<bool>
 {
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
-    
+
     public FlagTargeting Targeting { get; set; }
 
     public string Reason { get; set; }
@@ -19,7 +19,7 @@ public class CreateFlagChangeRequest : IRequest<Guid>
     public ICollection<Guid> Reviewers { get; set; }
 }
 
-public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRequest, Guid>
+public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRequest, bool>
 {
     private readonly IFeatureFlagService _flagService;
     private readonly IFlagChangeRequestService _flagChangeRequestService;
@@ -38,7 +38,7 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
         _currentUser = currentUser;
     }
 
-    public async Task<Guid> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateTargeting(
@@ -59,12 +59,12 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
             flagDraft.Id,
             flag.Id,
             request.Reason,
-            request.Reviewers, 
+            request.Reviewers,
             _currentUser.Id
         );
-        
+
         await _flagChangeRequestService.AddOneAsync(flagChangeRequest);
 
-        return flagChangeRequest.Id;
+        return true;
     }
 }
