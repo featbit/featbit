@@ -13,7 +13,6 @@ public class Experiment : AuditedEntity
     public string BaselineVariationId { get; set; }
     public List<ExperimentIteration> Iterations { get; set; }
     public double? Alpha { get; set; }
-    public double? Power { get; set; }
 }
 
 public class ExperimentIteration
