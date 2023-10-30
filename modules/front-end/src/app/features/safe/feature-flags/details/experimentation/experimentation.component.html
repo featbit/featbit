@@ -110,6 +110,7 @@
                       <ng-container i18n="@@ff.expt.default-confidence-level">Default confidence level: </ng-container> 
                       {{(1-(experiment.alpha ?? 0.05))*100 + "%"}}
                       <span nz-tooltip
+                            i18n-nzTooltipTitle="@@ff.expt.reacreated-to-change-default-confidence-level"
                             nzTooltipTitle="You need to recreated a new experiment to change this value" [nzTooltipColor]="'cyan'">
                         <i nz-icon nzType="info-circle" nzTheme="outline" style="padding:5px;"></i>
                       </span>
@@ -172,7 +173,6 @@
                           </ng-container>
                           <th style="width: 210px" i18n="@@common.confidence-interval">Confidence interval</th>
                           <th i18n="@@common.changes">Changes</th>
-                          <!-- <th i18n="@@common.effect-size">Effect Size</th> -->
                           <th>
                             <ng-container i18n="@@ff.expt.p-value">P-Value</ng-container>&nbsp;
                             <span [nzTooltipOverlayStyle]="{'max-width': '300px'}"
