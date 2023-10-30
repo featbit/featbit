@@ -353,7 +353,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     Status = expt.Status,
                     MetricCustomEventTrackOption = metric.CustomEventTrackOption,
                     MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
-                    Iterations = expt.Iterations,
+                    Iterations = expt.Iterations != null ? expt.Iterations.Where(p => !p.IsArchived).ToList() : expt.Iterations,
                     Alpha = expt.Alpha ?? 0.05
                 };
 
@@ -400,7 +400,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     Status = expt.Status,
                     MetricCustomEventTrackOption = metric.CustomEventTrackOption,
                     MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
-                    Iterations = expt.Iterations,
+                    Iterations = expt.Iterations != null ? expt.Iterations.Where(p => !p.IsArchived).ToList() : expt.Iterations, 
                     Alpha = expt.Alpha
                 };
 
