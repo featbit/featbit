@@ -92,7 +92,7 @@ export class MetricDrawerComponent implements OnInit {
       eventType: [EventType.Custom, [Validators.required]],
       maintainerUserId: [null, [Validators.required]],
       customEventTrackOption: [CustomEventTrackOption.Undefined],
-      eventName: [null],
+      eventName: [null, [Validators.required]],
       customEventUnit: [null],
       customEventSuccessCriteria: [CustomEventSuccessCriteria.Higher],
       elementTargets: [null],
@@ -193,13 +193,13 @@ export class MetricDrawerComponent implements OnInit {
       }
 
       if (eventType === this.customEventType &&
-        (!eventName || !customEventTrackOption || !customEventUnit || !customEventSuccessCriteria )
+        (!eventName || !customEventTrackOption )
         ) {
 
-        this.metricForm.controls['eventName'].setErrors({required: true});
-        this.metricForm.controls['customEventTrackOption'].setErrors({required: true});
-        this.metricForm.controls['customEventUnit'].setErrors({required: true});
-        this.metricForm.controls['customEventSuccessCriteria'].setErrors({required: true});
+        if(!eventName)
+          this.metricForm.controls['eventName'].setErrors({required: true});
+        if(!customEventTrackOption)
+          this.metricForm.controls['customEventTrackOption'].setErrors({required: true});
       }
 
       if (eventType === this.pageViewEventType || eventType === this.clickEventType) {

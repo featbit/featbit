@@ -54,7 +54,33 @@
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-
+      <ng-container
+        *ngIf="metricForm.value.eventType === pageViewEventType || metricForm.value.eventType === clickEventType">
+        <nz-form-item *ngIf="metricForm.value.eventType === clickEventType">
+          <nz-form-label>Targets</nz-form-label>
+          <nz-form-control nzErrorTip="Targets">
+            <input type="text" nz-input formControlName="elementTargets" i18n-placeholder="@@expt.metric.target-selector" placeholder="One or more CSS selector, seperated by (,)"/>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item formArrayName="targetUrls">
+          <nz-form-label>
+            <span i18n="@@expt.metric.targeting-page-url">Targeting page URL</span>
+            <i class="add-target-url-icon" (click)="addTargetUrl()" nz-icon nzType="icons:icon-add-outline"></i>
+          </nz-form-label>
+          <nz-form-control
+            class="target-url-form-control"
+            *ngFor="let n of metricForm.controls.targetUrls.controls; let idx = index;"
+            nzErrorTip="URL！" formGroupName="{{idx}}">
+            <div class="target-url-row">
+              <nz-select formControlName="matchType">
+                <nz-option i18n-nzLabel="@@expt.metric.string-including" nzLabel="String including" [nzValue]="substringUrlMatchType"></nz-option>
+              </nz-select>
+              <input type="text" nz-input formControlName="url" i18n-placeholder="@@expt.metric.targeting-page-url" placeholder="Targeting page URL"/>
+              <i (click)="removeTargetUrl(idx)" nz-icon nzType="icons:icon-delete"></i>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </ng-container>
       <ng-container *ngIf="metricForm.value.eventType === customEventType">
         <nz-form-item>
           <nz-form-control>
