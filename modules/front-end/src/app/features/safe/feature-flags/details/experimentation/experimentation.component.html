@@ -62,14 +62,14 @@
 
                     <nz-dropdown-menu #options="nzDropdownMenu">
                       <ul nz-menu nzSelectable style="min-width: 150px;">
-                        <li *ngIf="experiment.status !== exptStatusNotStarted" nz-menu-item
+                        <li *ngIf="experiment.status !== exptStatusRecording" nz-menu-item
                             nz-popconfirm
                             i18n-nzPopconfirmTitle="@@ff.expt.remove-expt-data-confirm"
                             nzPopconfirmTitle="This would remove all data of this experiment, it cannot be reverted, are you sure to remove it?"
                             nzPopconfirmPlacement="bottomRight"
                             [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                             (nzOnConfirm)="onDeleteExptDataClick(experiment)">
-                          <ng-container i18n="@@ff.expt.remove-data">Archive Paused Iterations</ng-container>
+                          <ng-container i18n="@@ff.expt.remove-data">Remove Data</ng-container>
                         </li>
                         <li nz-menu-item
                             nz-popconfirm
