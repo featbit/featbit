@@ -1,4 +1,5 @@
 using Application.Caches;
+using Domain.AuditLogs;
 using Domain.Messages;
 using Domain.Segments;
 
@@ -8,11 +9,20 @@ public class OnSegmentChange : INotification
 {
     public Segment Segment { get; set; }
 
+    public string Operation { get; set; }
+
+    public DataChange DataChange { get; set; }
+
+    public Guid OperatorId { get; set; }
+
     public IEnumerable<Guid> AffectedFlagIds { get; set; }
 
-    public OnSegmentChange(Segment segment)
+    public OnSegmentChange(Segment segment, string operation, DataChange dataChange, Guid operatorId)
     {
         Segment = segment;
+        Operation = operation;
+        DataChange = dataChange;
+        OperatorId = operatorId;
         AffectedFlagIds = Array.Empty<Guid>();
     }
 
@@ -20,6 +30,13 @@ public class OnSegmentChange : INotification
     {
         Segment = segment;
         AffectedFlagIds = affectedFlagIds;
+    }
+
+    public AuditLog GetAuditLog()
+    {
+        var auditLog = AuditLog.For(Segment, Operations.Update, DataChange, string.Empty, OperatorId);
+
+        return auditLog;
     }
 }
 
