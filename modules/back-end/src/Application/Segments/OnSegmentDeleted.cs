@@ -10,10 +10,10 @@ public class OnSegmentDeleted : INotification
 
     public Guid OperatorId { get; set; }
 
-    public OnSegmentDeleted(Segment segment, Guid currentUserId)
+    public OnSegmentDeleted(Segment segment, Guid operatorId)
     {
         Segment = segment;
-        OperatorId = currentUserId;
+        OperatorId = operatorId;
     }
 
     public AuditLog GetAuditLog()
