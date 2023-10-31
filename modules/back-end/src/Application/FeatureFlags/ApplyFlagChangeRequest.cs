@@ -19,7 +19,6 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
     private readonly IFlagChangeRequestService _flagChangeRequestService;
     private readonly IFeatureFlagService _featureFlagService;
     private readonly IFlagDraftService _flagDraftService;
-    private readonly IAuditLogService _auditLogService;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
 
@@ -27,7 +26,6 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
         IFlagChangeRequestService flagChangeRequestService,
         IFeatureFlagService featureFlagService,
         IFlagDraftService flagDraftService,
-        IAuditLogService auditLogService,
         ICurrentUser currentUser,
         IPublisher publisher)
     {
@@ -35,7 +33,6 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
         _featureFlagService = featureFlagService;
         _currentUser = currentUser;
         _flagDraftService = flagDraftService;
-        _auditLogService = auditLogService;
         _publisher = publisher;
     }
 
@@ -60,7 +57,7 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
 
         var instructions = flagDraft.GetInstructions();
         var flag = await _featureFlagService.GetAsync(flagDraft.FlagId);
-        
+
         // apply flag instructions
         flag.ApplyInstructions(instructions, flagDraft.CreatorId);
         await _featureFlagService.UpdateAsync(flag);
@@ -71,13 +68,12 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
         await _flagDraftService.UpdateAsync(flagDraft);
         await _flagChangeRequestService.UpdateAsync(changeRequest);
 
-        // write audit log
-        var auditLog = AuditLog.ForApplyFlagChangeRequest(flag, flagDraft.DataChange, flagDraft.Comment, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
-
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag, flagDraft.Comment), cancellationToken);
-        
+        var notification = new OnFeatureFlagChanged(
+            flag, Operations.ApplyFlagChangeRequest, flagDraft.DataChange, _currentUser.Id, flagDraft.Comment
+        );
+        await _publisher.Publish(notification, cancellationToken);
+
         return true;
     }
 }
