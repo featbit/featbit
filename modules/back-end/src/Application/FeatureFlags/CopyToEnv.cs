@@ -46,8 +46,9 @@ public class CopyToEnvHandler : IRequestHandler<CopyToEnv, CopyToEnvResult>
             await _service.AddOneAsync(targetFlag);
 
             // publish on feature flag change notification
+            var dataChange = new DataChange(null).To(targetFlag);
             var notification =
-                new OnFeatureFlagChanged(targetFlag, Operations.Create, DataChange.Empty, _currentUser.Id);
+                new OnFeatureFlagChanged(targetFlag, Operations.Create, dataChange, _currentUser.Id);
             await _publisher.Publish(notification, cancellationToken);
         }
 

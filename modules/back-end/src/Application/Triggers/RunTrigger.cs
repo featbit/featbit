@@ -43,18 +43,24 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
         // feature flag general trigger
         if (trigger.Type == TriggerTypes.FfGeneral)
         {
-            var featureFlag = await _flagService.GetAsync(trigger.TargetId);
-            trigger.Run(featureFlag);
-            await _flagService.UpdateAsync(featureFlag);
+            var flag = await _flagService.GetAsync(trigger.TargetId);
+
+            // If we needn't to run this trigger
+            if (!trigger.NeedToRun(flag))
+            {
+                return true;
+            }
+
+            var dataChange = trigger.Run(flag);
+            await _flagService.UpdateAsync(flag);
+            await _triggerService.UpdateAsync(trigger);
 
             // publish on feature flag change notification
             var comment = trigger.Action == TriggerActions.TurnOff ? "Turn off by trigger" : "Turn on by trigger";
             var notification =
-                new OnFeatureFlagChanged(featureFlag, Operations.Update, DataChange.Empty, Guid.Empty, comment);
+                new OnFeatureFlagChanged(flag, Operations.Update, dataChange, Guid.Empty, comment);
             await _publisher.Publish(notification, cancellationToken);
         }
-
-        await _triggerService.UpdateAsync(trigger);
 
         return true;
     }

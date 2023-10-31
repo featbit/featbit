@@ -18,8 +18,9 @@ public class OnSegmentDeleted : INotification
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Segment, Operations.Remove, DataChange.Empty, string.Empty, OperatorId);
+        var dataChange = new DataChange(Segment).To(null);
 
+        var auditLog = AuditLog.For(Segment, Operations.Remove, dataChange, string.Empty, OperatorId);
         return auditLog;
     }
 }

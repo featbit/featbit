@@ -18,8 +18,9 @@ public class OnFeatureFlagDeleted : INotification
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Flag, Operations.Remove, DataChange.Empty, string.Empty, OperatorId);
+        var dataChange = new DataChange(Flag).To(null);
 
+        var auditLog = AuditLog.For(Flag, Operations.Remove, dataChange, string.Empty, OperatorId);
         return auditLog;
     }
 }

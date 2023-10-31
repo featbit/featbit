@@ -104,7 +104,8 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
         await _service.AddOneAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Create, DataChange.Empty, _currentUser.Id);
+        var dataChange = new DataChange(null).To(flag);
+        var notification = new OnFeatureFlagChanged(flag, Operations.Create, dataChange, _currentUser.Id);
         await _publisher.Publish(notification, cancellationToken);
 
         return flag;
