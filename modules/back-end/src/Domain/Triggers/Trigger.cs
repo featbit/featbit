@@ -1,3 +1,5 @@
+#nullable enable
+
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 
@@ -21,7 +23,7 @@ public class Trigger : AuditedEntity
 
     public DateTime? LastTriggeredAt { get; set; }
 
-    public Trigger(Guid id, Guid targetId, string type, string action, string description)
+    public Trigger(Guid id, Guid targetId, string type, string action, string? description)
     {
         Id = id;
 
@@ -55,39 +57,29 @@ public class Trigger : AuditedEntity
         return true;
     }
 
-    public bool NeedToRun(FeatureFlag featureFlag)
+    public DataChange? Run(FeatureFlag featureFlag)
     {
         if (!IsEnabled)
         {
-            return false;
+            return null;
         }
 
         switch (featureFlag.IsEnabled)
         {
-            case false when Action == TriggerActions.TurnOff:
             case true when Action == TriggerActions.TurnOn:
-                return false;
-            default:
-                return true;
+            case false when Action == TriggerActions.TurnOff:
+                return null;
         }
-    }
 
-    public DataChange Run(FeatureFlag featureFlag)
-    {
         var dataChange = new DataChange(featureFlag);
 
-        switch (Action)
+        featureFlag.IsEnabled = Action switch
         {
-            case TriggerActions.TurnOff:
-                featureFlag.IsEnabled = false;
-                featureFlag.Revision = Guid.NewGuid();
-                break;
-
-            case TriggerActions.TurnOn:
-                featureFlag.IsEnabled = true;
-                featureFlag.Revision = Guid.NewGuid();
-                break;
-        }
+            TriggerActions.TurnOff => false,
+            TriggerActions.TurnOn => true,
+            _ => featureFlag.IsEnabled
+        };
+        featureFlag.Revision = Guid.NewGuid();
 
         TriggeredTimes++;
         LastTriggeredAt = DateTime.UtcNow;

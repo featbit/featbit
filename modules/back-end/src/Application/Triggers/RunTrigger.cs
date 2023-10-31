@@ -45,13 +45,12 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
         {
             var flag = await _flagService.GetAsync(trigger.TargetId);
 
-            // If we needn't to run this trigger
-            if (!trigger.NeedToRun(flag))
+            var dataChange = trigger.Run(flag);
+            if (dataChange == null)
             {
                 return true;
             }
 
-            var dataChange = trigger.Run(flag);
             await _flagService.UpdateAsync(flag);
             await _triggerService.UpdateAsync(trigger);
 
