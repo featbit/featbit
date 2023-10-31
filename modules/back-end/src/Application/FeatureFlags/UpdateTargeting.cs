@@ -21,18 +21,15 @@ public class UpdateTargeting: IRequest<bool>
 public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 {
     private readonly IFeatureFlagService _flagService;
-    private readonly IAuditLogService _auditLogService;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
 
     public UpdateTargetingHandler(
         IFeatureFlagService flagService,
-        IAuditLogService auditLogService,
         ICurrentUser currentUser,
         IPublisher publisher)
     {
         _flagService = flagService;
-        _auditLogService = auditLogService;
         _currentUser = currentUser;
         _publisher = publisher;
     }
@@ -50,12 +47,10 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
 
         await _flagService.UpdateAsync(flag);
 
-        // write audit log
-        var auditLog = AuditLog.ForUpdate(flag, dataChange, request.Comment, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
-
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag, request.Comment), cancellationToken);
+        var notification =
+            new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id, request.Comment);
+        await _publisher.Publish(notification, cancellationToken);
 
         return true;
     }

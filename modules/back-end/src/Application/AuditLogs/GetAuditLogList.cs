@@ -59,6 +59,13 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
             {
                 item.CreatorName = accessToken.Name;
                 item.CreatorEmail = "Access token";
+                continue;
+            }
+
+            // If the creator id is empty, it means that the audit log is created by the system
+            if (item.CreatorId == Guid.Empty)
+            {
+                item.CreatorName = "System";
             }
         }
 

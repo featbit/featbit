@@ -51,6 +51,17 @@ public class RedisCacheService : ICacheService
         await _redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
     }
 
+    public async Task DeleteSegmentAsync(Guid envId, Guid segmentId)
+    {
+        // delete cache
+        var cacheKey = RedisKeys.Segment(segmentId);
+        await _redis.KeyDeleteAsync(cacheKey);
+
+        // delete index
+        var index = RedisKeys.SegmentIndex(envId);
+        await _redis.SortedSetRemoveAsync(index, segmentId.ToString());
+    }
+
     public async Task UpsertLicenseAsync(Organization organization)
     {
         var key = RedisKeys.License(organization.Id);
