@@ -77,8 +77,6 @@ public class AuditLog : Entity
         return auditLog;
     }
 
-    #region segment
-
     public static AuditLog For(
         Segment segment,
         string operation,
@@ -99,48 +97,4 @@ public class AuditLog : Entity
 
         return auditLog;
     }
-
-    public static AuditLog ForCreate(Segment segment, Guid creatorId)
-    {
-        var dataChange = new DataChange(null).To(segment);
-
-        var auditLog = For(segment, Operations.Create, dataChange, string.Empty, creatorId);
-        return auditLog;
-    }
-
-    public static AuditLog ForUpdate(
-        Segment segment,
-        DataChange dataChange,
-        string comment,
-        Guid creatorId)
-    {
-        var auditLog = For(segment, Operations.Update, dataChange, comment, creatorId);
-
-        return auditLog;
-    }
-
-    public static AuditLog ForArchive(Segment segment, DataChange dataChange, Guid operatorId)
-    {
-        var auditLog = For(segment, Operations.Archive, dataChange, string.Empty, operatorId);
-
-        return auditLog;
-    }
-
-    public static AuditLog ForRestore(Segment segment, DataChange dataChange, Guid operatorId)
-    {
-        var auditLog = For(segment, Operations.Restore, dataChange, string.Empty, operatorId);
-
-        return auditLog;
-    }
-    
-    public static AuditLog ForRemove(Segment segment, Guid operatorId)
-    {
-        var dataChange = new DataChange(segment).To(null);
-
-        var auditLog = For(segment, Operations.Remove, dataChange, string.Empty, operatorId);
-
-        return auditLog;
-    }
-    
-    #endregion
 }

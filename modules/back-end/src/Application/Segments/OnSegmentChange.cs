@@ -26,10 +26,18 @@ public class OnSegmentChange : INotification
         AffectedFlagIds = Array.Empty<Guid>();
     }
 
-    public OnSegmentChange(Segment segment, IEnumerable<Guid> affectedFlagIds)
+    public OnSegmentChange(
+        Segment segment,
+        IEnumerable<Guid> affectedFlagIds,
+        string operation,
+        DataChange dataChange,
+        Guid operatorId)
     {
         Segment = segment;
         AffectedFlagIds = affectedFlagIds;
+        Operation = operation;
+        DataChange = dataChange;
+        OperatorId = operatorId;
     }
 
     public AuditLog GetAuditLog()
