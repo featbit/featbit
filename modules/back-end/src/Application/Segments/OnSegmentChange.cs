@@ -47,7 +47,7 @@ public class OnSegmentChange : INotification
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Segment, Operations.Update, DataChange, Comment, OperatorId);
+        var auditLog = AuditLog.For(Segment, Operation, DataChange, Comment, OperatorId);
 
         return auditLog;
     }
