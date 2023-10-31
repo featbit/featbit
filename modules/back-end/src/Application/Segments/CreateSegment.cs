@@ -47,17 +47,14 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
     private readonly ISegmentService _service;
     private readonly IPublisher _publisher;
     private readonly ICurrentUser _currentUser;
-    private readonly IAuditLogService _auditLogService;
 
     public CreateSegmentHandler(
         ISegmentService service,
         IPublisher publisher,
-        ICurrentUser currentUser,
-        IAuditLogService auditLogService)
+        ICurrentUser currentUser)
     {
         _service = service;
         _publisher = publisher;
-        _auditLogService = auditLogService;
         _currentUser = currentUser;
     }
 
@@ -66,12 +63,10 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
         var segment = request.AsSegment();
         await _service.AddOneAsync(segment);
 
-        // write audit log
-        var auditLog = AuditLog.ForCreate(segment, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
-
         // publish on segment created message
-        await _publisher.Publish(new OnSegmentChange(segment), cancellationToken);
+        var dataChange = new DataChange(null).To(segment);
+        var notification = new OnSegmentChange(segment, Operations.Create, dataChange, _currentUser.Id);
+        await _publisher.Publish(notification, cancellationToken);
 
         return segment;
     }

@@ -81,18 +81,15 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
-    private readonly IAuditLogService _auditLogService;
 
     public CreateFeatureFlagHandler(
         IFeatureFlagService service,
         ICurrentUser currentUser,
-        IPublisher publisher,
-        IAuditLogService auditLogService)
+        IPublisher publisher)
     {
         _service = service;
         _currentUser = currentUser;
         _publisher = publisher;
-        _auditLogService = auditLogService;
     }
 
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
@@ -106,12 +103,10 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
         var flag = request.AsFeatureFlag(_currentUser.Id);
         await _service.AddOneAsync(flag);
 
-        // write audit log
-        var auditLog = AuditLog.ForCreate(flag, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
-
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
+        var dataChange = new DataChange(null).To(flag);
+        var notification = new OnFeatureFlagChanged(flag, Operations.Create, dataChange, _currentUser.Id);
+        await _publisher.Publish(notification, cancellationToken);
 
         return flag;
     }

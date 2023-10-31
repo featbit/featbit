@@ -16,7 +16,6 @@ public class FlagScheduleWorker : BackgroundService
     private readonly IFlagScheduleService _flagScheduleService;
     private readonly IFlagDraftService _flagDraftService;
     private readonly ILicenseService _licenseService;
-    private readonly IAuditLogService _auditLogService;
     private readonly ILogger<FlagScheduleWorker> _logger;
     private readonly IPublisher _publisher;
 
@@ -25,7 +24,6 @@ public class FlagScheduleWorker : BackgroundService
         IFlagScheduleService flagScheduleService,
         IFlagDraftService flagDraftService,
         ILicenseService licenseService,
-        IAuditLogService auditLogService,
         ILogger<FlagScheduleWorker> logger,
         IPublisher publisher)
     {
@@ -33,7 +31,6 @@ public class FlagScheduleWorker : BackgroundService
         _flagScheduleService = flagScheduleService;
         _flagDraftService = flagDraftService;
         _licenseService = licenseService;
-        _auditLogService = auditLogService;
         _logger = logger;
         _publisher = publisher;
     }
@@ -111,12 +108,11 @@ public class FlagScheduleWorker : BackgroundService
             await _flagDraftService.UpdateAsync(flagDraft);
             await _flagScheduleService.UpdateAsync(schedule);
 
-            // write audit log
-            var auditLog = AuditLog.ForUpdate(flag, flagDraft.DataChange, flagDraft.Comment, flagDraft.CreatorId);
-            await _auditLogService.AddOneAsync(auditLog);
-
             // publish on feature flag change notification
-            await _publisher.Publish(new OnFeatureFlagChanged(flag, flagDraft.Comment), cancellationToken);
+            var notification = new OnFeatureFlagChanged(
+                flag, Operations.Update, flagDraft.DataChange, flagDraft.CreatorId, flagDraft.Comment
+            );
+            await _publisher.Publish(notification, cancellationToken);
         }
     }
 }

@@ -13,18 +13,15 @@ public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>
     private readonly ISegmentService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
-    private readonly IAuditLogService _auditLogService;
 
     public RestoreSegmentHandler(
         ISegmentService service,
         ICurrentUser currentUser,
-        IPublisher publisher,
-        IAuditLogService auditLogService)
+        IPublisher publisher)
     {
         _service = service;
         _currentUser = currentUser;
         _publisher = publisher;
-        _auditLogService = auditLogService;
     }
 
     public async Task<bool> Handle(RestoreSegment request, CancellationToken cancellationToken)
@@ -33,12 +30,9 @@ public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>
         var dataChange = segment.Restore();
         await _service.UpdateAsync(segment);
 
-        // write audit log
-        var auditLog = AuditLog.ForRestore(segment, dataChange, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
-
         // publish on segment change notification
-        await _publisher.Publish(new OnSegmentChange(segment), cancellationToken);
+        var notification = new OnSegmentChange(segment, Operations.Restore, dataChange, _currentUser.Id);
+        await _publisher.Publish(notification, cancellationToken);
 
         return true;
     }

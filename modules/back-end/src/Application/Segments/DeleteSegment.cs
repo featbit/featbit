@@ -1,7 +1,6 @@
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
-using Domain.AuditLogs;
 
 namespace Application.Segments;
 
@@ -16,13 +15,13 @@ public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
 {
     private readonly ISegmentService _service;
     private readonly ICurrentUser _currentUser;
-    private readonly IAuditLogService _auditLogService;
+    private readonly IPublisher _publisher;
 
-    public DeleteSegmentHandler(ISegmentService service, ICurrentUser currentUser, IAuditLogService auditLogService)
+    public DeleteSegmentHandler(ISegmentService service, ICurrentUser currentUser, IPublisher publisher)
     {
         _service = service;
         _currentUser = currentUser;
-        _auditLogService = auditLogService;
+        _publisher = publisher;
     }
 
     public async Task<bool> Handle(DeleteSegment request, CancellationToken cancellationToken)
@@ -35,9 +34,9 @@ public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
 
         await _service.DeleteAsync(request.Id);
 
-        // write audit log
-        var auditLog = AuditLog.ForRemove(segment, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
+        // publish on segment change notification
+        var notification = new OnSegmentDeleted(segment, _currentUser.Id);
+        await _publisher.Publish(notification, cancellationToken);
 
         return true;
     }

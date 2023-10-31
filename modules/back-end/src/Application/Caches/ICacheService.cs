@@ -12,6 +12,8 @@ public interface ICacheService
 
     Task UpsertSegmentAsync(Segment segment);
 
+    Task DeleteSegmentAsync(Guid envId, Guid segmentId);
+
     Task UpsertLicenseAsync(Organization organization);
 
     Task<string> GetLicenseAsync(Guid orgId);
