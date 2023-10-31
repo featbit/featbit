@@ -44,15 +44,24 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
 {
     private readonly IMessageProducer _messageProducer;
     private readonly ICacheService _cache;
+    private readonly IAuditLogService _auditLogService;
 
-    public OnSegmentChangeHandler(IMessageProducer messageProducer, ICacheService cache)
+    public OnSegmentChangeHandler(
+        IMessageProducer messageProducer,
+        ICacheService cache,
+        IAuditLogService auditLogService)
     {
         _messageProducer = messageProducer;
         _cache = cache;
+        _auditLogService = auditLogService;
     }
 
     public async Task Handle(OnSegmentChange notification, CancellationToken cancellationToken)
     {
+        // write audit log
+        var auditLog = notification.GetAuditLog();
+        await _auditLogService.AddOneAsync(auditLog);
+
         // update cache
         await _cache.UpsertSegmentAsync(notification.Segment);
 
