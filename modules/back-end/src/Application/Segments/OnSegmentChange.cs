@@ -20,10 +20,10 @@ public class OnSegmentChange : INotification
     public OnSegmentChange(Segment segment, string operation, DataChange dataChange, Guid operatorId)
     {
         Segment = segment;
+        AffectedFlagIds = Array.Empty<Guid>();
         Operation = operation;
         DataChange = dataChange;
         OperatorId = operatorId;
-        AffectedFlagIds = Array.Empty<Guid>();
     }
 
     public OnSegmentChange(
