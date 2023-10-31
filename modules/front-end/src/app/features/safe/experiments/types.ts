@@ -97,6 +97,7 @@ export interface IExptIteration {
 
 export interface IExptIterationResult {
   changeToBaseline: number, // float
+  effectSize: number, // float
   conversion: number, // long
   conversionRate: number, // float
   isBaseline: boolean,
