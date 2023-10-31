@@ -15,18 +15,15 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
-    private readonly IAuditLogService _auditLogService;
 
     public ToggleFeatureFlagHandler(
         IFeatureFlagService service,
         ICurrentUser currentUser,
-        IPublisher publisher,
-        IAuditLogService auditLogService)
+        IPublisher publisher)
     {
         _service = service;
         _currentUser = currentUser;
         _publisher = publisher;
-        _auditLogService = auditLogService;
     }
 
     public async Task<bool> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
