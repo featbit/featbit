@@ -202,16 +202,16 @@ public class FeatureFlagController : ApiControllerBase
     /// Get the list of pending changes of a particular flag
     /// </remarks>
     [HttpGet("{key}/pending-changes")]
-    public async Task<ApiResponse<ICollection<PendingChangesVm>>> GetPendingChangesAsync(Guid envId, string key)
+    public async Task<ApiResponse<IEnumerable<PendingChangesVm>>> GetPendingChangesAsync(Guid envId, string key)
     {
-        var request = new GetPendingChangesList
+        var request = new GetPendingChanges
         {
             EnvId = envId,
             Key = key
         };
 
-        var pendingChangesList = await Mediator.Send(request);
-        return Ok(pendingChangesList);
+        var pendingChanges = await Mediator.Send(request);
+        return Ok(pendingChanges);
     }
 
     [Authorize(LicenseFeatures.Schedule)]

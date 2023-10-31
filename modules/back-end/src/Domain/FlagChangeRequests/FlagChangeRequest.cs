@@ -1,6 +1,4 @@
-﻿using System.Data;
-
-namespace Domain.FlagChangeRequests;
+﻿namespace Domain.FlagChangeRequests;
 
 public class FlagChangeRequest : FullAuditedEntity
 {
