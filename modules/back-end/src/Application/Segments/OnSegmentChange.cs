@@ -9,21 +9,24 @@ public class OnSegmentChange : INotification
 {
     public Segment Segment { get; set; }
 
+    public IEnumerable<Guid> AffectedFlagIds { get; set; }
+
     public string Operation { get; set; }
 
     public DataChange DataChange { get; set; }
 
     public Guid OperatorId { get; set; }
 
-    public IEnumerable<Guid> AffectedFlagIds { get; set; }
+    public string Comment { get; set; }
 
-    public OnSegmentChange(Segment segment, string operation, DataChange dataChange, Guid operatorId)
+    public OnSegmentChange(Segment segment, string operation, DataChange dataChange, Guid operatorId, string comment = "")
     {
         Segment = segment;
         AffectedFlagIds = Array.Empty<Guid>();
         Operation = operation;
         DataChange = dataChange;
         OperatorId = operatorId;
+        Comment = comment;
     }
 
     public OnSegmentChange(
@@ -31,18 +34,20 @@ public class OnSegmentChange : INotification
         IEnumerable<Guid> affectedFlagIds,
         string operation,
         DataChange dataChange,
-        Guid operatorId)
+        Guid operatorId,
+        string comment = "")
     {
         Segment = segment;
         AffectedFlagIds = affectedFlagIds;
         Operation = operation;
         DataChange = dataChange;
         OperatorId = operatorId;
+        Comment = comment;
     }
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Segment, Operations.Update, DataChange, string.Empty, OperatorId);
+        var auditLog = AuditLog.For(Segment, Operations.Update, DataChange, Comment, OperatorId);
 
         return auditLog;
     }
