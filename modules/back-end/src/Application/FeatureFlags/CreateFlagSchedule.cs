@@ -1,6 +1,7 @@
 ﻿using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
+using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
 using Domain.FlagSchedules;
@@ -8,22 +9,22 @@ using Domain.Organizations;
 
 namespace Application.FeatureFlags;
 
-public class CreateFlagSchedule: IRequest<bool>
+public class CreateFlagSchedule : IRequest<bool>
 {
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
-    
+
     public FlagTargeting Targeting { get; set; }
 
     public string Title { get; set; }
 
     public DateTime ScheduledTime { get; set; }
-    
+
     public bool WithChangeRequest { get; set; }
-    
+
     public string Reason { get; set; }
 
     public ICollection<Guid> Reviewers { get; set; }
@@ -57,20 +58,14 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
     public async Task<bool> Handle(CreateFlagSchedule request, CancellationToken cancellationToken)
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.UpdateTargeting(
-            request.Targeting.TargetUsers,
-            request.Targeting.Rules,
-            request.Targeting.Fallthrough,
-            request.Targeting.ExptIncludeAllTargets,
-            _currentUser.Id
-        );
+        var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
 
         // create draft
-        var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, string.Empty, dataChange, _currentUser.Id);
+        var flagDraft = new FlagDraft(request.EnvId, flag.Id, dataChange, _currentUser.Id);
         await _flagDraftService.AddOneAsync(flagDraft);
 
         FlagChangeRequest flagChangeRequest = null;
-        
+
         if (request.WithChangeRequest)
         {
             var isChangeRequestGranted =
@@ -80,24 +75,24 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
             {
                 throw new BusinessException(ErrorCodes.Unauthorized);
             }
-            
+
             // create change request
-            flagChangeRequest = FlagChangeRequest.PendingReview(
+            flagChangeRequest = new FlagChangeRequest(
                 request.OrgId,
                 request.EnvId,
                 flagDraft.Id,
                 flag.Id,
-                request.Reason,
-                request.Reviewers, 
-                _currentUser.Id
+                request.Reviewers,
+                _currentUser.Id,
+                reason: request.Reason
             );
-            
+
             await _flagChangeRequestService.AddOneAsync(flagChangeRequest);
         }
-        
+
         // create schedule
         FlagSchedule flagSchedule = null;
-        
+
         if (flagChangeRequest != null)
         {
             flagSchedule = FlagSchedule.PendingReview(
@@ -110,9 +105,9 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
                 _currentUser.Id,
                 flagChangeRequest.Id
             );
-            
+
             await _flagScheduleService.AddOneAsync(flagSchedule);
-            
+
             flagChangeRequest.SetScheduleId(flagSchedule.Id, _currentUser.Id);
             await _flagChangeRequestService.UpdateAsync(flagChangeRequest);
         }
@@ -127,10 +122,10 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
                 request.ScheduledTime,
                 _currentUser.Id
             );
-            
+
             await _flagScheduleService.AddOneAsync(flagSchedule);
         }
-        
+
         return true;
     }
 }

@@ -20,10 +20,10 @@ public class FlagDraft : FullAuditedEntity
     public FlagDraft(
         Guid envId,
         Guid flagId,
-        string status,
-        string comment,
         DataChange dataChange,
-        Guid currentUserId) : base(currentUserId)
+        Guid currentUserId,
+        string comment = "",
+        string status = FlagDraftStatus.Pending) : base(currentUserId)
     {
         if (!FlagDraftStatus.IsDefined(status))
         {
@@ -32,19 +32,10 @@ public class FlagDraft : FullAuditedEntity
 
         EnvId = envId;
         FlagId = flagId;
-        Status = status;
-        Comment = comment;
         DataChange = dataChange;
-    }
 
-    public static FlagDraft Pending(
-        Guid envId,
-        Guid flagId,
-        string comment,
-        DataChange dataChange,
-        Guid currentUserId)
-    {
-        return new FlagDraft(envId, flagId, FlagDraftStatus.Pending, comment, dataChange, currentUserId);
+        Comment = comment;
+        Status = status;
     }
 
     public void Applied(Guid memberId)

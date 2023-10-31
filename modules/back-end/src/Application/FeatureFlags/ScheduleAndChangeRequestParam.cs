@@ -1,3 +1,5 @@
+using Domain.FeatureFlags;
+
 namespace Application.FeatureFlags;
 
 public class ScheduleWithChangeRequestParam
@@ -7,7 +9,7 @@ public class ScheduleWithChangeRequestParam
     public string Title { get; set; }
 
     public DateTime ScheduledTime { get; set; }
-    
+
     public bool WithChangeRequest { get; set; }
 
     public string Reason { get; set; }

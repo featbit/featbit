@@ -1,7 +1,6 @@
-using Domain.FeatureFlags;
 using Domain.Targeting;
 
-namespace Application.FeatureFlags;
+namespace Domain.FeatureFlags;
 
 public class FlagTargeting
 {

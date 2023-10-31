@@ -163,19 +163,14 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public DataChange UpdateTargeting(
-        ICollection<TargetUser> targetUsers,
-        ICollection<TargetRule> rules,
-        Fallthrough fallthrough,
-        bool exptIncludeAllTargets,
-        Guid currentUserId)
+    public DataChange UpdateTargeting(FlagTargeting targeting, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
-        TargetUsers = targetUsers;
-        Rules = rules;
-        Fallthrough = fallthrough;
-        ExptIncludeAllTargets = exptIncludeAllTargets;
+        TargetUsers = targeting.TargetUsers;
+        Rules = targeting.Rules;
+        Fallthrough = targeting.Fallthrough;
+        ExptIncludeAllTargets = targeting.ExptIncludeAllTargets;
         MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);

@@ -1,4 +1,5 @@
 ﻿using Application.Users;
+using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
 
@@ -41,26 +42,21 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
     public async Task<bool> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.UpdateTargeting(
-            request.Targeting.TargetUsers,
-            request.Targeting.Rules,
-            request.Targeting.Fallthrough,
-            request.Targeting.ExptIncludeAllTargets,
-            _currentUser.Id
-        );
 
-        var flagDraft = FlagDraft.Pending(request.EnvId, flag.Id, request.Reason, dataChange, _currentUser.Id);
+        // create flag draft
+        var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
+        var flagDraft = new FlagDraft(request.EnvId, flag.Id, dataChange, _currentUser.Id, comment: request.Reason);
         await _flagDraftService.AddOneAsync(flagDraft);
 
         // create change request
-        var flagChangeRequest = FlagChangeRequest.PendingReview(
+        var flagChangeRequest = new FlagChangeRequest(
             request.OrgId,
             request.EnvId,
             flagDraft.Id,
             flag.Id,
-            request.Reason,
             request.Reviewers,
-            _currentUser.Id
+            _currentUser.Id,
+            reason: request.Reason
         );
 
         await _flagChangeRequestService.AddOneAsync(flagChangeRequest);
