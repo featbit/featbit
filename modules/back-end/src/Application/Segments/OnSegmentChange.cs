@@ -72,8 +72,7 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
     public async Task Handle(OnSegmentChange notification, CancellationToken cancellationToken)
     {
         // write audit log
-        var auditLog = notification.GetAuditLog();
-        await _auditLogService.AddOneAsync(auditLog);
+        await _auditLogService.AddOneAsync(notification.GetAuditLog());
 
         // update cache
         await _cache.UpsertSegmentAsync(notification.Segment);
