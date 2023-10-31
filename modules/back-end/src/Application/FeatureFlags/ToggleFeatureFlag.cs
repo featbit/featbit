@@ -35,12 +35,9 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
         var dataChange = flag.Toggle(_currentUser.Id);
         await _service.UpdateAsync(flag);
 
-        // write audit log
-        var auditLog = AuditLog.ForUpdate(flag, dataChange, string.Empty, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
-
         // publish on feature flag change notification
-        await _publisher.Publish(new OnFeatureFlagChanged(flag), cancellationToken);
+        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id);
+        await _publisher.Publish(notification, cancellationToken);
 
         return true;
     }

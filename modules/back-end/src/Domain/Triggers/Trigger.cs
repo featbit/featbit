@@ -60,12 +60,10 @@ public class Trigger : AuditedEntity
         {
             case TriggerActions.TurnOff:
                 featureFlag.IsEnabled = false;
-                featureFlag.UpdatedAt = DateTime.UtcNow;
                 break;
 
             case TriggerActions.TurnOn:
                 featureFlag.IsEnabled = true;
-                featureFlag.UpdatedAt = DateTime.UtcNow;
                 break;
         }
 

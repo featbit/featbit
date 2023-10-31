@@ -8,6 +8,8 @@ public class DataChange
 
     public string Current { get; set; }
 
+    public static DataChange Empty => new();
+
     public DataChange()
     {
         Previous = string.Empty;

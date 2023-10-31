@@ -15,18 +15,15 @@ public class CopyToEnvHandler : IRequestHandler<CopyToEnv, CopyToEnvResult>
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
-    private readonly IAuditLogService _auditLogService;
 
     public CopyToEnvHandler(
         IFeatureFlagService service,
         ICurrentUser currentUser,
-        IPublisher publisher,
-        IAuditLogService auditLogService)
+        IPublisher publisher)
     {
         _service = service;
         _currentUser = currentUser;
         _publisher = publisher;
-        _auditLogService = auditLogService;
     }
 
     public async Task<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
@@ -46,15 +43,13 @@ public class CopyToEnvHandler : IRequestHandler<CopyToEnv, CopyToEnvResult>
         foreach (var targetFlag in targetFlags)
         {
             targetFlag.CopyToEnv(request.TargetEnvId, _currentUser.Id);
-
             await _service.AddOneAsync(targetFlag);
 
-            // write audit log
-            var auditLog = AuditLog.ForCreate(targetFlag, _currentUser.Id);
-            await _auditLogService.AddOneAsync(auditLog);
-
             // publish on feature flag change notification
-            await _publisher.Publish(new OnFeatureFlagChanged(targetFlag), cancellationToken);
+            var dataChange = new DataChange(null).To(targetFlag);
+            var notification =
+                new OnFeatureFlagChanged(targetFlag, Operations.Create, dataChange, _currentUser.Id);
+            await _publisher.Publish(notification, cancellationToken);
         }
 
         var result = new CopyToEnvResult(targetFlags.Length, duplicateKeys);

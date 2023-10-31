@@ -1,32 +1,48 @@
 using Application.Caches;
+using Domain.AuditLogs;
+using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
 public class OnFeatureFlagDeleted : INotification
 {
-    public Guid EnvId { get; set; }
+    public FeatureFlag Flag { get; set; }
 
-    public Guid FlagId { get; set; }
+    public Guid OperatorId { get; set; }
 
-    public OnFeatureFlagDeleted(Guid envId, Guid flagId)
+    public OnFeatureFlagDeleted(FeatureFlag flag, Guid operatorId)
     {
-        EnvId = envId;
-        FlagId = flagId;
+        Flag = flag;
+        OperatorId = operatorId;
+    }
+
+    public AuditLog GetAuditLog()
+    {
+        var auditLog = AuditLog.For(Flag, Operations.Remove, DataChange.Empty, string.Empty, OperatorId);
+
+        return auditLog;
     }
 }
 
 public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDeleted>
 {
     private readonly ICacheService _cache;
+    private readonly IAuditLogService _auditLogService;
 
-    public OnFeatureFlagDeletedHandler(ICacheService cache)
+    public OnFeatureFlagDeletedHandler(ICacheService cache, IAuditLogService auditLogService)
     {
         _cache = cache;
+        _auditLogService = auditLogService;
     }
 
     public async Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
     {
+        // write audit log
+        await _auditLogService.AddOneAsync(notification.GetAuditLog());
+
         // delete cache
-        await _cache.DeleteFlagAsync(notification.EnvId, notification.FlagId);
+        var envId = notification.Flag.EnvId;
+        var flagId = notification.Flag.Id;
+        await _cache.DeleteFlagAsync(envId, flagId);
     }
 }
