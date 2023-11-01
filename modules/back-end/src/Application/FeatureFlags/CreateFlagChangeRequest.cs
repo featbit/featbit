@@ -58,7 +58,6 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
             _currentUser.Id,
             reason: request.Reason
         );
-
         await _flagChangeRequestService.AddOneAsync(flagChangeRequest);
 
         return true;

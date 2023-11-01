@@ -25,6 +25,7 @@ public class FlagChangeRequest : FullAuditedEntity
         Guid flagId,
         ICollection<Guid> reviewers,
         Guid currentUserId,
+        Guid? scheduleId = null,
         string reason = "",
         string status = FlagChangeRequestStatus.PendingReview) : base(currentUserId)
     {
@@ -38,17 +39,13 @@ public class FlagChangeRequest : FullAuditedEntity
         FlagDraftId = flagDraftId;
         FlagId = flagId;
         Reviewers = reviewers.Select(x => new Reviewer(x)).ToArray();
+        ScheduleId = scheduleId;
 
         Status = status;
         Reason = reason;
     }
 
-    public void SetScheduleId(Guid scheduleId, Guid memberId)
-    {
-        ScheduleId = scheduleId;
-
-        MarkAsUpdated(memberId);
-    }
+    public void AttachSchedule(Guid scheduleId) => ScheduleId = scheduleId;
 
     public bool CanBeApprovedBy(Guid operatorId)
     {
