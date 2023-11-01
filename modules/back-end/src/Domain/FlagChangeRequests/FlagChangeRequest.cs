@@ -56,6 +56,19 @@ public class FlagChangeRequest : FullAuditedEntity
         return reviewer != null;
     }
 
+    public bool CanBeAppliedBy(Guid operatorId)
+    {
+        if (Status != FlagChangeRequestStatus.Approved)
+        {
+            return false;
+        }
+
+        var isReviewer = Reviewers.Any(r => r.MemberId == operatorId);
+        var isCreator = CreatorId == operatorId;
+
+        return isReviewer || isCreator;
+    }
+
     public void Applied(Guid memberId)
     {
         Status = FlagChangeRequestStatus.Applied;

@@ -98,39 +98,40 @@ public class FlagScheduleWorker : BackgroundService
 
         async Task ApplyScheduleAsync(FlagSchedule schedule)
         {
-            var flagDraft = await _flagDraftService.FindOneAsync(x => x.Id == schedule.FlagDraftId && x.Status == FlagDraftStatus.Pending);
-            if (flagDraft == null)
+            // check draft status
+            var draft = await _flagDraftService.GetAsync(schedule.FlagDraftId);
+            if (draft.IsApplied())
             {
                 return;
             }
-            
-            var instructions = flagDraft.GetInstructions();
-            var flag = await _featureFlagService.GetAsync(flagDraft.FlagId);
 
-            // apply flag instructions
-            flag.ApplyInstructions(instructions, flagDraft.CreatorId);
+            // apply flag draft
+            var flag = await _featureFlagService.GetAsync(draft.FlagId);
+            var dataChange = flag.ApplyDraft(draft);
             await _featureFlagService.UpdateAsync(flag);
 
-            // set draft and schedule status
-            flagDraft.Applied(schedule.CreatorId);
-            schedule.Applied(schedule.CreatorId);
-            await _flagDraftService.UpdateAsync(flagDraft);
-            await _flagScheduleService.UpdateAsync(schedule);
-            if (schedule.ChangeRequestId.HasValue)
-            {
-                await _flagChangeRequestService.GetAsync(schedule.ChangeRequestId.Value).ContinueWith(async t =>
-                {
-                    var changeRequest = t.Result;
-                    changeRequest.Applied(schedule.CreatorId);
-                    await _flagChangeRequestService.UpdateAsync(changeRequest);
-                });
-            }
+            // update draft status
+            draft.Applied(schedule.CreatorId);
+            await _flagDraftService.UpdateAsync(draft);
 
             // publish on feature flag change notification
+            // TODO: should we use `draft.DataChange` instead?
             var notification = new OnFeatureFlagChanged(
-                flag, Operations.Update, flagDraft.DataChange, flagDraft.CreatorId, flagDraft.Comment
+                flag, Operations.Update, dataChange, draft.CreatorId, draft.Comment
             );
             await _publisher.Publish(notification, cancellationToken);
+
+            // update schedule status
+            schedule.Applied(schedule.CreatorId);
+            await _flagScheduleService.UpdateAsync(schedule);
+
+            // update change request status
+            if (schedule.ChangeRequestId.HasValue)
+            {
+                var changeRequest = await _flagChangeRequestService.GetAsync(schedule.ChangeRequestId.Value);
+                changeRequest.Applied(schedule.CreatorId);
+                await _flagChangeRequestService.UpdateAsync(changeRequest);
+            }
         }
     }
 }

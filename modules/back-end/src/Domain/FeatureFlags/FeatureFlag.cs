@@ -1,6 +1,6 @@
 using Domain.AuditLogs;
+using Domain.FlagDrafts;
 using Domain.Targeting;
-using Domain.SemanticPatch;
 
 namespace Domain.FeatureFlags;
 
@@ -221,14 +221,18 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public void ApplyInstructions(IEnumerable<FlagInstruction> instructions, Guid updatorId)
+    public DataChange ApplyDraft(FlagDraft draft)
     {
+        var dataChange = new DataChange(this);
+
+        var instructions = draft.GetInstructions();
         foreach (var instruction in instructions)
         {
             instruction.Apply(this);
         }
+        MarkAsUpdated(draft.CreatorId);
 
-        MarkAsUpdated(updatorId);
+        return dataChange.To(this);
     }
 
     public override void MarkAsUpdated(Guid updatorId)

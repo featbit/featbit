@@ -41,6 +41,7 @@ public class FlagDraft : FullAuditedEntity
     public void Applied(Guid memberId)
     {
         Status = FlagDraftStatus.Applied;
+
         MarkAsUpdated(memberId);
     }
 
@@ -53,4 +54,6 @@ public class FlagDraft : FullAuditedEntity
 
         return FlagComparer.Compare(previous, current);
     }
+
+    public bool IsApplied() => Status == FlagDraftStatus.Applied;
 }
