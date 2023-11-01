@@ -14,13 +14,16 @@ public class DeclineFlagChangeRequest : IRequest<bool>
 public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChangeRequest, bool>
 {
     private readonly IFlagChangeRequestService _flagChangeRequestService;
+    private readonly IFlagScheduleService _flagScheduleService;
     private readonly ICurrentUser _currentUser;
 
     public DeclineFlagChangeRequestHandler(
         IFlagChangeRequestService flagChangeRequestService,
+        IFlagScheduleService flagScheduleService,
         ICurrentUser currentUser)
     {
         _flagChangeRequestService = flagChangeRequestService;
+        _flagScheduleService = flagScheduleService;
         _currentUser = currentUser;
     }
 
@@ -38,6 +41,14 @@ public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChange
 
         changeRequest.Decline(_currentUser.Id);
         await _flagChangeRequestService.UpdateAsync(changeRequest);
+
+        // update schedule status if change request is attached to a schedule
+        if (changeRequest.ScheduleId.HasValue)
+        {
+            var schedule = await _flagScheduleService.GetAsync(changeRequest.ScheduleId.Value);
+            schedule.Decline(_currentUser.Id);
+            await _flagScheduleService.UpdateAsync(schedule);
+        }
 
         return true;
     }

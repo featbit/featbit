@@ -51,6 +51,13 @@ public class FlagSchedule : FullAuditedEntity
         MarkAsUpdated(memberId);
     }
 
+    public void Decline(Guid memberId)
+    {
+        Status = FlagScheduleStatus.Declined;
+
+        MarkAsUpdated(memberId);
+    }
+
     public void Applied(Guid memberId)
     {
         Status = FlagScheduleStatus.Applied;
