@@ -3,7 +3,7 @@
 public class FlagScheduleStatus
 {
     public const string PendingReview = nameof(PendingReview);
-    
+
     public const string PendingExecution = nameof(PendingExecution);
 
     public const string Applied = nameof(Applied);
