@@ -1,9 +1,6 @@
-using Application.FeatureFlags;
 using Domain.Organizations;
 using Domain.AuditLogs;
-using Domain.FlagDrafts;
 using Domain.FlagSchedules;
-using MediatR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -13,30 +10,24 @@ public class FlagScheduleWorker : BackgroundService
 {
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(45));
 
-    private readonly IFeatureFlagService _featureFlagService;
     private readonly IFlagScheduleService _flagScheduleService;
+    private readonly IFeatureFlagAppService _featureFlagAppService;
     private readonly IFlagChangeRequestService _flagChangeRequestService;
-    private readonly IFlagDraftService _flagDraftService;
     private readonly ILicenseService _licenseService;
     private readonly ILogger<FlagScheduleWorker> _logger;
-    private readonly IPublisher _publisher;
 
     public FlagScheduleWorker(
-        IFeatureFlagService featureFlagService,
         IFlagScheduleService flagScheduleService,
+        IFeatureFlagAppService featureFlagAppService,
         IFlagChangeRequestService flagChangeRequestService,
-        IFlagDraftService flagDraftService,
         ILicenseService licenseService,
-        ILogger<FlagScheduleWorker> logger,
-        IPublisher publisher)
+        ILogger<FlagScheduleWorker> logger)
     {
-        _featureFlagService = featureFlagService;
         _flagScheduleService = flagScheduleService;
+        _featureFlagAppService = featureFlagAppService;
         _flagChangeRequestService = flagChangeRequestService;
-        _flagDraftService = flagDraftService;
         _licenseService = licenseService;
         _logger = logger;
-        _publisher = publisher;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -62,8 +53,9 @@ public class FlagScheduleWorker : BackgroundService
     {
         try
         {
-            var pendingSchedules =
-                await _flagScheduleService.FindManyAsync(s => s.Status == FlagScheduleStatus.PendingExecution && s.ScheduledTime <= DateTime.UtcNow);
+            var pendingSchedules = await _flagScheduleService.FindManyAsync(
+                x => x.Status == FlagScheduleStatus.PendingExecution && x.ScheduledTime <= DateTime.UtcNow
+            );
 
             foreach (var schedule in pendingSchedules)
             {
@@ -77,11 +69,18 @@ public class FlagScheduleWorker : BackgroundService
                     }
 
                     await ApplyScheduleAsync(schedule);
-                    _logger.LogInformation("{ScheduleId}:{ScheduleTitle}: Flag schedule has been applied.", schedule.Id, schedule.Title);
+
+                    _logger.LogInformation(
+                        "{ScheduleId}:{ScheduleTitle}: Flag schedule has been applied.", schedule.Id,
+                        schedule.Title
+                    );
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "{ScheduleId}:{ScheduleTitle}: Error occurred while applying flag schedule.", schedule.Id, schedule.Title);
+                    _logger.LogError(ex,
+                        "{ScheduleId}:{ScheduleTitle}: Error occurred while applying flag schedule.",
+                        schedule.Id, schedule.Title
+                    );
                 }
             }
         }
@@ -98,27 +97,10 @@ public class FlagScheduleWorker : BackgroundService
 
         async Task ApplyScheduleAsync(FlagSchedule schedule)
         {
-            // check draft status
-            var draft = await _flagDraftService.GetAsync(schedule.FlagDraftId);
-            if (draft.IsApplied())
-            {
-                return;
-            }
-
             // apply flag draft
-            var flag = await _featureFlagService.GetAsync(draft.FlagId);
-            var dataChange = flag.ApplyDraft(draft);
-            await _featureFlagService.UpdateAsync(flag);
-
-            // update draft status
-            draft.Applied(schedule.CreatorId);
-            await _flagDraftService.UpdateAsync(draft);
-
-            // publish on feature flag change notification
-            var notification = new OnFeatureFlagChanged(
-                flag, Operations.Update, dataChange, draft.CreatorId, draft.Comment
+            await _featureFlagAppService.ApplyDraftAsync(
+                schedule.FlagDraftId, Operations.ApplyFlagSchedule, schedule.CreatorId
             );
-            await _publisher.Publish(notification, cancellationToken);
 
             // update schedule status
             schedule.Applied(schedule.CreatorId);

@@ -96,6 +96,7 @@ public static class ConfigureServices
         services.AddTransient<IFlagScheduleService, FlagScheduleService>();
         services.AddTransient<IFlagRevisionService, FlagRevisionService>();
         services.AddTransient<IFlagChangeRequestService, FlagChangeRequestService>();
+        services.AddTransient<IFeatureFlagAppService, FeatureFlagAppService>();
 
         return services;
     }

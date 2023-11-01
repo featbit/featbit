@@ -15,23 +15,17 @@ public class ApplyFlagChangeRequest : IRequest<bool>
 public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequest, bool>
 {
     private readonly IFlagChangeRequestService _flagChangeRequestService;
-    private readonly IFeatureFlagService _featureFlagService;
-    private readonly IFlagDraftService _flagDraftService;
+    private readonly IFeatureFlagAppService _featureFlagAppService;
     private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
 
     public ApplyFlagChangeRequestHandler(
         IFlagChangeRequestService flagChangeRequestService,
-        IFeatureFlagService featureFlagService,
-        IFlagDraftService flagDraftService,
-        ICurrentUser currentUser,
-        IPublisher publisher)
+        IFeatureFlagAppService featureFlagAppService,
+        ICurrentUser currentUser)
     {
         _flagChangeRequestService = flagChangeRequestService;
-        _featureFlagService = featureFlagService;
+        _featureFlagAppService = featureFlagAppService;
         _currentUser = currentUser;
-        _flagDraftService = flagDraftService;
-        _publisher = publisher;
     }
 
     public async Task<bool> Handle(ApplyFlagChangeRequest request, CancellationToken cancellationToken)
@@ -46,27 +40,10 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
             return false;
         }
 
-        // check draft status
-        var draft = await _flagDraftService.GetAsync(changeRequest.FlagDraftId);
-        if (draft.IsApplied())
-        {
-            return false;
-        }
-
         // apply flag draft
-        var flag = await _featureFlagService.GetAsync(draft.FlagId);
-        var dataChange = flag.ApplyDraft(draft);
-        await _featureFlagService.UpdateAsync(flag);
-
-        // update draft status
-        draft.Applied(_currentUser.Id);
-        await _flagDraftService.UpdateAsync(draft);
-
-        // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(
-            flag, Operations.ApplyFlagChangeRequest, dataChange, _currentUser.Id, draft.Comment
+        await _featureFlagAppService.ApplyDraftAsync(
+            changeRequest.FlagDraftId, Operations.ApplyFlagChangeRequest, _currentUser.Id
         );
-        await _publisher.Publish(notification, cancellationToken);
 
         // update change request status
         changeRequest.Applied(_currentUser.Id);
