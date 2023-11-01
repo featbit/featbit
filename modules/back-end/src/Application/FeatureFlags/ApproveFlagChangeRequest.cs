@@ -32,7 +32,9 @@ public class ApproveFlagChangeRequestHandler : IRequestHandler<ApproveFlagChange
         var changeRequest = await _flagChangeRequestService.FindOneAsync(
             x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id
         );
-        if (changeRequest == null || !changeRequest.CanBeApprovedBy(_currentUser.Id))
+
+        // check if change request can be approved by current user
+        if (changeRequest?.CanBeApprovedBy(_currentUser.Id) != true)
         {
             return false;
         }
