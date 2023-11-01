@@ -50,10 +50,17 @@ public class FlagChangeRequest : FullAuditedEntity
         MarkAsUpdated(memberId);
     }
 
-    public bool IsReviewer(Guid memberId)
+    public bool IsReviewer(Guid memberId) => Reviewers.Any(reviewer => reviewer.MemberId == memberId);
+
+    public bool CanBeApprovedBy(Guid operatorId)
     {
-        var reviewer = Reviewers.FirstOrDefault(r => r.MemberId == memberId);
-        return reviewer != null;
+        if (Status == FlagChangeRequestStatus.Applied)
+        {
+            return false;
+        }
+
+        var isReviewer = Reviewers.Any(r => r.MemberId == operatorId);
+        return isReviewer;
     }
 
     public bool CanBeAppliedBy(Guid operatorId)
@@ -78,8 +85,7 @@ public class FlagChangeRequest : FullAuditedEntity
 
     public void Approve(Guid memberId)
     {
-        var reviewer = Reviewers.FirstOrDefault(r => r.MemberId == memberId);
-
+        var reviewer = Reviewers.First(r => r.MemberId == memberId);
         reviewer.Action = FlagChangeRequestAction.Approve;
         reviewer.Timestamp = DateTime.UtcNow;
 
@@ -90,8 +96,7 @@ public class FlagChangeRequest : FullAuditedEntity
 
     public void Decline(Guid memberId)
     {
-        var reviewer = Reviewers.FirstOrDefault(r => r.MemberId == memberId);
-
+        var reviewer = Reviewers.First(r => r.MemberId == memberId);
         reviewer.Action = FlagChangeRequestAction.Decline;
         reviewer.Timestamp = DateTime.UtcNow;
 
@@ -102,11 +107,11 @@ public class FlagChangeRequest : FullAuditedEntity
 
     private void RefreshStatus()
     {
-        if (Reviewers.Any(r => r.Action == FlagChangeRequestAction.Decline))
+        if (Reviewers.Any(reviewer => reviewer.Action == FlagChangeRequestAction.Decline))
         {
             Status = FlagChangeRequestStatus.Declined;
         }
-        else if (Reviewers.Any(r => r.Action == FlagChangeRequestAction.Approve))
+        else if (Reviewers.Any(reviewer => reviewer.Action == FlagChangeRequestAction.Approve))
         {
             Status = FlagChangeRequestStatus.Approved;
         }

@@ -1,5 +1,4 @@
 ﻿using Application.Users;
-using Domain.FlagChangeRequests;
 
 namespace Application.FeatureFlags;
 
@@ -30,17 +29,17 @@ public class ApproveFlagChangeRequestHandler : IRequestHandler<ApproveFlagChange
 
     public async Task<bool> Handle(ApproveFlagChangeRequest request, CancellationToken cancellationToken)
     {
-        var changeRequest = await _flagChangeRequestService.FindOneAsync(x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id);
-        
-        if (changeRequest == null || !changeRequest.IsReviewer(_currentUser.Id) || changeRequest.Status == FlagChangeRequestStatus.Applied)
+        var changeRequest = await _flagChangeRequestService.FindOneAsync(
+            x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id
+        );
+        if (changeRequest == null || !changeRequest.CanBeApprovedBy(_currentUser.Id))
         {
             return false;
         }
-        
+
         changeRequest.Approve(_currentUser.Id);
-        
         await _flagChangeRequestService.UpdateAsync(changeRequest);
-        
+
         // update schedule status if exists
         if (changeRequest.ScheduleId.HasValue)
         {
