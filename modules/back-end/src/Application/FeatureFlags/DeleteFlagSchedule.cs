@@ -2,8 +2,6 @@ namespace Application.FeatureFlags;
 
 public class DeleteFlagSchedule : IRequest<bool>
 {
-    public Guid OrgId { get; set; }
-
     public Guid Id { get; set; }
 }
 

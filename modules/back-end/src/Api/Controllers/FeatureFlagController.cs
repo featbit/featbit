@@ -235,7 +235,6 @@ public class FeatureFlagController : ApiControllerBase
     {
         var request = new DeleteFlagSchedule
         {
-            OrgId = OrgId,
             Id = id
         };
 
