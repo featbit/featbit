@@ -17,11 +17,7 @@ public class DeleteFlagChangeRequestHandler : IRequestHandler<DeleteFlagChangeRe
 
     public async Task<bool> Handle(DeleteFlagChangeRequest request, CancellationToken cancellationToken)
     {
-        var changeRequest = await _flagChangeRequestService.GetAsync(request.Id);
-        if (changeRequest != null)
-        {
-            await _flagChangeRequestService.DeleteAsync(changeRequest.Id);
-        }
+        await _flagChangeRequestService.DeleteAsync(request.Id);
 
         return true;
     }
