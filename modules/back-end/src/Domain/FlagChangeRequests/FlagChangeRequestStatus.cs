@@ -3,9 +3,9 @@
 public class FlagChangeRequestStatus
 {
     public const string PendingReview = nameof(PendingReview);
-    
+
     public const string Approved = nameof(Approved);
-    
+
     public const string Declined = nameof(Declined);
 
     public const string Applied = nameof(Applied);

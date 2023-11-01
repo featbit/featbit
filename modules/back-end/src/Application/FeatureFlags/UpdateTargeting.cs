@@ -37,7 +37,6 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
-
         await _flagService.UpdateAsync(flag);
 
         // publish on feature flag change notification
