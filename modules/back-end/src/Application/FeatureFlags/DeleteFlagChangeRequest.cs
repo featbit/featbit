@@ -9,8 +9,7 @@ public class DeleteFlagChangeRequestHandler : IRequestHandler<DeleteFlagChangeRe
 {
     private readonly IFlagChangeRequestService _flagChangeRequestService;
 
-    public DeleteFlagChangeRequestHandler(
-        IFlagChangeRequestService flagChangeRequestService)
+    public DeleteFlagChangeRequestHandler(IFlagChangeRequestService flagChangeRequestService)
     {
         _flagChangeRequestService = flagChangeRequestService;
     }

@@ -63,7 +63,6 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
         await _flagDraftService.UpdateAsync(draft);
 
         // publish on feature flag change notification
-        // TODO: should we use `draft.DataChange` instead?
         var notification = new OnFeatureFlagChanged(
             flag, Operations.ApplyFlagChangeRequest, dataChange, _currentUser.Id, draft.Comment
         );

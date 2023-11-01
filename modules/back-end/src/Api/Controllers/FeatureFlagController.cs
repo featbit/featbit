@@ -267,7 +267,7 @@ public class FeatureFlagController : ApiControllerBase
         };
 
         var success = await Mediator.Send(request);
-        return Ok(true);
+        return Ok(success);
     }
 
     /// <summary>
