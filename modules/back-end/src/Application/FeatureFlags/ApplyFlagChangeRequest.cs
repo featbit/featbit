@@ -34,8 +34,8 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
             x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id
         );
 
-        // check if change request can be reviewed by current user
-        if (changeRequest?.CanBeReviewedBy(_currentUser.Id) != true)
+        // check if change request can be applied by current user
+        if (changeRequest?.CanBeAppliedBy(_currentUser.Id) != true)
         {
             return false;
         }

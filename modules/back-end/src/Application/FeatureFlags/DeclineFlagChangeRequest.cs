@@ -30,8 +30,8 @@ public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChange
             x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id
         );
 
-        // check if change request can be reviewed by current user
-        if (changeRequest?.CanBeReviewedBy(_currentUser.Id) != true)
+        // check if change request can be declined by current user
+        if (changeRequest?.CanBeDeclinedBy(_currentUser.Id) != true)
         {
             return false;
         }
