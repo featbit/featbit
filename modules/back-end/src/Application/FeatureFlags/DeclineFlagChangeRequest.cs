@@ -1,5 +1,4 @@
 ﻿using Application.Users;
-using Domain.FlagChangeRequests;
 
 namespace Application.FeatureFlags;
 
@@ -27,15 +26,17 @@ public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChange
 
     public async Task<bool> Handle(DeclineFlagChangeRequest request, CancellationToken cancellationToken)
     {
-        var changeRequest = await _flagChangeRequestService.FindOneAsync(x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id);
+        var changeRequest = await _flagChangeRequestService.FindOneAsync(
+            x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id
+        );
 
-        if (changeRequest == null || !changeRequest.IsReviewer(_currentUser.Id) || changeRequest.Status == FlagChangeRequestStatus.Applied)
+        // check if change request can be reviewed by current user
+        if (changeRequest?.CanBeReviewedBy(_currentUser.Id) != true)
         {
             return false;
         }
-        
+
         changeRequest.Decline(_currentUser.Id);
-        
         await _flagChangeRequestService.UpdateAsync(changeRequest);
 
         return true;

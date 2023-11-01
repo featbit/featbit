@@ -50,8 +50,6 @@ public class FlagChangeRequest : FullAuditedEntity
         MarkAsUpdated(memberId);
     }
 
-    public bool IsReviewer(Guid memberId) => Reviewers.Any(reviewer => reviewer.MemberId == memberId);
-
     public bool CanBeApprovedBy(Guid operatorId)
     {
         if (Status == FlagChangeRequestStatus.Applied)
@@ -63,7 +61,7 @@ public class FlagChangeRequest : FullAuditedEntity
         return isReviewer;
     }
 
-    public bool CanBeAppliedBy(Guid operatorId)
+    public bool CanBeReviewedBy(Guid operatorId)
     {
         if (Status != FlagChangeRequestStatus.Approved)
         {
