@@ -81,7 +81,7 @@ export class IdentityService {
     };
 
     if (keepOrgProject) {
-      // restore account and project, so when user login, he would always see the same project & env
+      // restore org and project, so when user login, he would always see the same project & env
       storageToKeep[CURRENT_ORGANIZATION()] = localStorage.getItem(CURRENT_ORGANIZATION());
       storageToKeep[CURRENT_PROJECT()] = localStorage.getItem(CURRENT_PROJECT());
     }
