@@ -255,6 +255,36 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPut("change-requests/{id:guid}/approve")]
+    public async Task<ApiResponse<bool>> ApproveChangeRequestAsync(Guid envId, Guid id)
+    {
+        var request = new ApproveFlagChangeRequest
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPut("change-requests/{id:guid}/decline")]
+    public async Task<ApiResponse<bool>> DeclineChangeRequestAsync(Guid envId, Guid id)
+    {
+        var request = new DeclineFlagChangeRequest
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [Authorize(LicenseFeatures.ChangeRequest)]
     [HttpPut("change-requests/{id:guid}/apply")]
     public async Task<ApiResponse<bool>> ApplyChangeRequestAsync(Guid envId, Guid id)
     {
@@ -278,36 +308,6 @@ public class FeatureFlagController : ApiControllerBase
     {
         var request = new DeleteFlagChangeRequest
         {
-            Id = id
-        };
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
-
-    [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPut("change-requests/{id:guid}/approve")]
-    public async Task<ApiResponse<bool>> ApproveChangeRequestAsync(Guid envId, Guid id)
-    {
-        var request = new ApproveFlagChangeRequest
-        {
-            OrgId = OrgId,
-            EnvId = envId,
-            Id = id
-        };
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
-
-    [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPut("change-requests/{id:guid}/decline")]
-    public async Task<ApiResponse<bool>> DeclineChangeRequestAsync(Guid envId, Guid id)
-    {
-        var request = new DeclineFlagChangeRequest
-        {
-            OrgId = OrgId,
-            EnvId = envId,
             Id = id
         };
 
