@@ -11,7 +11,7 @@ public class GetPendingChanges : IRequest<IEnumerable<PendingChangesVm>>
     public string Key { get; set; }
 }
 
-public class GetPendingChangesListHandler : IRequestHandler<GetPendingChanges, IEnumerable<PendingChangesVm>>
+public class GetPendingChangesHandler : IRequestHandler<GetPendingChanges, IEnumerable<PendingChangesVm>>
 {
     private readonly IFlagScheduleService _flagScheduleService;
     private readonly IFlagChangeRequestService _flagChangeRequestService;
@@ -19,7 +19,7 @@ public class GetPendingChangesListHandler : IRequestHandler<GetPendingChanges, I
     private readonly IUserService _userService;
     private readonly IFeatureFlagService _flagService;
 
-    public GetPendingChangesListHandler(
+    public GetPendingChangesHandler(
         IFlagScheduleService flagScheduleService,
         IFlagChangeRequestService flagChangeRequestService,
         IFlagDraftService flagDraftService,
