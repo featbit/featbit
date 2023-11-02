@@ -28,7 +28,7 @@
           <change-list class="change-list" *ngIf="instructions.length > 0" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list>
         </div>
       </section>
-      <section class="form-wraper" >
+      <section class="form-wrapper" >
         <form nz-form [formGroup]="form" nzLayout="vertical">
           <ng-container *ngIf="license?.isGranted(LicenseFeatureEnum.Schedule) && refType === RefTypeEnum.Flag">
             <div class="section-title with-extension-icon">
