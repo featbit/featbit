@@ -132,7 +132,7 @@ export class PendingChangesDrawerComponent {
     private msg: NzMessageService
   ) { }
 
-  removeSchedule(id: string, type: PendingChangeType) {
+  removePendingChange(id: string, type: PendingChangeType) {
     const observer = {
       next: () => {
         this.onItemRemoved.emit(id);

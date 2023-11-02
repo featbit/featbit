@@ -34,7 +34,7 @@
                     nz-popconfirm
                     i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
                     nzPopconfirmTitle="Are you sure to remove it?"
-                    (nzOnConfirm)="removeSchedule(changeCategories.id, changeCategories.type)"
+                    (nzOnConfirm)="removePendingChange(changeCategories.id, changeCategories.type)"
                     [nzIcon]="iconTplDelete">
                   <ng-container i18n="@@common.remove">Remove</ng-container>
                 </li>
