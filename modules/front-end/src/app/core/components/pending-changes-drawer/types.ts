@@ -8,17 +8,16 @@ export enum PendingChangeType {
 
 export enum PendingChangeStatus {
   PendingReview = 'PendingReview',
+  PendingExecution = 'PendingExecution',
   Approved = 'Approved',
   Declined = 'Declined',
-  Applied = 'Applied',
-  PendingExecution = 'PendingExecution'
+  Applied = 'Applied'
 }
 
 export enum ChangeRequestAction {
   Approve = 'Approve',
   Decline = 'Decline',
-  Apply = 'Apply',
-  Empty = 'Empty'
+  Apply = 'Apply'
 }
 
 export interface IReviewer {
