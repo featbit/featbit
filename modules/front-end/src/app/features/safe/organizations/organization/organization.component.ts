@@ -40,7 +40,7 @@ export class OrganizationComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.canUpdateOrgName = this.permissionsService.isGranted(generalResourceRNPattern.account, permissionActions.UpdateOrgName);
+    this.canUpdateOrgName = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgName);
     this.allOrganizations = this.organizationService.organizations;
 
     const currentOrganizationId = getCurrentOrganization().id;
