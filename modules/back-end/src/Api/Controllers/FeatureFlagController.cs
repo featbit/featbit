@@ -40,40 +40,6 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
-    /// Get the list of pending changes of a flag
-    /// </summary>
-    /// <remarks>
-    /// Get the list of pending changes of a particular flag
-    /// </remarks>
-    [HttpGet("{key}/pending-changes")]
-    public async Task<ApiResponse<ICollection<PendingChangesVm>>> GetPendingChangesAsync(Guid envId, string key)
-    {
-        var request = new GetPendingChangesList
-        {
-            EnvId = envId,
-            Key = key
-        };
-
-        var pendingChangesList = await Mediator.Send(request);
-        return Ok(pendingChangesList);
-    }
-
-    /// <summary>
-    /// Delete a flag schedule
-    /// </summary>
-    [HttpDelete("schedules/{scheduleId:guid}")]
-    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid scheduleId)
-    {
-        var request = new DeleteFlagSchedule
-        {
-            ScheduleId = scheduleId
-        };
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
-
-    /// <summary>
     /// Get a feature flag
     /// </summary>
     /// <remarks>
@@ -229,13 +195,121 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Get the list of pending changes of a flag
+    /// </summary>
+    /// <remarks>
+    /// Get the list of pending changes of a particular flag
+    /// </remarks>
+    [HttpGet("{key}/pending-changes")]
+    public async Task<ApiResponse<IEnumerable<PendingChangesVm>>> GetPendingChangesAsync(Guid envId, string key)
+    {
+        var request = new GetPendingChanges
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var pendingChanges = await Mediator.Send(request);
+        return Ok(pendingChanges);
+    }
+
     [Authorize(LicenseFeatures.Schedule)]
-    [HttpPost("{key}/schedule")]
+    [HttpPost("{key}/schedules")]
     public async Task<ApiResponse<bool>> CreateScheduleAsync(Guid envId, string key, CreateFlagSchedule request)
     {
         request.OrgId = OrgId;
         request.Key = key;
         request.EnvId = envId;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    /// <summary>
+    /// Delete a flag schedule
+    /// </summary>
+    [Authorize(LicenseFeatures.Schedule)]
+    [HttpDelete("schedules/{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid id)
+    {
+        var request = new DeleteFlagSchedule
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPost("{key}/change-requests")]
+    public async Task<ApiResponse<bool>> CreateChangeRequestAsync(Guid envId, string key, CreateFlagChangeRequest request)
+    {
+        request.OrgId = OrgId;
+        request.Key = key;
+        request.EnvId = envId;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPut("change-requests/{id:guid}/approve")]
+    public async Task<ApiResponse<bool>> ApproveChangeRequestAsync(Guid envId, Guid id)
+    {
+        var request = new ApproveFlagChangeRequest
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPut("change-requests/{id:guid}/decline")]
+    public async Task<ApiResponse<bool>> DeclineChangeRequestAsync(Guid envId, Guid id)
+    {
+        var request = new DeclineFlagChangeRequest
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpPut("change-requests/{id:guid}/apply")]
+    public async Task<ApiResponse<bool>> ApplyChangeRequestAsync(Guid envId, Guid id)
+    {
+        var request = new ApplyFlagChangeRequest
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    /// <summary>
+    /// Delete a flag change request
+    /// </summary>
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    [HttpDelete("change-requests/{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteChangeRequestAsync(Guid id)
+    {
+        var request = new DeleteFlagChangeRequest
+        {
+            Id = id
+        };
 
         var success = await Mediator.Send(request);
         return Ok(success);

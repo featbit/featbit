@@ -24,6 +24,11 @@
       <span i18n="@@common.schedule">Schedule</span>
     </div>
     <div class="feature">
+      <i *ngIf="license.isGranted(LicenseFeatureEnum.ChangeRequest)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
+      <i *ngIf="!license.isGranted(LicenseFeatureEnum.ChangeRequest)" nz-icon nzType="close" nzTheme="outline"></i>
+      <span i18n="@@common.change-request">Change Request</span>
+    </div>
+    <div class="feature">
       <i *ngIf="license.isGranted(LicenseFeatureEnum.CreateOrg)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
       <i *ngIf="!license.isGranted(LicenseFeatureEnum.CreateOrg)" nz-icon nzType="close" nzTheme="outline"></i>
       <span i18n="@@common.create-org">Create Organization</span>

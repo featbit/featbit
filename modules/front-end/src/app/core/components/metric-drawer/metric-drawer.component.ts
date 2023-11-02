@@ -171,10 +171,8 @@ export class MetricDrawerComponent implements OnInit {
   isMaintainersLoading = false;
   maintainerList: any[];
   onSearchMaintainer(value: string) {
-    if (value.length > 0) {
-      this.isMaintainersLoading = true;
-      this.maintainerSearchChange$.next(value);
-    }
+    this.isMaintainersLoading = true;
+    this.maintainerSearchChange$.next(value);
   }
 
   onClose() {

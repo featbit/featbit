@@ -2,7 +2,7 @@ namespace Application.FeatureFlags;
 
 public class DeleteFlagSchedule : IRequest<bool>
 {
-    public Guid ScheduleId { get; set; }
+    public Guid Id { get; set; }
 }
 
 public class DeleteFlagScheduleHandler : IRequestHandler<DeleteFlagSchedule, bool>
@@ -16,13 +16,7 @@ public class DeleteFlagScheduleHandler : IRequestHandler<DeleteFlagSchedule, boo
 
     public async Task<bool> Handle(DeleteFlagSchedule request, CancellationToken cancellationToken)
     {
-        var schedule = await _service.GetAsync(request.ScheduleId);
-        if (schedule == null)
-        {
-            return true;
-        }
-
-        await _service.DeleteAsync(schedule.Id);
+        await _service.DeleteAsync(request.Id);
 
         return true;
     }

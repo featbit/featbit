@@ -8,9 +8,29 @@
   .title {
     font-size: 15px;
     font-weight: 700;
-    margin-bottom: 10px;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+
     i {
-      margin-right: 4px;
+      font-size: 17px;
+    }
+
+    nz-tag {
+      &.approved {
+        background-color: @green70-color;
+        color: @white;
+      }
+
+      &.declined {
+        background-color: @red50-color;
+        color: @white;
+      }
+
+      &.pending-execution {
+        background-color: @yellow55-color;
+        color: @white;
+      }
     }
   }
 
@@ -32,5 +52,17 @@
     margin-top: 10px;
     width: 100%;
     text-align: right;
+  }
+
+  .pending-change-comment {
+    color: @grey50-color;
+    padding-bottom: 12px;
+  }
+
+  .more-actions {
+    cursor: pointer;
+    font-size: 25px;
+    font-weight: bold;
+    margin-left: 20px
   }
 }

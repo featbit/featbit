@@ -1,7 +1,6 @@
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
-using Domain.Targeting;
 
 namespace Application.FeatureFlags;
 
@@ -13,13 +12,7 @@ public class UpdateTargeting : IRequest<bool>
 
     public string Key { get; set; }
 
-    public ICollection<TargetUser> TargetUsers { get; set; }
-
-    public ICollection<TargetRule> Rules { get; set; }
-
-    public Fallthrough Fallthrough { get; set; }
-
-    public bool ExptIncludeAllTargets { get; set; }
+    public FlagTargeting Targeting { get; set; }
 
     public string Comment { get; set; }
 }
@@ -43,14 +36,7 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
     public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.UpdateTargeting(
-            request.TargetUsers,
-            request.Rules,
-            request.Fallthrough,
-            request.ExptIncludeAllTargets,
-            _currentUser.Id
-        );
-
+        var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
         await _flagService.UpdateAsync(flag);
 
         // publish on feature flag change notification

@@ -16,6 +16,8 @@ public class FlagSchedule : FullAuditedEntity
 
     public DateTime ScheduledTime { get; set; }
 
+    public Guid? ChangeRequestId { get; set; }
+
     public FlagSchedule(
         Guid orgId,
         Guid envId,
@@ -24,7 +26,8 @@ public class FlagSchedule : FullAuditedEntity
         string status,
         string title,
         DateTime scheduledTime,
-        Guid currentUserId) : base(currentUserId)
+        Guid currentUserId,
+        Guid? changeRequestId) : base(currentUserId)
     {
         if (!FlagScheduleStatus.IsDefined(status))
         {
@@ -38,23 +41,27 @@ public class FlagSchedule : FullAuditedEntity
         Status = status;
         Title = title;
         ScheduledTime = scheduledTime;
+        ChangeRequestId = changeRequestId;
     }
 
-    public static FlagSchedule WaitingForExecution(
-        Guid orgId,
-        Guid envId,
-        Guid flagDraftId,
-        Guid flagId,
-        string title,
-        DateTime scheduledTime,
-        Guid currentUserId)
+    public void PendingExecution(Guid memberId)
     {
-        return new FlagSchedule(orgId, envId, flagDraftId, flagId, FlagScheduleStatus.Pending, title, scheduledTime, currentUserId);
+        Status = FlagScheduleStatus.PendingExecution;
+
+        MarkAsUpdated(memberId);
     }
 
-    public void Applied()
+    public void Decline(Guid memberId)
+    {
+        Status = FlagScheduleStatus.Declined;
+
+        MarkAsUpdated(memberId);
+    }
+
+    public void Applied(Guid memberId)
     {
         Status = FlagScheduleStatus.Applied;
-        UpdatedAt = DateTime.UtcNow;
+
+        MarkAsUpdated(memberId);
     }
 }

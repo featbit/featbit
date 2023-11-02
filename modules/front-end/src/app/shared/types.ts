@@ -60,6 +60,7 @@ export enum LicenseFeatureEnum {
   Asterisk = '*',
   Sso = 'sso',
   Schedule = 'schedule',
+  ChangeRequest = 'change-request',
   CreateOrg = 'create-org'
 }
 

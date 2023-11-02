@@ -20,10 +20,10 @@ public class FlagDraft : FullAuditedEntity
     public FlagDraft(
         Guid envId,
         Guid flagId,
-        string status,
-        string comment,
         DataChange dataChange,
-        Guid currentUserId) : base(currentUserId)
+        Guid currentUserId,
+        string comment = "",
+        string status = FlagDraftStatus.Pending) : base(currentUserId)
     {
         if (!FlagDraftStatus.IsDefined(status))
         {
@@ -32,25 +32,17 @@ public class FlagDraft : FullAuditedEntity
 
         EnvId = envId;
         FlagId = flagId;
-        Status = status;
-        Comment = comment;
         DataChange = dataChange;
+
+        Comment = comment;
+        Status = status;
     }
 
-    public static FlagDraft Pending(
-        Guid envId,
-        Guid flagId,
-        string comment,
-        DataChange dataChange,
-        Guid currentUserId)
-    {
-        return new FlagDraft(envId, flagId, FlagDraftStatus.Pending, comment, dataChange, currentUserId);
-    }
-
-    public void Applied()
+    public void Applied(Guid memberId)
     {
         Status = FlagDraftStatus.Applied;
-        UpdatedAt = DateTime.UtcNow;
+
+        MarkAsUpdated(memberId);
     }
 
     public IEnumerable<FlagInstruction> GetInstructions()
@@ -62,4 +54,6 @@ public class FlagDraft : FullAuditedEntity
 
         return FlagComparer.Compare(previous, current);
     }
+
+    public bool IsApplied() => Status == FlagDraftStatus.Applied;
 }

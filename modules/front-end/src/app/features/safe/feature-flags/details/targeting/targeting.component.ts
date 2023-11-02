@@ -14,7 +14,7 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { SegmentService } from "@services/segment.service";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { ChangeReviewOutput, ReviewModalKindEnum } from "@core/components/change-review/types";
+import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { environment } from "src/environments/environment";
 import { getCurrentOrganization } from "@utils/project-env";
@@ -72,12 +72,20 @@ export class TargetingComponent implements OnInit {
   reviewModalVisible: boolean = false;
 
 
-  onScheduleClick(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
+  onScheduleClick(validationErrortpl: TemplateRef<void>) {
     if (!this.license.isGranted(LicenseFeatureEnum.Schedule)) {
       return false;
     }
 
-    return this.onReviewChanges(validationErrortpl, modalKind);
+    return this.onReviewChanges(validationErrortpl, ReviewModalKindEnum.Schedule);
+  }
+
+  onChangeRequestClick(validationErrortpl: TemplateRef<void>) {
+    if (!this.license.isGranted(LicenseFeatureEnum.ChangeRequest)) {
+      return false;
+    }
+
+    return this.onReviewChanges(validationErrortpl, ReviewModalKindEnum.ChangeRequest);
   }
 
   onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
@@ -309,12 +317,14 @@ export class TargetingComponent implements OnInit {
       }
     };
 
-    switch (this.reviewModalKind) {
-      case ReviewModalKindEnum.Review:
-        this.featureFlagService.updateTargeting(targeting, data.comment, data.schedule).subscribe(observer);
-        break;
-      case ReviewModalKindEnum.Schedule:
-        this.featureFlagService.createSchedule(targeting, data.schedule).subscribe(observer);
+    if (!ReviewModalMode.isScheduleEnabled(this.reviewModalKind) && !ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)) {
+      this.featureFlagService.updateTargeting(targeting, data.comment).subscribe(observer);
+    } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind)) { // schedule (with or without change request)
+      this.featureFlagService.createSchedule(targeting, data.schedule.scheduledTime, data.schedule.title, data.changeRequest?.reviewers, data.changeRequest?.reason, ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)).subscribe(observer);
+    } else if (ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)){ // change request only
+      this.featureFlagService.createChangeRequest(targeting, data.changeRequest.reviewers, data.changeRequest.reason).subscribe(observer);
+    } else {
+      // error
     }
 
     this.reviewModalVisible = false;

@@ -1,6 +1,6 @@
 using Domain.AuditLogs;
+using Domain.FlagDrafts;
 using Domain.Targeting;
-using Domain.SemanticPatch;
 
 namespace Domain.FeatureFlags;
 
@@ -163,19 +163,14 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public DataChange UpdateTargeting(
-        ICollection<TargetUser> targetUsers,
-        ICollection<TargetRule> rules,
-        Fallthrough fallthrough,
-        bool exptIncludeAllTargets,
-        Guid currentUserId)
+    public DataChange UpdateTargeting(FlagTargeting targeting, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
-        TargetUsers = targetUsers;
-        Rules = rules;
-        Fallthrough = fallthrough;
-        ExptIncludeAllTargets = exptIncludeAllTargets;
+        TargetUsers = targeting.TargetUsers;
+        Rules = targeting.Rules;
+        Fallthrough = targeting.Fallthrough;
+        ExptIncludeAllTargets = targeting.ExptIncludeAllTargets;
         MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
@@ -226,14 +221,18 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public void ApplyInstructions(IEnumerable<FlagInstruction> instructions, Guid updatorId)
+    public DataChange ApplyDraft(FlagDraft draft)
     {
+        var dataChange = new DataChange(this);
+
+        var instructions = draft.GetInstructions();
         foreach (var instruction in instructions)
         {
             instruction.Apply(this);
         }
+        MarkAsUpdated(draft.CreatorId);
 
-        MarkAsUpdated(updatorId);
+        return dataChange.To(this);
     }
 
     public override void MarkAsUpdated(Guid updatorId)
