@@ -9,23 +9,23 @@ export const ReviewModalMode = {
     return (option & ReviewModalKindEnum.Schedule) === ReviewModalKindEnum.Schedule;
   },
 
-  isChangeRequestEnabled(option: number){
+  isChangeRequestEnabled(option: number) {
     return (option & ReviewModalKindEnum.ChangeRequest) === ReviewModalKindEnum.ChangeRequest;
   },
 
-  enableSchedule(option: number){
+  enableSchedule(option: number) {
     return option | ReviewModalKindEnum.Schedule;
   },
 
-  disableSchedule(option: number){
+  disableSchedule(option: number) {
     return option & ~ReviewModalKindEnum.Schedule;
   },
 
-  enableChangeRequest(option: number){
+  enableChangeRequest(option: number) {
     return option | ReviewModalKindEnum.ChangeRequest;
   },
 
-  disableChangeRequest(option: number){
+  disableChangeRequest(option: number) {
     return option & ~ReviewModalKindEnum.ChangeRequest;
   }
 }
