@@ -10,7 +10,7 @@ public class FlagScheduleStatus
 
     public const string Declined = nameof(Declined);
 
-    public static readonly string[] All = { PendingReview, PendingExecution, Applied };
+    public static readonly string[] All = { PendingReview, PendingExecution, Applied, Declined };
 
     public static bool IsDefined(string type)
     {
