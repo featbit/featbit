@@ -6171,7 +6171,7 @@
           <context context-type="linenumber">8</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.need-license-for-schedule" datatype="html">
+      <trans-unit id="common.need-license" datatype="html">
         <source>You don&apos;t have a license or your current license doesn&apos;t grant this feature, please contact FeatBit team to get a license.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
