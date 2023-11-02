@@ -33,7 +33,7 @@ public class GroupService : MongoDbService<Group>, IGroupService
 
         var filters = new List<FilterDefinition<Group>>
         {
-            // accountId filter
+            // organizationId filter
             filterBuilder.Eq(group => group.OrganizationId, organizationId)
         };
 
