@@ -255,7 +255,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPost("change-requests/{id:guid}/apply")]
+    [HttpPut("change-requests/{id:guid}/apply")]
     public async Task<ApiResponse<bool>> ApplyChangeRequestAsync(Guid envId, Guid id)
     {
         var request = new ApplyFlagChangeRequest
@@ -286,7 +286,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPost("change-requests/{id:guid}/approve")]
+    [HttpPut("change-requests/{id:guid}/approve")]
     public async Task<ApiResponse<bool>> ApproveChangeRequestAsync(Guid envId, Guid id)
     {
         var request = new ApproveFlagChangeRequest
@@ -301,7 +301,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPost("change-requests/{id:guid}/decline")]
+    [HttpPut("change-requests/{id:guid}/decline")]
     public async Task<ApiResponse<bool>> DeclineChangeRequestAsync(Guid envId, Guid id)
     {
         var request = new DeclineFlagChangeRequest
