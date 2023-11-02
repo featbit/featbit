@@ -12,9 +12,9 @@
       <nz-list nzItemLayout="horizontal">
         <nz-list-item *ngFor="let changeCategories of changeCategoriesList">
           <ng-template #extraTemplate>
-            <i class="options" nzPlacement="bottomCenter" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold; margin-left: 20px" nzType="ellipsis" [nzRotate]="90" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
+            <i class="more-actions" nz-icon nzType="ellipsis" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
             <nz-dropdown-menu #options="nzDropdownMenu">
-              <ul nz-menu nzSelectable style="min-width: 150px;">
+              <ul nz-menu nzSelectable style="min-width: 100px;">
                 <li nz-menu-item
                     (click)="declineChangeRequest(changeCategories)"
                     *ngIf="changeCategories.canDecline(currentUser.id)">
