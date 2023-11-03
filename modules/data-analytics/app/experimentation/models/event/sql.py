@@ -53,23 +53,28 @@ FROM flag_events GLOBAL INNER JOIN custom_events USING target_user
 GROUP BY target_user, variation
 )"""
 
-GET_VARS_SQL = """SELECT uniq(target_user), sum(exposure_weight), avg(exposure_weight), stddevSamp(exposure_weight), variation
+GET_BINOMIAL_VARS_SQL = """SELECT uniq(target_user), sum(exposure_weight), variation
+FROM variations
+GROUP BY variation
+ORDER BY variation"""
+
+GET_NUMERIC_VARS_SQL = """SELECT uniq(target_user), sum(exposure_weight), avg(exposure_weight), varSamp(exposure_weight), variation
 FROM variations
 GROUP BY variation
 ORDER BY variation"""
 
 
-GET_PROP_ZTEST_VARS_SQL = f"""WITH
+GET_BINOMIAL_TEST_VARS_SQL = f"""WITH
 {FLAG_EVENTS_CTE},
 {CUSTOM_EVENTS_CTE},
 {VARIATION_CTE}
-{GET_VARS_SQL}"""
+{GET_BINOMIAL_VARS_SQL}"""
 
-GET_TTEST_VARS_SQL = f"""WITH
+GET_NUMERIC_TEST_VARS_SQL = f"""WITH
 {FLAG_EVENTS_CTE},
 {CUSTOM_EVENTS_WITH_WEIGHT_CTE},
 {VARIATION_WITH_WEIGHT_CTE}
-{GET_VARS_SQL}"""
+{GET_NUMERIC_VARS_SQL}"""
 
 
 def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -117,7 +122,7 @@ def _query_metric_events_sample_from_mongod(query_params: Dict[str, Any]) -> Lis
     ]
 
 
-def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], props_test: bool):
+def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], binomial_test: bool):
     df_ff_events = get_events_sample_from_mongod(_query_ff_events_sample_from_mongod(query_params), cols=['user_key', 'variation'])
     if df_ff_events.empty:
         return []
@@ -125,7 +130,7 @@ def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], props_test: bo
     if df_metric_events.empty:
         df_metric_events = pd.DataFrame({'user_key': pd.Series(dtype='str'),
                                          'weight': pd.Series(dtype='float')})
-    elif props_test:
+    elif binomial_test:
         df_metric_events["weight"] = 1.0
 
     df = df_ff_events.merge(df_metric_events, on='user_key', how='left') \
@@ -133,10 +138,17 @@ def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], props_test: bo
         .groupby(['user_key', 'variation']).mean() \
         .reset_index()
 
-    df = df.groupby('variation') \
-        .agg(uniq=('user_key', lambda x: float(x.nunique())), sum=('weight', lambda x: x.sum()),
-             avg=('weight', lambda x: x.mean()), stddev=('weight', lambda x: x.std(ddof=1))) \
-        .sort_values('variation') \
-        .reset_index()
-    for count, exposure, mean_sample, stdev_sample, var_key in df[['uniq', 'sum', 'avg', 'stddev', 'variation']].values.tolist():
-        yield count, exposure, mean_sample, stdev_sample, var_key
+    df = df.groupby('variation')
+    if binomial_test:
+        df = df.agg(uniq=('user_key', lambda x: float(x.nunique())), sum=('weight', lambda x: x.sum())) \
+            .sort_values('variation') \
+            .reset_index()
+        for count, exposure, var_key in df[['uniq', 'sum', 'variation']].values.tolist():
+            yield count, exposure, var_key
+    else:
+        df = df.agg(uniq=('user_key', lambda x: float(x.nunique())), sum=('weight', lambda x: x.sum()),
+                    avg=('weight', lambda x: x.mean()), var=('weight', lambda x: x.var(ddof=1))) \
+            .sort_values('variation') \
+            .reset_index()
+        for count, exposure, mean_sample, var_sample, var_key in df[['uniq', 'sum', 'avg', 'var', 'variation']].values.tolist():
+            yield count, exposure, mean_sample, var_sample, var_key
