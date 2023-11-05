@@ -84,7 +84,6 @@ export interface IExptIteration {
   updatedAt?: Date,
   updatedAtStr?: string,
   dateTimeInterval?: string,
-  numericConfidenceIntervalBoundary?: number[], // [min, max, max - min]
   customEventTrackOption: CustomEventTrackOption,
   customEventUnit: string,
   isFinish: boolean,
