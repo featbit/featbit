@@ -133,7 +133,7 @@ def cal_experiment_vars_from_mongod(query_params: Dict[str, Any], binomial_test:
     elif binomial_test:
         df_metric_events["weight"] = 1.0
 
-    df = df_ff_events.merge(df_metric_events, on='user_key', how='left') \
+    df = df_ff_events.merge(df_metric_events, on='user_key', how='left' if binomial_test else 'inner') \
         .fillna(0) \
         .groupby(['user_key', 'variation']).mean() \
         .reset_index()

@@ -172,7 +172,7 @@ class NumericVariation(Variation):
     def output(self) -> Dict[str, Any]:
         return {
             "variationId": self.var_id,
-            "totalEvents": int(self.sum),
+            "totalEvents": int(self.count),
             "average": format_float_positional(self.mean),
         }
 
