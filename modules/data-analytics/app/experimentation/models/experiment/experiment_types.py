@@ -148,8 +148,8 @@ class BinomialVariation(Variation):
     def output(self) -> Dict[str, Any]:
         return {
             "variationId": self.var_id,
-            "uniqueUsers": str(int(self.count)),
-            "conversion": str(int(self.sum)),
+            "uniqueUsers": int(self.count),
+            "conversion": int(self.sum),
             "conversionRate": format_float_positional(self.mean),
         }
 
@@ -172,7 +172,7 @@ class NumericVariation(Variation):
     def output(self) -> Dict[str, Any]:
         return {
             "variationId": self.var_id,
-            "totalEvents": str(int(self.sum)),
+            "totalEvents": int(self.sum),
             "average": format_float_positional(self.mean),
         }
 
