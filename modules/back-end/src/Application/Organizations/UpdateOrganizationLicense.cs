@@ -1,6 +1,6 @@
 using Application.Bases;
 using Application.Caches;
-using Domain.Accounts;
+using Domain.Workspaces;
 
 namespace Application.Organizations;
 

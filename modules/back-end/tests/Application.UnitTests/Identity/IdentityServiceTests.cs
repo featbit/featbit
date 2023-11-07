@@ -62,7 +62,7 @@ public class IdentityServiceTests
             .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<User,bool>>>()))
             .Returns(Task.FromResult(user)!);
 
-        var loginResult = await _identityService.LoginByEmailAsync(user.Email, realPwd);
+        var loginResult = await _identityService.LoginByEmailAsync(user.Email, realPwd, Guid.NewGuid());
 
         Assert.True(loginResult.Success);
         Assert.Empty(loginResult.ErrorCode);

@@ -1,7 +1,7 @@
 ﻿using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
-using Domain.Accounts;
+using Domain.Workspaces;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;

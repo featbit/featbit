@@ -6,11 +6,11 @@ import {IdentityService} from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
 import { finalize } from "rxjs/operators";
-import { AccountService } from "@services/account.service";
+import { WorkspaceService } from "@services/workspace.service";
 
 enum LoginStep {
   Email = 'email',
-  AccountKey = 'accountKey',
+  Workspace = 'workspace',
   Password = 'password'
 }
 
@@ -36,14 +36,14 @@ export class DoLoginComponent implements OnInit {
     private identityService: IdentityService,
     private ssoService: SsoService,
     private message: NzMessageService,
-    private accountService: AccountService
+    private workspaceService: WorkspaceService
   ) { }
 
   async ngOnInit() {
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
       password: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Password)]],
-      accountKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.AccountKey)]]
+      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Workspace)]]
     });
 
     this.isSsoEnabled = await this.ssoService.isEnabled();
@@ -56,8 +56,8 @@ export class DoLoginComponent implements OnInit {
       let currentControl: AbstractControl = null;
 
       switch (step) {
-        case LoginStep.AccountKey:
-          currentControl = control.parent?.controls['accountKey'];
+        case LoginStep.Workspace:
+          currentControl = control.parent?.controls['workspaceKey'];
           break;
         case LoginStep.Password:
           currentControl = control.parent?.controls['password'];
@@ -76,10 +76,10 @@ export class DoLoginComponent implements OnInit {
     };
   }
 
-  hasMultipleAccounts(identity: string) {
-    this.accountService.hasMultipleAccounts(identity).subscribe({
+  hasMultipleWorkspaces(identity: string) {
+    this.workspaceService.hasMultipleWorkspaces(identity).subscribe({
       next: response => {
-        this.step = response ? LoginStep.AccountKey : LoginStep.Password;
+        this.step = response ? LoginStep.Workspace : LoginStep.Password;
         this.isLoading = false;
       },
       error: error => this.handleError(error)
@@ -98,22 +98,22 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
-    const { identity, password, accountKey } = this.pwdLoginForm.value;
+    const { identity, password, workspaceKey } = this.pwdLoginForm.value;
 
     switch (this.step) {
       case LoginStep.Email:
         this.isLoading = true;
-        this.hasMultipleAccounts(identity);
+        this.hasMultipleWorkspaces(identity);
         break;
-      case LoginStep.AccountKey:
+      case LoginStep.Workspace:
         this.step = LoginStep.Password;
         break;
       case LoginStep.Password:
         this.isLoading = true;
-        this.identityService.loginByEmail(identity, password, accountKey).subscribe(
-          response => this.handleResponse(response),
-          error => this.handleError(error)
-        )
+        this.identityService.loginByEmail(identity, password, workspaceKey).subscribe({
+          next: response => this.handleResponse(response),
+          error: error => this.handleError(error)
+        });
         break;
     }
   }

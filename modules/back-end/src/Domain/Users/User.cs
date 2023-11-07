@@ -12,15 +12,16 @@ public class User : AuditedEntity
 
     public string Origin { get; set; }
 
-    public Guid AccountId { get; set; }
+    public Guid WorkspaceId { get; set; }
 
     /// <summary>
     /// for test project use only
     /// </summary>
-    public User(Guid accountId, Guid id, string email, string password, string name = "", string origin = UserOrigin.Local)
+    public User(Guid workspaceId, Guid id, string email, string password, string name = "", string origin = UserOrigin.Local)
     {
         Id = id;
 
+        WorkspaceId = workspaceId;
         Email = email;
         Password = password;
         Name = name;
@@ -30,8 +31,9 @@ public class User : AuditedEntity
         UpdatedAt = CreatedAt;
     }
 
-    public User(Guid accountId, string email, string password, string name = "", string origin = UserOrigin.Local)
+    public User(Guid workspaceId, string email, string password, string name = "", string origin = UserOrigin.Local)
     {
+        WorkspaceId = workspaceId;
         Email = email;
         Password = password;
         Name = name;
@@ -47,7 +49,7 @@ public class User : AuditedEntity
         {
             new(UserClaims.Id, Id.ToString()),
             new(UserClaims.Email, Email),
-            new(UserClaims.AccountId, AccountId.ToString()),
+            new(UserClaims.WorkspaceId, WorkspaceId.ToString()),
         };
 
         return claims;

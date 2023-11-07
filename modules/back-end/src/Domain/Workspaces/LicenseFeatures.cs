@@ -1,4 +1,4 @@
-namespace Domain.Accounts;
+namespace Domain.Workspaces;
 
 public static class LicenseFeatures
 {

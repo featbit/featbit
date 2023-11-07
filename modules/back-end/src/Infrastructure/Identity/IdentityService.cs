@@ -66,9 +66,9 @@ public class IdentityService : IIdentityService
         return handler.WriteToken(jwt);
     }
 
-    public async Task<LoginResult> LoginByEmailAsync(string email, string password, Guid accountId)
+    public async Task<LoginResult> LoginByEmailAsync(string email, string password, Guid workspaceId)
     {
-        var user = await _store.FindOneAsync(x => x.Email == email && x.AccountId == accountId);
+        var user = await _store.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspaceId);
         if (user == null)
         {
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
@@ -84,13 +84,13 @@ public class IdentityService : IIdentityService
         return LoginResult.Ok(token);
     }
 
-    public async Task<RegisterResult> RegisterByEmailAsync(Guid accountId, string email, string password, string origin)
+    public async Task<RegisterResult> RegisterByEmailAsync(Guid workspaceId, string email, string password, string origin)
     {
         var hashedPwd = string.IsNullOrWhiteSpace(password)
             ? string.Empty
             : _passwordHasher.HashPassword(null!, password);
 
-        var user = new User(accountId, email, hashedPwd, origin: origin);
+        var user = new User(workspaceId, email, hashedPwd, origin: origin);
 
         await _store.AddAsync(user);
 

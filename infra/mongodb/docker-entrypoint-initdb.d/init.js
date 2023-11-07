@@ -5,7 +5,7 @@ db = db.getSiblingDB(dbName)
 print('seed started...')
 
 // seed ids
-const accountId = UUID()
+const workspaceId = UUID()
 const userId = UUID()
 const organizationId = UUID()
 
@@ -19,20 +19,20 @@ function getUUIDString() {
     return UUID().toString().split('"')[1];
 }
 
-// seed account
-print('clean and seed collection: Accounts')
-db.Accounts.deleteMany({})
-db.Accounts.insertOne(
+// seed workspace
+print('clean and seed collection: Workspaces')
+db.Workspaces.deleteMany({})
+db.Workspaces.insertOne(
     {
-        _id: accountId,
-        name: "Your Company name",
-		key: "your-company-name",
+        _id: workspaceId,
+        name: "Your Workspace name",
+		key: "your-workspace-name",
         license: null,
         createdAt: new Date(),
         updatedAt: new Date()
     }
 )
-print('collection seeded: Accounts')
+print('collection seeded: Workspaces')
 
 // seed user
 print('clean and seed collection: Users')
@@ -44,7 +44,7 @@ db.Users.insertOne(
         password: "AQAAAAEAACcQAAAAELDHEjCrDQrmnAXU5C//mOLvUBJ7lnVFEMMFxNMDIIrF7xK8JDQKUifU3HH4gexNAQ==",
         name: "tester",
         origin: "Local",
-        accountId: accountId,
+        workspaceId: workspaceId,
         createAt: new Date(),
         updatedAt: new Date()
     }
@@ -57,7 +57,7 @@ db.Organizations.deleteMany({})
 db.Organizations.insertOne(
     {
         _id: organizationId,
-        accountId: accountId,
+        workspaceId: workspaceId,
         name: "playground",
         initialized: false,
         createdAt: new Date(),

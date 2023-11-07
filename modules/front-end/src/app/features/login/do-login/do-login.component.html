@@ -16,16 +16,16 @@
             </ng-template>
           </nz-form-control>
         </nz-form-item>
-        <nz-form-item *ngIf="step === LoginStep.AccountKey">
-          <nz-form-control [nzErrorTip]="invalidAccountKey">
-            <nz-input-group [nzPrefix]="accountPrefix">
-              <input type="text" nz-input formControlName="accountKey" i18n-placeholder="@@common.account-key" placeholder="Account key"/>
+        <nz-form-item *ngIf="step === LoginStep.Workspace">
+          <nz-form-control [nzErrorTip]="invalidWorkspaceKey">
+            <nz-input-group [nzPrefix]="workspacePrefix">
+              <input type="text" nz-input formControlName="workspaceKey" i18n-placeholder="@@common.workspace-key" placeholder="Workspace key"/>
             </nz-input-group>
-            <ng-template #accountPrefix>
+            <ng-template #workspacePrefix>
               <i nz-icon nzType="bank"></i>
             </ng-template>
-            <ng-template #invalidAccountKey let-control>
-              <ng-container *ngIf="control.hasError('required')" i18n="@@common.account-keyu-cannot-be-empty">Account key is mandatory</ng-container>
+            <ng-template #invalidWorkspaceKey let-control>
+              <ng-container *ngIf="control.hasError('required')" i18n="@@common.workspace-key-cannot-be-empty">Workspace key is mandatory</ng-container>
             </ng-template>
           </nz-form-control>
         </nz-form-item>

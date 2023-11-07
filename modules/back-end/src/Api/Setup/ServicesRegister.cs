@@ -3,7 +3,7 @@ using Api.Authentication;
 using Api.Authorization;
 using Api.Swagger;
 using Application.Services;
-using Domain.Accounts;
+using Domain.Workspaces;
 using Domain.Identity;
 using Infrastructure.License;
 using Microsoft.Extensions.DependencyInjection.Extensions;

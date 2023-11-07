@@ -7,7 +7,7 @@ public class LoginByEmail : IRequest<LoginResult>
 {
     public string Email { get; init; } = string.Empty;
 
-    public string AccountKey { get; set; }
+    public string WorkspaceKey { get; set; }
 
     public string Password { get; init; } = string.Empty;
 }
@@ -28,16 +28,16 @@ public class LoginByEmailValidator : AbstractValidator<LoginByEmail>
 public class LoginByEmailHandler : IRequestHandler<LoginByEmail, LoginResult>
 {
     private readonly IIdentityService _identityService;
-    private readonly IAccountService _accountService;
+    private readonly IWorkspaceService _workspaceService;
     private readonly ILogger<LoginByEmailHandler> _logger;
 
     public LoginByEmailHandler(
         IIdentityService identityService,
-        IAccountService accountService,
+        IWorkspaceService workspaceService,
         ILogger<LoginByEmailHandler> logger)
     {
         _identityService = identityService;
-        _accountService = accountService;
+        _workspaceService = workspaceService;
         _logger = logger;
     }
 
@@ -45,19 +45,19 @@ public class LoginByEmailHandler : IRequestHandler<LoginByEmail, LoginResult>
     {
         _logger.LogInformation("user {Identity} login in by password", request.Email);
 
-        var accounts = await _accountService.GetByEmailAsync(request.Email);
-        var accountId = accounts.FirstOrDefault(x => x.Key == request.AccountKey && !string.IsNullOrEmpty(request.AccountKey))?.Id;
+        var workspaces = await _workspaceService.GetByEmailAsync(request.Email);
+        var workspaceId = workspaces.FirstOrDefault(x => x.Key == request.WorkspaceKey && !string.IsNullOrEmpty(request.WorkspaceKey))?.Id;
 
-        if (!accountId.HasValue && accounts.Count() == 1)
+        if (!workspaceId.HasValue && workspaces.Count() == 1)
         {
-            accountId = accounts.First().Id;
+            workspaceId = workspaces.First().Id;
         }
         
-        if (!accountId.HasValue)
+        if (!workspaceId.HasValue)
         {
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
         
-        return await _identityService.LoginByEmailAsync(request.Email, request.Password, accountId.Value);
+        return await _identityService.LoginByEmailAsync(request.Email, request.Password, workspaceId.Value);
     }
 }

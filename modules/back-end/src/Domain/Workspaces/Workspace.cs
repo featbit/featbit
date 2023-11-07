@@ -1,6 +1,6 @@
-namespace Domain.Accounts;
+namespace Domain.Workspaces;
 
-public class Account : AuditedEntity
+public class Workspace : AuditedEntity
 {
     public string Name { get; set; }
 
@@ -8,7 +8,7 @@ public class Account : AuditedEntity
     
     public string License { get; set; }
 
-    public Account(string name, string key)
+    public Workspace(string name, string key)
     {
         Name = name;
         License = string.Empty;

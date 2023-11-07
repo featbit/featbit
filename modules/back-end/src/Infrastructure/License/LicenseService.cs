@@ -1,5 +1,5 @@
 using Application.Caches;
-using Domain.Accounts;
+using Domain.Workspaces;
 
 namespace Infrastructure.License;
 

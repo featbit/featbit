@@ -12,7 +12,7 @@ public interface IIdentityService
 
     string IssueToken(User user);
 
-    Task<LoginResult> LoginByEmailAsync(string email, string password, Guid accountId);
+    Task<LoginResult> LoginByEmailAsync(string email, string password, Guid workspaceId);
 
-    Task<RegisterResult> RegisterByEmailAsync(Guid accountId, string email, string password, string origin);
+    Task<RegisterResult> RegisterByEmailAsync(Guid workspaceId, string email, string password, string origin);
 }

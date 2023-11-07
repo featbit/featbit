@@ -5,7 +5,7 @@ using Api.Authorization;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
-using Domain.Accounts;
+using Domain.Workspaces;
 using Domain.FeatureFlags;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;

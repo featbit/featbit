@@ -6,17 +6,17 @@ import { Observable } from "rxjs";
 @Injectable({
   providedIn: 'root'
 })
-export class AccountService {
+export class WorkspaceService {
 
   get baseUrl() {
-    return `${environment.url}/api/v1/accounts`;
+    return `${environment.url}/api/v1/workspaces`;
   }
 
   constructor(
     private http: HttpClient
   ) { }
 
-  hasMultipleAccounts(email: string): Observable<boolean> {
-    return this.http.post<boolean>(`${this.baseUrl}/has-multiple-accounts`, { email });
+  hasMultipleWorkspaces(email: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.baseUrl}/has-multiple-workspaces`, { email });
   }
 }

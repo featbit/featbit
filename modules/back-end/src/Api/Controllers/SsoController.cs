@@ -1,7 +1,7 @@
 using Api.Authentication.OpenIdConnect;
 using Application.Identity;
 using Application.Services;
-using Domain.Accounts;
+using Domain.Workspaces;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Users;
@@ -85,7 +85,7 @@ public class SsoController : ApiControllerBase
             {
                 
                 // register user by email
-                var registerResult = await _identityService.RegisterByEmailAsync(user.AccountId, email, string.Empty, UserOrigin.Sso);
+                var registerResult = await _identityService.RegisterByEmailAsync(user.WorkspaceId, email, string.Empty, UserOrigin.Sso);
 
                 // add user to organization
                 var organizationUser = new OrganizationUser(organization.Id, registerResult.UserId);
