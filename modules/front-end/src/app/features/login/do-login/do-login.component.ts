@@ -9,9 +9,8 @@ import { finalize } from "rxjs/operators";
 import { WorkspaceService } from "@services/workspace.service";
 
 enum LoginStep {
-  Email = 'email',
-  Workspace = 'workspace',
-  Password = 'password'
+  Step1 = 'step1', // email
+  Step2 = 'step2' // workspace and (or) password
 }
 
 @Component({
@@ -22,7 +21,8 @@ enum LoginStep {
 export class DoLoginComponent implements OnInit {
 
   isSSO: boolean = false;
-  step: LoginStep = LoginStep.Email;
+  step: LoginStep = LoginStep.Step1;
+  displayWorkspaceKey: boolean = false;
   pwdLoginForm: FormGroup;
   ssoForm: FormGroup;
   passwordVisible: boolean = false;
@@ -43,12 +43,12 @@ export class DoLoginComponent implements OnInit {
   async ngOnInit() {
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
-      password: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Password)]],
-      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Workspace)]]
+      password: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]],
+      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
     });
 
     this.ssoForm = this.fb.group({
-      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Workspace)]]
+      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
     });
 
     this.isSsoEnabled = await this.ssoService.isEnabled();
@@ -57,18 +57,8 @@ export class DoLoginComponent implements OnInit {
 
   requiredWhenLoginVerifiedValidator = (step: LoginStep): ValidatorFn => {
     return (control: AbstractControl) => {
-      let currentControl: AbstractControl = null;
 
-      switch (step) {
-        case LoginStep.Workspace:
-          currentControl = control.parent?.controls['workspaceKey'];
-          break;
-        case LoginStep.Password:
-          currentControl = control.parent?.controls['password'];
-          break;
-      }
-
-      if (step === this.step && currentControl && (!currentControl.value || currentControl.value.length === 0)) {
+      if (step === this.step && (!control.value || control.value.length === 0)) {
         const error = { required: true };
         control.setErrors(error);
         return error;
@@ -83,7 +73,8 @@ export class DoLoginComponent implements OnInit {
   hasMultipleWorkspaces(identity: string) {
     this.workspaceService.hasMultipleWorkspaces(identity).subscribe({
       next: response => {
-        this.step = response ? LoginStep.Workspace : LoginStep.Password;
+        this.displayWorkspaceKey = response;
+        this.step = LoginStep.Step2;
         this.isLoading = false;
       },
       error: error => this.handleError(error)
@@ -122,14 +113,11 @@ export class DoLoginComponent implements OnInit {
     const { identity, password, workspaceKey } = this.pwdLoginForm.value;
 
     switch (this.step) {
-      case LoginStep.Email:
+      case LoginStep.Step1:
         this.isLoading = true;
         this.hasMultipleWorkspaces(identity);
         break;
-      case LoginStep.Workspace:
-        this.step = LoginStep.Password;
-        break;
-      case LoginStep.Password:
+      case LoginStep.Step2:
         this.isLoading = true;
         this.identityService.loginByEmail(identity, password, workspaceKey).subscribe({
           next: response => this.handleResponse(response),

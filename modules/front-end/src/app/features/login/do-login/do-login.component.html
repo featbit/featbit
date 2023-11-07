@@ -2,7 +2,7 @@
   <nz-tabset class="no-bottom-line">
     <nz-tab i18n-nzTitle="@@common.login" nzTitle="Login" *ngIf="!isSSO">
       <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
-        <nz-form-item *ngIf="step === LoginStep.Email">
+        <nz-form-item *ngIf="step === LoginStep.Step1">
           <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
             <nz-input-group [nzPrefix]="emailPrefix">
               <input type="text" nz-input formControlName="identity" i18n-placeholder="@@common.email" placeholder="Email"/>
@@ -16,41 +16,43 @@
             </ng-template>
           </nz-form-control>
         </nz-form-item>
-        <nz-form-item *ngIf="step === LoginStep.Workspace">
-          <nz-form-control [nzErrorTip]="invalidWorkspaceKey">
-            <nz-input-group [nzPrefix]="workspacePrefix">
-              <input type="text" nz-input formControlName="workspaceKey" i18n-placeholder="@@common.workspace-key" placeholder="Workspace key"/>
-            </nz-input-group>
-            <ng-template #workspacePrefix>
-              <i nz-icon nzType="bank"></i>
-            </ng-template>
-            <ng-template #invalidWorkspaceKey let-control>
-              <ng-container *ngIf="control.hasError('required')" i18n="@@common.workspace-key-cannot-be-empty">Workspace key is mandatory</ng-container>
-            </ng-template>
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item *ngIf="step === LoginStep.Password">
-          <nz-form-control i18n-nzErrorTip="@@common.password-mandatory" nzErrorTip="password is mandatory">
-            <nz-input-group [nzPrefix]="passwordPrefix" [nzSuffix]="suffixTemplate">
-              <input
-                i18n-placeholder="@@common.password"
-                formControlName="password"
-                [type]="passwordVisible ? 'text' : 'password'"
-                nz-input
-                placeholder="password"
-              />
-            </nz-input-group>
-            <ng-template #passwordPrefix>
-              <i nz-icon nzType="icons:icon-password"></i>
-            </ng-template>
-            <ng-template #suffixTemplate>
-              <i nz-icon [nzType]="passwordVisible ? 'eye' : 'eye-invisible'" (click)="passwordVisible = !passwordVisible"></i>
-            </ng-template>
-          </nz-form-control>
-        </nz-form-item>
+        <ng-container *ngIf="step === LoginStep.Step2">
+          <nz-form-item *ngIf="displayWorkspaceKey">
+            <nz-form-control [nzErrorTip]="invalidWorkspaceKey">
+              <nz-input-group [nzPrefix]="workspacePrefix">
+                <input type="text" nz-input formControlName="workspaceKey" i18n-placeholder="@@common.workspace-key" placeholder="Workspace key"/>
+              </nz-input-group>
+              <ng-template #workspacePrefix>
+                <i nz-icon nzType="bank"></i>
+              </ng-template>
+              <ng-template #invalidWorkspaceKey let-control>
+                <ng-container *ngIf="control.hasError('required')" i18n="@@common.workspace-key-cannot-be-empty">Workspace key is mandatory</ng-container>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item>
+            <nz-form-control i18n-nzErrorTip="@@common.password-mandatory" nzErrorTip="password is mandatory">
+              <nz-input-group [nzPrefix]="passwordPrefix" [nzSuffix]="suffixTemplate">
+                <input
+                  i18n-placeholder="@@common.password"
+                  formControlName="password"
+                  [type]="passwordVisible ? 'text' : 'password'"
+                  nz-input
+                  placeholder="password"
+                />
+              </nz-input-group>
+              <ng-template #passwordPrefix>
+                <i nz-icon nzType="icons:icon-password"></i>
+              </ng-template>
+              <ng-template #suffixTemplate>
+                <i nz-icon [nzType]="passwordVisible ? 'eye' : 'eye-invisible'" (click)="passwordVisible = !passwordVisible"></i>
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+        </ng-container>
         <button type="submit" nz-button nzType="primary" class="btn submit-btn" [nzLoading]="isLoading">
-          <ng-container *ngIf="step !== LoginStep.Password" i18n="@@common.continue">Continue</ng-container>
-          <ng-container *ngIf="step === LoginStep.Password" i18n="@@common.login">Login</ng-container>
+          <ng-container *ngIf="step !== LoginStep.Step2" i18n="@@common.continue">Continue</ng-container>
+          <ng-container *ngIf="step === LoginStep.Step2" i18n="@@common.login">Login</ng-container>
         </button>
       </form>
     </nz-tab>
