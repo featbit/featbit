@@ -3,6 +3,7 @@ using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
 using Infrastructure.AccessTokens;
+using Infrastructure.Accounts;
 using Infrastructure.AuditLogs;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
@@ -60,6 +61,9 @@ public static class ConfigureServices
         // messaging services
         AddMessagingServices(services, configuration);
 
+        // account
+        services.AddTransient<IAccountService, AccountService>();
+        
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IUserStore, MongoDbUserStore>();

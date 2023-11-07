@@ -1,4 +1,4 @@
-namespace Domain.Organizations;
+namespace Domain.Accounts;
 
 public record License
 {
@@ -10,7 +10,7 @@ public record License
 
     public long Exp { get; set; }
 
-    public Guid OrgId { get; set; } = Guid.Empty;
+    public Guid AccountId { get; set; } = Guid.Empty;
 
     public string Issuer { get; set; } = string.Empty;
 
@@ -18,10 +18,10 @@ public record License
 
     public ICollection<string> Features { get; set; } = Array.Empty<string>();
 
-    public bool IsValid(Guid orgId)
+    public bool IsValid(Guid accountId)
     {
         // check organization
-        if (OrgId != orgId)
+        if (AccountId != accountId)
         {
             return false;
         }

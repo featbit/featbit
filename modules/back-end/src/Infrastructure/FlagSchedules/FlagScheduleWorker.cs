@@ -1,4 +1,4 @@
-using Domain.Organizations;
+using Domain.Accounts;
 using Domain.AuditLogs;
 using Domain.FlagSchedules;
 using Microsoft.Extensions.Hosting;

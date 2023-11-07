@@ -1,11 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
 import { finalize } from "rxjs/operators";
+import { AccountService } from "@services/account.service";
+
+enum LoginStep {
+  Email = 'email',
+  AccountKey = 'accountKey',
+  Password = 'password'
+}
 
 @Component({
   selector: 'app-do-login',
@@ -14,9 +21,10 @@ import { finalize } from "rxjs/operators";
 })
 export class DoLoginComponent implements OnInit {
 
+  step: LoginStep = LoginStep.Email;
   pwdLoginForm: FormGroup;
   passwordVisible: boolean = false;
-  isLogin: boolean = false;
+  isLoading: boolean = false;
 
   isSsoEnabled: boolean = false;
   isSpinning: boolean = false;
@@ -27,13 +35,15 @@ export class DoLoginComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private identityService: IdentityService,
     private ssoService: SsoService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private accountService: AccountService
   ) { }
 
   async ngOnInit() {
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
-      password: ['', [Validators.required]]
+      password: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Password)]],
+      accountKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.AccountKey)]]
     });
 
     this.isSsoEnabled = await this.ssoService.isEnabled();
@@ -41,7 +51,42 @@ export class DoLoginComponent implements OnInit {
     this.subscribeSsoLogin();
   }
 
-  passwordLogin() {
+  requiredWhenLoginVerifiedValidator = (step: LoginStep): ValidatorFn => {
+    return (control: AbstractControl) => {
+      let currentControl: AbstractControl = null;
+
+      switch (step) {
+        case LoginStep.AccountKey:
+          currentControl = control.parent?.controls['accountKey'];
+          break;
+        case LoginStep.Password:
+          currentControl = control.parent?.controls['password'];
+          break;
+      }
+
+      if (step === this.step && currentControl && (!currentControl.value || currentControl.value.length === 0)) {
+        const error = { required: true };
+        control.setErrors(error);
+        return error;
+      } else {
+        control.setErrors(null);
+      }
+
+      return null;
+    };
+  }
+
+  hasMultipleAccounts(identity: string) {
+    this.accountService.hasMultipleAccounts(identity).subscribe({
+      next: response => {
+        this.step = response ? LoginStep.AccountKey : LoginStep.Password;
+        this.isLoading = false;
+      },
+      error: error => this.handleError(error)
+    });
+  }
+
+  async passwordLogin() {
     if (this.pwdLoginForm.invalid) {
       Object.values(this.pwdLoginForm.controls).forEach(control => {
         if (control.invalid) {
@@ -53,17 +98,28 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
-    this.isLogin = true;
+    const { identity, password, accountKey } = this.pwdLoginForm.value;
 
-    const { identity, password } = this.pwdLoginForm.value;
-    this.identityService.loginByEmail(identity, password).subscribe(
-      response => this.handleResponse(response),
-      error => this.handleError(error)
-    )
+    switch (this.step) {
+      case LoginStep.Email:
+        this.isLoading = true;
+        this.hasMultipleAccounts(identity);
+        break;
+      case LoginStep.AccountKey:
+        this.step = LoginStep.Password;
+        break;
+      case LoginStep.Password:
+        this.isLoading = true;
+        this.identityService.loginByEmail(identity, password, accountKey).subscribe(
+          response => this.handleResponse(response),
+          error => this.handleError(error)
+        )
+        break;
+    }
   }
 
   async handleResponse(response) {
-    this.isLogin = false;
+    this.isLoading = false;
 
     if (!response.success) {
       this.message.error($localize `:@@common.incorrect-email-or-password:Email and/or password incorrect` );
@@ -75,7 +131,7 @@ export class DoLoginComponent implements OnInit {
   }
 
   handleError(_) {
-    this.isLogin = false;
+    this.isLoading = false;
 
     this.message.error($localize `:@@common.login-error:Error occurred, please contact the support.`);
   }
@@ -109,4 +165,6 @@ export class DoLoginComponent implements OnInit {
     await this.identityService.doLoginUser(response.data.token);
     this.message.success($localize`:@@common.login-success:Login with success`);
   }
+
+  protected readonly LoginStep = LoginStep;
 }

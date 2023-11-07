@@ -36,7 +36,7 @@ public class IdentityServiceTests
         const string hashedPwd = "hashed-pwd";
         const string realPwd = "pwd";
 
-        var user = new User("identity", hashedPwd);
+        var user = new User(Guid.NewGuid(), "identity", hashedPwd);
 
         _passwordHasherMock
             .Setup(x => x.VerifyHashedPassword(user, hashedPwd, realPwd))
@@ -52,7 +52,7 @@ public class IdentityServiceTests
         const string hashedPwd = "hashed-pwd";
         const string realPwd = "pwd";
 
-        var user = new User(Guid.NewGuid(), "identity", hashedPwd);
+        var user = new User(Guid.NewGuid(), Guid.NewGuid(), "identity", hashedPwd);
 
         _passwordHasherMock
             .Setup(x => x.VerifyHashedPassword(user, hashedPwd, realPwd))

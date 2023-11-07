@@ -15,6 +15,18 @@ public class IdentityController : ApiControllerBase
             ? Ok(new LoginToken(loginResult.Token))
             : Error<LoginToken>(loginResult.ErrorCode);
     }
+    
+    [HttpPost]
+    [AllowAnonymous]
+    [Route("verify-email")]
+    public async Task<ApiResponse<LoginToken>> VerifyEmailAsync(LoginByEmail request)
+    {
+        var loginResult = await Mediator.Send(request);
+
+        return loginResult.Success
+            ? Ok(new LoginToken(loginResult.Token))
+            : Error<LoginToken>(loginResult.ErrorCode);
+    }
 
     [HttpPut("reset-password")]
     public async Task<ApiResponse<ResetPasswordResult>> ResetPasswordAsync(ResetPassword request)

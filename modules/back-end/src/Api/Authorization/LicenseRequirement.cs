@@ -1,4 +1,4 @@
-using Domain.Organizations;
+using Domain.Accounts;
 
 namespace Api.Authorization;
 

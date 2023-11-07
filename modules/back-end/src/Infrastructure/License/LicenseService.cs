@@ -1,5 +1,5 @@
 using Application.Caches;
-using Domain.Organizations;
+using Domain.Accounts;
 
 namespace Infrastructure.License;
 

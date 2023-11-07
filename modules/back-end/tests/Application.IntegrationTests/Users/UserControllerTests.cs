@@ -29,7 +29,7 @@ public class UserControllerTests
     [Fact]
     public async Task GetUserProfile_NotExist()
     {
-        var userNotExist = new User(Guid.NewGuid(), "email", "pwd");
+        var userNotExist = new User(Guid.NewGuid(), Guid.NewGuid(), "email", "pwd");
         var token = _app.GetToken(userNotExist);
 
         var factory = _app.WithWebHostBuilder(builder => builder.ConfigureTestServices(collection =>

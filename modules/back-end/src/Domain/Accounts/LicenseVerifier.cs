@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace Domain.Organizations;
+namespace Domain.Accounts;
 
 public static class LicenseVerifier
 {

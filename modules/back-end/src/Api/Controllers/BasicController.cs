@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Application.Users;
-using Domain.Organizations;
+using Domain.Accounts;
 
 namespace Api.Controllers;
 

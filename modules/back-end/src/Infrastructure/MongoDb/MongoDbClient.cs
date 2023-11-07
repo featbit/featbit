@@ -1,4 +1,5 @@
 using Domain.AccessTokens;
+using Domain.Accounts;
 using Domain.AuditLogs;
 using Domain.EndUsers;
 using Domain.ExperimentMetrics;
@@ -47,6 +48,8 @@ public class MongoDbClient
     {
         { typeof(User), "Users" },
 
+        { typeof(Account), "Accounts" },
+        
         { typeof(Organization), "Organizations" },
         { typeof(OrganizationUser), "OrganizationUsers" },
         { typeof(Project), "Projects" },

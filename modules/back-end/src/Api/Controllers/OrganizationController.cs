@@ -1,5 +1,5 @@
 using Application.Organizations;
-using Domain.Organizations;
+using Domain.Accounts;
 
 namespace Api.Controllers;
 
