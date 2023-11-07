@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Web;
 using Application.Identity;
 using Microsoft.Extensions.Options;
 
@@ -23,7 +24,7 @@ public class OidcClient
                   $"client_id={_options.ClientId}" +
                   $"&response_type=code" +
                   $"&scope={_options.Scope}" +
-                  $"&redirect_uri={redirectUri}" +
+                  $"&redirect_uri={HttpUtility.UrlEncode(redirectUri)}" +
                   $"&state={Guid.NewGuid()}";
 
         return url;

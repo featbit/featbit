@@ -1,6 +1,6 @@
 <nz-spin [nzSpinning]="isSpinning">
   <nz-tabset class="no-bottom-line">
-    <nz-tab i18n-nzTitle="@@common.login" nzTitle="Login">
+    <nz-tab i18n-nzTitle="@@common.login" nzTitle="Login" *ngIf="!isSSO">
       <form nz-form [formGroup]="pwdLoginForm" (ngSubmit)="passwordLogin()">
         <nz-form-item *ngIf="step === LoginStep.Email">
           <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
@@ -53,14 +53,24 @@
           <ng-container *ngIf="step === LoginStep.Password" i18n="@@common.login">Login</ng-container>
         </button>
       </form>
-      <a
-        *ngIf="isSsoEnabled"
-        [href]="ssoAuthorizeUrl"
-        nz-button
-        nzType="link"
-        class="btn sso-btn"
-        i18n="@@common.login-with-sso">Login with SSO
-      </a>
+    </nz-tab>
+    <nz-tab i18n-nzTitle="@@common.sso" nzTitle="SSO" *ngIf="isSsoEnabled">
+      <form nz-form [formGroup]="ssoForm" (ngSubmit)="ssoLogin()">
+        <nz-form-item>
+          <nz-form-control [nzErrorTip]="invalidWorkspaceKey">
+            <nz-input-group [nzPrefix]="workspacePrefix">
+              <input type="text" nz-input formControlName="workspaceKey" i18n-placeholder="@@common.workspace-key" placeholder="Workspace key"/>
+            </nz-input-group>
+            <ng-template #workspacePrefix>
+              <i nz-icon nzType="bank"></i>
+            </ng-template>
+            <ng-template #invalidWorkspaceKey let-control>
+              <ng-container *ngIf="control.hasError('required')" i18n="@@common.workspace-key-cannot-be-empty">Workspace key is mandatory</ng-container>
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+        <button type="submit" nz-button nzType="primary" class="btn submit-btn" [nzLoading]="isLoading" i18n="@@common.continue">Continue</button>
+      </form>
     </nz-tab>
   </nz-tabset>
 </nz-spin>

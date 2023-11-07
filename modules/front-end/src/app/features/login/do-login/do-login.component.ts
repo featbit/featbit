@@ -21,14 +21,15 @@ enum LoginStep {
 })
 export class DoLoginComponent implements OnInit {
 
+  isSSO: boolean = false;
   step: LoginStep = LoginStep.Email;
   pwdLoginForm: FormGroup;
+  ssoForm: FormGroup;
   passwordVisible: boolean = false;
   isLoading: boolean = false;
 
   isSsoEnabled: boolean = false;
   isSpinning: boolean = false;
-  ssoAuthorizeUrl: string;
 
   constructor(
     private fb: FormBuilder,
@@ -46,8 +47,11 @@ export class DoLoginComponent implements OnInit {
       workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Workspace)]]
     });
 
+    this.ssoForm = this.fb.group({
+      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Workspace)]]
+    });
+
     this.isSsoEnabled = await this.ssoService.isEnabled();
-    this.ssoAuthorizeUrl = this.ssoService.authorizeUrl;
     this.subscribeSsoLogin();
   }
 
@@ -84,6 +88,23 @@ export class DoLoginComponent implements OnInit {
       },
       error: error => this.handleError(error)
     });
+  }
+
+  ssoLogin() {
+    if (this.ssoForm.invalid) {
+      Object.values(this.ssoForm.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({ onlySelf: true });
+        }
+      });
+
+      return;
+    }
+
+    const { workspaceKey } = this.ssoForm.value;
+
+    window.location.href = this.ssoService.getAuthorizeUrl(workspaceKey);
   }
 
   async passwordLogin() {
@@ -139,9 +160,10 @@ export class DoLoginComponent implements OnInit {
   subscribeSsoLogin() {
     this.activatedRoute.queryParams.subscribe(params => {
       if (params["sso-logged-in"] && params['code']) {
+        this.isSSO = true;
         this.isSpinning = true;
 
-        this.ssoService.oidcLogin(params['code'])
+        this.ssoService.oidcLogin(params['code'], params['workspace_key'])
           .pipe(finalize(() => this.isSpinning = false))
           .subscribe({
             next: response => this.handleSsoResponse(response),

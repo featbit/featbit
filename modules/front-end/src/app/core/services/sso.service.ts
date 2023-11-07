@@ -18,15 +18,15 @@ export class SsoService {
     return `${location.origin}${location.pathname}?sso-logged-in=true`;
   }
 
-  get authorizeUrl() {
-    return `${this.baseUrl}/oidc-authorize-url?redirect_uri=${this.redirectUri}`;
+  getAuthorizeUrl(workspaceKey: string) {
+    return `${this.baseUrl}/oidc-authorize-url?redirect_uri=${this.redirectUri}%26workspace_key=${workspaceKey}`;
   }
 
   isEnabled(): Promise<boolean> {
     return firstValueFrom(this.http.get<boolean>(`${this.baseUrl}/check-enabled`));
   }
 
-  oidcLogin(code: string) {
-    return this.http.post(`${this.baseUrl}/oidc/login`, { code, redirectUri: this.redirectUri });
+  oidcLogin(code: string, workspaceKey: string) {
+    return this.http.post(`${this.baseUrl}/oidc/login`, { code, redirectUri: `${this.redirectUri}&${workspaceKey}`});
   }
 }
