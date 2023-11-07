@@ -37,14 +37,21 @@ public class SsoController : ApiControllerBase
     }
 
     [HttpGet("oidc-authorize-url")]
-    public IActionResult GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string redirectUri, [FromQuery(Name = "workspace_key")] string workspaceKey)
+    public async Task<IActionResult> GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string redirectUri, [FromQuery(Name = "workspace_key")] string workspaceKey)
     {
         if (!_isEnabled)
         {
             return BadRequest("SSO not enabled");
         }
 
-        var url = _client.GetAuthorizeUrl(redirectUri, workspaceKey);
+        var workspace = await _workspaceService.FindOneAsync(x => x.Key == workspaceKey);
+        if (workspace == null)
+        {
+            return BadRequest("SSO not enabled");
+        }
+        
+        var oidcOptions = OidcOptions.FromOidcConfig(workspace.Sso.Oidc);
+        var url = _client.GetAuthorizeUrl(redirectUri, workspaceKey, oidcOptions);
         return Redirect(url);
     }
 
@@ -58,18 +65,19 @@ public class SsoController : ApiControllerBase
 
         try
         {
-            var email = await _client.GetEmailAsync(request);
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                return Error<LoginToken>("SSO failed");
-            }
-
             var workspace = await _workspaceService.FindOneAsync(x => x.Key == request.WorkspaceKey);
             if (workspace == null)
             {
                 return Error<LoginToken>("SSO failed");
             }
             
+            var oidcOptions = OidcOptions.FromOidcConfig(workspace.Sso.Oidc);
+            var email = await _client.GetEmailAsync(request, oidcOptions);
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return Error<LoginToken>("SSO failed");
+            }
+
             var user = await _userService.FindByEmailAsync(email, workspace.Id);
             if (user != null)
             {

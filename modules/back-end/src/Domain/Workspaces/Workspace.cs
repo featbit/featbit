@@ -8,6 +8,8 @@ public class Workspace : AuditedEntity
     
     public string License { get; set; }
 
+    public SsoConfig Sso { get; set; }
+
     public Workspace(string name, string key)
     {
         Name = name;

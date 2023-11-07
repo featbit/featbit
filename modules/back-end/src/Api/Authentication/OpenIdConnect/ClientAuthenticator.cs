@@ -33,7 +33,7 @@ public class BasicAuthenticator : IClientAuthenticator
         };
         var httpContent = new FormUrlEncodedContent(kvs);
 
-        var client = $"{options.ClientId}:{options.ClientSecret}";
+        var client = $"{options.Config.ClientId}:{options.Config.ClientSecret}";
         var authorizationString = Convert.ToBase64String(Encoding.UTF8.GetBytes(client));
 
         var param = new AuthParameters(httpContent, authorizationString);
@@ -50,8 +50,8 @@ public class PostAuthenticator : IClientAuthenticator
             new("code", request.Code),
             new("grant_type", "authorization_code"),
             new("redirect_uri", request.RedirectUri),
-            new("client_id", options.ClientId),
-            new("client_secret", options.ClientSecret),
+            new("client_id", options.Config.ClientId),
+            new("client_secret", options.Config.ClientSecret),
         };
         var httpContent = new FormUrlEncodedContent(kvs);
 
