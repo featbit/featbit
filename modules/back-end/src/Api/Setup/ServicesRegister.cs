@@ -129,6 +129,9 @@ public static class ServicesRegister
             }
         });
 
+        // SSO
+        builder.Services.AddSso(builder.Configuration);
+        
         // replace default authorization result handler
         var authorizationResultHandler =
             ServiceDescriptor.Singleton<IAuthorizationMiddlewareResultHandler>(new ApiAuthorizationResultHandler());

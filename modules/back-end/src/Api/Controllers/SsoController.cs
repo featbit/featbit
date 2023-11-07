@@ -50,6 +50,11 @@ public class SsoController : ApiControllerBase
             return BadRequest("SSO not enabled");
         }
         
+        if (workspace.Sso?.Oidc == null)
+        {
+            return BadRequest("SSO not configured");
+        }
+        
         var oidcOptions = OidcOptions.FromOidcConfig(workspace.Sso.Oidc);
         var url = _client.GetAuthorizeUrl(redirectUri, workspaceKey, oidcOptions);
         return Redirect(url);
@@ -69,6 +74,11 @@ public class SsoController : ApiControllerBase
             if (workspace == null)
             {
                 return Error<LoginToken>("SSO failed");
+            }
+            
+            if (workspace.Sso?.Oidc == null)
+            {
+                return Error<LoginToken>("SSO not configured");
             }
             
             var oidcOptions = OidcOptions.FromOidcConfig(workspace.Sso.Oidc);
