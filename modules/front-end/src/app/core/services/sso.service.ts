@@ -27,6 +27,6 @@ export class SsoService {
   }
 
   oidcLogin(code: string, workspaceKey: string) {
-    return this.http.post(`${this.baseUrl}/oidc/login`, { code, redirectUri: `${this.redirectUri}&${workspaceKey}`});
+    return this.http.post(`${this.baseUrl}/oidc/login`, { code, redirectUri: this.redirectUri, workspaceKey});
   }
 }

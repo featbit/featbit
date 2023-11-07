@@ -28,9 +28,9 @@ public class UserService : IUserService
         return await _users.FindManyAsync(x => ids.Contains(x.Id));
     }
 
-    public async Task<User?> FindByEmailAsync(string email)
+    public async Task<User?> FindByEmailAsync(string email, Guid workspaceId)
     {
-        return await _users.FindOneAsync(x => x.Email == email);
+        return await _users.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspaceId);
     }
 
     public async Task UpdateAsync(User user)

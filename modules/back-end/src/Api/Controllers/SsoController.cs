@@ -1,10 +1,6 @@
 using Api.Authentication.OpenIdConnect;
 using Application.Identity;
 using Application.Services;
-using Domain.Workspaces;
-using Domain.Organizations;
-using Domain.Policies;
-using Domain.Users;
 
 namespace Api.Controllers;
 
@@ -18,7 +14,7 @@ public class SsoController : ApiControllerBase
     private readonly IUserService _userService;
     private readonly ILicenseService _licenseService;
     private readonly IIdentityService _identityService;
-    private readonly IOrganizationService _organizationService;
+    private readonly IWorkspaceService _workspaceService;
     private readonly ILogger<SsoController> _logger;
 
     public SsoController(
@@ -26,7 +22,7 @@ public class SsoController : ApiControllerBase
         IUserService userService,
         ILicenseService licenseService,
         IIdentityService identityService,
-        IOrganizationService organizationService,
+        IWorkspaceService workspaceService,
         IConfiguration configuration,
         ILogger<SsoController> logger)
     {
@@ -36,7 +32,7 @@ public class SsoController : ApiControllerBase
         _userService = userService;
         _licenseService = licenseService;
         _identityService = identityService;
-        _organizationService = organizationService;
+        _workspaceService = workspaceService;
         _logger = logger;
     }
 
@@ -62,43 +58,26 @@ public class SsoController : ApiControllerBase
 
         try
         {
-            // var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
-            //
-            // var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(organization.Id, LicenseFeatures.Sso);
-            // if (!isSsoGranted)
-            // {
-            //     return Error<LoginToken>(
-            //         "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
-            //     );
-            // }
-
-            string token;
-
             var email = await _client.GetEmailAsync(request);
             if (string.IsNullOrWhiteSpace(email))
             {
-                return Error<LoginToken>("Can not get email from id_token");
+                return Error<LoginToken>("SSO failed");
             }
 
-            var user = await _userService.FindByEmailAsync(email);
-            if (user == null)
+            var workspace = await _workspaceService.FindOneAsync(x => x.Key == request.WorkspaceKey);
+            if (workspace == null)
             {
-                
-                // register user by email
-                var registerResult = await _identityService.RegisterByEmailAsync(user.WorkspaceId, email, string.Empty, UserOrigin.Sso);
-
-                // add user to organization
-                var organizationUser = new OrganizationUser(organization.Id, registerResult.UserId);
-                await _organizationService.AddUserAsync(organizationUser, policies: new[] { BuiltInPolicy.Developer });
-
-                token = registerResult.Token;
+                return Error<LoginToken>("SSO failed");
             }
-            else
+            
+            var user = await _userService.FindByEmailAsync(email, workspace.Id);
+            if (user != null)
             {
-                token = _identityService.IssueToken(user);
+                var token = _identityService.IssueToken(user);
+                return Ok(new LoginToken(token));
             }
-
-            return Ok(new LoginToken(token));
+            
+            return Error<LoginToken>("SSO not enabled");
         }
         catch (Exception ex)
         {

@@ -8,7 +8,7 @@ public interface IUserService
 
     Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids);
 
-    Task<User> FindByEmailAsync(string email);
+    Task<User> FindByEmailAsync(string email, Guid workspaceId);
 
     Task UpdateAsync(User user);
 }

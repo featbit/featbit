@@ -9,6 +9,8 @@ public class AddUser : IRequest<bool>
 {
     // possible values: email
     public string Method { get; set; }
+    
+    public Guid WorkspaceId { get; set; }
 
     public Guid OrganizationId { get; set; }
 
@@ -59,7 +61,7 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         string initialPwd;
         Guid userId;
 
-        var user = await _userService.FindByEmailAsync(email);
+        var user = await _userService.FindByEmailAsync(email, request.WorkspaceId);
         // automatically register users if they do not exist
         if (user == null)
         {
