@@ -30,7 +30,7 @@ public class SsoController : ApiControllerBase
         IConfiguration configuration,
         ILogger<SsoController> logger)
     {
-        _isEnabled = "true".Equals(configuration["SSO:enabled"], StringComparison.CurrentCultureIgnoreCase);
+        _isEnabled = "true".Equals(configuration["SSOEnabled"], StringComparison.CurrentCultureIgnoreCase);
 
         _client = client;
         _userService = userService;
@@ -62,15 +62,15 @@ public class SsoController : ApiControllerBase
 
         try
         {
-            var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
-
-            var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(organization.Id, LicenseFeatures.Sso);
-            if (!isSsoGranted)
-            {
-                return Error<LoginToken>(
-                    "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
-                );
-            }
+            // var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
+            //
+            // var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(organization.Id, LicenseFeatures.Sso);
+            // if (!isSsoGranted)
+            // {
+            //     return Error<LoginToken>(
+            //         "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
+            //     );
+            // }
 
             string token;
 
