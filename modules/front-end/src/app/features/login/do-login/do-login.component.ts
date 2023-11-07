@@ -151,7 +151,7 @@ export class DoLoginComponent implements OnInit {
         this.isSSO = true;
         this.isSpinning = true;
 
-        this.ssoService.oidcLogin(params['code'], params['workspace_key'])
+        this.ssoService.oidcLogin(params['code'], params['state'])
           .pipe(finalize(() => this.isSpinning = false))
           .subscribe({
             next: response => this.handleSsoResponse(response),

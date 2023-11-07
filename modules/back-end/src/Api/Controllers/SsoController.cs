@@ -37,14 +37,14 @@ public class SsoController : ApiControllerBase
     }
 
     [HttpGet("oidc-authorize-url")]
-    public IActionResult GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string? redirectUri = null)
+    public IActionResult GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string redirectUri, [FromQuery(Name = "workspace_key")] string workspaceKey)
     {
         if (!_isEnabled)
         {
             return BadRequest("SSO not enabled");
         }
 
-        var url = _client.GetAuthorizeUrl(redirectUri);
+        var url = _client.GetAuthorizeUrl(redirectUri, workspaceKey);
         return Redirect(url);
     }
 

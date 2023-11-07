@@ -18,14 +18,14 @@ public class OidcClient
         _options = options.Value;
     }
 
-    public string GetAuthorizeUrl(string? redirectUri)
+    public string GetAuthorizeUrl(string redirectUri, string workspaceKey)
     {
         var url = $"{_options.AuthorizationEndpoint}?" +
                   $"client_id={_options.ClientId}" +
                   $"&response_type=code" +
                   $"&scope={_options.Scope}" +
-                  $"&redirect_uri={HttpUtility.UrlEncode(redirectUri)}" +
-                  $"&state={Guid.NewGuid()}";
+                  $"&redirect_uri={redirectUri}" +
+                  $"&state={workspaceKey}";
 
         return url;
     }
