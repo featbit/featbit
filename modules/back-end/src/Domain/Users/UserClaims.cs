@@ -6,5 +6,5 @@ public class UserClaims
 
     public const string Email = "email";
     
-    public const string WorkspaceId = "workspace_id";
+    public const string WorkspaceId = "wsId";
 }

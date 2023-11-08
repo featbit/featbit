@@ -51,7 +51,7 @@ public class SsoController : ApiControllerBase
             return BadRequest("SSO not enabled");
         }
         
-        var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
+        var isSsoGranted = _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
         if (!isSsoGranted)
         {
             return BadRequest(
@@ -85,7 +85,7 @@ public class SsoController : ApiControllerBase
                 return Error<LoginToken>("SSO failed");
             }
             
-            var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
+            var isSsoGranted = _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
             if (!isSsoGranted)
             {
                 return Error<LoginToken>(

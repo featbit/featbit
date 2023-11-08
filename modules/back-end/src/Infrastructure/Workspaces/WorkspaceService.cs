@@ -25,4 +25,12 @@ public class WorkspaceService : MongoDbService<Workspace>,  IWorkspaceService
 
         return await query.ToListAsync();
     }
+    
+    public async Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key)
+    {
+        return await AnyAsync(ws =>
+            ws.Id != workspaceId &&
+            string.Equals(ws.Key, key, StringComparison.OrdinalIgnoreCase)
+        );
+    }
 }

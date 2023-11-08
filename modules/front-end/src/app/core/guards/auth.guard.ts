@@ -9,6 +9,7 @@ import { IEnvironment, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
+import { WorkspaceService } from "@services/workspace.service";
 
 export const authGuard = async (
   route: ActivatedRouteSnapshot,
@@ -16,6 +17,7 @@ export const authGuard = async (
   router = inject(Router),
   permissionService = inject(PermissionsService),
   projectService = inject(ProjectService),
+  workspaceService = inject(WorkspaceService),
   organizationService = inject(OrganizationService),
   identityService = inject(IdentityService),
   notification = inject(NzNotificationService)
@@ -28,6 +30,8 @@ export const authGuard = async (
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
     return router.parseUrl('/login');
   }
+
+  await workspaceService.refreshWorkspace();
 
   // set user organizations
   const organization = await organizationService.setUserOrganizations();

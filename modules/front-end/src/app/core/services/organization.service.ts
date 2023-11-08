@@ -27,10 +27,6 @@ export class OrganizationService {
     return this.http.post(url, params);
   }
 
-  updateLicense(license: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/license`, { license });
-  }
-
   update(params: any): Observable<any> {
     return this.http.put(this.baseUrl, params);
   }
@@ -62,7 +58,6 @@ export class OrganizationService {
     if (!!organization) {
       const currentOrganization = this.organizations.find(ws => ws.id == organization.id);
       currentOrganization.name = organization.name;
-      currentOrganization.license = organization.license;
       currentOrganization.initialized = organization.initialized;
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrganization));
     } else {

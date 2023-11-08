@@ -46,6 +46,25 @@ public class ApiControllerBase : ControllerBase
             return _orgId.Value;
         }
     }
+    
+    private Guid? _workspaceId;
+    protected Guid WorkspaceId
+    {
+        get
+        {
+            if (_workspaceId.HasValue)
+            {
+                return _workspaceId.Value;
+            }
+
+            var workspaceIdHeaderValue = HttpContext.Request.Headers[OpenApiConstants.WorkspaceHeaderKey];
+
+            _workspaceId = Guid.TryParse(workspaceIdHeaderValue, out var workspaceId)
+                ? workspaceId
+                : Guid.Empty;
+            return _workspaceId.Value;
+        }
+    }
 
     protected static ApiResponse<TData> Ok<TData>(TData data) => ApiResponse<TData>.Ok(data);
 

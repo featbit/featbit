@@ -16,10 +16,10 @@ public class LicenseService : ILicenseService
     {
         var licenseString = await _cacheService.GetLicenseAsync(workSpaceId);
 
-        return await IsFeatureGrantedAsync(feature, workSpaceId, licenseString);
+        return IsFeatureGrantedAsync(feature, workSpaceId, licenseString);
     }
     
-    public async Task<bool> IsFeatureGrantedAsync(string feature, Guid workSpaceId, string licenseString)
+    public bool IsFeatureGrantedAsync(string feature, Guid workSpaceId, string licenseString)
     {
         if (!LicenseFeatures.IsDefined(feature))
         {

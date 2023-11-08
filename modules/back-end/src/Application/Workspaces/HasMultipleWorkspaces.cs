@@ -1,6 +1,6 @@
 using Application.Bases;
 
-namespace Application.Identity;
+namespace Application.Workspaces;
 
 public class HasMultipleWorkspaces : IRequest<bool>
 {

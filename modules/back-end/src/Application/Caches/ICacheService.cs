@@ -1,6 +1,7 @@
 using Domain.Segments;
 using Domain.FeatureFlags;
 using Domain.Organizations;
+using Domain.Workspaces;
 
 namespace Application.Caches;
 
@@ -14,7 +15,7 @@ public interface ICacheService
 
     Task DeleteSegmentAsync(Guid envId, Guid segmentId);
 
-    Task UpsertLicenseAsync(Organization organization);
+    Task UpsertLicenseAsync(Workspace workspace);
 
-    Task<string> GetLicenseAsync(Guid orgId);
+    Task<string> GetLicenseAsync(Guid workspaceId);
 }

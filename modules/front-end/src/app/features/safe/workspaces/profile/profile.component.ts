@@ -5,7 +5,7 @@ import { getAuth } from '@utils/index';
 import { UserService } from "@services/user.service";
 import { IAuthProps } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
-import { UserOriginEnum } from "@features/safe/organizations/types/profiles";
+import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
 @Component({
   selector: 'app-profile',

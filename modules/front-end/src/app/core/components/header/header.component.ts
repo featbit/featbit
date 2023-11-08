@@ -16,7 +16,7 @@ import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
 import { copyToClipboard } from '@utils/index';
 import { EnvService } from '@core/services/env.service';
-import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentOrganization, getCurrentProjectEnv, getCurrentWorkspace } from "@utils/project-env";
 
 @Component({
   selector: 'app-header',
@@ -143,7 +143,8 @@ export class HeaderComponent implements OnInit {
   private setSelectedProjectEnv() {
     this.currentOrganization = getCurrentOrganization();
     this.currentProjectEnv = getCurrentProjectEnv();
-    this.license = new License(this.currentOrganization.license);
+    const workspace = getCurrentWorkspace();
+    this.license = new License(workspace.license);
 
     this.setCurrentEnv();
 

@@ -1,4 +1,4 @@
-import { UserOriginEnum } from "@features/safe/organizations/types/profiles";
+import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
 export interface IResponse {
   success: boolean,
@@ -46,14 +46,21 @@ export interface IAuthProps {
   id: string;
   email: string;
   name: string;
+  workspaceId: string;
   origin: UserOriginEnum;
+}
+
+export interface IWorkspace {
+  id: string,
+  name: string,
+  key: string,
+  license?: string
 }
 
 export interface IOrganization {
   id: string,
   initialized: boolean,
   name: string,
-  license?: string
 }
 
 export enum LicenseFeatureEnum {
@@ -67,7 +74,7 @@ export enum LicenseFeatureEnum {
 export interface ILicense {
   plan: string,
   sub: string,
-  orgId: string,
+  wsId: string,
   iat: number,
   exp: number,
   issuer: string,

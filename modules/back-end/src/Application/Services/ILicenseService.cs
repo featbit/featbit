@@ -10,5 +10,5 @@ public interface ILicenseService
     /// <summary>
     /// Check if the feature is granted for the organization
     /// </summary>
-    Task<bool> IsFeatureGrantedAsync(string feature, Guid workSpaceId, string licenseString);
+    bool IsFeatureGrantedAsync(string feature, Guid workSpaceId, string licenseString);
 }

@@ -1,0 +1,81 @@
+<div class="standard-div rows" *ngIf="!isLoading; else loadingTem;">
+  <div class="row">
+    <div class="row-title">
+      <span i18n="@@common.id">Id</span>
+      <i nz-icon i18n-nz-tooltip="@@common.workspace-id-copy-hint" nz-tooltip="You will need to provide this Id to generate the license, please contact us to get a license." nzType="icons:icon-info-outline"></i>
+    </div>
+    <div class="row-content">
+      <nz-form-item class="extend">
+        <nz-input-group class="row-input-group" [nzPrefix]="idIcon">
+          <input disabled type="text" nz-input [ngModel]="workspace?.id" placeholder="License" i18n-placeholder="@@common.license"/>
+          <ng-template #idIcon>
+            <i nz-icon nzType="icons:icon-id"></i>
+          </ng-template>
+        </nz-input-group>
+      </nz-form-item>
+      <button nz-button class="copy-id-btn" nzType="primary" (click)="copyText(workspace?.id)">
+        <i nz-icon nzType="icons:icon-copy"></i>
+        <ng-container i18n="@@common.copy">Copy</ng-container>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="row-title" i18n="@@common.license">License</div>
+    <form class="row-content" nz-form [formGroup]="licenseForm" [nzLayout]="'inline'" (ngSubmit)="submitLicenseForm()">
+      <nz-form-item class="extend">
+        <nz-form-control nzErrorTip="License is mandatory!" i18n-nzErrorTip="@@common.license-mandatory">
+          <nz-input-group class="row-input-group" [nzPrefix]="licenseIcon">
+            <input type="text" nz-input formControlName="license" placeholder="License" i18n-placeholder="@@common.license"/>
+            <ng-template #licenseIcon>
+              <i nz-icon nzType="icons:icon-license"></i>
+            </ng-template>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button class="update-license-btn" nzType="primary" [nzLoading]="isLicenseLoading">
+        <i nz-icon nzType="icons:icon-sync"></i>
+        <ng-container i18n="@@common.updateLicense">Update</ng-container>
+      </button>
+    </form>
+  </div>
+</div>
+<div class="standard-div rows" *ngIf="!isLoading; else loadingTem;">
+  <form nz-form [formGroup]="nameKeyForm" [nzLayout]="'vertical'" (ngSubmit)="submitNameKeyForm()">
+    <nz-form-item>
+      <nz-form-label i18n="@@common.name">Name</nz-form-label>
+      <nz-form-control nzErrorTip="Workspace name is mandatory!" i18n-nzErrorTip="@@workspace.workspace.nameMandatory">
+        <nz-input-group [nzPrefix]="orgIcon">
+          <input id="name" type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+        </nz-input-group>
+        <ng-template #orgIcon>
+          <i nz-icon nzType="icons:icon-org"></i>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label i18n="@@common.key">Key</nz-form-label>
+      <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
+        <nz-input-group [nzPrefix]="keyIcon">
+          <input id="key" type="text" nz-input formControlName="key" placeholder="Key" i18n-placeholder="@@common.key"/>
+        </nz-input-group>
+        <ng-template #keyIcon>
+          <i nz-icon nzType="icons:icon-org"></i>
+        </ng-template>
+        <ng-template #keyErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+          <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
+          <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <button nz-button class="name-key-btn" nzType="primary" [nzLoading]="isNameKeyLoading">
+      <i nz-icon nzType="icons:icon-sync"></i>
+      <ng-container i18n="@@common.update">Update</ng-container>
+    </button>
+  </form>
+</div>
+<ng-template #loadingTem>
+  <div class="block" style="margin: auto;text-align: center">
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+  </div>
+</ng-template>

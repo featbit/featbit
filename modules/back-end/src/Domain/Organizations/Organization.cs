@@ -7,24 +7,20 @@ public class Organization : AuditedEntity
     public bool Initialized { get; set; }
 
     public string License { get; set; }
+    
+    public Guid WorkspaceId { get; set; }
 
-    public Organization(string name)
+    public Organization(string name, Guid workspaceId)
     {
         Name = name;
         Initialized = false;
         License = string.Empty;
+        WorkspaceId = workspaceId;
     }
 
     public void UpdateName(string name)
     {
         Name = name;
-
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void UpdateLicense(string license)
-    {
-        License = license;
 
         UpdatedAt = DateTime.UtcNow;
     }

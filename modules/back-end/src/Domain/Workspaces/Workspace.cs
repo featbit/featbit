@@ -16,9 +16,10 @@ public class Workspace : AuditedEntity
         License = string.Empty;
     }
 
-    public void UpdateName(string name)
+    public void Update(string name, string key)
     {
         Name = name;
+        Key = key;
 
         UpdatedAt = DateTime.UtcNow;
     }

@@ -13,7 +13,8 @@ import { Router } from "@angular/router";
 import { UserService } from "@services/user.service";
 import { IResponse } from "@shared/types";
 import { Observable } from "rxjs";
-import { IResetPasswordResult } from "@features/safe/organizations/types/profiles";
+import { IResetPasswordResult } from "@features/safe/workspaces/types/profiles";
+import { WorkspaceService } from "@services/workspace.service";
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,8 @@ export class IdentityService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private workspaceService: WorkspaceService
   ) { }
 
   loginByEmail(email: string, password: string, workspaceKey: string) {
@@ -52,7 +54,7 @@ export class IdentityService {
       this.userService.getProfile().subscribe({
         next: async (profile: IResponse) => {
           localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
-
+          await this.workspaceService.refreshWorkspace();
           resolve();
 
           const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);

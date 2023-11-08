@@ -7,6 +7,7 @@ namespace Application.Organizations;
 
 public class CreateOrganization : IRequest<OrganizationVm>
 {
+    public Guid WorkspaceId { get; set; }
     public string Name { get; set; }
 }
 
@@ -38,7 +39,7 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
     public async Task<OrganizationVm> Handle(CreateOrganization request, CancellationToken cancellationToken)
     {
         // add new organization
-        var organization = new Organization(request.Name);
+        var organization = new Organization(request.Name, request.WorkspaceId);
         await _service.AddOneAsync(organization);
         
         // add user to organization

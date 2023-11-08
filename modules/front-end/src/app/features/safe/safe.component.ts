@@ -68,9 +68,9 @@ export class SafeComponent implements OnInit {
         line: true
       },
       {
-        title: $localize `:@@menu.organization:Organization`,
+        title: $localize `:@@menu.workspace:Workspace`,
         icon: 'icons:icon-org',
-        path: '/organizations'
+        path: '/workspace'
       },
       {
         title: $localize `:@@menu.relay-proxies:Relay Proxies`,

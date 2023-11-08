@@ -8,6 +8,10 @@ export function CURRENT_PROJECT(): string {
   return getLocalStorageKey('current-project', false);
 }
 
+export function CURRENT_WORKSPACE(): string {
+  return getLocalStorageKey('current-workspace', false);
+}
+
 export function CURRENT_ORGANIZATION(): string {
   return getLocalStorageKey('current-organization', false);
 }
