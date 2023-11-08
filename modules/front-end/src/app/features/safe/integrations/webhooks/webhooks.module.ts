@@ -2,11 +2,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { WebhooksRoutingModule } from './webhooks-routing.module';
-import { WebhooksComponent } from './webhooks.component';
+import { IndexComponent } from './index/index.component';
 
 @NgModule({
   declarations: [
-    WebhooksComponent
+    IndexComponent
   ],
   imports: [
     CommonModule,
