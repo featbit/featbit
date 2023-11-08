@@ -10,7 +10,7 @@ public record License
 
     public long Exp { get; set; }
 
-    public Guid WorkspaceId { get; set; } = Guid.Empty;
+    public Guid WsId { get; set; } = Guid.Empty;
 
     public string Issuer { get; set; } = string.Empty;
 
@@ -21,7 +21,7 @@ public record License
     public bool IsValid(Guid workspaceId)
     {
         // check organization
-        if (WorkspaceId != workspaceId)
+        if (WsId != workspaceId)
         {
             return false;
         }

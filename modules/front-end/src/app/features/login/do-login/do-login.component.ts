@@ -141,6 +141,7 @@ export class DoLoginComponent implements OnInit {
 
   handleError(_) {
     this.isLoading = false;
+    this.isSpinning = false;
 
     this.message.error($localize `:@@common.login-error:Error occurred, please contact the support.`);
   }
@@ -152,7 +153,6 @@ export class DoLoginComponent implements OnInit {
         this.isSpinning = true;
 
         this.ssoService.oidcLogin(params['code'], params['state'])
-          .pipe(finalize(() => this.isSpinning = false))
           .subscribe({
             next: response => this.handleSsoResponse(response),
             error: error => this.handleError(error)

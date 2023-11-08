@@ -1,6 +1,7 @@
 using Api.Authentication.OpenIdConnect;
 using Application.Identity;
 using Application.Services;
+using Domain.Workspaces;
 
 namespace Api.Controllers;
 
@@ -50,6 +51,14 @@ public class SsoController : ApiControllerBase
             return BadRequest("SSO not enabled");
         }
         
+        var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
+        if (!isSsoGranted)
+        {
+            return BadRequest(
+                "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
+            );
+        }
+        
         if (workspace.Sso?.Oidc == null)
         {
             return BadRequest("SSO not configured");
@@ -74,6 +83,14 @@ public class SsoController : ApiControllerBase
             if (workspace == null)
             {
                 return Error<LoginToken>("SSO failed");
+            }
+            
+            var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
+            if (!isSsoGranted)
+            {
+                return Error<LoginToken>(
+                    "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
+                );
             }
             
             if (workspace.Sso?.Oidc == null)

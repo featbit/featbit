@@ -106,7 +106,7 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
         {
             // check license
             var isChangeRequestGranted =
-                await _licenseService.IsFeatureGrantedAsync(request.OrgId, LicenseFeatures.ChangeRequest);
+                await _licenseService.IsFeatureGrantedAsync(LicenseFeatures.ChangeRequest, request.OrgId);
             if (!isChangeRequestGranted)
             {
                 throw new BusinessException(ErrorCodes.Unauthorized);

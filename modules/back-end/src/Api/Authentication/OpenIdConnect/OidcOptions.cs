@@ -5,8 +5,6 @@ namespace Api.Authentication.OpenIdConnect;
 
 public class OidcOptions
 {
-    public const string Oidc = "SSO:OIDC";
-    
     public OidcConfig Config { get; set; }
 
     public static OidcOptions FromOidcConfig(OidcConfig config)
