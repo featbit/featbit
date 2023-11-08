@@ -12,22 +12,25 @@ const routes: Routes = [
     children: [
       {
         path: 'organization',
-        component: OrganizationComponent
+        component: OrganizationComponent,
+        data: {
+          breadcrumb: $localize `:@@workspace.routing.org:Organization`
+        },
       }, {
         path: 'projects',
         component: ProjectComponent,
         data: {
-          breadcrumb: $localize `:@@org.routing.projects:Projects`
+          breadcrumb: $localize `:@@workspace.routing.projects:Projects`
         },
       }, {
         path: 'profile',
         component: ProfileComponent,
         data: {
-          breadcrumb: $localize `:@@org.routing.profile:Profile`
+          breadcrumb: $localize `:@@workspace.routing.profile:Profile`
         },
       }, {
         path: '',
-        redirectTo: './org',
+        redirectTo: '.',
         pathMatch: 'full'
       }
     ]
