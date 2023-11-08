@@ -59,7 +59,7 @@
           <input id="key" type="text" nz-input formControlName="key" placeholder="Key" i18n-placeholder="@@common.key"/>
         </nz-input-group>
         <ng-template #keyIcon>
-          <i nz-icon nzType="icons:icon-org"></i>
+          <i nz-icon nzType="key" nzTheme="outline"></i>
         </ng-template>
         <ng-template #keyErrorTpl let-control>
           <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
