@@ -7502,11 +7502,18 @@
           <context context-type="linenumber">111</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="integrations.routing.webhooks" datatype="html">
+        <source>Webhooks</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/integrations-routing.module.ts</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="integrations.routing.access-tokens" datatype="html">
         <source>Access Tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/integrations-routing.module.ts</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">19</context>
         </context-group>
       </trans-unit>
       <trans-unit id="onboarding.complete.title" datatype="html">
@@ -8081,11 +8088,18 @@
           <context context-type="linenumber">103</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="menu.integrations.webhooks" datatype="html">
+        <source>Webhooks</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
+          <context context-type="linenumber">108</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="menu.integrations.access-tokens" datatype="html">
         <source>Access Tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/safe.component.ts</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">113</context>
         </context-group>
       </trans-unit>
       <trans-unit id="segment.details.segment-not-used" datatype="html">
