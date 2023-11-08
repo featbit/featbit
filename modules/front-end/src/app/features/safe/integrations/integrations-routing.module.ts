@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { accessTokensGuard } from "@core/guards/accessTokens.guard";
 
 const routes: Routes = [
+  { path: '', redirectTo: '/integrations/webhooks', pathMatch: 'full' },
   {
     path: 'webhooks',
     loadChildren: () => import('./webhooks/webhooks.module').then(m => m.WebhooksModule),
