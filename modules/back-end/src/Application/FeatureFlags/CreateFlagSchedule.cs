@@ -12,6 +12,8 @@ namespace Application.FeatureFlags;
 
 public class CreateFlagSchedule : IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+    
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
@@ -106,7 +108,7 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
         {
             // check license
             var isChangeRequestGranted =
-                await _licenseService.IsFeatureGrantedAsync(LicenseFeatures.ChangeRequest, request.OrgId);
+                await _licenseService.IsFeatureGrantedAsync(LicenseFeatures.ChangeRequest, request.WorkspaceId);
             if (!isChangeRequestGranted)
             {
                 throw new BusinessException(ErrorCodes.Unauthorized);

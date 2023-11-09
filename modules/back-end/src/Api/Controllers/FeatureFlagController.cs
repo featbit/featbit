@@ -218,6 +218,7 @@ public class FeatureFlagController : ApiControllerBase
     [HttpPost("{key}/schedules")]
     public async Task<ApiResponse<bool>> CreateScheduleAsync(Guid envId, string key, CreateFlagSchedule request)
     {
+        request.WorkspaceId = WorkspaceId;
         request.OrgId = OrgId;
         request.Key = key;
         request.EnvId = envId;
