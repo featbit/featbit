@@ -61,13 +61,6 @@ public class FlagScheduleWorker : BackgroundService
             {
                 try
                 {
-                    var isScheduleGranted =
-                        await _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Schedule, schedule.OrgId);
-                    if (!isScheduleGranted)
-                    {
-                        continue;
-                    }
-
                     await ApplyScheduleAsync(schedule);
 
                     _logger.LogInformation(
