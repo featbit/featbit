@@ -34,4 +34,11 @@ public class InMemoryUserStore : IUserStore
 
         return Task.FromResult(true);
     }
+
+    public Task DeleteAsync(Guid userId)
+    {
+        _users.RemoveAll(x => x.Id == userId);
+
+        return Task.FromResult(true);
+    }
 }
