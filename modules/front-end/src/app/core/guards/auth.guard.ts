@@ -1,11 +1,11 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { getAuth } from '@shared/utils';
-import { CURRENT_PROJECT, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
+import { CURRENT_ORGANIZATION, CURRENT_PROJECT, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { IEnvironment, IProject } from "@shared/types";
+import { IEnvironment, IOrganization, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
@@ -32,12 +32,27 @@ export const authGuard = async (
   }
 
   await workspaceService.refreshWorkspace();
+  const organizations = await organizationService.getListAsync();
+  organizationService.organizations = organizations;
 
-  // set user organizations
-  const organization = await organizationService.setUserOrganizations();
+  if (url.startsWith("/select-organization")) {
+    return true;
+  }
+
+  // if no available orgs, logout
+  if (organizations.length === 0) {
+    return router.parseUrl('/select-organization');
+  }
+
+  const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
+  let organization: IOrganization = orgStr ? JSON.parse(orgStr) : null;
+
   if (!organization) {
-    identityService.doLogoutUser(false);
-    return false;
+    localStorage.setItem(LOGIN_REDIRECT_URL, url);
+    return router.parseUrl('/select-organization');
+  } else {
+    organization = organizations.find(org => org.id === organization.id) || organizations[0];
+    organizationService.setOrganization(organization);
   }
 
   // init user permission

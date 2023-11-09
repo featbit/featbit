@@ -737,6 +737,10 @@
           <context context-type="linenumber">72</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
           <context context-type="linenumber">140</context>
         </context-group>
@@ -926,7 +930,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">100</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
@@ -2399,6 +2403,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
           <context context-type="linenumber">75</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
+          <context context-type="linenumber">83</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
@@ -4001,10 +4009,6 @@
           <context context-type="linenumber">38</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">72</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
           <context context-type="linenumber">121</context>
         </context-group>
@@ -4435,10 +4439,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/details/setting/setting.component.html</context>
           <context context-type="linenumber">33</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
@@ -5117,7 +5117,7 @@
         <source>Permission Denied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <target>无权访问</target>
       </trans-unit>
@@ -5125,7 +5125,7 @@
         <source>You don&apos;t have permissions to access to the current environment or you don&apos;t have access to any projects and environments, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <target>您没有访问当前项目和环境或者任何项目和环境的权限，请联系管理员授予您所需的权限。</target>
       </trans-unit>
@@ -8177,6 +8177,38 @@
         </context-group>
         <target>项</target>
       </trans-unit>
+      <trans-unit id="common.remove-from-organization-confirm" datatype="html">
+        <source>This operation will remove the user only from the current organization, are you sure to do this?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">68</context>
+        </context-group>
+        <target>该操作只会将用户从当前机构中移除，您确定要进行该操作吗？</target>
+      </trans-unit>
+      <trans-unit id="common.remove-from-org" datatype="html">
+        <source>Remove from Organization</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+        <target>从机构中移除</target>
+      </trans-unit>
+      <trans-unit id="common.remove-from-workspace-confirm" datatype="html">
+        <source>This operation will remove the user from the workspace and all the related organizations, are you sure to do this?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+        <target>该操作将会把用户从 Workspace 以及所有关联机构中移除，您确定要进行该操作吗？</target>
+      </trans-unit>
+      <trans-unit id="common.remove-from-workspace" datatype="html">
+        <source>Remove from workspace</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
+          <context context-type="linenumber">79</context>
+        </context-group>
+        <target>从 Workspace 中移除</target>
+      </trans-unit>
       <trans-unit id="common.searchNamePlaceholder" datatype="html">
         <source>Filter by name</source>
         <context-group purpose="location">
@@ -8641,6 +8673,46 @@
         </context-group>
         <target>该用户组正在被 <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegmentFlagReferences.length}}"/> 个开关所引用，在操作之前需要先移除这些引用！</target>
       </trans-unit>
+      <trans-unit id="common.zero-org-info" datatype="html">
+        <source> You don&apos;t have any organization yet. Please contact your admin to add you to an organization.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <target>您当前没有任何机构，请联系管理员将您添加到相关机构中.</target>
+      </trans-unit>
+      <trans-unit id="common.select-an-organization" datatype="html">
+        <source>Select an organization</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target>选择机构</target>
+      </trans-unit>
+      <trans-unit id="common.organizations-for" datatype="html">
+        <source>Organizations for</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <target>以下机构属于用户</target>
+      </trans-unit>
+      <trans-unit id="common.select" datatype="html">
+        <source>Select</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+        <target>选择</target>
+      </trans-unit>
+      <trans-unit id="common.sign-in-with-another-email" datatype="html">
+        <source>Sign in with another Email</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <target>使用其它邮箱登录</target>
+      </trans-unit>
       <trans-unit id="org.org.orgName" datatype="html">
         <source>Name</source>
         <context-group purpose="location">
@@ -8685,7 +8757,7 @@
         <source>Organization name updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <target>机构名称更新成功！</target>
       </trans-unit>

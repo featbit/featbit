@@ -51,7 +51,6 @@ export class OrganizationService {
     }
 
     this.projectService.clearCurrentProjectEnv();
-    window.location.reload();
   }
 
   setOrganization(organization: IOrganization) {

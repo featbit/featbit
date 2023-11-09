@@ -1,0 +1,51 @@
+@import "src/app/features/safe/safe.component";
+@import "variables";
+
+section.main-body {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .content-wrapper {
+    min-width: 586px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -18px;
+    padding: 36px;
+    background-color: @grey5-color;
+    border: none;
+    border-radius: 20px;
+
+    .zero-org-info {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .orgs-wrapper {
+      .title {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+
+      .org-list {
+        border: none;
+        border-radius: 20px;
+
+        .auth-email {
+          font-weight: 700;
+          display: inline-block;
+          margin-left: 4px;
+        }
+
+        .org-item {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}

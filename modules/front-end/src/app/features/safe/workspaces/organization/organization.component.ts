@@ -61,11 +61,13 @@ export class OrganizationComponent implements OnInit {
     if (organization) {
       this.organizationService.organizations = [...this.organizationService.organizations, organization];
       this.organizationService.switchOrganization(organization);
+      window.location.reload();
     }
   }
 
   onOrganizationChange() {
     this.organizationService.switchOrganization(this.currentOrganization);
+    window.location.reload();
   }
 
   submitOrgForm() {
