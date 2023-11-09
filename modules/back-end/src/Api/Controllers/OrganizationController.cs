@@ -38,6 +38,7 @@ public class OrganizationController : ApiControllerBase
     [HttpPost("add-user")]
     public async Task<ApiResponse<bool>> AddMemberByEmailAsync([FromBody] AddUser request)
     {
+        request.WorkspaceId = WorkspaceId;
         request.OrganizationId = OrgId;
 
         var success = await Mediator.Send(request);

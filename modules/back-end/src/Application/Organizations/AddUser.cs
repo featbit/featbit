@@ -66,7 +66,7 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         if (user == null)
         {
             initialPwd = PasswordGenerator.New(email);
-            var registerResult = await _identityService.RegisterByEmailAsync(user.WorkspaceId, email, initialPwd, UserOrigin.Local);
+            var registerResult = await _identityService.RegisterByEmailAsync(request.WorkspaceId, email, initialPwd, UserOrigin.Local);
             userId = registerResult.UserId;
         }
         else

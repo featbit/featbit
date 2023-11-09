@@ -11,4 +11,6 @@ public interface IUserService
     Task<User> FindByEmailAsync(string email, Guid workspaceId);
 
     Task UpdateAsync(User user);
+    
+    Task DeleteAsync(Guid userId);
 }

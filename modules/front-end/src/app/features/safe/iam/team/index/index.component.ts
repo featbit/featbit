@@ -67,8 +67,16 @@ export class IndexComponent implements OnInit {
     return this.auth.email !== member.email;
   }
 
-  deleteMember(member: IMember) {
-    this.memberService.delete(member.id).subscribe(() => {
+  deleteMemberFromOrg(member: IMember) {
+    this.memberService.deleteFromOrg(member.id).subscribe(() => {
+      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+      this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
+      this.pagedMember.totalCount--;
+    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
+  }
+
+  deleteMemberFromWorkspace(member: IMember) {
+    this.memberService.deleteFromWorkspace(member.id).subscribe(() => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
       this.pagedMember.totalCount--;

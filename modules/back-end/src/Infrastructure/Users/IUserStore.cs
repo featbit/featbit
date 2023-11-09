@@ -12,4 +12,6 @@ public interface IUserStore
     Task AddAsync(User user);
 
     Task<bool> UpdateAsync(User user);
+    
+    Task DeleteAsync(Guid userId);
 }

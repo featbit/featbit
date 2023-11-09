@@ -47,7 +47,7 @@ export class SettingComponent implements OnInit {
   }
 
   deleteMember() {
-    this.memberService.delete(this.member.id).subscribe(() => {
+    this.memberService.deleteFromOrg(this.member.id).subscribe(() => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
       this.router.navigateByUrl(`/iam/users`);
     }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))

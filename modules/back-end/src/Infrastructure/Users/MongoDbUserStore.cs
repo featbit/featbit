@@ -35,4 +35,9 @@ public class MongoDbUserStore : IUserStore
 
         return result.IsAcknowledged;
     }
+    
+    public async Task DeleteAsync(Guid id)
+    {
+       await _users.DeleteOneAsync(x => x.Id == id);
+    }
 }

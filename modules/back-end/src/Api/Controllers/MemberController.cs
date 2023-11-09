@@ -20,12 +20,25 @@ public class MemberController : ApiControllerBase
         return Ok(member);
     }
 
-    [HttpDelete("{memberId:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid memberId)
+    [HttpDelete("remove-from-org/{memberId:guid}")]
+    public async Task<ApiResponse<bool>> DeleteFromOrgAsync(Guid memberId)
     {
-        var request = new DeleteMember
+        var request = new DeleteMemberFromOrg
         {
             OrganizationId = OrgId,
+            MemberId = memberId
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+    
+    [HttpDelete("remove-from-workspace/{memberId:guid}")]
+    public async Task<ApiResponse<bool>> DeleteWorkspaceAsync(Guid memberId)
+    {
+        var request = new DeleteMemberFromWorkspace
+        {
+            WorkspaceId = WorkspaceId,
             MemberId = memberId
         };
 

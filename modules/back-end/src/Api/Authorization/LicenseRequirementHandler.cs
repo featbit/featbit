@@ -21,17 +21,17 @@ public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement
             return;
         }
 
-        if (!httpContext.Request.Headers.TryGetValue(OpenApiConstants.OrgIdHeaderKey, out var orgIdString))
+        if (!httpContext.Request.Headers.TryGetValue(OpenApiConstants.WorkspaceHeaderKey, out var workspaceIdString))
         {
             return;
         }
 
-        if (!Guid.TryParse(orgIdString, out var orgId))
+        if (!Guid.TryParse(workspaceIdString, out var workspaceId))
         {
             return;
         }
 
-        var isFeatureGranted = await _licenseService.IsFeatureGrantedAsync(requirement.Feature, orgId);
+        var isFeatureGranted = await _licenseService.IsFeatureGrantedAsync(requirement.Feature, workspaceId);
         if (isFeatureGranted)
         {
             context.Succeed(requirement);

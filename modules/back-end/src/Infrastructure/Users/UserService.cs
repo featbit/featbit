@@ -37,4 +37,9 @@ public class UserService : IUserService
     {
         await _users.UpdateAsync(user);
     }
+    
+    public async Task DeleteAsync(Guid memberId)
+    {
+        await _users.DeleteAsync(memberId);
+    }
 }
