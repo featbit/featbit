@@ -234,18 +234,6 @@
 
                             <ng-container>
                               <td *ngIf="!data.isBaseline">
-                                <div  style="width: 200px;box-sizing: border-box;">
-                                  <div class="BoxChart">
-                                    <div class="BoxChart-whisker"></div>
-                                    <div class="BoxChart-box--container">
-                                      <div class="BoxChart-box--line"></div>
-                                      <div 
-                                           class="BoxChart-box" [style.left.px]="100 + data.confidenceInterval[0] * 100" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) * 100">
-                                      </div>
-                                    </div>
-                                    <div class="BoxChart-whisker"></div>
-                                  </div>
-                                </div>
                                 <div class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
                               </td>
                             </ng-container>
