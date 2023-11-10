@@ -1,1 +1,38 @@
-<p>index works!</p>
+<div class="table-content-area">
+  <div class="table-search-area">
+    <div class="search-inputs">
+      <nz-input-group [nzPrefix]="prefixIconSearch">
+        <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.searchNamePlaceholder">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+    </div>
+    <button nz-button nzType="primary" (click)="openDrawer()">
+      <i nz-icon nzType="icons:icon-add"></i>
+      <ng-container i18n="@@common.add">Add</ng-container>
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <nz-table #table>
+      <thead>
+      <tr>
+        <th i18n="@@common.name">Name</th>
+        <th i18n="@@common.status">Status</th>
+        <th i18n="@@integrations.webhooks.endpoint">Endpoint</th>
+        <th i18n="@@integrations.webhooks.events">Events</th>
+        <th i18n="@@integrations.webhooks.last-trigged-at">Last triggered at</th>
+        <th i18n="@@common.created-by">Created by</th>
+        <th i18n="@@common.actions">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of table.data">
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+<webhook-drawer [webhook]="webhook" [visible]="drawerVisible" (close)="closeDrawer()"></webhook-drawer>

@@ -3,6 +3,12 @@ import { CommonModule } from '@angular/common';
 
 import { WebhooksRoutingModule } from './webhooks-routing.module';
 import { IndexComponent } from './index/index.component';
+import { CoreModule } from "@core/core.module";
+import { NzInputModule } from "ng-zorro-antd/input";
+import { NzTableModule } from "ng-zorro-antd/table";
+import { NzIconModule } from "ng-zorro-antd/icon";
+import { NzButtonModule } from "ng-zorro-antd/button";
+import { NzWaveModule } from "ng-zorro-antd/core/wave";
 
 @NgModule({
   declarations: [
@@ -10,7 +16,13 @@ import { IndexComponent } from './index/index.component';
   ],
   imports: [
     CommonModule,
-    WebhooksRoutingModule
+    WebhooksRoutingModule,
+    CoreModule,
+    NzInputModule,
+    NzTableModule,
+    NzIconModule,
+    NzButtonModule,
+    NzWaveModule
   ]
 })
 export class WebhooksModule { }
