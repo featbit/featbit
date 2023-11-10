@@ -34,12 +34,13 @@ public class TestApp : WebApplicationFactory<Program>
                 typeof(TestPasswordHasher),
                 ServiceLifetime.Scoped
             );
-            var currentUser = ServiceDescriptor.Singleton<ICurrentUser>(new TestCurrentUser(TestUser.Id));
+            var currentUser = ServiceDescriptor.Singleton<ICurrentUser>(new TestCurrentUser(TestData.Id));
 
             collection.Replace(userStore);
             collection.Replace(passwordHasher);
             collection.Replace(currentUser);
 
+            collection.Replace(ServiceDescriptor.Singleton<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Singleton<IRedisClient, TestRedisClient>());
             collection.Replace(ServiceDescriptor.Transient<ICachePopulatingService, TestCachePopulatingService>());
 
@@ -98,7 +99,7 @@ public class TestApp : WebApplicationFactory<Program>
 
     private void AddAuthorizationHeader(HttpClient client)
     {
-        var token = GetToken(TestUser.Instance());
+        var token = GetToken(TestData.User());
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             JwtBearerDefaults.AuthenticationScheme, token
         );

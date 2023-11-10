@@ -10,12 +10,6 @@ public class Workspace : AuditedEntity
 
     public SsoConfig Sso { get; set; }
 
-    public Workspace(string name, string key)
-    {
-        Name = name;
-        License = string.Empty;
-    }
-
     public void Update(string name, string key)
     {
         Name = name;

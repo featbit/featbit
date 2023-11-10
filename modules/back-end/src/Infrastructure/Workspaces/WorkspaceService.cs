@@ -11,7 +11,7 @@ public class WorkspaceService : MongoDbService<Workspace>,  IWorkspaceService
     {
     }
 
-    public async Task<IEnumerable<Workspace>> GetByEmailAsync(string email)
+    public async Task<ICollection<Workspace>> GetByEmailAsync(string email)
     {
         var workspaces = MongoDb.QueryableOf<Workspace>();
         var users = MongoDb.QueryableOf<User>();

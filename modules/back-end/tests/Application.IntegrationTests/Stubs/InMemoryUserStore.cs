@@ -8,7 +8,7 @@ public class InMemoryUserStore : IUserStore
 {
     private readonly List<User> _users = new()
     {
-        TestUser.Instance()
+        TestData.User()
     };
 
     public Task<User?> FindOneAsync(Expression<Func<User, bool>> predicate)
