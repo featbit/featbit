@@ -26,7 +26,8 @@ db.Workspaces.insertOne(
     {
         _id: workspaceId,
         name: "Your Workspace name",
-		key: "your-workspace-name",
+        key: "ws-1",
+		sso: null,
         license: null,
         createdAt: new Date(),
         updatedAt: new Date()
