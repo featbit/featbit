@@ -150,10 +150,6 @@ app-root {
 
 .target-users,
 .flag-container {
-  .status-switcher .ant-select .ant-select-selector .ant-select-selection-item {
-    margin-top: 1px !important;
-  }
-
   .ant-select .ant-select-selector {
     height: 36px !important;
 
@@ -161,9 +157,13 @@ app-root {
       line-height: 31px !important;
     }
 
+    .ant-select-selection-item {
+      padding-top: 2px;
+    }
+
     .ant-select-selection-search-input,
     .ant-select-selection-placeholder {
-      margin-top: 2px !important;
+      margin-top: 2px;
       line-height: 31px !important;
       font-size: 13px;
       height: 31px !important;
@@ -193,19 +193,24 @@ app-root {
     .ant-select .ant-select-selector {
       height: 36px !important;
 
-      .ant-select-selection-search-input,
-      .ant-select-selection-placeholder {
-        margin-top: 2px !important;
+      .ant-select-selection-search,
+      .ant-select-selection-placeholder,
+      .ant-select-selection-item {
+        padding-top: 2px;
       }
     }
 
-    .multi-select {
+    .multi-select .ant-select .ant-select-selector {
       .ant-select-selection-search {
         width: 60px !important;
+        margin-inline-start: 3px;
       }
 
+      .ant-select-selection-search,
+      .ant-select-selection-placeholder,
       .ant-select-selection-item {
-        margin-top: 5px !important;
+        padding-top: 0;
+        margin-top: 0;
       }
 
       .ant-select-selection-item-content {
@@ -225,17 +230,6 @@ app-root {
 .standard-select {
   .standard-bordered-input;
   height: 40px;
-
-  .ant-select-selection-search-input,
-  .ant-select-selection-placeholder,
-  .ant-select-selection-item {
-    margin: 5px;
-  }
-}
-
-// multiple select placeholder
-.ant-select-multiple .ant-select-selection-placeholder {
-  top: 40%;
 }
 
 .standard-form-input {
