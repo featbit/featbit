@@ -6,6 +6,7 @@
   i18n-nzTitle="@@expt.overview.expt"
   nzTitle="Experiment"
   [nzWidth]="500"
+  nzWrapClassName="expt-drawer"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="experimentForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
