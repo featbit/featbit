@@ -36,6 +36,9 @@ def _create_app(config_name='default') -> Flask:
     from app.experimentation import get_expt_blueprint
     __app.register_blueprint(get_expt_blueprint(), url_prefix='/api/expt')
 
+    from app.health import get_health_blueprint
+    __app.register_blueprint(get_health_blueprint(), url_prefix='/health')
+
     # https://flask-caching.readthedocs.io/en/latest/
     cache_config = {"CACHE_KEY_PREFIX": CACHE_KEY_PREFIX}
     cache_options = {"ssl": REDIS_SSL, "username": REDIS_USER}
