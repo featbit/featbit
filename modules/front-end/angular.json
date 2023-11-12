@@ -55,7 +55,11 @@
                 "src/"
               ]
             },
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "prismjs",
+              "moment"
+            ]
           },
           "configurations": {
             "production": {
@@ -86,7 +90,9 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,
-              "localize": ["en"]
+              "localize": [
+                "en"
+              ]
             },
             "zh": {
               "buildOptimizer": false,
@@ -95,7 +101,9 @@
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,
-              "localize": ["zh"],
+              "localize": [
+                "zh"
+              ],
               "styles": [
                 "src/styles-zh.less"
               ]
