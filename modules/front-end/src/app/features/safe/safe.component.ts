@@ -69,7 +69,7 @@ export class SafeComponent implements OnInit {
       },
       {
         title: $localize `:@@menu.workspace:Workspace`,
-        icon: 'icons:icon-org',
+        icon: 'bank',
         path: '/workspace'
       },
       {
