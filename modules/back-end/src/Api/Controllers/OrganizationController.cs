@@ -25,7 +25,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpPost]
-    [Authorize(LicenseFeatures.CreateOrg)]
+    [Authorize(LicenseFeatures.MultiOrg)]
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
     {
         request.WorkspaceId = WorkspaceId;

@@ -24,7 +24,7 @@
       <nz-select class="extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentOrganization" (ngModelChange)="onOrganizationChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">
         <nz-option *ngFor="let org of allOrganizations" [nzLabel]="org.name" [nzValue]="org"></nz-option>
       </nz-select>
-      <button class="create-org-btn" [disabled]="!license.isGranted(LicenseFeatureEnum.CreateOrg)" nz-button nzType="primary" (click)="onCreateOrganizationClick()">
+      <button class="create-org-btn" [disabled]="!license.isGranted(LicenseFeatureEnum.MultiOrg)" nz-button nzType="primary" (click)="onCreateOrganizationClick()">
         <i nz-icon nzType="icons:icon-add"></i>
         <ng-container i18n="@@common.add">Add</ng-container>
       </button>
