@@ -77,7 +77,7 @@
   </div>
 </div>
 <div class="standard-div rows" *ngIf="!isLoading; else loadingTem;">
-  <h5 nz-typography i18n="@@common.sso-settings">SSO settings</h5>
+  <h5 nz-typography i18n="@@common.sso-settings">SSO (OIDC) settings</h5>
   <form nz-form [formGroup]="ssoForm" [nzLayout]="'vertical'" (ngSubmit)="submitSsoForm()">
     <nz-form-item>
       <nz-form-label i18n="@@workspace.workspace.client-id">Client Id</nz-form-label>

@@ -9118,12 +9118,12 @@
         <target>更新</target>
       </trans-unit>
       <trans-unit id="common.sso-settings" datatype="html">
-        <source>SSO settings</source>
+        <source>SSO (OIDC) settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
           <context context-type="linenumber">80</context>
         </context-group>
-        <target>SSO 设置</target>
+        <target>SSO (OIDC) 设置</target>
       </trans-unit>
       <trans-unit id="workspace.workspace.client-id" datatype="html">
         <source>Client Id</source>
