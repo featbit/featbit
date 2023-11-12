@@ -34,6 +34,15 @@ public class WorkspaceController : ApiControllerBase
         return Ok(organization);
     }
     
+    [HttpPut("sso-oidc")]
+    public async Task<ApiResponse<WorkspaceVm>> UpdateOidcAsync(UpdateSsoOidc request)
+    {
+        request.Id = WorkspaceId;
+        
+        var organization = await Mediator.Send(request);
+        return Ok(organization);
+    }
+    
     [HttpGet("is-key-used")]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
     {

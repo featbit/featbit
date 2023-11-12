@@ -24,4 +24,13 @@ public class Workspace : AuditedEntity
 
         UpdatedAt = DateTime.UtcNow;
     }
+    
+    public void UpdateSsoOidc(OidcConfig oidc)
+    {
+        Sso ??= new SsoConfig();
+        
+        Sso.Oidc = oidc;
+
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

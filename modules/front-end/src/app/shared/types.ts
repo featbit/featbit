@@ -50,11 +50,26 @@ export interface IAuthProps {
   origin: UserOriginEnum;
 }
 
+export interface IOidc {
+  clientId: string,
+  clientSecret: string,
+  tokenEndpoint: string,
+  clientAuthenticationMethod: string,
+  authorizationEndpoint: string,
+  scope: string,
+  userEmailClaim: string,
+}
+
+export interface ISso {
+  oidc: IOidc
+}
+
 export interface IWorkspace {
   id: string,
   name: string,
   key: string,
-  license?: string
+  license?: string,
+  sso: ISso
 }
 
 export interface IOrganization {

@@ -18,7 +18,7 @@ export class WorkspaceComponent implements OnInit {
 
   isLoading: boolean = false;
   nameKeyForm!: FormGroup;
-
+  ssoForm!: FormGroup;
   licenseForm!: FormGroup;
 
   auth = getAuth();
@@ -27,6 +27,7 @@ export class WorkspaceComponent implements OnInit {
   license: License;
 
   isNameKeyLoading: boolean = false;
+  isSsoLoading: boolean = false;
   isLicenseLoading: boolean = false;
 
   constructor(
@@ -67,6 +68,16 @@ export class WorkspaceComponent implements OnInit {
       key: new FormControl(this.workspace.key, Validators.required, this.keyAsyncValidator)
     });
 
+    this.ssoForm = new FormGroup({
+      clientId: new FormControl(this.workspace.sso?.oidc?.clientId, [Validators.required]),
+      clientSecret: new FormControl(this.workspace.sso?.oidc?.clientSecret, [Validators.required]),
+      tokenEndpoint: new FormControl(this.workspace.sso?.oidc?.tokenEndpoint, [Validators.required]),
+      clientAuthenticationMethod: new FormControl(this.workspace.sso?.oidc?.clientAuthenticationMethod, [Validators.required]),
+      authorizationEndpoint: new FormControl(this.workspace.sso?.oidc?.authorizationEndpoint, [Validators.required]),
+      scope: new FormControl(this.workspace.sso?.oidc?.scope, [Validators.required]),
+      userEmailClaim: new FormControl(this.workspace.sso?.oidc?.userEmailClaim, [Validators.required]),
+    });
+
     this.licenseForm = new FormGroup({
       license: new FormControl(this.workspace.license, [Validators.required]),
     });
@@ -99,6 +110,32 @@ export class WorkspaceComponent implements OnInit {
           this.workspaceService.setWorkspace(workspace);
         },
         error: () => this.isNameKeyLoading = false
+      });
+  }
+
+  submitSsoForm() {
+    if (this.ssoForm.invalid) {
+      for (const i in this.ssoForm.controls) {
+        this.ssoForm.controls[i].markAsDirty();
+        this.ssoForm.controls[i].updateValueAndValidity();
+      }
+      return;
+    }
+    const payload = {
+      ...this.ssoForm.value,
+      id: this.workspace.id
+    };
+
+    this.isSsoLoading = true;
+    this.workspaceService.updateOidcSetting(payload)
+      .subscribe({
+        next: (workspace) => {
+          this.workspace = workspace;
+          this.isSsoLoading = false;
+          this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.workspaceService.setWorkspace(workspace);
+        },
+        error: () => this.isSsoLoading = false
       });
   }
 

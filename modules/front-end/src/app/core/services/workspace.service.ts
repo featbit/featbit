@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 import { firstValueFrom, Observable, of } from "rxjs";
-import { IOrganization, IWorkspace } from "@shared/types";
+import { IOidc, IOrganization, IWorkspace } from "@shared/types";
 import { CURRENT_ORGANIZATION, CURRENT_WORKSPACE } from "@utils/localstorage-keys";
 import { getCurrentWorkspace } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
@@ -24,8 +24,12 @@ export class WorkspaceService {
     return this.http.post<boolean>(`${this.baseUrl}/has-multiple-workspaces`, { email });
   }
 
-  update(id: string, name: string, key: string): Observable<any> {
-    return this.http.put(this.baseUrl, {id, name, key});
+  update(id: string, name: string, key: string): Observable<IWorkspace> {
+    return this.http.put<IWorkspace>(this.baseUrl, {id, name, key});
+  }
+
+  updateOidcSetting(oidc: IOidc): Observable<IWorkspace> {
+    return this.http.put<IWorkspace>(`${this.baseUrl}/sso-oidc`, oidc);
   }
 
   getWorkspace(): Promise<IWorkspace> {

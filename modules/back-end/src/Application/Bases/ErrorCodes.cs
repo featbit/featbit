@@ -27,6 +27,15 @@ public static class ErrorCodes
     public const string KeyIsRequired = nameof(KeyIsRequired);
     public const string KeyHasBeenUsed = nameof(KeyHasBeenUsed);
 
+    // workspace
+    public const string ClientIdRequired= nameof(ClientIdRequired);
+    public const string ClientSecretRequired = nameof(ClientSecretRequired);
+    public const string TokenEndpointRequired = nameof(TokenEndpointRequired);
+    public const string ClientAuthenticationMethodRequired = nameof(ClientAuthenticationMethodRequired);
+    public const string AuthorizationEndpointRequired = nameof(AuthorizationEndpointRequired);
+    public const string ScopeRequired = nameof(ScopeRequired);
+    public const string UserEmailClaimRequired = nameof(UserEmailClaimRequired);
+    
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
 

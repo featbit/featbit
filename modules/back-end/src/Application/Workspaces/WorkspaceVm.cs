@@ -1,3 +1,5 @@
+using Domain.Workspaces;
+
 namespace Application.Workspaces;
 
 public class WorkspaceVm
@@ -9,4 +11,6 @@ public class WorkspaceVm
     public string Key { get; set; }
 
     public string License { get; set; }
+    
+    public SsoConfig Sso { get; set; }
 }

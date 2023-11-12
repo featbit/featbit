@@ -774,7 +774,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">109</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>操作成功</target>
       </trans-unit>
@@ -938,7 +942,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <target>复制成功</target>
       </trans-unit>
@@ -8674,7 +8678,7 @@
         <target>该用户组正在被 <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegmentFlagReferences.length}}"/> 个开关所引用，在操作之前需要先移除这些引用！</target>
       </trans-unit>
       <trans-unit id="common.zero-org-info" datatype="html">
-        <source> You don&apos;t have any organization yet. Please contact your admin to add you to an organization.</source>
+        <source>You don&apos;t have any organization yet. Please contact your admin to add you to an organization.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
           <context context-type="linenumber">9</context>
@@ -9091,13 +9095,157 @@
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
           <context context-type="linenumber">73</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">123</context>
+        </context-group>
         <target>更新</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.client-id" datatype="html">
+        <source>Client Id</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+        <target>Client Id</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.client-id-mandatory" datatype="html">
+        <source>Client Id is mandatory!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+        <target>Client Id 不可为空</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.client-secret" datatype="html">
+        <source>Client secret</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+        <target>Client secret</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.client-secret-mandatory" datatype="html">
+        <source>Client secret is mandatory!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+        <target>Client secret 不可为空</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.token-endpoint" datatype="html">
+        <source>Token endpoint</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">92</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+        <target>Token endpoint</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.token-endpoint-mandatory" datatype="html">
+        <source>Token endpoint is mandatory!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+        <target>Token endpoint 不可为空</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.client-authentication-method" datatype="html">
+        <source>Client authentication method</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">100</context>
+        </context-group>
+        <target>Client authentication method</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.client-authentication-method-mandatory" datatype="html">
+        <source>Client authentication method is mandatory!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">99</context>
+        </context-group>
+        <target>Client authentication method 不可为空</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.authorization-endpoint" datatype="html">
+        <source>Authorization endpoint</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">106</context>
+        </context-group>
+        <target>Authorization endpoint</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.authorization-endpoint-mandatory" datatype="html">
+        <source>Authorization endpoint is mandatory!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+        <target>Authorization endpoint 不可为空</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.scope" datatype="html">
+        <source>Scope</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">112</context>
+        </context-group>
+        <target>Scope</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.scope-mandatory" datatype="html">
+        <source>Scope is mandatory!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+        <target>Scope 不可为空</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.user-email-claim" datatype="html">
+        <source>User email claim</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">118</context>
+        </context-group>
+        <target>User email claim</target>
+      </trans-unit>
+      <trans-unit id="workspace.workspace.user-email-claim-mandatory" datatype="html">
+        <source>User email claim is mandatory!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">117</context>
+        </context-group>
+        <target>User email claim 不可为空</target>
       </trans-unit>
       <trans-unit id="org.org.license-update-success" datatype="html">
         <source>License updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <target>License 更新成功</target>
       </trans-unit>
@@ -9105,7 +9253,7 @@
         <source>Invalid license, please contact FeatBit team to get a license!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="linenumber">165</context>
         </context-group>
         <target>无效 License, 请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
