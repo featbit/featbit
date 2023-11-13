@@ -153,17 +153,18 @@ app-root {
   .ant-select .ant-select-selector {
     height: 36px !important;
 
+    .ant-select-selection-search,
+    .ant-select-selection-placeholder,
+    .ant-select-selection-item {
+      margin-top: 3px !important;
+    }
+
     &::after {
       line-height: 31px !important;
     }
 
-    .ant-select-selection-item {
-      padding-top: 3px;
-    }
-
     .ant-select-selection-search-input,
     .ant-select-selection-placeholder {
-      margin-top: 2px;
       line-height: 31px !important;
       font-size: 13px;
       height: 31px !important;
@@ -196,7 +197,7 @@ app-root {
       .ant-select-selection-search,
       .ant-select-selection-placeholder,
       .ant-select-selection-item {
-        padding-top: 3px;
+        margin-top: 3px !important;
       }
     }
 
@@ -209,8 +210,7 @@ app-root {
       .ant-select-selection-search,
       .ant-select-selection-placeholder,
       .ant-select-selection-item {
-        padding-top: 0;
-        margin-top: 0;
+        margin-top: 0 !important;
       }
 
       .ant-select-selection-item-content {
@@ -230,6 +230,18 @@ app-root {
 .standard-select {
   .standard-bordered-input;
   height: 40px;
+
+  .ant-select-selection-search {
+    margin-top: 3px;
+  }
+
+  .ant-select-selection-item {
+    margin-top: 4px;
+  }
+
+  .ant-select-selection-placeholder {
+    margin-top: 5px;
+  }
 }
 
 .standard-form-input {
@@ -698,20 +710,6 @@ app-root {
 
 .ant-drawer-body {
   .standard-form;
-
-  // drawer select (40px height select)
-  .ant-select-selection-search {
-    margin-top: 3px;
-  }
-
-  .ant-select-selection-item {
-    margin-top: 4px;
-  }
-
-  .ant-select-selection-placeholder {
-    margin-top: 5px;
-  }
-
   padding: 20px 24px;
 
   .submit-btn {
