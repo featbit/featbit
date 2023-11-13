@@ -5,7 +5,7 @@
     </div>
   </ng-template>
   <ng-container *ngIf="!isInitLoading; else loadingTem;">
-    <div class="detail-body" name="detail" *ngIf="featureFlag?.id">
+    <div class="detail-body" *ngIf="featureFlag?.id">
       <nz-empty style="margin-top: 50px" *ngIf="!isInitLoading && experimentList.length === 0"
       [nzNotFoundContent]="contentTpl"
       >
@@ -99,24 +99,20 @@
                     </button>
                   </div>
                   <div class="right">
-                    <div style="padding-top: 6px;
-                                font-size: 14px;
-                                font-variant: tabular-nums;
-                                line-height: 1.5715;
-                                padding-right: 12px;
-                                font-weight: 600;"
-                              >
-                      <i nz-icon nzType="aim" nzTheme="outline"></i>
-                      <ng-container i18n="@@ff.expt.default-confidence-level">Default confidence level: </ng-container> 
+                    <div class="confidence-level">
+                      <ng-container i18n="@@ff.expt.default-confidence-level">Default confidence level: </ng-container>
                       {{(1-(experiment.alpha ?? 0.05))*100 + "%"}}
-                      <span nz-tooltip
-                            i18n-nzTooltipTitle="@@ff.expt.reacreated-to-change-default-confidence-level"
-                            nzTooltipTitle="You need to recreated a new experiment to change this value" [nzTooltipColor]="'cyan'">
-                        <i nz-icon nzType="info-circle" nzTheme="outline" style="padding:5px;"></i>
-                      </span>
+                      <i nz-icon
+                         nzType="info-circle"
+                         nzTheme="outline"
+                         nz-tooltip
+                         i18n-nzTooltipTitle="@@ff.expt.reacreated-to-change-default-confidence-level"
+                         nzTooltipTitle="You need to recreated a new experiment to change this value"
+                         [nzTooltipColor]="'cyan'">
+                      </i>
                     </div>
                     <div *ngIf="experiment.iterations.length > 0">
-                      <ng-container i18n="@@ff.expt.period">Period</ng-container>： &nbsp;
+                      <ng-container i18n="@@ff.expt.period">Period</ng-container>:
                       <nz-select name="iterations_{{experiment.id}}"
                                  [compareWith]="compareWith"
                           [(ngModel)]="experiment.selectedIteration"
@@ -149,8 +145,7 @@
                   <ng-container i18n="@@ff.expt.start">Start</ng-container>
                 </button>
               </div>
-              <nz-spin [nzSpinning]="experiment.isLoading" i18n-nzTip="@@common.loading" nzTip="Loading..." 
-                       *ngIf="experiment.status !== exptStatusNotStarted">
+              <nz-spin [nzSpinning]="experiment.isLoading" i18n-nzTip="@@common.loading" nzTip="Loading..." *ngIf="experiment.status !== exptStatusNotStarted">
                 <div class="table-content-area" style="padding-bottom: 10px;">
                   <div class="table-wrapper">
                     <nz-table
@@ -239,7 +234,7 @@
                             </ng-container>
 
                             <td *ngIf="!data.isBaseline">
-                                {{ data.effectSize | percentage }}
+                              {{ data.effectSize | percentage }}
                             </td>
                             <td>
                               {{ data.pValue }}
