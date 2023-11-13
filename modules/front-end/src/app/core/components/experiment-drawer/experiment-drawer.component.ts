@@ -85,6 +85,7 @@ export class ExperimentDrawerComponent implements OnInit {
       featureFlag: [null, [Validators.required]],
       metricId: [null, [Validators.required]],
       baselineVariationId: [null, [Validators.required]],
+      alpha: [0.05, [Validators.required]]
     });
 
     this.experimentForm.get('featureFlag').valueChanges.subscribe((event) => {
@@ -140,13 +141,14 @@ export class ExperimentDrawerComponent implements OnInit {
 
     this.isLoading = true;
 
-    const { featureFlag, metricId, baselineVariationId } = this.experimentForm.value;
+    const { featureFlag, metricId, baselineVariationId, alpha } = this.experimentForm.value;
 
     const metric = this.pagedMetric.items.find(m => m.id === metricId);
     this.experimentService.createExperiment({
       featureFlagId: featureFlag.id,
       metricId: metric.id,
       baselineVariationId: baselineVariationId,
+      alpha: alpha
     }).subscribe(
         res => {
           this.isLoading = false;
