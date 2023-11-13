@@ -20,6 +20,7 @@
             [compareWith]="compareWith"
             formControlName="featureFlag"
             (nzOnSearch)="onSearchFeatureFlag($event)"
+            [nzOptionHeightPx]="36"
             [nzCustomTemplate]="ffTemplate"
           >
             <ng-container *ngFor="let ff of featureFlagList?.items">

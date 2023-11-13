@@ -190,14 +190,13 @@ export class MetricDrawerComponent implements OnInit {
         this.metricForm.controls[i].updateValueAndValidity();
       }
 
-      if (eventType === this.customEventType &&
-        (!eventName || !customEventTrackOption )
-        ) {
-
-        if(!eventName)
-          this.metricForm.controls['eventName'].setErrors({required: true});
-        if(!customEventTrackOption)
-          this.metricForm.controls['customEventTrackOption'].setErrors({required: true});
+      if (eventType === this.customEventType && (!eventName || !customEventTrackOption)) {
+        if (!eventName) {
+          this.metricForm.controls['eventName'].setErrors({ required: true });
+        }
+        if (!customEventTrackOption) {
+          this.metricForm.controls['customEventTrackOption'].setErrors({ required: true });
+        }
       }
 
       if (eventType === this.pageViewEventType || eventType === this.clickEventType) {
