@@ -209,7 +209,7 @@ app-root {
       }
 
       .ant-select-selection-item-content {
-        max-width: 90px;
+        max-width: 180px;
         overflow: hidden;
         text-overflow: ellipsis;
       }
@@ -229,8 +229,13 @@ app-root {
   .ant-select-selection-search-input,
   .ant-select-selection-placeholder,
   .ant-select-selection-item {
-    margin: 3px;
+    margin: 5px;
   }
+}
+
+// multiple select placeholder
+.ant-select-multiple .ant-select-selection-placeholder {
+  top: 40%;
 }
 
 .standard-form-input {
@@ -1056,6 +1061,9 @@ app-root {
   }
 }
 
+.license-data-popover {
+  max-width: 100%;
+}
 // custom nz-alert
 .ant-alert {
   padding: 24px;

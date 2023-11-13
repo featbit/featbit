@@ -44,18 +44,15 @@ public class UpdateSegmentHandler : IRequestHandler<UpdateSegment, Segment>
     private readonly ISegmentService _service;
     private readonly IPublisher _publisher;
     private readonly ICurrentUser _currentUser;
-    private readonly IAuditLogService _auditLogService;
 
     public UpdateSegmentHandler(
         ISegmentService service,
         IPublisher publisher,
-        ICurrentUser currentUser,
-        IAuditLogService auditLogService)
+        ICurrentUser currentUser)
     {
         _service = service;
         _publisher = publisher;
         _currentUser = currentUser;
-        _auditLogService = auditLogService;
     }
 
     public async Task<Segment> Handle(UpdateSegment request, CancellationToken cancellationToken)
@@ -64,13 +61,12 @@ public class UpdateSegmentHandler : IRequestHandler<UpdateSegment, Segment>
         var dataChange = segment.Update(request.Name, request.Included, request.Excluded, request.Rules, request.Description);
         await _service.UpdateAsync(segment);
 
-        // write audit log
-        var auditLog = AuditLog.ForUpdate(segment, dataChange, request.Comment, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
-
         // publish segment updated notification
         var flagReferences = await _service.GetFlagReferencesAsync(segment.EnvId, segment.Id);
-        await _publisher.Publish(new OnSegmentChange(segment, flagReferences.Select(x => x.Id)), cancellationToken);
+        var notification = new OnSegmentChange(
+            segment, flagReferences.Select(x => x.Id), Operations.Update, dataChange, _currentUser.Id, request.Comment
+        );
+        await _publisher.Publish(notification, cancellationToken);
 
         return segment;
     }

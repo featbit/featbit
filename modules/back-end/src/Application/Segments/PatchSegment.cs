@@ -17,18 +17,15 @@ public class PatchSegmentHandler : IRequestHandler<PatchSegment, PatchResult>
     private readonly ISegmentService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
-    private readonly IAuditLogService _auditLogService;
 
     public PatchSegmentHandler(
         ISegmentService service,
         ICurrentUser currentUser,
-        IPublisher publisher,
-        IAuditLogService auditLogService)
+        IPublisher publisher)
     {
         _service = service;
         _currentUser = currentUser;
         _publisher = publisher;
-        _auditLogService = auditLogService;
     }
 
     public async Task<PatchResult> Handle(PatchSegment request, CancellationToken cancellationToken)
@@ -49,12 +46,9 @@ public class PatchSegmentHandler : IRequestHandler<PatchSegment, PatchResult>
         dataChange.To(segment);
         await _service.UpdateAsync(segment);
 
-        // write audit log
-        var auditLog = AuditLog.ForUpdate(segment, dataChange, string.Empty, _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
-
         // publish on segment change notification
-        await _publisher.Publish(new OnSegmentChange(segment), cancellationToken);
+        var notification = new OnSegmentChange(segment, Operations.Update, dataChange, _currentUser.Id);
+        await _publisher.Publish(notification, cancellationToken);
 
         return PatchResult.Ok();
     }

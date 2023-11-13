@@ -10,6 +10,7 @@ using Infrastructure.Environments;
 using Infrastructure.ExperimentMetrics;
 using Infrastructure.Experiments;
 using Infrastructure.FeatureFlags;
+using Infrastructure.FlagChangeRequests;
 using Infrastructure.FlagDrafts;
 using Infrastructure.FlagRevisions;
 using Infrastructure.FlagSchedules;
@@ -94,6 +95,8 @@ public static class ConfigureServices
         services.AddTransient<IFlagDraftService, FlagDraftService>();
         services.AddTransient<IFlagScheduleService, FlagScheduleService>();
         services.AddTransient<IFlagRevisionService, FlagRevisionService>();
+        services.AddTransient<IFlagChangeRequestService, FlagChangeRequestService>();
+        services.AddTransient<IFeatureFlagAppService, FeatureFlagAppService>();
 
         return services;
     }

@@ -18,7 +18,13 @@
       <license [license]="license"></license>
     </ng-template>
     <ng-template #upgradeLicense>
-      <span i18n="@@common.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license.</span>
+      <div>
+        <span i18n="@@common.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license or generate a trial license from</span>
+        <a href="https://dashboard.featbit.co/account"
+           nzType="link"
+           class="bash-board-link"
+           target="_blank">https://dashboard.featbit.co/account</a>
+      </div>
     </ng-template>
 
     <a target="_blank" class="header-btn doc-btn" href="https://docs.featbit.co"><span nz-icon nzType="read" nzTheme="outline"></span></a>

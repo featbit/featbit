@@ -54,12 +54,16 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
             }
 
             // An audit log may also be created by an access token
-            var accessToken = await _accessTokenService.GetAsync(item.CreatorId);
+            var accessToken = await _accessTokenService.FindOneAsync(x => x.Id == item.CreatorId);
             if (accessToken != null)
             {
                 item.CreatorName = accessToken.Name;
                 item.CreatorEmail = "Access token";
+                continue;
             }
+
+            // Otherwise this audit log is created by system user
+            item.CreatorEmail = "System";
         }
 
         return logVms;

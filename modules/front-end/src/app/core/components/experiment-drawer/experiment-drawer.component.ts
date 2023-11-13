@@ -1,15 +1,15 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { ExperimentService } from '@services/experiment.service';
 import { MetricService } from '@services/metric.service';
-import {FeatureFlagService} from "@services/feature-flag.service";
-import {IFeatureFlagListFilter, IFeatureFlagListModel} from "@features/safe/feature-flags/types/feature-flag";
-import {IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {IVariation} from "@shared/rules";
-import {IExpt, IPagedMetric, MetricListFilter} from "@features/safe/experiments/types";
+import { FeatureFlagService } from "@services/feature-flag.service";
+import { IFeatureFlagListFilter, IFeatureFlagListModel } from "@features/safe/feature-flags/types/feature-flag";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { IVariation } from "@shared/rules";
+import { IPagedMetric, MetricListFilter } from "@features/safe/experiments/types";
 
 
 @Component({
@@ -17,9 +17,7 @@ import {IExpt, IPagedMetric, MetricListFilter} from "@features/safe/experiments/
   templateUrl: './experiment-drawer.component.html',
   styleUrls: ['./experiment-drawer.component.less']
 })
-export class ExperimentDrawerComponent implements OnInit {
-
-  private _experiment: IExpt;
+export class ExperimentDrawerComponent {
 
   experimentForm: FormGroup;
   isLoading: boolean = false;
@@ -32,18 +30,17 @@ export class ExperimentDrawerComponent implements OnInit {
     }
   };
 
+  private _visible: boolean = false;
+  get visible(): boolean {
+    return this._visible;
+  }
+
   @Input()
-  set experiment(experiment: IExpt) {
-    this.resetForm();
-
-    this._experiment = experiment;
+  set visible(value: boolean) {
+    this._visible = value;
+    this.initForm();
   }
 
-  get experiment() {
-    return this._experiment;
-  }
-
-  @Input() visible: boolean = false;
   @Output() close: EventEmitter<any> = new EventEmitter();
 
   constructor(
@@ -76,24 +73,17 @@ export class ExperimentDrawerComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.initForm();
-  }
-
   initForm() {
     this.experimentForm = this.fb.group({
       featureFlag: [null, [Validators.required]],
       metricId: [null, [Validators.required]],
       baselineVariationId: [null, [Validators.required]],
+      alpha: ['0.05', [Validators.required]]
     });
 
     this.experimentForm.get('featureFlag').valueChanges.subscribe((event) => {
       this.onFeatureFlagChange(event);
     })
-  }
-
-  resetForm() {
-    this.experimentForm && this.experimentForm.reset();
   }
 
   featureFlagSearchChange$ = new BehaviorSubject('');
@@ -140,13 +130,14 @@ export class ExperimentDrawerComponent implements OnInit {
 
     this.isLoading = true;
 
-    const { featureFlag, metricId, baselineVariationId } = this.experimentForm.value;
+    const { featureFlag, metricId, baselineVariationId, alpha } = this.experimentForm.value;
 
     const metric = this.pagedMetric.items.find(m => m.id === metricId);
     this.experimentService.createExperiment({
       featureFlagId: featureFlag.id,
       metricId: metric.id,
       baselineVariationId: baselineVariationId,
+      alpha: alpha
     }).subscribe(
         res => {
           this.isLoading = false;

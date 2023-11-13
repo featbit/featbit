@@ -57,8 +57,10 @@ export interface IOrganization {
 }
 
 export enum LicenseFeatureEnum {
+  Asterisk = '*',
   Sso = 'sso',
   Schedule = 'schedule',
+  ChangeRequest = 'change-request',
   CreateOrg = 'create-org'
 }
 
@@ -79,7 +81,7 @@ export class License {
   }
 
   isGranted(feature: LicenseFeatureEnum): boolean {
-    return this.data?.features?.includes(feature);
+    return this.data?.features?.includes(feature) || this.data?.features?.includes(LicenseFeatureEnum.Asterisk);
   }
 }
 

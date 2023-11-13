@@ -92,7 +92,7 @@ export class MetricDrawerComponent implements OnInit {
       eventType: [EventType.Custom, [Validators.required]],
       maintainerUserId: [null, [Validators.required]],
       customEventTrackOption: [CustomEventTrackOption.Undefined],
-      eventName: [null],
+      eventName: [null, [Validators.required]],
       customEventUnit: [null],
       customEventSuccessCriteria: [CustomEventSuccessCriteria.Higher],
       elementTargets: [null],
@@ -171,10 +171,8 @@ export class MetricDrawerComponent implements OnInit {
   isMaintainersLoading = false;
   maintainerList: any[];
   onSearchMaintainer(value: string) {
-    if (value.length > 0) {
-      this.isMaintainersLoading = true;
-      this.maintainerSearchChange$.next(value);
-    }
+    this.isMaintainersLoading = true;
+    this.maintainerSearchChange$.next(value);
   }
 
   onClose() {
@@ -192,14 +190,13 @@ export class MetricDrawerComponent implements OnInit {
         this.metricForm.controls[i].updateValueAndValidity();
       }
 
-      if (eventType === this.customEventType &&
-        (!eventName || !customEventTrackOption || !customEventUnit || !customEventSuccessCriteria )
-        ) {
-
-        this.metricForm.controls['eventName'].setErrors({required: true});
-        this.metricForm.controls['customEventTrackOption'].setErrors({required: true});
-        this.metricForm.controls['customEventUnit'].setErrors({required: true});
-        this.metricForm.controls['customEventSuccessCriteria'].setErrors({required: true});
+      if (eventType === this.customEventType && (!eventName || !customEventTrackOption)) {
+        if (!eventName) {
+          this.metricForm.controls['eventName'].setErrors({ required: true });
+        }
+        if (!customEventTrackOption) {
+          this.metricForm.controls['customEventTrackOption'].setErrors({ required: true });
+        }
       }
 
       if (eventType === this.pageViewEventType || eventType === this.clickEventType) {

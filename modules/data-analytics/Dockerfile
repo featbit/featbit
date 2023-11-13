@@ -69,7 +69,7 @@ ENV KAFKA_HOSTS=${KAFKA_HOSTS} \
     MONGO_DB=${MONGO_INITDB_DATABASE} \
     IS_PRO=${IS_PRO} \
     CHECK_DB_LIVNESS=${CHECK_DB_LIVNESS}
-RUN apt update &&apt install -y nginx && apt install -y supervisor && apt install -y git
+RUN apt update && apt install -y nginx && apt install -y supervisor && apt install -y git
 RUN mkdir -p /var/log/nginx && \
     touch /var/log/nginx/access.log && \
     touch /var/log/nginx/error.log
@@ -78,6 +78,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY . /featbit_da
 WORKDIR /featbit_da
 RUN chmod +x start.sh docker-entrypoint.sh wait-for-it.sh
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["/usr/bin/supervisord","-c","supervisord.conf"]

@@ -9,10 +9,9 @@ public class Experiment : AuditedEntity
     public Guid FeatureFlagId { get; set; }
     public bool IsArchived { get; set; }
     public string Status { get; set; } // possible values: NotStarted, NotRecording, Recording
-
     public string BaselineVariationId { get; set; }
-
     public List<ExperimentIteration> Iterations { get; set; }
+    public double? Alpha { get; set; }
 }
 
 public class ExperimentIteration
@@ -45,6 +44,8 @@ public class IterationResult
     public string PValue { get; set; }
     public long? UniqueUsers { get; set; }
     public string VariationId { get; set; }
+    public string EffectSize { get; set; }
+    public string Reason { get; set; }
 }
 
 public class ExptIterationParam
@@ -74,6 +75,7 @@ public class ExptIterationParam
     public long StartExptTime { get; set; } // format "1667489884000000"
 
     public long? EndExptTime { get; set; } // format "1667489884000000"
+    public double? Alpha { get; set; }
 }
 
 public class OlapExptIterationResponse
@@ -95,4 +97,5 @@ public class ExptIterationResult
     public bool IsFinish { get; set; }
     public List<IterationResult> Results { get; set; }
     public DateTime StartTime { get; set; }
+    public double? Alpha { get; set; }
 }

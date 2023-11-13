@@ -4,6 +4,7 @@ using Domain.EndUsers;
 using Domain.ExperimentMetrics;
 using Domain.Experiments;
 using Domain.FeatureFlags;
+using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
 using Domain.FlagRevisions;
 using Domain.FlagSchedules;
@@ -57,6 +58,7 @@ public class MongoDbClient
         { typeof(FlagRevision), "FlagRevisions" },
         { typeof(FlagDraft), "FlagDrafts" },
         { typeof(FlagSchedule), "FlagSchedules" },
+        { typeof(FlagChangeRequest), "FlagChangeRequests" },
         { typeof(Trigger), "Triggers" },
         { typeof(AuditLog), "AuditLogs" },
 

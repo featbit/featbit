@@ -5,7 +5,7 @@
     </div>
   </ng-template>
   <ng-container *ngIf="!isInitLoading; else loadingTem;">
-    <div class="detail-body" name="detail" *ngIf="featureFlag?.id">
+    <div class="detail-body" *ngIf="featureFlag?.id">
       <nz-empty style="margin-top: 50px" *ngIf="!isInitLoading && experimentList.length === 0"
       [nzNotFoundContent]="contentTpl"
       >
@@ -62,14 +62,14 @@
 
                     <nz-dropdown-menu #options="nzDropdownMenu">
                       <ul nz-menu nzSelectable style="min-width: 150px;">
-                        <li *ngIf="experiment.status !== exptStatusNotStarted" nz-menu-item
+                        <li *ngIf="experiment.status !== exptStatusRecording" nz-menu-item
                             nz-popconfirm
                             i18n-nzPopconfirmTitle="@@ff.expt.remove-expt-data-confirm"
                             nzPopconfirmTitle="This would remove all data of this experiment, it cannot be reverted, are you sure to remove it?"
                             nzPopconfirmPlacement="bottomRight"
                             [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
                             (nzOnConfirm)="onDeleteExptDataClick(experiment)">
-                          <ng-container i18n="@@ff.expt.remove-data">Remove data</ng-container>
+                          <ng-container i18n="@@ff.expt.remove-data">Remove Data</ng-container>
                         </li>
                         <li nz-menu-item
                             nz-popconfirm
@@ -99,8 +99,20 @@
                     </button>
                   </div>
                   <div class="right">
+                    <div class="confidence-level">
+                      <ng-container i18n="@@ff.expt.default-confidence-level">Default confidence level: </ng-container>
+                      {{(1-(experiment.alpha ?? 0.05))*100 + "%"}}
+                      <i nz-icon
+                         nzType="info-circle"
+                         nzTheme="outline"
+                         nz-tooltip
+                         i18n-nzTooltipTitle="@@ff.expt.reacreated-to-change-default-confidence-level"
+                         nzTooltipTitle="You need to recreated a new experiment to change this value"
+                         [nzTooltipColor]="'cyan'">
+                      </i>
+                    </div>
                     <div *ngIf="experiment.iterations.length > 0">
-                      <ng-container i18n="@@ff.expt.period">Period</ng-container>： &nbsp;
+                      <ng-container i18n="@@ff.expt.period">Period</ng-container>:
                       <nz-select name="iterations_{{experiment.id}}"
                                  [compareWith]="compareWith"
                           [(ngModel)]="experiment.selectedIteration"
@@ -215,45 +227,14 @@
                               <div i18n="@@common.baseline">Baseline</div>
                             </td>
 
-                            <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metricCustomEventTrackOption)">
+                            <ng-container>
                               <td *ngIf="!data.isBaseline">
-                                <div  style="width: 200px;box-sizing: border-box;">
-                                  <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
-                                    <div class="BoxChart-whisker"></div>
-                                    <div class="BoxChart-box--container">
-                                      <div class="BoxChart-box--line"></div>
-                                      <div class="BoxChart-box" [style.left.px]="data.confidenceInterval[0] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) * 200">
-                                        <div class="BoxChart-box--median" [style.left.px]="(data.conversionRate - data.confidenceInterval[0]) * 200"></div>
-                                      </div>
-                                    </div>
-                                    <div class="BoxChart-whisker"></div>
-                                  </div>
-                                </div>
-                                <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
-                                <div *ngIf="data.confidenceInterval[0] === -1" class="confidence_interval"> -- </div>
-                              </td>
-                            </ng-container>
-                            <ng-container *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
-                              <td *ngIf="!data.isBaseline">
-                                <div  style="width: 200px;box-sizing: border-box;">
-                                  <div *ngIf="data.confidenceInterval[0] >= 0" class="BoxChart">
-                                    <div class="BoxChart-whisker"></div>
-                                    <div class="BoxChart-box--container">
-                                      <div class="BoxChart-box--line"></div>
-                                      <div class="BoxChart-box" [style.left.px]="(data.confidenceInterval[0] - experiment.selectedIteration.numericConfidenceIntervalBoundary[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200" [style.width.px]="(data.confidenceInterval[1] - data.confidenceInterval[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200">
-                                        <div class="BoxChart-box--median" [style.left.px]="(data.average - data.confidenceInterval[0]) / experiment.selectedIteration.numericConfidenceIntervalBoundary[2] * 200"></div>
-                                      </div>
-                                    </div>
-                                    <div class="BoxChart-whisker"></div>
-                                  </div>
-                                </div>
-                                <div *ngIf="data.confidenceInterval[0] >= 0" class="confidence_interval">{{data.confidenceInterval[0]}} {{experiment.metricCustomEventUnit}} - {{data.confidenceInterval[1]}} {{experiment.metricCustomEventUnit}}</div>
-                                <div *ngIf="data.confidenceInterval[0] === -1" class="confidence_interval"> -- </div>
+                                <div class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
                               </td>
                             </ng-container>
 
                             <td *ngIf="!data.isBaseline">
-                              {{ data.changeToBaseline | percentage }}
+                              {{ data.effectSize | percentage }}
                             </td>
                             <td>
                               {{ data.pValue }}
@@ -266,7 +247,8 @@
                   <ng-container *ngIf="experiment.isChartExpanded">
                     <g2-line-chart [containerId]="experiment.id" [chartConfig]="experiment.chartConfig"></g2-line-chart>
                   </ng-container>
-                  <div style="text-align: center; margin-top: 10px; margin-bottom: 10px;">
+                  <div style="text-align: center; margin-top: 10px; margin-bottom: 10px;"
+                       *ngIf="experiment.metricCustomEventTrackOption !== customEventTrackNumeric">
                     <button nz-button nzType="default" (click)="experiment.isChartExpanded = !experiment.isChartExpanded">
                       <ng-container *ngIf="experiment.isChartExpanded" i18n="@@ff.expt.hide-chart">Hide chart</ng-container>
                       <ng-container *ngIf="!experiment.isChartExpanded" i18n="@@ff.expt.show-chart">Show chart</ng-container>
