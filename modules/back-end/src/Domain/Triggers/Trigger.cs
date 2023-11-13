@@ -2,6 +2,7 @@
 
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
+using Domain.Users;
 
 namespace Domain.Triggers;
 
@@ -72,14 +73,7 @@ public class Trigger : AuditedEntity
         }
 
         var dataChange = new DataChange(featureFlag);
-
-        featureFlag.IsEnabled = Action switch
-        {
-            TriggerActions.TurnOff => false,
-            TriggerActions.TurnOn => true,
-            _ => featureFlag.IsEnabled
-        };
-        featureFlag.Revision = Guid.NewGuid();
+        featureFlag.Toggle(SystemUser.Id);
 
         TriggeredTimes++;
         LastTriggeredAt = DateTime.UtcNow;
