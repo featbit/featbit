@@ -11,8 +11,8 @@
       <div *ngIf="isFlagListInitialized && !isCreatingFlag" class="flag-selector">
         <p nz-typography i18n="@@get-started.create-flag-paragraph-1">A Feature Flag controls what you want to release, who receive it and how it will be delivered.</p>
         <p nz-typography i18n="@@get-started.create-flag-paragraph-2">Select an existing Flag or type the name to create a new one</p>
-
         <nz-select
+          class="nz-select-40"
           i18n-nzPlaceHolder="@@common.select-or-create-ff"
           nzPlaceHolder="Select or create a feature flag"
           nzShowSearch

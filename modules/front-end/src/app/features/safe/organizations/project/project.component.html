@@ -149,7 +149,7 @@
           i18n-nzTooltipTitle="@@org.project.type-description"
           nzTooltipTitle="The secret would be used by a client side or server side SDK">Type</nz-form-label>
         <nz-form-control>
-          <nz-select [nzDisabled]="isEditingSecret" formControlName="type">
+          <nz-select class="nz-select-40" [nzDisabled]="isEditingSecret" formControlName="type">
             <nz-option [nzValue]="SecretTypeEnum.Client" i18n-nzLabel="@@org.project.secret-type-client-side-sdk" nzLabel="Client Side SDK"></nz-option>
             <nz-option [nzValue]="SecretTypeEnum.Server" i18n-nzLabel="@@org.project.secret-type-server-side-sdk" nzLabel="Server Side SDK"></nz-option>
           </nz-select>
