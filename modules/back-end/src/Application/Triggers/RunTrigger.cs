@@ -3,6 +3,7 @@ using Application.Bases.Exceptions;
 using Application.FeatureFlags;
 using Domain.AuditLogs;
 using Domain.Triggers;
+using Domain.Users;
 
 namespace Application.Triggers;
 
@@ -57,7 +58,7 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
             // publish on feature flag change notification
             var comment = trigger.Action == TriggerActions.TurnOff ? "Turn off by trigger" : "Turn on by trigger";
             var notification =
-                new OnFeatureFlagChanged(flag, Operations.Update, dataChange, Guid.Empty, comment);
+                new OnFeatureFlagChanged(flag, Operations.Update, dataChange, SystemUser.Id, comment);
             await _publisher.Publish(notification, cancellationToken);
         }
 
