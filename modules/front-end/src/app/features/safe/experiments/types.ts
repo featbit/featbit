@@ -27,6 +27,7 @@ export interface IExptCreation {
   featureFlagId: string,
   metricId: string,
   baselineVariationId: string,
+  alpha: number 
 }
 
 export class ExperimentListFilter {
@@ -83,7 +84,6 @@ export interface IExptIteration {
   updatedAt?: Date,
   updatedAtStr?: string,
   dateTimeInterval?: string,
-  numericConfidenceIntervalBoundary?: number[], // [min, max, max - min]
   customEventTrackOption: CustomEventTrackOption,
   customEventUnit: string,
   isFinish: boolean,
@@ -96,6 +96,7 @@ export interface IExptIteration {
 
 export interface IExptIterationResult {
   changeToBaseline: number, // float
+  effectSize: number, // float
   conversion: number, // long
   conversionRate: number, // float
   isBaseline: boolean,

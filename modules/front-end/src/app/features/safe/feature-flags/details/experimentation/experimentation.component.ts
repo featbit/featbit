@@ -90,7 +90,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.refreshIntervalId = setInterval(() => {
       const activeExperimentIteration = this.onGoingExperiments.flatMap(expt => {
         expt.isLoading = true;
-
         return expt.iterations.filter(it => it.endTime === null || !it.isFinish).map( i =>
           ({
             exptId: expt.id,
@@ -120,16 +119,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
                 if (iteration.updatedAt) {
                   expt.selectedIteration.updatedAt = iteration.updatedAt;
                   expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
-                }
-
-                if (expt.metricCustomEventTrackOption === this.customEventTrackNumeric) {
-                  // [min, max, max - min]
-                  expt.selectedIteration.numericConfidenceIntervalBoundary = [
-                    Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
-                    Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
-                  ];
-
-                  expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
                 }
 
                 // update experiment original iterations
@@ -163,16 +152,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
           if (expt.iterations.length > 0) {
             expt.iterations = expt.iterations.map(iteration => this.processIteration(iteration, expt.baselineVariation.id)).reverse();
             expt.selectedIteration = expt.iterations[0];
-
-            if (expt.metricCustomEventTrackOption === this.customEventTrackNumeric) {
-              // [min, max, max - min]
-              expt.selectedIteration.numericConfidenceIntervalBoundary = [
-                Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
-                Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
-              ];
-
-              expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
-            }
 
             this.loadIterationResults(expt);
           } else {
@@ -268,16 +247,6 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
           expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
         }
 
-        if (expt.metricCustomEventTrackOption === this.customEventTrackNumeric) {
-          // [min, max, max - min]
-          expt.selectedIteration.numericConfidenceIntervalBoundary = [
-            Math.min(...expt.selectedIteration.results.map(r => r.confidenceInterval[0])),
-            Math.max(...expt.selectedIteration.results.map(r => r.confidenceInterval[1])),
-          ];
-
-          expt.selectedIteration.numericConfidenceIntervalBoundary.push(expt.selectedIteration.numericConfidenceIntervalBoundary[1] - expt.selectedIteration.numericConfidenceIntervalBoundary[0]);
-        }
-
         this.setExptStatus(expt, res[0]);
       }
 
@@ -321,7 +290,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         const found = iteration.results?.find(r => r.variationId === option.id);
         return !found ? this.createEmptyIterationResult(option, baselineVariationId) : { ...found,
           variationValue: option.value,
-          confidenceInterval: !found.confidenceInterval ? [-1, -1] : found.confidenceInterval.map(x => Math.max(0, x)),
+          confidenceInterval: !found.confidenceInterval ? [-1, -1] : found.confidenceInterval,
           isEmpty: false,
         }
       });
@@ -329,12 +298,12 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     const invalidVariation = !!iterationResults.find(e => e.isInvalid && !e.isBaseline);
     const winnerVariation = !!iterationResults.find(e => e.isWinner);
 
-    const nowStr = $localize `:@@common.now:Now`;
+    const nowStr = (iteration.isFinish === true) ? "" : "(" + ($localize `:@@common.now:Now`) + ")";
     const startStr = `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')}`;
     const endStr = `${iteration.endTime ?
       moment(iteration.endTime).format('YYYY-MM-DD HH:mm') :
-      moment(new Date()).format('YYYY-MM-DD HH:mm')}  (${nowStr})`
-
+      moment(new Date()).format('YYYY-MM-DD HH:mm')}  ${nowStr}`
+      
     return {
       ...iteration,
       invalidVariation,
