@@ -54,7 +54,6 @@
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-
       <ng-container
         *ngIf="metricForm.value.eventType === pageViewEventType || metricForm.value.eventType === clickEventType">
         <nz-form-item *ngIf="metricForm.value.eventType === clickEventType">
@@ -104,13 +103,13 @@
         </nz-form-item>
         <nz-form-item>
           <nz-form-label i18n="@@expt.metric.unit">Unit</nz-form-label>
-          <nz-form-control i18n-nzErrorTip="@@expt.metric.unit-cannot-be-empty" nzErrorTip="Unit cannot be empty">
+          <nz-form-control>
             <input type="text" nz-input formControlName="customEventUnit" i18n-placeholder="@@expt.metric.unit-exemple" placeholder="ms, $, kg etc."/>
           </nz-form-control>
         </nz-form-item>
         <nz-form-item>
           <nz-form-label i18n="@@expt.metric.winning-criteria">Winning criteria</nz-form-label>
-          <nz-form-control i18n-nzErrorTip="@@expt.metric.winning-criteria" nzErrorTip="Winning criteria">
+          <nz-form-control>
             <nz-select formControlName="customEventSuccessCriteria">
               <nz-option [nzValue]="customEventSuccessCriteriaHigher" i18n-nzLabel="@@expt.metric.higher-than-baseline" nzLabel="Higher than baseline"></nz-option>
               <nz-option [nzValue]="customEventSuccessCriteriaLower" i18n-nzLabel="@@expt.metric.lower-than-baseline" nzLabel="Lower than baseline"></nz-option>

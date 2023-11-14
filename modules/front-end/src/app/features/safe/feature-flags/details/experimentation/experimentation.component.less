@@ -143,6 +143,15 @@
               .right {
                 display: flex;
                 justify-content: flex-end;
+                align-items: center;
+                gap: 12px;
+
+                .confidence-level {
+                  font-size: 14px;
+                  font-variant: tabular-nums;
+                  line-height: 1.5715;
+                  font-weight: 600;
+                }
               }
 
               .anticon.status {
@@ -187,7 +196,7 @@
         list-style-type: none;
       }
 
-      padding: 0px;
+      padding: 0;
       .winner_icon {
         color: #44bc9d;
       }
@@ -235,48 +244,6 @@
         display: inline-block;
         width: 15px;
       }
-    }
-
-    .BoxChart {
-      display: flex;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    .BoxChart-whisker {
-      background-color: rgb(209, 211, 212);
-      height: 1.25rem;
-      width: 0.2rem;
-    }
-
-    .BoxChart-box--container {
-      height: 1.25rem;
-      position: relative;
-      width: 100%;
-    }
-
-    .BoxChart-box--line {
-      width: 100%;
-      background-color: rgb(209, 211, 212);
-      position: absolute;
-      height: 0.2rem;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .BoxChart-box {
-      height: 1.25rem;
-      min-width: 0.21rem;
-      background-color: rgb(209, 211, 212);
-      position: absolute;
-    }
-
-    .BoxChart-box--median {
-      background-color: rgb(248, 248, 248);
-      height: 1.25rem;
-      position: absolute;
-      transform: translate(-50%);
-      width: 0.2rem;
     }
   }
 }
