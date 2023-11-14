@@ -38,7 +38,9 @@ public class SsoController : ApiControllerBase
     }
 
     [HttpGet("oidc-authorize-url")]
-    public async Task<IActionResult> GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string redirectUri, [FromQuery(Name = "workspace_key")] string workspaceKey)
+    public async Task<IActionResult> GetOidcAuthorizeUrl(
+        [FromQuery(Name = "redirect_uri")] string redirectUri,
+        [FromQuery(Name = "workspace_key")] string workspaceKey)
     {
         if (!_isEnabled)
         {
@@ -50,7 +52,7 @@ public class SsoController : ApiControllerBase
         {
             return BadRequest("SSO not enabled");
         }
-        
+
         var isSsoGranted = _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
         if (!isSsoGranted)
         {
@@ -58,14 +60,14 @@ public class SsoController : ApiControllerBase
                 "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
             );
         }
-        
-        if (workspace.Sso?.Oidc == null)
+
+        var oidcConfig = workspace.Sso?.Oidc;
+        if (oidcConfig == null)
         {
             return BadRequest("SSO not configured");
         }
-        
-        var oidcOptions = OidcOptions.FromOidcConfig(workspace.Sso.Oidc);
-        var url = _client.GetAuthorizeUrl(redirectUri, workspaceKey, oidcOptions);
+
+        var url = _client.GetAuthorizeUrl(redirectUri, workspaceKey, oidcConfig);
         return Redirect(url);
     }
 
@@ -84,7 +86,7 @@ public class SsoController : ApiControllerBase
             {
                 return Error<LoginToken>("SSO failed");
             }
-            
+
             var isSsoGranted = _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
             if (!isSsoGranted)
             {
@@ -92,14 +94,14 @@ public class SsoController : ApiControllerBase
                     "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
                 );
             }
-            
-            if (workspace.Sso?.Oidc == null)
+
+            var oidcConfig = workspace.Sso?.Oidc;
+            if (oidcConfig == null)
             {
                 return Error<LoginToken>("SSO not configured");
             }
-            
-            var oidcOptions = OidcOptions.FromOidcConfig(workspace.Sso.Oidc);
-            var email = await _client.GetEmailAsync(request, oidcOptions);
+
+            var email = await _client.GetEmailAsync(request, oidcConfig);
             if (string.IsNullOrWhiteSpace(email))
             {
                 return Error<LoginToken>("SSO failed");
@@ -111,7 +113,7 @@ public class SsoController : ApiControllerBase
                 var token = _identityService.IssueToken(user);
                 return Ok(new LoginToken(token));
             }
-            
+
             return Error<LoginToken>("SSO not enabled");
         }
         catch (Exception ex)
