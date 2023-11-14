@@ -22,6 +22,7 @@ services:
       - MongoDb__Database=featbit
       - Kafka__BootstrapServers=kafka:9092
       - OLAP__ServiceHost=http://da-server
+      - SSOEnabled=false
     ports:
       - "5000:5000"
     networks:
