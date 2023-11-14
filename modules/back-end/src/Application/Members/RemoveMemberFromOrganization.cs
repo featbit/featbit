@@ -1,13 +1,13 @@
 namespace Application.Members;
 
-public class DeleteMemberFromOrg : IRequest<bool>
+public class RemoveMemberFromOrganization : IRequest<bool>
 {
     public Guid OrganizationId { get; set; }
 
     public Guid MemberId { get; set; }
 }
 
-public class DeleteMemberFromOrgHandler : IRequestHandler<DeleteMemberFromOrg, bool>
+public class DeleteMemberFromOrgHandler : IRequestHandler<RemoveMemberFromOrganization, bool>
 {
     private readonly IMemberService _service;
 
@@ -16,7 +16,7 @@ public class DeleteMemberFromOrgHandler : IRequestHandler<DeleteMemberFromOrg, b
         _service = service;
     }
 
-    public async Task<bool> Handle(DeleteMemberFromOrg request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(RemoveMemberFromOrganization request, CancellationToken cancellationToken)
     {
         await _service.DeleteAsync(request.OrganizationId, request.MemberId);
 
