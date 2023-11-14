@@ -18,12 +18,12 @@ public class Resource
         Type = ResourceTypes.All
     };
 
-    public static readonly Resource AllAccount = new()
+    public static readonly Resource AllOrganizations = new()
     {
         Id = new Guid("e394832e-bd98-43de-b174-e0c98e03d19d"),
-        Name = "account",
-        Rn = "account/*",
-        Type = ResourceTypes.Account
+        Name = "organization",
+        Rn = "organization/*",
+        Type = ResourceTypes.Organization
     };
 
     public static readonly Resource AllIam = new()

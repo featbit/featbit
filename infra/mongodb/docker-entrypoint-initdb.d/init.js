@@ -97,10 +97,10 @@ db.Policies.insertOne(
         statements: [
             {
                 _id: getUUIDString(),
-                resourceType: "account",
+                resourceType: "organization",
                 effect: "allow",
                 actions: ["UpdateOrgName"],
-                resources: ["account/*"]
+                resources: ["organization/*"]
             },
             {
                 _id: getUUIDString(),

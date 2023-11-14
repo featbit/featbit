@@ -60,10 +60,10 @@
   <div class="row">
     <div class="row-title" i18n="@@org.org.switchorg">Switch organization</div>
     <div class="row-content">
-      <nz-select class="extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentOrganization" (ngModelChange)="onAccountChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">
-        <nz-option *ngFor="let account of allOrganizations" [nzLabel]="account.name" [nzValue]="account"></nz-option>
+      <nz-select class="extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentOrganization" (ngModelChange)="onOrganizationChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">
+        <nz-option *ngFor="let org of allOrganizations" [nzLabel]="org.name" [nzValue]="org"></nz-option>
       </nz-select>
-      <button class="create-org-btn" [disabled]="!license.isGranted(LicenseFeatureEnum.CreateOrg)" nz-button nzType="primary" (click)="onCreateAccountClick()">
+      <button class="create-org-btn" [disabled]="!license.isGranted(LicenseFeatureEnum.CreateOrg)" nz-button nzType="primary" (click)="onCreateOrganizationClick()">
         <i nz-icon nzType="icons:icon-add"></i>
         <ng-container i18n="@@common.add">Add</ng-container>
       </button>
@@ -71,4 +71,4 @@
   </div>
 </div>
 
-<organization-drawer [visible]="creatOrganizationFormVisible" (close)="onCreateAccountClosed($event)"></organization-drawer>
+<organization-drawer [visible]="creatOrganizationFormVisible" (close)="onCreateOrganizationClosed($event)"></organization-drawer>

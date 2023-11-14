@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { OrganizationDrawerComponent } from './organization-drawer.component';
 
-describe('AccountDrawerComponent', () => {
+describe('OrganizationDrawerComponent', () => {
   let component: OrganizationDrawerComponent;
   let fixture: ComponentFixture<OrganizationDrawerComponent>;
 

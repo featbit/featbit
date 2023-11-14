@@ -45,11 +45,11 @@ export class OrganizationService {
     return this.http.post(url, payload);
   }
 
-  switchOrganization(account: IOrganization) {
-    if (!!account) {
-      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(account));
-      const currentAccount = this.organizations.find(ws => ws.id == account.id);
-      currentAccount.name = account.name;
+  switchOrganization(org: IOrganization) {
+    if (!!org) {
+      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(org));
+      const currentOrganization = this.organizations.find(ws => ws.id == org.id);
+      currentOrganization.name = org.name;
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
@@ -60,11 +60,11 @@ export class OrganizationService {
 
   setOrganization(organization: IOrganization) {
     if (!!organization) {
-      const currentAccount = this.organizations.find(ws => ws.id == organization.id);
-      currentAccount.name = organization.name;
-      currentAccount.license = organization.license;
-      currentAccount.initialized = organization.initialized;
-      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentAccount));
+      const currentOrganization = this.organizations.find(ws => ws.id == organization.id);
+      currentOrganization.name = organization.name;
+      currentOrganization.license = organization.license;
+      currentOrganization.initialized = organization.initialized;
+      localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrganization));
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-account-manage',
+  selector: 'organization-manage',
   templateUrl: './organizations.component.html',
   styleUrls: ['./organizations.component.less']
 })
