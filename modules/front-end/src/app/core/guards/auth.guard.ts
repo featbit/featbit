@@ -1,7 +1,12 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { getAuth } from '@shared/utils';
-import { CURRENT_ORGANIZATION, CURRENT_PROJECT, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
+import {
+  CURRENT_ORGANIZATION,
+  CURRENT_PROJECT,
+  LOGIN_BY_SSO,
+  LOGIN_REDIRECT_URL
+} from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
@@ -32,7 +37,8 @@ export const authGuard = async (
   }
 
   await workspaceService.refreshWorkspace();
-  const organizations = await organizationService.getListAsync();
+  const isSsoInitial = localStorage.getItem(LOGIN_BY_SSO) === 'true';
+  const organizations = await organizationService.getListAsync(isSsoInitial);
   organizationService.organizations = organizations;
 
   if (url.startsWith("/select-organization")) {

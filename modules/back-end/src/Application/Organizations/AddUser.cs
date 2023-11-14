@@ -1,6 +1,7 @@
 using Application.Bases;
 using Application.Users;
 using Domain.Organizations;
+using Domain.Policies;
 using Domain.Users;
 
 namespace Application.Organizations;
@@ -73,6 +74,11 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         {
             initialPwd = string.Empty;
             userId = user.Id;
+        }
+        
+        if (!request.PolicyIds.Any() && !request.GroupIds.Any())
+        {
+            request.PolicyIds = new List<Guid> { BuiltInPolicy.Developer };
         }
 
         var organizationUser = new OrganizationUser(request.OrganizationId, userId, _currentUser.Id, initialPwd);

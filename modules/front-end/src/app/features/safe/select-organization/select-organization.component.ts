@@ -3,8 +3,9 @@ import { IdentityService } from "@services/identity.service";
 import { IAuthProps, IOrganization } from "@shared/types";
 import { OrganizationService } from "@services/organization.service";
 import { Router } from "@angular/router";
-import { LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
+import { LOGIN_BY_SSO, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
 import { getAuth } from "@utils/index";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
   selector: 'select-organization',
@@ -20,6 +21,7 @@ export class SelectOrganizationComponent {
   constructor(
     private router: Router,
     private organizationService: OrganizationService,
+    private message: NzMessageService,
     private identityService: IdentityService)
   {
     this.organizations = organizationService.organizations;
@@ -32,14 +34,21 @@ export class SelectOrganizationComponent {
 
   async setOrganization(organization: any) {
     this.organizationService.switchOrganization(organization);
-
-    const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
-    if (redirectUrl) {
-      localStorage.removeItem(LOGIN_REDIRECT_URL);
-      await this.router.navigateByUrl(redirectUrl);
-    } else {
-      await this.router.navigateByUrl(`/`);
-    }
+    this.organizationService.addUser({ method: 'Email', email: this.auth.email, policyIds: [], groupIds: [] }).subscribe(
+      async () => {
+        localStorage.removeItem(LOGIN_BY_SSO);
+        const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
+        if (redirectUrl) {
+          localStorage.removeItem(LOGIN_REDIRECT_URL);
+          await this.router.navigateByUrl(redirectUrl);
+        } else {
+          await this.router.navigateByUrl(`/`);
+        }
+      },
+      _ => {
+        this.message.error($localize `:@@common.error-happened-please-relogin:Error happened, please login again!` );
+      }
+    )
   }
 
   toggleMenu(extended: boolean) {

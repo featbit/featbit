@@ -1,5 +1,6 @@
 import { getLocalStorageKey } from "./index";
 
+export const LOGIN_BY_SSO = 'login-by-sso';
 export const LOGIN_REDIRECT_URL = 'login-redirect-url';
 export const IDENTITY_TOKEN = 'token';
 export const USER_PROFILE = 'auth';

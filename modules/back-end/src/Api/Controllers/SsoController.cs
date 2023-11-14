@@ -1,6 +1,7 @@
 using Api.Authentication.OpenIdConnect;
 using Application.Identity;
 using Application.Services;
+using Domain.Users;
 using Domain.Workspaces;
 
 namespace Api.Controllers;
@@ -107,14 +108,19 @@ public class SsoController : ApiControllerBase
                 return Error<LoginToken>("SSO failed");
             }
 
+            string token;
             var user = await _userService.FindByEmailAsync(email, workspace.Id);
-            if (user != null)
+            if (user == null)
             {
-                var token = _identityService.IssueToken(user);
-                return Ok(new LoginToken(token));
+                var registerResult = await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
+                token = registerResult.Token;
+            }
+            else
+            {
+                token = _identityService.IssueToken(user);
             }
 
-            return Error<LoginToken>("SSO not enabled");
+            return Ok(new LoginToken(token));
         }
         catch (Exception ex)
         {
