@@ -49,8 +49,8 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
 
             // set workspace, organization id header & store permissions
             var org = await _organizationService.GetAsync(accessToken.OrganizationId);
-            Context.Request.Headers.Add(OpenApiConstants.WorkspaceHeaderKey, org.WorkspaceId.ToString());
-            Context.Request.Headers.Add(OpenApiConstants.OrgIdHeaderKey, org.ToString());
+            Context.Request.Headers.Add(ApiConstants.WorkspaceHeaderKey, org.WorkspaceId.ToString());
+            Context.Request.Headers.Add(ApiConstants.OrgIdHeaderKey, org.ToString());
             if (accessToken.Type == AccessTokenTypes.Service)
             {
                 Context.Items[OpenApiConstants.PermissionStoreKey] = accessToken.Permissions;

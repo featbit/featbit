@@ -1,4 +1,3 @@
-using Api.Authentication;
 using Application.Services;
 
 namespace Api.Authorization;
@@ -21,7 +20,7 @@ public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement
             return;
         }
 
-        if (!httpContext.Request.Headers.TryGetValue(OpenApiConstants.WorkspaceHeaderKey, out var workspaceIdString))
+        if (!httpContext.Request.Headers.TryGetValue(ApiConstants.WorkspaceHeaderKey, out var workspaceIdString))
         {
             return;
         }
