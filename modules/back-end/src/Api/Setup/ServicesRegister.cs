@@ -130,7 +130,7 @@ public static class ServicesRegister
         });
 
         // SSO
-        builder.Services.AddSso(builder.Configuration);
+        builder.Services.AddSso();
         
         // replace default authorization result handler
         var authorizationResultHandler =
