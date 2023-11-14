@@ -5,7 +5,7 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Workspaces;
 
-public class WorkspaceService : MongoDbService<Workspace>,  IWorkspaceService
+public class WorkspaceService : MongoDbService<Workspace>, IWorkspaceService
 {
     public WorkspaceService(MongoDbClient mongoDb) : base(mongoDb)
     {
@@ -25,7 +25,7 @@ public class WorkspaceService : MongoDbService<Workspace>,  IWorkspaceService
 
         return await query.ToListAsync();
     }
-    
+
     public async Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key)
     {
         return await AnyAsync(ws =>
