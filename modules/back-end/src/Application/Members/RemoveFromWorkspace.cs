@@ -1,21 +1,21 @@
 namespace Application.Members;
 
-public class DeleteMemberFromWorkspace : IRequest<bool>
+public class RemoveFromWorkspace : IRequest<bool>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid MemberId { get; set; }
 }
 
-public class DeleteMemberFromWorkspaceHandler : IRequestHandler<DeleteMemberFromWorkspace, bool>
+public class RemoveFromWorkspaceHandler : IRequestHandler<RemoveFromWorkspace, bool>
 {
     private readonly IUserService _userService;
     private readonly IOrganizationService _organizationService;
     private readonly IMemberService _memberService;
 
-    public DeleteMemberFromWorkspaceHandler(
-        IUserService userService, 
-        IOrganizationService organizationService, 
+    public RemoveFromWorkspaceHandler(
+        IUserService userService,
+        IOrganizationService organizationService,
         IMemberService memberService)
     {
         _userService = userService;
@@ -23,7 +23,7 @@ public class DeleteMemberFromWorkspaceHandler : IRequestHandler<DeleteMemberFrom
         _memberService = memberService;
     }
 
-    public async Task<bool> Handle(DeleteMemberFromWorkspace request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(RemoveFromWorkspace request, CancellationToken cancellationToken)
     {
         var user = await _userService.GetAsync(request.MemberId);
         var organizations = await _organizationService.GetListAsync(request.MemberId);
@@ -31,7 +31,7 @@ public class DeleteMemberFromWorkspaceHandler : IRequestHandler<DeleteMemberFrom
         {
             await _memberService.DeleteAsync(organization.Id, request.MemberId);
         }
-        
+
         await _userService.DeleteAsync(user.Id);
         return true;
     }

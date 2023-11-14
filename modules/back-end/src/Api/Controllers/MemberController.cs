@@ -23,7 +23,7 @@ public class MemberController : ApiControllerBase
     [HttpDelete("remove-from-org/{memberId:guid}")]
     public async Task<ApiResponse<bool>> RemoveFromOrganizationAsync(Guid memberId)
     {
-        var request = new RemoveMemberFromOrganization
+        var request = new RemoveFromOrganization
         {
             OrganizationId = OrgId,
             MemberId = memberId
@@ -36,7 +36,7 @@ public class MemberController : ApiControllerBase
     [HttpDelete("remove-from-workspace/{memberId:guid}")]
     public async Task<ApiResponse<bool>> RemoveFromWorkspaceAsync(Guid memberId)
     {
-        var request = new DeleteMemberFromWorkspace
+        var request = new RemoveFromWorkspace
         {
             WorkspaceId = WorkspaceId,
             MemberId = memberId
