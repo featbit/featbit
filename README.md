@@ -29,7 +29,9 @@
 </div>
 </div>
 
-🙏 If you are using FeatBit, we have launched the [FeatBit Usage Survey](https://forms.gle/gZT715wE9aMPpoBw8). It would be greatly appreciated and incredibly helpful if you could take the time to fill it out (5 questions).
+<br/>
+
+🙏 If you are using FeatBit, we have launched the [**FeatBit Usage Survey**](https://forms.gle/gZT715wE9aMPpoBw8). It would be greatly appreciated and incredibly helpful if you could take the time to fill it out (5 questions).
 
 ## Try FeatBit Online
 
@@ -98,6 +100,12 @@ else
     // run old algorithm
 }
 ```
+
+--------
+
+🙏 If you are using FeatBit, we have launched the [**FeatBit Usage Survey**](https://forms.gle/gZT715wE9aMPpoBw8). It would be greatly appreciated and incredibly helpful if you could take the time to fill it out (5 questions).
+
+--------
 
 ## Configure and run FeatBit anywhere
 
