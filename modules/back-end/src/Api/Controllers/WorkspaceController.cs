@@ -30,8 +30,8 @@ public class WorkspaceController : ApiControllerBase
     {
         request.Id = WorkspaceId;
 
-        var organization = await Mediator.Send(request);
-        return Ok(organization);
+        var workspace = await Mediator.Send(request);
+        return Ok(workspace);
     }
 
     [HttpPut("sso-oidc")]
@@ -39,8 +39,8 @@ public class WorkspaceController : ApiControllerBase
     {
         request.Id = WorkspaceId;
 
-        var organization = await Mediator.Send(request);
-        return Ok(organization);
+        var workspace = await Mediator.Send(request);
+        return Ok(workspace);
     }
 
     [HttpGet("is-key-used")]
@@ -61,8 +61,8 @@ public class WorkspaceController : ApiControllerBase
     {
         request.Id = WorkspaceId;
 
-        var organization = await Mediator.Send(request);
-        return Ok(organization);
+        var workspace = await Mediator.Send(request);
+        return Ok(workspace);
     }
 
     [AllowAnonymous]
