@@ -62,7 +62,7 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         string initialPwd;
         Guid userId;
 
-        var user = await _userService.FindByEmailAsync(email, request.WorkspaceId);
+        var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == request.WorkspaceId);
         // automatically register users if they do not exist
         if (user == null)
         {

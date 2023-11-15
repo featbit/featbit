@@ -1,16 +1,13 @@
 using Domain.Users;
+using Domain.Workspaces;
 
 namespace Application.Services;
 
-public interface IUserService
+public interface IUserService : IService<User>
 {
-    Task<User> GetAsync(Guid id);
-
     Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids);
 
-    Task<User> FindByEmailAsync(string email, Guid workspaceId);
+    Task<ICollection<Workspace>> GetWorkspacesAsync(string email);
 
-    Task UpdateAsync(User user);
-    
-    Task DeleteAsync(Guid userId);
+    Task DeleteAsync(Guid id);
 }

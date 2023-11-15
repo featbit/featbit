@@ -66,8 +66,13 @@ public class IdentityService : IIdentityService
         return handler.WriteToken(jwt);
     }
 
-    public async Task<LoginResult> LoginByEmailAsync(string email, string password, Guid workspaceId)
+    public async Task<LoginResult> LoginByEmailAsync(string email, string password, Guid? workspaceId)
     {
+        if (workspaceId is null)
+        {
+            return LoginResult.Failed(ErrorCodes.Invalid(nameof(workspaceId)));
+        }
+
         var user = await _store.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspaceId);
         if (user == null)
         {

@@ -76,7 +76,7 @@ public class SsoController : ApiControllerBase
             }
 
             string token;
-            var user = await _userService.FindByEmailAsync(email, workspace.Id);
+            var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspace.Id);
             if (user == null)
             {
                 var registerResult = await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);

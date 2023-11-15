@@ -30,17 +30,17 @@ public class LoginByEmailValidator : AbstractValidator<LoginByEmail>
 
 public class LoginByEmailHandler : IRequestHandler<LoginByEmail, LoginResult>
 {
+    private readonly IUserService _userService;
     private readonly IIdentityService _identityService;
-    private readonly IWorkspaceService _workspaceService;
     private readonly ILogger<LoginByEmailHandler> _logger;
 
     public LoginByEmailHandler(
+        IUserService userService,
         IIdentityService identityService,
-        IWorkspaceService workspaceService,
         ILogger<LoginByEmailHandler> logger)
     {
+        _userService = userService;
         _identityService = identityService;
-        _workspaceService = workspaceService;
         _logger = logger;
     }
 
@@ -48,19 +48,19 @@ public class LoginByEmailHandler : IRequestHandler<LoginByEmail, LoginResult>
     {
         _logger.LogInformation("user {Identity} login in by password", request.Email);
 
-        var workspaces = await _workspaceService.GetByEmailAsync(request.Email);
-        var workspaceId = workspaces.FirstOrDefault(x => x.Key == request.WorkspaceKey && !string.IsNullOrEmpty(request.WorkspaceKey))?.Id;
-
-        if (!workspaceId.HasValue && workspaces.Count() == 1)
+        var workspaces = await _userService.GetWorkspacesAsync(request.Email);
+        var workspaceId = workspaces.Count switch
         {
-            workspaceId = workspaces.First().Id;
-        }
+            // if user has no workspace
+            0 => null,
 
-        if (!workspaceId.HasValue)
-        {
-            return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
-        }
+            // if user has only one workspace
+            1 => workspaces.First().Id,
 
-        return await _identityService.LoginByEmailAsync(request.Email, request.Password, workspaceId.Value);
+            // if user has multiple workspaces, use the one specified in the request
+            _ => workspaces.FirstOrDefault(x => x.Key == request.WorkspaceKey)?.Id
+        };
+
+        return await _identityService.LoginByEmailAsync(request.Email, request.Password, workspaceId);
     }
 }
