@@ -8,18 +8,17 @@ namespace Application.Organizations;
 
 public class AddUser : IRequest<bool>
 {
-    // possible values: email
     public string Method { get; set; }
-    
+
     public Guid WorkspaceId { get; set; }
 
     public Guid OrganizationId { get; set; }
 
     public string Email { get; set; }
 
-    public ICollection<Guid> PolicyIds { get; set; }
+    public ICollection<Guid> PolicyIds { get; set; } = Array.Empty<Guid>();
 
-    public ICollection<Guid> GroupIds { get; set; }
+    public ICollection<Guid> GroupIds { get; set; } = Array.Empty<Guid>();
 }
 
 public class AddUserValidator : AbstractValidator<AddUser>
@@ -27,12 +26,12 @@ public class AddUserValidator : AbstractValidator<AddUser>
     public AddUserValidator()
     {
         RuleFor(x => x.Method)
-            .NotEmpty().WithErrorCode(ErrorCodes.MethodIsRequired)
-            .Equal(x => "Email").WithErrorCode(ErrorCodes.MethodIsInvalid);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("method"))
+            .Equal(x => "Email").WithErrorCode(ErrorCodes.Invalid("method"));
 
         RuleFor(x => x.Email)
-            .NotEmpty().WithErrorCode(ErrorCodes.EmailIsRequired)
-            .EmailAddress().WithErrorCode(ErrorCodes.EmailIsInvalid);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("email"))
+            .EmailAddress().WithErrorCode(ErrorCodes.Invalid("email"));
     }
 }
 
@@ -67,7 +66,8 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         if (user == null)
         {
             initialPwd = PasswordGenerator.New(email);
-            var registerResult = await _identityService.RegisterByEmailAsync(request.WorkspaceId, email, initialPwd, UserOrigin.Local);
+            var registerResult =
+                await _identityService.RegisterByEmailAsync(request.WorkspaceId, email, initialPwd, UserOrigin.Local);
             userId = registerResult.UserId;
         }
         else
@@ -75,10 +75,11 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
             initialPwd = string.Empty;
             userId = user.Id;
         }
-        
+
+        // if no policies or groups are specified, give user the Developer policy
         if (!request.PolicyIds.Any() && !request.GroupIds.Any())
         {
-            request.PolicyIds = new List<Guid> { BuiltInPolicy.Developer };
+            request.PolicyIds = new[] { BuiltInPolicy.Developer };
         }
 
         var organizationUser = new OrganizationUser(request.OrganizationId, userId, _currentUser.Id, initialPwd);
