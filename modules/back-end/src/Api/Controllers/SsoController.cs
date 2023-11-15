@@ -70,7 +70,9 @@ public class SsoController : ApiControllerBase
             var email = await _client.GetEmailAsync(request, oidcConfig);
             if (string.IsNullOrWhiteSpace(email))
             {
-                return Error<LoginToken>("SSO failed");
+                return Error<LoginToken>(
+                    $"Can not get email from id_token by using claim ${oidcConfig.UserEmailClaim}. Please check your 'UserEmailClaim' configuration"
+                );
             }
 
             string token;
