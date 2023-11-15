@@ -7,7 +7,7 @@ public class LoginByEmail : IRequest<LoginResult>
 {
     public string Email { get; init; } = string.Empty;
 
-    public string WorkspaceKey { get; set; }
+    public string WorkspaceKey { get; set; } = string.Empty;
 
     public string Password { get; init; } = string.Empty;
 }
@@ -17,11 +17,14 @@ public class LoginByEmailValidator : AbstractValidator<LoginByEmail>
     public LoginByEmailValidator()
     {
         RuleFor(x => x.Email)
-            .NotEmpty().WithErrorCode(ErrorCodes.EmailIsRequired)
-            .EmailAddress().WithErrorCode(ErrorCodes.EmailIsInvalid);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("email"))
+            .EmailAddress().WithErrorCode(ErrorCodes.Invalid("email"));
+
+        RuleFor(x => x.WorkspaceKey)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("workspaceKey"));
 
         RuleFor(x => x.Password)
-            .NotEmpty().WithErrorCode(ErrorCodes.PasswordIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("password"));
     }
 }
 
@@ -52,12 +55,12 @@ public class LoginByEmailHandler : IRequestHandler<LoginByEmail, LoginResult>
         {
             workspaceId = workspaces.First().Id;
         }
-        
+
         if (!workspaceId.HasValue)
         {
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
-        
+
         return await _identityService.LoginByEmailAsync(request.Email, request.Password, workspaceId.Value);
     }
 }
