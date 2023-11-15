@@ -6,24 +6,24 @@ using System.IdentityModel.Tokens.Jwt;
 using Application.Bases;
 using Domain.Identity;
 using Domain.Users;
-using Infrastructure.Users;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace Infrastructure.Identity;
 
 public class IdentityService : IIdentityService
 {
-    private readonly IUserStore _store;
+    private readonly IMongoCollection<User> _users;
     private readonly IPasswordHasher<User> _passwordHasher;
     private readonly JwtOptions _options;
 
     public IdentityService(
-        IUserStore store,
+        MongoDbClient mongodb,
         IPasswordHasher<User> passwordHasher,
         IOptions<JwtOptions> options)
     {
+        _users = mongodb.CollectionOf<User>();
         _passwordHasher = passwordHasher;
-        _store = store;
         _options = options.Value;
     }
 
@@ -44,7 +44,7 @@ public class IdentityService : IIdentityService
         var newPasswordHash = _passwordHasher.HashPassword(user, newPassword);
         user.Password = newPasswordHash;
 
-        await _store.UpdateAsync(user);
+        await _users.ReplaceOneAsync(x => x.Id == user.Id, user);
 
         return IdentityResult.Success;
     }
@@ -73,7 +73,7 @@ public class IdentityService : IIdentityService
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
-        var user = await _store.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspaceId);
+        var user = await _users.Find(x => x.Email == email && x.WorkspaceId == workspaceId).FirstOrDefaultAsync();
         if (user == null)
         {
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
@@ -97,7 +97,7 @@ public class IdentityService : IIdentityService
 
         var user = new User(workspaceId, email, hashedPwd, origin: origin);
 
-        await _store.AddAsync(user);
+        await _users.InsertOneAsync(user);
 
         var token = IssueToken(user);
         return RegisterResult.Ok(user.Id, token);
