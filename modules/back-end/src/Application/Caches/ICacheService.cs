@@ -1,6 +1,5 @@
 using Domain.Segments;
 using Domain.FeatureFlags;
-using Domain.Organizations;
 using Domain.Workspaces;
 
 namespace Application.Caches;

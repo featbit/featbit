@@ -6,14 +6,13 @@ using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
 using Domain.FlagSchedules;
-using Domain.Organizations;
 
 namespace Application.FeatureFlags;
 
 public class CreateFlagSchedule : IRequest<bool>
 {
     public Guid WorkspaceId { get; set; }
-    
+
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
