@@ -77,7 +77,7 @@ public static class ConfigureServices
         services.AddHttpClient<IAgentService, AgentService>();
 
         // custom services
-        services.AddScoped<IUserService, UserService>();
+        services.AddTransient<IUserService, UserService>();
         services.AddTransient<IOrganizationService, OrganizationService>();
         services.AddTransient<IMemberService, MemberService>();
         services.AddTransient<IProjectService, ProjectService>();

@@ -34,15 +34,16 @@ public class TestApp : WebApplicationFactory<Program>
                 typeof(TestPasswordHasher),
                 ServiceLifetime.Scoped
             );
-            var currentUser = ServiceDescriptor.Singleton<ICurrentUser>(new TestCurrentUser(TestData.Id));
+            var currentUser = ServiceDescriptor.Singleton<ICurrentUser>(new TestCurrentUser(TestUser.Id));
 
             collection.Replace(userStore);
             collection.Replace(passwordHasher);
             collection.Replace(currentUser);
 
-            collection.Replace(ServiceDescriptor.Singleton<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Singleton<IRedisClient, TestRedisClient>());
             collection.Replace(ServiceDescriptor.Transient<ICachePopulatingService, TestCachePopulatingService>());
+            collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
+            collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
 
             // remove the kafka consumer from the test application because it is not needed
             var kafkaConsumerService =
@@ -99,7 +100,7 @@ public class TestApp : WebApplicationFactory<Program>
 
     private void AddAuthorizationHeader(HttpClient client)
     {
-        var token = GetToken(TestData.User());
+        var token = GetToken(TestUser.Instance());
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             JwtBearerDefaults.AuthenticationScheme, token
         );

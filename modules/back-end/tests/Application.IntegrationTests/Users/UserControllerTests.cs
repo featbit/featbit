@@ -39,7 +39,7 @@ public class UserControllerTests
 
         var client = factory.CreateClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        
+
         var response = await client.GetAsync("/api/v1/user/profile");
         await Verify(response);
     }
