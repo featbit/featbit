@@ -70,7 +70,7 @@ public class IdentityService : IIdentityService
     {
         if (workspaceId is null)
         {
-            return LoginResult.Failed(ErrorCodes.Invalid(nameof(workspaceId)));
+            return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
         var user = await _store.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspaceId);
