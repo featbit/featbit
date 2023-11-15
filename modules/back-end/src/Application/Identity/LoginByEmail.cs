@@ -20,9 +20,6 @@ public class LoginByEmailValidator : AbstractValidator<LoginByEmail>
             .NotEmpty().WithErrorCode(ErrorCodes.Required("email"))
             .EmailAddress().WithErrorCode(ErrorCodes.Invalid("email"));
 
-        RuleFor(x => x.WorkspaceKey)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("workspaceKey"));
-
         RuleFor(x => x.Password)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("password"));
     }
@@ -54,10 +51,10 @@ public class LoginByEmailHandler : IRequestHandler<LoginByEmail, LoginResult>
             // if user has no workspace
             0 => null,
 
-            // if user has only one workspace
-            1 => workspaces.First().Id,
+            // if user has only one workspace and no workspace key is specified in the request
+            1 when string.IsNullOrWhiteSpace(request.WorkspaceKey) => workspaces.First().Id,
 
-            // if user has multiple workspaces, use the one specified in the request
+            // if workspace key is specified in the request
             _ => workspaces.FirstOrDefault(x => x.Key == request.WorkspaceKey)?.Id
         };
 
