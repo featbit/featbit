@@ -8,7 +8,6 @@ using Application.Users;
 using Domain.Users;
 using Infrastructure.Kafka;
 using Infrastructure.Redis;
-using Infrastructure.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -25,10 +24,6 @@ public class TestApp : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(collection =>
         {
-            var userStore = new ServiceDescriptor(typeof(IUserStore),
-                typeof(InMemoryUserStore),
-                ServiceLifetime.Scoped
-            );
             var passwordHasher = new ServiceDescriptor(
                 typeof(IPasswordHasher<User>),
                 typeof(TestPasswordHasher),
@@ -36,7 +31,6 @@ public class TestApp : WebApplicationFactory<Program>
             );
             var currentUser = ServiceDescriptor.Singleton<ICurrentUser>(new TestCurrentUser(TestUser.Id));
 
-            collection.Replace(userStore);
             collection.Replace(passwordHasher);
             collection.Replace(currentUser);
 

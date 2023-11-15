@@ -63,10 +63,9 @@ public static class ConfigureServices
 
         // workspace
         services.AddTransient<IWorkspaceService, WorkspaceService>();
-        
+
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-        services.AddScoped<IUserStore, MongoDbUserStore>();
         services.AddScoped<IIdentityService, IdentityService>();
 
         // typed http clients
