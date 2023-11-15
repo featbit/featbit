@@ -25,14 +25,16 @@ public class RemoveFromWorkspaceHandler : IRequestHandler<RemoveFromWorkspace, b
 
     public async Task<bool> Handle(RemoveFromWorkspace request, CancellationToken cancellationToken)
     {
-        var user = await _userService.GetAsync(request.MemberId);
+        // remove member from all organizations
         var organizations = await _organizationService.GetListAsync(request.MemberId);
         foreach (var organization in organizations)
         {
             await _memberService.DeleteAsync(organization.Id, request.MemberId);
         }
 
-        await _userService.DeleteAsync(user.Id);
+        // remove member from workspace
+        await _userService.DeleteAsync(request.MemberId);
+
         return true;
     }
 }
