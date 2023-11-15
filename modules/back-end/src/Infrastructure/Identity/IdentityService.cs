@@ -66,7 +66,7 @@ public class IdentityService : IIdentityService
         return handler.WriteToken(jwt);
     }
 
-    public async Task<LoginResult> LoginByEmailAsync(string email, string password, Guid? workspaceId)
+    public async Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password)
     {
         if (workspaceId is null)
         {

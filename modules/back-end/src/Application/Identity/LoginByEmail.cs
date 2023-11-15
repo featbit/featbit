@@ -58,6 +58,6 @@ public class LoginByEmailHandler : IRequestHandler<LoginByEmail, LoginResult>
             _ => workspaces.FirstOrDefault(x => x.Key == request.WorkspaceKey)?.Id
         };
 
-        return await _identityService.LoginByEmailAsync(request.Email, request.Password, workspaceId);
+        return await _identityService.LoginByEmailAsync(workspaceId, request.Email, request.Password);
     }
 }
