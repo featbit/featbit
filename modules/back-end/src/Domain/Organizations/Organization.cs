@@ -10,7 +10,7 @@ public class Organization : AuditedEntity
     
     public Guid WorkspaceId { get; set; }
 
-    public Organization(string name, Guid workspaceId)
+    public Organization(Guid workspaceId, string name)
     {
         Name = name;
         Initialized = false;
