@@ -12,8 +12,8 @@ public class HasMultipleWorkspacesValidator : AbstractValidator<HasMultipleWorks
     public HasMultipleWorkspacesValidator()
     {
         RuleFor(x => x.Email)
-            .NotEmpty().WithErrorCode(ErrorCodes.EmailIsRequired)
-            .EmailAddress().WithErrorCode(ErrorCodes.EmailIsInvalid);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("email"))
+            .EmailAddress().WithErrorCode(ErrorCodes.Invalid("email"));
     }
 }
 
@@ -30,7 +30,7 @@ public class HasMultipleWorkspacesHandler : IRequestHandler<HasMultipleWorkspace
     public async Task<bool> Handle(HasMultipleWorkspaces request, CancellationToken cancellationToken)
     {
         var workspaces = await _workspaceService.GetByEmailAsync(request.Email);
-        
+
         return workspaces.Count() > 1;
     }
 }

@@ -13,8 +13,6 @@ public static class ErrorCodes
     public const string EntityExistsAlready = nameof(EntityExistsAlready);
 
     // identity error codes
-    public const string EmailIsRequired = nameof(EmailIsRequired);
-    public const string EmailIsInvalid = nameof(EmailIsInvalid);
     public const string EmailPasswordMismatch = nameof(EmailPasswordMismatch);
     public const string ExternalUserCannotChangePassword = nameof(ExternalUserCannotChangePassword);
     public const string PasswordTooShort = nameof(PasswordTooShort);
