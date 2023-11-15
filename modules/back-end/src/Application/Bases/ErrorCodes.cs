@@ -26,7 +26,7 @@ public static class ErrorCodes
     public const string NameIsRequired = nameof(NameIsRequired);
     public const string KeyIsRequired = nameof(KeyIsRequired);
     public const string KeyHasBeenUsed = nameof(KeyHasBeenUsed);
-    
+
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
 
