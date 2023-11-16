@@ -5,7 +5,7 @@ import { IProfile } from "@shared/types";
 import { getProfile, copyToClipboard } from "@utils/index";
 import { IMember, memberRn } from "@features/safe/iam/types/member";
 import { MemberService } from "@services/member.service";
-import {UserService} from "@services/user.service";
+import { UserService } from "@services/user.service";
 
 @Component({
   selector: 'user-setting',
@@ -46,11 +46,14 @@ export class SettingComponent implements OnInit {
     return this.profile.email !== this.member.email;
   }
 
-  deleteMember() {
-    this.memberService.deleteFromOrg(this.member.id).subscribe(() => {
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.router.navigateByUrl(`/iam/users`);
-    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
+  deleteMemberFromOrg() {
+    this.memberService.deleteFromOrg(this.member.id).subscribe({
+      next: _ => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.router.navigateByUrl(`/iam/users`);
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    });
   }
 
   copyText(text: string) {
