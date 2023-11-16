@@ -25,7 +25,7 @@ db.Workspaces.deleteMany({})
 db.Workspaces.insertOne(
     {
         _id: workspaceId,
-        name: "Default workspace",
+        name: "Default Workspace",
         key: "default-workspace",
         sso: null,
         license: null,

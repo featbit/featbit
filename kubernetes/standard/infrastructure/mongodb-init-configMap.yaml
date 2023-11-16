@@ -34,7 +34,8 @@ data:
         {
             _id: workspaceId,
             name: "Default Workspace",
-            key: "ws",
+            key: "default-workspace",
+            sso: null,
             license: null,
             createdAt: new Date(),
             updatedAt: new Date()
