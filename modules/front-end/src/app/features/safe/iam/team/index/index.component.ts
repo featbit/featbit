@@ -68,19 +68,25 @@ export class IndexComponent implements OnInit {
   }
 
   deleteMemberFromOrg(member: IMember) {
-    this.memberService.deleteFromOrg(member.id).subscribe(() => {
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
-      this.pagedMember.totalCount--;
-    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
+    this.memberService.deleteFromOrg(member.id).subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
+        this.pagedMember.totalCount--;
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    });
   }
 
   deleteMemberFromWorkspace(member: IMember) {
-    this.memberService.deleteFromWorkspace(member.id).subscribe(() => {
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
-      this.pagedMember.totalCount--;
-    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
+    this.memberService.deleteFromWorkspace(member.id).subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
+        this.pagedMember.totalCount--;
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    });
   }
 
   memberDrawerVisible: boolean = false;
