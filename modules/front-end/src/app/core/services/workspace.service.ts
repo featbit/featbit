@@ -2,9 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 import { firstValueFrom, Observable, of } from "rxjs";
-import { IOidc, IOrganization, IWorkspace } from "@shared/types";
-import { CURRENT_ORGANIZATION, CURRENT_WORKSPACE } from "@utils/localstorage-keys";
-import { getCurrentWorkspace } from "@utils/project-env";
+import { IOidc, IWorkspace } from "@shared/types";
+import { CURRENT_WORKSPACE } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
 
 @Injectable({
@@ -20,12 +19,8 @@ export class WorkspaceService {
     private http: HttpClient
   ) { }
 
-  hasMultipleWorkspaces(email: string): Observable<boolean> {
-    return this.http.post<boolean>(`${this.baseUrl}/has-multiple-workspaces`, { email });
-  }
-
   update(id: string, name: string, key: string): Observable<IWorkspace> {
-    return this.http.put<IWorkspace>(this.baseUrl, {id, name, key});
+    return this.http.put<IWorkspace>(this.baseUrl, { id, name, key });
   }
 
   updateOidcSetting(oidc: IOidc): Observable<IWorkspace> {
@@ -54,7 +49,7 @@ export class WorkspaceService {
     }
   }
 
-  async refreshWorkspace(){
+  async refreshWorkspace() {
     const workspace = await this.getWorkspace();
     this.setWorkspace(workspace);
   }

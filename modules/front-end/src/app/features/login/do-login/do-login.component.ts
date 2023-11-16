@@ -5,9 +5,8 @@ import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
-import { finalize } from "rxjs/operators";
-import { WorkspaceService } from "@services/workspace.service";
-import { LOGIN_BY_SSO, USER_PROFILE } from "@utils/localstorage-keys";
+import { LOGIN_BY_SSO } from "@utils/localstorage-keys";
+import { UserService } from "@services/user.service";
 
 enum LoginStep {
   Step1 = 'step1', // email
@@ -38,7 +37,7 @@ export class DoLoginComponent implements OnInit {
     private identityService: IdentityService,
     private ssoService: SsoService,
     private message: NzMessageService,
-    private workspaceService: WorkspaceService
+    private userService: UserService
   ) { }
 
   async ngOnInit() {
@@ -72,7 +71,7 @@ export class DoLoginComponent implements OnInit {
   }
 
   hasMultipleWorkspaces(identity: string) {
-    this.workspaceService.hasMultipleWorkspaces(identity).subscribe({
+    this.userService.hasMultipleWorkspaces(identity).subscribe({
       next: response => {
         this.displayWorkspaceKey = response;
         this.step = LoginStep.Step2;

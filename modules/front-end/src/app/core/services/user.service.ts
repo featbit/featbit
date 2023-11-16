@@ -4,6 +4,7 @@ import { environment } from "src/environments/environment";
 import { IAuthProps } from "@shared/types";
 import { USER_PROFILE } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
+import { Observable } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +24,10 @@ export class UserService {
 
   updateProfile(params: any) {
     return this.http.put(`${this.baseUrl}/profile`, params);
+  }
+
+  hasMultipleWorkspaces(email: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.baseUrl}/has-multiple-workspaces`, { email });
   }
 
   updateLocaleProfile(profile: IAuthProps) {
