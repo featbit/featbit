@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IAuthProps } from "@shared/types";
+import { IProfile } from "@shared/types";
 import { getProfile, copyToClipboard } from "@utils/index";
 import { IMember, memberRn } from "@features/safe/iam/types/member";
 import { MemberService } from "@services/member.service";
@@ -14,7 +14,7 @@ import {UserService} from "@services/user.service";
 })
 export class SettingComponent implements OnInit {
 
-  get profile(): IAuthProps {
+  get profile(): IProfile {
     return getProfile();
   }
 

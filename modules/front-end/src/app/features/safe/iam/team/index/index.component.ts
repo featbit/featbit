@@ -5,8 +5,8 @@ import { debounceTime } from 'rxjs/operators';
 import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MemberService } from "@services/member.service";
-import {IMember, IMemberListModel, MemberFilter, memberRn} from "@features/safe/iam/types/member";
-import {IAuthProps} from "@shared/types";
+import { IMember, IMemberListModel, MemberFilter, memberRn } from "@features/safe/iam/types/member";
+import { IProfile } from "@shared/types";
 
 @Component({
   selector: 'iam-users',
@@ -14,7 +14,7 @@ import {IAuthProps} from "@shared/types";
   styleUrls: ['./index.component.less']
 })
 export class IndexComponent implements OnInit {
-  get profile(): IAuthProps {
+  get profile(): IProfile {
     return getProfile();
   }
 

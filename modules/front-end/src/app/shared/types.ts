@@ -42,7 +42,7 @@ export interface IUserPropertyPresetValue {
   description: string;
 }
 
-export interface IAuthProps {
+export interface IProfile {
   id: string;
   email: string;
   name: string;
@@ -69,7 +69,7 @@ export interface IWorkspace {
   name: string,
   key: string,
   license?: string,
-  sso: ISso
+  sso?: ISso
 }
 
 export interface IOrganization {

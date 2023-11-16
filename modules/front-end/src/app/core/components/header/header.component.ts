@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import {
-  IAuthProps,
+  IProfile,
   IOrganization,
   IProject,
   IEnvironment,
@@ -25,7 +25,7 @@ import { getCurrentOrganization, getCurrentProjectEnv, getCurrentWorkspace } fro
 })
 export class HeaderComponent implements OnInit {
 
-  @Input() profile: IAuthProps;
+  @Input() profile: IProfile;
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
 

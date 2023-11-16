@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IdentityService } from "@services/identity.service";
-import { IAuthProps, IOrganization } from "@shared/types";
+import { IProfile, IOrganization } from "@shared/types";
 import { OrganizationService } from "@services/organization.service";
 import { Router } from "@angular/router";
 import { LOGIN_BY_SSO, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
@@ -16,7 +16,7 @@ export class SelectOrganizationComponent {
 
   menuExtended: boolean = false;
   organizations: IOrganization[] = [];
-  profile: IAuthProps = null;
+  profile: IProfile = null;
 
   constructor(
     private router: Router,

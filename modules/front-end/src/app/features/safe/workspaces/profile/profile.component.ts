@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { getProfile } from '@utils/index';
 import { UserService } from "@services/user.service";
-import { IAuthProps } from "@shared/types";
+import { IProfile } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
@@ -74,10 +74,10 @@ export class ProfileComponent implements OnInit {
     const { email, name } = this.profileForm.value;
 
     this.userService.updateProfile({ email, name }).subscribe(
-      (profile) => {
+      profile => {
         this.isUpdatingProfile = false;
         this.message.success($localize`:@@org.profile.profileUpdateSuccess:Profile successfully updated`);
-        this.userService.updateLocaleProfile(profile as IAuthProps);
+        this.userService.updateLocaleProfile(profile);
       }
     );
   }

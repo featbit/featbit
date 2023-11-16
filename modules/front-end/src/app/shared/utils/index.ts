@@ -1,5 +1,5 @@
 import { USER_PROFILE } from "./localstorage-keys";
-import { IAuthProps } from "../types";
+import { IProfile } from "../types";
 import { USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT } from "@shared/constants";
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
@@ -7,10 +7,9 @@ export function getPathPrefix() {
   return location.pathname.match(/^(?<locale>\/en\/|\/zh\/)/i)?.groups['locale'] || '/';
 }
 
-export function getProfile() : IAuthProps | null {
+export function getProfile(): IProfile | null {
   const profile = localStorage.getItem(USER_PROFILE);
-  if (!profile) return null;
-  return Object.assign({ origin: UserOriginEnum.Local }, JSON.parse(profile));
+  return !profile ? null : Object.assign({ origin: UserOriginEnum.Local }, JSON.parse(profile));
 }
 
 export function getLocalStorageKey(key: string, isUserIndependant: boolean): string {

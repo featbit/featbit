@@ -1,8 +1,8 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { IMenuItem } from './menu';
 import { getProfile } from "@utils/index";
-import { IAuthProps } from "@shared/types";
-import {MessageQueueService} from "@services/message-queue.service";
+import { IProfile } from "@shared/types";
+import { MessageQueueService } from "@services/message-queue.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FeedbackService } from "@services/feedback.service";
 import { NzMessageService } from "ng-zorro-antd/message";
@@ -19,7 +19,7 @@ export class MenuComponent implements OnInit {
   @Output() toggleMenu = new EventEmitter();
   @Input() menuExtended: boolean = true;
 
-  profile: IAuthProps;
+  profile: IProfile;
   constructor(
     private messageQueueService: MessageQueueService,
     private fb: FormBuilder,

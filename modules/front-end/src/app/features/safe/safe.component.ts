@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IAuthProps } from '@shared/types';
+import { IProfile } from '@shared/types';
 import { IMenuItem } from '@core/components/menu/menu';
 import { getProfile } from '@shared/utils';
 import { IdentityService } from "@services/identity.service";
@@ -12,7 +12,7 @@ import { IdentityService } from "@services/identity.service";
 export class SafeComponent implements OnInit {
 
   public menus: IMenuItem[] = [];
-  public profile: IAuthProps;
+  public profile: IProfile;
   public menuExtended: boolean = true;
 
   constructor(private identityService: IdentityService) {
