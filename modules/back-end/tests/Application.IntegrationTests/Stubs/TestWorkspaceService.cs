@@ -17,7 +17,7 @@ public class TestWorkspaceService : NullServiceBase<Workspace>, IWorkspaceServic
 
     public Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key)
     {
-        var isUsed = workspaceId == TestWorkspace.Id && key == TestWorkspace.Key;
+        var isUsed = workspaceId != TestWorkspace.Id && key == TestWorkspace.Key;
 
         return Task.FromResult(isUsed);
     }
