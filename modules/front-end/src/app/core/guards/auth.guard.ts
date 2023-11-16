@@ -10,7 +10,7 @@ import {
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { IEnvironment, IProject } from "@shared/types";
+import { IEnvironment, IOrganization, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
@@ -52,12 +52,13 @@ export const authGuard = async (
 
   // if no current org, redirect to select org page
   const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
+  let organization: IOrganization = orgStr ? JSON.parse(orgStr) : null;
   if (!orgStr) {
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
     return router.parseUrl('/select-organization');
   }
 
-  let organization = organizations.find(org => org.id === organization.id) || organizations[0];
+  organization = organizations.find(org => org.id === organization.id) || organizations[0];
   organizationService.setOrganization(organization);
 
   // init user permission
