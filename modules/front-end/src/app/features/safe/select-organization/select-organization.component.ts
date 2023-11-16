@@ -4,7 +4,7 @@ import { IAuthProps, IOrganization } from "@shared/types";
 import { OrganizationService } from "@services/organization.service";
 import { Router } from "@angular/router";
 import { LOGIN_BY_SSO, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
-import { getAuth } from "@utils/index";
+import { getProfile } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
@@ -16,16 +16,15 @@ export class SelectOrganizationComponent {
 
   menuExtended: boolean = false;
   organizations: IOrganization[] = [];
-  auth: IAuthProps = null;
+  profile: IAuthProps = null;
 
   constructor(
     private router: Router,
     private organizationService: OrganizationService,
     private message: NzMessageService,
-    private identityService: IdentityService)
-  {
+    private identityService: IdentityService) {
     this.organizations = organizationService.organizations;
-    this.auth = getAuth();
+    this.profile = getProfile();
 
     if (this.organizations.length === 1) {
       this.setOrganization(this.organizations[0]);
@@ -34,7 +33,7 @@ export class SelectOrganizationComponent {
 
   async setOrganization(organization: any) {
     this.organizationService.switchOrganization(organization);
-    this.organizationService.addUser({ method: 'Email', email: this.auth.email, policyIds: [], groupIds: [] }).subscribe(
+    this.organizationService.addUser({ method: 'Email', email: this.profile.email, policyIds: [], groupIds: [] }).subscribe(
       async () => {
         localStorage.removeItem(LOGIN_BY_SSO);
         const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);

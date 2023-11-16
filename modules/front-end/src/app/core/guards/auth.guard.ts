@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { getAuth } from '@shared/utils';
+import { getProfile } from '@shared/utils';
 import {
   CURRENT_ORGANIZATION,
   CURRENT_PROJECT,
@@ -27,11 +27,11 @@ export const authGuard = async (
   identityService = inject(IdentityService),
   notification = inject(NzNotificationService)
 ) => {
-  const auth = getAuth();
+  const profile = getProfile();
   const url = state.url;
 
-  // if no auth token, redirect to login page
-  if (!auth) {
+  // if no auth token or workspaceId, redirect to login page
+  if (!profile || !profile.workspaceId) {
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
     return router.parseUrl('/login');
   }
@@ -62,7 +62,7 @@ export const authGuard = async (
   }
 
   // init user permission
-  await permissionService.initUserPolicies(auth.id);
+  await permissionService.initUserPolicies(profile.id);
 
   // if we're going to onboarding page
   if (url.startsWith("/onboarding")) {
@@ -79,7 +79,7 @@ export const authGuard = async (
     return router.parseUrl('/onboarding');
   }
 
-  // try to set user accessible project and env
+  // try to set the user-accessible project and env
   const success = await trySetAccessibleProjectEnv(projectService);
   if (!success) {
     showDenyMessage(notification);

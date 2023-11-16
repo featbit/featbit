@@ -11,7 +11,7 @@
       <div *ngIf="organizations.length > 1" class="orgs-wrapper">
         <div class="title" i18n="@@common.select-an-organization">Select an organization</div>
         <ul nz-list [nzDataSource]="organizations" nzBordered nzSize="large" class="org-list">
-          <nz-list-header><span i18n="@@common.organizations-for">Organizations for</span><span class="auth-email">{{auth.email}}</span></nz-list-header>
+          <nz-list-header><span i18n="@@common.organizations-for">Organizations for</span><span class="auth-email">{{profile.email}}</span></nz-list-header>
           <li nz-list-item *ngFor="let item of organizations" nzNoFlex class="org-item" (click)="setOrganization(item)">
             <ul nz-list-item-actions>
               <nz-list-item-action>

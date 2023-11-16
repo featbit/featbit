@@ -7,15 +7,15 @@ export function getPathPrefix() {
   return location.pathname.match(/^(?<locale>\/en\/|\/zh\/)/i)?.groups['locale'] || '/';
 }
 
-export function getAuth() : IAuthProps | null {
-  const auth = localStorage.getItem(USER_PROFILE);
-  if (!auth) return null;
-  return Object.assign({ origin: UserOriginEnum.Local }, JSON.parse(auth));
+export function getProfile() : IAuthProps | null {
+  const profile = localStorage.getItem(USER_PROFILE);
+  if (!profile) return null;
+  return Object.assign({ origin: UserOriginEnum.Local }, JSON.parse(profile));
 }
 
 export function getLocalStorageKey(key: string, isUserIndependant: boolean): string {
-  const auth = getAuth();
-  return !isUserIndependant && auth ? `${key}_${auth.id}` : key;
+  const profile = getProfile();
+  return !isUserIndependant && profile ? `${key}_${profile.id}` : key;
 }
 
 export function uuidv4() {

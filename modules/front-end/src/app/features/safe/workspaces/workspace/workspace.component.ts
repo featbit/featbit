@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { copyToClipboard, getAuth } from '@utils/index';
+import { copyToClipboard, getProfile } from '@utils/index';
 import { IWorkspace, License, LicenseFeatureEnum } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
-import { getCurrentWorkspace } from "@utils/project-env";
 import { MessageQueueService } from '@core/services/message-queue.service';
 import { WorkspaceService } from "@services/workspace.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
@@ -21,7 +20,7 @@ export class WorkspaceComponent implements OnInit {
   ssoForm!: FormGroup;
   licenseForm!: FormGroup;
 
-  auth = getAuth();
+  profile = getProfile();
   workspace: IWorkspace;
 
   license: License;

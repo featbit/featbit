@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { copyToClipboard, encodeURIComponentFfc, getAuth } from '@utils/index';
+import { copyToClipboard, encodeURIComponentFfc, getProfile } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Router } from "@angular/router";
@@ -14,8 +14,8 @@ import {IAuthProps} from "@shared/types";
   styleUrls: ['./index.component.less']
 })
 export class IndexComponent implements OnInit {
-  get auth(): IAuthProps {
-    return getAuth();
+  get profile(): IAuthProps {
+    return getProfile();
   }
 
   constructor(
@@ -64,7 +64,7 @@ export class IndexComponent implements OnInit {
   }
 
   canDelete(member: IMember): boolean {
-    return this.auth.email !== member.email;
+    return this.profile.email !== member.email;
   }
 
   deleteMemberFromOrg(member: IMember) {

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IAuthProps } from "@shared/types";
-import { getAuth, copyToClipboard } from "@utils/index";
+import { getProfile, copyToClipboard } from "@utils/index";
 import { IMember, memberRn } from "@features/safe/iam/types/member";
 import { MemberService } from "@services/member.service";
 import {UserService} from "@services/user.service";
@@ -14,8 +14,8 @@ import {UserService} from "@services/user.service";
 })
 export class SettingComponent implements OnInit {
 
-  get auth(): IAuthProps {
-    return getAuth();
+  get profile(): IAuthProps {
+    return getProfile();
   }
 
   constructor(
@@ -43,7 +43,7 @@ export class SettingComponent implements OnInit {
   }
 
   canDelete(): boolean {
-    return this.auth.email !== this.member.email;
+    return this.profile.email !== this.member.email;
   }
 
   deleteMember() {

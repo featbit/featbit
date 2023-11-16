@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { getAuth } from '@utils/index';
+import { getProfile } from '@utils/index';
 import { UserService } from "@services/user.service";
 import { IAuthProps } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
@@ -16,10 +16,10 @@ export class ProfileComponent implements OnInit {
 
   // profile form
   profileForm!: FormGroup;
-  auth = getAuth();
+  profile = getProfile();
   isUpdatingProfile: boolean = false;
 
-  // reset password form
+  // reset the password form
   resetPasswordForm!: FormGroup;
   isResettingPassword: boolean = false;
   confirmValidator = (control: FormControl) => {
@@ -44,8 +44,8 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.profileForm = this.fb.group({
-      email: [this.auth.email, [Validators.required, Validators.email]],
-      name: [this.auth.name]
+      email: [this.profile.email, [Validators.required, Validators.email]],
+      name: [this.profile.name]
     });
 
     this.resetPasswordForm = this.fb.group({

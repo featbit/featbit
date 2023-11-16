@@ -25,7 +25,7 @@ import { getCurrentOrganization, getCurrentProjectEnv, getCurrentWorkspace } fro
 })
 export class HeaderComponent implements OnInit {
 
-  @Input() auth: IAuthProps;
+  @Input() profile: IAuthProps;
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
 

@@ -13,8 +13,8 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { Injectable } from "@angular/core";
 import { IDENTITY_TOKEN } from "@utils/localstorage-keys";
 import { IResponse } from "@shared/types";
-import { getCurrentOrganization, getCurrentWorkspace } from "@utils/project-env";
-import { getAuth } from "@utils/index";
+import { getCurrentOrganization } from "@utils/project-env";
+import { getProfile } from "@utils/index";
 
 @Injectable()
 export class RequestResponseInterceptor implements HttpInterceptor {
@@ -27,7 +27,7 @@ export class RequestResponseInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = localStorage.getItem(IDENTITY_TOKEN);
     const currentOrgId = getCurrentOrganization()?.id ?? '';
-    const currentWorkspaceId = getAuth()?.workspaceId ?? '';
+    const currentWorkspaceId = getProfile()?.workspaceId ?? '';
 
     const authedReq = request.clone({
       headers: request.headers

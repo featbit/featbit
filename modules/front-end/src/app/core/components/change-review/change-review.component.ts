@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from "@angular/core";
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from "@angular/forms";
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/forms";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
 import { differenceInCalendarDays, setHours, setMinutes, setSeconds } from 'date-fns';
@@ -12,7 +12,7 @@ import { getCurrentWorkspace } from "@utils/project-env";
 import { BehaviorSubject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { TeamService } from "@services/team.service";
-import { getAuth } from "@utils/index";
+import { getProfile } from "@utils/index";
 
 @Component({
   selector: 'change-review',
@@ -48,13 +48,13 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     const workspace = getCurrentWorkspace();
     this.license = new License(workspace.license);
 
-    const auth = getAuth();
+    const profile = getProfile();
     this.memberSearchChange$.pipe(
       debounceTime(500)
     ).subscribe(searchText => {
       this.teamService.search(searchText).subscribe({
         next: (result) => {
-          this.memberList = result.items.filter(itm => itm.id !== auth.id);
+          this.memberList = result.items.filter(itm => itm.id !== profile.id);
           this.isMemberLoading = false;
         },
         error: _ => {
