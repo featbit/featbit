@@ -30,7 +30,7 @@ public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement
             return;
         }
 
-        var isFeatureGranted = await _licenseService.IsFeatureGrantedAsync(requirement.Feature, workspaceId);
+        var isFeatureGranted = await _licenseService.IsFeatureGrantedAsync(workspaceId, requirement.Feature);
         if (isFeatureGranted)
         {
             context.Succeed(requirement);

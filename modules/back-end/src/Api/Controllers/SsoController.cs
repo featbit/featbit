@@ -14,7 +14,6 @@ public class SsoController : ApiControllerBase
 
     private readonly OidcClient _client;
     private readonly IUserService _userService;
-    private readonly ILicenseService _licenseService;
     private readonly IIdentityService _identityService;
     private readonly IWorkspaceService _workspaceService;
     private readonly ILogger<SsoController> _logger;
@@ -22,7 +21,6 @@ public class SsoController : ApiControllerBase
     public SsoController(
         OidcClient client,
         IUserService userService,
-        ILicenseService licenseService,
         IIdentityService identityService,
         IWorkspaceService workspaceService,
         IConfiguration configuration,
@@ -32,7 +30,6 @@ public class SsoController : ApiControllerBase
 
         _client = client;
         _userService = userService;
-        _licenseService = licenseService;
         _identityService = identityService;
         _workspaceService = workspaceService;
         _logger = logger;
@@ -113,7 +110,7 @@ public class SsoController : ApiControllerBase
             return ("Workspace not found", null);
         }
 
-        var isSsoGranted = _licenseService.IsFeatureGrantedAsync(LicenseFeatures.Sso, workspace.Id, workspace.License);
+        var isSsoGranted = workspace.IsFeatureGranted(LicenseFeatures.Sso);
         if (!isSsoGranted)
         {
             return (

@@ -3,12 +3,7 @@ namespace Application.Services;
 public interface ILicenseService
 {
     /// <summary>
-    /// Check if the feature is granted for the organization
+    /// Check if the feature is granted for the workspace
     /// </summary>
-    Task<bool> IsFeatureGrantedAsync(string feature, Guid orgId);
-    
-    /// <summary>
-    /// Check if the feature is granted for the organization
-    /// </summary>
-    bool IsFeatureGrantedAsync(string feature, Guid workSpaceId, string licenseString);
+    Task<bool> IsFeatureGrantedAsync(Guid workspaceId, string feature);
 }

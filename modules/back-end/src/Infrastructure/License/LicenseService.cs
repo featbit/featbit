@@ -12,24 +12,18 @@ public class LicenseService : ILicenseService
         _cacheService = cacheService;
     }
 
-    public async Task<bool> IsFeatureGrantedAsync(string feature, Guid workSpaceId)
-    {
-        var licenseString = await _cacheService.GetLicenseAsync(workSpaceId);
-
-        return IsFeatureGrantedAsync(feature, workSpaceId, licenseString);
-    }
-    
-    public bool IsFeatureGrantedAsync(string feature, Guid workSpaceId, string licenseString)
+    public async Task<bool> IsFeatureGrantedAsync(Guid workspaceId, string feature)
     {
         if (!LicenseFeatures.IsDefined(feature))
         {
             return false;
         }
-        
-        var isGranted =
-            LicenseVerifier.TryParse(workSpaceId, licenseString, out var license) &&
-            license.IsGranted(feature);
 
+        var licenseString = await _cacheService.GetLicenseAsync(workspaceId);
+
+        var isGranted =
+            LicenseVerifier.TryParse(workspaceId, licenseString, out var license) &&
+            license.IsGranted(feature);
         return isGranted;
     }
 }
