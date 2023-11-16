@@ -1,4 +1,3 @@
-using Domain.Workspaces;
 using Domain.AuditLogs;
 using Domain.FlagSchedules;
 using Microsoft.Extensions.Hosting;
@@ -13,20 +12,17 @@ public class FlagScheduleWorker : BackgroundService
     private readonly IFlagScheduleService _flagScheduleService;
     private readonly IFeatureFlagAppService _featureFlagAppService;
     private readonly IFlagChangeRequestService _flagChangeRequestService;
-    private readonly ILicenseService _licenseService;
     private readonly ILogger<FlagScheduleWorker> _logger;
 
     public FlagScheduleWorker(
         IFlagScheduleService flagScheduleService,
         IFeatureFlagAppService featureFlagAppService,
         IFlagChangeRequestService flagChangeRequestService,
-        ILicenseService licenseService,
         ILogger<FlagScheduleWorker> logger)
     {
         _flagScheduleService = flagScheduleService;
         _featureFlagAppService = featureFlagAppService;
         _flagChangeRequestService = flagChangeRequestService;
-        _licenseService = licenseService;
         _logger = logger;
     }
 

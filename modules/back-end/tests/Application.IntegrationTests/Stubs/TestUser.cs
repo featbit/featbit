@@ -11,6 +11,6 @@ public static class TestUser
 
     public static User Instance()
     {
-        return new User(TestWorkspace.Id, Id, Email, HashedPassword);
+        return new User(Id, TestWorkspace.Id, Email, HashedPassword);
     }
 }

@@ -61,9 +61,6 @@ public static class ConfigureServices
         // messaging services
         AddMessagingServices(services, configuration);
 
-        // workspace
-        services.AddTransient<IWorkspaceService, WorkspaceService>();
-
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IIdentityService, IdentityService>();
@@ -76,6 +73,7 @@ public static class ConfigureServices
         services.AddHttpClient<IAgentService, AgentService>();
 
         // custom services
+        services.AddTransient<IWorkspaceService, WorkspaceService>();
         services.AddTransient<IUserService, UserService>();
         services.AddTransient<IOrganizationService, OrganizationService>();
         services.AddTransient<IMemberService, MemberService>();

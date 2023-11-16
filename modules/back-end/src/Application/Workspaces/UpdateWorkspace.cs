@@ -17,10 +17,10 @@ public class UpdateWorkspaceValidator : AbstractValidator<UpdateWorkspace>
     public UpdateWorkspaceValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
+
         RuleFor(x => x.Key)
-            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("key"));
     }
 }
 
@@ -38,20 +38,14 @@ public class UpdateWorkspaceHandler : IRequestHandler<UpdateWorkspace, Workspace
     public async Task<WorkspaceVm> Handle(UpdateWorkspace request, CancellationToken cancellationToken)
     {
         var workspace = await _service.GetAsync(request.Id);
-        if (workspace == null)
-        {
-            return null;
-        }
 
         var isKeyUsed = await _service.HasKeyBeenUsedAsync(workspace.Id, request.Key);
-
         if (isKeyUsed)
         {
             throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
         }
 
         workspace.Update(request.Name, request.Key);
-
         await _service.UpdateAsync(workspace);
 
         return _mapper.Map<WorkspaceVm>(workspace);

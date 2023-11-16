@@ -4,6 +4,8 @@ namespace Domain.Users;
 
 public class User : AuditedEntity
 {
+    public Guid WorkspaceId { get; set; }
+
     public string Name { get; set; }
 
     public string Email { get; set; }
@@ -12,12 +14,10 @@ public class User : AuditedEntity
 
     public string Origin { get; set; }
 
-    public Guid WorkspaceId { get; set; }
-
     /// <summary>
     /// for test project use only
     /// </summary>
-    public User(Guid workspaceId, Guid id, string email, string password, string name = "", string origin = UserOrigin.Local)
+    public User(Guid id, Guid workspaceId, string email, string password, string name = "", string origin = UserOrigin.Local)
     {
         Id = id;
 

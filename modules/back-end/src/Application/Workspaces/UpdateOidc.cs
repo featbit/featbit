@@ -64,7 +64,6 @@ public class UpdateSsoOidcHandler : IRequestHandler<UpdateOidc, WorkspaceVm>
     {
         var workspace = await _service.GetAsync(request.Id);
 
-        // save to database
         var oidcConfig = new OidcConfig
         {
             ClientId = request.ClientId,
