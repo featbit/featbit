@@ -6,7 +6,7 @@ public class GetOrganizationList : IRequest<IEnumerable<OrganizationVm>>
 
     public Guid UserId { get; set; }
 
-    public bool IsSsoInitial { get; set; }
+    public bool IsSsoFirstLogin { get; set; }
 }
 
 public class GetOrganizationListHandler : IRequestHandler<GetOrganizationList, IEnumerable<OrganizationVm>>
@@ -23,7 +23,10 @@ public class GetOrganizationListHandler : IRequestHandler<GetOrganizationList, I
     public async Task<IEnumerable<OrganizationVm>> Handle(GetOrganizationList request, CancellationToken cancellationToken)
     {
         var organizations = await _service.GetListAsync(request.UserId);
-        if (!organizations.Any() && request.IsSsoInitial)
+
+        // If the user is logging in for the first time via Single Sign-On (SSO) and they are not part of any organization yet,
+        // retrieve and return all organizations within the same workspace.
+        if (!organizations.Any() && request.IsSsoFirstLogin)
         {
             organizations = await _service.FindManyAsync(x => x.WorkspaceId == request.WorkspaceId);
         }

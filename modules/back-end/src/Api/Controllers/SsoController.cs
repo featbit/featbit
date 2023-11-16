@@ -72,19 +72,19 @@ public class SsoController : ApiControllerBase
                 );
             }
 
-            string token;
+            LoginToken token;
             var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspace.Id);
             if (user == null)
             {
                 var registerResult = await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
-                token = registerResult.Token;
+                token = new LoginToken(true, registerResult.Token);
             }
             else
             {
-                token = _identityService.IssueToken(user);
+                token = new LoginToken(false, _identityService.IssueToken(user));
             }
 
-            return Ok(new LoginToken(token));
+            return Ok(token);
         }
         catch (Exception ex)
         {

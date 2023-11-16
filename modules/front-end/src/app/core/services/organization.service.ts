@@ -18,8 +18,8 @@ export class OrganizationService {
     private projectService: ProjectService
   ) { }
 
-  async getListAsync(isSsoInitial: boolean = false): Promise<IOrganization[]> {
-    return firstValueFrom(this.http.get<IOrganization[]>(`${this.baseUrl}?isSsoInitial=${isSsoInitial}`));
+  async getListAsync(isSsoFirstLogin: boolean = false): Promise<IOrganization[]> {
+    return firstValueFrom(this.http.get<IOrganization[]>(`${this.baseUrl}?isSsoFirstLogin=${isSsoFirstLogin}`));
   }
 
   create(params: any): Observable<any> {

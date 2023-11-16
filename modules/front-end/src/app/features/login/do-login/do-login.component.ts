@@ -5,7 +5,7 @@ import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
-import { LOGIN_BY_SSO } from "@utils/localstorage-keys";
+import { IS_SSO_FIRST_LOGIN } from "@utils/localstorage-keys";
 import { UserService } from "@services/user.service";
 
 enum LoginStep {
@@ -172,7 +172,7 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
-    localStorage.setItem(LOGIN_BY_SSO, 'true');
+    localStorage.setItem(IS_SSO_FIRST_LOGIN, response.data.isSsoFirstLogin);
     await this.identityService.doLoginUser(response.data.token);
     this.message.success($localize`:@@common.login-success:Login with success`);
   }

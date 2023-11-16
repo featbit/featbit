@@ -4,7 +4,7 @@ import { getProfile } from '@shared/utils';
 import {
   CURRENT_ORGANIZATION,
   CURRENT_PROJECT,
-  LOGIN_BY_SSO,
+  IS_SSO_FIRST_LOGIN,
   LOGIN_REDIRECT_URL
 } from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
@@ -37,8 +37,8 @@ export const authGuard = async (
   }
 
   await workspaceService.refreshWorkspace();
-  const isSsoInitial = localStorage.getItem(LOGIN_BY_SSO) === 'true';
-  const organizations = await organizationService.getListAsync(isSsoInitial);
+  const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN) === 'true';
+  const organizations = await organizationService.getListAsync(isSsoFirstLogin);
   organizationService.organizations = organizations;
 
   if (url.startsWith("/select-organization")) {
