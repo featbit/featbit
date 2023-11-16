@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
 import { License, LicenseFeatureEnum } from "@shared/types";
-import { getCurrentOrganization, getCurrentWorkspace } from "@utils/project-env";
+import { getCurrentWorkspace } from "@utils/project-env";
 import { BehaviorSubject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { TeamService } from "@services/team.service";

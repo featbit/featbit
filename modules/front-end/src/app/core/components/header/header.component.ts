@@ -10,7 +10,7 @@ import {
 } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { Router } from '@angular/router';
-import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
+import { Breadcrumb } from '@services/bread-crumb.service';
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
@@ -48,12 +48,9 @@ export class HeaderComponent implements OnInit {
     private router: Router,
     private projectService: ProjectService,
     private message: NzMessageService,
-    private readonly breadcrumbService: BreadcrumbService,
     private messageQueueService: MessageQueueService,
     private envService: EnvService
-  ) {
-    this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
-  }
+  ) { }
 
   async ngOnInit() {
     this.setSelectedProjectEnv();
@@ -164,7 +161,7 @@ export class HeaderComponent implements OnInit {
   }
 
   // copy environment key
-  copyText(event, text: string) {
+  copyText(text: string) {
     copyToClipboard(text).then(
       () => this.message.success($localize`:@@common.copy-success:Copied`)
     );
