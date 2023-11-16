@@ -27,7 +27,7 @@ db.Workspaces.insertOne(
         _id: workspaceId,
         name: "Default workspace",
         key: "default-workspace",
-		sso: null,
+        sso: null,
         license: null,
         createdAt: new Date(),
         updatedAt: new Date()
