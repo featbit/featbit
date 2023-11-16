@@ -15,9 +15,7 @@ export class WorkspaceService {
     return `${environment.url}/api/v1/workspaces`;
   }
 
-  constructor(
-    private http: HttpClient
-  ) { }
+  constructor(private http: HttpClient) { }
 
   update(id: string, name: string, key: string): Observable<IWorkspace> {
     return this.http.put<IWorkspace>(this.baseUrl, { id, name, key });
