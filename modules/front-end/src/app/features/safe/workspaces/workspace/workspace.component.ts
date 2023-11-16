@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { copyToClipboard, getProfile } from '@utils/index';
+import { copyToClipboard } from '@utils/index';
 import { IWorkspace, License, LicenseFeatureEnum } from '@shared/types';
-import { OrganizationService } from '@services/organization.service';
 import { MessageQueueService } from '@core/services/message-queue.service';
 import { WorkspaceService } from "@services/workspace.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
@@ -20,7 +19,6 @@ export class WorkspaceComponent implements OnInit {
   ssoForm!: FormGroup;
   licenseForm!: FormGroup;
 
-  profile = getProfile();
   workspace: IWorkspace;
 
   license: License;
@@ -31,7 +29,6 @@ export class WorkspaceComponent implements OnInit {
 
   constructor(
     private messageQueueService: MessageQueueService,
-    private organizationService: OrganizationService,
     private workspaceService: WorkspaceService,
     private message: NzMessageService
   ) { }
@@ -88,16 +85,17 @@ export class WorkspaceComponent implements OnInit {
     );
   }
 
-  submitNameKeyForm() {
-    if (this.nameKeyForm.invalid) {
+  updateWorkspace() {
+    if (!this.nameKeyForm.valid) {
       for (const i in this.nameKeyForm.controls) {
         this.nameKeyForm.controls[i].markAsDirty();
         this.nameKeyForm.controls[i].updateValueAndValidity();
       }
       return;
     }
+
     const { name, key } = this.nameKeyForm.value;
-    const { id} = this.workspace;
+    const { id } = this.workspace;
 
     this.isNameKeyLoading = true;
     this.workspaceService.update(id, name, key)
@@ -112,14 +110,15 @@ export class WorkspaceComponent implements OnInit {
       });
   }
 
-  submitSsoForm() {
-    if (this.ssoForm.invalid) {
+  updateOidcSetting() {
+    if (!this.ssoForm.valid) {
       for (const i in this.ssoForm.controls) {
         this.ssoForm.controls[i].markAsDirty();
         this.ssoForm.controls[i].updateValueAndValidity();
       }
       return;
     }
+
     const payload = {
       ...this.ssoForm.value,
       id: this.workspace.id
@@ -138,8 +137,8 @@ export class WorkspaceComponent implements OnInit {
       });
   }
 
-  submitLicenseForm() {
-    if (this.licenseForm.invalid) {
+  updateLicense() {
+    if (!this.licenseForm.valid) {
       for (const i in this.licenseForm.controls) {
         this.licenseForm.controls[i].markAsDirty();
         this.licenseForm.controls[i].updateValueAndValidity();
@@ -150,21 +149,20 @@ export class WorkspaceComponent implements OnInit {
     const { license } = this.licenseForm.value;
 
     this.isLicenseLoading = true;
-    this.workspaceService.updateLicense(license)
-      .subscribe({
-        next: (workspace) => {
-          this.isLicenseLoading = false;
-          this.workspace = workspace;
-          this.license = new License(workspace.license);
-          this.message.success($localize`:@@org.org.license-update-success:License updated!`);
-          this.workspaceService.setWorkspace(workspace);
-          this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
-        },
-        error: () => {
-          this.message.error($localize`:@@org.org.invalid-license:Invalid license, please contact FeatBit team to get a license!`);
-          this.isLicenseLoading = false;
-        }
-      });
+    this.workspaceService.updateLicense(license).subscribe({
+      next: (workspace) => {
+        this.isLicenseLoading = false;
+        this.workspace = workspace;
+        this.license = new License(workspace.license);
+        this.message.success($localize`:@@org.org.license-update-success:License updated!`);
+        this.workspaceService.setWorkspace(workspace);
+        this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
+      },
+      error: () => {
+        this.message.error($localize`:@@org.org.invalid-license:Invalid license, please contact FeatBit team to get a license!`);
+        this.isLicenseLoading = false;
+      }
+    });
   }
 
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;

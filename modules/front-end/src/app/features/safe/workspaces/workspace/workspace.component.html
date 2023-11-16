@@ -1,6 +1,6 @@
 <div class="standard-div rows" *ngIf="!isLoading; else loadingTem;">
   <h5 nz-typography i18n="@@common.general-settings">General settings</h5>
-  <form nz-form [formGroup]="nameKeyForm" [nzLayout]="'vertical'" (ngSubmit)="submitNameKeyForm()">
+  <form nz-form [formGroup]="nameKeyForm" [nzLayout]="'vertical'" (ngSubmit)="updateWorkspace()">
     <nz-form-item>
       <nz-form-label i18n="@@common.name">Name</nz-form-label>
       <nz-form-control nzErrorTip="Workspace name is mandatory!" i18n-nzErrorTip="@@workspace.workspace.nameMandatory">
@@ -58,7 +58,7 @@
   </div>
   <div class="row">
     <div class="row-title" i18n="@@common.license">License</div>
-    <form class="row-content" nz-form [formGroup]="licenseForm" [nzLayout]="'inline'" (ngSubmit)="submitLicenseForm()">
+    <form class="row-content" nz-form [formGroup]="licenseForm" [nzLayout]="'inline'" (ngSubmit)="updateLicense()">
       <nz-form-item class="extend">
         <nz-form-control nzErrorTip="License is mandatory!" i18n-nzErrorTip="@@common.license-mandatory">
           <nz-input-group class="row-input-group" [nzPrefix]="licenseIcon">
@@ -78,7 +78,7 @@
 </div>
 <div class="standard-div rows" *ngIf="!isLoading; else loadingTem;">
   <h5 nz-typography i18n="@@common.sso-settings">SSO (OIDC) settings</h5>
-  <form nz-form [formGroup]="ssoForm" [nzLayout]="'vertical'" (ngSubmit)="submitSsoForm()">
+  <form nz-form [formGroup]="ssoForm" [nzLayout]="'vertical'" (ngSubmit)="updateOidcSetting()">
     <nz-form-item>
       <nz-form-label i18n="@@workspace.workspace.client-id">Client Id</nz-form-label>
       <nz-form-control nzErrorTip="Client Id is mandatory!" i18n-nzErrorTip="@@workspace.workspace.client-id-mandatory">
