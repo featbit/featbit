@@ -64,12 +64,4 @@ public class WorkspaceController : ApiControllerBase
         var workspace = await Mediator.Send(request);
         return Ok(workspace);
     }
-
-    [AllowAnonymous]
-    [HttpPost("has-multiple-workspaces")]
-    public async Task<ApiResponse<bool>> GetAsync(HasMultipleWorkspaces request)
-    {
-        var vm = await Mediator.Send(request);
-        return Ok(vm);
-    }
 }

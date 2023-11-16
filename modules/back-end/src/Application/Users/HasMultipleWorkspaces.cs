@@ -1,6 +1,6 @@
 using Application.Bases;
 
-namespace Application.Workspaces;
+namespace Application.Users;
 
 public class HasMultipleWorkspaces : IRequest<bool>
 {
@@ -19,18 +19,16 @@ public class HasMultipleWorkspacesValidator : AbstractValidator<HasMultipleWorks
 
 public class HasMultipleWorkspacesHandler : IRequestHandler<HasMultipleWorkspaces, bool>
 {
-    private readonly IWorkspaceService _workspaceService;
+    private readonly IUserService _service;
 
-    public HasMultipleWorkspacesHandler(
-        IWorkspaceService workspaceService)
+    public HasMultipleWorkspacesHandler(IUserService service)
     {
-        _workspaceService = workspaceService;
+        _service = service;
     }
 
     public async Task<bool> Handle(HasMultipleWorkspaces request, CancellationToken cancellationToken)
     {
-        var workspaces = await _workspaceService.GetByEmailAsync(request.Email);
-
-        return workspaces.Count() > 1;
+        var workspaces = await _service.GetWorkspacesAsync(request.Email);
+        return workspaces.Count > 1;
     }
 }
