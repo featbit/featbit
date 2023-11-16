@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Application.Bases.Exceptions;
 using Application.Services;
 using Domain.Users;
@@ -15,6 +16,16 @@ public class TestUserService : NullServiceBase<User>, IUserService
         }
 
         return Task.FromResult(TestUser.Instance());
+    }
+
+    public override Task<User> FindOneAsync(Expression<Func<User, bool>> predicate)
+    {
+        var user = TestUser.Instance();
+
+        var func = predicate.Compile();
+        return func(user)
+            ? Task.FromResult(user)
+            : Task.FromResult<User>(null!);
     }
 
     public Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids)
