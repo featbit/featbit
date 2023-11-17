@@ -9,7 +9,7 @@ import {
 import { IInstruction } from "@core/components/change-list/instructions/types";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { getAuth } from "@utils/index";
+import { getProfile } from "@utils/index";
 
 class ChangeCategory {
   get statusLabel() : string {
@@ -102,7 +102,7 @@ class ChangeCategory {
 })
 export class PendingChangesDrawerComponent {
   changeCategoriesList: ChangeCategory[] = [];
-  currentUser = getAuth();
+  profile = getProfile();
 
   @Input() visible: boolean = false;
   @Input()
@@ -153,7 +153,7 @@ export class PendingChangesDrawerComponent {
   declineChangeRequest(param: ChangeCategory) {
     this.featureFlagService.declineChangeRequest(param.changeRequestId).subscribe({
       next: () => {
-        const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.currentUser.id);
+        const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.profile.id);
         reviewer.action = ChangeRequestAction.Decline;
         param.status = PendingChangeStatus.Declined;
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -167,7 +167,7 @@ export class PendingChangesDrawerComponent {
   approveChangeRequest(param: ChangeCategory) {
     this.featureFlagService.approveChangeRequest(param.changeRequestId).subscribe({
       next: () => {
-        const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.currentUser.id);
+        const reviewer = param.reviewers.find((item: IReviewer) => item.memberId === this.profile.id);
         reviewer.action = ChangeRequestAction.Approve;
         if (param.type === PendingChangeType.ChangeRequest) {
           param.status = PendingChangeStatus.Approved;

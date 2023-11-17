@@ -1,3 +1,3 @@
 namespace Application.Identity;
 
-public record LoginToken(string Token);
+public record LoginToken(bool IsSsoFirstLogin, string Token);

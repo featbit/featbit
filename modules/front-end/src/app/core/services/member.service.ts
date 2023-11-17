@@ -50,8 +50,12 @@ export class MemberService {
     );
   }
 
-  delete(id: string): Observable<boolean> {
-    return this.http.delete<boolean>(`${this.baseUrl}/${id}`);
+  deleteFromOrg(id: string): Observable<boolean> {
+    return this.http.delete<boolean>(`${this.baseUrl}/remove-from-org/${id}`);
+  }
+
+  deleteFromWorkspace(id: string): Observable<boolean> {
+    return this.http.delete<boolean>(`${this.baseUrl}/remove-from-workspace/${id}`);
   }
 
   update(id, payload): Observable<boolean> {

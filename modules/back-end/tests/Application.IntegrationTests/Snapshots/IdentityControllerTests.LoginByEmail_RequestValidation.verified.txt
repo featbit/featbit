@@ -14,8 +14,8 @@
     Value: {
       data: null,
       errors: [
-        EmailIsRequired,
-        PasswordIsRequired
+        email_is_required,
+        password_is_required
       ],
       success: false
     }
@@ -25,7 +25,7 @@
     Uri: http://localhost/api/v1/identity/login-by-email,
     Content: {
       Headers: {
-        Content-Length: 26,
+        Content-Length: 44,
         Content-Type: application/json; charset=utf-8
       },
       Value: 

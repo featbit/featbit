@@ -24,7 +24,7 @@ public class ResourceService : IResourceService
         return filter.Type switch
         {
             ResourceTypes.All => new[] { Resource.All },
-            ResourceTypes.Account => new[] { Resource.AllAccount },
+            ResourceTypes.Organization => new[] { Resource.AllOrganizations },
             ResourceTypes.Iam => new[] { Resource.AllIam },
             ResourceTypes.AccessToken => new[] { Resource.AllAccessToken },
             ResourceTypes.RelayProxy => new[] { Resource.AllRelayProxies },

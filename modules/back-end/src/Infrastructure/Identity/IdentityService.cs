@@ -6,24 +6,23 @@ using System.IdentityModel.Tokens.Jwt;
 using Application.Bases;
 using Domain.Identity;
 using Domain.Users;
-using Infrastructure.Users;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Identity;
 
 public class IdentityService : IIdentityService
 {
-    private readonly IUserStore _store;
+    private readonly IUserService _userService;
     private readonly IPasswordHasher<User> _passwordHasher;
     private readonly JwtOptions _options;
 
     public IdentityService(
-        IUserStore store,
+        IUserService userService,
         IPasswordHasher<User> passwordHasher,
         IOptions<JwtOptions> options)
     {
+        _userService = userService;
         _passwordHasher = passwordHasher;
-        _store = store;
         _options = options.Value;
     }
 
@@ -44,7 +43,7 @@ public class IdentityService : IIdentityService
         var newPasswordHash = _passwordHasher.HashPassword(user, newPassword);
         user.Password = newPasswordHash;
 
-        await _store.UpdateAsync(user);
+        await _userService.UpdateAsync(user);
 
         return IdentityResult.Success;
     }
@@ -66,33 +65,38 @@ public class IdentityService : IIdentityService
         return handler.WriteToken(jwt);
     }
 
-    public async Task<LoginResult> LoginByEmailAsync(string email, string password)
+    public async Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password)
     {
-        var user = await _store.FindOneAsync(x => x.Email == email);
+        if (workspaceId is null)
+        {
+            return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
+        }
+
+        var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspaceId);
         if (user == null)
         {
-            return LoginResult.Failed(ErrorCodes.EmailNotExist);
+            return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
         var passwordMatch = await CheckPasswordAsync(user, password);
         if (!passwordMatch)
         {
-            return LoginResult.Failed(ErrorCodes.PasswordMismatch);
+            return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
         var token = IssueToken(user);
         return LoginResult.Ok(token);
     }
 
-    public async Task<RegisterResult> RegisterByEmailAsync(string email, string password, string origin)
+    public async Task<RegisterResult> RegisterByEmailAsync(Guid workspaceId, string email, string password, string origin)
     {
         var hashedPwd = string.IsNullOrWhiteSpace(password)
             ? string.Empty
             : _passwordHasher.HashPassword(null!, password);
 
-        var user = new User(email, hashedPwd, origin: origin);
+        var user = new User(workspaceId, email, hashedPwd, origin: origin);
 
-        await _store.AddAsync(user);
+        await _userService.AddOneAsync(user);
 
         var token = IssueToken(user);
         return RegisterResult.Ok(user.Id, token);

@@ -113,10 +113,7 @@
                     </div>
                     <div *ngIf="experiment.iterations.length > 0">
                       <ng-container i18n="@@ff.expt.period">Period</ng-container>:
-                      <nz-select name="iterations_{{experiment.id}}"
-                                 [compareWith]="compareWith"
-                          [(ngModel)]="experiment.selectedIteration"
-                      >
+                      <nz-select class="nz-select-40" name="iterations_{{experiment.id}}" [compareWith]="compareWith" [(ngModel)]="experiment.selectedIteration">
                         <nz-option *ngFor="let iteration of experiment.iterations" [nzLabel]="iteration.dateTimeInterval" [nzValue]="iteration"></nz-option>
                       </nz-select>
                     </div>

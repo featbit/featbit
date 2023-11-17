@@ -2,7 +2,7 @@
   <div class="rule-serve">
     <div class="tip" i18n="@@core.components.findrule.serve">Serve</div>
     <div class="select">
-      <nz-select [(ngModel)]="selectedVariationId" (ngModelChange)="modelChange()"
+      <nz-select class="nz-select-36" [(ngModel)]="selectedVariationId" (ngModelChange)="modelChange()"
                  nzPlaceHolder="variation" i18n-nzPlaceHolder="@@app.components.findrule.selectvariation">
         <nz-option *ngFor="let variationOption of availableVariations; let i = index" nzCustomContent [nzValue]="variationOption.id" [nzLabel]="variationOption.name">
             {{variationOption.name}}
@@ -32,6 +32,7 @@
           <div i18n="@@core.components.findrule.dispatch-by">Dispatch By</div>
           <div class="select">
             <nz-select
+              class="nz-select-36"
               nzShowSearch
               nzPlaceHolder="Select property"
               i18n-nzPlaceHolder="@@core.components.findrule.serve.selectuserproperty"

@@ -44,7 +44,7 @@ public class ResetPasswordHandler : IRequestHandler<ResetPassword, ResetPassword
 
         if (!await _identityService.CheckPasswordAsync(user, request.CurrentPassword))
         {
-            return ResetPasswordResult.Failed(ErrorCodes.PasswordMismatch);
+            return ResetPasswordResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
         await _identityService.ResetPasswordAsync(user, request.NewPassword);

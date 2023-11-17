@@ -114,4 +114,6 @@ export class MetricsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.search$.complete();
   }
+
+  protected readonly EventType = EventType;
 }

@@ -1,0 +1,69 @@
+<div class="standard-div">
+  <form nz-form [formGroup]="profileForm" class="" [nzLayout]="'vertical'" (ngSubmit)="updateProfile()">
+    <nz-form-item>
+      <nz-form-label i18n="@@common.name">Name</nz-form-label>
+      <nz-form-control>
+        <nz-input-group [nzPrefix]="userPrefix">
+          <input id="name" type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+        </nz-input-group>
+        <ng-template #userPrefix>
+          <i nz-icon nzType="icons:icon-user"></i>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label i18n="@@org.profile.email">Email</nz-form-label>
+      <nz-form-control nzErrorTip="Email is mandatory!" i18n-nzErrorTip="@@org.profile.emailMandatory">
+        <nz-input-group [nzPrefix]="emailPrefix">
+          <input id="email" type="text" nz-input formControlName="email" placeholder="Email" i18n-placeholder="@@org.profile.emailPlaceholder"/>
+        </nz-input-group>
+        <ng-template #emailPrefix>
+          <i nz-icon nzType="icons:icon-email"></i>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <button class="submit-btn" nz-button [nzType]="'primary'" [nzLoading]="isUpdatingProfile">
+      <i nz-icon nzType="icons:icon-sync"></i>
+      <ng-container i18n="@@org.profile.update">Update Profile</ng-container>
+    </button>
+  </form>
+</div>
+<div class="standard-div" *ngIf="profile.origin === UserOriginEnum.Local">
+  <form nz-form [formGroup]="resetPasswordForm" nzLayout="vertical" (ngSubmit)="resetPassword()">
+    <nz-form-item>
+      <nz-form-label nzRequired i18n="@@org.profile.current-password">Current Password</nz-form-label>
+      <nz-form-control nzDisableAutoTips nzErrorTip="Please input your current password" i18n-nzErrorTip="@@org.profile.current-password-is-required">
+        <input class="standard-form-input" nz-input type="password" formControlName="currentPassword"/>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzRequired>
+        <span i18n="@@org.profile.new-password">New Password</span>
+        <i class="label-hint" nz-icon nzType="icons:icon-info-outline"
+           i18n-nz-tooltip="@@org.profile.password-hint" nz-tooltip="Your password must be at least 6 characters long">
+        </i>
+      </nz-form-label>
+      <nz-form-control nzDisableAutoTips [nzErrorTip]="passwordErrorTpl">
+        <input class="standard-form-input" nz-input type="password" formControlName="newPassword"/>
+      </nz-form-control>
+      <ng-template #passwordErrorTpl let-control>
+        <ng-container *ngIf="control.hasError('required')" i18n="@@org.profile.new-password-is-required">Please input your new password</ng-container>
+        <ng-container *ngIf="control.hasError('minlength')" i18n="@@org.profile.new-password-is-too-short">Password must be at least 6 characters</ng-container>
+      </ng-template>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzRequired i18n="@@org.profile.confirm-password">Confirm new password</nz-form-label>
+      <nz-form-control nzDisableAutoTips [nzErrorTip]="confirmPasswordErrorTpl">
+        <input class="standard-form-input" nz-input type="password" formControlName="confirmPassword"/>
+        <ng-template #confirmPasswordErrorTpl let-control>
+          <ng-container *ngIf="control.hasError('required')" i18n="@@org.profile.confirm-password-is-required">Please confirm your password</ng-container>
+          <ng-container *ngIf="control.hasError('confirm')" i18n="@@org.profile.confirm-password-is-inconsistent">Password is inconsistent</ng-container>
+        </ng-template>
+      </nz-form-control>
+    </nz-form-item>
+    <button style="width: 180px" class="submit-btn" nz-button [nzType]="'primary'" [nzLoading]="isResettingPassword">
+      <i nz-icon nzType="icons:icon-sync"></i>
+      <ng-container i18n="@@org.profile.reset-password">Reset Password</ng-container>
+    </button>
+  </form>
+</div>

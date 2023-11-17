@@ -1,14 +1,20 @@
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { getAuth } from '@shared/utils';
-import { CURRENT_PROJECT, LOGIN_REDIRECT_URL } from "@shared/utils/localstorage-keys";
+import { getProfile } from '@shared/utils';
+import {
+  CURRENT_ORGANIZATION,
+  CURRENT_PROJECT,
+  IS_SSO_FIRST_LOGIN,
+  LOGIN_REDIRECT_URL
+} from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { IEnvironment, IProject } from "@shared/types";
+import { IEnvironment, IOrganization, IProject } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
+import { WorkspaceService } from "@services/workspace.service";
 
 export const authGuard = async (
   route: ActivatedRouteSnapshot,
@@ -16,28 +22,47 @@ export const authGuard = async (
   router = inject(Router),
   permissionService = inject(PermissionsService),
   projectService = inject(ProjectService),
+  workspaceService = inject(WorkspaceService),
   organizationService = inject(OrganizationService),
   identityService = inject(IdentityService),
   notification = inject(NzNotificationService)
 ) => {
-  const auth = getAuth();
+  const profile = getProfile();
   const url = state.url;
 
-  // if no auth token, redirect to login page
-  if (!auth) {
+  // if no auth token or workspaceId, redirect to login page
+  if (!profile || !profile.workspaceId) {
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
     return router.parseUrl('/login');
   }
 
-  // set user organizations
-  const organization = await organizationService.setUserOrganizations();
-  if (!organization) {
-    identityService.doLogoutUser(false);
-    return false;
+  await workspaceService.refreshWorkspace();
+  const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN) === 'true';
+  const organizations = await organizationService.getListAsync(isSsoFirstLogin);
+  organizationService.organizations = organizations;
+
+  if (url.startsWith("/select-organization")) {
+    return true;
   }
 
+  // if no available organization, redirect to select org page
+  if (organizations.length === 0) {
+    return router.parseUrl('/select-organization');
+  }
+
+  // if no current org, redirect to select org page
+  const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
+  let organization: IOrganization = orgStr ? JSON.parse(orgStr) : null;
+  if (!orgStr) {
+    localStorage.setItem(LOGIN_REDIRECT_URL, url);
+    return router.parseUrl('/select-organization');
+  }
+
+  organization = organizations.find(org => org.id === organization.id) || organizations[0];
+  organizationService.setOrganization(organization);
+
   // init user permission
-  await permissionService.initUserPolicies(auth.id);
+  await permissionService.initUserPolicies(profile.id);
 
   // if we're going to onboarding page
   if (url.startsWith("/onboarding")) {
@@ -54,7 +79,7 @@ export const authGuard = async (
     return router.parseUrl('/onboarding');
   }
 
-  // try to set user accessible project and env
+  // try to set the user-accessible project and env
   const success = await trySetAccessibleProjectEnv(projectService);
   if (!success) {
     showDenyMessage(notification);

@@ -13,7 +13,8 @@
         email: test@email.com,
         id: Guid_1,
         name: ,
-        origin: Local
+        origin: Local,
+        workspaceId: Guid_2
       },
       errors: [],
       success: true

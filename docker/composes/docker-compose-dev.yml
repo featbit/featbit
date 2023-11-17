@@ -25,6 +25,8 @@ services:
     build:
       context: ./modules/back-end
       dockerfile: ./deploy/Dockerfile
+    environment:
+      - SSOEnabled=true
     depends_on:
       - mongodb
       - redis

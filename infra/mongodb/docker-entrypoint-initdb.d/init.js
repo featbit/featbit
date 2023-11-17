@@ -5,6 +5,7 @@ db = db.getSiblingDB(dbName)
 print('seed started...')
 
 // seed ids
+const workspaceId = UUID()
 const userId = UUID()
 const organizationId = UUID()
 
@@ -18,6 +19,22 @@ function getUUIDString() {
     return UUID().toString().split('"')[1];
 }
 
+// seed workspace
+print('clean and seed collection: Workspaces')
+db.Workspaces.deleteMany({})
+db.Workspaces.insertOne(
+    {
+        _id: workspaceId,
+        name: "Default Workspace",
+        key: "default-workspace",
+        sso: null,
+        license: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+)
+print('collection seeded: Workspaces')
+
 // seed user
 print('clean and seed collection: Users')
 db.Users.deleteMany({})
@@ -28,6 +45,7 @@ db.Users.insertOne(
         password: "AQAAAAEAACcQAAAAELDHEjCrDQrmnAXU5C//mOLvUBJ7lnVFEMMFxNMDIIrF7xK8JDQKUifU3HH4gexNAQ==",
         name: "tester",
         origin: "Local",
+        workspaceId: workspaceId,
         createAt: new Date(),
         updatedAt: new Date()
     }
@@ -40,6 +58,7 @@ db.Organizations.deleteMany({})
 db.Organizations.insertOne(
     {
         _id: organizationId,
+        workspaceId: workspaceId,
         name: "playground",
         initialized: false,
         createdAt: new Date(),
@@ -97,10 +116,10 @@ db.Policies.insertOne(
         statements: [
             {
                 _id: getUUIDString(),
-                resourceType: "account",
+                resourceType: "organization",
                 effect: "allow",
                 actions: ["UpdateOrgName"],
-                resources: ["account/*"]
+                resources: ["organization/*"]
             },
             {
                 _id: getUUIDString(),

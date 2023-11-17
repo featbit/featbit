@@ -143,6 +143,7 @@ services:
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
       - IS_PRO=true
+      - SSOEnabled=false
     depends_on:
       mongodb:
         condition: service_started

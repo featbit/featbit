@@ -1,0 +1,28 @@
+<div class="main-container" [class]="{'menu-extended': menuExtended}">
+  <div class="menu-container">
+    <app-menu [menus]="[{}]" [menuExtended]="menuExtended" [isInitialized]="false" (toggleMenu)="toggleMenu($event)" (logout)="logout()"></app-menu>
+  </div>
+  <section class="right-container main-body">
+    <div class="content-wrapper">
+      <div *ngIf="organizations.length === 0" class="zero-org-info">
+        <span nz-icon nzType="info-circle" nzTheme="outline"></span>
+        <span i18n="@@common.zero-org-info">You don't have any organization yet. Please contact your admin to add you to an organization.</span>
+      </div>
+      <div *ngIf="organizations.length > 1" class="orgs-wrapper">
+        <div class="title" i18n="@@common.select-an-organization">Select an organization</div>
+        <ul nz-list [nzDataSource]="organizations" nzBordered nzSize="large" class="org-list">
+          <nz-list-header><span i18n="@@common.organizations-for">Organizations for</span><span class="auth-email">{{profile.email}}</span></nz-list-header>
+          <li nz-list-item *ngFor="let item of organizations" nzNoFlex class="org-item" (click)="setOrganization(item)">
+            <ul nz-list-item-actions>
+              <nz-list-item-action>
+                <a i18n="@@common.select">Select</a>
+              </nz-list-item-action>
+            </ul>
+            {{ item.name }}
+          </li>
+          <nz-list-footer (click)="logout()"><a i18n="@@common.sign-in-with-another-email">Sign in with another Email</a></nz-list-footer>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>

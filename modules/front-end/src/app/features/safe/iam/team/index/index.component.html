@@ -65,18 +65,25 @@
           <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
           <ng-container *ngIf="canDelete(item)">
             <nz-divider nzType="vertical"></nz-divider>
-            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-from-organization-confirm"  nz-popconfirm="This operation will remove the user from the current organization, are you sure to do this?"
                nzPopconfirmPlacement="bottomRight"
                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-               (nzOnConfirm)="deleteMember(item)" [nzIcon]="iconTplIamUser">
-              <ng-container i18n="@@common.remove">Remove</ng-container>
+               (nzOnConfirm)="deleteMemberFromOrg(item)" [nzIcon]="questionIconTpl">
+              <ng-container i18n="@@common.remove-from-org">Remove from Organization</ng-container>
+            </a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-from-workspace-confirm"  nz-popconfirm="This operation will remove the user from the workspace and all the related organizations, are you sure to do this?"
+               nzPopconfirmPlacement="bottomRight"
+               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+               (nzOnConfirm)="deleteMemberFromWorkspace(item)" [nzIcon]="questionIconTpl">
+              <ng-container i18n="@@common.remove-from-workspace">Remove from workspace</ng-container>
             </a>
           </ng-container>
         </td>
       </tr>
       </tbody>
     </nz-table>
-    <ng-template #iconTplIamUser>
+    <ng-template #questionIconTpl>
       <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
     </ng-template>
   </div>
