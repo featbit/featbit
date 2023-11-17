@@ -1,4 +1,4 @@
-import { UserOriginEnum } from "@features/safe/organizations/types/profiles";
+import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
 export interface IResponse {
   success: boolean,
@@ -42,18 +42,40 @@ export interface IUserPropertyPresetValue {
   description: string;
 }
 
-export interface IAuthProps {
+export interface IProfile {
   id: string;
   email: string;
   name: string;
+  workspaceId: string;
   origin: UserOriginEnum;
+}
+
+export interface IOidc {
+  clientId: string,
+  clientSecret: string,
+  tokenEndpoint: string,
+  clientAuthenticationMethod: string,
+  authorizationEndpoint: string,
+  scope: string,
+  userEmailClaim: string,
+}
+
+export interface ISso {
+  oidc: IOidc
+}
+
+export interface IWorkspace {
+  id: string,
+  name: string,
+  key: string,
+  license?: string,
+  sso?: ISso
 }
 
 export interface IOrganization {
   id: string,
   initialized: boolean,
   name: string,
-  license?: string
 }
 
 export enum LicenseFeatureEnum {
@@ -61,13 +83,13 @@ export enum LicenseFeatureEnum {
   Sso = 'sso',
   Schedule = 'schedule',
   ChangeRequest = 'change-request',
-  CreateOrg = 'create-org'
+  MultiOrg = 'multi-organization'
 }
 
 export interface ILicense {
   plan: string,
   sub: string,
-  orgId: string,
+  wsId: string,
   iat: number,
   exp: number,
   issuer: string,

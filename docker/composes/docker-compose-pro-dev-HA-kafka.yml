@@ -27,6 +27,7 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - IS_PRO=true
+      - SSOEnabled=false
       - KAFKA__BOOTSTRAPSERVERS=kafka:9092
       - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
     depends_on:

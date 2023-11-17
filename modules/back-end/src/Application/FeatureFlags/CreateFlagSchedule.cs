@@ -1,16 +1,18 @@
 ﻿using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
+using Domain.Workspaces;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
 using Domain.FlagSchedules;
-using Domain.Organizations;
 
 namespace Application.FeatureFlags;
 
 public class CreateFlagSchedule : IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
@@ -105,7 +107,7 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
         {
             // check license
             var isChangeRequestGranted =
-                await _licenseService.IsFeatureGrantedAsync(request.OrgId, LicenseFeatures.ChangeRequest);
+                await _licenseService.IsFeatureGrantedAsync(request.WorkspaceId, LicenseFeatures.ChangeRequest);
             if (!isChangeRequestGranted)
             {
                 throw new BusinessException(ErrorCodes.Unauthorized);

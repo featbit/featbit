@@ -15,14 +15,7 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
     {
     }
 
-    public async Task<Organization> GetDefaultSsoOrganizationAsync()
-    {
-        return await MongoDb.QueryableOf<Organization>()
-            .OrderBy(x => x.CreatedAt)
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task<IEnumerable<Organization>> GetListAsync(Guid userId)
+    public async Task<ICollection<Organization>> GetListAsync(Guid userId)
     {
         var organizations = MongoDb.QueryableOf<Organization>();
         var users = MongoDb.QueryableOf<OrganizationUser>();

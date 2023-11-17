@@ -94,7 +94,6 @@ export class FeatureFlagDrawerComponent implements OnInit {
     first()
   );
 
-
   //#region tags
   allTags: string[] = [];
   currentAllTags: string[] = [];

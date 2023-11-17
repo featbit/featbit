@@ -13,7 +13,7 @@ import { Router } from "@angular/router";
 import { UserService } from "@services/user.service";
 import { IResponse } from "@shared/types";
 import { Observable } from "rxjs";
-import { IResetPasswordResult } from "@features/safe/organizations/types/profiles";
+import { IResetPasswordResult } from "@features/safe/workspaces/types/profiles";
 
 @Injectable({
   providedIn: 'root'
@@ -30,8 +30,8 @@ export class IdentityService {
     private userService: UserService
   ) { }
 
-  loginByEmail(email: string, password: string) {
-    return this.http.post(`${this.baseUrl}/login-by-email`, { email, password });
+  loginByEmail(email: string, password: string, workspaceKey: string) {
+    return this.http.post(`${this.baseUrl}/login-by-email`, { email, password, workspaceKey });
   }
 
   resetPassword(currentPassword: string, newPassword: string): Observable<IResetPasswordResult> {
@@ -81,7 +81,7 @@ export class IdentityService {
     };
 
     if (keepOrgProject) {
-      // restore account and project, so when user login, he would always see the same project & env
+      // restore org and project, so when user login, he would always see the same project & env
       storageToKeep[CURRENT_ORGANIZATION()] = localStorage.getItem(CURRENT_ORGANIZATION());
       storageToKeep[CURRENT_PROJECT()] = localStorage.getItem(CURRENT_PROJECT());
     }

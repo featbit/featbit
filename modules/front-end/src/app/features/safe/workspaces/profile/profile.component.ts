@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { getAuth } from '@utils/index';
+import { getProfile } from '@utils/index';
 import { UserService } from "@services/user.service";
-import { IAuthProps } from "@shared/types";
+import { IProfile } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
-import { UserOriginEnum } from "@features/safe/organizations/types/profiles";
+import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
 @Component({
   selector: 'app-profile',
@@ -16,10 +16,10 @@ export class ProfileComponent implements OnInit {
 
   // profile form
   profileForm!: FormGroup;
-  auth = getAuth();
+  profile = getProfile();
   isUpdatingProfile: boolean = false;
 
-  // reset password form
+  // reset the password form
   resetPasswordForm!: FormGroup;
   isResettingPassword: boolean = false;
   confirmValidator = (control: FormControl) => {
@@ -44,8 +44,8 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.profileForm = this.fb.group({
-      email: [this.auth.email, [Validators.required, Validators.email]],
-      name: [this.auth.name]
+      email: [this.profile.email, [Validators.required, Validators.email]],
+      name: [this.profile.name]
     });
 
     this.resetPasswordForm = this.fb.group({
@@ -74,10 +74,10 @@ export class ProfileComponent implements OnInit {
     const { email, name } = this.profileForm.value;
 
     this.userService.updateProfile({ email, name }).subscribe(
-      (profile) => {
+      profile => {
         this.isUpdatingProfile = false;
         this.message.success($localize`:@@org.profile.profileUpdateSuccess:Profile successfully updated`);
-        this.userService.updateLocaleProfile(profile as IAuthProps);
+        this.userService.updateLocaleProfile(profile);
       }
     );
   }

@@ -1,11 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
-import { finalize } from "rxjs/operators";
+import { IS_SSO_FIRST_LOGIN } from "@utils/localstorage-keys";
+import { UserService } from "@services/user.service";
+
+enum LoginStep {
+  Step1 = 'step1', // email
+  Step2 = 'step2' // workspace and (or) password
+}
 
 @Component({
   selector: 'app-do-login',
@@ -14,34 +20,85 @@ import { finalize } from "rxjs/operators";
 })
 export class DoLoginComponent implements OnInit {
 
+  isSSO: boolean = false;
+  step: LoginStep = LoginStep.Step1;
+  displayWorkspaceKey: boolean = false;
   pwdLoginForm: FormGroup;
+  ssoForm: FormGroup;
   passwordVisible: boolean = false;
-  isLogin: boolean = false;
+  isLoading: boolean = false;
 
   isSsoEnabled: boolean = false;
   isSpinning: boolean = false;
-  ssoAuthorizeUrl: string;
 
   constructor(
     private fb: FormBuilder,
     private activatedRoute: ActivatedRoute,
     private identityService: IdentityService,
     private ssoService: SsoService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private userService: UserService
   ) { }
 
   async ngOnInit() {
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
-      password: ['', [Validators.required]]
+      password: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]],
+      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
+    });
+
+    this.ssoForm = this.fb.group({
+      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
     });
 
     this.isSsoEnabled = await this.ssoService.isEnabled();
-    this.ssoAuthorizeUrl = this.ssoService.authorizeUrl;
     this.subscribeSsoLogin();
   }
 
-  passwordLogin() {
+  requiredWhenLoginVerifiedValidator = (step: LoginStep): ValidatorFn => {
+    return (control: AbstractControl) => {
+
+      if (step === this.step && (!control.value || control.value.length === 0)) {
+        const error = { required: true };
+        control.setErrors(error);
+        return error;
+      } else {
+        control.setErrors(null);
+      }
+
+      return null;
+    };
+  }
+
+  hasMultipleWorkspaces(identity: string) {
+    this.userService.hasMultipleWorkspaces(identity).subscribe({
+      next: response => {
+        this.displayWorkspaceKey = response;
+        this.step = LoginStep.Step2;
+        this.isLoading = false;
+      },
+      error: error => this.handleError(error)
+    });
+  }
+
+  ssoLogin() {
+    if (this.ssoForm.invalid) {
+      Object.values(this.ssoForm.controls).forEach(control => {
+        if (control.invalid) {
+          control.markAsDirty();
+          control.updateValueAndValidity({ onlySelf: true });
+        }
+      });
+
+      return;
+    }
+
+    const { workspaceKey } = this.ssoForm.value;
+
+    window.location.href = this.ssoService.getAuthorizeUrl(workspaceKey);
+  }
+
+  async passwordLogin() {
     if (this.pwdLoginForm.invalid) {
       Object.values(this.pwdLoginForm.controls).forEach(control => {
         if (control.invalid) {
@@ -53,17 +110,25 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
-    this.isLogin = true;
+    const { identity, password, workspaceKey } = this.pwdLoginForm.value;
 
-    const { identity, password } = this.pwdLoginForm.value;
-    this.identityService.loginByEmail(identity, password).subscribe(
-      response => this.handleResponse(response),
-      error => this.handleError(error)
-    )
+    switch (this.step) {
+      case LoginStep.Step1:
+        this.isLoading = true;
+        this.hasMultipleWorkspaces(identity);
+        break;
+      case LoginStep.Step2:
+        this.isLoading = true;
+        this.identityService.loginByEmail(identity, password, workspaceKey).subscribe({
+          next: response => this.handleResponse(response),
+          error: error => this.handleError(error)
+        });
+        break;
+    }
   }
 
   async handleResponse(response) {
-    this.isLogin = false;
+    this.isLoading = false;
 
     if (!response.success) {
       this.message.error($localize `:@@common.incorrect-email-or-password:Email and/or password incorrect` );
@@ -75,7 +140,8 @@ export class DoLoginComponent implements OnInit {
   }
 
   handleError(_) {
-    this.isLogin = false;
+    this.isLoading = false;
+    this.isSpinning = false;
 
     this.message.error($localize `:@@common.login-error:Error occurred, please contact the support.`);
   }
@@ -83,10 +149,10 @@ export class DoLoginComponent implements OnInit {
   subscribeSsoLogin() {
     this.activatedRoute.queryParams.subscribe(params => {
       if (params["sso-logged-in"] && params['code']) {
+        this.isSSO = true;
         this.isSpinning = true;
 
-        this.ssoService.oidcLogin(params['code'])
-          .pipe(finalize(() => this.isSpinning = false))
+        this.ssoService.oidcLogin(params['code'], params['state'])
           .subscribe({
             next: response => this.handleSsoResponse(response),
             error: error => this.handleError(error)
@@ -106,7 +172,10 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
+    localStorage.setItem(IS_SSO_FIRST_LOGIN, response.data.isSsoFirstLogin);
     await this.identityService.doLoginUser(response.data.token);
     this.message.success($localize`:@@common.login-success:Login with success`);
   }
+
+  protected readonly LoginStep = LoginStep;
 }

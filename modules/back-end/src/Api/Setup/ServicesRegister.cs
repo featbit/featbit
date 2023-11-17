@@ -2,8 +2,8 @@ using System.Text;
 using Api.Authentication;
 using Api.Authorization;
 using Api.Swagger;
-using Domain.Organizations;
 using Application.Services;
+using Domain.Workspaces;
 using Domain.Identity;
 using Infrastructure.License;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -130,7 +130,7 @@ public static class ServicesRegister
         });
 
         // SSO
-        builder.Services.AddSso(builder.Configuration);
+        builder.Services.AddSso();
 
         // replace default authorization result handler
         var authorizationResultHandler =

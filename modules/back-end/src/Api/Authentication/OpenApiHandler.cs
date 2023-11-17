@@ -10,6 +10,7 @@ namespace Api.Authentication;
 
 public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
 {
+    private readonly IOrganizationService _organizationService;
     private readonly IAccessTokenService _accessTokenService;
     private readonly IMemberService _memberService;
 
@@ -18,9 +19,11 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
         ILoggerFactory logger,
         UrlEncoder encoder,
         ISystemClock clock,
+        IOrganizationService organizationService,
         IAccessTokenService accessTokenService,
         IMemberService memberService) : base(options, logger, encoder, clock)
     {
+        _organizationService = organizationService;
         _accessTokenService = accessTokenService;
         _memberService = memberService;
     }
@@ -44,8 +47,10 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
                 return AuthenticateResult.Fail("invalid-access-token");
             }
 
-            // set organization id header & store permissions
-            Context.Request.Headers.Add(OpenApiConstants.OrgIdHeaderKey, accessToken.OrganizationId.ToString());
+            // set workspace, organization id header & store permissions
+            var org = await _organizationService.GetAsync(accessToken.OrganizationId);
+            Context.Request.Headers.Add(ApiConstants.WorkspaceHeaderKey, org.WorkspaceId.ToString());
+            Context.Request.Headers.Add(ApiConstants.OrgIdHeaderKey, org.ToString());
             if (accessToken.Type == AccessTokenTypes.Service)
             {
                 Context.Items[OpenApiConstants.PermissionStoreKey] = accessToken.Permissions;

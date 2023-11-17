@@ -21,7 +21,7 @@ import {IUserType} from "@shared/types";
 })
 export class ExptRulesDrawerComponent {
 
-  @Input() currentAccountId: number;
+  @Input() currentOrganizationId: number;
   @Input() visible: boolean = false;
   @Input() targetingUsersByVariation: { [key: string]: IUserType[] } = {};
   @Output() close: EventEmitter<any> = new EventEmitter();

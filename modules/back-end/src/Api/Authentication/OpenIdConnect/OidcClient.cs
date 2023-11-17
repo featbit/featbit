@@ -2,38 +2,38 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using Application.Identity;
-using Microsoft.Extensions.Options;
+using Domain.Workspaces;
 
 namespace Api.Authentication.OpenIdConnect;
 
 public class OidcClient
 {
-    private readonly OidcOptions _options;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public OidcClient(IOptions<OidcOptions> options, IHttpClientFactory httpClientFactory)
+    public OidcClient(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
-        _options = options.Value;
     }
 
-    public string GetAuthorizeUrl(string? redirectUri)
+    public string GetAuthorizeUrl(string redirectUri, string workspaceKey, OidcConfig config)
     {
-        var url = $"{_options.AuthorizationEndpoint}?" +
-                  $"client_id={_options.ClientId}" +
+        var url = $"{config.AuthorizationEndpoint}?" +
+                  $"client_id={config.ClientId}" +
                   $"&response_type=code" +
-                  $"&scope={_options.Scope}" +
+                  $"&scope={config.Scope}" +
                   $"&redirect_uri={redirectUri}" +
-                  $"&state={Guid.NewGuid()}";
+                  $"&state={workspaceKey}";
 
         return url;
     }
 
-    public async Task<string?> GetEmailAsync(LoginByOidcCode request)
+    public async Task<string?> GetEmailAsync(LoginByOidcCode request, OidcConfig config)
     {
-        // exchange idToken using code
-        var authParams = _options.GetAuthParameters(request);
+        // get auth parameters
+        var authenticator = ClientAuthenticator.GetAuthenticator(config.ClientAuthenticationMethod);
+        var authParams = authenticator.GetAuthParameters(request, config);
 
+        // exchange idToken using code
         var httpclient = _httpClientFactory.CreateClient();
         if (!string.IsNullOrEmpty(authParams.BasicAuthorizationString))
         {
@@ -41,7 +41,7 @@ public class OidcClient
                 new AuthenticationHeaderValue("Basic", authParams.BasicAuthorizationString);
         }
 
-        var response = await httpclient.PostAsync(_options.TokenEndpoint, authParams.HttpContent);
+        var response = await httpclient.PostAsync(config.TokenEndpoint, authParams.HttpContent);
         response.EnsureSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync();
@@ -52,7 +52,7 @@ public class OidcClient
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(idToken);
 
-        var email = jwt.Claims.FirstOrDefault(x => x.Type == _options.UserEmailClaim)?.Value;
+        var email = jwt.Claims.FirstOrDefault(x => x.Type == config.UserEmailClaim)?.Value;
         return email;
     }
 }

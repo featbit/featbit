@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import {
-  IAuthProps,
+  IProfile,
   IOrganization,
   IProject,
   IEnvironment,
@@ -16,7 +16,7 @@ import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
 import { copyToClipboard } from '@utils/index';
 import { EnvService } from '@core/services/env.service';
-import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentOrganization, getCurrentProjectEnv, getCurrentWorkspace } from "@utils/project-env";
 
 @Component({
   selector: 'app-header',
@@ -25,7 +25,7 @@ import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env
 })
 export class HeaderComponent implements OnInit {
 
-  @Input() auth: IAuthProps;
+  @Input() profile: IProfile;
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
 
@@ -48,7 +48,7 @@ export class HeaderComponent implements OnInit {
     private router: Router,
     private projectService: ProjectService,
     private message: NzMessageService,
-    private readonly breadcrumbService: BreadcrumbService,
+    private breadcrumbService: BreadcrumbService,
     private messageQueueService: MessageQueueService,
     private envService: EnvService
   ) {
@@ -143,7 +143,8 @@ export class HeaderComponent implements OnInit {
   private setSelectedProjectEnv() {
     this.currentOrganization = getCurrentOrganization();
     this.currentProjectEnv = getCurrentProjectEnv();
-    this.license = new License(this.currentOrganization.license);
+    const workspace = getCurrentWorkspace();
+    this.license = new License(workspace.license);
 
     this.setCurrentEnv();
 
@@ -163,7 +164,7 @@ export class HeaderComponent implements OnInit {
   }
 
   // copy environment key
-  copyText(event, text: string) {
+  copyText(text: string) {
     copyToClipboard(text).then(
       () => this.message.success($localize`:@@common.copy-success:Copied`)
     );

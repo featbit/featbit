@@ -29,9 +29,9 @@
       <span i18n="@@common.change-request">Change Request</span>
     </div>
     <div class="feature">
-      <i *ngIf="license.isGranted(LicenseFeatureEnum.CreateOrg)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
-      <i *ngIf="!license.isGranted(LicenseFeatureEnum.CreateOrg)" nz-icon nzType="close" nzTheme="outline"></i>
-      <span i18n="@@common.create-org">Create Organization</span>
+      <i *ngIf="license.isGranted(LicenseFeatureEnum.MultiOrg)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
+      <i *ngIf="!license.isGranted(LicenseFeatureEnum.MultiOrg)" nz-icon nzType="close" nzTheme="outline"></i>
+      <span i18n="@@common.multi-org">Multiple Organization</span>
     </div>
   </div>
 </div>

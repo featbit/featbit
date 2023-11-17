@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace Domain.Organizations;
+namespace Domain.Workspaces;
 
 public static class LicenseVerifier
 {
@@ -15,7 +15,7 @@ public static class LicenseVerifier
         _isInitialized = true;
     }
 
-    public static bool TryParse(Guid orgId, string licenseString, out License license)
+    public static bool TryParse(Guid workspaceId, string licenseString, out License license)
     {
         EnsureInitialized();
 
@@ -57,7 +57,7 @@ public static class LicenseVerifier
             Convert.FromBase64String(payload),
             ReusableJsonSerializerOptions.Web
         )!;
-        return license.IsValid(orgId);
+        return license.IsValid(workspaceId);
     }
 
     private static void EnsureInitialized()

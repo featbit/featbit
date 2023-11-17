@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { OrganizationsRoutingModule } from './organizations-routing.module';
-import { OrganizationsComponent } from './organizations.component';
+import { WorkspacesRoutingModule } from './workspaces-routing.module';
+import { WorkspacesComponent } from './workspaces.component';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { ProfileComponent } from './profile/profile.component';
 import { OrganizationComponent } from './organization/organization.component';
@@ -30,10 +30,12 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { NzTagModule } from "ng-zorro-antd/tag";
 import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
+import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspace.component";
 
 @NgModule({
   declarations: [
-    OrganizationsComponent,
+    WorkspacesComponent,
+    WorkspaceComponent,
     OrganizationComponent,
     ProfileComponent,
     ProjectComponent,
@@ -64,9 +66,9 @@ import { NzToolTipModule } from "ng-zorro-antd/tooltip";
     NzTagModule,
     ScrollingModule,
     ReactiveFormsModule,
-    OrganizationsRoutingModule,
+    WorkspacesRoutingModule,
     CoreModule,
     NzToolTipModule
   ]
 })
-export class OrganizationsModule { }
+export class WorkspacesModule { }
