@@ -12,7 +12,7 @@ public class IdentityController : ApiControllerBase
         var loginResult = await Mediator.Send(request);
 
         return loginResult.Success
-            ? Ok(new LoginToken(loginResult.Token))
+            ? Ok(new LoginToken(false, loginResult.Token))
             : Error<LoginToken>(loginResult.ErrorCode);
     }
 

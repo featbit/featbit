@@ -1,8 +1,8 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { IMenuItem } from './menu';
-import { getAuth } from "@utils/index";
-import { IAuthProps } from "@shared/types";
-import {MessageQueueService} from "@services/message-queue.service";
+import { getProfile } from "@utils/index";
+import { IProfile } from "@shared/types";
+import { MessageQueueService } from "@services/message-queue.service";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { FeedbackService } from "@services/feedback.service";
 import { NzMessageService } from "ng-zorro-antd/message";
@@ -19,14 +19,14 @@ export class MenuComponent implements OnInit {
   @Output() toggleMenu = new EventEmitter();
   @Input() menuExtended: boolean = true;
 
-  auth: IAuthProps;
+  profile: IProfile;
   constructor(
     private messageQueueService: MessageQueueService,
     private fb: FormBuilder,
     private message: NzMessageService,
     private feedbackService: FeedbackService
   ) {
-    this.auth = getAuth();
+    this.profile = getProfile();
 
     this.feedbackForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -36,7 +36,7 @@ export class MenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.messageQueueService.subscribe(this.messageQueueService.topics.USER_PROFILE_CHANGED, () => {
-      this.auth = getAuth();
+      this.profile = getProfile();
     });
   }
   toggleMenuMode() {

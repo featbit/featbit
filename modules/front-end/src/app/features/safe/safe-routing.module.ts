@@ -59,10 +59,10 @@ const routes: Routes = [
         },
       },
       {
-        path: 'organizations',
-        loadChildren: () => import("./organizations/organizations.module").then(m => m.OrganizationsModule),
+        path: 'workspace',
+        loadChildren: () => import("./workspaces/workspaces.module").then(m => m.WorkspacesModule),
         data: {
-          breadcrumb: $localize `:@@organization:Organization`
+          breadcrumb: $localize `:@@workspace:Workspace`
         },
       },
       {

@@ -18,17 +18,13 @@ export class OrganizationService {
     private projectService: ProjectService
   ) { }
 
-  async getListAsync(): Promise<IOrganization[]> {
-    return firstValueFrom(this.http.get<IOrganization[]>(this.baseUrl));
+  async getListAsync(isSsoFirstLogin: boolean = false): Promise<IOrganization[]> {
+    return firstValueFrom(this.http.get<IOrganization[]>(`${this.baseUrl}?isSsoFirstLogin=${isSsoFirstLogin}`));
   }
 
   create(params: any): Observable<any> {
     const url = this.baseUrl;
     return this.http.post(url, params);
-  }
-
-  updateLicense(license: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/license`, { license });
   }
 
   update(params: any): Observable<any> {
@@ -55,26 +51,16 @@ export class OrganizationService {
     }
 
     this.projectService.clearCurrentProjectEnv();
-    window.location.reload();
   }
 
   setOrganization(organization: IOrganization) {
     if (!!organization) {
       const currentOrganization = this.organizations.find(ws => ws.id == organization.id);
       currentOrganization.name = organization.name;
-      currentOrganization.license = organization.license;
       currentOrganization.initialized = organization.initialized;
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrganization));
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
-  }
-
-  async setUserOrganizations(): Promise<IOrganization> {
-    const orgStr = localStorage.getItem(CURRENT_ORGANIZATION());
-    this.organizations = await this.getListAsync();
-    const currentOrg = !orgStr ? this.organizations[0] : this.organizations.find(ws => ws.id === JSON.parse(orgStr).id);
-    this.setOrganization(currentOrg);
-    return currentOrg;
   }
 }

@@ -4,9 +4,7 @@ namespace Application.Services;
 
 public interface IOrganizationService : IService<Organization>
 {
-    Task<Organization> GetDefaultSsoOrganizationAsync();
-
-    Task<IEnumerable<Organization>> GetListAsync(Guid userId);
+    Task<ICollection<Organization>> GetListAsync(Guid userId);
 
     Task AddUserAsync(
         OrganizationUser organizationUser,

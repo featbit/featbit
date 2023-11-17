@@ -1,9 +1,8 @@
 using Api.Authentication.OpenIdConnect;
 using Application.Identity;
 using Application.Services;
-using Domain.Organizations;
-using Domain.Policies;
 using Domain.Users;
+using Domain.Workspaces;
 
 namespace Api.Controllers;
 
@@ -15,88 +14,77 @@ public class SsoController : ApiControllerBase
 
     private readonly OidcClient _client;
     private readonly IUserService _userService;
-    private readonly ILicenseService _licenseService;
     private readonly IIdentityService _identityService;
-    private readonly IOrganizationService _organizationService;
+    private readonly IWorkspaceService _workspaceService;
     private readonly ILogger<SsoController> _logger;
 
     public SsoController(
         OidcClient client,
         IUserService userService,
-        ILicenseService licenseService,
         IIdentityService identityService,
-        IOrganizationService organizationService,
+        IWorkspaceService workspaceService,
         IConfiguration configuration,
         ILogger<SsoController> logger)
     {
-        _isEnabled = "true".Equals(configuration["SSO:enabled"], StringComparison.CurrentCultureIgnoreCase);
+        _isEnabled = "true".Equals(configuration["SSOEnabled"], StringComparison.CurrentCultureIgnoreCase);
 
         _client = client;
         _userService = userService;
-        _licenseService = licenseService;
         _identityService = identityService;
-        _organizationService = organizationService;
+        _workspaceService = workspaceService;
         _logger = logger;
     }
 
     [HttpGet("oidc-authorize-url")]
-    public IActionResult GetOidcAuthorizeUrl([FromQuery(Name = "redirect_uri")] string? redirectUri = null)
+    public async Task<IActionResult> GetOidcAuthorizeUrl(
+        [FromQuery(Name = "redirect_uri")] string redirectUri,
+        [FromQuery(Name = "workspace_key")] string workspaceKey)
     {
-        if (!_isEnabled)
+        var (error, workspace) = await ValidateOidcAsync(workspaceKey);
+        if (!string.IsNullOrWhiteSpace(error))
         {
-            return BadRequest("SSO not enabled");
+            return BadRequest(error);
         }
 
-        var url = _client.GetAuthorizeUrl(redirectUri);
+        var oidcConfig = workspace!.Sso!.Oidc;
+        var url = _client.GetAuthorizeUrl(redirectUri, workspaceKey, oidcConfig);
         return Redirect(url);
     }
 
     [HttpPost("oidc/login")]
     public async Task<ApiResponse<LoginToken>> OidcLoginByCode(LoginByOidcCode request)
     {
-        if (!_isEnabled)
+        var (error, workspace) = await ValidateOidcAsync(request.WorkspaceKey);
+        if (!string.IsNullOrWhiteSpace(error))
         {
-            return Error<LoginToken>("SSO not enabled");
+            return Error<LoginToken>(error);
         }
 
         try
         {
-            var organization = await _organizationService.GetDefaultSsoOrganizationAsync();
+            var oidcConfig = workspace!.Sso!.Oidc;
 
-            var isSsoGranted = await _licenseService.IsFeatureGrantedAsync(organization.Id, LicenseFeatures.Sso);
-            if (!isSsoGranted)
+            var email = await _client.GetEmailAsync(request, oidcConfig);
+            if (string.IsNullOrWhiteSpace(email))
             {
                 return Error<LoginToken>(
-                    "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license."
+                    $"Can not get email from id_token by using claim ${oidcConfig.UserEmailClaim}. Please check your 'UserEmailClaim' configuration"
                 );
             }
 
-            string token;
-
-            var email = await _client.GetEmailAsync(request);
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                return Error<LoginToken>("Can not get email from id_token");
-            }
-
-            var user = await _userService.FindByEmailAsync(email);
+            LoginToken token;
+            var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspace.Id);
             if (user == null)
             {
-                // register user by email
-                var registerResult = await _identityService.RegisterByEmailAsync(email, string.Empty, UserOrigin.Sso);
-
-                // add user to organization
-                var organizationUser = new OrganizationUser(organization.Id, registerResult.UserId);
-                await _organizationService.AddUserAsync(organizationUser, policies: new[] { BuiltInPolicy.Developer });
-
-                token = registerResult.Token;
+                var registerResult = await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
+                token = new LoginToken(true, registerResult.Token);
             }
             else
             {
-                token = _identityService.IssueToken(user);
+                token = new LoginToken(false, _identityService.IssueToken(user));
             }
 
-            return Ok(new LoginToken(token));
+            return Ok(token);
         }
         catch (Exception ex)
         {
@@ -108,4 +96,35 @@ public class SsoController : ApiControllerBase
 
     [HttpGet("check-enabled")]
     public ApiResponse<bool> Enabled() => Ok(_isEnabled);
+
+    private async Task<(string error, Workspace? workspace)> ValidateOidcAsync(string workspaceKey)
+    {
+        if (!_isEnabled)
+        {
+            return ("SSO is not enabled", null);
+        }
+
+        var workspace = await _workspaceService.FindOneAsync(x => x.Key == workspaceKey);
+        if (workspace == null)
+        {
+            return ("Workspace not found", null);
+        }
+
+        var isSsoGranted = workspace.IsFeatureGranted(LicenseFeatures.Sso);
+        if (!isSsoGranted)
+        {
+            return (
+                "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license.",
+                workspace
+            );
+        }
+
+        var oidcConfig = workspace.Sso?.Oidc;
+        if (oidcConfig is null)
+        {
+            return ("SSO (OIDC) is not configured", workspace);
+        }
+
+        return (string.Empty, workspace);
+    }
 }

@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { IAuthProps } from "@shared/types";
-import { getAuth, copyToClipboard } from "@utils/index";
+import { IProfile } from "@shared/types";
+import { getProfile, copyToClipboard } from "@utils/index";
 import { IMember, memberRn } from "@features/safe/iam/types/member";
 import { MemberService } from "@services/member.service";
-import {UserService} from "@services/user.service";
+import { UserService } from "@services/user.service";
 
 @Component({
   selector: 'user-setting',
@@ -14,8 +14,8 @@ import {UserService} from "@services/user.service";
 })
 export class SettingComponent implements OnInit {
 
-  get auth(): IAuthProps {
-    return getAuth();
+  get profile(): IProfile {
+    return getProfile();
   }
 
   constructor(
@@ -43,14 +43,17 @@ export class SettingComponent implements OnInit {
   }
 
   canDelete(): boolean {
-    return this.auth.email !== this.member.email;
+    return this.profile.email !== this.member.email;
   }
 
-  deleteMember() {
-    this.memberService.delete(this.member.id).subscribe(() => {
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.router.navigateByUrl(`/iam/users`);
-    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
+  deleteMemberFromOrg() {
+    this.memberService.deleteFromOrg(this.member.id).subscribe({
+      next: _ => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.router.navigateByUrl(`/iam/users`);
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    });
   }
 
   copyText(text: string) {

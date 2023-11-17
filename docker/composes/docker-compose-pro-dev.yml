@@ -27,6 +27,7 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - IS_PRO=true
+      - SSOEnabled=false
     depends_on:
       mongodb:
         condition: service_started

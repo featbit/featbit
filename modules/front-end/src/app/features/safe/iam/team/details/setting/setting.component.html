@@ -30,14 +30,16 @@
   <ng-container *ngIf="!isLoading && canDelete()">
     <div class="block" *ngIf="!isLoading; else loadingTem;" >
       <div class="delete">
-        <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+        <button nz-button nzType="default"
+                nz-popconfirm="This operation will remove the user from the current organization, are you sure to do this?"
+                i18n-nz-popconfirm="@@common.remove-from-organization-confirm"
                 nzPopconfirmPlacement="bottomRight"
                 [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                (nzOnConfirm)="deleteMember()" [nzIcon]="iconTplIamUser">
+                (nzOnConfirm)="deleteMemberFromOrg()" [nzIcon]="questionIconTpl">
           <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
           <ng-container i18n="@@common.remove">Remove</ng-container>
         </button>
-        <ng-template #iconTplIamUser>
+        <ng-template #questionIconTpl>
           <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
         </ng-template>
       </div>

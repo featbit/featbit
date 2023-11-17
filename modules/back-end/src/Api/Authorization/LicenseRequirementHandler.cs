@@ -1,4 +1,3 @@
-using Api.Authentication;
 using Application.Services;
 
 namespace Api.Authorization;
@@ -21,17 +20,17 @@ public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement
             return;
         }
 
-        if (!httpContext.Request.Headers.TryGetValue(OpenApiConstants.OrgIdHeaderKey, out var orgIdString))
+        if (!httpContext.Request.Headers.TryGetValue(ApiConstants.WorkspaceHeaderKey, out var workspaceIdString))
         {
             return;
         }
 
-        if (!Guid.TryParse(orgIdString, out var orgId))
+        if (!Guid.TryParse(workspaceIdString, out var workspaceId))
         {
             return;
         }
 
-        var isFeatureGranted = await _licenseService.IsFeatureGrantedAsync(orgId, requirement.Feature);
+        var isFeatureGranted = await _licenseService.IsFeatureGrantedAsync(workspaceId, requirement.Feature);
         if (isFeatureGranted)
         {
             context.Succeed(requirement);

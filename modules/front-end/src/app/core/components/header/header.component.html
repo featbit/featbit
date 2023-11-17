@@ -21,7 +21,6 @@
       <div>
         <span i18n="@@common.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license or generate a trial license from</span>
         <a href="https://dashboard.featbit.co/account"
-           nzType="link"
            class="bash-board-link"
            target="_blank">https://dashboard.featbit.co/account</a>
       </div>
@@ -31,7 +30,7 @@
     <div class="org-btns">
       <div class="header-info">
         <div class="org-proj-env">
-          <span [routerLink]="['/organizations']">
+          <span [routerLink]="['/workspace/organization']">
             <i nz-icon nzType="icons:icon-org"></i>
             {{currentOrganization?.name}}
           </span>
@@ -48,7 +47,7 @@
           </span>
           <ng-template #environmentSecretContent>
             <ng-container *ngFor="let secret of env?.secrets">
-              <div class="env-secret-popover-content" (click)="copyText($event, secret.value)">
+              <div class="env-secret-popover-content" (click)="copyText(secret.value)">
                 <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
                 <span>{{secret.name}}</span>
                 <nz-tag nzColor="geekblue" *ngIf="secret.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>

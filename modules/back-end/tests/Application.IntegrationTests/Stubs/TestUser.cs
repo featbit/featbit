@@ -2,7 +2,7 @@ using Domain.Users;
 
 namespace Application.IntegrationTests.Stubs;
 
-public class TestUser
+public static class TestUser
 {
     public static readonly Guid Id = new("d082c894-d9b5-4846-99e9-ae27ab7d247d");
     public const string Email = "test@email.com";
@@ -11,6 +11,6 @@ public class TestUser
 
     public static User Instance()
     {
-        return new User(Id, Email, HashedPassword);
+        return new User(Id, TestWorkspace.Id, Email, HashedPassword);
     }
 }
