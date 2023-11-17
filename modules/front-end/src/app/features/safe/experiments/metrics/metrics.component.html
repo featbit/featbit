@@ -9,7 +9,7 @@
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
         <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.eventType" (ngModelChange)="onSearch()">
-          <nz-option nzValue="" i18n-nzLabel="@@common.all" nzLabel="All"></nz-option>
+          <nz-option [nzValue]="EventType.All" i18n-nzLabel="@@common.all" nzLabel="All"></nz-option>
           <nz-option [nzValue]="customEventType" i18n-nzLabel="@@expt.metric.custom-event-metric" nzLabel="Custom event"></nz-option>
         </nz-select>
       </div>
