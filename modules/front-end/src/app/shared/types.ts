@@ -103,7 +103,7 @@ export class License {
   }
 
   isGranted(feature: LicenseFeatureEnum): boolean {
-    return true; //this.data?.features?.includes(feature) || this.data?.features?.includes(LicenseFeatureEnum.Asterisk);
+    return this.data?.features?.includes(feature) || this.data?.features?.includes(LicenseFeatureEnum.Asterisk);
   }
 }
 
