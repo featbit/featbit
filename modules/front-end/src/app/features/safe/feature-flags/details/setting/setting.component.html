@@ -60,6 +60,7 @@
       <div class="disabled-variation">
         <span class="label" i18n="@@ff.if-off-return">If OFF, serve</span>
         <nz-select
+          class="nz-select-36"
           [compareWith]="compareWith"
           [(ngModel)]="featureFlag.disabledVariationId"
           (ngModelChange)="onChangeDisabledVariation()"
@@ -107,6 +108,7 @@
         </nz-tag>
       </div>
       <nz-select
+        class="nz-select-36"
         #tags
         nzPlaceHolder="Add Tags"
         nzShowSearch
@@ -177,6 +179,7 @@
           i18n="@@common.variation-type">Variation type</nz-form-label>
         <nz-form-control>
           <nz-select
+            class="nz-select-40"
             i18n-nzPlaceHolder="@@common.variation-type"
             nzPlaceHolder="Variation type"
             formControlName="variationType">

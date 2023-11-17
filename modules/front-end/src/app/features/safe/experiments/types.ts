@@ -8,7 +8,7 @@ export class MetricListFilter {
 
   constructor(
     metricName?: string,
-    eventType?: EventType,
+    eventType: EventType = EventType.All,
     pageIndex: number = 1,
     pageSize: number = 10) {
     this.metricName = metricName ?? '';
@@ -27,7 +27,7 @@ export interface IExptCreation {
   featureFlagId: string,
   metricId: string,
   baselineVariationId: string,
-  alpha: number 
+  alpha: number
 }
 
 export class ExperimentListFilter {
@@ -118,6 +118,7 @@ export interface IExptStatusCount {
 }
 
 export enum EventType {
+  All ='',
   Custom = 1,
   PageView = 2,
   Click = 3

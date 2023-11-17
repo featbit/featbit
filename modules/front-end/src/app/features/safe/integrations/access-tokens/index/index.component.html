@@ -8,6 +8,7 @@
         <i nz-icon nzType="icons:icon-search"></i>
       </ng-template>
       <nz-select
+        class="nz-select-40 rounded filter"
         i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-creator"
         nzPlaceHolder="Select creator"
         nzAllowClear
@@ -28,7 +29,7 @@
           <ng-container i18n="@@common.loading">Loading...</ng-container>
         </nz-option>
       </nz-select>
-      <nz-select nzAllowClear [(ngModel)]="filter.type" (ngModelChange)="doSearch(true)" i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-type" nzPlaceHolder="Filter by type">
+      <nz-select class="nz-select-40 rounded filter" nzAllowClear [(ngModel)]="filter.type" (ngModelChange)="doSearch(true)" i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-type" nzPlaceHolder="Filter by type">
         <nz-option [nzValue]="AccessTokenTypePersonal" [nzLabel]="AccessTokenTypePersonal | accessTokenType"></nz-option>
         <nz-option [nzValue]="AccessTokenTypeService" [nzLabel]="AccessTokenTypeService | accessTokenType"></nz-option>
       </nz-select>

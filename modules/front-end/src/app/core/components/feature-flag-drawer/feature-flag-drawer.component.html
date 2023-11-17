@@ -59,6 +59,7 @@
           </nz-tag>
         </div>
         <nz-select
+          class="nz-select-40"
           #tags
           i18n-nzPlaceHolder="@@common.add-tags"
           nzPlaceHolder="Add tags"
@@ -91,7 +92,7 @@
                        i18n="@@common.variation-type">Variation type</nz-form-label>
         <nz-form-control>
           <nz-select
-            class="variation-type-selector"
+            class="nz-select-40"
             i18n-nzPlaceHolder="@@common.variation-type"
             nzPlaceHolder="Variation type"
             formControlName="variationType">
@@ -147,7 +148,7 @@
       </ng-template>
     </nz-divider>
 
-    <form nz-form [formGroup]="defaultRuleForm" nzLayout="horizontal" class="form">
+    <form nz-form [formGroup]="defaultRuleForm" nzLayout="horizontal" class="form on-off-form">
       <nz-form-item>
         <nz-form-label i18n="@@common.on-off-status">ON/OFF Status</nz-form-label>
         <nz-form-control>
@@ -158,7 +159,7 @@
         <nz-form-label nzRequired i18n="@@common.serve-if-on">If the flag is ON, serve</nz-form-label>&nbsp;&nbsp;
         <nz-form-control>
           <nz-select
-            class="default-rule-selector"
+            class="nz-select-40"
             i18n-nzPlaceHolder="@@common.select-variation"
             nzPlaceHolder="Select variation"
             formControlName="enabledVariationId">
@@ -168,11 +169,11 @@
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-      <nz-form-item>
+      <nz-form-item class="on-off">
         <nz-form-label nzRequired i18n="@@common.serve-if-off">If the flag is OFF, serve</nz-form-label>
         <nz-form-control>
           <nz-select
-            class="default-rule-selector"
+            class="nz-select-40"
             i18n-nzPlaceHolder="@@common.select-variation"
             nzPlaceHolder="Select variation"
             formControlName="disabledVariationId">

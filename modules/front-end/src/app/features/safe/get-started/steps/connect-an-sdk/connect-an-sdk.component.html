@@ -19,6 +19,7 @@
       <nz-descriptions-item i18n-nzTitle="@@get-started.secrets" nzTitle="Secrets">
         <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon nzType="icons:icon-copy" (click)="copyText(selectedSecret.value)"></i>
         <nz-select
+          class="nz-select-36"
           [(ngModel)]="selectedSecret"
           i18n-nzPlaceHolder="@@get-started.select-secret"
           nzPlaceHolder="Select secret"

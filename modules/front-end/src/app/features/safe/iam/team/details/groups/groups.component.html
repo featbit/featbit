@@ -7,7 +7,7 @@
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="icons:icon-search"></i>
       </ng-template>
-      <nz-select class="group-filter" [(ngModel)]="filter.getAllGroups" (ngModelChange)="doSearch(true)">
+      <nz-select class="group-filter nz-select-40 rounded filter" [(ngModel)]="filter.getAllGroups" (ngModelChange)="doSearch(true)">
         <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.team.details.all-groups"></nz-option>
         <nz-option [nzValue]="false" nzLabel="Containing current member" i18n-nzLabel="@@iam.team.details.current-groups"></nz-option>
       </nz-select>

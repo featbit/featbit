@@ -8,6 +8,7 @@
 // Override less variables to here
 // View all variables: https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
 
+@import "./nz-select.less";
 @import "variables";
 
 html,
@@ -148,29 +149,6 @@ app-root {
   }
 }
 
-.target-users,
-.flag-container {
-  .status-switcher .ant-select .ant-select-selector .ant-select-selection-item {
-    margin-top: 1px !important;
-  }
-
-  .ant-select .ant-select-selector {
-    height: 36px !important;
-
-    &::after {
-      line-height: 31px !important;
-    }
-
-    .ant-select-selection-search-input,
-    .ant-select-selection-placeholder {
-      margin-top: 2px !important;
-      line-height: 31px !important;
-      font-size: 13px;
-      height: 31px !important;
-    }
-  }
-}
-
 .ant-picker-range {
   height: 40px;
   border-radius: 20px;
@@ -187,49 +165,6 @@ app-root {
 
   .ant-card-body {
     padding-top: 0;
-  }
-
-  .rule-item {
-    .ant-select .ant-select-selector {
-      height: 36px !important;
-
-      .ant-select-selection-search-input,
-      .ant-select-selection-placeholder {
-        margin-top: 2px !important;
-      }
-    }
-
-    .multi-select {
-      .ant-select-selection-search {
-        width: 60px !important;
-      }
-
-      .ant-select-selection-item {
-        margin-top: 5px !important;
-      }
-
-      .ant-select-selection-item-content {
-        max-width: 180px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      i {
-        font-size: 10px !important;
-      }
-    }
-  }
-}
-
-// standard select
-.standard-select {
-  .standard-bordered-input;
-  height: 40px;
-
-  .ant-select-selection-search-input,
-  .ant-select-selection-placeholder,
-  .ant-select-selection-item {
-    margin: 5px;
   }
 }
 
@@ -262,11 +197,6 @@ app-root {
     cursor: pointer;
   }
 
-  // select
-  .ant-select:not(.ant-select-customize-input) .ant-select-selector {
-    .standard-select;
-  }
-
   // primary button
   .ant-btn-primary {
     .standard-btn;
@@ -289,11 +219,6 @@ app-root {
   // input
   input {
     .standard-form-input;
-  }
-
-  // select
-  .ant-select:not(.ant-select-customize-input) .ant-select-selector {
-    .standard-select;
   }
 
   // textarea
@@ -342,76 +267,14 @@ app-root {
     .ant-btn-primary {
       .standard-btn;
     }
-
-    // select
-    .ant-select-selector {
-      border-radius: 32px;
-      width: 200px;
-      height: 40px;
-
-      .ant-select-selection-search-input,
-      .ant-select-selection-placeholder,
-      .ant-select-selection-item {
-        margin: 4px;
-      }
-    }
-
-    // middle select
-    .middle-select .ant-select-selector {
-      .ant-select-selector;
-      width: 250px;
-    }
-
-    // tag select
-    .tag-select .ant-select-selector {
-      .ant-select-selector;
-      width: 230px;
-      padding-right: 16px !important;
-
-      .ant-select-selection-item {
-        border-radius: 5px;
-        background-color: @grey10-color;
-      }
-
-      .ant-select-selection-search {
-        width: 15px !important;
-        margin: 0 !important;
-      }
-
-      .ant-select-selection-placeholder {
-        margin: 0;
-      }
-    }
-
-    // tag multiple select item
-    .ant-select-multiple .ant-select-selection-item {
-      max-width: 88px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
   }
 }
 
-// custom select arrow
-.ant-select-arrow {
-  display: none;
-}
-
-.ant-select-selector::after {
-  position: absolute;
-  right: 11px;
-  visibility: visible !important;
-  width: 20px !important;
-  height: 20px;
-  content: url("assets/icons/icon-dropdown.svg") !important;
-  align-self: center;
-}
-
+// custom pagination
 .ant-pagination-options .ant-select-selector::after {
   right: 2px;
 }
 
-// custom pagination
 .ant-pagination .ant-table-pagination {
   line-height: 16px;
 }
@@ -896,18 +759,6 @@ app-root {
 
 .ant-transfer-operation {
   gap: 16px;
-}
-
-.filters-area {
-  .ant-select .ant-select-selector {
-    border-radius: 32px !important;
-    height: 40px;
-
-    .ant-select-selection-item {
-      display: flex;
-      align-items: center;
-    }
-  }
 }
 
 // custom checkbox
