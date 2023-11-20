@@ -88,7 +88,7 @@
     <div class="create-trigger">
       <div class="info-item">
         <div i18n="@@ff.triggers.trigger-type">Type</div>
-        <nz-select [(ngModel)]="newFlagTrigger.type" i18n-nzPlaceHolder="@@ff.triggers.trigger-type" nzPlaceHolder="Type" [nzCustomTemplate]="typeTemplate">
+        <nz-select class="nz-select-40" [(ngModel)]="newFlagTrigger.type" i18n-nzPlaceHolder="@@ff.triggers.trigger-type" nzPlaceHolder="Type" [nzCustomTemplate]="typeTemplate">
           <nz-option *ngFor="let type of flagTriggerTypes;" [nzLabel]="type | T: flagTriggerTypeLabel[type] : 'trigger-type'" [nzValue]="type"></nz-option>
         </nz-select>
         <ng-template #typeTemplate let-selected>
@@ -98,7 +98,7 @@
       </div>
       <div class="info-item" style="margin-top: 10px">
         <div i18n="@@ff.triggers.trigger-action">Action</div>
-        <nz-select [(ngModel)]="newFlagTrigger.action" i18n-nzPlaceHolder="@@ff.triggers.trigger-action" nzPlaceHolder="Action" [nzCustomTemplate]="actionTemplate">
+        <nz-select  class="nz-select-40" [(ngModel)]="newFlagTrigger.action" i18n-nzPlaceHolder="@@ff.triggers.trigger-action" nzPlaceHolder="Action" [nzCustomTemplate]="actionTemplate">
           <nz-option *ngFor="let action of flagTriggerActions" [nzLabel]="flagTriggerActionLabel[action]" [nzValue]="action"></nz-option>
         </nz-select>
         <ng-template #actionTemplate let-selected>

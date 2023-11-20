@@ -24,6 +24,7 @@
         <nz-form-label nzRequired i18n="@@expt.metric.maintainer">Maintainer</nz-form-label>
         <nz-form-control i18n-nzErrorTip="@@expt.metric.maintainer-cannot-be-empty" nzErrorTip="Maintainer cannot be empty">
           <nz-select
+            class="nz-select-40"
             i18n-nzPlaceHolder="@@expt.metric.select-maintainer"
             nzPlaceHolder="Select maintainer"
             nzAllowClear
@@ -49,12 +50,11 @@
       <nz-form-item [ngStyle]="metricForm.value.eventType === customEventType ? { 'margin-bottom': '8px' } : {}">
         <nz-form-label nzRequired i18n="@@expt.overview.event-type">Event type</nz-form-label>
         <nz-form-control i18n-nzErrorTip="@@expt.overview.event-type-cannot-be-empty" nzErrorTip="Event type cannot be empty">
-          <nz-select formControlName="eventType">
+          <nz-select class="nz-select-40" formControlName="eventType">
             <nz-option [nzValue]="customEventType"  nzLabel="Custom"></nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-
       <ng-container
         *ngIf="metricForm.value.eventType === pageViewEventType || metricForm.value.eventType === clickEventType">
         <nz-form-item *ngIf="metricForm.value.eventType === clickEventType">
@@ -73,7 +73,7 @@
             *ngFor="let n of metricForm.controls.targetUrls.controls; let idx = index;"
             nzErrorTip="URL！" formGroupName="{{idx}}">
             <div class="target-url-row">
-              <nz-select formControlName="matchType">
+              <nz-select class="nz-select-40" formControlName="matchType">
                 <nz-option i18n-nzLabel="@@expt.metric.string-including" nzLabel="String including" [nzValue]="substringUrlMatchType"></nz-option>
               </nz-select>
               <input type="text" nz-input formControlName="url" i18n-placeholder="@@expt.metric.targeting-page-url" placeholder="Targeting page URL"/>
@@ -104,14 +104,14 @@
         </nz-form-item>
         <nz-form-item>
           <nz-form-label i18n="@@expt.metric.unit">Unit</nz-form-label>
-          <nz-form-control i18n-nzErrorTip="@@expt.metric.unit-cannot-be-empty" nzErrorTip="Unit cannot be empty">
+          <nz-form-control>
             <input type="text" nz-input formControlName="customEventUnit" i18n-placeholder="@@expt.metric.unit-exemple" placeholder="ms, $, kg etc."/>
           </nz-form-control>
         </nz-form-item>
         <nz-form-item>
           <nz-form-label i18n="@@expt.metric.winning-criteria">Winning criteria</nz-form-label>
-          <nz-form-control i18n-nzErrorTip="@@expt.metric.winning-criteria" nzErrorTip="Winning criteria">
-            <nz-select formControlName="customEventSuccessCriteria">
+          <nz-form-control>
+            <nz-select class="nz-select-40" formControlName="customEventSuccessCriteria">
               <nz-option [nzValue]="customEventSuccessCriteriaHigher" i18n-nzLabel="@@expt.metric.higher-than-baseline" nzLabel="Higher than baseline"></nz-option>
               <nz-option [nzValue]="customEventSuccessCriteriaLower" i18n-nzLabel="@@expt.metric.lower-than-baseline" nzLabel="Lower than baseline"></nz-option>
             </nz-select>

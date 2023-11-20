@@ -1,5 +1,4 @@
 using System.Net.Mime;
-using Api.Authentication;
 using Api.Filters;
 using Application.Users;
 using Swashbuckle.AspNetCore.Annotations;
@@ -38,12 +37,31 @@ public class ApiControllerBase : ControllerBase
                 return _orgId.Value;
             }
 
-            var orgIdHeaderValue = HttpContext.Request.Headers[OpenApiConstants.OrgIdHeaderKey];
+            var orgIdHeaderValue = HttpContext.Request.Headers[ApiConstants.OrgIdHeaderKey];
 
             _orgId = Guid.TryParse(orgIdHeaderValue, out var orgId)
                 ? orgId
                 : Guid.Empty;
             return _orgId.Value;
+        }
+    }
+    
+    private Guid? _workspaceId;
+    protected Guid WorkspaceId
+    {
+        get
+        {
+            if (_workspaceId.HasValue)
+            {
+                return _workspaceId.Value;
+            }
+
+            var workspaceIdHeaderValue = HttpContext.Request.Headers[ApiConstants.WorkspaceHeaderKey];
+
+            _workspaceId = Guid.TryParse(workspaceIdHeaderValue, out var workspaceId)
+                ? workspaceId
+                : Guid.Empty;
+            return _workspaceId.Value;
         }
     }
 

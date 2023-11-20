@@ -1,7 +1,7 @@
 using Application.Caches;
 using Domain.FeatureFlags;
-using Domain.Organizations;
 using Domain.Segments;
+using Domain.Workspaces;
 using MongoDB.Driver;
 using StackExchange.Redis;
 
@@ -62,17 +62,17 @@ public class RedisCacheService : ICacheService
         await _redis.SortedSetRemoveAsync(index, segmentId.ToString());
     }
 
-    public async Task UpsertLicenseAsync(Organization organization)
+    public async Task UpsertLicenseAsync(Workspace workspace)
     {
-        var key = RedisKeys.License(organization.Id);
-        var value = organization.License;
+        var key = RedisKeys.License(workspace.Id);
+        var value = workspace.License;
 
         await _redis.StringSetAsync(key, value);
     }
 
-    public async Task<string> GetLicenseAsync(Guid orgId)
+    public async Task<string> GetLicenseAsync(Guid workspaceId)
     {
-        var key = RedisKeys.License(orgId);
+        var key = RedisKeys.License(workspaceId);
         if (await _redis.KeyExistsAsync(key))
         {
             var value = await _redis.StringGetAsync(key);
@@ -80,8 +80,8 @@ public class RedisCacheService : ICacheService
         }
 
         // key not exist, get license from mongodb and cache it
-        var license = await _mongodb.CollectionOf<Organization>()
-            .Find(x => x.Id == orgId)
+        var license = await _mongodb.CollectionOf<Workspace>()
+            .Find(x => x.Id == workspaceId)
             .Project(y => y.License)
             .FirstOrDefaultAsync();
 

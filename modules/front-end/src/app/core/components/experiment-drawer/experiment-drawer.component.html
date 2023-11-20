@@ -12,79 +12,91 @@
       <nz-form-item>
         <nz-form-label i18n="@@common.ff">Feature flag</nz-form-label>
         <nz-form-control i18n-nzErrorTip="@@common.ff" nzErrorTip="Feature flag">
-          <nz-input-group>
-            <nz-select
-              i18n-nzPlaceHolder="@@expt.overview.select-ff"
-              nzPlaceHolder="Select feature flag"
-              nzShowSearch
-              nzServerSearch
-              [compareWith]="compareWith"
-              formControlName="featureFlag"
-              (nzOnSearch)="onSearchFeatureFlag($event)"
-              [nzCustomTemplate]="ffTemplate"
-            >
-              <ng-container *ngFor="let ff of featureFlagList?.items">
-                <nz-option *ngIf="!isFeatureFlagsLoading" nzCustomContent [nzValue]="ff" [nzLabel]="ff.name">
-                  <span>{{ff.name}}</span>
-                  <nz-tag *ngIf="ff.isEnabled" class="status on">ON</nz-tag>
-                  <nz-tag *ngIf="!ff.isEnabled" class="status off">OFF</nz-tag>
-                </nz-option>
-              </ng-container>
-              <nz-option *ngIf="isFeatureFlagsLoading" nzDisabled nzCustomContent>
-                <i nz-icon nzType="loading" class="loading-icon"></i>
-                <ng-container i18n="@@common.loading">Loading...</ng-container>
+          <nz-select
+            class="nz-select-40"
+            i18n-nzPlaceHolder="@@expt.overview.select-ff"
+            nzPlaceHolder="Select feature flag"
+            nzShowSearch
+            nzServerSearch
+            [compareWith]="compareWith"
+            formControlName="featureFlag"
+            (nzOnSearch)="onSearchFeatureFlag($event)"
+            [nzOptionHeightPx]="36"
+            [nzCustomTemplate]="ffTemplate"
+          >
+            <ng-container *ngFor="let ff of featureFlagList?.items">
+              <nz-option *ngIf="!isFeatureFlagsLoading" nzCustomContent [nzValue]="ff" [nzLabel]="ff.name">
+                <span>{{ff.name}}</span>
+                <nz-tag *ngIf="ff.isEnabled" class="status on">ON</nz-tag>
+                <nz-tag *ngIf="!ff.isEnabled" class="status off">OFF</nz-tag>
               </nz-option>
-            </nz-select>
-            <ng-template #ffTemplate let-selected>
-              <div class="selected-items-wrapper" style="">
-                <span>{{selected.nzValue.name}}</span>
-                <nz-tag *ngIf="selected.nzValue.isEnabled" class="status on">ON</nz-tag>
-                <nz-tag *ngIf="!selected.nzValue.isEnabled" class="status off">OFF</nz-tag>
-              </div>
-            </ng-template>
-          </nz-input-group>
+            </ng-container>
+            <nz-option *ngIf="isFeatureFlagsLoading" nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          </nz-select>
+          <ng-template #ffTemplate let-selected>
+            <div class="selected-items-wrapper" style="">
+              <span>{{selected.nzValue.name}}</span>
+              <nz-tag *ngIf="selected.nzValue.isEnabled" class="status on">ON</nz-tag>
+              <nz-tag *ngIf="!selected.nzValue.isEnabled" class="status off">OFF</nz-tag>
+            </div>
+          </ng-template>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
         <nz-form-label>Metric</nz-form-label>
         <nz-form-control nzErrorTip="Metric!">
-          <nz-input-group>
-            <nz-select
-              nzPlaceHolder="Metric"
-              nzShowSearch
-              nzServerSearch
-              formControlName="metricId"
-              (nzOnSearch)="onSearchMetrics($event)"
-            >
-              <ng-container *ngFor="let o of pagedMetric?.items">
-                <nz-option *ngIf="!isMetricsLoading" [nzValue]="o.id" [nzLabel]="o.name">
-                </nz-option>
-              </ng-container>
-              <nz-option *ngIf="isMetricsLoading" nzDisabled nzCustomContent>
-                <i nz-icon nzType="loading" class="loading-icon"></i>
-                <ng-container i18n="@@common.loading">Loading...</ng-container>
+          <nz-select
+            class="nz-select-40"
+            nzPlaceHolder="Metric"
+            nzShowSearch
+            nzServerSearch
+            formControlName="metricId"
+            (nzOnSearch)="onSearchMetrics($event)"
+          >
+            <ng-container *ngFor="let o of pagedMetric?.items">
+              <nz-option *ngIf="!isMetricsLoading" [nzValue]="o.id" [nzLabel]="o.name">
               </nz-option>
-            </nz-select>
-          </nz-input-group>
+            </ng-container>
+            <nz-option *ngIf="isMetricsLoading" nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          </nz-select>
         </nz-form-control>
       </nz-form-item>
       <nz-form-item>
         <nz-form-label i18n="@@common.baseline-variation">Baseline</nz-form-label>
         <nz-form-control i18n-nzErrorTip="@@common.baseline-variation" nzErrorTip="Baseline">
-          <nz-input-group>
-            <div class="">
-              <nz-select
-                i18n-nzPlaceHolder="@@expt.overview.select-baseline-variation"
-                nzPlaceHolder="Select baseline variation"
-                formControlName="baselineVariationId">
-                <nz-option
-                  *ngFor="let o of currentVariations"
-                  [nzValue]="o.id"
-                  [nzLabel]="o.value">
-                </nz-option>
-              </nz-select>
-            </div>
-          </nz-input-group>
+          <nz-select
+            class="nz-select-40"
+            i18n-nzPlaceHolder="@@expt.overview.select-baseline-variation"
+            nzPlaceHolder="Select baseline variation"
+            formControlName="baselineVariationId">
+            <nz-option
+              *ngFor="let o of currentVariations"
+              [nzValue]="o.id"
+              [nzLabel]="o.value">
+            </nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@common.default-confidence-level">Default Confidence Level</nz-form-label>
+        <nz-form-control>
+          <nz-select
+            class="nz-select-40"
+            i18n-nzPlaceHolder="@@expt.overview.select-default-confidence-level"
+            nzPlaceHolder="Select default confidence level (e.g 95%)"
+            formControlName="alpha">
+            <nz-option nzValue="0.2" nzLabel="80%"/>
+            <nz-option nzValue="0.1" nzLabel="90%"/>
+            <nz-option nzValue="0.05" nzLabel="95%"/>
+            <nz-option nzValue="0.02" nzLabel="98%"/>
+            <nz-option nzValue="0.01" nzLabel="99%"/>
+          </nz-select>
         </nz-form-control>
       </nz-form-item>
       <button nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>

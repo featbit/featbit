@@ -1,11 +1,16 @@
 import { getLocalStorageKey } from "./index";
 
+export const IS_SSO_FIRST_LOGIN = 'is-sso-first-login';
 export const LOGIN_REDIRECT_URL = 'login-redirect-url';
 export const IDENTITY_TOKEN = 'token';
 export const USER_PROFILE = 'auth';
 
 export function CURRENT_PROJECT(): string {
   return getLocalStorageKey('current-project', false);
+}
+
+export function CURRENT_WORKSPACE(): string {
+  return getLocalStorageKey('current-workspace', false);
 }
 
 export function CURRENT_ORGANIZATION(): string {

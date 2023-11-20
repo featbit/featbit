@@ -17,16 +17,16 @@
               <ul nz-menu nzSelectable style="min-width: 100px;">
                 <li nz-menu-item
                     (click)="declineChangeRequest(changeCategories)"
-                    *ngIf="changeCategories.canDecline(currentUser.id)">
+                    *ngIf="changeCategories.canDecline(profile.id)">
                   <ng-container i18n="@@common.decline">Decline</ng-container>
                 </li>
                 <li nz-menu-item
                     (click)="approveChangeRequest(changeCategories)"
-                    *ngIf="changeCategories.canApprove(currentUser.id)">
+                    *ngIf="changeCategories.canApprove(profile.id)">
                   <ng-container i18n="@@common.approve">Approve</ng-container>
                 </li>
                 <li nz-menu-item
-                    *ngIf="changeCategories.canApply(currentUser.id)"
+                    *ngIf="changeCategories.canApply(profile.id)"
                     (click)="applyChangeRequest(changeCategories)">
                   <ng-container i18n="@@common.apply">Apply</ng-container>
                 </li>

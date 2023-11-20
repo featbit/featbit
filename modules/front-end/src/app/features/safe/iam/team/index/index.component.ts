@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { copyToClipboard, encodeURIComponentFfc, getAuth } from '@utils/index';
+import { copyToClipboard, encodeURIComponentFfc, getProfile } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MemberService } from "@services/member.service";
-import {IMember, IMemberListModel, MemberFilter, memberRn} from "@features/safe/iam/types/member";
-import {IAuthProps} from "@shared/types";
+import { IMember, IMemberListModel, MemberFilter, memberRn } from "@features/safe/iam/types/member";
+import { IProfile } from "@shared/types";
 
 @Component({
   selector: 'iam-users',
@@ -14,8 +14,8 @@ import {IAuthProps} from "@shared/types";
   styleUrls: ['./index.component.less']
 })
 export class IndexComponent implements OnInit {
-  get auth(): IAuthProps {
-    return getAuth();
+  get profile(): IProfile {
+    return getProfile();
   }
 
   constructor(
@@ -64,15 +64,29 @@ export class IndexComponent implements OnInit {
   }
 
   canDelete(member: IMember): boolean {
-    return this.auth.email !== member.email;
+    return this.profile.email !== member.email;
   }
 
-  deleteMember(member: IMember) {
-    this.memberService.delete(member.id).subscribe(() => {
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
-      this.pagedMember.totalCount--;
-    }, () => this.message.error($localize `:@@common.operation-failed:Operation failed`))
+  deleteMemberFromOrg(member: IMember) {
+    this.memberService.deleteFromOrg(member.id).subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
+        this.pagedMember.totalCount--;
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    });
+  }
+
+  deleteMemberFromWorkspace(member: IMember) {
+    this.memberService.deleteFromWorkspace(member.id).subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.pagedMember.items = this.pagedMember.items.filter(it => it.id !== member.id);
+        this.pagedMember.totalCount--;
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    });
   }
 
   memberDrawerVisible: boolean = false;

@@ -8,7 +8,7 @@ export class MetricListFilter {
 
   constructor(
     metricName?: string,
-    eventType?: EventType,
+    eventType: EventType = EventType.All,
     pageIndex: number = 1,
     pageSize: number = 10) {
     this.metricName = metricName ?? '';
@@ -27,6 +27,7 @@ export interface IExptCreation {
   featureFlagId: string,
   metricId: string,
   baselineVariationId: string,
+  alpha: number
 }
 
 export class ExperimentListFilter {
@@ -83,7 +84,6 @@ export interface IExptIteration {
   updatedAt?: Date,
   updatedAtStr?: string,
   dateTimeInterval?: string,
-  numericConfidenceIntervalBoundary?: number[], // [min, max, max - min]
   customEventTrackOption: CustomEventTrackOption,
   customEventUnit: string,
   isFinish: boolean,
@@ -96,6 +96,7 @@ export interface IExptIteration {
 
 export interface IExptIterationResult {
   changeToBaseline: number, // float
+  effectSize: number, // float
   conversion: number, // long
   conversionRate: number, // float
   isBaseline: boolean,
@@ -117,6 +118,7 @@ export interface IExptStatusCount {
 }
 
 export enum EventType {
+  All ='',
   Custom = 1,
   PageView = 2,
   Click = 3

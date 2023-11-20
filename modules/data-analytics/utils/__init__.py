@@ -50,7 +50,7 @@ class SingletonDecorator:
 
 
 def format_float_positional(value: Optional[float]) -> Optional[str]:
-    return np.format_float_positional(value, precision=10, trim='-') if value is not None else None
+    return np.format_float_positional(value, precision=5, trim='-') if value is not None else None
 
 
 def time_to_special_tz(source: Union[datetime, date], tz: str) -> datetime:

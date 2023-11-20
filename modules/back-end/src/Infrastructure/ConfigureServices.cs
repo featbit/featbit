@@ -3,6 +3,7 @@ using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
 using Infrastructure.AccessTokens;
+using Infrastructure.Workspaces;
 using Infrastructure.AuditLogs;
 using Infrastructure.DataSync;
 using Infrastructure.EndUsers;
@@ -62,7 +63,6 @@ public static class ConfigureServices
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-        services.AddScoped<IUserStore, MongoDbUserStore>();
         services.AddScoped<IIdentityService, IdentityService>();
 
         // typed http clients
@@ -73,7 +73,8 @@ public static class ConfigureServices
         services.AddHttpClient<IAgentService, AgentService>();
 
         // custom services
-        services.AddScoped<IUserService, UserService>();
+        services.AddTransient<IWorkspaceService, WorkspaceService>();
+        services.AddTransient<IUserService, UserService>();
         services.AddTransient<IOrganizationService, OrganizationService>();
         services.AddTransient<IMemberService, MemberService>();
         services.AddTransient<IProjectService, ProjectService>();

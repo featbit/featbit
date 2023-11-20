@@ -9,7 +9,7 @@
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
       </div>
-      <nz-select class="policy-filter" [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)">
+      <nz-select class="policy-filter nz-select-40 rounded filter" [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)">
         <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.groups.details.all-policies"></nz-option>
         <nz-option [nzValue]="false" nzLabel="Affected to current group" i18n-nzLabel="@@iam.groups.details.current-policies"></nz-option>
       </nz-select>

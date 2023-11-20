@@ -1,10 +1,10 @@
 <section class="body-container">
   <div class="filters-area">
-    <nz-select class="period-selector" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()">
+    <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()">
       <nz-option *ngFor="let period of periodOptions" [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
     </nz-select>
 
-    <nz-select class="interval-selector" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()">
+    <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()">
       <nz-option *ngFor="let intervalType of intervalTypes" [nzValue]="intervalType.value" [nzLabel]="intervalType.label"></nz-option>
     </nz-select>
   </div>
@@ -35,7 +35,7 @@
             <ng-template #prefixIconSearch>
               <i nz-icon nzType="icons:icon-search"></i>
             </ng-template>
-            <nz-select class="variation-filter" [(ngModel)]="filter.variationId" (ngModelChange)="endUserFilterChanged()">
+            <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.variationId" (ngModelChange)="endUserFilterChanged()">
               <nz-option *ngFor="let variation of variations" [nzValue]="variation.id" [nzLabel]="variation.name"></nz-option>
             </nz-select>
           </div>

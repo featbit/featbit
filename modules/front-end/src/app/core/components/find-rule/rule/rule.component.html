@@ -5,6 +5,7 @@
   </ng-template>
   <div class="select">
     <nz-select
+      class="nz-select-36"
       nzShowSearch
       nzServerSearch
       nzPlaceHolder="Select property"
@@ -23,6 +24,7 @@
   </div>
   <div class="select" *ngIf="!isSegmentRule">
     <nz-select
+      class="nz-select-36"
       nzPlaceHolder="Select operation"
       i18n-nzPlaceHolder="@@core.components.findrule.rule.select-operation"
       nzShowSearch
@@ -33,7 +35,7 @@
   </div>
   <ng-container [ngSwitch]="condition.type" *ngIf="!isSegmentRule">
     <ng-template #presetSelect>
-      <nz-select style="min-width: 200px" nzShowSearch
+      <nz-select class="nz-select-36" style="min-width: 200px" nzShowSearch
                  nzPlaceHolder="values"
                  i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
                  [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()">
@@ -53,7 +55,7 @@
     </ng-container>
     <ng-container *ngSwitchCase="'number'">
       <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <nz-input-number class="standard-bordered-input" type="number" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" nzPlaceHolder="input a number"
+        <nz-input-number class="standard-bordered-input" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" nzPlaceHolder="input a number"
                          i18n-nzPlaceHolder="@@core.components.findrule.rule.inputnumber"></nz-input-number>
       </div>
     </ng-container>
@@ -64,53 +66,59 @@
     </ng-container>
     <ng-container *ngSwitchCase="'multi'">
       <div class="value">
-        <div class="multi-select">
-          <nz-select style="min-width: 200px"
-            [nzMode]="multiSelectMode"
-            nzPlaceHolder="values"
-            i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
-            nzShowSearch
-            [(ngModel)]="condition.multipleValue"
-            [nzMaxTagPlaceholder]="omittedPlaceHolder"
-            [nzMaxTagCount] = "2"
-            (ngModelChange)="onModelChange()">
-            <nz-option
-              *ngFor="let presetValue of currentUserProp.presetValues"
-              [nzLabel]="presetValue.description"
-              [nzValue]="presetValue.value">
-            </nz-option>
-          </nz-select>
-        </div>
+        <nz-select
+          class="nz-select-36"
+          style="min-width: 200px"
+          [nzMode]="multiSelectMode"
+          nzPlaceHolder="values"
+          i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
+          nzShowSearch
+          [(ngModel)]="condition.multipleValue"
+          [nzMaxTagPlaceholder]="omittedPlaceHolder"
+          [nzMaxTagCount]="2"
+          (ngModelChange)="onModelChange()">
+          <nz-option
+            *ngFor="let presetValue of currentUserProp.presetValues"
+            [nzLabel]="presetValue.description"
+            [nzValue]="presetValue.value">
+          </nz-option>
+        </nz-select>
       </div>
     </ng-container>
   </ng-container>
   <ng-container *ngIf="isSegmentRule">
-    <nz-select class="multi-select" style="min-width: 200px;"
-      nzMode="multiple"
-      nzPlaceHolder="segments"
-      i18n-nzPlaceHolder="@@core.components.findrule.rule.segments"
-      nzAllowClear
-      nzShowSearch
-      nzServerSearch
-      [nzMaxTagCount]="2"
-      [nzMaxTagPlaceholder]="omittedPlaceHolder"
-      [nzCustomTemplate]="multipleTemplate"
-      [(ngModel)]="condition.multipleValue"
-      (ngModelChange)="onModelChange()"
-      (nzFocus)="onSearchSegments('')"
-      (nzOnSearch)="onSearchSegments($event)">
-        <ng-container *ngFor="let item of segments;">
-          <nz-option *ngIf="!isLoadingSegments" nzCustomContent [nzValue]="item.id" [nzLabel]="item.name">{{item.name}}</nz-option>
-        </ng-container>
-        <ng-template #multipleTemplate let-selected>
-          <div class="ant-select-selection-item-content">
-            {{ selected.nzLabel }}
-          </div>
-        </ng-template>
-        <nz-option *ngIf="isLoadingSegments" nzDisabled nzCustomContent>
-            <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...
-        </nz-option>
-    </nz-select>
+    <div class="value">
+      <div>
+        <nz-select
+          class="nz-select-36"
+          style="min-width: 200px;"
+          nzMode="multiple"
+          nzPlaceHolder="segments"
+          i18n-nzPlaceHolder="@@core.components.findrule.rule.segments"
+          nzShowSearch
+          nzAllowClear
+          nzServerSearch
+          [(ngModel)]="condition.multipleValue"
+          [nzMaxTagPlaceholder]="omittedPlaceHolder"
+          [nzMaxTagCount]="2"
+          (ngModelChange)="onModelChange()"
+          [nzCustomTemplate]="multipleTemplate"
+          (nzFocus)="onSearchSegments('')"
+          (nzOnSearch)="onSearchSegments($event)">
+            <ng-container *ngFor="let item of segments;">
+              <nz-option *ngIf="!isLoadingSegments" nzCustomContent [nzValue]="item.id" [nzLabel]="item.name">{{item.name}}</nz-option>
+            </ng-container>
+            <ng-template #multipleTemplate let-selected>
+              <div class="ant-select-selection-item-content">
+                {{ selected.nzLabel }}
+              </div>
+            </ng-template>
+            <nz-option *ngIf="isLoadingSegments" nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i> Loading Data...
+            </nz-option>
+        </nz-select>
+      </div>
+    </div>
   </ng-container>
   <ng-template #omittedPlaceHolder>
     <div class="ant-select-selection-item-content"

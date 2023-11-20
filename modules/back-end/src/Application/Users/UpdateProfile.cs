@@ -13,8 +13,8 @@ public class UpdateProfileValidator : AbstractValidator<UpdateProfile>
     public UpdateProfileValidator()
     {
         RuleFor(x => x.Email)
-            .NotEmpty().WithErrorCode(ErrorCodes.EmailIsRequired)
-            .EmailAddress().WithErrorCode(ErrorCodes.EmailIsInvalid);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("email"))
+            .EmailAddress().WithErrorCode(ErrorCodes.Invalid("email"));
     }
 }
 
@@ -28,7 +28,7 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfile, Profile>
         _service = service;
         _currentUser = currentUser;
     }
-    
+
     public async Task<Profile> Handle(UpdateProfile request, CancellationToken cancellationToken)
     {
         var user = await _service.GetAsync(_currentUser.Id);

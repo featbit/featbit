@@ -10,6 +10,7 @@
     },
     Value: {
       data: {
+        isSsoFirstLogin: false,
         token: [Scrubbed JWT]
       },
       errors: [],
@@ -21,7 +22,7 @@
     Uri: http://localhost/api/v1/identity/login-by-email,
     Content: {
       Headers: {
-        Content-Length: 43,
+        Content-Length: 67,
         Content-Type: application/json; charset=utf-8
       },
       Value: 

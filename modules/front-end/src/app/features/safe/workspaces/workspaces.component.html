@@ -1,0 +1,29 @@
+<nz-tabset nzLinkRouter>
+  <nz-tab>
+    <a *nzTabLink nz-tab-link [routerLink]="['.']" i18n="@@workspace.workspace.tabtitle">Workspace</a>
+    <ng-template nz-tab>
+      <workspace></workspace>
+    </ng-template>
+  </nz-tab>
+
+  <nz-tab>
+    <a *nzTabLink nz-tab-link [routerLink]="['./organization']" i18n="@@workspace.org.tabtitle">Organization</a>
+    <ng-template nz-tab>
+      <organization></organization>
+    </ng-template>
+  </nz-tab>
+
+  <nz-tab>
+    <a *nzTabLink nz-tab-link [routerLink]="['./projects']" i18n="@@workspace.project.tabtitle">Projects</a>
+    <ng-template nz-tab>
+      <app-project></app-project>
+    </ng-template>
+  </nz-tab>
+
+  <nz-tab>
+    <a *nzTabLink nz-tab-link [routerLink]="['./profile']" i18n="@@workspace.profile.tabtitle">Profile</a>
+    <ng-template nz-tab>
+      <app-profile></app-profile>
+    </ng-template>
+  </nz-tab>
+</nz-tabset>

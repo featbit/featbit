@@ -28,7 +28,7 @@
     },
     {
       Key: enable.auto.offset.store,
-      Value: True
+      Value: False
     },
     {
       Key: group.id,

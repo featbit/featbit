@@ -12,12 +12,11 @@ import { FeatureFlag, IFeatureFlag } from "@features/safe/feature-flags/types/de
 import { ICondition, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
-import { SegmentService } from "@services/segment.service";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { environment } from "src/environments/environment";
-import { getCurrentOrganization } from "@utils/project-env";
+import { getCurrentWorkspace } from "@utils/project-env";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -112,17 +111,15 @@ export class TargetingComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
-    private segmentService: SegmentService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService,
     private messageQueueService: MessageQueueService
-  ) {
-  }
+  ) { }
 
   ngOnInit(): void {
-    const currentOrg = getCurrentOrganization();
-    this.license = new License(currentOrg.license);
+    const workspace = getCurrentWorkspace();
+    this.license = new License(workspace.license);
 
     this.isLoading = true;
     this.route.paramMap.subscribe(paramMap => {

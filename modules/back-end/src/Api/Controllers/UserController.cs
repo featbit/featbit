@@ -20,4 +20,12 @@ public class UserController : ApiControllerBase
 
         return Ok(profile);
     }
+
+    [AllowAnonymous]
+    [HttpPost("has-multiple-workspaces")]
+    public async Task<ApiResponse<bool>> HasMultipleWorkspacesAsync(HasMultipleWorkspaces request)
+    {
+        var hasMultipleWorkspaces = await Mediator.Send(request);
+        return Ok(hasMultipleWorkspaces);
+    }
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { IAuthProps } from '@shared/types';
+import { IProfile } from '@shared/types';
 import { IMenuItem } from '@core/components/menu/menu';
-import { getAuth } from '@shared/utils';
+import { getProfile } from '@shared/utils';
 import { IdentityService } from "@services/identity.service";
 
 @Component({
@@ -12,7 +12,7 @@ import { IdentityService } from "@services/identity.service";
 export class SafeComponent implements OnInit {
 
   public menus: IMenuItem[] = [];
-  public auth: IAuthProps;
+  public profile: IProfile;
   public menuExtended: boolean = true;
 
   constructor(private identityService: IdentityService) {
@@ -20,7 +20,7 @@ export class SafeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.auth = getAuth();
+    this.profile = getProfile();
   }
 
   toggleMenu(extended: boolean) {
@@ -68,9 +68,9 @@ export class SafeComponent implements OnInit {
         line: true
       },
       {
-        title: $localize `:@@menu.organization:Organization`,
-        icon: 'icons:icon-org',
-        path: '/organizations'
+        title: $localize `:@@menu.workspace:Workspace`,
+        icon: 'bank',
+        path: '/workspace'
       },
       {
         title: $localize `:@@menu.relay-proxies:Relay Proxies`,

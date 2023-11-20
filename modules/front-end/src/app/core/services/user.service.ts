@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { IAuthProps } from "@shared/types";
+import { IProfile } from "@shared/types";
 import { USER_PROFILE } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
+import { Observable } from "rxjs";
 
 @Injectable({
   providedIn: 'root'
@@ -21,11 +22,15 @@ export class UserService {
     return this.http.get(`${this.baseUrl}/profile`);
   }
 
-  updateProfile(params: any) {
-    return this.http.put(`${this.baseUrl}/profile`, params);
+  updateProfile(params: any): Observable<IProfile> {
+    return this.http.put<IProfile>(`${this.baseUrl}/profile`, params);
   }
 
-  updateLocaleProfile(profile: IAuthProps) {
+  hasMultipleWorkspaces(email: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.baseUrl}/has-multiple-workspaces`, { email });
+  }
+
+  updateLocaleProfile(profile: IProfile) {
     localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
     this.messageQueueService.emit(this.messageQueueService.topics.USER_PROFILE_CHANGED);
   }

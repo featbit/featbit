@@ -9,7 +9,7 @@
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
         <nz-select
-          class="tag-select"
+          class="nz-select-40 rounded filter"
           nzMode="multiple"
           nzAllowClear
           [nzMaxTagCount]="1"
@@ -27,7 +27,7 @@
           </nz-option>
           <ng-template #tagPlaceHolder let-selectedList>and {{ selectedList.length }} more</ng-template>
         </nz-select>
-        <nz-select nzAllowClear [(ngModel)]="featureFlagFilter.isEnabled" (ngModelChange)="onSearch(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
+        <nz-select class="nz-select-40 rounded filter" nzAllowClear [(ngModel)]="featureFlagFilter.isEnabled" (ngModelChange)="onSearch(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
           <nz-option nzValue="true" nzLabel="ON"></nz-option>
           <nz-option nzValue="false" nzLabel="OFF"></nz-option>
         </nz-select>

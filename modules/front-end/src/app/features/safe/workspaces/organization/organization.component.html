@@ -1,0 +1,35 @@
+<div class="standard-div rows">
+  <div class="row">
+    <div class="row-title" i18n="@@org.org.orgName">Name</div>
+    <form class="row-content" nz-form [formGroup]="validateOrgForm" [nzLayout]="'inline'" (ngSubmit)="submitOrgForm()">
+      <nz-form-item class="extend">
+        <nz-form-control nzErrorTip="Organization name is mandatory!" i18n-nzErrorTip="@@org.org.orgMandatory">
+          <nz-input-group class="row-input-group" [nzPrefix]="orgIcon">
+            <input type="text" nz-input formControlName="name" placeholder="Organization name" i18n-placeholder="@@org.org.orgNamePlaceholder"/>
+            <ng-template #orgIcon>
+              <i nz-icon nzType="icons:icon-org"></i>
+            </ng-template>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button nzType="primary" [nzLoading]="isLoading" [disabled]="!canUpdateOrgName">
+        <i nz-icon nzType="icons:icon-sync"></i>
+        <ng-container i18n="@@org.org.updateOrgName">Update</ng-container>
+      </button>
+    </form>
+  </div>
+  <div class="row">
+    <div class="row-title" i18n="@@org.org.switchorg">Switch organization</div>
+    <div class="row-content">
+      <nz-select class="extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentOrganization" (ngModelChange)="onOrganizationChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">
+        <nz-option *ngFor="let org of allOrganizations" [nzLabel]="org.name" [nzValue]="org"></nz-option>
+      </nz-select>
+      <button class="create-org-btn" [disabled]="!license.isGranted(LicenseFeatureEnum.MultiOrg)" nz-button nzType="primary" (click)="onCreateOrganizationClick()">
+        <i nz-icon nzType="icons:icon-add"></i>
+        <ng-container i18n="@@common.add">Add</ng-container>
+      </button>
+    </div>
+  </div>
+</div>
+
+<organization-drawer [visible]="creatOrganizationFormVisible" (close)="onCreateOrganizationClosed($event)"></organization-drawer>

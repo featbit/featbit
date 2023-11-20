@@ -1,6 +1,6 @@
 export default {
-  'account': {
-    zh: '账户'
+  'organization': {
+    zh: '机构'
   },
   'iam':{
     zh: '权限管理'

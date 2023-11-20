@@ -9,7 +9,7 @@
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
         <nz-select
-          class="member-select"
+          class="nz-select-40 rounded filter"
           nzShowSearch
           nzServerSearch
           nzAllowClear
@@ -27,6 +27,7 @@
           </nz-option>
         </nz-select>
         <nz-select
+          class="nz-select-40 rounded filter"
           *ngIf="!auditLogFilter?.refId"
           nzAllowClear
           [(ngModel)]="auditLogFilter.refType"
