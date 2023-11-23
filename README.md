@@ -79,7 +79,7 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 
 ### 2. Connect an SDK
 
-Find your preferred SDK in our list of [official SDKs](https://featbit.gitbook.io/sdks) and import it into your project. Follow the setup guides for your specific SDK.
+Find your preferred SDK in our list of [official SDKs](https://docs.featbit.co/sdk/overview) and import it into your project. Follow the setup guides for your specific SDK.
 
 You can also learn how to connect an SDK in the "Getting Started" section after logging in to the Portal for the first time.
 
