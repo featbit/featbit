@@ -135,7 +135,7 @@ FeatBit offers a range of features including:
 
 - **[Insights](https://docs.featbit.co/feature-flags/the-flag-insights)**: Gain insights into feature usage during the rollout.
 
-- **[IAM](https://docs.featbit.co/iam/about)**: Define access levels to projects, environments, or teams to enforce your policies.
+- **[IAM](https://docs.featbit.co/iam/overview)**: Define access levels to projects, environments, or teams to enforce your policies.
 
 - **[Experimentation](https://docs.featbit.co/experimentation/understanding-experimentation)**: Run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 
