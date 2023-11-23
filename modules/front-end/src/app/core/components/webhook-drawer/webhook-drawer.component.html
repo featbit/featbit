@@ -7,7 +7,117 @@
   [nzWidth]="500"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
-    Hello World...
+    <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="doSubmit()">
+      <!-- Name -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control nzHasFeedback nzErrorTip="Name cannot be empty"
+                         i18n-nzErrorTip="@@common.name-cannot-be-empty">
+          <input type="text" nz-input formControlName="name" placeholder="Name"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- URL -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@integrations.webhooks.url">URL</nz-form-label>
+        <nz-form-control
+          nzHasFeedback
+          nzErrorTip="URL cannot be empty"
+          i18n-nzErrorTip="@@integrations.webhooks.url-cannot-be-empty"
+          nzExtra="The URL of a web server that receives webhook event payloads.">
+          <input type="text" nz-input formControlName="url" placeholder="https://example.com/postreceive"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Events -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@integrations.webhooks.events">Events</nz-form-label>
+        <nz-form-control
+          class="events-form-control"
+          nzHasFeedback
+          nzErrorTip="Events cannot be empty"
+          i18n-nzErrorTip="@@integrations.webhooks.events-cannot-be-empty"
+          nzExtra="Choose the events you would like to trigger this webhook">
+          <ng-container formArrayName="events">
+            <div *ngFor="let control of events.controls; index as i">
+              <ng-container [formGroupName]="i">
+                <div class="events-checkbox-group">
+                  <div class="check-all-label" formGroupName="group">
+                    <label
+                      nz-checkbox
+                      formControlName="checked"
+                      [nzIndeterminate]="control.value.group.indeterminate">
+                      {{control.value.group.label}}
+                    </label>
+                  </div>
+                  <nz-checkbox-group formControlName="events"></nz-checkbox-group>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Headers -->
+      <nz-form-item>
+        <nz-form-label i18n="@@integrations.webhooks.headers">Headers</nz-form-label>
+        <nz-form-control
+          nzExtra="Optionally, you can add custom headers to the webhook request."
+          i18n-nzExtra="@@integrations.webhooks.headers-prompt-message">
+          <ng-container formArrayName="headers">
+            <div class="header-title">
+              <span class="text">Name</span>
+              <span class="text">Value</span>
+              <span class="placeholder"></span>
+            </div>
+            <div *ngFor="let control of headers.controls; index as i">
+              <ng-container [formGroupName]="i">
+                <div class="header-form">
+                  <input nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+                  <input nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
+                  <i nz-icon nzType="icons:icon-minus-outline" (click)="removeHeader(i)"></i>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+          <button class="add-header-button" nz-button nzType="link" (click)="addHeader()">
+            <span nz-icon nzType="icons:icon-plus" nzTheme="outline"></span>
+            <span i18n="@@common.add-header">Add Header</span>
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Payload Template -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@integrations.webhooks.payload-template">Payload Template</nz-form-label>
+        <nz-form-control
+          nzExtra="The payload template used to generate the webhook request body."
+          i18n-nzExtra="@@integrations.webhooks.payload-template-prompt-message">
+          <textarea nz-input formControlName="payloadTemplate" placeholder="Payload Template"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Secret -->
+      <nz-form-item>
+        <nz-form-label i18n="@@integrations.webhooks.secret">Secret</nz-form-label>
+        <nz-form-control
+          nzExtra="Optionally, you can use a webhook secret to verify that a webhook delivery is from FeatBit."
+          i18n-nzExtra="@@integrations.webgooks.secret-prompt-message">
+          <input type="text" nz-input formControlName="secret"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Active -->
+      <nz-form-item>
+        <label nz-checkbox formControlName="isActive" i18n="@@integrations.webhooks.active">Active</label>
+        <nz-form-control>
+          <nz-form-text>We will deliver event details when this hook is triggered.</nz-form-text>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Submit -->
+      <button nz-button class="submit-btn" [nzType]="'primary'" i18n="@@common.save">Save</button>
+    </form>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>

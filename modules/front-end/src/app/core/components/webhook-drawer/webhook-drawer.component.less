@@ -1,0 +1,71 @@
+@import "variables";
+
+.events-form-control {
+  padding: 0 8px;
+
+  .events-checkbox-group {
+    margin-bottom: 16px;
+
+    .check-all-label {
+      margin-bottom: 8px;
+      border-bottom: 1px solid @grey20-color;
+
+      label {
+        margin-bottom: 8px;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+.header-title {
+  display: flex;
+  flex-direction: row;
+
+  .text {
+    flex: 1;
+    font-weight: 700;
+  }
+
+  .placeholder {
+    width: 32px;
+  }
+
+  margin-bottom: 8px;
+}
+
+.header-form {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  input {
+    height: 36px;
+    border-radius: 6px;
+    padding: 4.8px 8px;
+  }
+
+  i {
+    cursor: pointer;
+    margin-right: 12px;
+    font-size: 20px;
+    color: @grey50-color;
+
+    &:hover {
+      color: @grey60-color;
+    }
+  }
+
+  margin-bottom: 8px;
+}
+
+.add-header-button {
+  padding: 0 2px;
+  height: 20px;
+}
+
+.submit-btn {
+  margin-top: 12px;
+}
