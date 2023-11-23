@@ -12,8 +12,18 @@ public class RedisClient : IRedisClient
     {
         var value = options.Value;
 
+        var connectionString = value.ConnectionString;
+        var configurationOptions = ConfigurationOptions.Parse(connectionString);
+
+        // if user has specified a password in the configuration, use it
+        var password = value.Password;
+        if (!string.IsNullOrWhiteSpace(password))
+        {
+            configurationOptions.Password = password;
+        }
+
         _lazyConnection = new Lazy<ConnectionMultiplexer>(
-            () => StackExchange.Redis.ConnectionMultiplexer.Connect(value.ConnectionString)
+            () => StackExchange.Redis.ConnectionMultiplexer.Connect(configurationOptions)
         );
     }
 
