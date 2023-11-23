@@ -145,7 +145,7 @@ FeatBit offers a range of features including:
 
 - **[Web APIs](https://docs.featbit.co/api-docs/overview)**, automate your workflow with Web APIs.
 
-- **SSO**, integrate with your existing Identity Provider.
+- **[SSO](https://docs.featbit.co/integrations/single-sign-on)**, integrate with your existing Identity Provider.
 
 - **[Platform-level](https://docs.featbit.co/feature-flags/organizing-flags/projects)**, manage your flags in multiple projects and environments.
 
