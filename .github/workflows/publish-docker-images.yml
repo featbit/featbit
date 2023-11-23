@@ -12,11 +12,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Dockerhub image version"
+        description: "Dockerhub image version (For example: 1.0.0)"
         required: true
 
 env:
-  TEST_TAG: test
   LATEST_TAG: latest
   VERSION_TAG: ${{ github.event.inputs.version || github.ref_name }}
   APP_UI: featbit-ui
@@ -47,70 +46,106 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Build and push - UI
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Build and push - UI (current)
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:modules/front-end"
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.LATEST_TAG }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push - API-Server
+      - name: Build and push - UI (latest)
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/front-end"
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push - API-Server (current)
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:modules/back-end"
           file: ./deploy/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.LATEST_TAG }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push - Data-Analytics-Server
+      - name: Build and push - API-Server (latest)
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/back-end"
+          file: ./deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push - Data-Analytics-Server (current)
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:modules/data-analytics"
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.VERSION_TAG }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.LATEST_TAG }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push - Evaluation-Server
+      - name: Build and push - Data-Analytics-Server (latest)
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/data-analytics"
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push - Evaluation-Server (current)
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:modules/evaluation-server"
           file: ./deploy/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.VERSION_TAG }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.LATEST_TAG }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}
+      - name: Build and push - Evaluation-Server (latest)
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v3
+        with:
+          context: "{{defaultContext}}:modules/evaluation-server"
+          file: ./deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Inspect image
+      - name: Inspect Docker images
         run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}
-
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}
-
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}
+          IMAGES=("${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}" "${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}" "${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}" "${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}")
+          for IMAGE in "${IMAGES[@]}"; do
+            docker buildx imagetools inspect $IMAGE
+          done
