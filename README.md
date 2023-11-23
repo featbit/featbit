@@ -143,7 +143,7 @@ FeatBit offers a range of features including:
 
 - **[Feature Workflow](https://docs.featbit.co/feature-flags/feature-workflow)**: Control your use of feature flags by creating complex automated workflows within FeatBit (Flag Triggers, Scheduled Flag Changes, Change Approve Requests).
 
-- **[Web APIs](https://docs.featbit.co/integrations/using-featbit-rest-api)**, automate your workflow with Web APIs.
+- **[Web APIs](https://docs.featbit.co/api-docs/overview)**, automate your workflow with Web APIs.
 
 - **SSO**, integrate with your existing Identity Provider.
 
