@@ -142,10 +142,3 @@ jobs:
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.LATEST_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Inspect Docker images
-        run: |
-          IMAGES=("${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}" "${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}" "${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}" "${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}")
-          for IMAGE in "${IMAGES[@]}"; do
-            docker buildx imagetools inspect $IMAGE
-          done
