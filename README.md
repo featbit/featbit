@@ -75,7 +75,7 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 - Password: **123456**
 
 > **Note**
-> By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/docs/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
+> By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
 
 ### 2. Connect an SDK
 
@@ -109,7 +109,7 @@ else
 
 ## Configure and run FeatBit anywhere
 
-The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/docs/installation/full-installation), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/docs/featbit-agent/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
+The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/installation/full-installation), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/featbit-agent/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
 
 ## Documentation & Community
 
@@ -127,31 +127,31 @@ FeatBit offers a range of features including:
 
 - **SDKs** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), with more to come.
 
-- **[Managing Feature flags](https://docs.featbit.co/docs/feature-flags/organizing-flags/the-flags-list)**: Create, manage, and filter feature flags.
+- **[Managing Feature flags](https://docs.featbit.co/feature-flags/organizing-flags/the-flags-list)**: Create, manage, and filter feature flags.
 
-- **[Targeting users with flags](https://docs.featbit.co/docs/feature-flags/targeting-users-with-flags)**: Assign individual users to specific flag variations.
+- **[Targeting users with flags](https://docs.featbit.co/feature-flags/targeting-users-with-flags)**: Assign individual users to specific flag variations.
 
-- **[Reusable Segments](https://docs.featbit.co/docs/feature-flags/users-and-user-segments)**: Include or exclude users from a segment based on user attributes.
+- **[Reusable Segments](https://docs.featbit.co/feature-flags/users-and-user-segments)**: Include or exclude users from a segment based on user attributes.
 
-- **[Insights](https://docs.featbit.co/docs/feature-flags/the-flag-insights)**: Gain insights into feature usage during the rollout.
+- **[Insights](https://docs.featbit.co/feature-flags/the-flag-insights)**: Gain insights into feature usage during the rollout.
 
-- **[IAM](https://docs.featbit.co/docs/iam/about)**: Define access levels to projects, environments, or teams to enforce your policies.
+- **[IAM](https://docs.featbit.co/iam/about)**: Define access levels to projects, environments, or teams to enforce your policies.
 
-- **[Experimentation](https://docs.featbit.co/docs/experimentation/understanding-experimentation)**: Run feature-level A/B tests anywhere in your stack to make data-driven decisions.
+- **[Experimentation](https://docs.featbit.co/experimentation/understanding-experimentation)**: Run feature-level A/B tests anywhere in your stack to make data-driven decisions.
 
-- **[Audit Log](https://docs.featbit.co/docs/feature-flags/audit-log)**: Keep track of feature flag and segment changes.
+- **[Audit Log](https://docs.featbit.co/feature-flags/audit-log)**: Keep track of feature flag and segment changes.
 
-- **[Feature Workflow](https://docs.featbit.co/docs/feature-flags/feature-workflow)**: Control your use of feature flags by creating complex automated workflows within FeatBit (Flag Triggers, Scheduled Flag Changes, Change Approve Requests).
+- **[Feature Workflow](https://docs.featbit.co/feature-flags/feature-workflow)**: Control your use of feature flags by creating complex automated workflows within FeatBit (Flag Triggers, Scheduled Flag Changes, Change Approve Requests).
 
-- **[Web APIs](https://docs.featbit.co/docs/integrations/using-featbit-rest-api)**, automate your workflow with Web APIs.
+- **[Web APIs](https://docs.featbit.co/integrations/using-featbit-rest-api)**, automate your workflow with Web APIs.
 
 - **SSO**, integrate with your existing Identity Provider.
 
-- **[Platform-level](https://docs.featbit.co/docs/feature-flags/organizing-flags/projects)**, manage your flags in multiple projects and environments.
+- **[Platform-level](https://docs.featbit.co/feature-flags/organizing-flags/projects)**, manage your flags in multiple projects and environments.
 
-- **[Pro Solution for Big Data](https://docs.featbit.co/docs/tech-stack/standard-vs.-professional)**, a [professional version](https://docs.featbit.co/docs/tech-stack/architecture-professional) tailored for teams and companies to accommodate in excess of millions of daily online users with feature usage, custom events, and A/B testing insights.
+- **[Pro Solution for Big Data](https://docs.featbit.co/tech-stack/standard-vs.-professional)**, a [professional version](https://docs.featbit.co/tech-stack/architecture-professional) tailored for teams and companies to accommodate in excess of millions of daily online users with feature usage, custom events, and A/B testing insights.
 
-- **[Relay Proxy/Agent](https://docs.featbit.co/docs/featbit-agent/featbit-agent)**: Host a feature flag service in your customers' private environments or reduce network latency for your end users.
+- **[Relay Proxy/Agent](https://docs.featbit.co/featbit-agent/featbit-agent)**: Host a feature flag service in your customers' private environments or reduce network latency for your end users.
 
 - **Integrations** (experimental features): Export data to third-party system monitoring services, data analytics services, workflow tools, or any other tools that can optimize your entire workflow.
 
