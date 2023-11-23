@@ -125,7 +125,7 @@ Email us at [contact@featbit.co](mailto:contact@featbit.co) if Slack isn't your 
 
 FeatBit offers a range of features including:
 
-- **SDKs(https://docs.featbit.co/sdk/overview)** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), with more to come.
+- **[SDKs](https://docs.featbit.co/sdk/overview)** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), with more to come.
 
 - **[Managing Feature flags](https://docs.featbit.co/feature-flags/organizing-flags/the-flags-list)**: Create, manage, and filter feature flags.
 
