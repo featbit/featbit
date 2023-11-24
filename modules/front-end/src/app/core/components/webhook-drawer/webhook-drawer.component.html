@@ -91,9 +91,10 @@
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@integrations.webhooks.payload-template">Payload Template</nz-form-label>
         <nz-form-control
+          class="payload-template-form-control"
           nzExtra="The payload template used to generate the webhook request body."
           i18n-nzExtra="@@integrations.webhooks.payload-template-prompt-message">
-          <textarea nz-input formControlName="payloadTemplate" placeholder="Payload Template"></textarea>
+          <nz-code-editor formControlName="payloadTemplate" [nzEditorOption]="{ language: 'json' }"></nz-code-editor>
         </nz-form-control>
       </nz-form-item>
 
@@ -116,7 +117,11 @@
       </nz-form-item>
 
       <!-- Submit -->
-      <button nz-button class="submit-btn" [nzType]="'primary'" i18n="@@common.save">Save</button>
+      <nz-form-item>
+        <nz-form-control class="align-end">
+          <button nz-button class="standard-btn" nzType="primary" i18n="@@common.save">Save</button>
+        </nz-form-control>
+      </nz-form-item>
     </form>
   </ng-container>
   <ng-template #extra>

@@ -154,7 +154,11 @@ export class WebhookDrawerComponent {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ejt..'
         },
-        payloadTemplate: '',
+        payloadTemplate: `{
+	"hello": 1,
+	"enabled": true,
+	"world": "yes"
+}`,
         isActive: true,
         lastTriggeredAt: null,
         status: 'None',
