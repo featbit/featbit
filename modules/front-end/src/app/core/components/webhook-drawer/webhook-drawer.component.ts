@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Webhook, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { trimJsonString, uuidv4 } from "@utils/index";
-import { urlValidator } from "@utils/form-validators";
+import { jsonValidator, urlValidator } from "@utils/form-validators";
 
 @Component({
   selector: 'webhook-drawer',
@@ -49,7 +49,7 @@ export class WebhookDrawerComponent {
       url: new FormControl(this._webhook?.url, [Validators.required, urlValidator]),
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
-      payloadTemplate: new FormControl(this._webhook?.payloadTemplate),
+      payloadTemplate: new FormControl(this._webhook?.payloadTemplate, [jsonValidator]),
       secret: new FormControl(this._webhook?.secret),
       isActive: new FormControl(this._webhook?.isActive)
     });

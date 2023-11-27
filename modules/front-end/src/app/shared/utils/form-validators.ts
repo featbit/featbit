@@ -61,3 +61,15 @@ export const urlValidator: ValidatorFn = (control: FormControl) => {
 
   return isValid ? null : { invalid: true };
 }
+
+export const jsonValidator: ValidatorFn = (control: FormControl) => {
+  let isValid = false;
+
+  try {
+    JSON.parse(control.value);
+    isValid = true;
+  } catch (err) {
+  }
+
+  return isValid ? null : { invalid: true };
+}
