@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Webhook, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { uuidv4 } from "@utils/index";
+import { trimJsonString, uuidv4 } from "@utils/index";
+import { urlValidator } from "@utils/form-validators";
 
 @Component({
   selector: 'webhook-drawer',
@@ -45,7 +46,7 @@ export class WebhookDrawerComponent {
     this.form = new FormGroup({
       id: new FormControl(this._webhook?.id),
       name: new FormControl(this._webhook?.name, [Validators.required]),
-      url: new FormControl(this._webhook?.url),
+      url: new FormControl(this._webhook?.url, [Validators.required, urlValidator]),
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
       payloadTemplate: new FormControl(this._webhook?.payloadTemplate),
@@ -56,23 +57,6 @@ export class WebhookDrawerComponent {
 
   get events() {
     return this.form.get('events') as FormArray;
-  }
-
-  get headers() {
-    return this.form.get('headers') as FormArray;
-  }
-
-  addHeader() {
-    const formGroup = new FormGroup({
-      name: new FormControl(''),
-      value: new FormControl('')
-    });
-
-    this.headers.push(formGroup);
-  }
-
-  removeHeader(index: number) {
-    this.headers.removeAt(index);
   }
 
   private constructEventsFormArray(events: string[]): FormArray {
@@ -106,7 +90,16 @@ export class WebhookDrawerComponent {
       });
     });
 
-    const formArray = this.fb.array(formGroups)
+    const eventsValidator = (control: FormArray) => {
+      let events = control.value?.flatMap(group => group.events);
+      if (events?.some(event => event.checked === true)) {
+        return null;
+      }
+
+      return { error: true };
+    }
+
+    const formArray = this.fb.array(formGroups, [eventsValidator]);
     formArray.controls.forEach(control => {
       let eventsControl = control.get('events');
       let checkAllControl = control.get('group.checked');
@@ -134,6 +127,23 @@ export class WebhookDrawerComponent {
     return formArray;
   }
 
+  get headers() {
+    return this.form.get('headers') as FormArray;
+  }
+
+  addHeader() {
+    const formGroup = new FormGroup({
+      key: new FormControl(''),
+      value: new FormControl('')
+    });
+
+    this.headers.push(formGroup);
+  }
+
+  removeHeader(index: number) {
+    this.headers.removeAt(index);
+  }
+
   private _webhook: Webhook;
   @Input()
   set webhook(webhook: Webhook) {
@@ -150,10 +160,16 @@ export class WebhookDrawerComponent {
         url: '',
         secret: '',
         events: ['feature_flag.delete'],
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ejt..'
-        },
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json'
+          },
+          {
+            key: 'Authorization',
+            value: 'Bearer <token>..'
+          }
+        ],
         payloadTemplate: `{
 	"hello": 1,
 	"enabled": true,
@@ -174,11 +190,11 @@ export class WebhookDrawerComponent {
     this.close.emit();
   }
 
-  private constructHeaderFormArray(headers: Record<string, string>) {
-    let formGroups = Object.keys(headers ?? {}).map(name => {
+  private constructHeaderFormArray(headers: { key: string; value: string; }[]) {
+    let formGroups = (headers ?? [{ key: '', value: '' }]).map(header => {
       return new FormGroup({
-        name: new FormControl(name),
-        value: new FormControl(headers[name])
+        key: new FormControl(header.key),
+        value: new FormControl(header.value)
       });
     });
 
@@ -187,5 +203,22 @@ export class WebhookDrawerComponent {
 
   doSubmit() {
     console.log(this.form.value);
+
+    const { name, url, events, headers, payloadTemplate, secret, isActive } = this.form.value;
+
+    const payload = {
+      name,
+      url,
+      events: events.flatMap(group => group.events.filter(event => event.checked).map(event => event.value)),
+      headers: headers.reduce((acc, header) => {
+        acc[header.name] = header.value;
+        return acc;
+      }, {}),
+      payloadTemplate: trimJsonString(payloadTemplate),
+      secret,
+      isActive
+    };
+
+    console.log(payload);
   }
 }

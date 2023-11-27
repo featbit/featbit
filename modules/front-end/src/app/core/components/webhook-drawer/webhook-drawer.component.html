@@ -11,9 +11,8 @@
       <!-- Name -->
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback nzErrorTip="Name cannot be empty"
-                         i18n-nzErrorTip="@@common.name-cannot-be-empty">
-          <input type="text" nz-input formControlName="name" placeholder="Name"/>
+        <nz-form-control nzHasFeedback nzErrorTip="Name cannot be empty" i18n-nzErrorTip="@@common.name-cannot-be-empty">
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-form-control>
       </nz-form-item>
 
@@ -22,10 +21,10 @@
         <nz-form-label nzRequired i18n="@@integrations.webhooks.url">URL</nz-form-label>
         <nz-form-control
           nzHasFeedback
-          nzErrorTip="URL cannot be empty"
-          i18n-nzErrorTip="@@integrations.webhooks.url-cannot-be-empty"
-          nzExtra="The URL of a web server that receives webhook event payloads.">
-          <input type="text" nz-input formControlName="url" placeholder="https://example.com/postreceive"/>
+          nzErrorTip="Please provide a valid URL"
+          i18n-nzErrorTip="@@integrations.webhooks.url-validation-message"
+          nzExtra="The URL of a web server that receives HTTP POST JSON payloads.">
+          <input type="text" nz-input formControlName="url" placeholder="https://example.com/post-receive"/>
         </nz-form-control>
       </nz-form-item>
 
@@ -34,7 +33,7 @@
         <nz-form-label nzRequired i18n="@@integrations.webhooks.events">Events</nz-form-label>
         <nz-form-control
           class="events-form-control"
-          nzHasFeedback
+          [nzValidateStatus]="events"
           nzErrorTip="At least one event must be selected"
           i18n-nzErrorTip="@@integrations.webhooks.events-cannot-be-empty"
           nzExtra="Choose the events you would like to trigger this webhook">
@@ -73,7 +72,7 @@
             <div *ngFor="let control of headers.controls; index as i">
               <ng-container [formGroupName]="i">
                 <div class="header-form">
-                  <input nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+                  <input nz-input formControlName="key" placeholder="Key" i18n-placeholder="@@common.key"/>
                   <input nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
                   <i nz-icon nzType="icons:icon-minus-outline" (click)="removeHeader(i)"></i>
                 </div>
@@ -94,7 +93,10 @@
           class="payload-template-form-control"
           nzExtra="The payload template used to generate the webhook request body."
           i18n-nzExtra="@@integrations.webhooks.payload-template-prompt-message">
-          <nz-code-editor formControlName="payloadTemplate" [nzEditorOption]="{ language: 'json' }"></nz-code-editor>
+          <nz-code-editor
+            formControlName="payloadTemplate"
+            [nzEditorOption]="{ language: 'json', minimap: { enabled: false } }">
+          </nz-code-editor>
         </nz-form-control>
       </nz-form-item>
 
@@ -119,7 +121,7 @@
       <!-- Submit -->
       <nz-form-item>
         <nz-form-control class="align-end">
-          <button nz-button class="standard-btn" nzType="primary" i18n="@@common.save">Save</button>
+          <button [disabled]="!form.valid" nz-button class="standard-btn" nzType="primary" i18n="@@common.save">Save</button>
         </nz-form-control>
       </nz-form-item>
     </form>

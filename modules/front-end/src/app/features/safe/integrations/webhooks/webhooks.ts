@@ -4,7 +4,7 @@ export interface Webhook {
   url: string;
   secret: string;
   events: string[];
-  headers: Record<string, string>;
+  headers: { key: string; value: string; }[];
   payloadTemplate: string;
   isActive: boolean;
   creator: string;
