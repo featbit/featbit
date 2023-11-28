@@ -3,6 +3,8 @@ import { Webhook, WebhookEvents } from "@features/safe/integrations/webhooks/web
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { trimJsonString, uuidv4 } from "@utils/index";
 import { jsonValidator, urlValidator } from "@utils/form-validators";
+import { WebhookService } from "@services/webhook.service";
+import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators";
 
 import { editor } from 'monaco-editor';
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
@@ -29,7 +31,7 @@ export class WebhookDrawerComponent {
     isActive: FormControl<boolean>;
   }>;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private webhookService: WebhookService) {
     this.initForm();
   }
 
@@ -49,7 +51,7 @@ export class WebhookDrawerComponent {
   private initForm() {
     this.form = new FormGroup({
       id: new FormControl(this._webhook?.id),
-      name: new FormControl(this._webhook?.name, [Validators.required]),
+      name: new FormControl(this._webhook?.name, [Validators.required], [this.nameAsyncValidator]),
       url: new FormControl(this._webhook?.url, [Validators.required, urlValidator]),
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
@@ -58,6 +60,16 @@ export class WebhookDrawerComponent {
       isActive: new FormControl(this._webhook?.isActive)
     });
   }
+
+  nameAsyncValidator = (control: FormControl) => {
+    return control.valueChanges.pipe(
+      debounceTime(300),
+      switchMap(value => this.webhookService.isNameUsed(value)),
+      map(isUsed => isUsed ? { error: true, duplicated: true } : null),
+      catchError(() => [{ error: true, unknown: true }]),
+      first()
+    );
+  };
 
   editor?: editor.IStandaloneCodeEditor;
   onEditorInit(e: editor.IStandaloneCodeEditor): void {

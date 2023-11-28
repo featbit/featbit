@@ -11,8 +11,17 @@
       <!-- Name -->
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback nzErrorTip="Name cannot be empty" i18n-nzErrorTip="@@common.name-cannot-be-empty">
+        <nz-form-control
+          nzHasFeedback
+          nzValidatingTip="Validating..."
+          i18n-nzValidatingTip="@@common.validating"
+          [nzErrorTip]="errorTpl">
           <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+          <ng-template #errorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">Name has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
+          </ng-template>
         </nz-form-control>
       </nz-form-item>
 
