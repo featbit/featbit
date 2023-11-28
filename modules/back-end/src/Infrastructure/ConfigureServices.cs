@@ -30,6 +30,7 @@ using Infrastructure.Segments;
 using Infrastructure.Targeting;
 using Infrastructure.Triggers;
 using Infrastructure.Users;
+using Infrastructure.Webhooks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
@@ -98,6 +99,7 @@ public static class ConfigureServices
         services.AddTransient<IFlagRevisionService, FlagRevisionService>();
         services.AddTransient<IFlagChangeRequestService, FlagChangeRequestService>();
         services.AddTransient<IFeatureFlagAppService, FeatureFlagAppService>();
+        services.AddTransient<IWebhookService, WebhookService>();
 
         return services;
     }
