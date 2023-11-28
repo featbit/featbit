@@ -4,6 +4,10 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@ang
 import { trimJsonString, uuidv4 } from "@utils/index";
 import { jsonValidator, urlValidator } from "@utils/form-validators";
 
+import { editor } from 'monaco-editor';
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+declare const monaco: any;
+
 @Component({
   selector: 'webhook-drawer',
   templateUrl: './webhook-drawer.component.html',
@@ -52,6 +56,51 @@ export class WebhookDrawerComponent {
       payloadTemplate: new FormControl(this._webhook?.payloadTemplate, [jsonValidator]),
       secret: new FormControl(this._webhook?.secret),
       isActive: new FormControl(this._webhook?.isActive)
+    });
+  }
+
+  editor?: editor.IStandaloneCodeEditor;
+  onEditorInit(e: editor.IStandaloneCodeEditor): void {
+    this.editor = e;
+
+    function createDependencyProposals(range) {
+      // returning a static list of proposals, not even looking at the prefix (filtering is done by the Monaco editor),
+      // here you could do a server side lookup
+      return [
+        {
+          label: '"@@flag.name"',
+          kind: monaco.languages.CompletionItemKind.Variable,
+          documentation: "The name of the feature flag",
+          insertText: '@@flag.name',
+          range: range
+        },
+        {
+          label: '"@@flag.description"',
+          kind: monaco.languages.CompletionItemKind.Variable,
+          documentation: "The description of the feature flag",
+          insertText: '@@flag.description',
+          range: range
+        }
+      ];
+    }
+
+    monaco.languages.registerCompletionItemProvider("json", {
+      provideCompletionItems: function (model, position) {
+        // Get the text before the cursor
+        const word = model.getWordUntilPosition(position);
+
+        const idx = word.word.lastIndexOf('@');
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn + Math.max(0, idx),
+          endColumn: word.endColumn,
+        };
+
+        return { suggestions: createDependencyProposals(range) };
+      },
+
+      triggerCharacters: ['@']
     });
   }
 

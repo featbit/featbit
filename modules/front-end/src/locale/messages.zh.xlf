@@ -446,7 +446,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">126</context>
+          <context context-type="linenumber">127</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -5253,7 +5253,7 @@
         <source>Secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">108</context>
         </context-group>
         <target>秘钥</target>
       </trans-unit>
@@ -5261,7 +5261,7 @@
         <source>Optionally, you can use a webhook secret to verify that a webhook delivery is from FeatBit.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <target>（可选）您可以使用改密钥来验证 Webhook 请求是否来自 FeatBit。</target>
       </trans-unit>
@@ -5269,7 +5269,7 @@
         <source>Active</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">118</context>
         </context-group>
         <target>是否启用</target>
       </trans-unit>
@@ -5277,7 +5277,7 @@
         <source>Edit Webhook</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">151</context>
+          <context context-type="linenumber">200</context>
         </context-group>
         <target>编辑 Webhook</target>
       </trans-unit>
@@ -5285,7 +5285,7 @@
         <source>Add Webhook</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <target>添加 Webhook</target>
       </trans-unit>

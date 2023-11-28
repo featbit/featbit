@@ -97,7 +97,8 @@
           i18n-nzExtra="@@integrations.webhooks.payload-template-prompt-message">
           <nz-code-editor
             formControlName="payloadTemplate"
-            [nzEditorOption]="{ language: 'json', minimap: { enabled: false } }">
+            [nzEditorOption]="{ language: 'json', minimap: { enabled: false }, quickSuggestions: { strings: true } }"
+            (nzEditorInitialized)="onEditorInit($event)">
           </nz-code-editor>
         </nz-form-control>
       </nz-form-item>
