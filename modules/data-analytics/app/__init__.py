@@ -61,6 +61,7 @@ def _create_app(config_name='default') -> Flask:
                              "CACHE_KEY_PREFIX": CACHE_KEY_PREFIX,
                              "CACHE_REDIS_HOST": REDIS_HOST,
                              "CACHE_REDIS_PORT": REDIS_PORT,
+                             "CACHE_REDIS_DB": REDIS_DB,
                              "CACHE_REDIS_PASSWORD": REDIS_PASSWORD,
                              "CACHE_OPTIONS": cache_options, })  # type: ignore
     cache = get_cache(config=cache_config)
