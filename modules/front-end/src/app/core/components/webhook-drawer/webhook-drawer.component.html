@@ -19,7 +19,7 @@
           <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
           <ng-template #errorTpl let-control>
             <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">Name has been used</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">This name has been used</ng-container>
             <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
           </ng-template>
         </nz-form-control>

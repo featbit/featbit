@@ -7,6 +7,7 @@ import { WebhookService } from "@services/webhook.service";
 import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators";
 
 import { editor } from 'monaco-editor';
+import { NzMessageService } from "ng-zorro-antd/message";
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 declare const monaco: any;
 
@@ -31,7 +32,11 @@ export class WebhookDrawerComponent {
     isActive: FormControl<boolean>;
   }>;
 
-  constructor(private fb: FormBuilder, private webhookService: WebhookService) {
+  constructor(
+    private fb: FormBuilder,
+    private webhookService: WebhookService,
+    private message: NzMessageService
+  ) {
     this.initForm();
   }
 
@@ -217,10 +222,9 @@ export class WebhookDrawerComponent {
     } else {
       this._webhook = {
         id: uuidv4(),
-        name: '',
-        url: '',
-        secret: '',
-        events: ['feature_flag.delete'],
+        name: 'hello',
+        url: 'http://localhost',
+        events: ['feature_flag.create', 'segment.create'],
         headers: [
           {
             key: 'Content-Type',
@@ -237,6 +241,7 @@ export class WebhookDrawerComponent {
 	"world": "yes"
 }`,
         isActive: true,
+        secret: 'this is a secret',
         lastTriggeredAt: null,
         status: 'None',
         creator: ''
@@ -271,15 +276,18 @@ export class WebhookDrawerComponent {
       name,
       url,
       events: events.flatMap(group => group.events.filter(event => event.checked).map(event => event.value)),
-      headers: headers.reduce((acc, header) => {
-        acc[header.name] = header.value;
-        return acc;
-      }, {}),
+      headers: headers.map(header => ({ key: header.key, value: header.value })),
       payloadTemplate: trimJsonString(payloadTemplate),
       secret,
       isActive
     };
 
-    console.log(payload);
+    this.webhookService.create(payload).subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.close.emit();
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
+    });
   }
 }
