@@ -1,40 +1,39 @@
-# Build and publish docker images for the following services:
-# UI
-# API Server
-# Data Analytics Server
-# Evaluation Server
-
 name: Publish Docker Images
 
 on:
-  release:
-    types: [ created ]
   workflow_dispatch:
     inputs:
       version:
         description: "Dockerhub image version (For example: 1.0.0)"
         required: true
+      build-latest:
+        description: "Build and publish the latest image?"
+        type: boolean
+        default: false
+        required: false
 
 env:
   LATEST_TAG: latest
   VERSION_TAG: ${{ github.event.inputs.version || github.ref_name }}
-  APP_UI: featbit-ui
-  APP_API: featbit-api-server
-  APP_DA: featbit-data-analytics-server
-  APP_EVAL: featbit-evaluation-server
+  APPS: |
+    APP_UI: featbit-ui
+    APP_API: featbit-api-server
+    APP_DA: featbit-data-analytics-server
+    APP_EVAL: featbit-evaluation-server
 
 jobs:
   build-publish:
-    name: build and publish image to docker hub
+    name: Build and publish image to Docker Hub
     runs-on: ubuntu-latest
     environment: Production
+    strategy:
+      matrix:
+        app: [${APPS}]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - # Add support for more platforms with QEMU
-        # https://github.com/docker/setup-qemu-action
-        name: Set up QEMU
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
@@ -47,98 +46,27 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+        run: echo "${{ toJson(github) }}"
 
-      - name: Build and push - UI (current)
+      - name: Build and push - ${{ matrix.app }} (current)
         uses: docker/build-push-action@v3
         with:
-          context: "{{defaultContext}}:modules/front-end"
+          context: "{{defaultContext}}:modules/${{ matrix.app }}"
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push - UI (latest)
-        if: github.ref == 'refs/heads/main'
+      - name: Build and push - ${{ matrix.app }} (latest)
+        if: github.event.inputs.build-latest
         uses: docker/build-push-action@v3
         with:
-          context: "{{defaultContext}}:modules/front-end"
+          context: "{{defaultContext}}:modules/${{ matrix.app }}"
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.LATEST_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push - API-Server (current)
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:modules/back-end"
-          file: ./deploy/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push - API-Server (latest)
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:modules/back-end"
-          file: ./deploy/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.LATEST_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push - Data-Analytics-Server (current)
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:modules/data-analytics"
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.VERSION_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push - Data-Analytics-Server (latest)
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:modules/data-analytics"
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.LATEST_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push - Evaluation-Server (current)
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:modules/evaluation-server"
-          file: ./deploy/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.VERSION_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push - Evaluation-Server (latest)
-        if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:modules/evaluation-server"
-          file: ./deploy/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.LATEST_TAG }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
