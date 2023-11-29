@@ -62,8 +62,8 @@ jobs:
       - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
         uses: docker/build-push-action@v5
         with:
-          context: "{{defaultContext}}:${{ steps.set-dockerfile-subdirectory.outputs.subdirectory }}"
-          file: ./Dockerfile
+          context: "{{defaultContext}}:${{ steps.set-dockerfile-context.outputs.subdir }}"
+          file: ${{ steps.set-dockerfile-context.outputs.file }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
