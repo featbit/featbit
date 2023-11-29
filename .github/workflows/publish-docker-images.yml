@@ -53,7 +53,7 @@ jobs:
       - name: Build and push - ${{ matrix.app }} (current)
         uses: docker/build-push-action@v5
         with:
-          context: "./modules/${{ matrix.app }}"
+          context: "{{defaultContext}}:modules/${{ matrix.app }}"
           file: ${{ steps.set-dockerfile-path.outputs.path }}
           platforms: linux/amd64,linux/arm64
           push: true
@@ -65,7 +65,7 @@ jobs:
         if: github.event.inputs.build-latest
         uses: docker/build-push-action@v3
         with:
-          context: "./modules/${{ matrix.app }}"
+          context: "{{defaultContext}}:modules/${{ matrix.app }}"
           file: ${{ steps.set-dockerfile-path.outputs.path }}
           platforms: linux/amd64,linux/arm64
           push: true
