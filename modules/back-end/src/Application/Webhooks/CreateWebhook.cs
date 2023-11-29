@@ -11,6 +11,8 @@ public class CreateWebhook : IRequest<Webhook>
 
     public string Name { get; set; }
 
+    public string[] Scopes { get; set; }
+
     public string Url { get; set; }
 
     public string[] Events { get; set; }
@@ -23,7 +25,7 @@ public class CreateWebhook : IRequest<Webhook>
 
     public Webhook AsWebhook(Guid currentId)
     {
-        var webhook = new Webhook(OrgId, Name, Url, Events, Headers, PayloadTemplate, Secret, currentId);
+        var webhook = new Webhook(OrgId, Name, Scopes, Url, Events, Headers, PayloadTemplate, Secret, currentId);
         return webhook;
     }
 }
@@ -37,6 +39,9 @@ public class CreateWebhookValidator : AbstractValidator<CreateWebhook>
 
         RuleFor(x => x.Url)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("url"));
+
+        RuleFor(x => x.Scopes)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("scopes"));
 
         RuleFor(x => x.Events)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("events"))

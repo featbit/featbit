@@ -8,6 +8,8 @@ public class Webhook : FullAuditedEntity
 
     public string Url { get; set; }
 
+    public string[] Scopes { get; set; }
+
     public string[] Events { get; set; }
 
     public KeyValuePair<string, string>[] Headers { get; set; }
@@ -21,6 +23,7 @@ public class Webhook : FullAuditedEntity
     public Webhook(
         Guid orgId,
         string name,
+        string[] scopes,
         string url,
         string[] events,
         KeyValuePair<string, string>[] headers,
@@ -32,6 +35,7 @@ public class Webhook : FullAuditedEntity
         Name = name;
         Url = url;
 
+        Scopes = scopes ?? Array.Empty<string>();
         Events = events ?? Array.Empty<string>();
 
         Headers = headers ?? Array.Empty<KeyValuePair<string, string>>();

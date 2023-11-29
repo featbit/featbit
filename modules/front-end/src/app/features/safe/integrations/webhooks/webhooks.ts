@@ -1,6 +1,7 @@
 export interface Webhook {
   id: string;
   name: string;
+  scopes: string[];
   url: string;
   secret: string;
   events: string[];

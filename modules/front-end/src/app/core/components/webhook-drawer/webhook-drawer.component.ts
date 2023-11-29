@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Webhook, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { trimJsonString, uuidv4 } from "@utils/index";
@@ -8,6 +8,8 @@ import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators"
 
 import { editor } from 'monaco-editor';
 import { NzMessageService } from "ng-zorro-antd/message";
+import { ProjectService } from "@services/project.service";
+import { IEnvironment, IProject } from "@shared/types";
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 declare const monaco: any;
 
@@ -16,7 +18,7 @@ declare const monaco: any;
   templateUrl: './webhook-drawer.component.html',
   styleUrls: ['./webhook-drawer.component.less']
 })
-export class WebhookDrawerComponent {
+export class WebhookDrawerComponent implements OnInit {
 
   title: string = '';
 
@@ -24,6 +26,7 @@ export class WebhookDrawerComponent {
   form: FormGroup<{
     id: FormControl<string>;
     name: FormControl<string>;
+    scopes: FormArray;
     url: FormControl<string>;
     events: FormArray;
     headers: FormArray;
@@ -34,10 +37,19 @@ export class WebhookDrawerComponent {
 
   constructor(
     private fb: FormBuilder,
+    private projectService: ProjectService,
     private webhookService: WebhookService,
     private message: NzMessageService
   ) {
     this.initForm();
+  }
+
+  isProjectsLoading: boolean = true;
+  projects: IProject[] = [];
+
+  async ngOnInit() {
+    this.projects = await this.projectService.getListAsync();
+    this.isProjectsLoading = false;
   }
 
   private _visible: boolean = false;
@@ -57,6 +69,7 @@ export class WebhookDrawerComponent {
     this.form = new FormGroup({
       id: new FormControl(this._webhook?.id),
       name: new FormControl(this._webhook?.name, [Validators.required], [this.nameAsyncValidator]),
+      scopes: this.constructScopesFormArray(this._webhook?.scopes),
       url: new FormControl(this._webhook?.url, [Validators.required, urlValidator]),
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
@@ -77,6 +90,7 @@ export class WebhookDrawerComponent {
   };
 
   editor?: editor.IStandaloneCodeEditor;
+
   onEditorInit(e: editor.IStandaloneCodeEditor): void {
     this.editor = e;
 
@@ -119,6 +133,63 @@ export class WebhookDrawerComponent {
 
       triggerCharacters: ['@']
     });
+  }
+
+  get scopes() {
+    return this.form.get('scopes') as FormArray;
+  }
+
+  private constructScopesFormArray(scopes: string[]): FormArray {
+    let formGroups;
+    if (!scopes || scopes.length === 0) {
+      // if scopes are null or empty, return a default form array
+      formGroups = [this.fb.group({ projectId: '', envIds: [] })];
+    } else {
+      formGroups = scopes.map(scope => {
+          const projectEnvs = scope.split('/');
+          const projectId = projectEnvs[0];
+          const envIds = projectEnvs[1]?.split(',');
+          return this.fb.group({ projectId, envIds })
+        }
+      );
+    }
+
+    const scopesValidator = (control: FormArray) => {
+      let envIds = control.value?.flatMap(scope => scope.envIds);
+      if (envIds?.length > 0) {
+        return null;
+      }
+
+      return { error: true };
+    }
+
+    return this.fb.array(formGroups, [scopesValidator]);
+  }
+
+  addScope() {
+    const formGroup = this.fb.group({
+      projectId: '',
+      envIds: []
+    });
+
+    this.scopes.push(formGroup);
+  }
+
+  removeScope(index: number) {
+    this.scopes.removeAt(index);
+  }
+
+  isProjectSelected(projectId: string): boolean {
+    return this.scopes.value?.some(scope => scope.projectId === projectId);
+  }
+
+  getProjectEnvs(index: number): IEnvironment[] {
+    const { projectId } = this.scopes.at(index).value;
+    return this.projects.find(x => x.id === projectId)?.environments;
+  }
+
+  isEnvironmentSelected(envId: string): boolean {
+    return this.scopes.value?.some(scope => scope.envId === envId);
   }
 
   get events() {
@@ -197,6 +268,17 @@ export class WebhookDrawerComponent {
     return this.form.get('headers') as FormArray;
   }
 
+  private constructHeaderFormArray(headers: { key: string; value: string; }[]) {
+    let formGroups = (headers ?? [{ key: '', value: '' }]).map(header => {
+      return new FormGroup({
+        key: new FormControl(header.key),
+        value: new FormControl(header.value)
+      });
+    });
+
+    return this.fb.array(formGroups);
+  }
+
   addHeader() {
     const formGroup = new FormGroup({
       key: new FormControl(''),
@@ -224,6 +306,7 @@ export class WebhookDrawerComponent {
         id: uuidv4(),
         name: 'hello',
         url: 'http://localhost',
+        scopes: [],
         events: ['feature_flag.create', 'segment.create'],
         headers: [
           {
@@ -256,25 +339,14 @@ export class WebhookDrawerComponent {
     this.close.emit();
   }
 
-  private constructHeaderFormArray(headers: { key: string; value: string; }[]) {
-    let formGroups = (headers ?? [{ key: '', value: '' }]).map(header => {
-      return new FormGroup({
-        key: new FormControl(header.key),
-        value: new FormControl(header.value)
-      });
-    });
-
-    return this.fb.array(formGroups);
-  }
-
   doSubmit() {
-    console.log(this.form.value);
-
-    const { name, url, events, headers, payloadTemplate, secret, isActive } = this.form.value;
-
+    const { name, url, scopes, events, headers, payloadTemplate, secret, isActive } = this.form.value;
     const payload = {
       name,
       url,
+      scopes: scopes
+        .filter(scope => scope.projectId && scope.envIds?.length > 0)
+        .map(scope => `${scope.projectId}/${scope.envIds.join(',')}`),
       events: events.flatMap(group => group.events.filter(event => event.checked).map(event => event.value)),
       headers: headers.map(header => ({ key: header.key, value: header.value })),
       payloadTemplate: trimJsonString(payloadTemplate),
