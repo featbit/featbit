@@ -40,17 +40,24 @@ jobs:
       - name: Dump GitHub context
         run: echo "${{ toJson(github) }}"
 
-      - name: Set Dockerfile Subdirectory
-        id: set-dockerfile-subdirectory
+      - name: Set Dockerfile Context
+        id: set-dockerfile-context
         run: |
           declare -A app_subdir_map
           app_subdir_map=(
-            ["featbit-api-server"]="modules/back-end/deploy"
+            ["featbit-api-server"]="modules/back-end"
             ["featbit-data-analytics-server"]="modules/data-analytics"
-            ["featbit-evaluation-server"]="modules/evaluation-server/deploy"
-            ["featbit-ui"]="modules/frontend"
+            ["featbit-evaluation-server"]="modules/evaluation-server"
+            ["featbit-ui"]="modules/front-end"
+          )
+          app_file_map=(
+            ["featbit-api-server"]="./deploy/Dockerfile"
+            ["featbit-evaluation-server"]="./deploy/Dockerfile"
+            ["featbit-data-analytics-server"]="Dockerfile"
+            ["featbit-ui"]="Dockerfile"
           )
           echo "subdirectory=${app_subdir_map[${{ matrix.app }}]}" >> $GITHUB_OUTPUT
+          echo "file=${app_file_map[${{ matrix.app }}]}" >> $GITHUB_OUTPUT
 
       - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
         uses: docker/build-push-action@v5
@@ -67,8 +74,8 @@ jobs:
         if: github.event.inputs.build-latest
         uses: docker/build-push-action@v3
         with:
-          context: "{{defaultContext}}:${{ steps.set-dockerfile-subdirectory.outputs.subdirectory }}"
-          file: ./Dockerfile
+          context: "{{defaultContext}}:${{ steps.set-dockerfile-context.outputs.subdir }}"
+          file: ${{ steps.set-dockerfile-context.outputs.file }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
