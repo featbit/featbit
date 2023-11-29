@@ -40,17 +40,19 @@ jobs:
       - name: Dump GitHub context
         run: echo "${{ toJson(github) }}"
 
-      - name: Set Dockerfile Path
-        id: set-dockerfile-path
+      - name: Set Dockerfile Subdirectory
+        id: set-dockerfile-subdirectory
         run: |
-          ls -la
-          if [[ "${{ matrix.app }}" == "featbit-ui" || "${{ matrix.app }}" == "featbit-data-analytics-server" ]]; then
-            echo "path=./Dockerfile" >> $GITHUB_OUTPUT
-          else
-            echo "path=./deploy/Dockerfile" >> $GITHUB_OUTPUT
-          fi
+          declare -A app_subdir_map
+          app_subdir_map=(
+            ["featbit-api-server"]="modules/back-end/deploy"
+            ["featbit-data-analytics-server"]="modules/data-analytics"
+            ["featbit-evaluation-server"]="modules/evaluation-server/deploy"
+            ["featbit-ui"]="modules/frontend/Dockerfile"
+          )
+          echo "subdirectory=${app_subdir_map[${{ matrix.app }}]}"
 
-      - name: Build and push - ${{ matrix.app }} (current)
+      - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
         uses: docker/build-push-action@v5
         with:
           context: "{{defaultContext}}:modules/${{ matrix.app }}"
@@ -61,12 +63,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push - ${{ matrix.app }} (latest)
+      - name: Build and push - ${{ matrix.app }} (${{ env.LATEST_TAG }})
         if: github.event.inputs.build-latest
         uses: docker/build-push-action@v3
         with:
-          context: "{{defaultContext}}:modules/${{ matrix.app }}"
-          file: ${{ steps.set-dockerfile-path.outputs.path }}
+          context: "{{defaultContext}}:${{ steps.set-dockerfile-subdirectory.outputs.subdirectory }}"
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
