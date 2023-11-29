@@ -14,12 +14,7 @@ on:
 
 env:
   LATEST_TAG: latest
-  VERSION_TAG: ${{ github.event.inputs.version || github.ref_name }}
-  APPS: |
-    APP_UI: featbit-ui
-    APP_API: featbit-api-server
-    APP_DA: featbit-data-analytics-server
-    APP_EVAL: featbit-evaluation-server
+  VERSION_TAG: ${{ github.event.inputs.version }}
 
 jobs:
   build-publish:
@@ -28,7 +23,7 @@ jobs:
     environment: Production
     strategy:
       matrix:
-        app: [${APPS}]
+        app: [featbit-ui, featbit-api-server, featbit-data-analytics-server, featbit-evaluation-server]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -48,11 +43,20 @@ jobs:
       - name: Dump GitHub context
         run: echo "${{ toJson(github) }}"
 
+      - name: Set Dockerfile Path
+        id: set-dockerfile-path
+        run: |
+          if [[ "${{ matrix.app }}" == "featbit-ui" || "${{ featbit-data-analytics-server }}" == "APP_DA" ]]; then
+            echo "::set-output name=path::./Dockerfile"
+          else
+            echo "::set-output name=path::./deploy/Dockerfile"
+          fi
+
       - name: Build and push - ${{ matrix.app }} (current)
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:modules/${{ matrix.app }}"
-          file: ./Dockerfile
+          file: ${{ steps.set-dockerfile-path.outputs.path }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
@@ -64,7 +68,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: "{{defaultContext}}:modules/${{ matrix.app }}"
-          file: ./Dockerfile
+          file: ${{ steps.set-dockerfile-path.outputs.path }}
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
