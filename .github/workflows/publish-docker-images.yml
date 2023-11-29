@@ -48,15 +48,14 @@ jobs:
             ["featbit-api-server"]="modules/back-end/deploy"
             ["featbit-data-analytics-server"]="modules/data-analytics"
             ["featbit-evaluation-server"]="modules/evaluation-server/deploy"
-            ["featbit-ui"]="modules/frontend/Dockerfile"
+            ["featbit-ui"]="modules/frontend"
           )
           echo "subdirectory=${app_subdir_map[${{ matrix.app }}]}"
 
       - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
         uses: docker/build-push-action@v5
         with:
-          context: "{{defaultContext}}:modules/${{ matrix.app }}"
-          file: ${{ steps.set-dockerfile-path.outputs.path }}
+          context: "{{defaultContext}}:modules/${{ steps.set-dockerfile-subdirectory.outputs.subdirectory }}"
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
