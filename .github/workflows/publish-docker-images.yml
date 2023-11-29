@@ -45,9 +45,9 @@ jobs:
         run: |
           ls -la
           if [[ "${{ matrix.app }}" == "featbit-ui" || "${{ matrix.app }}" == "featbit-data-analytics-server" ]]; then
-            echo "path::./Dockerfile" >> $GITHUB_OUTPUT
+            echo "path=./Dockerfile" >> $GITHUB_OUTPUT
           else
-            echo "path::./deploy/Dockerfile" >> $GITHUB_OUTPUT
+            echo "path=./deploy/Dockerfile" >> $GITHUB_OUTPUT
           fi
 
       - name: Build and push - ${{ matrix.app }} (current)
