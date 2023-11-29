@@ -50,7 +50,7 @@ jobs:
             ["featbit-evaluation-server"]="modules/evaluation-server/deploy"
             ["featbit-ui"]="modules/frontend"
           )
-          echo "subdirectory=${app_subdir_map[${{ matrix.app }}]}"
+          echo "subdirectory=${app_subdir_map[${{ matrix.app }}]}" >> $GITHUB_OUTPUT
 
       - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
         uses: docker/build-push-action@v5
