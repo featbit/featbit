@@ -7,7 +7,7 @@ on:
         description: "Dockerhub image version (For example: 1.0.0)"
         required: true
       build-latest:
-        description: "Build and publish the latest image?"
+        description: "Build and publish latest image"
         type: boolean
         default: false
         required: false
