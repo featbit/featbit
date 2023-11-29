@@ -46,7 +46,7 @@ jobs:
       - name: Set Dockerfile Path
         id: set-dockerfile-path
         run: |
-          if [[ "${{ matrix.app }}" == "featbit-ui" || "${{ featbit-data-analytics-server }}" == "APP_DA" ]]; then
+          if [[ "${{ matrix.app }}" == "featbit-ui" || "${{ matrix.app }}" == "featbit-data-analytics-server" ]]; then
             echo "::set-output name=path::./Dockerfile"
           else
             echo "::set-output name=path::./deploy/Dockerfile"
