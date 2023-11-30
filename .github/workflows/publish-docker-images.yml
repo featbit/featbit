@@ -79,26 +79,24 @@ jobs:
           echo "Cache-to: type=gha,mode=max"
 
       - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
-        run: echo "Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})"
-#        uses: docker/build-push-action@v5
-#        with:
-#          context: "{{defaultContext}}:${{ matrix.build-dir }}"
-#          file: ${{ matrix.file }}
-#          platforms: linux/amd64,linux/arm64
-#          push: true
-#          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
-#          cache-from: type=gha
-#          cache-to: type=gha,mode=max
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:${{ matrix.build-dir }}"
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push - ${{ matrix.app }} (${{ env.LATEST_TAG }})
         if: ${{ github.event.inputs.build-latest == 'true' }}
-        run: echo "Build and push - ${{ matrix.app }} (${{ env.LATEST_TAG }})"
-#        uses: docker/build-push-action@v5
-#        with:
-#          context: "{{defaultContext}}:${{ matrix.build-dir }}"
-#          file: ${{ matrix.file }}
-#          platforms: linux/amd64,linux/arm64
-#          push: true
-#          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
-#          cache-from: type=gha
-#          cache-to: type=gha,mode=max
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:${{ matrix.build-dir }}"
+          file: ${{ matrix.file }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
