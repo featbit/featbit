@@ -11,6 +11,11 @@ on:
         type: boolean
         default: false
         required: false
+      debug:
+        description: "Debug mode"
+        type: boolean
+        default: false
+        required: false
 
 env:
   LATEST_TAG: latest
@@ -50,16 +55,31 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Dump GitHub context
+        if: ${{ github.event.inputs.debug == 'true' }}
         run: echo "${{ toJson(github) }}"
 
       - name: Normal (always run)
+        if: ${{ github.event.inputs.debug == 'true' }}
         run: echo "Always run"
 
       - name: Conditional (run only if build-latest is true)
-        if: ${{ github.event.inputs.build-latest == 'true' }}
+        if: ${{ github.event.inputs.debug == 'true' && github.event.inputs.build-latest == 'true' }}
         run: echo "Run only if build-latest is true"
 
-#      - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
+      - name: Echo build parameters
+        if: ${{ github.event.inputs.debug == 'true' }}
+        run: |
+          echo "Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})"
+          echo "Context: ${{ github.workspace }}:${{ matrix.build-dir }}"
+          echo "File: ${{ matrix.file }}"
+          echo "Platforms: linux/amd64,linux/arm64"
+          echo "Push: true"
+          echo "Tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}"
+          echo "Cache-from: type=gha"
+          echo "Cache-to: type=gha,mode=max"
+
+      - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
+        run: echo "Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})"
 #        uses: docker/build-push-action@v5
 #        with:
 #          context: "{{defaultContext}}:${{ matrix.build-dir }}"
@@ -69,9 +89,10 @@ jobs:
 #          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
 #          cache-from: type=gha
 #          cache-to: type=gha,mode=max
-#
-#      - name: Build and push - ${{ matrix.app }} (${{ env.LATEST_TAG }})
-#        if: github.event.inputs.build-latest
+
+      - name: Build and push - ${{ matrix.app }} (${{ env.LATEST_TAG }})
+        if: ${{ github.event.inputs.build-latest == 'true' }}
+        run: echo "Build and push - ${{ matrix.app }} (${{ env.LATEST_TAG }})"
 #        uses: docker/build-push-action@v5
 #        with:
 #          context: "{{defaultContext}}:${{ matrix.build-dir }}"
