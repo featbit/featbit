@@ -56,7 +56,7 @@ jobs:
         run: echo "Always run"
 
       - name: Conditional (run only if build-latest is true)
-        if: github.event.inputs.build-latest
+        if: ${{ github.event.inputs.build-latest == 'true' }}
         run: echo "Run only if build-latest is true"
 
 #      - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
