@@ -42,6 +42,18 @@ jobs:
             build-dir: modules/evaluation-server
             file: ./deploy/Dockerfile
     steps:
+      - name: Dump GitHub context (run if debug is true)
+        if: ${{ github.event.inputs.debug == 'true' }}
+        run: echo "${{ toJson(github) }}"
+
+      - name: Normal (run if debug is true)
+        if: ${{ github.event.inputs.debug == 'true' }}
+        run: echo "debug is true"
+
+      - name: Conditional (run if debug and build-latest is true)
+        if: ${{ github.event.inputs.debug == 'true' && github.event.inputs.build-latest == 'true' }}
+        run: echo "debug and build-latest is true"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -53,30 +65,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Dump GitHub context
-        if: ${{ github.event.inputs.debug == 'true' }}
-        run: echo "${{ toJson(github) }}"
-
-      - name: Normal (always run)
-        if: ${{ github.event.inputs.debug == 'true' }}
-        run: echo "Always run"
-
-      - name: Conditional (run only if build-latest is true)
-        if: ${{ github.event.inputs.debug == 'true' && github.event.inputs.build-latest == 'true' }}
-        run: echo "Run only if build-latest is true"
-
-      - name: Echo build parameters
-        if: ${{ github.event.inputs.debug == 'true' }}
-        run: |
-          echo "Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})"
-          echo "Context: ${{ github.workspace }}:${{ matrix.build-dir }}"
-          echo "File: ${{ matrix.file }}"
-          echo "Platforms: linux/amd64,linux/arm64"
-          echo "Push: true"
-          echo "Tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}"
-          echo "Cache-from: type=gha"
-          echo "Cache-to: type=gha,mode=max"
 
       - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
         uses: docker/build-push-action@v5
