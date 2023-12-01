@@ -1,6 +1,28 @@
+@import "variables";
+
 .table-content-area {
   nz-input-group {
     width: 300px;
+  }
+}
+
+.name {
+  cursor: pointer;
+}
+
+.status {
+  cursor: pointer;
+
+  i {
+    margin-right: 4px;
+  }
+
+  .active {
+    color: @green70-color;
+  }
+
+  .inactive {
+    color: @grey50-color;
   }
 }
 

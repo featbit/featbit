@@ -9,6 +9,8 @@ import { NzTableModule } from "ng-zorro-antd/table";
 import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzButtonModule } from "ng-zorro-antd/button";
 import { NzWaveModule } from "ng-zorro-antd/core/wave";
+import { NzToolTipModule } from "ng-zorro-antd/tooltip";
+import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
 
 @NgModule({
   declarations: [
@@ -22,7 +24,9 @@ import { NzWaveModule } from "ng-zorro-antd/core/wave";
     NzTableModule,
     NzIconModule,
     NzButtonModule,
-    NzWaveModule
+    NzWaveModule,
+    NzToolTipModule,
+    NzPopconfirmModule
   ]
 })
 export class WebhooksModule { }

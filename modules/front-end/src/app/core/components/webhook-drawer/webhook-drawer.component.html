@@ -4,7 +4,7 @@
   [nzVisible]="visible"
   nzPlacement="right"
   [nzTitle]="title"
-  [nzWidth]="600"
+  [nzWidth]="650"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="doSubmit()">
@@ -159,7 +159,7 @@
           class="payload-template-form-control"
           nzErrorTip="Not a valid JSON payload template"
           i18n-nzErrorTip="@@integrations.webhooks.payload-template-validation-message"
-          nzExtra="The payload template used to generate the webhook request body."
+          nzExtra="The JSON payload template used to generate the webhook request body."
           i18n-nzExtra="@@integrations.webhooks.payload-template-description">
           <nz-code-editor
             formControlName="payloadTemplate"

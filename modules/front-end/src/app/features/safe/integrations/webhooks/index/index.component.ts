@@ -1,21 +1,65 @@
-import { Component } from '@angular/core';
-import { Webhook } from "@features/safe/integrations/webhooks/webhooks";
+import { Component, OnInit } from '@angular/core';
+import { PagedWebhook, Webhook, WebhookFilter } from "@features/safe/integrations/webhooks/webhooks";
+import { WebhookService } from "@services/webhook.service";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { finalize } from "rxjs/operators";
 
 @Component({
   selector: 'index',
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.less']
 })
-export class IndexComponent {
+export class IndexComponent implements OnInit {
+
+  isLoading: boolean = true;
+  webhooks: PagedWebhook = {
+    totalCount: 0,
+    items: []
+  };
+  filter: WebhookFilter = new WebhookFilter();
+
+  constructor(
+    private webhookService: WebhookService,
+    private message: NzMessageService
+  ) { }
+
+  ngOnInit() {
+    this.loadWebhooks();
+  }
+
+  loadWebhooks() {
+    this.isLoading = true;
+    this.webhookService.getList(this.filter)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: webhooks => this.webhooks = webhooks,
+        error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
+      });
+  }
+
+  selectedWebhook: Webhook;
   drawerVisible: boolean = false;
 
-  webhook: Webhook;
-
-  openDrawer() {
+  openDrawer(webhook: Webhook) {
+    this.selectedWebhook = webhook;
     this.drawerVisible = true;
   }
 
-  closeDrawer() {
+  closeDrawer(hasChange: boolean) {
+    this.selectedWebhook = undefined;
     this.drawerVisible = false;
+    if (hasChange) {
+      this.loadWebhooks();
+    }
+  }
+
+  delete(id: string) {
+    this.webhookService.delete(id).subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.loadWebhooks();
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    });
   }
 }

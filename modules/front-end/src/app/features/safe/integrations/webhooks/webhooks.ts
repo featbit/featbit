@@ -9,10 +9,7 @@ export interface Webhook {
   payloadTemplate: string;
   isActive: boolean;
   creator: string;
-
-  // last triggered state
   lastTriggeredAt: Date;
-  status: string;
 }
 
 export const WebhookEvents = [
@@ -24,3 +21,23 @@ export const WebhookEvents = [
   { group: 'Segment', label: "Create", value: "segment.create" },
   { group: 'Segment', label: "Delete", value: "segment.delete" },
 ]
+
+export interface PagedWebhook {
+  totalCount: number;
+  items: Webhook[];
+}
+
+export class WebhookFilter {
+  name?: string;
+  pageIndex: number;
+  pageSize: number;
+
+  constructor(
+    name?: string,
+    pageIndex: number = 1,
+    pageSize: number = 10) {
+    this.name = name ?? '';
+    this.pageIndex = pageIndex;
+    this.pageSize = pageSize;
+  }
+}

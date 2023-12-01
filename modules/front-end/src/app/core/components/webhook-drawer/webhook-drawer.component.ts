@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Webhook, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { trimJsonString, uuidv4 } from "@utils/index";
+import { trimJsonString } from "@utils/index";
 import { jsonValidator, urlValidator } from "@utils/form-validators";
 import { WebhookService } from "@services/webhook.service";
 import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators";
@@ -10,6 +10,7 @@ import { editor } from 'monaco-editor';
 import { NzMessageService } from "ng-zorro-antd/message";
 import { ProjectService } from "@services/project.service";
 import { IEnvironment, IProject } from "@shared/types";
+import { of } from "rxjs";
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 declare const monaco: any;
 
@@ -24,7 +25,6 @@ export class WebhookDrawerComponent implements OnInit {
 
   // the webhook form
   form: FormGroup<{
-    id: FormControl<string>;
     name: FormControl<string>;
     scopes: FormArray;
     url: FormControl<string>;
@@ -67,19 +67,28 @@ export class WebhookDrawerComponent implements OnInit {
 
   private initForm() {
     this.form = new FormGroup({
-      id: new FormControl(this._webhook?.id),
       name: new FormControl(this._webhook?.name, [Validators.required], [this.nameAsyncValidator]),
       scopes: this.constructScopesFormArray(this._webhook?.scopes),
       url: new FormControl(this._webhook?.url, [Validators.required, urlValidator]),
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
-      payloadTemplate: new FormControl(this._webhook?.payloadTemplate, [jsonValidator]),
+      payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? "{}", [jsonValidator]),
       secret: new FormControl(this._webhook?.secret),
-      isActive: new FormControl(this._webhook?.isActive)
+      isActive: new FormControl(this._webhook?.isActive ?? true)
     });
+
+    if (this._webhook) {
+      setTimeout(() => {
+        this.form.controls.name.updateValueAndValidity();
+      });
+    }
   }
 
   nameAsyncValidator = (control: FormControl) => {
+    if (this.operation === 'Edit' && control.value === this._webhook.name) {
+      return of(null);
+    }
+
     return control.valueChanges.pipe(
       debounceTime(300),
       switchMap(value => this.webhookService.isNameUsed(value)),
@@ -89,11 +98,8 @@ export class WebhookDrawerComponent implements OnInit {
     );
   };
 
-  editor?: editor.IStandaloneCodeEditor;
-
-  onEditorInit(e: editor.IStandaloneCodeEditor): void {
-    this.editor = e;
-
+  onEditorInit(editor: editor.IStandaloneCodeEditor): void {
+    // register editor variables
     function createDependencyProposals(range) {
       // returning a static list of proposals, not even looking at the prefix (filtering is done by the Monaco editor),
       // here you could do a server side lookup
@@ -133,6 +139,12 @@ export class WebhookDrawerComponent implements OnInit {
 
       triggerCharacters: ['@']
     });
+
+    // format the document
+    setTimeout(() => {
+        editor.trigger('source', 'editor.action.formatDocument', null);
+      }, 100
+    );
   }
 
   get scopes() {
@@ -143,13 +155,23 @@ export class WebhookDrawerComponent implements OnInit {
     let formGroups;
     if (!scopes || scopes.length === 0) {
       // if scopes are null or empty, return a default form array
-      formGroups = [this.fb.group({ projectId: '', envIds: [] })];
+      formGroups = [
+        this.fb.group({
+            projectId: [''],
+            envIds: [[]]
+          }
+        )
+      ];
     } else {
       formGroups = scopes.map(scope => {
           const projectEnvs = scope.split('/');
           const projectId = projectEnvs[0];
           const envIds = projectEnvs[1]?.split(',');
-          return this.fb.group({ projectId, envIds })
+          return this.fb.group({
+              projectId: [projectId],
+              envIds: [envIds]
+            }
+          )
         }
       );
     }
@@ -168,8 +190,8 @@ export class WebhookDrawerComponent implements OnInit {
 
   addScope() {
     const formGroup = this.fb.group({
-      projectId: '',
-      envIds: []
+      projectId: [''],
+      envIds: [[]]
     });
 
     this.scopes.push(formGroup);
@@ -292,6 +314,7 @@ export class WebhookDrawerComponent implements OnInit {
     this.headers.removeAt(index);
   }
 
+  private operation: 'Edit' | 'Add' = 'Add';
   private _webhook: Webhook;
   @Input()
   set webhook(webhook: Webhook) {
@@ -299,44 +322,15 @@ export class WebhookDrawerComponent implements OnInit {
       ? $localize`:@@integrations.webhooks.webhook-drawer.edit-title:Edit Webhook`
       : $localize`:@@integrations.webhooks.webhook-drawer.add-title:Add Webhook`;
 
-    if (webhook) {
-      this._webhook = webhook;
-    } else {
-      this._webhook = {
-        id: uuidv4(),
-        name: 'hello',
-        url: 'http://localhost',
-        scopes: [],
-        events: ['feature_flag.create', 'segment.create'],
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'application/json'
-          },
-          {
-            key: 'Authorization',
-            value: 'Bearer <token>..'
-          }
-        ],
-        payloadTemplate: `{
-	"hello": 1,
-	"enabled": true,
-	"world": "yes"
-}`,
-        isActive: true,
-        secret: 'this is a secret',
-        lastTriggeredAt: null,
-        status: 'None',
-        creator: ''
-      };
-    }
+    this._webhook = webhook;
+    this.operation = webhook ? 'Edit' : 'Add';
   }
 
   @Output()
-  close: EventEmitter<void> = new EventEmitter();
+  close: EventEmitter<boolean> = new EventEmitter();
 
   onClose() {
-    this.close.emit();
+    this.close.emit(false);
   }
 
   doSubmit() {
@@ -354,12 +348,18 @@ export class WebhookDrawerComponent implements OnInit {
       isActive
     };
 
-    this.webhookService.create(payload).subscribe({
+    let responseHandler = {
       next: () => {
         this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.close.emit();
+        this.close.emit(true);
       },
       error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
-    });
+    };
+
+    if (this.operation === 'Edit') {
+      this.webhookService.update(this._webhook.id, payload).subscribe(responseHandler);
+    } else {
+      this.webhookService.create(payload).subscribe(responseHandler);
+    }
   }
 }
