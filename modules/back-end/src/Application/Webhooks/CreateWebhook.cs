@@ -5,7 +5,7 @@ using Domain.Webhooks;
 
 namespace Application.Webhooks;
 
-public class CreateWebhook : IRequest<Webhook>
+public class CreateWebhook : IRequest<WebhookVm>
 {
     public Guid OrgId { get; set; }
 
@@ -23,9 +23,11 @@ public class CreateWebhook : IRequest<Webhook>
 
     public string Secret { get; set; }
 
-    public Webhook AsWebhook(Guid currentId)
+    public bool IsActive { get; set; }
+
+    public Webhook AsWebhook(Guid creatorId)
     {
-        var webhook = new Webhook(OrgId, Name, Scopes, Url, Events, Headers, PayloadTemplate, Secret, currentId);
+        var webhook = new Webhook(OrgId, Name, Scopes, Url, Events, Headers, PayloadTemplate, Secret, IsActive, creatorId);
         return webhook;
     }
 }
@@ -52,18 +54,20 @@ public class CreateWebhookValidator : AbstractValidator<CreateWebhook>
     }
 }
 
-public class CreateWebhookHandler : IRequestHandler<CreateWebhook, Webhook>
+public class CreateWebhookHandler : IRequestHandler<CreateWebhook, WebhookVm>
 {
     private readonly IWebhookService _service;
     private readonly ICurrentUser _currentUser;
+    private readonly IMapper _mapper;
 
-    public CreateWebhookHandler(IWebhookService service, ICurrentUser currentUser)
+    public CreateWebhookHandler(IWebhookService service, ICurrentUser currentUser, IMapper mapper)
     {
         _service = service;
         _currentUser = currentUser;
+        _mapper = mapper;
     }
 
-    public async Task<Webhook> Handle(CreateWebhook request, CancellationToken cancellationToken)
+    public async Task<WebhookVm> Handle(CreateWebhook request, CancellationToken cancellationToken)
     {
         if (await _service.IsNameUsedAsync(request.OrgId, request.Name))
         {
@@ -73,6 +77,7 @@ public class CreateWebhookHandler : IRequestHandler<CreateWebhook, Webhook>
         var webhook = request.AsWebhook(_currentUser.Id);
         await _service.AddOneAsync(webhook);
 
-        return webhook;
+        var vm = _mapper.Map<Webhook, WebhookVm>(webhook);
+        return vm;
     }
 }

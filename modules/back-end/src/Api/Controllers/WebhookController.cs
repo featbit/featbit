@@ -1,4 +1,4 @@
-using Domain.Webhooks;
+using Application.Bases.Models;
 using Application.Webhooks;
 
 namespace Api.Controllers;
@@ -6,14 +6,17 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/webhooks")]
 public class WebhookController : ApiControllerBase
 {
-    [HttpPost]
-    public async Task<ApiResponse<Webhook>> CreateAsync(CreateWebhook request)
+    [HttpGet]
+    public async Task<ApiResponse<PagedResult<WebhookVm>>> GetListAsync([FromQuery] WebhookFilter filter)
     {
-        request.OrgId = OrgId;
+        var request = new GetWebhookList
+        {
+            OrgId = OrgId,
+            Filter = filter
+        };
 
-        var webhook = await Mediator.Send(request);
-
-        return Ok(webhook);
+        var webhooks = await Mediator.Send(request);
+        return Ok(webhooks);
     }
 
     [HttpGet("is-name-used")]
@@ -27,5 +30,35 @@ public class WebhookController : ApiControllerBase
 
         var isNameUsed = await Mediator.Send(request);
         return Ok(isNameUsed);
+    }
+
+    [HttpPost]
+    public async Task<ApiResponse<WebhookVm>> CreateAsync(CreateWebhook request)
+    {
+        request.OrgId = OrgId;
+
+        var vm = await Mediator.Send(request);
+        return Ok(vm);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ApiResponse<WebhookVm>> UpdateAsync(Guid id, UpdateWebhook request)
+    {
+        request.Id = id;
+
+        var vm = await Mediator.Send(request);
+        return Ok(vm);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
+    {
+        var request = new DeleteWebhook
+        {
+            Id = id
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
     }
 }

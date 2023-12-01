@@ -20,6 +20,8 @@ public class Webhook : FullAuditedEntity
 
     public bool IsActive { get; set; }
 
+    public DateTime? LastTriggeredAt { get; set; }
+
     public Webhook(
         Guid orgId,
         string name,
@@ -29,6 +31,7 @@ public class Webhook : FullAuditedEntity
         KeyValuePair<string, string>[] headers,
         string payloadTemplate,
         string secret,
+        bool isActive,
         Guid creatorId) : base(creatorId)
     {
         OrgId = orgId;
@@ -42,10 +45,34 @@ public class Webhook : FullAuditedEntity
         PayloadTemplate = payloadTemplate;
         Secret = secret ?? string.Empty;
 
-        IsActive = true;
+        IsActive = isActive;
+        LastTriggeredAt = null;
     }
 
-    public void Enable() => IsActive = true;
+    public void Update(
+        string name,
+        string[] scopes,
+        string url,
+        string[] events,
+        KeyValuePair<string, string>[] headers,
+        string payloadTemplate,
+        string secret,
+        bool isActive,
+        Guid currentUserId)
+    {
+        Name = name;
+        Url = url;
 
-    public void Disable() => IsActive = false;
+        Scopes = scopes ?? Array.Empty<string>();
+        Events = events ?? Array.Empty<string>();
+
+        Headers = headers ?? Array.Empty<KeyValuePair<string, string>>();
+        PayloadTemplate = payloadTemplate;
+        Secret = secret ?? string.Empty;
+
+        IsActive = isActive;
+        LastTriggeredAt = null;
+
+        MarkAsUpdated(currentUserId);
+    }
 }
