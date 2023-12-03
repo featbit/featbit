@@ -61,7 +61,9 @@
             <span i18n="@@common.inactive">Inactive</span>
           </span>
         </td>
-        <td> {{ item.url }} </td>
+        <td class="url">
+          <span nz-tooltip [nzTooltipTitle]="item.url">{{ item.url }}</span>
+        </td>
         <td> {{ item.events }} </td>
         <td> {{ item.lastTriggeredAt | date: 'medium' }} </td>
         <td> {{ item.creator }} </td>
