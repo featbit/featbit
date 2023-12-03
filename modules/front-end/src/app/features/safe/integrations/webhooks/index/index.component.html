@@ -81,12 +81,12 @@
             nz-button
             nzType="link"
             nz-popconfirm
-            nzPopconfirmTitle="Are you sure delete this webhook?"
-            i18n-nzPopconfirmTitle="@@integrations.webhooks.delete-confirm"
+            nzPopconfirmTitle="Are you sure to remove it?"
+            i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
             nzPopconfirmPlacement="top"
-            (nzOnConfirm)="delete(item.id)">
+            (nzOnConfirm)="remove(item.id)">
             <i nz-icon nzType="icons:icon-delete"></i>
-            <span i18n="@@common.delete">Delete</span>
+            <span i18n="@@common.remove">Remove</span>
           </button>
         </td>
       </tr>

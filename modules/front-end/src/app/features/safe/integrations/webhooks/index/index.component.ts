@@ -53,7 +53,7 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  delete(id: string) {
+  remove(id: string) {
     this.webhookService.delete(id).subscribe({
       next: () => {
         this.message.success($localize`:@@common.operation-success:Operation succeeded`);
