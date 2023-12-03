@@ -26,10 +26,19 @@
   }
 }
 
-.url {
-  max-width: 150px;
+.truncate {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.url {
+  max-width: 150px;
+  .truncate;
+}
+
+.events {
+  max-width: 250px;
+  .truncate;
 }
 

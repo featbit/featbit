@@ -64,7 +64,9 @@
         <td class="url">
           <span nz-tooltip [nzTooltipTitle]="item.url">{{ item.url }}</span>
         </td>
-        <td> {{ item.events }} </td>
+        <td class="events">
+          <span nz-tooltip [nzTooltipTitle]="item.events?.join(',')">{{ item.events }}</span>
+        </td>
         <td> {{ item.lastTriggeredAt | date: 'medium' }} </td>
         <td> {{ item.creator }} </td>
         <td>
