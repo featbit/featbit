@@ -71,7 +71,7 @@
           <span *ngIf="item.lastTriggeredAt">{{ item.lastTriggeredAt | date: 'YYYY-MM-dd HH:mm:ss' }}</span>
           <span *ngIf="!item.lastTriggeredAt" class="never" i18n="@@integrations.webhooks.never-triggered">Never Triggered</span>
         </td>
-        <td> {{ item.creator }} </td>
+        <td> {{ item.creator.name ?? item.creator.email }} </td>
         <td>
           <button nz-button nzType="link" (click)="openDrawer(item)">
             <i nz-icon nzType="icons:icon-edit"></i>

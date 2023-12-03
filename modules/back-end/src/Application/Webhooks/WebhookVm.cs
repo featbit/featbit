@@ -1,3 +1,5 @@
+using Application.Users;
+
 namespace Application.Webhooks;
 
 public class WebhookVm
@@ -21,4 +23,6 @@ public class WebhookVm
     public bool IsActive { get; set; }
 
     public DateTime? LastTriggeredAt { get; set; }
+
+    public UserVm Creator { get; set; }
 }

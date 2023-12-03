@@ -1,3 +1,5 @@
+import { Creator } from "@shared/users";
+
 export interface Webhook {
   id: string;
   name: string;
@@ -8,7 +10,7 @@ export interface Webhook {
   headers: { key: string; value: string; }[];
   payloadTemplate: string;
   isActive: boolean;
-  creator: string;
+  creator: Creator;
   lastTriggeredAt?: Date;
 }
 
