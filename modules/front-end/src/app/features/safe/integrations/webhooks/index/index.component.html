@@ -72,7 +72,7 @@
           <span *ngIf="!item.lastTriggeredAt" class="never" i18n="@@integrations.webhooks.never-triggered">Never Triggered</span>
         </td>
         <td> {{ item.creator.name ?? item.creator.email }} </td>
-        <td>
+        <td class="actions">
           <button nz-button nzType="link" (click)="openDrawer(item)">
             <i nz-icon nzType="icons:icon-edit"></i>
             <span i18n="@@common.edit">Edit</span>
