@@ -9,7 +9,7 @@ export interface Webhook {
   payloadTemplate: string;
   isActive: boolean;
   creator: string;
-  lastTriggeredAt: Date;
+  lastTriggeredAt?: Date;
 }
 
 export const WebhookEvents = [
