@@ -78,7 +78,12 @@
           </ng-template>
         </td>
         <td class="events">
-          <span nz-tooltip [nzTooltipTitle]="item.events?.join(',')">{{ item.events }}</span>
+          <span nz-tooltip [nzTooltipTitle]="eventsTooltip">{{ item.events }}</span>
+          <ng-template #eventsTooltip>
+            <ul>
+              <li *ngFor="let event of item.events;">{{ event }}</li>
+            </ul>
+          </ng-template>
         </td>
         <td> {{ item.creator.name ?? item.creator.email }} </td>
         <td class="actions">
