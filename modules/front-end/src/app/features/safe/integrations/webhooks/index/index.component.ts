@@ -3,6 +3,7 @@ import { LastDelivery, PagedWebhook, Webhook, WebhookFilter } from "@features/sa
 import { WebhookService } from "@services/webhook.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { finalize } from "rxjs/operators";
+import { formatDate } from "@angular/common";
 
 @Component({
   selector: 'index',
@@ -38,9 +39,12 @@ export class IndexComponent implements OnInit {
   }
 
   getDeliveryTooltip(delivery: LastDelivery) {
+    const happenedAt = formatDate(delivery.happenedAt, 'medium', 'en-US');
+    const response = delivery.response;
+
     return delivery.success
-      ? $localize`:@@webhooks.last-delivery-successful:Last delivery was successful. HTTP Response: ${delivery.response}`
-      : $localize`:@@webhooks.last-delivery-failed:Last delivery was not successful. Invalid HTTP Response: ${delivery.response}`;
+      ? $localize`:@@webhooks.last-delivery-successful:Last delivery happened at ${happenedAt} was successful (HTTP Response: ${response}).`
+      : $localize`:@@webhooks.last-delivery-failed:Last delivery happened at ${happenedAt} was not successful (Invalid HTTP Response: ${response}).`;
   }
 
   selectedWebhook: Webhook;

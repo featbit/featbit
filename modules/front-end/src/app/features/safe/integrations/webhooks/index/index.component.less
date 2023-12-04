@@ -17,11 +17,22 @@
     margin-right: 4px;
   }
 
+  .success,
   .active {
     color: @green70-color;
   }
 
   .inactive {
+    color: @grey50-color;
+  }
+
+  .failed {
+    color: @red50-color;
+  }
+
+  .never {
+    font-size: 12px;
+    font-style: oblique;
     color: @grey50-color;
   }
 }
@@ -40,26 +51,6 @@
 .events {
   max-width: 250px;
   .truncate;
-}
-
-.last-delivery {
-  i {
-    margin-right: 4px;
-  }
-
-  .success {
-    color: @green70-color;
-  }
-
-  .failed {
-    color: @red50-color;
-  }
-
-  .never {
-    font-size: 12px;
-    font-style: oblique;
-    color: @grey50-color;
-  }
 }
 
 .actions {
