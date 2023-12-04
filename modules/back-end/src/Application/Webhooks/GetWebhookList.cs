@@ -1,5 +1,8 @@
+using System.Net;
 using Application.Bases.Models;
 using Application.Users;
+using Domain.Organizations;
+using Domain.Webhooks;
 
 namespace Application.Webhooks;
 
@@ -14,12 +17,18 @@ public class GetWebhookListHandler : IRequestHandler<GetWebhookList, PagedResult
 {
     private readonly IWebhookService _webhookService;
     private readonly IUserService _userService;
+    private readonly IOrganizationService _organizationService;
     private readonly IMapper _mapper;
 
-    public GetWebhookListHandler(IWebhookService webhookService, IUserService userService, IMapper mapper)
+    public GetWebhookListHandler(
+        IWebhookService webhookService,
+        IUserService userService,
+        IOrganizationService organizationService,
+        IMapper mapper)
     {
         _webhookService = webhookService;
         _userService = userService;
+        _organizationService = organizationService;
         _mapper = mapper;
     }
 
@@ -36,6 +45,9 @@ public class GetWebhookListHandler : IRequestHandler<GetWebhookList, PagedResult
         {
             var vm = webhookVms.Items.First(x => x.Id == webhook.Id);
             vm.Creator = _mapper.Map<UserVm>(creators.FirstOrDefault(x => x.Id == webhook.CreatorId));
+
+            var scopeStrings = vm.Scopes.Select(scope => new ScopeString(scope)).ToArray();
+            vm.Scopes = await _organizationService.GetScopesAsync(scopeStrings);
         }
 
         return webhookVms;
