@@ -11,7 +11,13 @@ export interface Webhook {
   payloadTemplate: string;
   isActive: boolean;
   creator: Creator;
-  lastTriggeredAt?: Date;
+  lastDelivery?: LastDelivery;
+}
+
+export interface LastDelivery {
+  success: boolean;
+  happenedAt: Date;
+  response: number;
 }
 
 export const WebhookEvents = [

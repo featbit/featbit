@@ -20,7 +20,7 @@ public class Webhook : FullAuditedEntity
 
     public bool IsActive { get; set; }
 
-    public DateTime? LastTriggeredAt { get; set; }
+    public LastDelivery LastDelivery { get; set; }
 
     public Webhook(
         Guid orgId,
@@ -46,7 +46,7 @@ public class Webhook : FullAuditedEntity
         Secret = secret ?? string.Empty;
 
         IsActive = isActive;
-        LastTriggeredAt = null;
+        LastDelivery = null;
     }
 
     public void Update(
@@ -71,7 +71,6 @@ public class Webhook : FullAuditedEntity
         Secret = secret ?? string.Empty;
 
         IsActive = isActive;
-        LastTriggeredAt = null;
 
         MarkAsUpdated(currentUserId);
     }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { PagedWebhook, Webhook, WebhookFilter } from "@features/safe/integrations/webhooks/webhooks";
+import { LastDelivery, PagedWebhook, Webhook, WebhookFilter } from "@features/safe/integrations/webhooks/webhooks";
 import { WebhookService } from "@services/webhook.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { finalize } from "rxjs/operators";
@@ -35,6 +35,12 @@ export class IndexComponent implements OnInit {
         next: webhooks => this.webhooks = webhooks,
         error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
       });
+  }
+
+  getDeliveryTooltip(delivery: LastDelivery) {
+    return delivery.success
+      ? $localize`:@@webhooks.last-delivery-successful:Last delivery was successful. HTTP Response: ${delivery.response}`
+      : $localize`:@@webhooks.last-delivery-failed:Last delivery was not successful. Invalid HTTP Response: ${delivery.response}`;
   }
 
   selectedWebhook: Webhook;

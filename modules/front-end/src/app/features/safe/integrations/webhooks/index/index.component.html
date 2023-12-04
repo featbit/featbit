@@ -33,7 +33,7 @@
         <th i18n="@@common.status">Status</th>
         <th i18n="@@integrations.webhooks.url">URL</th>
         <th i18n="@@integrations.webhooks.events">Events</th>
-        <th i18n="@@integrations.webhooks.last-trigged-at">Last triggered at</th>
+        <th i18n="@@integrations.webhooks.last-delivery">Last delivery</th>
         <th i18n="@@common.created-by">Created by</th>
         <th i18n="@@common.actions">Actions</th>
       </tr>
@@ -67,9 +67,17 @@
         <td class="events">
           <span nz-tooltip [nzTooltipTitle]="item.events?.join(',')">{{ item.events }}</span>
         </td>
-        <td class="last-triggered-at">
-          <span *ngIf="item.lastTriggeredAt">{{ item.lastTriggeredAt | date: 'YYYY-MM-dd HH:mm:ss' }}</span>
-          <span *ngIf="!item.lastTriggeredAt" class="never" i18n="@@integrations.webhooks.never-triggered">Never Triggered</span>
+        <td class="last-delivery">
+          <ng-container *ngIf="item.lastDelivery">
+            <span nz-tooltip [nzTooltipTitle]="getDeliveryTooltip(item.lastDelivery)">
+              <i nz-icon
+                 [class]="item.lastDelivery.success ? 'success' : 'failed'"
+                 [nzType]="item.lastDelivery.success ? 'check-circle' : 'close-circle'">
+              </i>
+              <span>{{ item.lastDelivery.happenedAt | date: 'medium' }}</span>
+            </span>
+          </ng-container>
+          <span *ngIf="!item.lastDelivery" class="never" i18n="@@integrations.webhooks.never-triggered">Never Triggered</span>
         </td>
         <td> {{ item.creator.name ?? item.creator.email }} </td>
         <td class="actions">
