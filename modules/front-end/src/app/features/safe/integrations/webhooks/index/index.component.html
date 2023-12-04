@@ -34,13 +34,18 @@
         <th i18n="@@integrations.webhooks.url">URL</th>
         <th i18n="@@common.scopes">Scopes</th>
         <th i18n="@@integrations.webhooks.events">Events</th>
-        <th i18n="@@common.created-by">Created by</th>
         <th i18n="@@common.actions">Actions</th>
       </tr>
       </thead>
       <tbody>
       <tr *ngFor="let item of table.data">
-        <td class="name" (click)="openDrawer(item)"> {{ item.name }} </td>
+        <td class="name" (click)="openDrawer(item)">
+          <span>{{ item.name }}</span>
+          <br>
+          <div class="additional-info">
+            <span i18n="@@common.created-by">Created by</span>: {{item.creator.name ?? item.creator.email}}
+          </div>
+        </td>
         <td class="status" nz-tooltip [nzTooltipTitle]="statusTooltip" nzTooltipPlacement="topLeft">
           <span [class]="item.isActive ? 'active' : 'inactive'">
             <i nz-icon [nzType]="item.isActive ? 'check-circle' : 'close-circle'"></i>
@@ -85,7 +90,6 @@
             </ul>
           </ng-template>
         </td>
-        <td> {{ item.creator.name ?? item.creator.email }} </td>
         <td class="actions">
           <button nz-button nzType="link" (click)="openDrawer(item)">
             <i nz-icon nzType="icons:icon-edit"></i>
