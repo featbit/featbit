@@ -22,8 +22,14 @@ public class WebhookService : MongoDbService<Webhook>, IWebhookService
             query = query.Where(x => x.Name.Contains(filter.Name, StringComparison.CurrentCultureIgnoreCase));
         }
 
+        // envId filter
+        if (!string.IsNullOrWhiteSpace(filter.EnvId))
+        {
+            query = query.Where(x => x.Scopes.Any(y => y.Contains(filter.EnvId)));
+        }
+
         // projectId filter
-        if (!string.IsNullOrWhiteSpace(filter.ProjectId))
+        if (!string.IsNullOrWhiteSpace(filter.ProjectId) && string.IsNullOrWhiteSpace(filter.EnvId))
         {
             query = query.Where(x => x.Scopes.Any(y => y.StartsWith(filter.ProjectId)));
         }

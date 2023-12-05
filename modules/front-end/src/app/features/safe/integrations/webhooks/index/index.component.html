@@ -12,7 +12,7 @@
         nzShowSearch
         nzAllowClear
         [(ngModel)]="filter.projectId"
-        (ngModelChange)="doSearch(true)"
+        (ngModelChange)="onSelectProject($event)"
         i18n-nzPlaceHolder="@@common.filter-by-project"
         nzPlaceHolder="Filter by project">
         <ng-container *ngFor="let project of projects">
@@ -22,6 +22,17 @@
           <i nz-icon nzType="loading" class="loading-icon"></i>
           <ng-container i18n="@@common.loading">Loading...</ng-container>
         </nz-option>
+      </nz-select>
+      <nz-select
+        *ngIf="filter.projectId"
+        class="nz-select-40 rounded filter"
+        nzShowSearch
+        nzAllowClear
+        [(ngModel)]="filter.envId"
+        (ngModelChange)="doSearch(true)"
+        i18n-nzPlaceHolder="@@common.filter-by-enviroment"
+        nzPlaceHolder="Filter by environment">
+        <nz-option *ngFor="let env of projectEnvs" [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
       </nz-select>
     </div>
     <button nz-button nzType="primary" (click)="openDrawer(undefined)">

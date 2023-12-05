@@ -39,17 +39,15 @@ export interface PagedWebhook {
 export class WebhookFilter {
   name?: string;
   projectId?: string;
+  envId: string;
   pageIndex: number;
   pageSize: number;
 
-  constructor(
-    name?: string,
-    projectId?: string,
-    pageIndex: number = 1,
-    pageSize: number = 10) {
-    this.name = name;
-    this.projectId = projectId;
-    this.pageIndex = pageIndex;
-    this.pageSize = pageSize;
+  constructor() {
+    this.name = '';
+    this.projectId = '';
+    this.envId = '';
+    this.pageIndex = 1;
+    this.pageSize = 10;
   }
 }

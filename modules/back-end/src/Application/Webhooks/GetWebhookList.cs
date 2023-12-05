@@ -1,8 +1,6 @@
-using System.Net;
 using Application.Bases.Models;
 using Application.Users;
 using Domain.Organizations;
-using Domain.Webhooks;
 
 namespace Application.Webhooks;
 

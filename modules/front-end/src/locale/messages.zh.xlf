@@ -210,7 +210,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">59</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -778,7 +778,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
@@ -1166,7 +1166,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">22</context>
+          <context context-type="linenumber">23</context>
         </context-group>
         <target>数据加载中...</target>
       </trans-unit>
@@ -2486,7 +2486,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">105</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
@@ -4006,7 +4006,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">129</context>
         </context-group>
         <target>确定要删除么？</target>
       </trans-unit>
@@ -4094,7 +4094,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">122</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -4334,7 +4334,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">40</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -4458,7 +4458,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -4641,7 +4641,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <target>环境</target>
       </trans-unit>
@@ -4745,7 +4745,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">48</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -5245,7 +5245,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">49</context>
+          <context context-type="linenumber">61</context>
         </context-group>
         <target>URL</target>
       </trans-unit>
@@ -5313,7 +5313,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">63</context>
         </context-group>
         <target>事件</target>
       </trans-unit>
@@ -6077,7 +6077,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">123</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -6113,7 +6113,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
@@ -8601,7 +8601,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">73</context>
         </context-group>
         <target>创建者</target>
       </trans-unit>
@@ -8677,15 +8677,23 @@
         <source>Filter by project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <target>按项目筛选</target>
+      </trans-unit>
+      <trans-unit id="common.filter-by-enviroment" datatype="html">
+        <source>Filter by environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <target>按环境筛选</target>
       </trans-unit>
       <trans-unit id="common.active" datatype="html">
         <source>Active</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">79</context>
         </context-group>
         <target>启用</target>
       </trans-unit>
@@ -8693,7 +8701,7 @@
         <source>Inactive</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <target>禁用</target>
       </trans-unit>
@@ -8701,7 +8709,7 @@
         <source>Never Triggered</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <target>从未触发</target>
       </trans-unit>
@@ -8709,7 +8717,7 @@
         <source>This hook is active.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">92</context>
         </context-group>
         <target>该 Webhook 处于启用状态。</target>
       </trans-unit>
@@ -8717,7 +8725,7 @@
         <source>This hook is inactive.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <target>该 Webhook 处于禁用状态。</target>
       </trans-unit>
@@ -8725,7 +8733,7 @@
         <source>Last delivery happened at <x id="PH" equiv-text="happenedAt"/> was successful (HTTP Response: <x id="PH_1" equiv-text="response"/>).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="linenumber">79</context>
         </context-group>
         <target>上次触发成功，发生于 <x id="PH" equiv-text="happenedAt"/> (HTTP 响应：<x id="PH_1" equiv-text="response"/>)。</target>
       </trans-unit>
@@ -8733,7 +8741,7 @@
         <source>Last delivery happened at <x id="PH" equiv-text="happenedAt"/> was not successful (Invalid HTTP Response: <x id="PH_1" equiv-text="response"/>).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">60</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <target>上次触发失败，发生于 <x id="PH" equiv-text="happenedAt"/> (非法的 HTTP 响应：<x id="PH_1" equiv-text="response"/>)。</target>
       </trans-unit>

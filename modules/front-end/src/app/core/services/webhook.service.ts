@@ -17,6 +17,7 @@ export class WebhookService {
     const queryParam = {
       name: filter.name ?? '',
       projectId: filter.projectId ?? '',
+      envId: filter.envId ?? '',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };

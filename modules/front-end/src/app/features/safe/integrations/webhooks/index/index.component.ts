@@ -5,7 +5,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { debounceTime, finalize } from "rxjs/operators";
 import { formatDate } from "@angular/common";
 import { ProjectService } from "@services/project.service";
-import { IProject } from "@shared/types";
+import { IEnvironment, IProject } from "@shared/types";
 import { Subject } from "rxjs";
 
 @Component({
@@ -23,6 +23,13 @@ export class IndexComponent implements OnInit {
 
   isProjectsLoading: boolean = true;
   projects: IProject[] = [];
+  projectEnvs: IEnvironment[] = [];
+
+  onSelectProject(projectId: string) {
+    this.filter.envId = '';
+    this.projectEnvs = this.projects.find(x => x.id === projectId)?.environments;
+    this.doSearch(true);
+  }
 
   search$ = new Subject<void>();
   filter: WebhookFilter = new WebhookFilter();
