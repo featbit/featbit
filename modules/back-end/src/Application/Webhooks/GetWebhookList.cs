@@ -47,7 +47,7 @@ public class GetWebhookListHandler : IRequestHandler<GetWebhookList, PagedResult
             vm.Creator = _mapper.Map<UserVm>(creators.FirstOrDefault(x => x.Id == webhook.CreatorId));
 
             var scopeStrings = vm.Scopes.Select(scope => new ScopeString(scope)).ToArray();
-            vm.Scopes = await _organizationService.GetScopesAsync(scopeStrings);
+            vm.ScopeNames = await _organizationService.GetScopesAsync(scopeStrings);
         }
 
         return webhookVms;

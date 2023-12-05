@@ -13,6 +13,8 @@ public class WebhookVm
 
     public string[] Scopes { get; set; }
 
+    public string[] ScopeNames { get; set; }
+
     public string[] Events { get; set; }
 
     public KeyValuePair<string, string>[] Headers { get; set; }

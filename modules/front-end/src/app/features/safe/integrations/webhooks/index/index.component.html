@@ -91,10 +91,10 @@
           <span nz-tooltip [nzTooltipTitle]="item.url">{{ item.url }}</span>
         </td>
         <td class="scopes">
-          <span nz-tooltip [nzTooltipTitle]="scopesTooltip">{{ item.scopes }}</span>
+          <span nz-tooltip [nzTooltipTitle]="scopesTooltip">{{ item.scopeNames }}</span>
           <ng-template #scopesTooltip>
             <ul>
-              <li *ngFor="let scope of item.scopes;">{{ scope }}</li>
+              <li *ngFor="let scopeName of item.scopeNames;">{{ scopeName }}</li>
             </ul>
           </ng-template>
         </td>
