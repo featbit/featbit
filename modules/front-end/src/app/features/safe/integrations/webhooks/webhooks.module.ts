@@ -11,6 +11,7 @@ import { NzButtonModule } from "ng-zorro-antd/button";
 import { NzWaveModule } from "ng-zorro-antd/core/wave";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
+import { NzSelectModule } from "ng-zorro-antd/select";
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
     NzButtonModule,
     NzWaveModule,
     NzToolTipModule,
-    NzPopconfirmModule
+    NzPopconfirmModule,
+    NzSelectModule
   ]
 })
 export class WebhooksModule { }

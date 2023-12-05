@@ -2,11 +2,26 @@
   <div class="table-search-area">
     <div class="search-inputs">
       <nz-input-group [nzPrefix]="prefixIconSearch">
-        <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.searchNamePlaceholder">
+        <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name">
       </nz-input-group>
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="icons:icon-search"></i>
       </ng-template>
+      <nz-select
+        class="nz-select-40 rounded filter"
+        nzShowSearch
+        nzAllowClear
+        [(ngModel)]="filter.projectId"
+        i18n-nzPlaceHolder="@@common.filter-by-project"
+        nzPlaceHolder="Filter by project">
+        <ng-container *ngFor="let project of projects">
+          <nz-option *ngIf="!isProjectsLoading" [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
+        </ng-container>
+        <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
+          <i nz-icon nzType="loading" class="loading-icon"></i>
+          <ng-container i18n="@@common.loading">Loading...</ng-container>
+        </nz-option>
+      </nz-select>
     </div>
     <button nz-button nzType="primary" (click)="openDrawer(undefined)">
       <i nz-icon nzType="icons:icon-add"></i>

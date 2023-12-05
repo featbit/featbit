@@ -4,6 +4,8 @@ import { WebhookService } from "@services/webhook.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { finalize } from "rxjs/operators";
 import { formatDate } from "@angular/common";
+import { ProjectService } from "@services/project.service";
+import { IProject } from "@shared/types";
 
 @Component({
   selector: 'index',
@@ -21,11 +23,22 @@ export class IndexComponent implements OnInit {
 
   constructor(
     private webhookService: WebhookService,
+    private projectService: ProjectService,
     private message: NzMessageService
   ) { }
 
-  ngOnInit() {
+  isProjectsLoading: boolean = true;
+  projects: IProject[] = [];
+
+  async ngOnInit() {
+    await this.loadProjects();
     this.loadWebhooks();
+  }
+
+  async loadProjects() {
+    this.isProjectsLoading = true;
+    this.projects = await this.projectService.getListAsync();
+    this.isProjectsLoading = false;
   }
 
   loadWebhooks() {
