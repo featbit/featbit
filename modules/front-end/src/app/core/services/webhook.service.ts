@@ -16,6 +16,7 @@ export class WebhookService {
   getList(filter: WebhookFilter = new WebhookFilter()): Observable<PagedWebhook> {
     const queryParam = {
       name: filter.name ?? '',
+      projectId: filter.projectId ?? '',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };

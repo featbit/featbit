@@ -46,8 +46,8 @@ export class WebhookFilter {
     projectId?: string,
     pageIndex: number = 1,
     pageSize: number = 10) {
-    this.name = name ?? '';
-    this.projectId = projectId ?? '';
+    this.name = name;
+    this.projectId = projectId;
     this.pageIndex = pageIndex;
     this.pageSize = pageSize;
   }

@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { LastDelivery, PagedWebhook, Webhook, WebhookFilter } from "@features/safe/integrations/webhooks/webhooks";
 import { WebhookService } from "@services/webhook.service";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { finalize } from "rxjs/operators";
+import { debounceTime, finalize } from "rxjs/operators";
 import { formatDate } from "@angular/common";
 import { ProjectService } from "@services/project.service";
 import { IProject } from "@shared/types";
+import { Subject } from "rxjs";
 
 @Component({
   selector: 'index',
@@ -19,6 +20,11 @@ export class IndexComponent implements OnInit {
     totalCount: 0,
     items: []
   };
+
+  isProjectsLoading: boolean = true;
+  projects: IProject[] = [];
+
+  search$ = new Subject<void>();
   filter: WebhookFilter = new WebhookFilter();
 
   constructor(
@@ -27,12 +33,11 @@ export class IndexComponent implements OnInit {
     private message: NzMessageService
   ) { }
 
-  isProjectsLoading: boolean = true;
-  projects: IProject[] = [];
-
   async ngOnInit() {
     await this.loadProjects();
     this.loadWebhooks();
+
+    this.search$.pipe(debounceTime(250)).subscribe(() => this.loadWebhooks());
   }
 
   async loadProjects() {
@@ -49,6 +54,14 @@ export class IndexComponent implements OnInit {
         next: webhooks => this.webhooks = webhooks,
         error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
       });
+  }
+
+  doSearch(reset: boolean = false) {
+    if (reset) {
+      this.filter.pageIndex = 1;
+    }
+
+    this.search$.next();
   }
 
   getDeliveryTooltip(delivery: LastDelivery) {
