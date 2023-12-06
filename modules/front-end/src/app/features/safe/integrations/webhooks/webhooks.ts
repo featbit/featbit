@@ -22,13 +22,25 @@ export interface LastDelivery {
 }
 
 export const WebhookEvents = [
-  { group: 'Feature Flag', label: "Update", value: "feature_flag.update" },
-  { group: 'Feature Flag', label: "Create", value: "feature_flag.create" },
-  { group: 'Feature Flag', label: "Delete", value: "feature_flag.delete" },
+  { group: 'Feature Flag', label: "Created", value: "feature_flag.created" },
+  { group: 'Feature Flag', label: "Toggled", value: "feature_flag.toggled" },
+  { group: 'Feature Flag', label: "Archived", value: "feature_flag.archived" },
+  { group: 'Feature Flag', label: "Restored", value: "feature_flag.restored" },
+  { group: 'Feature Flag', label: "Variation Changed", value: "feature_flag.variation_changed" },
+  { group: 'Feature Flag', label: "Off Variation Changed", value: "feature_flag.off_variation_changed" },
+  { group: 'Feature Flag', label: "Default Rule Changed", value: "feature_flag.default_rule_changed" },
+  { group: 'Feature Flag', label: "Target Users Changed", value: "feature_flag.target_users_changed" },
+  { group: 'Feature Flag', label: "Targeting Rules Changed", value: "feature_flag.targeting_rules_changed" },
+  { group: 'Feature Flag', label: "Basic Info Updated", value: "feature_flag.basic_info_updated" },
+  { group: 'Feature Flag', label: "Deleted", value: "feature_flag.deleted" },
 
-  { group: 'Segment', label: "Update", value: "segment.update" },
-  { group: 'Segment', label: "Create", value: "segment.create" },
-  { group: 'Segment', label: "Delete", value: "segment.delete" },
+  { group: 'Segment', label: "Created", value: "segment.created" },
+  { group: 'Segment', label: "Archived", value: "segment.archived" },
+  { group: 'Segment', label: "Restored", value: "segment.restored" },
+  { group: 'Segment', label: "Rules Changed", value: "segment.rules_changed" },
+  { group: 'Segment', label: "Target Users Changed", value: "segment.target_users_changed" },
+  { group: 'Segment', label: "Basic Info Updated", value: "segment.basic_info_updated" },
+  { group: 'Segment', label: "Deleted", value: "segment.deleted" }
 ]
 
 export interface PagedWebhook {
