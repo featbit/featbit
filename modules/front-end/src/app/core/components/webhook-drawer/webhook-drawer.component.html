@@ -161,6 +161,13 @@
           i18n-nzErrorTip="@@integrations.webhooks.payload-template-validation-message"
           nzExtra="The Handlebars payload template used to generate the webhook JSON request body."
           i18n-nzExtra="@@integrations.webhooks.payload-template-description">
+          <div class="select-template-type">
+            <span class="title" i18n="@@integrations.webhooks.selecte-template-type">Select Template Type</span>
+            <nz-radio-group formControlName="payloadTemplateType">
+              <label nz-radio nzValue="default" i18n="@@common.default">Default</label>
+              <label nz-radio nzValue="custom" i18n="@@common.custom">Custom</label>
+            </nz-radio-group>
+          </div>
           <nz-code-editor
             formControlName="payloadTemplate"
             [nzEditorOption]="{ language: 'handlebars', minimap: { enabled: false }, quickSuggestions: { strings: true } }"

@@ -28,6 +28,7 @@ export class WebhookDrawerComponent implements OnInit {
     url: FormControl<string>;
     events: FormArray;
     headers: FormArray;
+    payloadTemplateType: FormControl<string>;
     payloadTemplate: FormControl<string>;
     secret: FormControl<string>;
     isActive: FormControl<boolean>;
@@ -71,6 +72,7 @@ export class WebhookDrawerComponent implements OnInit {
       url: new FormControl(this._webhook?.url, [Validators.required, urlValidator]),
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
+      payloadTemplateType: new FormControl(this._webhook?.payloadTemplateType ?? 'default'),
       payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? "{}", [handlebarTemplateValidator]),
       secret: new FormControl(this._webhook?.secret),
       isActive: new FormControl(this._webhook?.isActive ?? true)
@@ -294,7 +296,7 @@ export class WebhookDrawerComponent implements OnInit {
   }
 
   doSubmit() {
-    const { name, url, scopes, events, headers, payloadTemplate, secret, isActive } = this.form.value;
+    const { name, url, scopes, events, headers, payloadTemplateType, payloadTemplate, secret, isActive } = this.form.value;
     const payload = {
       name,
       url,
@@ -303,6 +305,7 @@ export class WebhookDrawerComponent implements OnInit {
         .map(scope => `${scope.projectId}/${scope.envIds.join(',')}`),
       events: events.flatMap(group => group.events.filter(event => event.checked).map(event => event.value)),
       headers: headers.map(header => ({ key: header.key, value: header.value })),
+      payloadTemplateType,
       payloadTemplate,
       secret,
       isActive

@@ -2,25 +2,17 @@ using Application.Users;
 
 namespace Application.Webhooks;
 
-public class UpdateWebhook : IRequest<WebhookVm>
+public class UpdateWebhook : WebhookBase, IRequest<WebhookVm>
 {
     public Guid Id { get; set; }
+}
 
-    public string Name { get; set; }
-
-    public string[] Scopes { get; set; }
-
-    public string Url { get; set; }
-
-    public string[] Events { get; set; }
-
-    public KeyValuePair<string, string>[] Headers { get; set; }
-
-    public string PayloadTemplate { get; set; }
-
-    public string Secret { get; set; }
-
-    public bool IsActive { get; set; }
+public class UpdateWebhookValidator : AbstractValidator<UpdateWebhook>
+{
+    public UpdateWebhookValidator()
+    {
+        Include(new WebhookBaseValidator());
+    }
 }
 
 public class UpdateWebhookHandler : IRequestHandler<UpdateWebhook, WebhookVm>
@@ -45,6 +37,7 @@ public class UpdateWebhookHandler : IRequestHandler<UpdateWebhook, WebhookVm>
             request.Url,
             request.Events,
             request.Headers,
+            request.PayloadTemplateType,
             request.PayloadTemplate,
             request.Secret,
             request.IsActive,

@@ -14,6 +14,8 @@ public class Webhook : FullAuditedEntity
 
     public KeyValuePair<string, string>[] Headers { get; set; }
 
+    public string PayloadTemplateType { get; set; }
+
     public string PayloadTemplate { get; set; }
 
     public string Secret { get; set; }
@@ -29,6 +31,7 @@ public class Webhook : FullAuditedEntity
         string url,
         string[] events,
         KeyValuePair<string, string>[] headers,
+        string payloadTemplateType,
         string payloadTemplate,
         string secret,
         bool isActive,
@@ -42,6 +45,7 @@ public class Webhook : FullAuditedEntity
         Events = events ?? Array.Empty<string>();
 
         Headers = headers ?? Array.Empty<KeyValuePair<string, string>>();
+        PayloadTemplateType = payloadTemplateType;
         PayloadTemplate = payloadTemplate;
         Secret = secret ?? string.Empty;
 
@@ -55,6 +59,7 @@ public class Webhook : FullAuditedEntity
         string url,
         string[] events,
         KeyValuePair<string, string>[] headers,
+        string payloadTemplateType,
         string payloadTemplate,
         string secret,
         bool isActive,
@@ -67,6 +72,7 @@ public class Webhook : FullAuditedEntity
         Events = events ?? Array.Empty<string>();
 
         Headers = headers ?? Array.Empty<KeyValuePair<string, string>>();
+        PayloadTemplateType = payloadTemplateType;
         PayloadTemplate = payloadTemplate;
         Secret = secret ?? string.Empty;
 

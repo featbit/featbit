@@ -9,6 +9,7 @@ export interface Webhook {
   secret: string;
   events: string[];
   headers: { key: string; value: string; }[];
+  payloadTemplateType: string;
   payloadTemplate: string;
   isActive: boolean;
   creator: SimpleUser;

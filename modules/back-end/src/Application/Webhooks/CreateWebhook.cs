@@ -5,29 +5,13 @@ using Domain.Webhooks;
 
 namespace Application.Webhooks;
 
-public class CreateWebhook : IRequest<WebhookVm>
+public class CreateWebhook : WebhookBase, IRequest<WebhookVm>
 {
     public Guid OrgId { get; set; }
 
-    public string Name { get; set; }
-
-    public string[] Scopes { get; set; }
-
-    public string Url { get; set; }
-
-    public string[] Events { get; set; }
-
-    public KeyValuePair<string, string>[] Headers { get; set; }
-
-    public string PayloadTemplate { get; set; }
-
-    public string Secret { get; set; }
-
-    public bool IsActive { get; set; }
-
     public Webhook AsWebhook(Guid creatorId)
     {
-        var webhook = new Webhook(OrgId, Name, Scopes, Url, Events, Headers, PayloadTemplate, Secret, IsActive, creatorId);
+        var webhook = new Webhook(OrgId, Name, Scopes, Url, Events, Headers, PayloadTemplateType, PayloadTemplate, Secret, IsActive, creatorId);
         return webhook;
     }
 }
@@ -36,21 +20,7 @@ public class CreateWebhookValidator : AbstractValidator<CreateWebhook>
 {
     public CreateWebhookValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
-
-        RuleFor(x => x.Url)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("url"));
-
-        RuleFor(x => x.Scopes)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("scopes"));
-
-        RuleFor(x => x.Events)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("events"))
-            .Must(x => x.All(y => WebhookEvents.All.Contains(y))).WithErrorCode(ErrorCodes.Invalid("events"));
-
-        RuleFor(x => x.PayloadTemplate)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("payloadTemplate"));
+       Include(new WebhookBaseValidator());
     }
 }
 

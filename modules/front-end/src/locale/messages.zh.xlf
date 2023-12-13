@@ -454,7 +454,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">193</context>
+          <context context-type="linenumber">200</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -622,7 +622,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">313</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
@@ -846,7 +846,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">316</context>
+          <context context-type="linenumber">319</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
@@ -5401,11 +5401,43 @@
         </context-group>
         <target>用于生成 Webhook JSON 请求正文的 Handlebars 模板。</target>
       </trans-unit>
+      <trans-unit id="integrations.webhooks.selecte-template-type" datatype="html">
+        <source>Select Template Type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">165</context>
+        </context-group>
+        <target>选择模版类别</target>
+      </trans-unit>
+      <trans-unit id="common.default" datatype="html">
+        <source>Default</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">167</context>
+        </context-group>
+        <target>默认</target>
+      </trans-unit>
+      <trans-unit id="common.custom" datatype="html">
+        <source>Custom</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">168</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+        <target>自定义</target>
+      </trans-unit>
       <trans-unit id="integrations.webhooks.secret" datatype="html">
         <source>Secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">181</context>
         </context-group>
         <target>秘钥</target>
       </trans-unit>
@@ -5413,7 +5445,7 @@
         <source>Optionally, you can use a webhook secret to verify that a webhook delivery is from FeatBit.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">176</context>
+          <context context-type="linenumber">183</context>
         </context-group>
         <target>（可选）您可以使用改密钥来验证 Webhook 请求是否来自 FeatBit。</target>
       </trans-unit>
@@ -5421,7 +5453,7 @@
         <source>Active</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">184</context>
+          <context context-type="linenumber">191</context>
         </context-group>
         <target>是否启用</target>
       </trans-unit>
@@ -5429,7 +5461,7 @@
         <source>We will deliver event details when this hook is triggered.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">186</context>
+          <context context-type="linenumber">193</context>
         </context-group>
         <target>当触发此 Webhook 时，我们将提供事件详细信息。</target>
       </trans-unit>
@@ -5437,7 +5469,7 @@
         <source>Edit Webhook</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">282</context>
+          <context context-type="linenumber">284</context>
         </context-group>
         <target>编辑 Webhook</target>
       </trans-unit>
@@ -5445,7 +5477,7 @@
         <source>Add Webhook</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">283</context>
+          <context context-type="linenumber">285</context>
         </context-group>
         <target>添加 Webhook</target>
       </trans-unit>
@@ -6036,18 +6068,6 @@
           <context context-type="linenumber">35</context>
         </context-group>
         <target>事件类型</target>
-      </trans-unit>
-      <trans-unit id="common.custom" datatype="html">
-        <source>Custom: </source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
-          <context context-type="linenumber">47</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
-          <context context-type="linenumber">91</context>
-        </context-group>
-        <target>自定义事件：</target>
       </trans-unit>
       <trans-unit id="common.conversion" datatype="html">
         <source>Conversion</source>
