@@ -44,6 +44,15 @@ public class WebhookService : MongoDbService<Webhook>, IWebhookService
         return new PagedResult<Webhook>(totalCount, webhooks);
     }
 
+    public async Task<List<Webhook>> GetByEventsAsync(Guid orgId, string[] events)
+    {
+        var query = events.Length == 1
+            ? Queryable.Where(x => x.OrgId == orgId && x.Events.Contains(events[0]))
+            : Queryable.Where(x => x.OrgId == orgId && x.Events.Any(events.Contains));
+
+        return await query.ToListAsync();
+    }
+
     public async Task<bool> IsNameUsedAsync(Guid orgId, string name)
     {
         return await AnyAsync(x =>

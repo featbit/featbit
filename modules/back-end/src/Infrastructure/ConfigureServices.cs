@@ -2,6 +2,7 @@ using Application.Caches;
 using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
+using Domain.Webhooks;
 using Infrastructure.AccessTokens;
 using Infrastructure.Workspaces;
 using Infrastructure.AuditLogs;
@@ -72,6 +73,7 @@ public static class ConfigureServices
             httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]);
         });
         services.AddHttpClient<IAgentService, AgentService>();
+        services.AddHttpClient<IWebhookSender, WebhookSender>();
 
         // custom services
         services.AddTransient<IWorkspaceService, WorkspaceService>();

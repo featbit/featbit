@@ -1,6 +1,7 @@
 using System.Reflection;
 using Application.Bases.Behaviours;
 using Application.Users;
+using Application.Webhooks;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,7 @@ public static class ConfigureServices
     {
         // automapper
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
-        
+
         // fluent validation
         ValidatorOptions.Global.DefaultRuleLevelCascadeMode = CascadeMode.Stop;
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
@@ -20,10 +21,11 @@ public static class ConfigureServices
         // MediatR
         services.AddMediatR(Assembly.GetExecutingAssembly());
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-        
+
         // custom services
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
+        services.AddTransient<IWebhookHandler, WebhookHandler>();
 
         // add httpclient services
         services.AddHttpClient();

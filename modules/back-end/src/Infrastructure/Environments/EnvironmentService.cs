@@ -1,5 +1,8 @@
 using Domain.Environments;
+using Domain.Organizations;
+using Domain.Projects;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Environments;
@@ -8,6 +11,39 @@ public class EnvironmentService : MongoDbService<Environment>, IEnvironmentServi
 {
     public EnvironmentService(MongoDbClient mongoDb) : base(mongoDb)
     {
+    }
+
+    public async Task<ResourceDescriptor> GetResourceDescriptorAsync(Guid envId)
+    {
+        var organizations = MongoDb.QueryableOf<Organization>();
+        var projects = MongoDb.QueryableOf<Project>();
+        var environments = MongoDb.QueryableOf<Environment>();
+
+        var query = from environment in environments
+            join project in projects on environment.ProjectId equals project.Id
+            join organization in organizations on project.OrganizationId equals organization.Id
+            where environment.Id == envId
+            select new ResourceDescriptor
+            {
+                Organization = new IdNameProps
+                {
+                    Id = organization.Id,
+                    Name = organization.Name
+                },
+                Project = new IdNameProps
+                {
+                    Id = project.Id,
+                    Name = project.Name
+                },
+                Environment = new IdNameProps
+                {
+                    Id = environment.Id,
+                    Name = environment.Name
+                }
+            };
+
+        var descriptor = await query.FirstOrDefaultAsync();
+        return descriptor;
     }
 
     public async Task DeleteAsync(Guid id)
