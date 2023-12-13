@@ -5385,27 +5385,11 @@
         </context-group>
         <target>消息体模版</target>
       </trans-unit>
-      <trans-unit id="integrations.webhooks.payload-template-validation-message" datatype="html">
-        <source>Not a valid Handlebars template</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">160</context>
-        </context-group>
-        <target>非法的 Handlebars 模版</target>
-      </trans-unit>
-      <trans-unit id="integrations.webhooks.payload-template-description" datatype="html">
-        <source>The Handlebars payload template used to generate the webhook JSON request body.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">162</context>
-        </context-group>
-        <target>用于生成 Webhook JSON 请求正文的 Handlebars 模板。</target>
-      </trans-unit>
       <trans-unit id="integrations.webhooks.selecte-template-type" datatype="html">
         <source>Select Template Type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">165</context>
+          <context context-type="linenumber">159</context>
         </context-group>
         <target>选择模版类别</target>
       </trans-unit>
@@ -5413,7 +5397,7 @@
         <source>Default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">167</context>
+          <context context-type="linenumber">161</context>
         </context-group>
         <target>默认</target>
       </trans-unit>
@@ -5421,7 +5405,7 @@
         <source>Custom</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">168</context>
+          <context context-type="linenumber">162</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -5432,6 +5416,22 @@
           <context context-type="linenumber">91</context>
         </context-group>
         <target>自定义</target>
+      </trans-unit>
+      <trans-unit id="integrations.webhooks.payload-template-validation-message" datatype="html">
+        <source>Not a valid Handlebars template</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">167</context>
+        </context-group>
+        <target>非法的 Handlebars 模版</target>
+      </trans-unit>
+      <trans-unit id="integrations.webhooks.payload-template-description" datatype="html">
+        <source>The Handlebars payload template used to generate the webhook JSON request body.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">169</context>
+        </context-group>
+        <target>用于生成 Webhook JSON 请求正文的 Handlebars 模板。</target>
       </trans-unit>
       <trans-unit id="integrations.webhooks.secret" datatype="html">
         <source>Secret</source>
