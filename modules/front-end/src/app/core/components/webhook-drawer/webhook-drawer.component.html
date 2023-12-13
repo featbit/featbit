@@ -157,13 +157,13 @@
         <nz-form-label nzRequired i18n="@@integrations.webhooks.payload-template">Payload Template</nz-form-label>
         <nz-form-control
           class="payload-template-form-control"
-          nzErrorTip="Not a valid JSON payload template"
+          nzErrorTip="Not a valid Handlebars template"
           i18n-nzErrorTip="@@integrations.webhooks.payload-template-validation-message"
-          nzExtra="The JSON payload template used to generate the webhook request body."
+          nzExtra="The Handlebars payload template used to generate the webhook JSON request body."
           i18n-nzExtra="@@integrations.webhooks.payload-template-description">
           <nz-code-editor
             formControlName="payloadTemplate"
-            [nzEditorOption]="{ language: 'json', minimap: { enabled: false }, quickSuggestions: { strings: true } }"
+            [nzEditorOption]="{ language: 'handlebars', minimap: { enabled: false }, quickSuggestions: { strings: true } }"
             (nzEditorInitialized)="onEditorInit($event)">
           </nz-code-editor>
         </nz-form-control>

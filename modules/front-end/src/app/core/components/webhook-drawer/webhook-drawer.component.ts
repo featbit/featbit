@@ -1,8 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Webhook, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { trimJsonString } from "@utils/index";
-import { jsonValidator, urlValidator } from "@utils/form-validators";
+import { handlebarTemplateValidator, urlValidator } from "@utils/form-validators";
 import { WebhookService } from "@services/webhook.service";
 import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators";
 
@@ -72,7 +71,7 @@ export class WebhookDrawerComponent implements OnInit {
       url: new FormControl(this._webhook?.url, [Validators.required, urlValidator]),
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
-      payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? "{}", [jsonValidator]),
+      payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? "{}", [handlebarTemplateValidator]),
       secret: new FormControl(this._webhook?.secret),
       isActive: new FormControl(this._webhook?.isActive ?? true)
     });
@@ -304,7 +303,7 @@ export class WebhookDrawerComponent implements OnInit {
         .map(scope => `${scope.projectId}/${scope.envIds.join(',')}`),
       events: events.flatMap(group => group.events.filter(event => event.checked).map(event => event.value)),
       headers: headers.map(header => ({ key: header.key, value: header.value })),
-      payloadTemplate: trimJsonString(payloadTemplate),
+      payloadTemplate,
       secret,
       isActive
     };
