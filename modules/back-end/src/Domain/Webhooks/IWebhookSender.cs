@@ -2,5 +2,5 @@ namespace Domain.Webhooks;
 
 public interface IWebhookSender
 {
-    Task SendAsync(Webhook webhook, object payloadData);
+    Task SendAsync(Webhook webhook, object dataObject);
 }

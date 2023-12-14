@@ -53,7 +53,7 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
                 continue;
             }
 
-            // An audit log may also be created by an access token
+            // An operation can also be made by an access token through our Open Api, see "OpenApiHandler"
             var accessToken = await _accessTokenService.FindOneAsync(x => x.Id == item.CreatorId);
             if (accessToken != null)
             {

@@ -1,5 +1,5 @@
-using System.Dynamic;
 using Application.FeatureFlags;
+using Application.Segments;
 using Domain.SemanticPatch;
 using Domain.Webhooks;
 
@@ -7,21 +7,27 @@ namespace Application.Webhooks;
 
 public class WebhookHandler : IWebhookHandler
 {
-    private static readonly string[] CreatedEvents = { WebhookEvents.FlagEvents.Created };
-    private static readonly string[] DeletedEvents = { WebhookEvents.FlagEvents.Deleted };
+    private static readonly string[] FlagCreatedEvents = { WebhookEvents.FlagEvents.Created };
+    private static readonly string[] FlagDeletedEvents = { WebhookEvents.FlagEvents.Deleted };
+
+    private static readonly string[] SegmentCreatedEvents = { WebhookEvents.SegmentEvents.Created };
+    private static readonly string[] SegmentDeletedEvents = { WebhookEvents.SegmentEvents.Deleted };
 
     private readonly IWebhookService _webhookService;
     private readonly IWebhookSender _webhookSender;
     private readonly IEnvironmentService _environmentService;
+    private readonly IUserService _userService;
 
     public WebhookHandler(
         IWebhookService webhookService,
         IWebhookSender webhookSender,
-        IEnvironmentService environmentService)
+        IEnvironmentService environmentService,
+        IUserService userService)
     {
         _webhookService = webhookService;
         _webhookSender = webhookSender;
         _environmentService = environmentService;
+        _userService = userService;
     }
 
     public async Task HandleAsync(OnFeatureFlagChanged notification)
@@ -31,52 +37,74 @@ public class WebhookHandler : IWebhookHandler
         var dataChange = notification.DataChange;
         if (dataChange.IsCreation())
         {
-            events = CreatedEvents;
+            events = FlagCreatedEvents;
         }
         else if (dataChange.IsDeletion())
         {
-            events = DeletedEvents;
+            events = FlagDeletedEvents;
         }
         else
         {
             var instructions = FlagComparer.Compare(dataChange).ToArray();
-            events = instructions.Select(x => WebhookEvents.FlagEvents.FromInstructionKind(x.Kind)).ToArray();
+            events = instructions
+                .Select(x => WebhookEvents.FlagEvents.FromInstructionKind(x.Kind))
+                .Distinct()
+                .ToArray();
         }
 
         var flag = notification.Flag;
 
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
+        var @operator = await _userService.GetOperatorAsync(notification.OperatorId);
 
-        dynamic payloadData = ConstructPayloadData();
+        var dataObject = DataObjectBuilder
+            .New(events, @operator, flag.UpdatedAt)
+            .AddResourceDescriptor(resourceDescriptor)
+            .AddFeatureFlag(flag);
+
         foreach (var webhook in webhooks)
         {
-            await _webhookSender.SendAsync(webhook, payloadData);
+            await _webhookSender.SendAsync(webhook, dataObject);
+        }
+    }
+
+    public async Task HandleAsync(OnSegmentChange notification)
+    {
+        string[] events;
+
+        var dataChange = notification.DataChange;
+        if (dataChange.IsCreation())
+        {
+            events = SegmentCreatedEvents;
+        }
+        else if (dataChange.IsDeletion())
+        {
+            events = SegmentDeletedEvents;
+        }
+        else
+        {
+            var instructions = SegmentComparer.Compare(dataChange).ToArray();
+            events = instructions
+                .Select(x => WebhookEvents.SegmentEvents.FromInstructionKind(x.Kind))
+                .Distinct()
+                .ToArray();
         }
 
-        return;
+        var segment = notification.Segment;
 
-        ExpandoObject ConstructPayloadData()
+        var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
+        var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
+        var @operator = await _userService.GetOperatorAsync(notification.OperatorId);
+
+        var dataObject = DataObjectBuilder
+            .New(events, @operator, segment.UpdatedAt)
+            .AddResourceDescriptor(resourceDescriptor)
+            .AddSegment(segment);
+
+        foreach (var webhook in webhooks)
         {
-            dynamic expando = new ExpandoObject();
-            expando.@event = string.Join(',', events);
-
-            expando.organization = new ExpandoObject();
-            expando.organization.id = resourceDescriptor.Organization.Id;
-            expando.organization.name = resourceDescriptor.Organization.Name;
-
-            expando.project = new ExpandoObject();
-            expando.project.id = resourceDescriptor.Project.Id;
-            expando.project.name = resourceDescriptor.Project.Name;
-
-            expando.environment = new ExpandoObject();
-            expando.environment.id = resourceDescriptor.Environment.Id;
-            expando.environment.name = resourceDescriptor.Environment.Name;
-
-            expando.data = new ExpandoObject();
-            expando.data.@object = flag;
-
-            return expando;
+            await _webhookSender.SendAsync(webhook, dataObject);
         }
     }
 }

@@ -12,10 +12,10 @@ public class WebhookSender : IWebhookSender
         _client = client;
     }
 
-    public async Task SendAsync(Webhook webhook, object payloadData)
+    public async Task SendAsync(Webhook webhook, object dataObject)
     {
         var template = Handlebars.Compile(webhook.PayloadTemplate);
-        var payload = template(payloadData);
+        var payload = template(dataObject);
 
         Console.WriteLine("The payload is {0}", payload);
 

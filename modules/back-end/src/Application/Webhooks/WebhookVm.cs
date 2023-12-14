@@ -19,6 +19,8 @@ public class WebhookVm
 
     public KeyValuePair<string, string>[] Headers { get; set; }
 
+    public string PayloadTemplateType { get; set; }
+
     public string PayloadTemplate { get; set; }
 
     public string Secret { get; set; }

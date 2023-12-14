@@ -18,14 +18,19 @@ public class TestUserService : NullServiceBase<User>, IUserService
         return Task.FromResult(TestUser.Instance());
     }
 
-    public override Task<User> FindOneAsync(Expression<Func<User, bool>> predicate)
+    public override Task<User?> FindOneAsync(Expression<Func<User, bool>> predicate)
     {
         var user = TestUser.Instance();
-
         var func = predicate.Compile();
-        return func(user)
-            ? Task.FromResult(user)
-            : Task.FromResult<User>(null!);
+        var ret = func(user) ? user : null;
+
+        return Task.FromResult(ret);
+    }
+
+    public Task<string> GetOperatorAsync(Guid operatorId)
+    {
+        var @operator = operatorId == TestUser.Id ? TestUser.Email : string.Empty;
+        return Task.FromResult(@operator);
     }
 
     public Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids)

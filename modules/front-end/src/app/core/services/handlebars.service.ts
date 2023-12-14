@@ -21,8 +21,12 @@ export class HandlebarsService {
   }
 
   private registerHelpers() {
-    Handlebars.registerHelper('eq', function(a, b, options) {
+    Handlebars.registerHelper('eq', function (a, b, options) {
       return a === b ? options.fn(this) : options.inverse(this);
+    });
+
+    Handlebars.registerHelper('json', function (obj) {
+      return JSON.stringify(obj);
     });
   }
 }

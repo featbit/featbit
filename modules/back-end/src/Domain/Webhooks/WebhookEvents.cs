@@ -74,7 +74,7 @@ public static class WebhookEvents
         public const string Archived = "segment.archived";
         public const string Restored = "segment.restored";
         public const string RulesChanged = "segment.rules_changed";
-        public const string TargetUsersChanged = "feature_flag.target_users_changed";
+        public const string TargetUsersChanged = "segment.target_users_changed";
         public const string BasicInfoUpdated = "segment.basic_info_updated";
         public const string Deleted = "segment.deleted";
 

@@ -16,6 +16,50 @@ export interface Webhook {
   lastDelivery?: LastDelivery;
 }
 
+export const WebhookDefaultPayloadTemplate: string = `{
+  "event": "{{events}}",
+  "operator": "{{operator}}",
+  "happenedAt": "{{happenedAt}}",
+  "organization": {
+    "id": "{{organization.id}}",
+    "name": "{{organization.name}}"
+  },
+  "project": {
+    "id": "{{project.id}}",
+    "name": "{{project.name}}"
+  },
+  "environment": {
+    "id": "{{environment.id}}",
+    "name": "{{environment.name}}"
+  },
+  "data": {
+    "kind": "{{data.kind}}",
+    "object": {
+      "id": "{{data.object.id}}",
+      "name": "{{data.object.name}}",
+      "description": "{{data.object.description}}",
+{{#eq data.kind "feature flag"}}
+      "key": "{{data.object.key}}",
+      "variationType": "{{data.object.variationType}}",
+      "variations": {{json data.object.variations}},
+      "targetUsers": {{json data.object.targetUsers}},
+      "rules": {{json data.object.rules}},
+      "isEnabled": {{data.object.isEnabled}},
+      "disabledVariationId": "{{data.object.disabledVariationId}}",
+      "fallthrough": {{json data.object.fallthrough}},
+      "exptIncludeAllTargets": {{data.object.exptIncludeAllTargets}},
+      "tags": {{json data.object.tags}},
+{{/eq}}
+{{#eq data.kind "segment"}}
+      "included": {{json data.object.included}},
+      "excluded": {{json data.object.excluded}},
+      "rules": {{json data.object.rules}},
+{{/eq}}
+      "isArchived": {{data.object.isArchived}}
+    }
+  }
+}`;
+
 export interface LastDelivery {
   success: boolean;
   happenedAt: Date;
