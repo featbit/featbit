@@ -46,9 +46,17 @@ public class WebhookService : MongoDbService<Webhook>, IWebhookService
 
     public async Task<List<Webhook>> GetByEventsAsync(Guid orgId, string[] events)
     {
-        var query = events.Length == 1
-            ? Queryable.Where(x => x.OrgId == orgId && x.Events.Contains(events[0]))
-            : Queryable.Where(x => x.OrgId == orgId && x.Events.Any(events.Contains));
+        IMongoQueryable<Webhook> query;
+
+        if (events.Length == 1)
+        {
+            query = Queryable.Where(x => x.OrgId == orgId && x.Events.Contains(events[0]));
+        }
+        else
+        {
+            var values = events.Select(y => new StringOrRegularExpression(y));
+            query = Queryable.Where(x => x.OrgId == orgId && x.Events.AnyStringIn(values));
+        }
 
         return await query.ToListAsync();
     }
