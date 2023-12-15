@@ -26,7 +26,7 @@ services:
       - featbit-network
     ports:
       - "16686:16686" # Jaeger Web UI
-      # - "14317:4317" # trace port
+      - "14317:4317" # trace port
       # - "14268"
       # - "14250"
 
@@ -34,18 +34,20 @@ services:
     image: prom/prometheus:v2.42.0
     container_name: prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infra/otel/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - featbit-network
     ports:
       - "9090:9090"
-  seq:
-    image: datalust/seq:latest
-    ports:
-      - 80:80
-      - 5341:5341
-    environment:
-      ACCEPT_EULA: Y
+  # seq:
+  #   image: datalust/seq:latest
+  #   networks:
+  #     - featbit-network
+  #   ports:
+  #     - 8082:80
+  #     - 5341:5341
+  #   environment:
+  #     - ACCEPT_EULA=Y 
 networks:
   featbit-network:
     name: featbit-network

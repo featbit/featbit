@@ -74,17 +74,16 @@ exporters:
     endpoint: "https://<YOUR HOST>/api/prom/push"
     tls:
       insecure: true
+
   debug:
 
-  logging:
-    verbosity: info
-    sampling_initial: 1
-    sampling_thereafter: 1
-
   otlp/jaeger:
-    endpoint: "jaeger:4317"
+    endpoint: "jaeger:14317"
     tls:
       insecure: true
+  
+  otlp/seq:
+    endpoint: "http://seq:80/ingest/otlp/v1/logs"
   
   otlp/newrelic:
     endpoint: "https://otlp.nr-data.net:4317"
@@ -134,11 +133,11 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch, tail_sampling, attributes/dev]
-      exporters: [file/traces]
+      exporters: [file/traces, otlp/jaeger]
     metrics:
       receivers: [otlp]
       processors: [batch, attributes/dev]
-      exporters: [file/metrics]
+      exporters: [file/metrics, prometheus]
     logs:
       receivers: [otlp]
       processors: [batch, attributes/dev]
