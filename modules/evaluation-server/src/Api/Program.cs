@@ -2,13 +2,33 @@ using Api.Setup;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
+using Serilog.Sinks.OpenTelemetry;
 
 try
 {
+    var otel_exporter = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT_GRPC") ?? "http://otel-collector:4317";
+
     Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
         .Enrich.FromLogContext()
         .WriteTo.Console(new CompactJsonFormatter())
+        .WriteTo.OpenTelemetry(options =>
+        {
+            options.Endpoint = otel_exporter;
+
+            options.IncludedData = IncludedData.MessageTemplateTextAttribute
+                                | IncludedData.TraceIdField
+                                | IncludedData.SpanIdField
+                                | IncludedData.MessageTemplateMD5HashAttribute;
+            options.BatchingOptions.BatchSizeLimit = 2;
+            options.BatchingOptions.Period = TimeSpan.FromSeconds(2);
+            options.BatchingOptions.QueueLimit = 10;
+
+            options.ResourceAttributes = new Dictionary<string, object>
+            {
+                ["service.name"] = "featbit-els"
+            };
+        })
         .CreateLogger();
 
     WebApplication.CreateBuilder(args)
