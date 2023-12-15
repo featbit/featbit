@@ -1,0 +1,26 @@
+name: featbit-otel-collector
+version: "3"
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: otel-collector
+    volumes:
+      - ./infra/otel/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
+      - ./.logs/otel:/otel:rw
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension
+    networks:
+      - featbit-network
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.10.0.0/16
