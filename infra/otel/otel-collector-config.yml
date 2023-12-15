@@ -3,13 +3,101 @@ receivers:
     protocols:
       grpc:
       http:
+        cors:
+          allowed_origins:
+            - "*" # allow all origins will not work when allow_credentials is true
 
 processors:
+  # Set your deployment environment here. This will be added as a tag to all spans.
+  attributes/dev:
+    actions:
+      - key: deployment.environment
+        value: local
+        action: insert
+  #Limit Memory Usage
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 75
+    spike_limit_percentage: 15
   batch:
+    send_batch_size: 100
+    timeout: 10s
+  #use tail sampling to filter our noise traces
+  tail_sampling:
+    policies:
+      - name: drop_noisy_traces_url
+        type: string_attribute
+        string_attribute:
+          key: http.target
+          values:
+            - \/health
+            - \/metrics
+            - opentelemetry\.proto
+            - favicon\.ico
+          enabled_regex_matching: true
+          invert_match: true
+  # use the following to filter out traces from the api service
+  filter/api:
+    spans:
+      include:
+        match_type: strict
+        services:
+        - featbit-api
+      exclude:
+        match_type: regexp
+        attributes:
+          - key: net.peer.name
+            value: otel-collector
+  # use the following to filter out traces from the das service            
+  filter/das:
+    spans:
+      include:
+        match_type: strict
+        services:
+        - featbit-das
+  # use the following to filter out traces from the els service
+  filter/els:
+    spans:
+      include:
+        match_type: strict
+        services:
+        - featbit-els
 
 exporters:
-  otlp:
-    endpoint: otelcol:4317
+
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    const_labels:
+      label1: featbit
+
+  prometheusremotewrite:
+    endpoint: "https://<YOUR HOST>/api/prom/push"
+    tls:
+      insecure: true
+  debug:
+
+  logging:
+    verbosity: info
+    sampling_initial: 1
+    sampling_thereafter: 1
+
+  otlp/jaeger:
+    endpoint: "jaeger:4317"
+    tls:
+      insecure: true
+  
+  otlp/newrelic:
+    endpoint: "https://otlp.nr-data.net:4317"
+    headers:
+      api-key: "<YOUR API KEY>"
+
+  # sentry:
+  #   dsn: "<YOUR DSN HERE>"
+  #   environment: <YOUR ENV HERE>
+
+  # otlp:
+  #   endpoint: otelcol:4317
+
   file/metrics:
     path: /otel/metrics/metrics.json
     rotation:
@@ -38,17 +126,20 @@ extensions:
   zpages:
 
 service:
+  telemetry:
+    logs:
+      level: info
   extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, tail_sampling, attributes/dev]
       exporters: [file/traces]
     metrics:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, attributes/dev]
       exporters: [file/metrics]
     logs:
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, attributes/dev]
       exporters: [file/logs]
