@@ -81,5 +81,7 @@ COPY . /featbit_da
 WORKDIR /featbit_da
 RUN chmod +x start.sh docker-entrypoint.sh wait-for-it.sh
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install opentelemetry-distro==0.41b0 opentelemetry-exporter-otlp==1.21.0
+RUN opentelemetry-bootstrap -a install
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["/usr/bin/supervisord","-c","supervisord.conf"]

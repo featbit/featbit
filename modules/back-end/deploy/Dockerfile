@@ -27,6 +27,12 @@ RUN dotnet publish -c Release --no-build -o /app
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
+
+RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
+ARG OTEL_VERSION=1.0.2
+ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v${OTEL_VERSION}/otel-dotnet-auto-install.sh otel-dotnet-auto-install.sh
+RUN chmod +x otel-dotnet-auto-install.sh
+RUN export OTEL_DOTNET_AUTO_HOME="/app" && ./otel-dotnet-auto-install.sh
 WORKDIR /app
 COPY --from=publish /app ./
 # ensure we listen on any IP Address
@@ -34,7 +40,7 @@ ENV ASPNETCORE_URLS=http://*:5000
 EXPOSE 5000
 
 # health check
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD curl --fail --silent http://localhost:5000/health/liveness || exit 1
 
