@@ -65,7 +65,10 @@ public class WebhookHandler : IWebhookHandler
 
         foreach (var webhook in webhooks)
         {
-            await _webhookSender.SendAsync(webhook, dataObject);
+            var delivery = await _webhookSender.SendAsync(webhook, dataObject);
+
+            webhook.LastDelivery = new LastDelivery(delivery);
+            await _webhookService.UpdateAsync(webhook);
         }
     }
 
@@ -104,7 +107,10 @@ public class WebhookHandler : IWebhookHandler
 
         foreach (var webhook in webhooks)
         {
-            await _webhookSender.SendAsync(webhook, dataObject);
+            var delivery = await _webhookSender.SendAsync(webhook, dataObject);
+
+            webhook.LastDelivery = new LastDelivery(delivery);
+            await _webhookService.UpdateAsync(webhook);
         }
     }
 }

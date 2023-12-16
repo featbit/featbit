@@ -1,18 +1,17 @@
-using System.Net;
-
 namespace Domain.Webhooks;
 
 public class LastDelivery
 {
-    public bool Success => (int)Response >= 200 && (int)Response <= 299;
+    public bool Success { get; set; }
 
     public DateTime HappenedAt { get; set; }
 
-    public HttpStatusCode Response { get; set; }
+    public int? Response { get; set; }
 
-    public LastDelivery(HttpStatusCode response, DateTime happenedAt)
+    public LastDelivery(WebhookDelivery delivery)
     {
-        HappenedAt = happenedAt;
-        Response = response;
+        Success = delivery.Success;
+        HappenedAt = delivery.StartedAt;
+        Response = delivery.Response == null ? null : ((dynamic)delivery.Response).statusCode;
     }
 }

@@ -80,6 +80,6 @@ public class OnFeatureFlagChangedHandler : INotificationHandler<OnFeatureFlagCha
         await _messageProducer.PublishAsync(Topics.FeatureFlagChange, flag);
 
         // handle webhooks
-        await _webhookHandler.HandleAsync(notification);
+        _ = _webhookHandler.HandleAsync(notification);
     }
 }

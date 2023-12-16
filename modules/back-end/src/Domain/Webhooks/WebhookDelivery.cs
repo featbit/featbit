@@ -6,6 +6,8 @@ public class WebhookDelivery : Entity
 {
     public Guid WebhookId { get; set; }
 
+    public bool Success { get; set; }
+
     public string Events { get; set; }
 
     public object Request { get; set; }
@@ -52,8 +54,15 @@ public class WebhookDelivery : Entity
             body = string.Empty;
         }
 
+        Success = response.IsSuccessStatusCode;
         Response = new { statusCode, reasonPhrase, headers, body };
     }
 
     public void Ended() => EndedAt = DateTime.UtcNow;
+
+    public void SetError(object error)
+    {
+        Error = error;
+        Success = false;
+    }
 }

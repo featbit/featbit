@@ -84,6 +84,6 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
         await _messageProducer.PublishAsync(Topics.SegmentChange, notification);
 
         // handle webhooks
-        await _webhookHandler.HandleAsync(notification);
+        _ = _webhookHandler.HandleAsync(notification);
     }
 }

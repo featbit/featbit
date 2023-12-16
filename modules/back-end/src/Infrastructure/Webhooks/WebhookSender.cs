@@ -15,21 +15,20 @@ public class WebhookSender : IWebhookSender
     private readonly IWebhookService _webhookService;
     private readonly ILogger<WebhookSender> _logger;
 
-    private readonly int _maxAttempts;
-    private readonly TimeSpan _retryInterval;
+    private readonly int _maxAttempts = 3;
+    private readonly TimeSpan _retryInterval = TimeSpan.FromSeconds(2);
 
     public WebhookSender(HttpClient client, IWebhookService webhookService, ILogger<WebhookSender> logger)
     {
         _client = client;
         _webhookService = webhookService;
         _logger = logger;
-
-        _maxAttempts = 3;
-        _retryInterval = TimeSpan.FromSeconds(2);
     }
 
-    public async Task SendAsync(Webhook webhook, Dictionary<string, object> dataObject)
+    public async Task<WebhookDelivery> SendAsync(Webhook webhook, Dictionary<string, object> dataObject)
     {
+        var events = dataObject["events"].ToString()!;
+
         string payload;
         try
         {
@@ -39,24 +38,22 @@ public class WebhookSender : IWebhookSender
         }
         catch (Exception ex)
         {
-            var delivery = new WebhookDelivery(webhook.Id, dataObject["events"].ToString())
+            var delivery = new WebhookDelivery(webhook.Id, events);
+            var error = new
             {
-                Error = new
-                {
-                    message = "Cannot construct a valid JSON payload by using the template and the data object",
-                    dataObject,
-                    payloadTemplate = webhook.PayloadTemplate,
-                    exceptionMessage = ex.Message,
-                }
+                message = "Cannot construct a valid JSON payload by using the template and the data object",
+                dataObject,
+                payloadTemplate = webhook.PayloadTemplate,
+                exceptionMessage = ex.Message,
             };
+            delivery.SetError(error);
+
             await AddDeliveryAsync(delivery);
-            return;
+            return delivery;
         }
 
-        var deliveryId = Guid.NewGuid();
-        var request = NewWebhookRequest();
-        var success = false;
-
+        var deliveryId = Guid.NewGuid().ToString("D");
+        WebhookDelivery lastDelivery = null!;;
         for (var attempt = 0; attempt < _maxAttempts; attempt++)
         {
             if (attempt > 0)
@@ -64,7 +61,20 @@ public class WebhookSender : IWebhookSender
                 await Task.Delay(_retryInterval);
             }
 
+            lastDelivery = await SendCoreAsync();
+            if (lastDelivery.Success)
+            {
+                break;
+            }
+        }
+
+        return lastDelivery;
+
+        async Task<WebhookDelivery> SendCoreAsync()
+        {
             var delivery = new WebhookDelivery(webhook.Id, dataObject["events"].ToString());
+
+            var request = CreateWebhookHttpRequest(webhook, deliveryId, events, payload);
             delivery.AddRequest(webhook.Url, request.Headers, payload);
             delivery.Started();
             try
@@ -72,100 +82,98 @@ public class WebhookSender : IWebhookSender
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 var response = await _client.SendAsync(request, cts.Token);
                 await delivery.AddResponseAsync(response);
-
-                success = true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while sending webhook '{Name}'", webhook.Name);
-                delivery.Error = new
+
+                var error = new
                 {
                     message = ex.Message,
                     stackTrace = ex.StackTrace,
                 };
+                delivery.SetError(error);
             }
 
             delivery.Ended();
 
-            // for each attempt, add a delivery log
+            // Add delivery log
             await AddDeliveryAsync(delivery);
+            return delivery;
+        }
+    }
 
-            if (success)
-            {
-                break;
-            }
+    private static HttpRequestMessage CreateWebhookHttpRequest(
+        Webhook webhook,
+        string deliveryId,
+        string events,
+        string payload)
+    {
+        var uri = string.IsNullOrEmpty(webhook.Url) ? null : new Uri(webhook.Url, UriKind.RelativeOrAbsolute);
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri)
+        {
+            Version = HttpVersion.Version11,
+            VersionPolicy = HttpVersionPolicy.RequestVersionOrLower
+        };
+
+        // add built-in headers
+        httpRequest.Headers.Add(WebhookHeaders.Delivery, deliveryId);
+        httpRequest.Headers.Add(WebhookHeaders.Event, events);
+        httpRequest.Headers.Add(WebhookHeaders.HookId, webhook.Id.ToString("D"));
+        if (!string.IsNullOrWhiteSpace(webhook.Secret))
+        {
+            var signature = ComputeSignature();
+            httpRequest.Headers.Add(WebhookHeaders.Signature, $"sha256={signature}");
         }
 
-        return;
-
-        HttpRequestMessage NewWebhookRequest()
+        // add user specified headers
+        foreach (var header in webhook.Headers)
         {
-            var uri = string.IsNullOrEmpty(webhook.Url) ? null : new Uri(webhook.Url, UriKind.RelativeOrAbsolute);
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, uri)
+            if (httpRequest.Headers.Contains(header.Key))
             {
-                Version = HttpVersion.Version11,
-                VersionPolicy = HttpVersionPolicy.RequestVersionOrLower
-            };
-
-            // add built-in headers
-            httpRequest.Headers.Add(WebhookHeaders.Delivery, deliveryId.ToString("D"));
-            httpRequest.Headers.Add(WebhookHeaders.Event, dataObject["events"].ToString());
-            httpRequest.Headers.Add(WebhookHeaders.HookId, webhook.Id.ToString("D"));
-            if (!string.IsNullOrWhiteSpace(webhook.Secret))
-            {
-                var signature = ComputeSignature(webhook.Secret, payload);
-                httpRequest.Headers.Add(WebhookHeaders.Signature, $"sha256={signature}");
+                httpRequest.Headers.Remove(header.Key);
             }
 
-            // add user specified headers
-            foreach (var header in webhook.Headers)
+            httpRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+
+        // add content
+        var content = new StringContent(payload, Encoding.UTF8, MediaTypeNames.Application.Json);
+        httpRequest.Content = content;
+
+        return httpRequest;
+
+        string ComputeSignature()
+        {
+            var key = Encoding.UTF8.GetBytes(webhook.Secret);
+            using var hmac = new HMACSHA256(key);
+            var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
+
+            var signature = ToHexString(hash);
+            return signature;
+
+            string ToHexString(IReadOnlyCollection<byte> bytes)
             {
-                if (httpRequest.Headers.Contains(header.Key))
+                var builder = new StringBuilder(bytes.Count * 2);
+                foreach (var b in bytes)
                 {
-                    httpRequest.Headers.Remove(header.Key);
+                    builder.Append($"{b:x2}");
                 }
 
-                httpRequest.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
-
-            // add content
-            var content = new StringContent(payload, Encoding.UTF8, MediaTypeNames.Application.Json);
-            httpRequest.Content = content;
-
-            return httpRequest;
-        }
-
-        async Task AddDeliveryAsync(WebhookDelivery theDelivery)
-        {
-            try
-            {
-                await _webhookService.AddDeliveryAsync(theDelivery);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to add webhook delivery log");
+                return builder.ToString();
             }
         }
     }
 
-    private static string ComputeSignature(string secret, string payload)
+    private async Task AddDeliveryAsync(WebhookDelivery theDelivery)
     {
-        var key = Encoding.UTF8.GetBytes(secret);
-        using var hmac = new HMACSHA256(key);
-        var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(payload));
-
-        var signature = ToHexString(hash);
-        return signature;
-
-        string ToHexString(IReadOnlyCollection<byte> bytes)
+        try
         {
-            var builder = new StringBuilder(bytes.Count * 2);
-            foreach (var b in bytes)
-            {
-                builder.Append($"{b:x2}");
-            }
-
-            return builder.ToString();
+            await _webhookService.AddDeliveryAsync(theDelivery);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add webhook delivery log");
         }
     }
 }
