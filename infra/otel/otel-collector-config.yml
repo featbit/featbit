@@ -78,12 +78,14 @@ exporters:
   debug:
 
   otlp/jaeger:
-    endpoint: "jaeger:14317"
+    endpoint: "jaeger:4317"
     tls:
       insecure: true
   
-  otlp/seq:
-    endpoint: "http://seq:80/ingest/otlp/v1/logs"
+  otlphttp/seq:
+    endpoint: "http://seq:80/ingest/otlp"
+    tls:
+      insecure: true
   
   otlp/newrelic:
     endpoint: "https://otlp.nr-data.net:4317"
@@ -141,4 +143,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [batch, attributes/dev]
-      exporters: [file/logs]
+      exporters: [file/logs, otlphttp/seq]

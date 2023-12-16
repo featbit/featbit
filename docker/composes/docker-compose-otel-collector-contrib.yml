@@ -17,6 +17,13 @@ services:
       - 55679:55679 # zpages extension
     networks:
       - featbit-network
+    depends_on:
+      jaeger:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      seq:
+        condition: service_started
   jaeger:
     image: jaegertracing/all-in-one:1.46.0
     container_name: jaeger
@@ -26,9 +33,9 @@ services:
       - featbit-network
     ports:
       - "16686:16686" # Jaeger Web UI
-      - "14317:4317" # trace port
+      # - "14317" # trace port
       # - "14268"
-      # - "14250"
+      - "14250"
 
   prometheus:
     image: prom/prometheus:v2.42.0
@@ -39,15 +46,16 @@ services:
       - featbit-network
     ports:
       - "9090:9090"
-  # seq:
-  #   image: datalust/seq:latest
-  #   networks:
-  #     - featbit-network
-  #   ports:
-  #     - 8082:80
-  #     - 5341:5341
-  #   environment:
-  #     - ACCEPT_EULA=Y 
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    networks:
+      - featbit-network
+    ports:
+      - 8082:80
+      - 5341:5341
+    environment:
+      - ACCEPT_EULA=Y 
 networks:
   featbit-network:
     name: featbit-network
