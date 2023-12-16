@@ -12,6 +12,11 @@ public class WebhookService : MongoDbService<Webhook>, IWebhookService
     {
     }
 
+    public async Task AddDeliveryAsync(WebhookDelivery delivery)
+    {
+        await MongoDb.CollectionOf<WebhookDelivery>().InsertOneAsync(delivery);
+    }
+
     public async Task<PagedResult<Webhook>> GetListAsync(Guid orgId, WebhookFilter filter)
     {
         var query = Queryable.Where(x => x.OrgId == orgId);

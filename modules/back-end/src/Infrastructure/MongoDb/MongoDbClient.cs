@@ -77,7 +77,8 @@ public class MongoDbClient
 
         { typeof(AccessToken), "AccessTokens" },
         { typeof(RelayProxy), "RelayProxies" },
-        { typeof(Webhook), "Webhooks" }
+        { typeof(Webhook), "Webhooks" },
+        { typeof(WebhookDelivery), "WebhookDeliveries" }
     };
 
     public IMongoCollection<TEntity> CollectionOf<TEntity>()
