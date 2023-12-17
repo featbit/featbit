@@ -1,11 +1,12 @@
-using Application.FeatureFlags;
-using Application.Segments;
+using Domain.AuditLogs;
+using Domain.FeatureFlags;
+using Domain.Segments;
 
 namespace Application.Services;
 
 public interface IWebhookHandler
 {
-    Task HandleAsync(OnFeatureFlagChanged notification);
+    Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId);
 
-    Task HandleAsync(OnSegmentChange notification);
+    Task HandleAsync(Segment segment, DataChange dataChange, Guid operatorId);
 }

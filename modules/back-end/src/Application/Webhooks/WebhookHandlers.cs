@@ -1,5 +1,6 @@
-using Application.FeatureFlags;
-using Application.Segments;
+using Domain.AuditLogs;
+using Domain.FeatureFlags;
+using Domain.Segments;
 using Domain.SemanticPatch;
 using Domain.Webhooks;
 
@@ -30,11 +31,10 @@ public class WebhookHandler : IWebhookHandler
         _userService = userService;
     }
 
-    public async Task HandleAsync(OnFeatureFlagChanged notification)
+    public async Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId)
     {
         string[] events;
 
-        var dataChange = notification.DataChange;
         if (dataChange.IsCreation())
         {
             events = FlagCreatedEvents;
@@ -52,11 +52,9 @@ public class WebhookHandler : IWebhookHandler
                 .ToArray();
         }
 
-        var flag = notification.Flag;
-
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
-        var @operator = await _userService.GetOperatorAsync(notification.OperatorId);
+        var @operator = await _userService.GetOperatorAsync(operatorId);
 
         var dataObject = DataObjectBuilder
             .New(events, @operator, flag.UpdatedAt)
@@ -72,11 +70,10 @@ public class WebhookHandler : IWebhookHandler
         }
     }
 
-    public async Task HandleAsync(OnSegmentChange notification)
+    public async Task HandleAsync(Segment segment, DataChange dataChange, Guid operatorId)
     {
         string[] events;
 
-        var dataChange = notification.DataChange;
         if (dataChange.IsCreation())
         {
             events = SegmentCreatedEvents;
@@ -94,11 +91,9 @@ public class WebhookHandler : IWebhookHandler
                 .ToArray();
         }
 
-        var segment = notification.Segment;
-
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
-        var @operator = await _userService.GetOperatorAsync(notification.OperatorId);
+        var @operator = await _userService.GetOperatorAsync(operatorId);
 
         var dataObject = DataObjectBuilder
             .New(events, @operator, segment.UpdatedAt)
