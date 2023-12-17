@@ -54,6 +54,7 @@ export const WebhookDefaultPayloadTemplate: string = `{
       "included": {{json data.object.included}},
       "excluded": {{json data.object.excluded}},
       "rules": {{json data.object.rules}},
+      "flagReferences": {{json data.object.flagReferences}},
 {{/eq}}
       "isArchived": {{data.object.isArchived}}
     }

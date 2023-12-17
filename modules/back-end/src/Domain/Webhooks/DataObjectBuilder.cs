@@ -74,7 +74,8 @@ public static class DataObjectBuilder
 
     public static Dictionary<string, object> AddSegment(
         this Dictionary<string, object> dataObject,
-        Segment segment)
+        Segment segment,
+        IEnumerable<FlagReference> flagReferences)
     {
         dataObject["data"] = new Dictionary<string, object>
         {
@@ -87,7 +88,8 @@ public static class DataObjectBuilder
                 ["included"] = segment.Included,
                 ["excluded"] = segment.Excluded,
                 ["rules"] = segment.Rules,
-                ["isArchived"] = BooleanToString(segment.IsArchived)
+                ["isArchived"] = BooleanToString(segment.IsArchived),
+                ["flagReferences"] = flagReferences
             }
         };
 

@@ -18,17 +18,20 @@ public class WebhookHandler : IWebhookHandler
     private readonly IWebhookSender _webhookSender;
     private readonly IEnvironmentService _environmentService;
     private readonly IUserService _userService;
+    private readonly ISegmentService _segmentService;
 
     public WebhookHandler(
         IWebhookService webhookService,
         IWebhookSender webhookSender,
         IEnvironmentService environmentService,
-        IUserService userService)
+        IUserService userService,
+        ISegmentService segmentService)
     {
         _webhookService = webhookService;
         _webhookSender = webhookSender;
         _environmentService = environmentService;
         _userService = userService;
+        _segmentService = segmentService;
     }
 
     public async Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId)
@@ -94,11 +97,12 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
         var @operator = await _userService.GetOperatorAsync(operatorId);
+        var flagReferences = await _segmentService.GetFlagReferencesAsync(segment.EnvId, segment.Id);
 
         var dataObject = DataObjectBuilder
             .New(events, @operator, segment.UpdatedAt)
             .AddResourceDescriptor(resourceDescriptor)
-            .AddSegment(segment);
+            .AddSegment(segment, flagReferences);
 
         foreach (var webhook in webhooks)
         {
