@@ -60,6 +60,7 @@ export class WebhookDrawerComponent implements OnInit {
   @Input()
   set visible(visible: boolean) {
     this._visible = visible;
+    this.customPayloadTemplateSnapshot = '';
     if (visible) {
       this.initForm();
     }
