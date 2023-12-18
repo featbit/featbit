@@ -257,10 +257,10 @@ export class IndexComponent implements OnInit {
     let msg: string;
     if (data.isEnabled) {
       msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-        `<b>${data.name}</b> ` + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
+        `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
     } else {
       msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-        `<b>${data.name}</b> ` + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
+        `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
     }
 
     this.featureFlagService.toggleStatus(data.key)
