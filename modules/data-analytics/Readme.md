@@ -48,7 +48,6 @@ docker-compose -f docker-compose-dev.yml up da-server -d
 | `CLICKHOUSE_ENABLE_STORAGE_POLICY` |                                                          | `"False"`                                  |
 | `CLICKHOUSE_KAFKA_HOSTS`           | Kafka Servers used for Consumers                         | `"kafka:9092"`                             |
 | `CLICKHOUSE_REPLICATION`           |                                                          | `"True"`                                   |
-| `REDIS_URL`                        | Redis connection string                                  | `"redis://redis:6379/0"`                   |
 | `MONGO_URI`                        | Mongodb connection string                                | `"mongodb://admin:password@mongodb:27017"` |
 | `MONGO_HOST`                       | Mongodb host, used to check db liveness                  | `mongodb`                                  |
 | `MONGO_PORT`                       | Mongodb port, used to check db liveness                  | `27017`                                    |
