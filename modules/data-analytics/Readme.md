@@ -21,35 +21,42 @@ docker-compose -f docker-compose-dev.yml up da-server -d
 
 ```
 
-## Settings
+## Environment variables
 
-| Name                               | Description                                              | Value                                      |
-|------------------------------------|----------------------------------------------------------|--------------------------------------------|
-| `IS_PRO`                           | If `true` operates in PRO mode with kafka and clickhouse | `"false"`                                  |
-| `TEST`                             |                                                          | `"false"`                                  |
-| `SUFFIX`                           |                                                          | `""`                                       |
-| `KAFKA_HOSTS`                      | Kafka servers used by producers                          | `"kafka:29092"`                            |
-| `KAFKA_SECURITY_PROTOCOL`          |                                                          | `None`                                     | 
-| `KAFKA_SASL_MECHANISM`             |                                                          | `None`                                     |
-| `KAFKA_SASL_USER`                  |                                                          | `None`                                     |
-| `KAFKA_SASL_PASSWORD`              |                                                          | `None`                                     |
-| `KAFKA_PRODUCER_ENABLED`           |                                                          | `"True"`                                   |
-| `KAFKA_PREFIX`                     |                                                          | `""`                                       |
-| `CLICKHOUSE_HOST`                  |                                                          | `"clickhouse-server"`                      |
-| `CLICKHOUSE_CLUSTER`               |                                                          | `"featbit_ch_cluster"`                     |
-| `CLICKHOUSE_DATABASE`              |                                                          | `"featbit"` + SUFFIX                       |
-| `CLICKHOUSE_SECURE`                |                                                          | `"False"`                                  |
-| `CLICKHOUSE_USER`                  |                                                          | `"default"`                                |
-| `CLICKHOUSE_PASSWORD`              |                                                          | `""`                                       |
-| `CLICKHOUSE_CA`                    |                                                          | `"None"`                                   |
-| `CLICKHOUSE_VERIFY`                |                                                          | `"True"`                                   |
-| `CLICKHOUSE_CONN_POOL_MIN`         |                                                          | `20`                                       |
-| `CLICKHOUSE_CONN_POOL_MAX`         |                                                          | `1000`                                     |
-| `CLICKHOUSE_ENABLE_STORAGE_POLICY` |                                                          | `"False"`                                  |
-| `CLICKHOUSE_KAFKA_HOSTS`           | Kafka Servers used for Consumers                         | `"kafka:9092"`                             |
-| `CLICKHOUSE_REPLICATION`           |                                                          | `"True"`                                   |
-| `MONGO_URI`                        | Mongodb connection string                                | `"mongodb://admin:password@mongodb:27017"` |
-| `MONGO_HOST`                       | Mongodb host, used to check db liveness                  | `mongodb`                                  |
-| `MONGO_PORT`                       | Mongodb port, used to check db liveness                  | `27017`                                    |
-| `MONGODB_DB`                       | Mongodb database name                                    | `"featbit"`                                |
-| `CHECK_DB_LIVNESS`                 | Whether to check db liveness on app startup              | `true`                                     |
+| Name                             | Description                                              | Value                                      |
+|----------------------------------|----------------------------------------------------------|--------------------------------------------|
+| `IS_PRO`                         | If `true` operates in PRO mode with kafka and clickhouse | `"false"`                                  |
+| `KAFKA_HOSTS`                    | Kafka servers used by producers                          | `"kafka:9092"`                             |
+| `KAFKA_SECURITY_PROTOCOL`        | Security protocol used by Kafka                          | `"PLAINTEXT"`                              |
+| `KAFKA_SASL_MECHANISM`           | SASL mechanism used by Kafka                             | `""`                                       |
+| `KAFKA_SASL_USER`                | SASL user for Kafka                                      | `""`                                       |
+| `KAFKA_SASL_PASSWORD`            | SASL password for Kafka                                  | `""`                                       |
+| `CLICKHOUSE_HOST`                | Hostname of the ClickHouse server                        | `"clickhouse-server"`                      |
+| `CLICKHOUSE_ALT_HOST`            | Alternate hostname for the ClickHouse server             | `""`                                       |
+| `CLICKHOUSE_PORT`                | Port of the ClickHouse server                            | `9000`                                     |
+| `CLICKHOUSE_HTTP_PORT`           | HTTP port of the ClickHouse server                       | `8123`                                     |
+| `CLICKHOUSE_KAFKA_HOSTS`         | Kafka Servers used for Consumers                         | `"kafka:9092"`                             |
+| `CLICKHOUSE_USER`                | User for ClickHouse server                               | `"default"`                                |
+| `CLICKHOUSE_PASSWORD`            | Password for ClickHouse server                           | `""`                                       |
+| `CLICKHOUSE_DATABASE`            | Database name in ClickHouse server                       | `"featbit"`                                |
+| `CLICKHOUSE_CLUSTER`             | ClickHouse cluster name                                  | `"featbit_ch_cluster"`                     |
+| `CLICKHOUSE_REPLICATION`         | If `true`, enables replication in ClickHouse             | `"true"`                                   |
+| `CLICKHOUSE_SECURE`              | If `true`, enables secure connection to ClickHouse       | `"false"`                                  |
+| `CLICKHOUSE_VERIFY`              | If `true`, verifies the ClickHouse connection            | `"true"`                                   |
+| `CACHE_TYPE`                     | Type of cache used                                       | `"RedisCache"`                             |
+| `REDIS_USER`                     | User for Redis server                                    | `""`                                       |
+| `REDIS_PASSWORD`                 | Password for Redis server                                | `""`                                       |
+| `REDIS_DB`                       | Database number for Redis server                         | `0`                                        |
+| `REDIS_SSL`                      | If `true`, enables SSL for Redis                         | `"false"`                                  |
+| `REDIS_HOST`                     | Hostname of the Redis server                             | `"localhost"`                              |
+| `REDIS_PORT`                     | Port of the Redis server                                 | `6379`                                     |
+| `REDIS_CLUSTER_HOST_PORT_PAIRS`  | Host-port pairs for Redis cluster                        | `"localhost:6379"`                         |
+| `REDIS_SENTINEL_HOST_PORT_PAIRS` | Host-port pairs for Redis sentinel                       | `"localhost:26379"`                        |
+| `REDIS_SENTINEL_PASSWORD`        | Password for Redis sentinel                              | `""`                                       |
+| `REDIS_SENTINEL_MASTER_SET`      | Master set for Redis sentinel                            | `"mymaster"`                               |
+| `MONGO_HOST`                     | Mongodb host, used to check db liveness                  | `"mongodb"`                                |
+| `MONGO_PORT`                     | Mongodb port, used to check db liveness                  | `27017`                                    |
+| `MONGO_URI`                      | Mongodb connection string                                | `"mongodb://admin:password@mongodb:27017"` |
+| `MONGO_INITDB_DATABASE`          | Mongodb database name                                    | `"featbit"`                                |
+| `CHECK_DB_LIVNESS`               | Whether to check db liveness on app startup              | `"true"`                                   |
+| `TEST`                           | If `true`, runs the application in test mode             | `"false"`                                  |
