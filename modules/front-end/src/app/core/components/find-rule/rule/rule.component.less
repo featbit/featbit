@@ -21,13 +21,17 @@ section.rule-item {
   }
 
   .value {
-    input, nz-select, nz-input-number {
+    nz-input-number {
       width: 100%;
       line-height: 36px;
+    }
 
-      ::ng-deep .ant-input-number-handler-wrap {
-        border-radius: 8px;
-      }
+    nz-select {
+      line-height: 36px;
+    }
+
+    input {
+      height: 36px;
     }
   }
 
