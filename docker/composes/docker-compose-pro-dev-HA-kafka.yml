@@ -79,7 +79,9 @@ services:
       - featbit-network
     environment:
       KAFKA_HOSTS: kafka:9092
-      REDIS_URL: redis://redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka-consumer:9092
       IS_PRO: true

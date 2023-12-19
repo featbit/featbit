@@ -14,14 +14,14 @@ public class SdkController : PublicApiControllerBase
     }
 
     [HttpGet("server/latest-all")]
-    public async Task<IActionResult> GetServerSideSdkPayloadAsync()
+    public async Task<IActionResult> GetServerSideSdkPayloadAsync([FromQuery] long timestamp = 0)
     {
         if (!Authenticated)
         {
             return Unauthorized();
         }
 
-        var payload = await _dataSyncService.GetServerSdkPayloadAsync(EnvId, 0);
+        var payload = await _dataSyncService.GetServerSdkPayloadAsync(EnvId, timestamp);
 
         var bootstrap = new
         {

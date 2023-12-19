@@ -12,8 +12,18 @@ public class DefaultRedisClient : IRedisClient
 
     public DefaultRedisClient(IConfiguration configuration)
     {
+        var connectionString = configuration["Redis:ConnectionString"];
+        var options = ConfigurationOptions.Parse(connectionString);
+
+        // if user has specified a password in the configuration, use it
+        var password = configuration["Redis:Password"];
+        if (!string.IsNullOrWhiteSpace(password))
+        {
+            options.Password = password;
+        }
+
         _lazyConnection = new Lazy<ConnectionMultiplexer>(
-            () => ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"])
+            () => ConnectionMultiplexer.Connect(options)
         );
     }
 }

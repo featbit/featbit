@@ -1,116 +1,90 @@
-# Build and publish docker images for the following services:
-# UI
-# API Server
-# Data Analytics Server
-# Evaluation Server
-
 name: Publish Docker Images
 
 on:
-  release:
-    types: [ created ]
   workflow_dispatch:
     inputs:
       version:
-        description: "Dockerhub image version"
+        description: "Image version (For example: 1.0.0)"
         required: true
+      build-latest:
+        description: "Build and publish latest image"
+        type: boolean
+        default: false
+        required: false
+      debug:
+        description: "Debug mode"
+        type: boolean
+        default: false
+        required: false
 
 env:
-  TEST_TAG: test
   LATEST_TAG: latest
-  VERSION_TAG: ${{ github.event.inputs.version || github.ref_name }}
-  APP_UI: featbit-ui
-  APP_API: featbit-api-server
-  APP_DA: featbit-data-analytics-server
-  APP_EVAL: featbit-evaluation-server
+  VERSION_TAG: ${{ github.event.inputs.version }}
 
 jobs:
   build-publish:
-    name: build and publish image to docker hub
+    name: Build and publish image to Docker Hub
     runs-on: ubuntu-latest
     environment: Production
+    strategy:
+      matrix:
+        include:
+          - app: featbit-ui
+            build-dir: modules/front-end
+            file: ./Dockerfile
+          - app: featbit-api-server
+            build-dir: modules/back-end
+            file: ./deploy/Dockerfile
+          - app: featbit-data-analytics-server
+            build-dir: modules/data-analytics
+            file: ./Dockerfile
+          - app: featbit-evaluation-server
+            build-dir: modules/evaluation-server
+            file: ./deploy/Dockerfile
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Dump GitHub context (run if debug is true)
+        if: ${{ github.event.inputs.debug == 'true' }}
+        run: echo "${{ toJson(github) }}"
 
-      - # Add support for more platforms with QEMU
-        # https://github.com/docker/setup-qemu-action
-        name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+      - name: Normal (run if debug is true)
+        if: ${{ github.event.inputs.debug == 'true' }}
+        run: echo "debug is true"
+
+      - name: Conditional (run if debug and build-latest is true)
+        if: ${{ github.event.inputs.debug == 'true' && github.event.inputs.build-latest == 'true' }}
+        run: echo "debug and build-latest is true"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Build and push - UI
-        uses: docker/build-push-action@v3
+      - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
+        uses: docker/build-push-action@v5
         with:
-          context: "{{defaultContext}}:modules/front-end"
-          file: ./Dockerfile
+          context: "{{defaultContext}}:${{ matrix.build-dir }}"
+          file: ${{ matrix.file }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.VERSION_TAG }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}:${{ env.LATEST_TAG }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push - API-Server
-        uses: docker/build-push-action@v3
+      - name: Build and push - ${{ matrix.app }} (${{ env.LATEST_TAG }})
+        if: ${{ github.event.inputs.build-latest == 'true' }}
+        uses: docker/build-push-action@v5
         with:
-          context: "{{defaultContext}}:modules/back-end"
-          file: ./deploy/Dockerfile
+          context: "{{defaultContext}}:${{ matrix.build-dir }}"
+          file: ${{ matrix.file }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.VERSION_TAG }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}:${{ env.LATEST_TAG }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Build and push - Data-Analytics-Server
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:modules/data-analytics"
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.VERSION_TAG }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}:${{ env.LATEST_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push - Evaluation-Server
-        uses: docker/build-push-action@v3
-        with:
-          context: "{{defaultContext}}:modules/evaluation-server"
-          file: ./deploy/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.VERSION_TAG }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}:${{ env.LATEST_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_UI }}
-
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_API }}
-
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_DA }}
-
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.APP_EVAL }}
