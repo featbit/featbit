@@ -38,8 +38,8 @@ public class FlagInstructions : IEnumerable<FlagInstruction>
         { FlagInstructionKind.RemoveRuleConditions, (_, value) => new RemoveConditionsInstruction(value.Deserialize<RuleConditionIds>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.AddRuleConditions, (_, value) => new AddConditionsInstruction(value.Deserialize<RuleConditions>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.UpdateRuleCondition, (_, value) => new UpdateConditionInstruction(value.Deserialize<RuleCondition>(ReusableJsonSerializerOptions.Web)) },
-        { FlagInstructionKind.RemoveValuesFromRuleCondition, (_, value) => new RemoveValuesFromConditionInstruction(value.Deserialize<RuleConditionValues>(ReusableJsonSerializerOptions.Web)) },
-        { FlagInstructionKind.AddValuesToRuleCondition, (_, value) => new AddValuesToConditionInstruction(value.Deserialize<RuleConditionValues>(ReusableJsonSerializerOptions.Web)) },
+        { FlagInstructionKind.RemoveValuesFromRuleCondition, (kind, value) => new RuleConditionValuesInstruction(kind, value.Deserialize<RuleConditionValues>(ReusableJsonSerializerOptions.Web)) },
+        { FlagInstructionKind.AddValuesToRuleCondition, (kind, value) => new RuleConditionValuesInstruction(kind, value.Deserialize<RuleConditionValues>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.UpdateRuleVariationOrRollouts, (_, value) => new UpdateVariationOrRolloutInstruction(value.Deserialize<RuleVariations>(ReusableJsonSerializerOptions.Web)) },
     };
 
