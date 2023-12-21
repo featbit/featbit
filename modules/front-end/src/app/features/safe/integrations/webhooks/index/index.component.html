@@ -122,17 +122,25 @@
             <i nz-icon nzType="icons:icon-edit"></i>
             <span i18n="@@common.edit">Edit</span>
           </button>
-          <button
-            nz-button
-            nzType="link"
-            nz-popconfirm
-            nzPopconfirmTitle="Are you sure to remove it?"
-            i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
-            nzPopconfirmPlacement="top"
-            (nzOnConfirm)="remove(item.id)">
-            <i nz-icon nzType="icons:icon-delete"></i>
-            <span i18n="@@common.remove">Remove</span>
-          </button>
+          <a nz-dropdown nzTrigger="hover" [nzDropdownMenu]="actions">
+            <span i18n="@@common.more">More</span>&nbsp;
+            <span nz-icon nzType="down"></span>
+          </a>
+          <nz-dropdown-menu #actions="nzDropdownMenu">
+            <ul nz-menu>
+              <li nz-menu-item>Test</li>
+              <li
+                nzDanger
+                nz-menu-item
+                nz-popconfirm
+                nzPopconfirmTitle="Are you sure to remove it?"
+                i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
+                nzPopconfirmPlacement="top"
+                (nzOnConfirm)="remove(item.id)">
+                <span i18n="@@common.remove">Remove</span>
+              </li>
+            </ul>
+          </nz-dropdown-menu>
         </td>
       </tr>
       </tbody>
