@@ -110,7 +110,13 @@
           </ng-template>
         </td>
         <td class="events">
-          <span nz-tooltip [nzTooltipTitle]="eventsTooltip">{{ item.events }}</span>
+          <span
+            nz-tooltip
+            nzTooltipPlacement="topLeft"
+            [nzTooltipOverlayStyle]="{'max-width': '270px'}"
+            [nzTooltipTitle]="eventsTooltip">
+            {{ item.events }}
+          </span>
           <ng-template #eventsTooltip>
             <ul>
               <li *ngFor="let event of item.events;">{{ event }}</li>
