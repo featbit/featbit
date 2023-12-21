@@ -17,7 +17,7 @@ public static class InstructionDescriptor
             FlagInstructionKind.RestoreFlag => $"Restore flag: {current.Name}",
 
             FlagInstructionKind.UpdateDisabledVariation => instruction.Value is string disabledVariationId
-                ? $"Disabled variation updated to '{origin.Variations.FirstOrDefault(v => v.Id == disabledVariationId)?.Name}'"
+                ? $"Disabled variation updated to '{current.Variations.FirstOrDefault(v => v.Id == disabledVariationId)?.Name}'"
                 : string.Empty,
 
             // VariationChanged 
@@ -61,7 +61,7 @@ public static class InstructionDescriptor
                 or FlagInstructionKind.AddValuesToRuleCondition
                 or FlagInstructionKind.RemoveValuesFromRuleCondition
                 or FlagInstructionKind.UpdateRuleVariationOrRollouts => instruction.Value is TheRuleId theRuleId
-                    ? $"Update rule: {origin.Rules.FirstOrDefault(r => r.Id == theRuleId.RuleId)?.Name}"
+                    ? $"Update rule: {current.Rules.FirstOrDefault(r => r.Id == theRuleId.RuleId)?.Name}"
                     : string.Empty,
 
             // BasicInfoUpdated
@@ -129,14 +129,14 @@ public static class InstructionDescriptor
                 or SegmentInstructionKind.UpdateRuleCondition
                 or SegmentInstructionKind.AddValuesToRuleCondition
                 or SegmentInstructionKind.RemoveValuesFromRuleCondition => instruction.Value is TheRuleId theRuleId
-                    ? $"Update rule: {origin.Rules.FirstOrDefault(r => r.Id == theRuleId.RuleId)?.Name}"
+                    ? $"Update rule: {current.Rules.FirstOrDefault(r => r.Id == theRuleId.RuleId)?.Name}"
                     : string.Empty,
 
             // TargetUsersChanged
-            SegmentInstructionKind.AddTargetUsersToIncluded => "Add target users to included",
-            SegmentInstructionKind.RemoveTargetUsersFromIncluded => "Remove target users from included",
-            SegmentInstructionKind.AddTargetUsersToExcluded => "Add target users to excluded",
-            SegmentInstructionKind.RemoveTargetUsersFromExcluded => "Remove target users from excluded",
+            SegmentInstructionKind.AddTargetUsersToIncluded => "Add including users",
+            SegmentInstructionKind.RemoveTargetUsersFromIncluded => "Remove including users",
+            SegmentInstructionKind.AddTargetUsersToExcluded => "Add excluding users",
+            SegmentInstructionKind.RemoveTargetUsersFromExcluded => "Remove excluding users",
 
             // BasicInfoUpdated
             SegmentInstructionKind.UpdateName =>
