@@ -43,7 +43,7 @@ export class MonacoService {
       ];
     }
 
-    monaco.languages.registerCompletionItemProvider("json", {
+    monaco.languages.registerCompletionItemProvider("handlebars", {
       provideCompletionItems: function (model, position) {
         // Get the text before the cursor
         const word = model.getWordUntilPosition(position);
