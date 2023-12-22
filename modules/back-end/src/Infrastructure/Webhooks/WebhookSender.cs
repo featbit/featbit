@@ -53,7 +53,7 @@ public class WebhookSender : IWebhookSender
         }
 
         var deliveryId = Guid.NewGuid().ToString("D");
-        WebhookDelivery lastDelivery = null!;;
+        WebhookDelivery lastDelivery = null!;
         for (var attempt = 0; attempt < _maxAttempts; attempt++)
         {
             if (attempt > 0)
