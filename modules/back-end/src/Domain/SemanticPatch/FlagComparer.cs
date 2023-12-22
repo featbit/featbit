@@ -423,7 +423,8 @@ public static class FlagComparer
                     Values = removedValues
                 };
 
-                var instruction = new RemoveValuesFromConditionInstruction(conditionValues);
+                var instruction = 
+                    new RuleConditionValuesInstruction(FlagInstructionKind.RemoveValuesFromRuleCondition, conditionValues);
                 instructions.Add(instruction);
             }
 
@@ -436,7 +437,8 @@ public static class FlagComparer
                     Values = addedValues
                 };
 
-                var instruction = new AddValuesToConditionInstruction(conditionValues);
+                var instruction =
+                    new RuleConditionValuesInstruction(FlagInstructionKind.AddValuesToRuleCondition, conditionValues);
                 instructions.Add(instruction);
             }
         }
