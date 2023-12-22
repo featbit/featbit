@@ -56,6 +56,7 @@ export class ConnectAnSdkComponent implements OnChanges {
 
   buildSnippets() {
     this.jsSnippet = this.buildJsSnippet();
+    this.nodeJsSnippet = this.buildNodeJsSnippet();
     this.pythonSnippet = this.buildPythonSnippet();
     this.javaSnippet = this.buildJavaSnippet();
     this.csharpSnippet = this.buildCSharpSnippet();
@@ -69,6 +70,7 @@ export class ConnectAnSdkComponent implements OnChanges {
   }
 
   jsSnippet: string;
+  nodeJsSnippet: string;
   pythonSnippet: string;
   javaSnippet: string;
   csharpSnippet: string;
@@ -79,6 +81,42 @@ export class ConnectAnSdkComponent implements OnChanges {
     name: 'tester',
     group: 'qa'
   };
+
+  private buildNodeJsSnippet(): string {
+    return `
+const fbClient = require('@featbit/node-server-sdk');
+
+const fbClient = new fb.FbClientBuilder()
+    .sdkKey('${this.secret}')
+    .streamingUri('${this.streamingURL}')
+    .eventsUri('${this.eventURL}')
+    .build();
+
+const user = new fb.UserBuilder()
+    .key('aaa')
+    .build();
+
+// subscribe to flag change
+fbClient.on('update:${this.flagKey}',  (ee) => {
+    const variation = fbClient.boolVariation('${this.flagKey}', user, false);
+})
+
+async function run() {
+    try {
+        await fbClient.waitForInitialization();
+    } catch(err) {
+        //console.log(err);
+    }
+
+    const boolVariation = fbClient.boolVariation(${this.flagKey}, user, false);
+
+    // make sure the events are flushed
+    fbClient.flush();
+}
+
+run()
+`;
+  }
 
   private buildJsSnippet(): string {
     return `
