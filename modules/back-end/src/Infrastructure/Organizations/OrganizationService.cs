@@ -15,6 +15,25 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
     {
     }
 
+    public async Task<string[]> GetScopesAsync(ScopeString[] scopeStrings)
+    {
+        var projectIds = scopeStrings.Select(x => x.ProjectId);
+        var envIds = scopeStrings.SelectMany(x => x.EnvIds);
+
+        var projects =
+            await MongoDb.QueryableOf<Project>().Where(x => projectIds.Contains(x.Id)).ToListAsync();
+        var environments =
+            await MongoDb.QueryableOf<Environment>().Where(x => envIds.Contains(x.Id)).ToListAsync();
+
+        var aggregation =
+            from scopeString in scopeStrings
+            let project = projects.FirstOrDefault(x => x.Id == scopeString.ProjectId)
+            let envs = environments.Where(x => scopeString.EnvIds.Contains(x.Id))
+            select $"{project?.Name}/{string.Join(',', envs.Select(x => x.Name))}";
+
+        return aggregation.ToArray();
+    }
+
     public async Task<ICollection<Organization>> GetListAsync(Guid userId)
     {
         var organizations = MongoDb.QueryableOf<Organization>();

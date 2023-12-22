@@ -32,5 +32,9 @@ public class DataChange
         return this;
     }
 
-    public bool IsCreationOrDeletion() => string.IsNullOrWhiteSpace(Previous) || string.IsNullOrWhiteSpace(Current);
+    public bool IsCreation() => string.IsNullOrWhiteSpace(Previous);
+
+    public bool IsDeletion() => string.IsNullOrWhiteSpace(Current);
+
+    public bool IsCreationOrDeletion() => IsCreation() || IsDeletion();
 }

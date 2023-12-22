@@ -91,6 +91,8 @@ import {
 import { ChangeListModule } from "@core/components/change-list/change-list.module";
 import { PipesModule } from "@core/pipes/pipes.module";
 import { LicenseComponent } from "@core/components/license/license.component";
+import { WebhookDrawerComponent } from './components/webhook-drawer/webhook-drawer.component';
+import { HandlebarsService } from "@services/handlebars.service";
 
 @NgModule({
   declarations: [
@@ -126,7 +128,8 @@ import { LicenseComponent } from "@core/components/license/license.component";
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
     PrismComponent,
-    LicenseComponent
+    LicenseComponent,
+    WebhookDrawerComponent
   ],
   imports: [
     CommonModule,
@@ -220,7 +223,12 @@ import { LicenseComponent } from "@core/components/license/license.component";
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
     PrismComponent,
-    LicenseComponent
+    LicenseComponent,
+    WebhookDrawerComponent
   ]
 })
-export class CoreModule { }
+export class CoreModule {
+  constructor(handlebars: HandlebarsService) {
+    handlebars.init();
+  }
+}

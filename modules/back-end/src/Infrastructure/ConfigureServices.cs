@@ -2,6 +2,7 @@ using Application.Caches;
 using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
+using Domain.Webhooks;
 using Infrastructure.AccessTokens;
 using Infrastructure.Workspaces;
 using Infrastructure.AuditLogs;
@@ -30,6 +31,7 @@ using Infrastructure.Segments;
 using Infrastructure.Targeting;
 using Infrastructure.Triggers;
 using Infrastructure.Users;
+using Infrastructure.Webhooks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 
@@ -71,6 +73,7 @@ public static class ConfigureServices
             httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]);
         });
         services.AddHttpClient<IAgentService, AgentService>();
+        services.AddHttpClient<IWebhookSender, WebhookSender>();
 
         // custom services
         services.AddTransient<IWorkspaceService, WorkspaceService>();
@@ -98,6 +101,7 @@ public static class ConfigureServices
         services.AddTransient<IFlagRevisionService, FlagRevisionService>();
         services.AddTransient<IFlagChangeRequestService, FlagChangeRequestService>();
         services.AddTransient<IFeatureFlagAppService, FeatureFlagAppService>();
+        services.AddTransient<IWebhookService, WebhookService>();
 
         return services;
     }

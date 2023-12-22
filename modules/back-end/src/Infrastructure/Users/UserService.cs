@@ -1,3 +1,4 @@
+using Domain.AccessTokens;
 using Domain.Users;
 using Domain.Workspaces;
 using MongoDB.Driver;
@@ -9,6 +10,24 @@ public class UserService : MongoDbService<User>, IUserService
 {
     public UserService(MongoDbClient mongoDb) : base(mongoDb)
     {
+    }
+
+    public async Task<string> GetOperatorAsync(Guid operatorId)
+    {
+        if (operatorId == SystemUser.Id)
+        {
+            return "System";
+        }
+
+        var user = await FindOneAsync(x => x.Id == operatorId);
+        if (user is not null)
+        {
+            return user.Name ?? user.Email;
+        }
+
+        // An operation can also be made by an access token through our Open Api, see "OpenApiHandler"
+        var accessToken = await MongoDb.QueryableOf<AccessToken>().FirstOrDefaultAsync(x => x.Id == operatorId);
+        return accessToken?.Name ?? string.Empty;
     }
 
     public async Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids)

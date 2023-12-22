@@ -10,13 +10,13 @@ public class RestoreFeatureFlag : IRequest<bool>
     public string Key { get; set; }
 }
 
-public class UnArchiveFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, bool>
+public class RestoreFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, bool>
 {
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
 
-    public UnArchiveFeatureFlagHandler(
+    public RestoreFeatureFlagHandler(
         IFeatureFlagService service,
         ICurrentUser currentUser,
         IPublisher publisher)

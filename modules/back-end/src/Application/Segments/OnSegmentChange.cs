@@ -58,15 +58,18 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
     private readonly IMessageProducer _messageProducer;
     private readonly ICacheService _cache;
     private readonly IAuditLogService _auditLogService;
+    private readonly IWebhookHandler _webhookHandler;
 
     public OnSegmentChangeHandler(
         IMessageProducer messageProducer,
         ICacheService cache,
-        IAuditLogService auditLogService)
+        IAuditLogService auditLogService,
+        IWebhookHandler webhookHandler)
     {
         _messageProducer = messageProducer;
         _cache = cache;
         _auditLogService = auditLogService;
+        _webhookHandler = webhookHandler;
     }
 
     public async Task Handle(OnSegmentChange notification, CancellationToken cancellationToken)
@@ -79,5 +82,8 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
 
         // publish segment change message
         await _messageProducer.PublishAsync(Topics.SegmentChange, notification);
+
+        // handle webhooks
+        _ = _webhookHandler.HandleAsync(notification.Segment, notification.DataChange, notification.OperatorId);
     }
 }

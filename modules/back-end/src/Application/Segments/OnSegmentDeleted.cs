@@ -10,17 +10,18 @@ public class OnSegmentDeleted : INotification
 
     public Guid OperatorId { get; set; }
 
+    public DataChange DataChange { get; set; }
+
     public OnSegmentDeleted(Segment segment, Guid operatorId)
     {
         Segment = segment;
         OperatorId = operatorId;
+        DataChange = new DataChange(segment).To(null);
     }
 
     public AuditLog GetAuditLog()
     {
-        var dataChange = new DataChange(Segment).To(null);
-
-        var auditLog = AuditLog.For(Segment, Operations.Remove, dataChange, string.Empty, OperatorId);
+        var auditLog = AuditLog.For(Segment, Operations.Remove, DataChange, string.Empty, OperatorId);
         return auditLog;
     }
 }
@@ -29,11 +30,16 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
 {
     private readonly ICacheService _cache;
     private readonly IAuditLogService _auditLogService;
+    private readonly IWebhookHandler _webhookHandler;
 
-    public OnSegmentDeletedHandler(ICacheService cache, IAuditLogService auditLogService)
+    public OnSegmentDeletedHandler(
+        ICacheService cache,
+        IAuditLogService auditLogService,
+        IWebhookHandler webhookHandler)
     {
         _cache = cache;
         _auditLogService = auditLogService;
+        _webhookHandler = webhookHandler;
     }
 
     public async Task Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
@@ -45,5 +51,8 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
         var envId = notification.Segment.EnvId;
         var segmentId = notification.Segment.Id;
         await _cache.DeleteSegmentAsync(envId, segmentId);
+
+        // handle webhooks
+        await _webhookHandler.HandleAsync(notification.Segment, notification.DataChange, notification.OperatorId);
     }
 }

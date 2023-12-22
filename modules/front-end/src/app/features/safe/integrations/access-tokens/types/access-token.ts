@@ -1,11 +1,11 @@
 import { IPolicy } from "@features/safe/iam/types/policy";
-import { IMember } from "@features/safe/iam/types/member";
 import { IPolicyStatement } from "@shared/policy";
+import { SimpleUser } from "@shared/users";
 
 export interface IAccessToken {
   id?: string;
   type: AccessTokenTypeEnum;
-  creator?: IMember;
+  creator?: SimpleUser;
   status?: string;
   token?: string;
   name: string;
