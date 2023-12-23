@@ -124,9 +124,9 @@
           </ng-template>
         </td>
         <td class="actions">
-          <button nz-button nzType="link" (click)="openDrawer(item)">
-            <i nz-icon nzType="icons:icon-edit"></i>
-            <span i18n="@@common.edit">Edit</span>
+          <button nz-button nzType="link" (click)="openTestModal(item)">
+            <span nz-icon nzType="bug" nzTheme="outline"></span>
+            <span i18n="@@integrations.webhooks.test-webhook">Test</span>
           </button>
           <a nz-dropdown nzTrigger="hover" [nzDropdownMenu]="actions">
             <span i18n="@@common.more">More</span>&nbsp;
@@ -134,7 +134,7 @@
           </a>
           <nz-dropdown-menu #actions="nzDropdownMenu">
             <ul nz-menu>
-              <li nz-menu-item>Test</li>
+              <li nz-menu-item (click)="openDrawer(item)" i18n="@@common.edit">Edit</li>
               <li
                 nzDanger
                 nz-menu-item
@@ -155,3 +155,4 @@
 </div>
 
 <webhook-drawer [webhook]="selectedWebhook" [visible]="drawerVisible" (close)="closeDrawer($event)"></webhook-drawer>
+<test-webhook-modal [visible]="testModalVisible" [webhook]="selectedWebhook" (close)="closeTestModal()"></test-webhook-modal>

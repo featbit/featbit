@@ -9,6 +9,7 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-csharp';
 import 'prismjs/components/prism-go';
 import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-http'
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace'
 
 @Component({

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from "src/environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { PagedWebhook, Webhook, WebhookFilter } from "@features/safe/integrations/webhooks/webhooks";
+import { PagedWebhook, Webhook, WebhookDelivery, WebhookFilter } from "@features/safe/integrations/webhooks/webhooks";
 import { Observable } from "rxjs";
 
 @Injectable({
@@ -42,5 +42,9 @@ export class WebhookService {
 
   delete(id: string) {
     return this.http.delete<boolean>(`${this.baseUrl}/${id}`);
+  }
+
+  test(id: string): Observable<WebhookDelivery> {
+    return this.http.post<WebhookDelivery>(`${this.baseUrl}/${id}/test`, {});
   }
 }

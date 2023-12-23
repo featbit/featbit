@@ -93,6 +93,7 @@ import { PipesModule } from "@core/pipes/pipes.module";
 import { LicenseComponent } from "@core/components/license/license.component";
 import { WebhookDrawerComponent } from './components/webhook-drawer/webhook-drawer.component';
 import { HandlebarsService } from "@services/handlebars.service";
+import { TestWebhookModalComponent } from './components/test-webhook-modal/test-webhook-modal.component';
 
 @NgModule({
   declarations: [
@@ -129,7 +130,8 @@ import { HandlebarsService } from "@services/handlebars.service";
     RelayProxyDrawerComponent,
     PrismComponent,
     LicenseComponent,
-    WebhookDrawerComponent
+    WebhookDrawerComponent,
+    TestWebhookModalComponent
   ],
   imports: [
     CommonModule,
@@ -224,7 +226,8 @@ import { HandlebarsService } from "@services/handlebars.service";
     RelayProxyDrawerComponent,
     PrismComponent,
     LicenseComponent,
-    WebhookDrawerComponent
+    WebhookDrawerComponent,
+    TestWebhookModalComponent
   ]
 })
 export class CoreModule {

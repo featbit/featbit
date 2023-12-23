@@ -82,6 +82,7 @@ export class IndexComponent implements OnInit {
 
   selectedWebhook: Webhook;
   drawerVisible: boolean = false;
+  testModalVisible: boolean = false;
 
   openDrawer(webhook: Webhook) {
     this.selectedWebhook = webhook;
@@ -94,6 +95,16 @@ export class IndexComponent implements OnInit {
     if (hasChange) {
       this.loadWebhooks();
     }
+  }
+
+  openTestModal(item: Webhook) {
+    this.selectedWebhook = item;
+    this.testModalVisible = true;
+  }
+
+  closeTestModal() {
+    this.selectedWebhook = undefined;
+    this.testModalVisible = false;
   }
 
   remove(id: string) {
