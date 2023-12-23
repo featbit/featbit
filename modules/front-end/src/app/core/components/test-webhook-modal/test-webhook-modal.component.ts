@@ -100,7 +100,6 @@ ${formatted}
     this.isSending = true;
 
     setTimeout(() => {
-      this.message.success($localize`:@@webhooks.test-sent:Test sent successfully`);
       this.isSending = false;
     }, 3000);
 
