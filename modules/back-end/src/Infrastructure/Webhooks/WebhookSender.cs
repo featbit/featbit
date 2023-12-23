@@ -16,11 +16,14 @@ public class WebhookSender : IWebhookSender
     private readonly ILogger<WebhookSender> _logger;
 
     private readonly int _maxAttempts = 3;
+    private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
     private readonly TimeSpan _retryInterval = TimeSpan.FromSeconds(2);
 
     public WebhookSender(HttpClient client, IWebhookService webhookService, ILogger<WebhookSender> logger)
     {
         _client = client;
+        _client.Timeout = _timeout;
+
         _webhookService = webhookService;
         _logger = logger;
     }
@@ -53,7 +56,7 @@ public class WebhookSender : IWebhookSender
         }
 
         var deliveryId = Guid.NewGuid().ToString("D");
-        WebhookDelivery lastDelivery = null!;;
+        WebhookDelivery lastDelivery = null!;
         for (var attempt = 0; attempt < _maxAttempts; attempt++)
         {
             if (attempt > 0)
@@ -79,8 +82,7 @@ public class WebhookSender : IWebhookSender
             delivery.Started();
             try
             {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                var response = await _client.SendAsync(request, cts.Token);
+                var response = await _client.SendAsync(request);
                 await delivery.AddResponseAsync(response);
             }
             catch (Exception ex)
