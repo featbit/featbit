@@ -102,7 +102,7 @@
           <span nz-tooltip [nzTooltipTitle]="item.url">{{ item.url }}</span>
         </td>
         <td class="scopes">
-          <span nz-tooltip [nzTooltipTitle]="scopesTooltip">{{ item.scopeNames }}</span>
+          <span nz-tooltip [nzTooltipTitle]="scopesTooltip">{{ item.scopeNames?.join('; ') }}</span>
           <ng-template #scopesTooltip>
             <ul>
               <li *ngFor="let scopeName of item.scopeNames;">{{ scopeName }}</li>
@@ -115,7 +115,7 @@
             nzTooltipPlacement="topLeft"
             [nzTooltipOverlayStyle]="{'max-width': '270px'}"
             [nzTooltipTitle]="eventsTooltip">
-            {{ item.events }}
+            {{ item.events?.join('; ') }}
           </span>
           <ng-template #eventsTooltip>
             <ul>
