@@ -1,23 +1,50 @@
+@import "variables";
+
 .select-event {
   nz-select {
     width: 250px;
   }
 }
 
-.bold-font {
+.title {
   font-weight: bold;
 }
 
-.request {
-  margin: 16px 0;
+.headers {
+  max-height: 300px;
+  overflow: auto;
+  margin-bottom: 8px;
+}
 
-  .code {
-    max-height: 200px;
-    overflow: auto;
+.json {
+  max-height: 300px;
+  overflow: auto;
+}
+
+nz-tabset {
+  margin-top: 8px;
+
+  .error {
+    color: @red60-color;
+  }
+}
+
+.completed-in {
+  color: #0E1116;
+
+  i {
+    font-size: 14px;
+    margin-right: 6px;
+  }
+
+  span {
+    font-size: 12px;
   }
 }
 
 .footer {
+  margin-top: 12px;
+
   button {
     width: unset;
     height: unset;

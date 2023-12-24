@@ -10,6 +10,7 @@ import 'prismjs/components/prism-csharp';
 import 'prismjs/components/prism-go';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-http'
+import 'prismjs/components/prism-json'
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace'
 
 @Component({

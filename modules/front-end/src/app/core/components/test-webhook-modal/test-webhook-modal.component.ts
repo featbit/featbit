@@ -1,10 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Webhook, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
+import { Webhook, WebhookDelivery, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { HandlebarsService } from "@services/handlebars.service";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IFeatureFlag, VariationTypeEnum } from "@features/safe/feature-flags/types/details";
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { WebhookService } from "@services/webhook.service";
+import { finalize } from "rxjs/operators";
 
 @Component({
   selector: 'test-webhook-modal',
@@ -14,61 +16,19 @@ import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env
 export class TestWebhookModalComponent {
   events: string[] = WebhookEvents.map(x => x.value);
   event: string = this.events[1];
-
-  changeEvent() {
-    this.calculateRequest();
-  }
-
-  request: string;
-
-  calculateRequest() {
-    if (!this._webhook) {
-      return;
-    }
-
-    const data = Object.assign(
-      {},
-      { events: this.event, operator: 'webhook-tester', happenedAt: new Date().toISOString() },
-      { ...this.resourceDescriptor }
-    );
-
-    if (this.event.startsWith('feature_flag')) {
-      Object.assign(data, { data: { kind: 'feature flag', object: this.testFeatureFlag } });
-    } else if (this.event.startsWith('segment')) {
-      Object.assign(data, { data: { kind: 'segment', object: this.testSegment } });
-    }
-
-    const json = this.handlebarsService.compile(this._webhook.payloadTemplate, data);
-    const formatted = JSON.stringify(JSON.parse(json), null, 2);
-
-    this.request = `
-POST ${this._webhook.url} HTTP/1.1
-Content-Type: application/json
-
-${formatted}
-    `;
-  }
+  resourceDescriptor: { };
 
   @Input()
   visible: boolean;
-
-  private _webhook: Webhook;
   @Input()
-  set webhook(value: Webhook) {
-    this._webhook = value;
-    if (value) {
-      this.calculateRequest();
-    }
-  }
-
+  webhook: Webhook;
   @Output()
   close: EventEmitter<void> = new EventEmitter();
-
-  resourceDescriptor: any;
 
   constructor(
     private message: NzMessageService,
     private handlebarsService: HandlebarsService,
+    private webhookService: WebhookService
   ) {
     let projectEnv = getCurrentProjectEnv();
     let organization = getCurrentOrganization();
@@ -90,28 +50,92 @@ ${formatted}
   }
 
   onClose() {
+    this.resetDelivery();
     this.visible = false;
     this.close.emit();
   }
 
   isSending: boolean = false;
+  delivery: WebhookDelivery;
 
   sendTest() {
     this.isSending = true;
 
-    setTimeout(() => {
-      this.isSending = false;
-    }, 3000);
+    const payload = this.getPayload();
+    this.webhookService.test(this.webhook.id, payload, this.event)
+      .pipe(finalize(() => this.isSending = false))
+      .subscribe({
+        next: (delivery) => {
+          this.parseDelivery(delivery);
+          this.delivery = delivery;
+        },
+        error: () => this.message.error($localize`:@@webhooks.test-failed:Test failed`)
+      });
+  }
 
-    // this.webhookService.test(this.selectedWebhook.id)
-    //   .pipe(finalize(() => this.isSendingTest = false))
-    //   .subscribe({
-    //     next: () => {
-    //       this.message.success($localize`:@@webhooks.test-sent:Test sent successfully`);
-    //       this.closeTestModal();
-    //     },
-    //     error: () => this.message.error($localize`:@@webhooks.test-failed:Test failed`)
-    //   });
+  requestHeaders: string = '';
+  requestPayload: string = '';
+  responseHeaders: string = '';
+  responseBody: string = '';
+  completedIn: number;
+  parseDelivery(delivery: WebhookDelivery) {
+    let request = delivery.request;
+    if (request) {
+      this.requestHeaders = [
+        `Request URL: ${request.url}`,
+        'Request method: POST',
+        'Accept: */*',
+        'Content-Type: application/json',
+        Object.keys(request.headers).map(x => `${x}: ${request.headers[x]}`).join('\n')
+      ].join('\n');
+      this.requestPayload = JSON.stringify(JSON.parse(request.payload), null, 2);
+    }
+
+    let response = delivery.response;
+    if (response) {
+      this.responseHeaders = Object.keys(response.headers).map(x => `${x}: ${response.headers[x]}`).join('\n');
+      this.responseBody = response.body;
+    }
+
+    this.completedIn = (new Date(delivery.endedAt).getTime() - new Date(delivery.startedAt).getTime()) / 1000;
+  }
+
+  resetDelivery() {
+    this.delivery = null;
+    this.requestHeaders = '';
+    this.requestPayload = '';
+    this.responseHeaders = '';
+    this.responseBody = '';
+    this.completedIn = 0;
+  }
+
+  getPayload(): string {
+    if (!this.webhook) {
+      return;
+    }
+
+    const data = Object.assign(
+      {},
+      { events: this.event, operator: 'webhook-tester', happenedAt: new Date().toISOString() },
+      { ...this.resourceDescriptor }
+    );
+
+    if (this.event.startsWith('feature_flag')) {
+      Object.assign(data, { data: { kind: 'feature flag', object: this.testFeatureFlag } });
+    } else if (this.event.startsWith('segment')) {
+      const segmentData = Object.assign({}, { ...this.testSegment }, {
+        flagReferences: [
+          {
+            id: 'eac7cb6e-9860-4d58-b1fb-82c7bf5d5025',
+            name: 'Test Feature Flag',
+            key: 'test'
+          }
+        ]
+      })
+      Object.assign(data, { data: { kind: 'segment', object: segmentData } });
+    }
+
+    return this.handlebarsService.compile(this.webhook.payloadTemplate, data);
   }
 
   private readonly testSegment: ISegment = {

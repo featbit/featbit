@@ -44,7 +44,7 @@ export class WebhookService {
     return this.http.delete<boolean>(`${this.baseUrl}/${id}`);
   }
 
-  test(id: string): Observable<WebhookDelivery> {
-    return this.http.post<WebhookDelivery>(`${this.baseUrl}/${id}/test`, {});
+  test(id: string, payload: string, event: string): Observable<WebhookDelivery> {
+    return this.http.post<WebhookDelivery>(`${this.baseUrl}/${id}/test`, { payload, event });
   }
 }

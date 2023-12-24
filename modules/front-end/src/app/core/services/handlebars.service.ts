@@ -33,7 +33,7 @@ export class HandlebarsService {
     Handlebars.registerHelper('json', function (obj) {
       // disable HTML-escaping of return values
       // ref: https://handlebarsjs.com/guide/expressions.html#prevent-html-escaping-of-helper-return-values
-      return new Handlebars.SafeString(JSON.stringify(obj));
+      return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
     });
   }
 }

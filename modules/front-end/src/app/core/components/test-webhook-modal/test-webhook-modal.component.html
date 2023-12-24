@@ -5,25 +5,50 @@
   [(nzVisible)]="visible"
   (nzOnCancel)="onClose()">
   <div *nzModalContent>
-    <p>Attempt to deliver an example event to your webhook target.</p>
+    <p i18n="@@integrations.webhooks.test-webhook-tip">Attempt to deliver an example event to your webhook target.</p>
     <div class="select-event">
-      <nz-form-label nzRequired i18n="@@integrations.webhook.select-an-event">Select an Event</nz-form-label>
-      <nz-select nzShowSearch nzAllowClear [(ngModel)]="event" (ngModelChange)="changeEvent()">
+      <nz-form-label nzRequired i18n="@@integrations.webhooks.select-an-event">Select an Event</nz-form-label>
+      <nz-select nzShowSearch nzAllowClear [(ngModel)]="event">
         <nz-option *ngFor="let event of events" [nzValue]="event" [nzLabel]="event"></nz-option>
       </nz-select>
     </div>
-    <div class="request">
-      <span class="bold-font">Request</span>
-      <div class="code">
-        <prism [code]="request" language="http"></prism>
-      </div>
-    </div>
-    <div class="response">
-      <span class="bold-font">Response</span>
-    </div>
+    <nz-tabset *ngIf="delivery != null" nzSize="small" [nzTabBarExtraContent]="extra">
+      <nz-tab nzTitle="Request">
+        <span class="title">Headers</span>
+        <div class="headers">
+          <prism [code]="requestHeaders" language="http"></prism>
+        </div>
+        <span class="title">Payload</span>
+        <div class="json">
+          <prism [code]="requestPayload" language="json"></prism>
+        </div>
+      </nz-tab>
+      <nz-tab [nzTitle]="responseTitle">
+        <p class="error" *ngIf="delivery.error">{{delivery.error.message}}</p>
+        <span class="title">Headers</span>
+        <div class="headers">
+          <prism [code]="responseHeaders" language="http"></prism>
+        </div>
+        <span class="title">Body</span>
+        <div class="json">
+          <prism [code]="responseBody" language="json"></prism>
+        </div>
+        <ng-template #responseTitle>
+          <span>Response</span>
+          <nz-tag *ngIf="delivery.success" nzColor="success">{{ delivery.response?.statusCode ?? 200 }}</nz-tag>
+          <nz-tag *ngIf="!delivery.success" nzColor="error">{{ delivery.response?.statusCode ?? 'ERROR' }}</nz-tag>
+        </ng-template>
+      </nz-tab>
+      <ng-template #extra>
+        <span class="completed-in">
+          <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+          <span class="text">Completed in {{ completedIn }} seconds.</span>
+        </span>
+      </ng-template>
+    </nz-tabset>
   </div>
   <div class="footer" *nzModalFooter>
     <button nz-button nzType="text" (click)="onClose()">Cancel</button>
-    <button nz-button nzType="primary" (click)="sendTest()" [nzLoading]="isSending">Send test webhook</button>
+    <button nz-button nzType="primary" (click)="sendTest()" [nzLoading]="isSending" i18n="@@integration.webhooks.send-test-webhook">Send test webhook</button>
   </div>
 </nz-modal>
