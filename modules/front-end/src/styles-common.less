@@ -10,6 +10,7 @@
 
 @import "styles/nz-select.less";
 @import "styles/nz-input.less";
+@import "styles/nz-tabset.less";
 @import "variables";
 
 html,
@@ -359,15 +360,6 @@ app-root {
   margin-left: 12px;
 }
 
-// custom tab style
-.ant-tabs-tab a,
-.ant-tabs-tab-btn {
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 150%;
-  color: @grey50-color;
-}
-
 // login tab style
 .login-wrapper {
   .ant-tabs-top>.ant-tabs-nav {
@@ -401,34 +393,6 @@ app-root {
       color: @grey50-color;
     }
   }
-}
-
-.ant-tabs-tab-active a,
-.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: @grey80-color;
-}
-
-.ant-tabs-top>.ant-tabs-nav::before {
-  bottom: 2px;
-  border-color: @divider-color;
-}
-
-.ant-tabs-ink-bar {
-  height: 2px;
-  background: transparent;
-}
-
-.ant-tabs-ink-bar::after {
-  content: " ";
-  position: absolute;
-  left: 50%;
-  right: 0;
-  bottom: 0;
-  height: 5px;
-  background: @primary-color;
-  border-radius: 5px;
-  width: 16px;
-  transform: translateX(-50%);
 }
 
 // custom card style
