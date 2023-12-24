@@ -914,7 +914,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/prism/prism.component.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
@@ -5017,13 +5017,37 @@
         </context-group>
         <target>发送测试事件</target>
       </trans-unit>
-      <trans-unit id="integrations.webhook.select-an-event" datatype="html">
+      <trans-unit id="integrations.webhooks.test-webhook-tip" datatype="html">
+        <source>Attempt to deliver an example event to your webhook target.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <target>尝试将示例事件发送到 Webhook。</target>
+      </trans-unit>
+      <trans-unit id="integrations.webhooks.select-an-event" datatype="html">
         <source>Select an Event</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.html</context>
           <context context-type="linenumber">10</context>
         </context-group>
         <target>请选择一个事件</target>
+      </trans-unit>
+      <trans-unit id="integration.webhooks.send-test-webhook" datatype="html">
+        <source>Send test webhook</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.html</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+        <target>发送测试时间</target>
+      </trans-unit>
+      <trans-unit id="webhooks.test-failed" datatype="html">
+        <source>Test failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
+          <context context-type="linenumber">72</context>
+        </context-group>
+        <target>发送失败</target>
       </trans-unit>
       <trans-unit id="upload" datatype="html">
         <source>Upload</source>
@@ -5277,7 +5301,7 @@
         </context-group>
         <target>请提供一个合法的 URL</target>
       </trans-unit>
-      <trans-unit id="integrations.webhook.url-description" datatype="html">
+      <trans-unit id="integrations.webhooks.url-description" datatype="html">
         <source>The URL of a web server that receives HTTP POST JSON payloads.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -5293,7 +5317,7 @@
         </context-group>
         <target>至少需要选择一个环境</target>
       </trans-unit>
-      <trans-unit id="integrations.webhook.scopes-description" datatype="html">
+      <trans-unit id="integrations.webhooks.scopes-description" datatype="html">
         <source>Select the environments that this webhook should monitor. When an event occurs in these environments, this webhook will be triggered.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>

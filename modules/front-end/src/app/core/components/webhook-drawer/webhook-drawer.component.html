@@ -33,7 +33,7 @@
           nzErrorTip="Please provide a valid URL"
           i18n-nzErrorTip="@@integrations.webhooks.url-validation-message"
           nzExtra="The URL of a web server that receives HTTP POST JSON payloads."
-          i18n-nzExtra="@@integrations.webhook.url-description">
+          i18n-nzExtra="@@integrations.webhooks.url-description">
           <input type="text" nz-input formControlName="url" placeholder="https://example.com/post-receive"/>
         </nz-form-control>
       </nz-form-item>
@@ -46,7 +46,7 @@
           nzErrorTip="At least one environment must be selected"
           i18n-nzErrorTip="@@integrations.webhooks.scopes-cannot-be-empty"
           nzExtra="Select the environments that this webhook should monitor. When an event occurs in these environments, this webhook will be triggered."
-          i18n-nzExtra="@@integrations.webhook.scopes-description">
+          i18n-nzExtra="@@integrations.webhooks.scopes-description">
           <div class="scopes-title">
             <span class="text" i18n="@@common.project">Project</span>
             <span class="text" i18n="@@common.environments">Environments</span>

@@ -896,7 +896,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/prism/prism.component.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
@@ -4666,11 +4666,32 @@
           <context context-type="linenumber">2</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="integrations.webhook.select-an-event" datatype="html">
+      <trans-unit id="integrations.webhooks.test-webhook-tip" datatype="html">
+        <source>Attempt to deliver an example event to your webhook target.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.html</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integrations.webhooks.select-an-event" datatype="html">
         <source>Select an Event</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.html</context>
           <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="integration.webhooks.send-test-webhook" datatype="html">
+        <source>Send test webhook</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.html</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="webhooks.test-failed" datatype="html">
+        <source>Test failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
+          <context context-type="linenumber">72</context>
         </context-group>
       </trans-unit>
       <trans-unit id="upload" datatype="html">
@@ -4906,7 +4927,7 @@
           <context context-type="linenumber">33</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="integrations.webhook.url-description" datatype="html">
+      <trans-unit id="integrations.webhooks.url-description" datatype="html">
         <source>The URL of a web server that receives HTTP POST JSON payloads.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -4920,7 +4941,7 @@
           <context context-type="linenumber">46</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="integrations.webhook.scopes-description" datatype="html">
+      <trans-unit id="integrations.webhooks.scopes-description" datatype="html">
         <source>Select the environments that this webhook should monitor. When an event occurs in these environments, this webhook will be triggered.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
