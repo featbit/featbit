@@ -8,6 +8,7 @@ import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env
 import { WebhookService } from "@services/webhook.service";
 import { finalize } from "rxjs/operators";
 import { uuidv4 } from "@utils/index";
+import { Subscription } from "rxjs";
 
 @Component({
   selector: 'test-webhook-modal',
@@ -51,14 +52,19 @@ export class TestWebhookModalComponent {
   }
 
   onClose() {
+    // reset status
     this.delivery = null;
+    this.isSending = false;
+    this.event = this.events[1];
+    this.sendSubscription?.unsubscribe();
+
     this.visible = false;
     this.close.emit();
   }
 
   isSending: boolean = false;
   delivery: WebhookDelivery = null;
-
+  sendSubscription: Subscription;
   sendTest() {
     this.isSending = true;
 
@@ -73,7 +79,8 @@ export class TestWebhookModalComponent {
       events: this.event,
       payload: payload
     };
-    this.webhookService.send(request)
+
+    this.sendSubscription = this.webhookService.send(request)
       .pipe(finalize(() => this.isSending = false))
       .subscribe({
         next: (delivery) => {
