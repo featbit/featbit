@@ -5072,7 +5072,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.payload-template-validation-message" datatype="html">
-        <source>Not a valid Handlebars template</source>
+        <source>Not a valid JSON Handlebars template</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">167</context>
