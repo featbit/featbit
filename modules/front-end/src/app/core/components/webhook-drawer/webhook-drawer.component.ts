@@ -17,6 +17,7 @@ import { IEnvironment, IProject } from "@shared/types";
 import { of } from "rxjs";
 import { MonacoService } from "@services/monaco-service";
 import { uuidv4 } from "@utils/index";
+import { HandlebarsService } from "@services/handlebars.service";
 
 @Component({
   selector: 'webhook-drawer',
@@ -45,7 +46,8 @@ export class WebhookDrawerComponent implements OnInit {
     private projectService: ProjectService,
     private webhookService: WebhookService,
     private message: NzMessageService,
-    private monacoService: MonacoService
+    private monacoService: MonacoService,
+    private handlebarsService: HandlebarsService
   ) {
     this.initForm();
   }
@@ -124,6 +126,19 @@ export class WebhookDrawerComponent implements OnInit {
       first()
     );
   };
+
+  jsonHandlebarsTemplateValidator = (control: FormControl) => {
+    let isValid = false;
+
+    try {
+      const template = control.value;
+      const result = this.handlebarsService.compile(template, {});
+      isValid = !!result;
+    } catch (err) {
+    }
+
+    return isValid ? null : { invalid: true };
+  }
 
   private editor: editor.IStandaloneCodeEditor;
   onEditorInit(editor: editor.IStandaloneCodeEditor): void {
