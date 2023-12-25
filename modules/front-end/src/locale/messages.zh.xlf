@@ -5037,7 +5037,7 @@
         <source>Send test webhook</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.html</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">21</context>
         </context-group>
         <target>发送测试时间</target>
       </trans-unit>
@@ -5045,7 +5045,7 @@
         <source>Test failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>发送失败</target>
       </trans-unit>
