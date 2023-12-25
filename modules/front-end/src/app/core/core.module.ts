@@ -95,6 +95,7 @@ import { WebhookDrawerComponent } from './components/webhook-drawer/webhook-draw
 import { HandlebarsService } from "@services/handlebars.service";
 import { TestWebhookModalComponent } from './components/test-webhook-modal/test-webhook-modal.component';
 import { WebhookDeliveryComponent } from './components/webhook-delivery/webhook-delivery.component';
+import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 
 @NgModule({
   declarations: [
@@ -182,7 +183,8 @@ import { WebhookDeliveryComponent } from './components/webhook-delivery/webhook-
     NzInputNumberModule,
     NzCollapseModule,
     NzSwitchModule,
-    ChangeListModule
+    ChangeListModule,
+    NzSkeletonModule
   ],
   exports: [
     SlugifyPipe,

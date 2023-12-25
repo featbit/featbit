@@ -12,7 +12,9 @@
         <nz-option *ngFor="let event of events" [nzValue]="event" [nzLabel]="event"></nz-option>
       </nz-select>
     </div>
-    <ng-container *ngIf="delivery">
+    <nz-skeleton nzActive="true" [nzLoading]="isSending">
+    </nz-skeleton>
+    <ng-container *ngIf="!isSending && delivery">
       <webhook-delivery [delivery]="delivery"></webhook-delivery>
     </ng-container>
   </div>
