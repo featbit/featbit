@@ -6,7 +6,7 @@ import {
   WebhookEvents
 } from "@features/safe/integrations/webhooks/webhooks";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { handlebarTemplateValidator, urlValidator } from "@utils/form-validators";
+import { urlValidator } from "@utils/form-validators";
 import { WebhookService } from "@services/webhook.service";
 import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators";
 
@@ -17,7 +17,7 @@ import { IEnvironment, IProject } from "@shared/types";
 import { of } from "rxjs";
 import { MonacoService } from "@services/monaco-service";
 import { uuidv4 } from "@utils/index";
-import { HandlebarsService } from "@services/handlebars.service";
+import { getTestPayload } from "@core/components/test-webhook-modal/test-webhook";
 
 @Component({
   selector: 'webhook-drawer',
@@ -46,8 +46,7 @@ export class WebhookDrawerComponent implements OnInit {
     private projectService: ProjectService,
     private webhookService: WebhookService,
     private message: NzMessageService,
-    private monacoService: MonacoService,
-    private handlebarsService: HandlebarsService
+    private monacoService: MonacoService
   ) {
     this.initForm();
   }
@@ -84,7 +83,7 @@ export class WebhookDrawerComponent implements OnInit {
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
       payloadTemplateType: new FormControl(this._webhook?.payloadTemplateType ?? 'default'),
-      payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? WebhookDefaultPayloadTemplate, [handlebarTemplateValidator]),
+      payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? WebhookDefaultPayloadTemplate, [this.jsonHandlebarsTemplateValidator]),
       secret: new FormControl(this._webhook?.secret),
       isActive: new FormControl(this._webhook?.isActive ?? true)
     });
@@ -132,8 +131,9 @@ export class WebhookDrawerComponent implements OnInit {
 
     try {
       const template = control.value;
-      const result = this.handlebarsService.compile(template, {});
-      isValid = !!result;
+      const payload = getTestPayload(WebhookEvents[1].value, template);
+      JSON.parse(payload);
+      isValid = true;
     } catch (err) {
     }
 
