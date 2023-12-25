@@ -63,12 +63,12 @@ public class WebhookController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpPost("{id:guid}/test")]
-    public async Task<ApiResponse<WebhookDelivery>> TestAsync(Guid id, TestWebhook request)
+    [HttpPost("send")]
+    public async Task<ApiResponse<WebhookDelivery>> SendAsync(WebhookRequest request)
     {
-        request.Id = id;
+        var sendRequest = new SendWebhook(request);
 
-        var delivery = await Mediator.Send(request);
+        var delivery = await Mediator.Send(sendRequest);
         return Ok(delivery);
     }
 }
