@@ -94,6 +94,7 @@ import { LicenseComponent } from "@core/components/license/license.component";
 import { WebhookDrawerComponent } from './components/webhook-drawer/webhook-drawer.component';
 import { HandlebarsService } from "@services/handlebars.service";
 import { TestWebhookModalComponent } from './components/test-webhook-modal/test-webhook-modal.component';
+import { WebhookDeliveryComponent } from './components/webhook-delivery/webhook-delivery.component';
 
 @NgModule({
   declarations: [
@@ -131,7 +132,8 @@ import { TestWebhookModalComponent } from './components/test-webhook-modal/test-
     PrismComponent,
     LicenseComponent,
     WebhookDrawerComponent,
-    TestWebhookModalComponent
+    TestWebhookModalComponent,
+    WebhookDeliveryComponent
   ],
   imports: [
     CommonModule,
@@ -227,7 +229,8 @@ import { TestWebhookModalComponent } from './components/test-webhook-modal/test-
     PrismComponent,
     LicenseComponent,
     WebhookDrawerComponent,
-    TestWebhookModalComponent
+    TestWebhookModalComponent,
+    WebhookDeliveryComponent
   ]
 })
 export class CoreModule {

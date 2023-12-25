@@ -14,16 +14,16 @@ import { finalize } from "rxjs/operators";
   styleUrls: ['./test-webhook-modal.component.less']
 })
 export class TestWebhookModalComponent {
-  events: string[] = WebhookEvents.map(x => x.value);
-  event: string = this.events[1];
-  resourceDescriptor: { };
-
   @Input()
   visible: boolean;
   @Input()
   webhook: Webhook;
   @Output()
   close: EventEmitter<void> = new EventEmitter();
+
+  events: string[] = WebhookEvents.map(x => x.value);
+  event: string = this.events[1];
+  resourceDescriptor: { };
 
   constructor(
     private message: NzMessageService,
@@ -50,13 +50,13 @@ export class TestWebhookModalComponent {
   }
 
   onClose() {
-    this.resetDelivery();
+    this.delivery = null;
     this.visible = false;
     this.close.emit();
   }
 
   isSending: boolean = false;
-  delivery: WebhookDelivery;
+  delivery: WebhookDelivery = null;
 
   sendTest() {
     this.isSending = true;
@@ -65,48 +65,9 @@ export class TestWebhookModalComponent {
     this.webhookService.test(this.webhook.id, payload, this.event)
       .pipe(finalize(() => this.isSending = false))
       .subscribe({
-        next: (delivery) => {
-          this.parseDelivery(delivery);
-          this.delivery = delivery;
-        },
+        next: (delivery) => this.delivery = delivery,
         error: () => this.message.error($localize`:@@webhooks.test-failed:Test failed`)
       });
-  }
-
-  requestHeaders: string = '';
-  requestPayload: string = '';
-  responseHeaders: string = '';
-  responseBody: string = '';
-  completedIn: number;
-  parseDelivery(delivery: WebhookDelivery) {
-    let request = delivery.request;
-    if (request) {
-      this.requestHeaders = [
-        `Request URL: ${request.url}`,
-        'Request method: POST',
-        'Accept: */*',
-        'Content-Type: application/json',
-        Object.keys(request.headers).map(x => `${x}: ${request.headers[x]}`).join('\n')
-      ].join('\n');
-      this.requestPayload = JSON.stringify(JSON.parse(request.payload), null, 2);
-    }
-
-    let response = delivery.response;
-    if (response) {
-      this.responseHeaders = Object.keys(response.headers).map(x => `${x}: ${response.headers[x]}`).join('\n');
-      this.responseBody = response.body;
-    }
-
-    this.completedIn = (new Date(delivery.endedAt).getTime() - new Date(delivery.startedAt).getTime()) / 1000;
-  }
-
-  resetDelivery() {
-    this.delivery = null;
-    this.requestHeaders = '';
-    this.requestPayload = '';
-    this.responseHeaders = '';
-    this.responseBody = '';
-    this.completedIn = 0;
   }
 
   getPayload(): string {

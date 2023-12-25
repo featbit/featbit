@@ -12,40 +12,9 @@
         <nz-option *ngFor="let event of events" [nzValue]="event" [nzLabel]="event"></nz-option>
       </nz-select>
     </div>
-    <nz-tabset *ngIf="delivery != null" nzSize="small" [nzTabBarExtraContent]="extra">
-      <nz-tab nzTitle="Request">
-        <span class="title">Headers</span>
-        <div class="headers">
-          <prism [code]="requestHeaders" language="http"></prism>
-        </div>
-        <span class="title">Payload</span>
-        <div class="json">
-          <prism [code]="requestPayload" language="json"></prism>
-        </div>
-      </nz-tab>
-      <nz-tab [nzTitle]="responseTitle">
-        <p class="error" *ngIf="delivery.error">{{delivery.error.message}}</p>
-        <span class="title">Headers</span>
-        <div class="headers">
-          <prism [code]="responseHeaders" language="http"></prism>
-        </div>
-        <span class="title">Body</span>
-        <div class="json">
-          <prism [code]="responseBody" language="json"></prism>
-        </div>
-        <ng-template #responseTitle>
-          <span>Response</span>
-          <nz-tag *ngIf="delivery.success" nzColor="success">{{ delivery.response?.statusCode ?? 200 }}</nz-tag>
-          <nz-tag *ngIf="!delivery.success" nzColor="error">{{ delivery.response?.statusCode ?? 'ERROR' }}</nz-tag>
-        </ng-template>
-      </nz-tab>
-      <ng-template #extra>
-        <span class="completed-in">
-          <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
-          <span class="text">Completed in {{ completedIn }} seconds.</span>
-        </span>
-      </ng-template>
-    </nz-tabset>
+    <ng-container *ngIf="delivery">
+      <webhook-delivery [delivery]="delivery"></webhook-delivery>
+    </ng-container>
   </div>
   <div class="footer" *nzModalFooter>
     <button nz-button nzType="text" (click)="onClose()">Cancel</button>
