@@ -1,5 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Webhook, WebhookDefaultPayloadTemplate, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
+import {
+  TestWebhook,
+  Webhook,
+  WebhookDefaultPayloadTemplate,
+  WebhookEvents
+} from "@features/safe/integrations/webhooks/webhooks";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { handlebarTemplateValidator, urlValidator } from "@utils/form-validators";
 import { WebhookService } from "@services/webhook.service";
@@ -11,6 +16,7 @@ import { ProjectService } from "@services/project.service";
 import { IEnvironment, IProject } from "@shared/types";
 import { of } from "rxjs";
 import { MonacoService } from "@services/monaco-service";
+import { uuidv4 } from "@utils/index";
 
 @Component({
   selector: 'webhook-drawer',
@@ -319,6 +325,29 @@ export class WebhookDrawerComponent implements OnInit {
 
   onClose() {
     this.close.emit(false);
+  }
+
+  testWebhook: TestWebhook = null;
+  testModalVisible: boolean = false;
+  openTestModal() {
+    const { name, url, payloadTemplate, headers, secret } = this.form.value;
+    this.testWebhook = {
+      id: uuidv4(),
+      name,
+      url,
+      headers: headers
+        .filter(header => header.key)
+        .map(header => ({ key: header.key, value: header.value })),
+      payloadTemplate,
+      secret
+    };
+
+    this.testModalVisible = true;
+  }
+
+  closeTestModal() {
+    this.testWebhook = null;
+    this.testModalVisible = false;
   }
 
   doSubmit() {

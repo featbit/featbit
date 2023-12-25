@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Webhook, WebhookDelivery, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
+import { TestWebhook, WebhookDelivery, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { HandlebarsService } from "@services/handlebars.service";
 import { ISegment } from "@features/safe/segments/types/segments-index";
@@ -7,6 +7,7 @@ import { IFeatureFlag, VariationTypeEnum } from "@features/safe/feature-flags/ty
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { WebhookService } from "@services/webhook.service";
 import { finalize } from "rxjs/operators";
+import { uuidv4 } from "@utils/index";
 
 @Component({
   selector: 'test-webhook-modal',
@@ -17,7 +18,7 @@ export class TestWebhookModalComponent {
   @Input()
   visible: boolean;
   @Input()
-  webhook: Webhook;
+  webhook: TestWebhook;
   @Output()
   close: EventEmitter<void> = new EventEmitter();
 
@@ -62,7 +63,17 @@ export class TestWebhookModalComponent {
     this.isSending = true;
 
     const payload = this.getPayload();
-    this.webhookService.test(this.webhook.id, payload, this.event)
+    const request = {
+      id: this.webhook.id,
+      deliveryId: uuidv4(),
+      url: this.webhook.url,
+      name: this.webhook.name,
+      secret: this.webhook.secret,
+      headers: this.webhook.headers,
+      events: this.event,
+      payload: payload
+    };
+    this.webhookService.send(request)
       .pipe(finalize(() => this.isSending = false))
       .subscribe({
         next: (delivery) => this.delivery = delivery,

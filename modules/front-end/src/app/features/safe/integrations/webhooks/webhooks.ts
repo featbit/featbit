@@ -134,3 +134,16 @@ export interface WebhookDeliveryResponse {
   headers: { key: string; value: string; }[];
   body: string;
 }
+
+export type TestWebhook = Pick<Webhook, 'id' | 'url' | 'name' | 'secret' | 'headers' | 'payloadTemplate'>;
+
+export interface WebhookRequest {
+  id: string;
+  deliveryId: string;
+  url: string;
+  name: string;
+  secret: string;
+  headers: { key: string; value: string; }[];
+  events: string;
+  payload: string;
+}

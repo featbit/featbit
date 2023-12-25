@@ -194,6 +194,19 @@
         </nz-form-control>
       </nz-form-item>
 
+      <!-- Test -->
+      <nz-form-item>
+        <nz-form-label i18n="@@common.test">Test</nz-form-label>
+        <nz-form-control
+          nzExtra="Optionally, you can test your webhook configuration before saving it."
+          i18n-nzExtra="@@integrations.webhooks.test-webhook-description">
+          <button [disabled]="!form.valid" class="test-webhook-button" type="button" nz-button nzType="link" (click)="openTestModal()">
+            <i nz-icon nzType="bug" nzTheme="outline"></i>
+            <span i18n="@@integrations.webhooks.test-your-webhook-configuration">Test your webhook configuration</span>
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+
       <!-- Submit -->
       <nz-form-item>
         <nz-form-control class="align-end">
@@ -206,3 +219,5 @@
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
   </ng-template>
 </nz-drawer>
+
+<test-webhook-modal [visible]="testModalVisible" (close)="closeTestModal()"></test-webhook-modal>
