@@ -454,7 +454,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">200</context>
+          <context context-type="linenumber">213</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -621,8 +621,12 @@
           <context context-type="linenumber">327</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">344</context>
+          <context context-type="linenumber">373</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
@@ -845,8 +849,12 @@
           <context context-type="linenumber">162</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">347</context>
+          <context context-type="linenumber">376</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
@@ -5041,14 +5049,6 @@
         </context-group>
         <target>发送测试时间</target>
       </trans-unit>
-      <trans-unit id="webhooks.test-failed" datatype="html">
-        <source>Test failed</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
-          <context context-type="linenumber">69</context>
-        </context-group>
-        <target>发送失败</target>
-      </trans-unit>
       <trans-unit id="upload" datatype="html">
         <source>Upload</source>
         <context-group purpose="location">
@@ -5509,11 +5509,39 @@
         </context-group>
         <target>当触发此 Webhook 时，我们将提供事件详细信息。</target>
       </trans-unit>
+      <trans-unit id="common.test" datatype="html">
+        <source>Test</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">199</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
+          <context context-type="linenumber">129</context>
+        </context-group>
+        <target>测试</target>
+      </trans-unit>
+      <trans-unit id="integrations.webhooks.test-webhook-description" datatype="html">
+        <source>Optionally, you can test your webhook configuration before saving it.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">201</context>
+        </context-group>
+        <target>（可选）您可以在保存之前测试您的 Webhook 配置。</target>
+      </trans-unit>
+      <trans-unit id="integrations.webhooks.test-your-webhook-configuration" datatype="html">
+        <source>Test your webhook configuration</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">205</context>
+        </context-group>
+        <target>测试 webhook 配置</target>
+      </trans-unit>
       <trans-unit id="integrations.webhooks.webhook-drawer.edit-title" datatype="html">
         <source>Edit Webhook</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">310</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <target>编辑 Webhook</target>
       </trans-unit>
@@ -5521,7 +5549,7 @@
         <source>Add Webhook</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">311</context>
+          <context context-type="linenumber">317</context>
         </context-group>
         <target>添加 Webhook</target>
       </trans-unit>
@@ -8780,14 +8808,6 @@
           <context context-type="linenumber">94</context>
         </context-group>
         <target>该 Webhook 处于禁用状态。</target>
-      </trans-unit>
-      <trans-unit id="integrations.webhooks.test-webhook" datatype="html">
-        <source>Test</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">129</context>
-        </context-group>
-        <target>测试</target>
       </trans-unit>
       <trans-unit id="webhooks.last-delivery-successful" datatype="html">
         <source>Last delivery happened at <x id="PH" equiv-text="happenedAt"/> was successful (HTTP Response: <x id="PH_1" equiv-text="response"/>).</source>

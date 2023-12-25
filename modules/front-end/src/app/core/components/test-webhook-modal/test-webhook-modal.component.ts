@@ -76,8 +76,11 @@ export class TestWebhookModalComponent {
     this.webhookService.send(request)
       .pipe(finalize(() => this.isSending = false))
       .subscribe({
-        next: (delivery) => this.delivery = delivery,
-        error: () => this.message.error($localize`:@@webhooks.test-failed:Test failed`)
+        next: (delivery) => {
+          this.delivery = delivery;
+          this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        },
+        error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
       });
   }
 
