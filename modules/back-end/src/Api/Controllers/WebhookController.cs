@@ -64,11 +64,9 @@ public class WebhookController : ApiControllerBase
     }
 
     [HttpPost("send")]
-    public async Task<ApiResponse<WebhookDelivery>> SendAsync(WebhookRequest request)
+    public async Task<ApiResponse<WebhookDelivery>> SendAsync(SendWebhook request)
     {
-        var sendRequest = new SendWebhook(request);
-
-        var delivery = await Mediator.Send(sendRequest);
+        var delivery = await Mediator.Send(request);
         return Ok(delivery);
     }
 }
