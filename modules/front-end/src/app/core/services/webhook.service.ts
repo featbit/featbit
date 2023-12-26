@@ -58,7 +58,8 @@ export class WebhookService {
 
   getDeliveries(id: string, filter: WebhookDeliveryFilter): Observable<PagedWebhookDelivery> {
     const queryParam = {
-      events: filter.events,
+      event: filter.event ?? '',
+      success: filter.success ?? '',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };

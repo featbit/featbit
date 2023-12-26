@@ -2,7 +2,7 @@
   <div class="table-search-area">
     <div class="search-inputs">
       <nz-input-group [nzPrefix]="prefixIconSearch">
-        <input nz-input [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name">
+        <input nz-input [(ngModel)]="filter.name" (ngModelChange)="doSearch()" type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name">
       </nz-input-group>
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="icons:icon-search"></i>
@@ -29,7 +29,7 @@
         nzShowSearch
         nzAllowClear
         [(ngModel)]="filter.envId"
-        (ngModelChange)="doSearch(true)"
+        (ngModelChange)="doSearch()"
         i18n-nzPlaceHolder="@@common.filter-by-enviroment"
         nzPlaceHolder="Filter by environment">
         <nz-option *ngFor="let env of projectEnvs" [nzValue]="env.id" [nzLabel]="env.name"></nz-option>

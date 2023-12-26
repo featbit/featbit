@@ -28,7 +28,7 @@ export class IndexComponent implements OnInit {
   onSelectProject(projectId: string) {
     this.filter.envId = '';
     this.projectEnvs = this.projects.find(x => x.id === projectId)?.environments;
-    this.doSearch(true);
+    this.doSearch();
   }
 
   search$ = new Subject<void>();
@@ -63,11 +63,8 @@ export class IndexComponent implements OnInit {
       });
   }
 
-  doSearch(reset: boolean = false) {
-    if (reset) {
-      this.filter.pageIndex = 1;
-    }
-
+  doSearch() {
+    this.filter.pageIndex = 1;
     this.search$.next();
   }
 

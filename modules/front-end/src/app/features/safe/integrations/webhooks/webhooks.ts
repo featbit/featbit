@@ -136,14 +136,16 @@ export interface WebhookDeliveryResponse {
 }
 
 export class WebhookDeliveryFilter {
-  events: string[];
+  event: string;
+  success?: boolean;
   pageIndex: number;
   pageSize: number;
 
   constructor() {
-    this.events = [];
+    this.event = '';
+    this.success = null;
     this.pageIndex = 1;
-    this.pageSize = 3;
+    this.pageSize = 5;
   }
 }
 

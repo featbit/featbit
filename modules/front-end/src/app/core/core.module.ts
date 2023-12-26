@@ -97,6 +97,7 @@ import { TestWebhookModalComponent } from './components/test-webhook-modal/test-
 import { WebhookDeliveryComponent } from './components/webhook-delivery/webhook-delivery.component';
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { WebhookDeliveriesComponent } from './components/webhook-deliveries/webhook-deliveries.component';
+import { NzSegmentedModule } from "ng-zorro-antd/segmented";
 
 @NgModule({
   declarations: [
@@ -186,7 +187,8 @@ import { WebhookDeliveriesComponent } from './components/webhook-deliveries/webh
     NzCollapseModule,
     NzSwitchModule,
     ChangeListModule,
-    NzSkeletonModule
+    NzSkeletonModule,
+    NzSegmentedModule
   ],
   exports: [
     SlugifyPipe,

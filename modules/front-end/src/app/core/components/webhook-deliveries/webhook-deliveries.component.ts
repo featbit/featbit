@@ -1,5 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { PagedWebhookDelivery, Webhook, WebhookDeliveryFilter } from "@features/safe/integrations/webhooks/webhooks";
+import {
+  PagedWebhookDelivery,
+  Webhook,
+  WebhookDeliveryFilter,
+  WebhookEvents
+} from "@features/safe/integrations/webhooks/webhooks";
 import { Subject } from "rxjs";
 import { WebhookService } from "@services/webhook.service";
 import { NzMessageService } from "ng-zorro-antd/message";
@@ -36,6 +41,9 @@ export class WebhookDeliveriesComponent {
     this.search$.pipe(debounceTime(250)).subscribe(() => this.loadDeliveries());
   }
 
+  events: string[] = WebhookEvents.map(e => e.value);
+  statuses: string[] = ['All', 'Succeeded', 'Failed'];
+
   loadDeliveries() {
     this.isLoading = true;
     this.webhookService.getDeliveries(this._webhook.id, this.filter)
@@ -47,6 +55,18 @@ export class WebhookDeliveriesComponent {
         },
         error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`),
       });
+  }
+
+
+  doSearch() {
+    this.filter.pageIndex = 1;
+    this.search$.next();
+  }
+
+  onStatusChange(index: number) {
+    const status = this.statuses[index];
+    this.filter.success = status === 'All' ? null : status === 'Succeeded';
+    this.doSearch();
   }
 
   expandedRowId: string = '';
