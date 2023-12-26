@@ -96,6 +96,7 @@ import { HandlebarsService } from "@services/handlebars.service";
 import { TestWebhookModalComponent } from './components/test-webhook-modal/test-webhook-modal.component';
 import { WebhookDeliveryComponent } from './components/webhook-delivery/webhook-delivery.component';
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
+import { WebhookDeliveriesComponent } from './components/webhook-deliveries/webhook-deliveries.component';
 
 @NgModule({
   declarations: [
@@ -134,7 +135,8 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
     LicenseComponent,
     WebhookDrawerComponent,
     TestWebhookModalComponent,
-    WebhookDeliveryComponent
+    WebhookDeliveryComponent,
+    WebhookDeliveriesComponent
   ],
   imports: [
     CommonModule,
@@ -232,7 +234,8 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
     LicenseComponent,
     WebhookDrawerComponent,
     TestWebhookModalComponent,
-    WebhookDeliveryComponent
+    WebhookDeliveryComponent,
+    WebhookDeliveriesComponent
   ]
 })
 export class CoreModule {

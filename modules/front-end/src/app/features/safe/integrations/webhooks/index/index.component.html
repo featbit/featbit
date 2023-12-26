@@ -73,7 +73,7 @@
             <span i18n="@@common.created-by">Created by</span>: {{item.creator.name ?? item.creator.email}}
           </div>
         </td>
-        <td class="status" nz-tooltip [nzTooltipTitle]="statusTooltip" nzTooltipPlacement="topLeft">
+        <td class="status" (click)="openLogsModal(item)" nz-tooltip [nzTooltipTitle]="statusTooltip" nzTooltipPlacement="topLeft">
           <span [class]="item.isActive ? 'active' : 'inactive'">
             <i nz-icon [nzType]="item.isActive ? 'check-circle' : 'close-circle'"></i>
             <span *ngIf="item.isActive" i18n="@@common.active">Active</span>
@@ -135,6 +135,7 @@
           <nz-dropdown-menu #actions="nzDropdownMenu">
             <ul nz-menu>
               <li nz-menu-item (click)="openDrawer(item)" i18n="@@common.edit">Edit</li>
+              <li nz-menu-item (click)="openLogsModal(item)" i18n="@@common.view-logs">View Logs</li>
               <li
                 nzDanger
                 nz-menu-item
@@ -156,3 +157,4 @@
 
 <webhook-drawer [webhook]="selectedWebhook" [visible]="drawerVisible" (close)="closeDrawer($event)"></webhook-drawer>
 <test-webhook-modal [visible]="testModalVisible" [webhook]="selectedWebhook" (close)="closeTestModal()"></test-webhook-modal>
+<webhook-deliveries [visible]="logsModalVisible" [webhook]="selectedWebhook" (close)="closeLogsModal()"></webhook-deliveries>

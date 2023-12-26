@@ -4,8 +4,10 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import {
   PagedWebhook,
   Webhook,
+  PagedWebhookDelivery,
   WebhookDelivery,
   WebhookFilter,
+  WebhookDeliveryFilter,
   WebhookRequest
 } from "@features/safe/integrations/webhooks/webhooks";
 import { Observable } from "rxjs";
@@ -52,5 +54,18 @@ export class WebhookService {
 
   send(request: WebhookRequest): Observable<WebhookDelivery> {
     return this.http.post<WebhookDelivery>(`${this.baseUrl}/send`, request);
+  }
+
+  getDeliveries(id: string, filter: WebhookDeliveryFilter): Observable<PagedWebhookDelivery> {
+    const queryParam = {
+      events: filter.events,
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    return this.http.get<PagedWebhookDelivery>(
+      `${this.baseUrl}/${id}/deliveries`,
+      { params: new HttpParams({ fromObject: queryParam }) }
+    );
   }
 }

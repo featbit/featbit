@@ -135,6 +135,23 @@ export interface WebhookDeliveryResponse {
   body: string;
 }
 
+export class WebhookDeliveryFilter {
+  events: string[];
+  pageIndex: number;
+  pageSize: number;
+
+  constructor() {
+    this.events = [];
+    this.pageIndex = 1;
+    this.pageSize = 3;
+  }
+}
+
+export interface PagedWebhookDelivery {
+  totalCount: number;
+  items: WebhookDelivery[];
+}
+
 export type TestWebhook = Pick<Webhook, 'id' | 'url' | 'name' | 'secret' | 'headers' | 'payloadTemplate'>;
 
 export interface WebhookRequest {

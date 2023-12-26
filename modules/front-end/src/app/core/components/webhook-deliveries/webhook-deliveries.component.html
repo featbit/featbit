@@ -1,0 +1,53 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzTitle="Webhook deliveries"
+  i18n-nzTitle="@@integrations.webhooks.webhook-deliveries"
+  [nzWidth]="1000"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <nz-table
+        #table nzSize="small"
+        nzPaginationType="small"
+        [nzShowTotal]="totalTemplate"
+        [nzData]="deliveries.items"
+        [nzFrontPagination]="false"
+        [nzLoading]="isLoading"
+        [nzTotal]="deliveries.totalCount"
+        [nzPageSize]="filter.pageSize"
+        [(nzPageIndex)]="filter.pageIndex"
+        (nzPageIndexChange)="loadDeliveries()"
+    >
+      <thead>
+      <tr>
+        <th i18n="@@common.status">Status</th>
+        <th i18n="@@integrations.webhooks.events">Events</th>
+        <th i18n="@@common.date">Date</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let item of table.data">
+        <tr>
+          <td (click)="expandRow(item.id)">
+            <i class="expand-arrow" nz-icon nzType="right" [nzRotate]="isRowExpanded(item.id) ? 90 : 0"></i>
+            <nz-tag *ngIf="item.success" nzColor="success">{{ item.response?.statusCode ?? 200 }}</nz-tag>
+            <nz-tag *ngIf="!item.success" nzColor="error">{{ item.response?.statusCode ?? 'ERROR' }}</nz-tag>
+          </td>
+          <td>
+            <span>{{item.events}}</span>
+          </td>
+          <td>{{item.startedAt | date: 'YYYY/MM/dd HH:mm'}}</td>
+        </tr>
+        <tr [nzExpand]="isRowExpanded(item.id)">
+          <webhook-delivery [delivery]="item"></webhook-delivery>
+        </tr>
+      </ng-container>
+      </tbody>
+      <ng-template #totalTemplate let-total>Total {{ total }} items</ng-template>
+    </nz-table>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
