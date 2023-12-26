@@ -41,8 +41,8 @@ public class WebhookService : MongoDbService<Webhook>, IWebhookService
 
         var totalCount = await query.CountAsync();
         var webhooks = await query
-            .Skip(filter.PageIndex * filter.PageSize)
             .OrderByDescending(x => x.CreatedAt)
+            .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
 
