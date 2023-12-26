@@ -69,4 +69,19 @@ public class WebhookController : ApiControllerBase
         var delivery = await Mediator.Send(request);
         return Ok(delivery);
     }
+
+    [HttpGet("{id:guid}/deliveries")]
+    public async Task<ApiResponse<PagedResult<WebhookDelivery>>> GetDeliveriesAsync(
+        Guid id,
+        [FromQuery] WebhookDeliveryFilter filter)
+    {
+        var request = new GetWebhookDeliveryList
+        {
+            WebhookId = id,
+            Filter = filter
+        };
+
+        var deliveries = await Mediator.Send(request);
+        return Ok(deliveries);
+    }
 }

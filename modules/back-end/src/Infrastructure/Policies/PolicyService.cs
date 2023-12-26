@@ -43,8 +43,8 @@ public class PolicyService : MongoDbService<Policy>, IPolicyService
 
         var totalCount = await query.CountAsync();
         var items = await query
-            .Skip(filter.PageIndex * filter.PageSize)
             .OrderByDescending(x => x.CreatedAt)
+            .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
 
