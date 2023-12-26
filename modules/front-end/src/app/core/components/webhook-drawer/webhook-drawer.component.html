@@ -166,7 +166,7 @@
           class="payload-template-form-control"
           nzErrorTip="Not a valid JSON Handlebars template"
           i18n-nzErrorTip="@@integrations.webhooks.payload-template-validation-message"
-          nzExtra="The Handlebars payload template used to generate the webhook JSON request body."
+          nzExtra="The Handlebars payload template to generate the webhook JSON request body."
           i18n-nzExtra="@@integrations.webhooks.payload-template-description">
           <nz-code-editor
             formControlName="payloadTemplate"
@@ -196,13 +196,13 @@
 
       <!-- Test -->
       <nz-form-item>
-        <nz-form-label i18n="@@common.test">Test</nz-form-label>
+        <nz-form-label i18n="@@common.live-debug">Live debug</nz-form-label>
         <nz-form-control
           nzExtra="Optionally, you can test your webhook configuration before saving it."
           i18n-nzExtra="@@integrations.webhooks.test-webhook-description">
           <button [disabled]="!form.valid" class="test-webhook-button" type="button" nz-button nzType="link" (click)="openTestModal()">
             <i nz-icon nzType="bug" nzTheme="outline"></i>
-            <span i18n="@@integrations.webhooks.test-your-webhook-configuration">Test your webhook configuration</span>
+            <span i18n="@@integrations.webhooks.live-debug-webhook-configuration">Live debug webhook configuration</span>
           </button>
         </nz-form-control>
       </nz-form-item>

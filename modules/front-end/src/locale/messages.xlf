@@ -5079,7 +5079,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.payload-template-description" datatype="html">
-        <source>The Handlebars payload template used to generate the webhook JSON request body.</source>
+        <source>The Handlebars payload template to generate the webhook JSON request body.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">169</context>
@@ -5113,8 +5113,8 @@
           <context context-type="linenumber">193</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.test" datatype="html">
-        <source>Test</source>
+      <trans-unit id="common.live-debug" datatype="html">
+        <source>Live debug</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">199</context>
@@ -5131,8 +5131,8 @@
           <context context-type="linenumber">201</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="integrations.webhooks.test-your-webhook-configuration" datatype="html">
-        <source>Test your webhook configuration</source>
+      <trans-unit id="integrations.webhooks.live-debug-webhook-configuration" datatype="html">
+        <source>Live debug webhook configuration</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">205</context>

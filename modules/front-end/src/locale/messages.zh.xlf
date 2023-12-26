@@ -5470,7 +5470,7 @@
         <target>非法的 JSON Handlebars 模版</target>
       </trans-unit>
       <trans-unit id="integrations.webhooks.payload-template-description" datatype="html">
-        <source>The Handlebars payload template used to generate the webhook JSON request body.</source>
+        <source>The Handlebars payload template to generate the webhook JSON request body.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">169</context>
@@ -5509,8 +5509,8 @@
         </context-group>
         <target>当触发此 Webhook 时，我们将提供事件详细信息。</target>
       </trans-unit>
-      <trans-unit id="common.test" datatype="html">
-        <source>Test</source>
+      <trans-unit id="common.live-debug" datatype="html">
+        <source>Live debug</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">199</context>
@@ -5519,7 +5519,7 @@
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
           <context context-type="linenumber">129</context>
         </context-group>
-        <target>测试</target>
+        <target>实时调试</target>
       </trans-unit>
       <trans-unit id="integrations.webhooks.test-webhook-description" datatype="html">
         <source>Optionally, you can test your webhook configuration before saving it.</source>
@@ -5529,13 +5529,13 @@
         </context-group>
         <target>（可选）您可以在保存之前测试您的 Webhook 配置。</target>
       </trans-unit>
-      <trans-unit id="integrations.webhooks.test-your-webhook-configuration" datatype="html">
-        <source>Test your webhook configuration</source>
+      <trans-unit id="integrations.webhooks.live-debug-webhook-configuration" datatype="html">
+        <source>Live debug webhook configuration</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">205</context>
         </context-group>
-        <target>测试 webhook 配置</target>
+        <target>实时调试 webhook 配置</target>
       </trans-unit>
       <trans-unit id="integrations.webhooks.webhook-drawer.edit-title" datatype="html">
         <source>Edit Webhook</source>
