@@ -24,7 +24,15 @@ export function getTestPayload(event: string, payloadTemplate: string): string {
 
   const data = Object.assign(
     {},
-    { events: event, operator: 'webhook-tester', happenedAt: new Date().toISOString() },
+    {
+      events: event,
+      operator: 'webhook-tester',
+      happenedAt: new Date().toISOString(),
+      changes: [
+        'test change description 1',
+        'test change description 2'
+      ]
+    },
     { ...resourceDescriptor }
   );
 
