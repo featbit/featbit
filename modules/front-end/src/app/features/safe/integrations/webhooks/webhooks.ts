@@ -117,9 +117,14 @@ export interface WebhookDelivery {
   events: string;
   request: WebhookDeliveryRequest;
   response: WebhookDeliveryResponse;
-  error: any;
+  error: WebhookDeliveryError;
   startedAt: Date;
   endedAt: Date;
+}
+
+export interface WebhookDeliveryError {
+  message: string;
+  [key: string]: any;
 }
 
 export interface WebhookDeliveryRequest {
