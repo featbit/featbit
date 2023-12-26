@@ -110,7 +110,13 @@
           </ng-template>
         </td>
         <td class="events">
-          <span nz-tooltip [nzTooltipTitle]="eventsTooltip">{{ item.events?.join('; ') }}</span>
+          <span
+            nz-tooltip
+            nzTooltipPlacement="topLeft"
+            [nzTooltipOverlayStyle]="{'max-width': '270px'}"
+            [nzTooltipTitle]="eventsTooltip">
+            {{ item.events?.join('; ') }}
+          </span>
           <ng-template #eventsTooltip>
             <ul>
               <li *ngFor="let event of item.events;">{{ event }}</li>
@@ -118,21 +124,29 @@
           </ng-template>
         </td>
         <td class="actions">
-          <button nz-button nzType="link" (click)="openDrawer(item)">
-            <i nz-icon nzType="icons:icon-edit"></i>
-            <span i18n="@@common.edit">Edit</span>
+          <button nz-button nzType="link" (click)="openTestModal(item)">
+            <span nz-icon nzType="bug" nzTheme="outline"></span>
+            <span i18n="@@common.live-debug">Live debug</span>
           </button>
-          <button
-            nz-button
-            nzType="link"
-            nz-popconfirm
-            nzPopconfirmTitle="Are you sure to remove it?"
-            i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
-            nzPopconfirmPlacement="top"
-            (nzOnConfirm)="remove(item.id)">
-            <i nz-icon nzType="icons:icon-delete"></i>
-            <span i18n="@@common.remove">Remove</span>
-          </button>
+          <a nz-dropdown nzTrigger="hover" [nzDropdownMenu]="actions">
+            <span i18n="@@common.more">More</span>&nbsp;
+            <span nz-icon nzType="down"></span>
+          </a>
+          <nz-dropdown-menu #actions="nzDropdownMenu">
+            <ul nz-menu>
+              <li nz-menu-item (click)="openDrawer(item)" i18n="@@common.edit">Edit</li>
+              <li
+                nzDanger
+                nz-menu-item
+                nz-popconfirm
+                nzPopconfirmTitle="Are you sure to remove it?"
+                i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
+                nzPopconfirmPlacement="top"
+                (nzOnConfirm)="remove(item.id)">
+                <span i18n="@@common.remove">Remove</span>
+              </li>
+            </ul>
+          </nz-dropdown-menu>
         </td>
       </tr>
       </tbody>
@@ -141,3 +155,4 @@
 </div>
 
 <webhook-drawer [webhook]="selectedWebhook" [visible]="drawerVisible" (close)="closeDrawer($event)"></webhook-drawer>
+<test-webhook-modal [visible]="testModalVisible" [webhook]="selectedWebhook" (close)="closeTestModal()"></test-webhook-modal>

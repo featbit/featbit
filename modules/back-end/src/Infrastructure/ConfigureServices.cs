@@ -2,7 +2,6 @@ using Application.Caches;
 using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
-using Domain.Webhooks;
 using Infrastructure.AccessTokens;
 using Infrastructure.Workspaces;
 using Infrastructure.AuditLogs;

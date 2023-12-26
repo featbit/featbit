@@ -1,0 +1,60 @@
+@import "variables";
+
+.ant-tabs-tab a,
+.ant-tabs-tab-btn {
+  color: @grey50-color;
+}
+
+.ant-tabs-tab-active a,
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: @grey80-color;
+}
+
+.ant-tabs-tab-disabled {
+  .ant-tabs-tab a,
+  .ant-tabs-tab-btn {
+    color: rgba(0, 0, 0, 0.25);
+  }
+}
+
+.ant-tabs-tab a,
+.ant-tabs-tab-btn {
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 150%;
+}
+
+.ant-tabs-small {
+  .ant-tabs-tab a,
+  .ant-tabs-tab-btn {
+    font-size: 13px;
+  }
+
+  .ant-tabs-tab + .ant-tabs-tab {
+    margin-left: 16px;
+  }
+}
+
+
+.ant-tabs-top > .ant-tabs-nav::before {
+  bottom: 2px;
+  border-color: @divider-color;
+}
+
+.ant-tabs-ink-bar {
+  height: 2px;
+  background: transparent;
+}
+
+.ant-tabs-ink-bar::after {
+  content: " ";
+  position: absolute;
+  left: 50%;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  background: @primary-color;
+  border-radius: 5px;
+  width: 16px;
+  transform: translateX(-50%);
+}

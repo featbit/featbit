@@ -20,13 +20,20 @@ export class HandlebarsService {
     this._initialized = true;
   }
 
+  compile(template: string, data: any) {
+    const compiled = Handlebars.compile(template);
+    return compiled(data);
+  }
+
   private registerHelpers() {
     Handlebars.registerHelper('eq', function (a, b, options) {
       return a === b ? options.fn(this) : options.inverse(this);
     });
 
     Handlebars.registerHelper('json', function (obj) {
-      return JSON.stringify(obj);
+      // disable HTML-escaping of return values
+      // ref: https://handlebarsjs.com/guide/expressions.html#prevent-html-escaping-of-helper-return-values
+      return new Handlebars.SafeString(JSON.stringify(obj, null, 2));
     });
   }
 }

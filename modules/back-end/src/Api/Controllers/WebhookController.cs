@@ -1,5 +1,6 @@
 using Application.Bases.Models;
 using Application.Webhooks;
+using Domain.Webhooks;
 
 namespace Api.Controllers;
 
@@ -60,5 +61,12 @@ public class WebhookController : ApiControllerBase
 
         var success = await Mediator.Send(request);
         return Ok(success);
+    }
+
+    [HttpPost("send")]
+    public async Task<ApiResponse<WebhookDelivery>> SendAsync(SendWebhook request)
+    {
+        var delivery = await Mediator.Send(request);
+        return Ok(delivery);
     }
 }

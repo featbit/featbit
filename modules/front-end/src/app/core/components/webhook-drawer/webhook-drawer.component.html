@@ -33,7 +33,7 @@
           nzErrorTip="Please provide a valid URL"
           i18n-nzErrorTip="@@integrations.webhooks.url-validation-message"
           nzExtra="The URL of a web server that receives HTTP POST JSON payloads."
-          i18n-nzExtra="@@integrations.webhook.url-description">
+          i18n-nzExtra="@@integrations.webhooks.url-description">
           <input type="text" nz-input formControlName="url" placeholder="https://example.com/post-receive"/>
         </nz-form-control>
       </nz-form-item>
@@ -46,7 +46,7 @@
           nzErrorTip="At least one environment must be selected"
           i18n-nzErrorTip="@@integrations.webhooks.scopes-cannot-be-empty"
           nzExtra="Select the environments that this webhook should monitor. When an event occurs in these environments, this webhook will be triggered."
-          i18n-nzExtra="@@integrations.webhook.scopes-description">
+          i18n-nzExtra="@@integrations.webhooks.scopes-description">
           <div class="scopes-title">
             <span class="text" i18n="@@common.project">Project</span>
             <span class="text" i18n="@@common.environments">Environments</span>
@@ -164,9 +164,9 @@
         </div>
         <nz-form-control
           class="payload-template-form-control"
-          nzErrorTip="Not a valid Handlebars template"
+          nzErrorTip="Not a valid JSON Handlebars template"
           i18n-nzErrorTip="@@integrations.webhooks.payload-template-validation-message"
-          nzExtra="The Handlebars payload template used to generate the webhook JSON request body."
+          nzExtra="The Handlebars payload template to generate the webhook JSON request body."
           i18n-nzExtra="@@integrations.webhooks.payload-template-description">
           <nz-code-editor
             formControlName="payloadTemplate"
@@ -194,6 +194,19 @@
         </nz-form-control>
       </nz-form-item>
 
+      <!-- Test -->
+      <nz-form-item>
+        <nz-form-label i18n="@@common.live-debug">Live debug</nz-form-label>
+        <nz-form-control
+          nzExtra="Optionally, you can test your webhook configuration before saving it."
+          i18n-nzExtra="@@integrations.webhooks.test-webhook-description">
+          <button [disabled]="!form.valid" class="test-webhook-button" type="button" nz-button nzType="link" (click)="openTestModal()">
+            <i nz-icon nzType="bug" nzTheme="outline"></i>
+            <span i18n="@@integrations.webhooks.live-debug-webhook-configuration">Live debug webhook configuration</span>
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+
       <!-- Submit -->
       <nz-form-item>
         <nz-form-control class="align-end">
@@ -206,3 +219,5 @@
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
   </ng-template>
 </nz-drawer>
+
+<test-webhook-modal [visible]="testModalVisible" [webhook]="testWebhook" (close)="closeTestModal()"></test-webhook-modal>
