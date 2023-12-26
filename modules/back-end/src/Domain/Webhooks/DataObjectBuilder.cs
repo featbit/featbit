@@ -96,5 +96,12 @@ public static class DataObjectBuilder
         return dataObject;
     }
 
+    public static Dictionary<string, object> AddChanges(this Dictionary<string, object> dataObject, string[] changes)
+    {
+        dataObject["changes"] = changes;
+
+        return dataObject;
+    }
+
     private static string BooleanToString(this bool value) => value ? "true" : "false";
 }
