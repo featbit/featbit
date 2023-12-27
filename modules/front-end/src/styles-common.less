@@ -11,6 +11,10 @@
 @import "styles/nz-select.less";
 @import "styles/nz-input.less";
 @import "styles/nz-tabset.less";
+@import "styles/icon.less";
+@import "styles/nz-segmented.less";
+@import "styles/standards.less";
+@import "styles/nz-drawer.less";
 @import "variables";
 
 html,
@@ -115,23 +119,6 @@ app-root {
   padding: 0 5px;
 }
 
-// standard button
-.standard-btn {
-  width: 148px;
-  height: 40px;
-  border-radius: 32px;
-  font-weight: 500;
-  font-size: 14px;
-
-  text-shadow: none;
-  box-shadow: none;
-  border: none;
-
-  i {
-    font-size: 16px;
-  }
-}
-
 // no-bottom-line ant-tabs
 .no-bottom-line .ant-tabs-nav::before {
   border: none;
@@ -142,18 +129,6 @@ app-root {
   box-shadow: none;
   text-shadow: none;
   border: none;
-}
-
-// bordered input
-.standard-bordered-input {
-  border: 1px solid @grey20-color;
-  box-sizing: border-box;
-  border-radius: 8px;
-
-  i {
-    font-size: 20px;
-    color: @grey40-color;
-  }
 }
 
 .ant-picker-range {
@@ -178,65 +153,6 @@ app-root {
 // multiple select placeholder
 .ant-select-multiple .ant-select-selection-placeholder {
   top: 40%;
-}
-
-.standard-form-input {
-  .standard-bordered-input;
-  height: 40px;
-}
-
-// standard div
-.standard-div {
-  border-radius: 20px;
-  padding: 24px;
-  background-color: @grey5-color;
-
-  // standard inputs
-  nz-input-group {
-    .standard-bordered-input;
-    padding: 9px;
-  }
-
-  // copy icon
-  i.copy-icon {
-    font-size: 20px;
-    color: @grey40-color;
-    cursor: pointer;
-  }
-
-  // primary button
-  .ant-btn-primary {
-    .standard-btn;
-  }
-}
-
-// form label
-.ant-form-item-label > label {
-  font-size: 14px;
-  line-height: 150%;
-  color: @grey70-color;
-}
-
-// standard form
-.standard-form {
-  nz-form-control {
-    max-width: unset;
-  }
-
-  // input
-  input {
-    .standard-form-input;
-  }
-
-  // textarea
-  textarea {
-    .standard-bordered-input;
-    height: 80px;
-  }
-
-  .ant-form-item-extra {
-    margin-top: 4px;
-  }
 }
 
 // table style
@@ -531,41 +447,6 @@ app-root {
 .ant-divider-vertical {
   margin: 0 24px;
   border-color: @divider-color;
-}
-
-// custom drawer
-.ant-drawer-header {
-  margin: 0 24px;
-  padding: 20px 0;
-}
-
-.ant-drawer-body {
-  .standard-form;
-  padding: 20px 24px;
-
-  .submit-btn {
-    .standard-btn;
-    float: right;
-    margin-top: 48px;
-  }
-}
-
-.ant-drawer-title {
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 150%;
-  color: @grey70-color;
-}
-
-.ant-drawer-extra {
-  i {
-    font-size: 20px;
-
-    &:hover {
-      cursor: pointer;
-      filter: brightness(0.5);
-    }
-  }
 }
 
 // assures tabs take all available height

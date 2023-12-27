@@ -1,0 +1,89 @@
+@import "variables";
+
+// standard button
+.standard-btn {
+  width: 148px;
+  height: 40px;
+  border-radius: 32px;
+  font-weight: 500;
+  font-size: 14px;
+
+  text-shadow: none;
+  box-shadow: none;
+  border: none;
+
+  i {
+    font-size: 16px;
+  }
+}
+
+// bordered input
+.standard-bordered-input {
+  border: 1px solid @grey20-color;
+  box-sizing: border-box;
+  border-radius: 8px;
+
+  i {
+    font-size: 20px;
+    color: @grey40-color;
+  }
+}
+
+// standard div
+.standard-div {
+  border-radius: 20px;
+  padding: 24px;
+  background-color: @grey5-color;
+
+  // standard inputs
+  nz-input-group {
+    .standard-bordered-input;
+    padding: 9px;
+  }
+
+  // copy icon
+  i.copy-icon {
+    font-size: 20px;
+    color: @grey40-color;
+    cursor: pointer;
+  }
+
+  // primary button
+  .ant-btn-primary {
+    .standard-btn;
+  }
+}
+
+.standard-form-input {
+  .standard-bordered-input;
+  height: 40px;
+}
+
+// form label
+.ant-form-item-label > label {
+  font-size: 14px;
+  line-height: 150%;
+  color: @grey70-color;
+}
+
+// standard form
+.standard-form {
+  nz-form-control {
+    max-width: unset;
+  }
+
+  // input
+  input {
+    .standard-form-input;
+  }
+
+  // textarea
+  textarea {
+    .standard-bordered-input;
+    height: 80px;
+  }
+
+  .ant-form-item-extra {
+    margin-top: 4px;
+  }
+}

@@ -118,9 +118,14 @@ export interface WebhookDelivery {
   events: string;
   request: WebhookDeliveryRequest;
   response: WebhookDeliveryResponse;
-  error: any;
+  error: WebhookDeliveryError;
   startedAt: Date;
   endedAt: Date;
+}
+
+export interface WebhookDeliveryError {
+  message: string;
+  [key: string]: any;
 }
 
 export interface WebhookDeliveryRequest {
@@ -134,6 +139,25 @@ export interface WebhookDeliveryResponse {
   reasonPhrase: string;
   headers: { key: string; value: string; }[];
   body: string;
+}
+
+export class WebhookDeliveryFilter {
+  event: string;
+  success?: boolean;
+  pageIndex: number;
+  pageSize: number;
+
+  constructor() {
+    this.event = '';
+    this.success = null;
+    this.pageIndex = 1;
+    this.pageSize = 5;
+  }
+}
+
+export interface PagedWebhookDelivery {
+  totalCount: number;
+  items: WebhookDelivery[];
 }
 
 export type TestWebhook = Pick<Webhook, 'id' | 'url' | 'name' | 'secret' | 'headers' | 'payloadTemplate'>;

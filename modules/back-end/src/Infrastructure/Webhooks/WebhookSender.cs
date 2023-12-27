@@ -47,7 +47,7 @@ public class WebhookSender : IWebhookSender
                 message = "Cannot construct a valid JSON payload by using the template and the data object",
                 dataObject,
                 payloadTemplate = webhook.PayloadTemplate,
-                exceptionMessage = ex.Message,
+                exceptionMessage = ex.Message
             };
             delivery.SetError(error);
 
@@ -97,8 +97,7 @@ public class WebhookSender : IWebhookSender
 
             var error = new
             {
-                message = ex.Message,
-                stackTrace = ex.StackTrace
+                message = ex.Message
             };
             delivery.SetError(error);
         }

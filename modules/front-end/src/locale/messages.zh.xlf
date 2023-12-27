@@ -782,7 +782,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
@@ -2498,7 +2498,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">124</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
@@ -4018,7 +4018,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <target>确定要删除么？</target>
       </trans-unit>
@@ -4106,7 +4106,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">147</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -4748,6 +4748,10 @@
           <context context-type="linenumber">113</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">75</context>
         </context-group>
@@ -5257,6 +5261,86 @@
         </context-group>
         <target>关闭</target>
       </trans-unit>
+      <trans-unit id="integrations.webhooks.webhook-deliveries" datatype="html">
+        <source>Webhook deliveries</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <target>Webhook 调用日志</target>
+      </trans-unit>
+      <trans-unit id="integrations.webhooks.webhook-deliveries-tip" datatype="html">
+        <source>Webhook deliveries sent to your endpoint in the past 15 days.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <target>过去 15 天内的 Webhook 调用日志。</target>
+      </trans-unit>
+      <trans-unit id="integrations.webhooks.events" datatype="html">
+        <source>Events</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+        <target>事件</target>
+      </trans-unit>
+      <trans-unit id="common.happened-at" datatype="html">
+        <source>Happened At</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <target>发生于</target>
+      </trans-unit>
+      <trans-unit id="common.loading-failed-try-again" datatype="html">
+        <source>Loading failed, please try again</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">178</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">255</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">220</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
+          <context context-type="linenumber">93</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
+          <context context-type="linenumber">62</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+        <target>数据加载失败，请重试</target>
+      </trans-unit>
       <trans-unit id="common.name-has-been-used" datatype="html">
         <source>This name has been used</source>
         <context-group purpose="location">
@@ -5348,18 +5432,6 @@
           <context context-type="linenumber">91</context>
         </context-group>
         <target>添加范围</target>
-      </trans-unit>
-      <trans-unit id="integrations.webhooks.events" datatype="html">
-        <source>Events</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">98</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">63</context>
-        </context-group>
-        <target>事件</target>
       </trans-unit>
       <trans-unit id="integrations.webhooks.events-cannot-be-empty" datatype="html">
         <source>At least one event must be selected</source>
@@ -6176,42 +6248,6 @@
           <context context-type="linenumber">59</context>
         </context-group>
         <target>编辑</target>
-      </trans-unit>
-      <trans-unit id="common.loading-failed-try-again" datatype="html">
-        <source>Loading failed, please try again</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
-          <context context-type="linenumber">62</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
-          <context context-type="linenumber">81</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">178</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">255</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">220</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">93</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">62</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
-          <context context-type="linenumber">70</context>
-        </context-group>
-        <target>数据加载失败，请重试</target>
       </trans-unit>
       <trans-unit id="expt.metric.cannot-remove-metric-because-it-is-being-used" datatype="html">
         <source>Cannot remove this metric because it&apos;s being used by experiment</source>
@@ -8809,11 +8845,19 @@
         </context-group>
         <target>该 Webhook 处于禁用状态。</target>
       </trans-unit>
+      <trans-unit id="common.view-logs" datatype="html">
+        <source>View Logs</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+        <target>查看日志</target>
+      </trans-unit>
       <trans-unit id="webhooks.last-delivery-successful" datatype="html">
         <source>Last delivery happened at <x id="PH" equiv-text="happenedAt"/> was successful (HTTP Response: <x id="PH_1" equiv-text="response"/>).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">79</context>
+          <context context-type="linenumber">76</context>
         </context-group>
         <target>上次触发成功，发生于 <x id="PH" equiv-text="happenedAt"/> (HTTP 响应：<x id="PH_1" equiv-text="response"/>)。</target>
       </trans-unit>
@@ -8821,7 +8865,7 @@
         <source>Last delivery happened at <x id="PH" equiv-text="happenedAt"/> was not successful (Invalid HTTP Response: <x id="PH_1" equiv-text="response"/>).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">77</context>
         </context-group>
         <target>上次触发失败，发生于 <x id="PH" equiv-text="happenedAt"/> (非法的 HTTP 响应：<x id="PH_1" equiv-text="response"/>)。</target>
       </trans-unit>
