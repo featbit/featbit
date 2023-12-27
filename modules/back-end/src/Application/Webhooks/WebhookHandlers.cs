@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using Domain.SemanticPatch;
+using Domain.Utils;
 using Domain.Webhooks;
 
 namespace Application.Webhooks;
@@ -37,20 +39,32 @@ public class WebhookHandler : IWebhookHandler
     public async Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId)
     {
         string[] events;
+        string[] changes;
 
         if (dataChange.IsCreation())
         {
             events = FlagCreatedEvents;
+            changes = new[] { $"Created Flag: ${flag.Name}" };
         }
         else if (dataChange.IsDeletion())
         {
             events = FlagDeletedEvents;
+            changes = new[] { $"Deleted Flag: ${flag.Name}" };
         }
         else
         {
-            var instructions = FlagComparer.Compare(dataChange).ToArray();
+            var original =
+                JsonSerializer.Deserialize<FeatureFlag>(dataChange.Previous, ReusableJsonSerializerOptions.Web);
+            var current =
+                JsonSerializer.Deserialize<FeatureFlag>(dataChange.Current, ReusableJsonSerializerOptions.Web);
+
+            var instructions = FlagComparer.Compare(original, current).ToArray();
             events = instructions
                 .Select(x => WebhookEvents.FlagEvents.FromInstructionKind(x.Kind))
+                .Distinct()
+                .ToArray();
+            changes = instructions
+                .Select(x => InstructionDescriptor.Describe(x, original, current))
                 .Distinct()
                 .ToArray();
         }
@@ -62,7 +76,8 @@ public class WebhookHandler : IWebhookHandler
         var dataObject = DataObjectBuilder
             .New(events, @operator, flag.UpdatedAt)
             .AddResourceDescriptor(resourceDescriptor)
-            .AddFeatureFlag(flag);
+            .AddFeatureFlag(flag)
+            .AddChanges(changes);
 
         foreach (var webhook in webhooks)
         {
@@ -76,20 +91,32 @@ public class WebhookHandler : IWebhookHandler
     public async Task HandleAsync(Segment segment, DataChange dataChange, Guid operatorId)
     {
         string[] events;
+        string[] changes;
 
         if (dataChange.IsCreation())
         {
             events = SegmentCreatedEvents;
+            changes = new[] { $"Created Segment: ${segment.Name}" };
         }
         else if (dataChange.IsDeletion())
         {
             events = SegmentDeletedEvents;
+            changes = new[] { $"Deleted Segment: ${segment.Name}" };
         }
         else
         {
-            var instructions = SegmentComparer.Compare(dataChange).ToArray();
+            var original =
+                JsonSerializer.Deserialize<Segment>(dataChange.Previous, ReusableJsonSerializerOptions.Web);
+            var current =
+                JsonSerializer.Deserialize<Segment>(dataChange.Current, ReusableJsonSerializerOptions.Web);
+
+            var instructions = SegmentComparer.Compare(original, current).ToArray();
             events = instructions
                 .Select(x => WebhookEvents.SegmentEvents.FromInstructionKind(x.Kind))
+                .Distinct()
+                .ToArray();
+            changes = instructions
+                .Select(x => InstructionDescriptor.Describe(x, original, current))
                 .Distinct()
                 .ToArray();
         }
@@ -102,7 +129,8 @@ public class WebhookHandler : IWebhookHandler
         var dataObject = DataObjectBuilder
             .New(events, @operator, segment.UpdatedAt)
             .AddResourceDescriptor(resourceDescriptor)
-            .AddSegment(segment, flagReferences);
+            .AddSegment(segment, flagReferences)
+            .AddChanges(changes);
 
         foreach (var webhook in webhooks)
         {

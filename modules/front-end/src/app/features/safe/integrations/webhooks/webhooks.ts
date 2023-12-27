@@ -20,6 +20,7 @@ export const WebhookDefaultPayloadTemplate: string = `{
   "event": "{{events}}",
   "operator": "{{operator}}",
   "happenedAt": "{{happenedAt}}",
+  "changes": {{json changes}},
   "organization": {
     "id": "{{organization.id}}",
     "name": "{{organization.name}}"
