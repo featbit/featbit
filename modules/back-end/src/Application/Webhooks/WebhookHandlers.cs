@@ -71,6 +71,13 @@ public class WebhookHandler : IWebhookHandler
 
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
+
+        var activeWebhooks = webhooks.Where(x => x.IsActive).ToArray();
+        if (!activeWebhooks.Any())
+        {
+            return;
+        }
+
         var @operator = await _userService.GetOperatorAsync(operatorId);
 
         var dataObject = DataObjectBuilder
@@ -79,7 +86,7 @@ public class WebhookHandler : IWebhookHandler
             .AddFeatureFlag(flag)
             .AddChanges(changes);
 
-        foreach (var webhook in webhooks)
+        foreach (var webhook in activeWebhooks)
         {
             var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
@@ -123,6 +130,13 @@ public class WebhookHandler : IWebhookHandler
 
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
+
+        var activeWebhooks = webhooks.Where(x => x.IsActive).ToArray();
+        if (!activeWebhooks.Any())
+        {
+            return;
+        }
+
         var @operator = await _userService.GetOperatorAsync(operatorId);
         var flagReferences = await _segmentService.GetFlagReferencesAsync(segment.EnvId, segment.Id);
 
@@ -132,7 +146,7 @@ public class WebhookHandler : IWebhookHandler
             .AddSegment(segment, flagReferences)
             .AddChanges(changes);
 
-        foreach (var webhook in webhooks)
+        foreach (var webhook in activeWebhooks)
         {
             var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
