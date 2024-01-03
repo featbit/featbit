@@ -84,17 +84,15 @@ export class ConnectAnSdkComponent implements OnChanges {
 
   private buildNodeJsSnippet(): string {
     return `
-const fbClient = require('@featbit/node-server-sdk');
+const { FbClientBuilder, UserBuilder } = require('@featbit/node-server-sdk');
 
-const fbClient = new fb.FbClientBuilder()
+const fbClient = new FbClientBuilder()
     .sdkKey('${this.secret}')
     .streamingUri('${this.streamingURL}')
     .eventsUri('${this.eventURL}')
     .build();
 
-const user = new fb.UserBuilder()
-    .key('aaa')
-    .build();
+const user = new UserBuilder('aaa').build();
 
 // subscribe to flag change
 fbClient.on('update:${this.flagKey}',  (ee) => {
@@ -111,7 +109,7 @@ async function run() {
     const boolVariation = fbClient.boolVariation(${this.flagKey}, user, false);
 
     // make sure the events are flushed
-    fbClient.flush();
+    await fbClient.flush();
 }
 
 run()
