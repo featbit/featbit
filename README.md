@@ -1,5 +1,6 @@
+# FeatBit, a fast and scalable [open source feature flags managmement service](https://www.featbit.co/blogs/Modern-Feature-Flags-Management-Service-Overview) built in .NET.
 
-![image](https://github.com/featbit/featbit/assets/68597908/ff7a611e-9504-4f99-bf11-8ba9bccea696)
+<a href="https://www.featbit.co/blogs/Modern-Feature-Flags-Management-Service-Overview"><img src="https://github.com/featbit/featbit/assets/68597908/28bb8bc4-41bc-472d-8193-36226f915af0" /></a>
 
 <div id="header" align="center">
   <div id="badges">
@@ -31,43 +32,30 @@
 
 <br/>
 
-🙏 If you are using FeatBit, we have launched the [**FeatBit Usage Survey**](https://forms.gle/gZT715wE9aMPpoBw8). It would be greatly appreciated and incredibly helpful if you could take the time to fill it out (5 questions).
 
-## Try FeatBit Online
+## What is Feature Flags?
 
-Try FeatBit immediately with [our online demo](https://tryitonline.featbit.co). The video below shows you how to get started quickly.
-
-https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
-
-## About FeatBit
-
-[FeatBit](https://www.featbit.co) is an open-source [feature flags](https://blog.jetbrains.com/space/2022/06/16/feature-flags/) management tool that empowers developers:
-
-**Ship Code Safely**. Mitigate risks with Production Testing, roll out features to 1% of users initially then expanding progressively, and ensure instant error recovery without redeployment.
-
-**Targeted Experiences**. Giving you control over who sees each feature and when they see it. Release features to specific target users, and continuously measure and improve your business.
-
-**Innovate Faster**. Decouples code deployments from feature releases. Deploy at will, and release any feature immediately upon request from the boss.
-
-**Host Anywhere**. FeatBit allows you to host your feature flags service wherever your business needs it, ensuring compliance and data protection.
-
-**Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
-
-<a href="https://www.featbit.co">
-  <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
-</a>
+[Click here to learn about feature flags management tool](https://www.featbit.co/blogs/Modern-Feature-Flags-Management-Service-Overview).
 
 ## Get started in 3 steps
 
-### 1. Start FeatBit
+### 1. Install FeatBit
 
-To self-host FeatBit with Docker, Run this script:
+To self-host FeatBit with Docker, Run this script for standard version:
 
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
 docker compose up -d
 ```
+
+For professional version (for high data volume), run script:
+
+```
+docker compose -f docker-compose-pro.yml up -d
+```
+
+
 
 Once all containers have started, you can access FeatBit's portal at [http://localhost:8081](http://localhost:8081) and log in with the default credentials:
 
@@ -101,6 +89,12 @@ else
 }
 ```
 
+## Try FeatBit Online
+
+Try FeatBit immediately with [our online demo](https://tryitonline.featbit.co). The video below shows you how to get started quickly.
+
+https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
+
 --------
 
 🙏 If you are using FeatBit, we have launched the [**FeatBit Usage Survey**](https://forms.gle/gZT715wE9aMPpoBw8). It would be greatly appreciated and incredibly helpful if you could take the time to fill it out (5 questions).
@@ -125,7 +119,7 @@ Email us at [contact@featbit.co](mailto:contact@featbit.co) if Slack isn't your 
 
 FeatBit offers a range of features including:
 
-- **[SDKs](https://docs.featbit.co/sdk/overview)** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), with more to come.
+- **[SDKs](https://docs.featbit.co/sdk/overview)** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), NodeJs, [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), Java for OpenFeature, NodeJs for OpenFeature, Javascript for OpenFeature, React for OpenFeature, with more to come.
 
 - **[Managing Feature flags](https://docs.featbit.co/feature-flags/organizing-flags/the-flags-list)**: Create, manage, and filter feature flags.
 
@@ -186,4 +180,7 @@ The following listed features are protected by a commercial license key, please 
 - Change request
 - SSO
 - Multi-organizations
+
+-------------
+![image](https://github.com/featbit/featbit/assets/68597908/ff7a611e-9504-4f99-bf11-8ba9bccea696)
 
