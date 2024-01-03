@@ -60,7 +60,7 @@ Once all containers have started, you can access FeatBit's portal at [http://loc
 - Username: **test@featbit.com**
 - Password: **123456**
 
-**Or**, you can [try FeatBit online](https://tryitonline.featbit.co) without self-hosting.
+Alternatively, you can [try FeatBit online](https://tryitonline.featbit.co) without self-hosting.
 
 > **Note**
 > By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
