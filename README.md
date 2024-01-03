@@ -37,11 +37,11 @@
 
 [Click here to learn about feature flags management tool](https://www.featbit.co/blogs/Modern-Feature-Flags-Management-Service-Overview).
 
-## Get started in 3 steps
+## Get started in 2 steps
 
 ### 1. Install FeatBit
 
-To self-host FeatBit with Docker, Run this script for standard version:
+To self-host FeatBit with Docker, run this script for standard version:
 
 ```
 git clone https://github.com/featbit/featbit
@@ -55,43 +55,23 @@ For professional version (for high data volume), run script:
 docker compose -f docker-compose-pro.yml up -d
 ```
 
-
-
 Once all containers have started, you can access FeatBit's portal at [http://localhost:8081](http://localhost:8081) and log in with the default credentials:
 
 - Username: **test@featbit.com**
 - Password: **123456**
+
+**Or**, you can [try FeatBit online](https://tryitonline.featbit.co) without self-hosting.
 
 > **Note**
 > By default, FeatBit's portal is only accessible from the local machine where Docker Compose is running. If you want to make it publicly accessible, refer to the [**FAQ**](https://docs.featbit.co/installation/faq#how-to-make-featbit-portal-accessible-publicly) for instructions.
 
 ### 2. Connect an SDK
 
-Find your preferred SDK in our list of [official SDKs](https://docs.featbit.co/sdk/overview) and import it into your project. Follow the setup guides for your specific SDK.
+Find your preferred SDK in our list of [official SDKs](https://docs.featbit.co/sdk/overview) and import it into your project. Follow the setup guides for your specific SDK. You can also learn how to connect an SDK in the 'Getting Started' section after logging into the Portal for the first time. The video below demonstrates how to get started quickly:
 
-You can also learn how to connect an SDK in the "Getting Started" section after logging in to the Portal for the first time.
-
-![image](https://github.com/featbit/featbit/assets/68597908/f6fe85dd-0753-4896-8f84-fa17c0037c21)
-
-### 3. Check a feature flag
-
-To check the state of a feature flag in your code, you just need a simple function call to verify the expected value. Here's how it might look in C#:
-
-```csharp
-var user = FbUser.Builder("tester-id").Name("tester").Build();
-if (featbit.BoolVariation("user-new-algorithm", user, defaultValue: false))
-{
-    // run new algorithm
-}
-else
-{
-    // run old algorithm
-}
-```
-
-## Try FeatBit Online
-
-Try FeatBit immediately with [our online demo](https://tryitonline.featbit.co). The video below shows you how to get started quickly.
+1. Create a feature flag.
+2. Connect an SDK.
+3. Test your application with the feature flag.
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
