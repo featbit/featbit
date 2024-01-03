@@ -1,5 +1,4 @@
 import { FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from "@angular/forms";
-import Handlebars from 'handlebars/lib/handlebars';
 
 export const PHONE_NUMBER_PATTERN =
   "^(?:\\+?86)?1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7(?:[0-35-9]\\d{2}|4(?:0\\d|1[0-2]|9\\d))|9[0-35-9]\\d{2}|6[2567]\\d{2}|4[579]\\d{2})\\d{6}$";
@@ -57,20 +56,6 @@ export const urlValidator: ValidatorFn = (control: FormControl) => {
   try {
     const newUrl = new URL(control.value);
     isValid = newUrl.protocol === 'http:' || newUrl.protocol === 'https:';
-  } catch (err) {
-  }
-
-  return isValid ? null : { invalid: true };
-}
-
-export const handlebarTemplateValidator: ValidatorFn = (control: FormControl) => {
-  let isValid = false;
-
-  try {
-    const template = control.value;
-    const compiled = Handlebars.compile(template);
-    compiled({});
-    isValid = true;
   } catch (err) {
   }
 

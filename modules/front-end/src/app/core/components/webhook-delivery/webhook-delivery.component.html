@@ -1,0 +1,34 @@
+<nz-tabset nzSize="small" [nzTabBarExtraContent]="extra">
+  <nz-tab nzTitle="Request">
+    <span class="title">Headers</span>
+    <div class="headers">
+      <prism [code]="requestHeaders" language="http"></prism>
+    </div>
+    <span class="title">Payload</span>
+    <div class="json">
+      <prism [code]="requestPayload" language="json"></prism>
+    </div>
+  </nz-tab>
+  <nz-tab [nzTitle]="responseTitle">
+    <p class="error" *ngIf="_delivery.error">{{_delivery.error.message}}</p>
+    <span class="title">Headers</span>
+    <div class="headers">
+      <prism [code]="responseHeaders" language="http"></prism>
+    </div>
+    <span class="title">Body</span>
+    <div class="json">
+      <prism [code]="responseBody" language="json"></prism>
+    </div>
+    <ng-template #responseTitle>
+      <span>Response</span>
+      <nz-tag *ngIf="_delivery.success" nzColor="success">{{ _delivery.response?.statusCode ?? 200 }}</nz-tag>
+      <nz-tag *ngIf="!_delivery.success" nzColor="error">{{ _delivery.response?.statusCode ?? 'ERROR' }}</nz-tag>
+    </ng-template>
+  </nz-tab>
+  <ng-template #extra>
+        <span class="completed-in">
+          <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+          <span class="text">Completed in {{ completedIn }} seconds.</span>
+        </span>
+  </ng-template>
+</nz-tabset>

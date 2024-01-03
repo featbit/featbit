@@ -1,7 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Webhook, WebhookDefaultPayloadTemplate, WebhookEvents } from "@features/safe/integrations/webhooks/webhooks";
+import {
+  TestWebhook,
+  Webhook,
+  WebhookDefaultPayloadTemplate,
+  WebhookEvents
+} from "@features/safe/integrations/webhooks/webhooks";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { handlebarTemplateValidator, urlValidator } from "@utils/form-validators";
+import { urlValidator } from "@utils/form-validators";
 import { WebhookService } from "@services/webhook.service";
 import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators";
 
@@ -11,6 +16,8 @@ import { ProjectService } from "@services/project.service";
 import { IEnvironment, IProject } from "@shared/types";
 import { of } from "rxjs";
 import { MonacoService } from "@services/monaco-service";
+import { uuidv4 } from "@utils/index";
+import { getTestPayload } from "@core/components/test-webhook-modal/test-webhook";
 
 @Component({
   selector: 'webhook-drawer',
@@ -76,7 +83,7 @@ export class WebhookDrawerComponent implements OnInit {
       events: this.constructEventsFormArray(this._webhook?.events),
       headers: this.constructHeaderFormArray(this._webhook?.headers),
       payloadTemplateType: new FormControl(this._webhook?.payloadTemplateType ?? 'default'),
-      payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? WebhookDefaultPayloadTemplate, [handlebarTemplateValidator]),
+      payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? WebhookDefaultPayloadTemplate, [this.jsonHandlebarsTemplateValidator]),
       secret: new FormControl(this._webhook?.secret),
       isActive: new FormControl(this._webhook?.isActive ?? true)
     });
@@ -118,6 +125,20 @@ export class WebhookDrawerComponent implements OnInit {
       first()
     );
   };
+
+  jsonHandlebarsTemplateValidator = (control: FormControl) => {
+    let isValid = false;
+
+    try {
+      const template = control.value;
+      const payload = getTestPayload(WebhookEvents[1].value, template);
+      JSON.parse(payload);
+      isValid = true;
+    } catch (err) {
+    }
+
+    return isValid ? null : { invalid: true };
+  }
 
   private editor: editor.IStandaloneCodeEditor;
   onEditorInit(editor: editor.IStandaloneCodeEditor): void {
@@ -319,6 +340,29 @@ export class WebhookDrawerComponent implements OnInit {
 
   onClose() {
     this.close.emit(false);
+  }
+
+  testWebhook: TestWebhook = null;
+  testModalVisible: boolean = false;
+  openTestModal() {
+    const { name, url, payloadTemplate, headers, secret } = this.form.value;
+    this.testWebhook = {
+      id: uuidv4(),
+      name,
+      url,
+      headers: headers
+        .filter(header => header.key)
+        .map(header => ({ key: header.key, value: header.value })),
+      payloadTemplate,
+      secret
+    };
+
+    this.testModalVisible = true;
+  }
+
+  closeTestModal() {
+    this.testWebhook = null;
+    this.testModalVisible = false;
   }
 
   doSubmit() {

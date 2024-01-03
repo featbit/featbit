@@ -93,6 +93,11 @@ import { PipesModule } from "@core/pipes/pipes.module";
 import { LicenseComponent } from "@core/components/license/license.component";
 import { WebhookDrawerComponent } from './components/webhook-drawer/webhook-drawer.component';
 import { HandlebarsService } from "@services/handlebars.service";
+import { TestWebhookModalComponent } from './components/test-webhook-modal/test-webhook-modal.component';
+import { WebhookDeliveryComponent } from './components/webhook-delivery/webhook-delivery.component';
+import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
+import { WebhookDeliveriesComponent } from './components/webhook-deliveries/webhook-deliveries.component';
+import { NzSegmentedModule } from "ng-zorro-antd/segmented";
 
 @NgModule({
   declarations: [
@@ -129,7 +134,10 @@ import { HandlebarsService } from "@services/handlebars.service";
     RelayProxyDrawerComponent,
     PrismComponent,
     LicenseComponent,
-    WebhookDrawerComponent
+    WebhookDrawerComponent,
+    TestWebhookModalComponent,
+    WebhookDeliveryComponent,
+    WebhookDeliveriesComponent
   ],
   imports: [
     CommonModule,
@@ -178,7 +186,9 @@ import { HandlebarsService } from "@services/handlebars.service";
     NzInputNumberModule,
     NzCollapseModule,
     NzSwitchModule,
-    ChangeListModule
+    ChangeListModule,
+    NzSkeletonModule,
+    NzSegmentedModule
   ],
   exports: [
     SlugifyPipe,
@@ -224,7 +234,10 @@ import { HandlebarsService } from "@services/handlebars.service";
     RelayProxyDrawerComponent,
     PrismComponent,
     LicenseComponent,
-    WebhookDrawerComponent
+    WebhookDrawerComponent,
+    TestWebhookModalComponent,
+    WebhookDeliveryComponent,
+    WebhookDeliveriesComponent
   ]
 })
 export class CoreModule {

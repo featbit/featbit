@@ -1,0 +1,67 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzTitle="Webhook deliveries"
+  i18n-nzTitle="@@integrations.webhooks.webhook-deliveries"
+  [nzWidth]="1000"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <div class="searches">
+      <span i18n="@@integrations.webhooks.webhook-deliveries-tip" class="tip">Webhook deliveries sent to your endpoint in the past 15 days.</span>
+      <nz-select nzShowSearch nzAllowClear nzPlaceHolder="Filter by event" [(ngModel)]="filter.event" (ngModelChange)="doSearch()">
+        <nz-option *ngFor="let event of events" [nzValue]="event" [nzLabel]="event"></nz-option>
+      </nz-select>
+      <nz-segmented [nzOptions]="statuses" (nzValueChange)="onStatusChange($event)"></nz-segmented>
+    </div>
+    <nz-table
+        #table nzSize="small"
+        [nzShowTotal]="totalTemplate"
+        [nzData]="deliveries.items"
+        [nzFrontPagination]="false"
+        [nzLoading]="isLoading"
+        [nzTotal]="deliveries.totalCount"
+        [nzPageSize]="filter.pageSize"
+        [(nzPageIndex)]="filter.pageIndex"
+        (nzPageIndexChange)="loadDeliveries()"
+    >
+      <thead>
+      <tr>
+        <th i18n="@@common.status">Status</th>
+        <th i18n="@@integrations.webhooks.events">Events</th>
+        <th i18n="@@common.happened-at">Happened At</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let item of table.data">
+        <tr>
+          <td (click)="expandRow(item.id)">
+            <i class="animated" nz-icon nzType="right" [nzRotate]="isRowExpanded(item.id) ? 90 : 0"></i>
+            <nz-tag *ngIf="item.success" nzColor="success">
+              <span nz-icon nzType="check-circle"></span>
+              {{ item.response?.statusCode ?? 200 }}
+            </nz-tag>
+            <nz-tag *ngIf="!item.success" nzColor="error">
+              <span nz-icon nzType="close-circle"></span>
+              {{ item.response?.statusCode ?? 'ERROR' }}
+            </nz-tag>
+          </td>
+          <td>
+            <span>{{item.events}}</span>
+          </td>
+          <td>{{item.startedAt | date: 'YYYY/MM/dd HH:mm:ss'}}</td>
+        </tr>
+        <tr [nzExpand]="isRowExpanded(item.id)">
+          <webhook-delivery [delivery]="item"></webhook-delivery>
+        </tr>
+      </ng-container>
+      </tbody>
+      <ng-template #totalTemplate let-total>
+        <span class="total"><strong>{{ total }}</strong> results</span>
+      </ng-template>
+    </nz-table>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>

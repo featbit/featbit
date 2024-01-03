@@ -28,7 +28,7 @@ export class IndexComponent implements OnInit {
   onSelectProject(projectId: string) {
     this.filter.envId = '';
     this.projectEnvs = this.projects.find(x => x.id === projectId)?.environments;
-    this.doSearch(true);
+    this.doSearch();
   }
 
   search$ = new Subject<void>();
@@ -63,11 +63,8 @@ export class IndexComponent implements OnInit {
       });
   }
 
-  doSearch(reset: boolean = false) {
-    if (reset) {
-      this.filter.pageIndex = 1;
-    }
-
+  doSearch() {
+    this.filter.pageIndex = 1;
     this.search$.next();
   }
 
@@ -82,6 +79,8 @@ export class IndexComponent implements OnInit {
 
   selectedWebhook: Webhook;
   drawerVisible: boolean = false;
+  testModalVisible: boolean = false;
+  logsModalVisible: boolean = false;
 
   openDrawer(webhook: Webhook) {
     this.selectedWebhook = webhook;
@@ -94,6 +93,26 @@ export class IndexComponent implements OnInit {
     if (hasChange) {
       this.loadWebhooks();
     }
+  }
+
+  openTestModal(item: Webhook) {
+    this.selectedWebhook = item;
+    this.testModalVisible = true;
+  }
+
+  closeTestModal() {
+    this.selectedWebhook = undefined;
+    this.testModalVisible = false;
+  }
+
+  openLogsModal(item: Webhook) {
+    this.selectedWebhook = item;
+    this.logsModalVisible = true;
+  }
+
+  closeLogsModal() {
+    this.selectedWebhook = undefined;
+    this.logsModalVisible = false;
   }
 
   remove(id: string) {

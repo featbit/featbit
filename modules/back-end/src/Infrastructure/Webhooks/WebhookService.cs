@@ -41,8 +41,8 @@ public class WebhookService : MongoDbService<Webhook>, IWebhookService
 
         var totalCount = await query.CountAsync();
         var webhooks = await query
-            .Skip(filter.PageIndex * filter.PageSize)
             .OrderByDescending(x => x.CreatedAt)
+            .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
 
@@ -77,5 +77,36 @@ public class WebhookService : MongoDbService<Webhook>, IWebhookService
     public async Task DeleteAsync(Guid id)
     {
         await Collection.DeleteOneAsync(x => x.Id == id);
+    }
+
+    public async Task<PagedResult<WebhookDelivery>> GetDeliveriesAsync(Guid webhookId, WebhookDeliveryFilter filter)
+    {
+        var query = MongoDb.QueryableOf<WebhookDelivery>().Where(x => x.WebhookId == webhookId);
+
+        // not before filter, default to 15 days ago
+        var notBefore = filter.NotBefore ?? DateTime.UtcNow.AddDays(-15);
+        query = query.Where(x => x.StartedAt >= notBefore);
+
+        // event filter
+        if (!string.IsNullOrWhiteSpace(filter.Event))
+        {
+            query = query.Where(x => x.Events.Contains(filter.Event));
+        }
+
+        // success filter
+        var success = filter.Success;
+        if (success.HasValue)
+        {
+            query = query.Where(x => x.Success == success.Value);
+        }
+
+        var totalCount = await query.CountAsync();
+        var deliveries = await query
+            .OrderByDescending(x => x.StartedAt)
+            .Skip(filter.PageIndex * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<WebhookDelivery>(totalCount, deliveries);
     }
 }

@@ -20,6 +20,7 @@ export const WebhookDefaultPayloadTemplate: string = `{
   "event": "{{events}}",
   "operator": "{{operator}}",
   "happenedAt": "{{happenedAt}}",
+  "changes": {{json changes}},
   "organization": {
     "id": "{{organization.id}}",
     "name": "{{organization.name}}"
@@ -108,4 +109,66 @@ export class WebhookFilter {
     this.pageIndex = 1;
     this.pageSize = 10;
   }
+}
+
+export interface WebhookDelivery {
+  id: string;
+  webhookId: string;
+  success: boolean;
+  events: string;
+  request: WebhookDeliveryRequest;
+  response: WebhookDeliveryResponse;
+  error: WebhookDeliveryError;
+  startedAt: Date;
+  endedAt: Date;
+}
+
+export interface WebhookDeliveryError {
+  message: string;
+  [key: string]: any;
+}
+
+export interface WebhookDeliveryRequest {
+  url: string;
+  headers: { key: string; value: string; }[];
+  payload: string;
+}
+
+export interface WebhookDeliveryResponse {
+  statusCode: number;
+  reasonPhrase: string;
+  headers: { key: string; value: string; }[];
+  body: string;
+}
+
+export class WebhookDeliveryFilter {
+  event: string;
+  success?: boolean;
+  pageIndex: number;
+  pageSize: number;
+
+  constructor() {
+    this.event = '';
+    this.success = null;
+    this.pageIndex = 1;
+    this.pageSize = 5;
+  }
+}
+
+export interface PagedWebhookDelivery {
+  totalCount: number;
+  items: WebhookDelivery[];
+}
+
+export type TestWebhook = Pick<Webhook, 'id' | 'url' | 'name' | 'secret' | 'headers' | 'payloadTemplate'>;
+
+export interface WebhookRequest {
+  id: string;
+  deliveryId: string;
+  url: string;
+  name: string;
+  secret: string;
+  headers: { key: string; value: string; }[];
+  events: string;
+  payload: string;
 }
