@@ -84,32 +84,37 @@ export class ConnectAnSdkComponent implements OnChanges {
 
   private buildNodeJsSnippet(): string {
     return `
-const { FbClientBuilder, UserBuilder } = require('@featbit/node-server-sdk');
+import { FbClientBuilder, IUser, UserBuilder } from "@featbit/node-server-sdk";
 
 const fbClient = new FbClientBuilder()
-    .sdkKey('${this.secret}')
-    .streamingUri('${this.streamingURL}')
-    .eventsUri('${this.eventURL}')
-    .build();
+  .sdkKey('${this.secret}')
+  .streamingUri('${this.streamingURL}')
+  .eventsUri('${this.eventURL}')
+  .build();
 
-const user = new UserBuilder('aaa').build();
+const flagKey = '${this.flagKey}';
+const user = new UserBuilder('anonymous').build();
 
 // subscribe to flag change
-fbClient.on('update:${this.flagKey}',  (ee) => {
-    const variation = fbClient.boolVariation('${this.flagKey}', user, false);
-})
+fbClient.on(\`update:$\{flagKey\}\`, async () => {
+  const variation = await fbClient.boolVariation(flagKey, user, false);
+  console.log(\`flag '$\{flagKey\}' update event received, returns $\{variation\} for user $\{user.key\}\`);
+});
 
 async function run() {
-    try {
-        await fbClient.waitForInitialization();
-    } catch(err) {
-        //console.log(err);
-    }
+  try {
+    // wait for the client to be initialized
+    await fbClient.waitForInitialization();
+  } catch (err) {
+    console.log(err);
+  }
 
-    const boolVariation = fbClient.boolVariation(${this.flagKey}, user, false);
+  const boolVariationDetail = await fbClient.boolVariationDetail(flagKey, user, false);
+  console.log(\`flag '$\{flagKey\}' returns $\{boolVariationDetail.value\} for user $\{user.key\} \` +
+      \`Reason Kind: $\{boolVariationDetail.kind\}, Reason Description: $\{boolVariationDetail.reason\}\`);
 
-    // make sure the events are flushed
-    await fbClient.flush();
+  // make sure the events are flushed before exit
+  await fbClient.flush();
 }
 
 run()
