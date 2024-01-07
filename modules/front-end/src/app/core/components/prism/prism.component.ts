@@ -58,7 +58,8 @@ export class PrismComponent implements AfterViewInit {
   }
 
   copyCode() {
-    copyToClipboard(this.code).then(
+    const trimmed = this.code.trim();
+    copyToClipboard(trimmed).then(
       () => this.message.success($localize`:@@common.copy-success:Copied`)
     );
   }

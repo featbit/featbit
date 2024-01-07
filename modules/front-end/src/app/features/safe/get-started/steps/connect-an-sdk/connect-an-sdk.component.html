@@ -51,7 +51,7 @@
       <nz-tab nzTitle="Javascript">
         <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
         <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
-        <prism code="npm install featbit-js-client-sdk" language="bash"></prism>
+        <prism code="npm install featbit-js-client-sdk --save" language="bash"></prism>
         <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
         <p nz-typography>
           <span i18n="@@get-started.quick-start-introduction">The following code demonstrates the basic usages of the SDK.</span>
@@ -60,6 +60,19 @@
           <span i18n="@@get-startd.for-more-details">for more details.</span>
         </p>
         <prism [code]="jsSnippet" language="javascript"></prism>
+      </nz-tab>
+      <nz-tab nzTitle="Node.js">
+        <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
+        <p nz-typography i18n="@@get-started.install-sdk-command">Install the SDK by running the following command in your terminal.</p>
+        <prism code="npm install @featbit/node-server-sdk --save" language="bash"></prism>
+        <h5 nz-typography i18n="@@get-started.quick-start-title">Quick Start</h5>
+        <p nz-typography>
+          <span i18n="@@get-started.quick-start-introduction">The following code demonstrates the basic usages of the SDK.</span>
+          <span i18n="@@get-started.read">Read</span>
+          <a target="_blank" href="https://github.com/featbit/featbit-node-server-sdk"><span i18n="@@get-started.the-full-sdk-doc"> the full sdk doc </span></a>
+          <span i18n="@@get-startd.for-more-details">for more details.</span>
+        </p>
+        <prism [code]="nodeJsSnippet" language="javascript"></prism>
       </nz-tab>
       <nz-tab nzTitle="Python">
         <h5 nz-typography i18n="@@get-started.installation-title">Installation</h5>
