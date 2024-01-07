@@ -82,6 +82,39 @@ export class ConnectAnSdkComponent implements OnChanges {
     group: 'qa'
   };
 
+  private buildJsSnippet(): string {
+    return `
+import fbClient from 'featbit-js-client-sdk';
+
+const option = {
+  secret: '${this.secret}',
+  api: '${this.eventURL}',
+  user: {
+    name: '${this.tester.name}',
+    keyId: '${this.tester.id}',
+    customizedProperties: [
+      {
+        'name': 'group',
+        'value': '${this.tester.group}'
+      }
+    ]
+  }
+};
+
+// initialization
+fbClient.init(option);
+
+// evaluation
+const flagValue = fbClient.variation('${this.flagKey}', defaultValue);
+
+// subscribe to flag change
+fbClient.on('ff_update:${this.flagKey}', (change) => {
+  // change has this structure {id: '${this.flagKey}', oldValue: theOldValue, newValue: theNewValue }
+  // the type of theOldValue and theNewValue is defined on FeatBit
+});
+  `;
+  }
+
   private buildNodeJsSnippet(): string {
     return `
 import { FbClientBuilder, IUser, UserBuilder } from "@featbit/node-server-sdk";
@@ -119,39 +152,6 @@ async function run() {
 
 run()
 `;
-  }
-
-  private buildJsSnippet(): string {
-    return `
-import fbClient from 'featbit-js-client-sdk';
-
-const option = {
-  secret: '${this.secret}',
-  api: '${this.eventURL}',
-  user: {
-    name: '${this.tester.name}',
-    keyId: '${this.tester.id}',
-    customizedProperties: [
-      {
-        'name': 'group',
-        'value': '${this.tester.group}'
-      }
-    ]
-  }
-};
-
-// initialization
-fbClient.init(option);
-
-// evaluation
-const flagValue = fbClient.variation('${this.flagKey}', defaultValue);
-
-// subscribe to flag change
-fbClient.on('ff_update:${this.flagKey}', (change) => {
-  // change has this structure {id: '${this.flagKey}', oldValue: theOldValue, newValue: theNewValue }
-  // the type of theOldValue and theNewValue is defined on FeatBit
-});
-  `;
   }
 
   private buildPythonSnippet() {
