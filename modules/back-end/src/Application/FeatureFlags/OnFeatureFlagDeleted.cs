@@ -53,6 +53,6 @@ public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDel
         await _cache.DeleteFlagAsync(envId, flagId);
 
         // handle webhooks
-        await _webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
+        _ = _webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
     }
 }

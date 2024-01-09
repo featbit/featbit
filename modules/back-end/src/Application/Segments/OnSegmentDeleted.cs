@@ -53,6 +53,6 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
         await _cache.DeleteSegmentAsync(envId, segmentId);
 
         // handle webhooks
-        await _webhookHandler.HandleAsync(notification.Segment, notification.DataChange, notification.OperatorId);
+        _ = _webhookHandler.HandleAsync(notification.Segment, notification.DataChange, notification.OperatorId);
     }
 }
