@@ -153,7 +153,7 @@ FeatBit offers a range of features including:
 
 - **[Relay Proxy/Agent](https://docs.featbit.co/relay-proxy/relay-proxy)**: Host a feature flag service in your customers' private environments or reduce network latency for your end users.
 
-- **Integrations** (experimental features): Export data to third-party system monitoring services, data analytics services, workflow tools, or any other tools that can optimize your entire workflow.
+- **Powerful Integrations**: Our feature-rich [WebHook](https://docs.featbit.co/integrations/webhooks) allows seamless integration with various tools and workflows: [DataDog](https://docs.featbit.co/integrations/observability/datadog), [New Relic Ones](https://docs.featbit.co/integrations/observability/newrelic), [Grafana](https://docs.featbit.co/integrations/observability/grafana), [Growthbook](https://docs.featbit.co/integrations/data-analytic/growthbook), [Slack](https://docs.featbit.co/integrations/chat-apps/slack) and more.
 
 - **[ChatGPT Tech Debt Reduction](https://github.com/featbit/featbit/tree/main/llm)** (experimental features): Utilize ChatGPT4 and FeatBit's VSCode extension to minimize technical debt associated with feature flagging.
 
