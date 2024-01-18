@@ -3,7 +3,7 @@ import { DataSyncService } from "@services/data-sync.service";
 import { EnvSettingService } from "@services/env-setting.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { EnvironmentSettingTypes } from "@shared/types";
-import moment from "moment";
+import { format } from "date-fns";
 import { catchError } from "rxjs/operators";
 import { forkJoin, of } from "rxjs";
 import { uuidv4 } from "@utils/index";
@@ -65,7 +65,7 @@ export class RemoteSyncComponent implements OnInit {
 
     const success = remark.split(',')[0] === 'true';
     const timestamp = remark.split(',')[1];
-    const time = moment(timestamp, 'x').format('YYYY-MM-DD HH:mm');
+    const time = format(parseInt(timestamp), 'yyyy-MM-dd HH:mm');
 
     return { success, time };
   }

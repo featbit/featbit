@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ExperimentService } from '@services/experiment.service';
-import * as moment from 'moment';
+import { format } from 'date-fns';
 import {FeatureFlagService} from "@services/feature-flag.service";
 import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
 import {IVariation} from "@shared/rules";
@@ -118,7 +118,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
                 expt.selectedIteration = this.processIteration({ ...expt.selectedIteration }, expt.baselineVariation.id);
                 if (iteration.updatedAt) {
                   expt.selectedIteration.updatedAt = iteration.updatedAt;
-                  expt.selectedIteration.updatedAtStr = moment(iteration.updatedAt).format('YYYY-MM-DD HH:mm');
+                  expt.selectedIteration.updatedAtStr = format(iteration.updatedAt, 'yyyy-MM-dd HH:mm');
                 }
 
                 // update experiment original iterations
@@ -204,7 +204,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.experimentService.stopIteration(expt.id, expt.selectedIteration.id).subscribe(res => {
       if (res) {
         expt.selectedIteration.endTime = res.endTime;
-        expt.selectedIteration.dateTimeInterval = `${moment(expt.selectedIteration.startTime).format('YYYY-MM-DD HH:mm')} - ${moment(expt.selectedIteration.endTime).format('YYYY-MM-DD HH:mm')}`
+        expt.selectedIteration.dateTimeInterval = `${format(expt.selectedIteration.startTime, 'YYYY-MM-DD HH:mm')} - ${format(expt.selectedIteration.endTime, 'YYYY-MM-DD HH:mm')}`
         expt.status = ExperimentStatus.Paused;
       }
 
@@ -244,7 +244,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariation.id);
         if (res[0].updatedAt) {
           expt.selectedIteration.updatedAt = res[0].updatedAt;
-          expt.selectedIteration.updatedAtStr = moment(res[0].updatedAt).format('YYYY-MM-DD HH:mm');
+          expt.selectedIteration.updatedAtStr = format(res[0].updatedAt, 'YYYY-MM-DD HH:mm');
         }
 
         this.setExptStatus(expt, res[0]);
@@ -299,10 +299,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     const winnerVariation = !!iterationResults.find(e => e.isWinner);
 
     const nowStr = (iteration.isFinish === true) ? "" : "(" + ($localize `:@@common.now:Now`) + ")";
-    const startStr = `${moment(iteration.startTime).format('YYYY-MM-DD HH:mm')}`;
+    const startStr = `${format(iteration.startTime, 'YYYY-MM-DD HH:mm')}`;
     const endStr = `${iteration.endTime ?
-      moment(iteration.endTime).format('YYYY-MM-DD HH:mm') :
-      moment(new Date()).format('YYYY-MM-DD HH:mm')}  ${nowStr}`
+      format(iteration.endTime, 'YYYY-MM-DD HH:mm') :
+      format(new Date(), 'YYYY-MM-DD HH:mm')}  ${nowStr}`
       
     return {
       ...iteration,
