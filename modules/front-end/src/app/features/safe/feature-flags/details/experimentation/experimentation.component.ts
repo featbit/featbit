@@ -118,7 +118,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
                 expt.selectedIteration = this.processIteration({ ...expt.selectedIteration }, expt.baselineVariation.id);
                 if (iteration.updatedAt) {
                   expt.selectedIteration.updatedAt = iteration.updatedAt;
-                  expt.selectedIteration.updatedAtStr = format(iteration.updatedAt, 'yyyy-MM-dd HH:mm');
+                  expt.selectedIteration.updatedAtStr = format(iteration.updatedAt, 'YYYY-MM-DD HH:mm');
                 }
 
                 // update experiment original iterations

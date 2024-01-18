@@ -65,7 +65,7 @@ export class RemoteSyncComponent implements OnInit {
 
     const success = remark.split(',')[0] === 'true';
     const timestamp = remark.split(',')[1];
-    const time = format(parseInt(timestamp), 'yyyy-MM-dd HH:mm');
+    const time = format(parseInt(timestamp), 'YYYY-MM-DD HH:mm');
 
     return { success, time };
   }
