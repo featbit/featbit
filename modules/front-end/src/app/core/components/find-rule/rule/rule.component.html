@@ -33,59 +33,59 @@
       <nz-option *ngFor="let rule of ruleValueConfig" [nzValue]="rule.value" [nzLabel]="rule.label"></nz-option>
     </nz-select>
   </div>
-  <ng-container [ngSwitch]="condition.type" *ngIf="!isSegmentRule">
-    <ng-template #presetSelect>
-      <nz-select class="nz-select-36" style="min-width: 200px" nzShowSearch
-                 nzPlaceHolder="values"
-                 i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
-                 [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()">
-        <nz-option
-          *ngFor="let presetValue of currentUserProp.presetValues"
-          [nzLabel]="presetValue.description"
-          [nzValue]="presetValue.value">
-        </nz-option>
-      </nz-select>
-    </ng-template>
-    <ng-container *ngSwitchCase="'string'">
-      <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()"
-               placeholder="input string or number"
-               i18n-placeholder="@@core.components.findrule.rule.pleaseinput" />
-      </div>
-    </ng-container>
-    <ng-container *ngSwitchCase="'number'">
-      <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <nz-input-number class="standard-bordered-input" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" nzPlaceHolder="input a number"
-                         i18n-nzPlaceHolder="@@core.components.findrule.rule.inputnumber"></nz-input-number>
-      </div>
-    </ng-container>
-    <ng-container *ngSwitchCase="'regex'">
-      <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-        <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" placeholder="Eg. ^foo$"/>
-      </div>
-    </ng-container>
-    <ng-container *ngSwitchCase="'multi'">
-      <div class="value">
-        <nz-select
-          class="nz-select-36"
-          style="min-width: 200px"
-          [nzMode]="multiSelectMode"
-          nzPlaceHolder="values"
-          i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
-          nzShowSearch
-          [(ngModel)]="condition.multipleValue"
-          [nzMaxTagPlaceholder]="omittedPlaceHolder"
-          [nzMaxTagCount]="2"
-          (ngModelChange)="onModelChange()">
+  <div class="flexSelect" [ngSwitch]="condition.type" *ngIf="!isSegmentRule">
+    <ng-container>
+      <ng-template #presetSelect>
+        <nz-select class="nz-select-36" style="min-width: 200px" nzShowSearch
+                   nzPlaceHolder="values"
+                   i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
+                   [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()">
           <nz-option
             *ngFor="let presetValue of currentUserProp.presetValues"
             [nzLabel]="presetValue.description"
             [nzValue]="presetValue.value">
           </nz-option>
         </nz-select>
-      </div>
+      </ng-template>
+      <ng-container *ngSwitchCase="'string'">
+        <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
+          <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()"
+                 placeholder="input string or number"
+                 i18n-placeholder="@@core.components.findrule.rule.pleaseinput" />
+        </div>
+      </ng-container>
+      <ng-container *ngSwitchCase="'number'">
+        <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
+          <nz-input-number class="standard-bordered-input" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" nzPlaceHolder="input a number"
+                           i18n-nzPlaceHolder="@@core.components.findrule.rule.inputnumber"></nz-input-number>
+        </div>
+      </ng-container>
+      <ng-container *ngSwitchCase="'regex'">
+        <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
+          <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" placeholder="Eg. ^foo$"/>
+        </div>
+      </ng-container>
+      <ng-container *ngSwitchCase="'multi'">
+        <div class="value">
+          <nz-select
+            class="nz-select-36"
+            style="min-width: 200px"
+            [nzMode]="multiSelectMode"
+            nzPlaceHolder="values"
+            i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
+            nzShowSearch
+            [(ngModel)]="condition.multipleValue"
+            (ngModelChange)="onModelChange()">
+            <nz-option
+              *ngFor="let presetValue of currentUserProp.presetValues"
+              [nzLabel]="presetValue.description"
+              [nzValue]="presetValue.value">
+            </nz-option>
+          </nz-select>
+        </div>
+      </ng-container>
     </ng-container>
-  </ng-container>
+  </div>
   <ng-container *ngIf="isSegmentRule">
     <div class="value">
       <div>
