@@ -23,8 +23,10 @@ section.rule-item {
   .flexSelect {
     position: relative;
     flex: 1;
+    max-width: calc(100% - 500px);
     nz-select {
-      position: absolute;
+      position: relative;
+      max-width: 100%;
       width: 100%;
     }
   }
@@ -32,11 +34,11 @@ section.rule-item {
   .value {
     nz-input-number {
       width: 100%;
-      line-height: 36px;
+      line-height: 34.4px;
     }
 
     nz-select {
-      line-height: 36px;
+      line-height: 34.4px;
     }
 
     input {
