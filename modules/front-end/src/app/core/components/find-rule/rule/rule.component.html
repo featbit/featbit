@@ -33,8 +33,8 @@
       <nz-option *ngFor="let rule of ruleValueConfig" [nzValue]="rule.value" [nzLabel]="rule.label"></nz-option>
     </nz-select>
   </div>
-  <div class="flexSelect" [ngSwitch]="condition.type" *ngIf="!isSegmentRule">
-    <ng-container>
+  <div class="flexSelect" *ngIf="!isSegmentRule && condition.type">
+    <ng-container [ngSwitch]="condition.type" >
       <ng-template #presetSelect>
         <nz-select class="nz-select-36" style="min-width: 200px" nzShowSearch
                    nzPlaceHolder="values"
