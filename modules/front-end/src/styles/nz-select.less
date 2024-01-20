@@ -10,7 +10,9 @@
   width: 20px !important;
   height: 20px;
   content: url("../assets/icons/icon-dropdown.svg") !important;
-  align-self: center;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 !important;
 }
 
 .ant-pagination-options .ant-select-selector::after {
@@ -67,10 +69,19 @@ nz-select:not(.ant-select-customize-input) {
 
     &.nz-select-36 .ant-select-selector {
       min-height: 36px;
+      max-height: 70px;
+      overflow-x: scroll;
+
+      .ant-select-selection-search{
+        margin-right: 25px;
+      }
+      .ant-select-selection-item {
+        margin-top: 3px;
+        max-width:calc(100% - 25px);
+      }
 
       .ant-select-selection-search-input,
-      .ant-select-selection-placeholder,
-      .ant-select-selection-item {
+      .ant-select-selection-placeholder{
         margin-top: 3px;
       }
     }
