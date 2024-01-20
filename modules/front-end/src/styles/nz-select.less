@@ -3,7 +3,7 @@
   display: none;
 }
 
-.ant-select-selector::after {
+.ant-select::after {
   position: absolute;
   right: 11px;
   visibility: visible !important;
@@ -69,8 +69,11 @@ nz-select:not(.ant-select-customize-input) {
 
     &.nz-select-36 .ant-select-selector {
       min-height: 36px;
-      max-height: 70px;
+      max-height: 100px;
+      padding-top: 0;
+      padding-bottom: 0;
       overflow-x: scroll;
+      box-sizing: border-box;
 
       .ant-select-selection-search{
         margin-right: 25px;
