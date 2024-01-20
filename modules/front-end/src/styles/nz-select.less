@@ -67,12 +67,24 @@ nz-select:not(.ant-select-customize-input) {
       }
     }
 
-    &.nz-select-36 .ant-select-selector {
+    &.nz-select-36:not(.target-flex-rule-select) .ant-select-selector {
+      height: 36px;
+
+      .ant-select-selection-search-input,
+      .ant-select-selection-placeholder,
+      .ant-select-selection-item {
+        margin-top: 3px;
+      }
+    }
+
+    // for select used for "is one of" rules in targeting rules
+    &.target-flex-rule-select.nz-select-36 .ant-select-selector {
       min-height: 36px;
       max-height: 100px;
       padding-top: 0;
       padding-bottom: 0;
-      overflow-x: scroll;
+      overflow-y: auto;
+      overflow-x: hidden;
       box-sizing: border-box;
 
       .ant-select-selection-search{

@@ -33,10 +33,10 @@
       <nz-option *ngFor="let rule of ruleValueConfig" [nzValue]="rule.value" [nzLabel]="rule.label"></nz-option>
     </nz-select>
   </div>
-  <div class="flexSelect" *ngIf="!isSegmentRule && condition.type">
+  <div class="target-flex-rule-container" *ngIf="!isSegmentRule && condition.type">
     <ng-container [ngSwitch]="condition.type" >
       <ng-template #presetSelect>
-        <nz-select class="nz-select-36" style="min-width: 200px" nzShowSearch
+        <nz-select class="nz-select-36 target-flex-rule-select" style="min-width: 200px" nzShowSearch
                    nzPlaceHolder="values"
                    i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
                    [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()">
@@ -68,7 +68,7 @@
       <ng-container *ngSwitchCase="'multi'">
         <div class="value">
           <nz-select
-            class="nz-select-36"
+            class="nz-select-36 target-flex-rule-select"
             style="min-width: 200px"
             [nzMode]="multiSelectMode"
             nzPlaceHolder="values"
