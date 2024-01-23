@@ -29,7 +29,7 @@ RUN dotnet publish -c Release --no-build -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
-ARG OTEL_VERSION=1.0.2
+ARG OTEL_VERSION=1.1.0
 ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v${OTEL_VERSION}/otel-dotnet-auto-install.sh otel-dotnet-auto-install.sh
 RUN chmod +x otel-dotnet-auto-install.sh
 RUN export OTEL_DOTNET_AUTO_HOME="/app" && ./otel-dotnet-auto-install.sh
