@@ -1,0 +1,75 @@
+@import "variables";
+
+.search-inputs {
+  nz-select,
+  nz-input-group {
+    width: 250px;
+  }
+}
+
+.additional-info {
+  color: @grey40-color;
+}
+
+.name {
+  cursor: pointer;
+
+  &:hover {
+    color: @primary-color;
+  }
+}
+
+.status {
+  cursor: pointer;
+
+  i {
+    margin-right: 4px;
+  }
+
+  .success,
+  .active {
+    color: @green70-color;
+  }
+
+  .inactive {
+    color: @grey50-color;
+  }
+
+  .failed {
+    color: @red50-color;
+  }
+
+  .never {
+    font-size: 12px;
+    font-style: oblique;
+    .additional-info;
+  }
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.url {
+  max-width: 150px;
+  .truncate;
+}
+
+.scopes {
+  max-width: 200px;
+  .truncate;
+}
+
+.events {
+  max-width: 250px;
+  .truncate;
+}
+
+.actions {
+  button:first-of-type {
+    padding-left: 0;
+  }
+}
+

@@ -9,6 +9,8 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-csharp';
 import 'prismjs/components/prism-go';
 import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-http'
+import 'prismjs/components/prism-json'
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace'
 
 @Component({
@@ -56,7 +58,8 @@ export class PrismComponent implements AfterViewInit {
   }
 
   copyCode() {
-    copyToClipboard(this.code).then(
+    const trimmed = this.code.trim();
+    copyToClipboard(trimmed).then(
       () => this.message.success($localize`:@@common.copy-success:Copied`)
     );
   }

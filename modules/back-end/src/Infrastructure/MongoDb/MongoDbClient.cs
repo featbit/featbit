@@ -18,6 +18,7 @@ using Domain.RelayProxies;
 using Domain.Segments;
 using Domain.Triggers;
 using Domain.Users;
+using Domain.Webhooks;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -49,7 +50,7 @@ public class MongoDbClient
         { typeof(User), "Users" },
 
         { typeof(Workspace), "Workspaces" },
-        
+
         { typeof(Organization), "Organizations" },
         { typeof(OrganizationUser), "OrganizationUsers" },
         { typeof(Project), "Projects" },
@@ -75,8 +76,9 @@ public class MongoDbClient
         { typeof(ExperimentMetric), "ExperimentMetrics" },
 
         { typeof(AccessToken), "AccessTokens" },
-        
         { typeof(RelayProxy), "RelayProxies" },
+        { typeof(Webhook), "Webhooks" },
+        { typeof(WebhookDelivery), "WebhookDeliveries" }
     };
 
     public IMongoCollection<TEntity> CollectionOf<TEntity>()

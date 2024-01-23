@@ -105,6 +105,11 @@ export class SafeComponent implements OnInit {
         path: '/integrations/access-tokens',
         children: [
           {
+            title: $localize`:@@menu.integrations.webhooks:Webhooks`,
+            icon: '',
+            path: '/integrations/webhooks'
+          },
+          {
             title: $localize `:@@menu.integrations.access-tokens:Access Tokens`,
             icon: '',
             path: '/integrations/access-tokens'

@@ -20,14 +20,27 @@ section.rule-item {
     }
   }
 
-  .value {
-    input, nz-select, nz-input-number {
+  .target-flex-rule-container {
+    flex: 1;
+    max-width: calc(100% - 500px);
+    nz-select {
+      max-width: 100%;
       width: 100%;
-      line-height: 36px;
+    }
+  }
 
-      ::ng-deep .ant-input-number-handler-wrap {
-        border-radius: 8px;
-      }
+  .value {
+    nz-input-number {
+      width: 100%;
+      line-height: 34.4px;
+    }
+
+    nz-select {
+      line-height: 34.4px;
+    }
+
+    input {
+      height: 36px;
     }
   }
 

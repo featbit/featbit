@@ -1,0 +1,223 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzPlacement="right"
+  [nzTitle]="title"
+  [nzWidth]="800"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="doSubmit()">
+      <!-- Name -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control
+          nzHasFeedback
+          nzValidatingTip="Validating..."
+          i18n-nzValidatingTip="@@common.validating"
+          [nzErrorTip]="errorTpl">
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+          <ng-template #errorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">This name has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- URL -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@integrations.webhooks.url">URL</nz-form-label>
+        <nz-form-control
+          nzHasFeedback
+          nzErrorTip="Please provide a valid URL"
+          i18n-nzErrorTip="@@integrations.webhooks.url-validation-message"
+          nzExtra="The URL of a web server that receives HTTP POST JSON payloads."
+          i18n-nzExtra="@@integrations.webhooks.url-description">
+          <input type="text" nz-input formControlName="url" placeholder="https://example.com/post-receive"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Scopes -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.scopes">Scopes</nz-form-label>
+        <nz-form-control
+          [nzValidateStatus]="scopes"
+          nzErrorTip="At least one environment must be selected"
+          i18n-nzErrorTip="@@integrations.webhooks.scopes-cannot-be-empty"
+          nzExtra="Select the environments that this webhook should monitor. When an event occurs in these environments, this webhook will be triggered."
+          i18n-nzExtra="@@integrations.webhooks.scopes-description">
+          <div class="scopes-title">
+            <span class="text" i18n="@@common.project">Project</span>
+            <span class="text" i18n="@@common.environments">Environments</span>
+            <span class="placeholder"></span>
+          </div>
+          <ng-container formArrayName="scopes">
+            <div *ngFor="let control of scopes.controls; index as i">
+              <ng-container  [formGroupName]="i">
+                <div class="scopes-form">
+                  <nz-select
+                    class="nz-select-36"
+                    nzPlaceHolder="Select a Project"
+                    i18n-nzPlaceHolder="@@common.select-a-project"
+                    formControlName="projectId">
+                    <ng-container *ngFor="let project of projects">
+                      <nz-option *ngIf="!isProjectsLoading" [nzLabel]="project.name" [nzValue]="project.id" [nzHide]="isProjectSelected(project.id)"></nz-option>
+                    </ng-container>
+                    <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
+                      <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+                    </nz-option>
+                  </nz-select>
+                  <nz-select
+                    class="nz-select-36"
+                    nzMode="multiple"
+                    nzPlaceHolder="Select Project Environments"
+                    i18n-nzPlaceHolder="@@common.select-project-environments"
+                    formControlName="envIds">
+                    <ng-container *ngFor="let env of getProjectEnvs(i)">
+                      <nz-option *ngIf="!isProjectsLoading" [nzLabel]="env.name" [nzValue]="env.id" [nzHide]="isEnvironmentSelected(env.id)"></nz-option>
+                    </ng-container>
+                    <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
+                      <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+                    </nz-option>
+                  </nz-select>
+                  <i nz-icon nzType="icons:icon-minus-outline" (click)="removeScope(i)"></i>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+          <button type="button" class="add-scope-button" nz-button nzType="link" (click)="addScope()">
+            <span nz-icon nzType="icons:icon-plus" nzTheme="outline"></span>
+            <span i18n="@@common.add-scope">Add Scope</span>
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Events -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@integrations.webhooks.events">Events</nz-form-label>
+        <nz-form-control
+          class="events-form-control"
+          [nzValidateStatus]="events"
+          nzErrorTip="At least one event must be selected"
+          i18n-nzErrorTip="@@integrations.webhooks.events-cannot-be-empty"
+          nzExtra="Choose the events you would like to trigger this webhook"
+          i18n-nzExtra="@@integrations.webhooks.events-description">
+          <ng-container formArrayName="events">
+            <div *ngFor="let control of events.controls; index as i">
+              <ng-container [formGroupName]="i">
+                <div class="events-checkbox-group">
+                  <div class="check-all-label" formGroupName="group">
+                    <label
+                      nz-checkbox
+                      formControlName="checked"
+                      [nzIndeterminate]="control.value.group.indeterminate">
+                      {{control.value.group.label}}
+                    </label>
+                  </div>
+                  <nz-checkbox-group formControlName="events"></nz-checkbox-group>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Headers -->
+      <nz-form-item>
+        <nz-form-label i18n="@@integrations.webhooks.headers">Headers</nz-form-label>
+        <nz-form-control
+          nzExtra="Optionally, you can add custom headers to the webhook request."
+          i18n-nzExtra="@@integrations.webhooks.headers-description">
+          <ng-container formArrayName="headers">
+            <div class="header-title">
+              <span class="text" i18n="@@common.name">Name</span>
+              <span class="text" i18n="@@common.value">Value</span>
+              <span class="placeholder"></span>
+            </div>
+            <div *ngFor="let control of headers.controls; index as i">
+              <ng-container [formGroupName]="i">
+                <div class="header-form">
+                  <input nz-input formControlName="key" placeholder="Key" i18n-placeholder="@@common.key"/>
+                  <input nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
+                  <i nz-icon nzType="icons:icon-minus-outline" (click)="removeHeader(i)"></i>
+                </div>
+              </ng-container>
+            </div>
+          </ng-container>
+          <button type="button" class="add-header-button" nz-button nzType="link" (click)="addHeader()">
+            <span nz-icon nzType="icons:icon-plus" nzTheme="outline"></span>
+            <span i18n="@@common.add-header">Add Header</span>
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Payload Template -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@integrations.webhooks.payload-template">Payload Template</nz-form-label>
+        <div class="select-payload-template">
+          <span class="title" i18n="@@integrations.webhooks.selecte-template-type">Select Template Type</span>
+          <nz-radio-group formControlName="payloadTemplateType">
+            <label nz-radio nzValue="default" i18n="@@common.default">Default</label>
+            <label nz-radio nzValue="custom" i18n="@@common.custom">Custom</label>
+          </nz-radio-group>
+        </div>
+        <nz-form-control
+          class="payload-template-form-control"
+          nzErrorTip="Not a valid JSON Handlebars template"
+          i18n-nzErrorTip="@@integrations.webhooks.payload-template-validation-message"
+          nzExtra="The Handlebars payload template to generate the webhook JSON request body."
+          i18n-nzExtra="@@integrations.webhooks.payload-template-description">
+          <nz-code-editor
+            formControlName="payloadTemplate"
+            [nzEditorOption]="{ language: 'handlebars', minimap: { enabled: false }, quickSuggestions: { strings: true } }"
+            (nzEditorInitialized)="onEditorInit($event)">
+          </nz-code-editor>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Secret -->
+      <nz-form-item>
+        <nz-form-label i18n="@@integrations.webhooks.secret">Secret</nz-form-label>
+        <nz-form-control
+          nzExtra="Optionally, you can use a webhook secret to verify that a webhook delivery is from FeatBit."
+          i18n-nzExtra="@@integrations.webhooks.secret-description">
+          <input type="text" nz-input formControlName="secret"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Active -->
+      <nz-form-item>
+        <label nz-checkbox formControlName="isActive" i18n="@@integrations.webhooks.active">Active</label>
+        <nz-form-control>
+          <nz-form-text i18n="@@integrations.webhooks.active-description">We will deliver event details when this hook is triggered.</nz-form-text>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Test -->
+      <nz-form-item>
+        <nz-form-label i18n="@@common.live-debug">Live debug</nz-form-label>
+        <nz-form-control
+          nzExtra="Optionally, you can test your webhook configuration before saving it."
+          i18n-nzExtra="@@integrations.webhooks.test-webhook-description">
+          <button [disabled]="!form.valid" class="test-webhook-button" type="button" nz-button nzType="link" (click)="openTestModal()">
+            <i nz-icon nzType="bug" nzTheme="outline"></i>
+            <span i18n="@@integrations.webhooks.live-debug-webhook-configuration">Live debug webhook configuration</span>
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Submit -->
+      <nz-form-item>
+        <nz-form-control class="align-end">
+          <button [disabled]="!form.valid" nz-button class="standard-btn" nzType="primary" i18n="@@common.save">Save</button>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>
+
+<test-webhook-modal [visible]="testModalVisible" [webhook]="testWebhook" (close)="closeTestModal()"></test-webhook-modal>

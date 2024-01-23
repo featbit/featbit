@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Infrastructure.Webhooks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
@@ -33,5 +34,8 @@ public static class Initialization
 
         // register custom class mapping
         ClassMaps.Register();
+
+        // register handlebars helpers
+        HandlebarsHelpers.RegisterHelpers();
     }
 }

@@ -125,7 +125,7 @@ Email us at [contact@featbit.co](mailto:contact@featbit.co) if Slack isn't your 
 
 FeatBit offers a range of features including:
 
-- **[SDKs](https://docs.featbit.co/sdk/overview)** for [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**C#**](https://github.com/featbit/dotnet-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), and [**Go**](https://github.com/featbit/featbit-go-sdk), with more to come.
+- **[SDKs](https://docs.featbit.co/sdk/overview)** for [**.NET(C#)**](https://github.com/featbit/dotnet-server-sdk), [**JavaScript**](https://github.com/featbit/featbit-js-client-sdk), [**NodeJs**](https://github.com/featbit/featbit-node-server-sdk), [**Java**](https://github.com/featbit/featbit-java-sdk), [**Python**](https://github.com/featbit/featbit-python-sdk), [**Go**](https://github.com/featbit/featbit-go-sdk), and [**OpenFeature Providers**](https://docs.featbit.co/sdk/overview#openfeature-providers), with more to come.
 
 - **[Managing Feature flags](https://docs.featbit.co/feature-flags/organizing-flags/the-flags-list)**: Create, manage, and filter feature flags.
 
@@ -153,7 +153,7 @@ FeatBit offers a range of features including:
 
 - **[Relay Proxy/Agent](https://docs.featbit.co/relay-proxy/relay-proxy)**: Host a feature flag service in your customers' private environments or reduce network latency for your end users.
 
-- **Integrations** (experimental features): Export data to third-party system monitoring services, data analytics services, workflow tools, or any other tools that can optimize your entire workflow.
+- **Powerful Integrations**: Our feature-rich [WebHook](https://docs.featbit.co/integrations/webhooks) allows seamless integration with various tools and workflows: [DataDog](https://docs.featbit.co/integrations/observability/datadog), [New Relic Ones](https://docs.featbit.co/integrations/observability/newrelic), [Grafana](https://docs.featbit.co/integrations/observability/grafana), [Growthbook](https://docs.featbit.co/integrations/data-analytic/growthbook), [Slack](https://docs.featbit.co/integrations/chat-apps/slack) and more.
 
 - **[ChatGPT Tech Debt Reduction](https://github.com/featbit/featbit/tree/main/llm)** (experimental features): Utilize ChatGPT4 and FeatBit's VSCode extension to minimize technical debt associated with feature flagging.
 

@@ -49,3 +49,15 @@ export const phoneNumberOrEmailValidator: ValidatorFn = (control: FormControl) =
   control.setErrors(error);
   return error;
 };
+
+export const urlValidator: ValidatorFn = (control: FormControl) => {
+  let isValid = false;
+
+  try {
+    const newUrl = new URL(control.value);
+    isValid = newUrl.protocol === 'http:' || newUrl.protocol === 'https:';
+  } catch (err) {
+  }
+
+  return isValid ? null : { invalid: true };
+}

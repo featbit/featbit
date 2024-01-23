@@ -1,0 +1,160 @@
+<div class="table-content-area">
+  <div class="table-search-area">
+    <div class="search-inputs">
+      <nz-input-group [nzPrefix]="prefixIconSearch">
+        <input nz-input [(ngModel)]="filter.name" (ngModelChange)="doSearch()" type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+      <nz-select
+        class="nz-select-40 rounded filter"
+        nzShowSearch
+        nzAllowClear
+        [(ngModel)]="filter.projectId"
+        (ngModelChange)="onSelectProject($event)"
+        i18n-nzPlaceHolder="@@common.filter-by-project"
+        nzPlaceHolder="Filter by project">
+        <ng-container *ngFor="let project of projects">
+          <nz-option *ngIf="!isProjectsLoading" [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
+        </ng-container>
+        <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
+          <i nz-icon nzType="loading" class="loading-icon"></i>
+          <ng-container i18n="@@common.loading">Loading...</ng-container>
+        </nz-option>
+      </nz-select>
+      <nz-select
+        *ngIf="filter.projectId"
+        class="nz-select-40 rounded filter"
+        nzShowSearch
+        nzAllowClear
+        [(ngModel)]="filter.envId"
+        (ngModelChange)="doSearch()"
+        i18n-nzPlaceHolder="@@common.filter-by-enviroment"
+        nzPlaceHolder="Filter by environment">
+        <nz-option *ngFor="let env of projectEnvs" [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
+      </nz-select>
+    </div>
+    <button nz-button nzType="primary" (click)="openDrawer(undefined)">
+      <i nz-icon nzType="icons:icon-add"></i>
+      <ng-container i18n="@@common.add">Add</ng-container>
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <nz-table #table nzSize="small"
+              nzShowSizeChanger
+              [nzData]="webhooks.items"
+              [nzFrontPagination]="false"
+              [nzLoading]="isLoading"
+              [nzTotal]="webhooks.totalCount"
+              [(nzPageSize)]="filter.pageSize"
+              (nzPageSizeChange)="loadWebhooks()"
+              [nzPageSizeOptions]="[10,20,30]"
+              [(nzPageIndex)]="filter.pageIndex"
+              (nzPageIndexChange)="loadWebhooks()"
+    >
+      <thead>
+      <tr>
+        <th i18n="@@common.name">Name</th>
+        <th i18n="@@common.status">Status</th>
+        <th i18n="@@integrations.webhooks.url">URL</th>
+        <th i18n="@@common.scopes">Scopes</th>
+        <th i18n="@@integrations.webhooks.events">Events</th>
+        <th i18n="@@common.actions">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of table.data">
+        <td class="name" (click)="openDrawer(item)">
+          <span>{{ item.name }}</span>
+          <br>
+          <div class="additional-info">
+            <span i18n="@@common.created-by">Created by</span>: {{item.creator.name ?? item.creator.email}}
+          </div>
+        </td>
+        <td class="status" (click)="openLogsModal(item)" nz-tooltip [nzTooltipTitle]="statusTooltip" nzTooltipPlacement="topLeft">
+          <span [class]="item.isActive ? 'active' : 'inactive'">
+            <i nz-icon [nzType]="item.isActive ? 'check-circle' : 'close-circle'"></i>
+            <span *ngIf="item.isActive" i18n="@@common.active">Active</span>
+            <span *ngIf="!item.isActive" i18n="@@common.inactive">Inactive</span>
+          </span>
+          <br>
+          <ng-container *ngIf="item.lastDelivery">
+            <i nz-icon
+               [class]="item.lastDelivery.success ? 'success' : 'failed'"
+               [nzType]="item.lastDelivery.success ? 'check-circle' : 'close-circle'">
+            </i>
+            <span>{{ item.lastDelivery.happenedAt | date: 'medium' }}</span>
+          </ng-container>
+          <span *ngIf="!item.lastDelivery" class="never" i18n="@@integrations.webhooks.never-triggered">Never Triggered</span>
+          <ng-template #statusTooltip>
+            <span *ngIf="item.isActive" i18n="@@integrations.webhooks.status-active-tooltip">This hook is active.</span>
+            <span *ngIf="!item.isActive"
+                  i18n="@@integrations.webhooks.status-inactive-tooltip">This hook is inactive.</span>
+            <span *ngIf="item.lastDelivery">
+              <br>
+              {{ getDeliveryTooltip(item.lastDelivery) }}
+            </span>
+          </ng-template>
+        </td>
+        <td class="url">
+          <span nz-tooltip [nzTooltipTitle]="item.url">{{ item.url }}</span>
+        </td>
+        <td class="scopes">
+          <span nz-tooltip [nzTooltipTitle]="scopesTooltip">{{ item.scopeNames?.join('; ') }}</span>
+          <ng-template #scopesTooltip>
+            <ul>
+              <li *ngFor="let scopeName of item.scopeNames;">{{ scopeName }}</li>
+            </ul>
+          </ng-template>
+        </td>
+        <td class="events">
+          <span
+            nz-tooltip
+            nzTooltipPlacement="topLeft"
+            [nzTooltipOverlayStyle]="{'max-width': '270px'}"
+            [nzTooltipTitle]="eventsTooltip">
+            {{ item.events?.join('; ') }}
+          </span>
+          <ng-template #eventsTooltip>
+            <ul>
+              <li *ngFor="let event of item.events;">{{ event }}</li>
+            </ul>
+          </ng-template>
+        </td>
+        <td class="actions">
+          <button nz-button nzType="link" (click)="openTestModal(item)">
+            <span nz-icon nzType="bug" nzTheme="outline"></span>
+            <span i18n="@@common.live-debug">Live debug</span>
+          </button>
+          <a nz-dropdown nzTrigger="hover" [nzDropdownMenu]="actions">
+            <span i18n="@@common.more">More</span>&nbsp;
+            <span nz-icon nzType="down"></span>
+          </a>
+          <nz-dropdown-menu #actions="nzDropdownMenu">
+            <ul nz-menu>
+              <li nz-menu-item (click)="openDrawer(item)" i18n="@@common.edit">Edit</li>
+              <li nz-menu-item (click)="openLogsModal(item)" i18n="@@common.view-logs">View Logs</li>
+              <li
+                nzDanger
+                nz-menu-item
+                nz-popconfirm
+                nzPopconfirmTitle="Are you sure to remove it?"
+                i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
+                nzPopconfirmPlacement="top"
+                (nzOnConfirm)="remove(item.id)">
+                <span i18n="@@common.remove">Remove</span>
+              </li>
+            </ul>
+          </nz-dropdown-menu>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+<webhook-drawer [webhook]="selectedWebhook" [visible]="drawerVisible" (close)="closeDrawer($event)"></webhook-drawer>
+<test-webhook-modal [visible]="testModalVisible" [webhook]="selectedWebhook" (close)="closeTestModal()"></test-webhook-modal>
+<webhook-deliveries [visible]="logsModalVisible" [webhook]="selectedWebhook" (close)="closeLogsModal()"></webhook-deliveries>

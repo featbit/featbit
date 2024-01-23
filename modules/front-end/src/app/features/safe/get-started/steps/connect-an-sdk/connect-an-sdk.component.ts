@@ -56,6 +56,7 @@ export class ConnectAnSdkComponent implements OnChanges {
 
   buildSnippets() {
     this.jsSnippet = this.buildJsSnippet();
+    this.nodeJsSnippet = this.buildNodeJsSnippet();
     this.pythonSnippet = this.buildPythonSnippet();
     this.javaSnippet = this.buildJavaSnippet();
     this.csharpSnippet = this.buildCSharpSnippet();
@@ -69,6 +70,7 @@ export class ConnectAnSdkComponent implements OnChanges {
   }
 
   jsSnippet: string;
+  nodeJsSnippet: string;
   pythonSnippet: string;
   javaSnippet: string;
   csharpSnippet: string;
@@ -111,6 +113,45 @@ fbClient.on('ff_update:${this.flagKey}', (change) => {
   // the type of theOldValue and theNewValue is defined on FeatBit
 });
   `;
+  }
+
+  private buildNodeJsSnippet(): string {
+    return `
+import { FbClientBuilder, IUser, UserBuilder } from "@featbit/node-server-sdk";
+
+const fbClient = new FbClientBuilder()
+  .sdkKey('${this.secret}')
+  .streamingUri('${this.streamingURL}')
+  .eventsUri('${this.eventURL}')
+  .build();
+
+const flagKey = '${this.flagKey}';
+const user = new UserBuilder('anonymous').build();
+
+// subscribe to flag change
+fbClient.on(\`update:$\{flagKey\}\`, async () => {
+  const variation = await fbClient.boolVariation(flagKey, user, false);
+  console.log(\`flag '$\{flagKey\}' update event received, returns $\{variation\} for user $\{user.key\}\`);
+});
+
+async function run() {
+  try {
+    // wait for the client to be initialized
+    await fbClient.waitForInitialization();
+  } catch (err) {
+    console.log(err);
+  }
+
+  const boolVariationDetail = await fbClient.boolVariationDetail(flagKey, user, false);
+  console.log(\`flag '$\{flagKey\}' returns $\{boolVariationDetail.value\} for user $\{user.key\} \` +
+      \`Reason Kind: $\{boolVariationDetail.kind\}, Reason Description: $\{boolVariationDetail.reason\}\`);
+
+  // make sure the events are flushed before exit
+  await fbClient.flush();
+}
+
+run()
+`;
   }
 
   private buildPythonSnippet() {

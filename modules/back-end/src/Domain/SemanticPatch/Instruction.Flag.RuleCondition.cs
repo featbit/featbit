@@ -73,9 +73,9 @@ public class UpdateConditionInstruction : FlagInstruction
     }
 }
 
-public class RemoveValuesFromConditionInstruction : FlagInstruction
+public class RuleConditionValuesInstruction : FlagInstruction
 {
-    public RemoveValuesFromConditionInstruction(RuleConditionValues value) : base(FlagInstructionKind.RemoveValuesFromRuleCondition, value)
+    public RuleConditionValuesInstruction(string kind, RuleConditionValues value) : base(kind, value)
     {
     }
 
@@ -100,40 +100,16 @@ public class RemoveValuesFromConditionInstruction : FlagInstruction
         }
 
         var originalValues = JsonSerializer.Deserialize<List<string>>(condition.Value);
-        originalValues.RemoveAll(v => value.Values.Contains(v));
 
-        condition.Value = JsonSerializer.Serialize(originalValues);
-    }
-}
-
-public class AddValuesToConditionInstruction : FlagInstruction
-{
-    public AddValuesToConditionInstruction(RuleConditionValues value) : base(FlagInstructionKind.AddValuesToRuleCondition, value)
-    {
-    }
-
-    public override void Apply(FeatureFlag flag)
-    {
-        if (Value is not RuleConditionValues value)
+        switch (Kind)
         {
-            return;
+            case FlagInstructionKind.AddValuesToRuleCondition:
+                originalValues.AddRange(value.Values);
+                break;
+            case FlagInstructionKind.RemoveValuesFromRuleCondition:
+                originalValues.RemoveAll(v => value.Values.Contains(v));
+                break;
         }
-
-        var rule = flag.Rules.FirstOrDefault(r => r.Id == value.RuleId);
-
-        var condition = rule?.Conditions.FirstOrDefault(c => c.Id == value.ConditionId);
-        if (condition == null)
-        {
-            return;
-        }
-
-        if (value.Values.Count == 0)
-        {
-            return;
-        }
-
-        var originalValues = JsonSerializer.Deserialize<List<string>>(condition.Value);
-        originalValues.AddRange(value.Values);
 
         condition.Value = JsonSerializer.Serialize(originalValues);
     }

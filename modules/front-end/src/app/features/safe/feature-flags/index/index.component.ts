@@ -36,8 +36,7 @@ export class IndexComponent implements OnInit {
     private projectService: ProjectService,
     private notification: NzNotificationService,
     private modal: NzModalService,
-  ) {
-  }
+  ) { }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
 
@@ -254,22 +253,17 @@ export class IndexComponent implements OnInit {
 
   //#endregion
   onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
-    let msg: string;
-    if (data.isEnabled) {
-      msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-        `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-off:is changed to OFF`;
-    } else {
-      msg = $localize `:@@ff.idx.the-status-of-ff:The status of feature flag ` +
-        `<b>${data.name}</b>` + $localize `:@@ff.idx.changed-to-on:is changed to ON`;
-    }
+    let msg: string = data.isEnabled
+      ? $localize`:@@ff.idx.flag-turned-off:The status of feature flag <b>${data.name}</b> is changed to OFF`
+      : $localize`:@@ff.idx.flag-turned-on:The status of feature flag <b>${data.name}</b> is changed to ON`;
 
-    this.featureFlagService.toggleStatus(data.key)
-      .subscribe(_ => {
+    this.featureFlagService.toggleStatus(data.key).subscribe({
+      next: _ => {
         this.msg.success(msg);
         data.isEnabled = !data.isEnabled;
-      }, _ => {
-        this.msg.error($localize `:@@ff.idx.status-change-failed:Failed to change feature flag status`);
-      });
+      },
+      error: _ => this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`)
+    });
   }
 
   navigateToFlagDetail(key: string) {

@@ -10,17 +10,18 @@ public class OnFeatureFlagDeleted : INotification
 
     public Guid OperatorId { get; set; }
 
+    public DataChange DataChange { get; set; }
+
     public OnFeatureFlagDeleted(FeatureFlag flag, Guid operatorId)
     {
         Flag = flag;
         OperatorId = operatorId;
+        DataChange = new DataChange(flag).To(null);
     }
 
     public AuditLog GetAuditLog()
     {
-        var dataChange = new DataChange(Flag).To(null);
-
-        var auditLog = AuditLog.For(Flag, Operations.Remove, dataChange, string.Empty, OperatorId);
+        var auditLog = AuditLog.For(Flag, Operations.Remove, DataChange, string.Empty, OperatorId);
         return auditLog;
     }
 }
@@ -29,11 +30,16 @@ public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDel
 {
     private readonly ICacheService _cache;
     private readonly IAuditLogService _auditLogService;
+    private readonly IWebhookHandler _webhookHandler;
 
-    public OnFeatureFlagDeletedHandler(ICacheService cache, IAuditLogService auditLogService)
+    public OnFeatureFlagDeletedHandler(
+        ICacheService cache,
+        IAuditLogService auditLogService,
+        IWebhookHandler webhookHandler)
     {
         _cache = cache;
         _auditLogService = auditLogService;
+        _webhookHandler = webhookHandler;
     }
 
     public async Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
@@ -45,5 +51,8 @@ public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDel
         var envId = notification.Flag.EnvId;
         var flagId = notification.Flag.Id;
         await _cache.DeleteFlagAsync(envId, flagId);
+
+        // handle webhooks
+        _ = _webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
     }
 }
