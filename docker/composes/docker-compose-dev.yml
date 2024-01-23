@@ -26,7 +26,7 @@ services:
       context: ./modules/back-end
       dockerfile: ./deploy/Dockerfile
     environment:
-      - SSOEnabled=false
+      - SSOEnabled=true
     env_file:
       - ./infra/otel/env/otel-api.env
     depends_on:
