@@ -56,32 +56,48 @@ export class RuleComponent  {
   filteredProps: IUserProp[] = [];
 
   get currentUserProp(): IUserProp {
-    const userProp = this.userProps.find(prop => prop.name === this.condition.property);
 
-    // adapt to existing value that preset values don't contain
-    if (userProp.usePresetValuesOnly) {
-      if (this.condition.value && userProp.presetValues.findIndex(x => x.value === this.condition.value) === -1) {
-        userProp.presetValues.push({
-          id: '',
-          value: this.condition.value,
-          description: this.condition.value
-        })
+    if(!this.condition.property) {
+      const newProp: IUserProp = {
+        id: uuidv4(),
+        name: "",
+        presetValues: [],
+        isBuiltIn: false,
+        usePresetValuesOnly: false,
+        isDigestField: false,
+        remark: '',
+        isNew: true
+      }
+      return newProp;
+    }else{
+      const userProp = this.userProps.find(prop => prop.name === this.condition.property);
+      // adapt to existing value that preset values don't contain
+      if (userProp.usePresetValuesOnly) {
+        if (this.condition.value && userProp.presetValues.findIndex(x => x.value === this.condition.value) === -1) {
+          userProp.presetValues.push({
+            id: '',
+            value: this.condition.value,
+            description: this.condition.value
+          })
+        }
+
+        if (this.condition.multipleValue) {
+          this.condition.multipleValue.forEach(value => {
+            if (userProp.presetValues.findIndex(x => x.value === value) === -1) {
+              userProp.presetValues.push({
+                id: '',
+                value: value,
+                description: value
+              })
+            }
+          });
+        }
       }
 
-      if (this.condition.multipleValue) {
-        this.condition.multipleValue.forEach(value => {
-          if (userProp.presetValues.findIndex(x => x.value === value) === -1) {
-            userProp.presetValues.push({
-              id: '',
-              value: value,
-              description: value
-            })
-          }
-        });
-      }
+      return userProp;
     }
 
-    return userProp;
+
   }
   get multiSelectMode(): 'multiple' | 'tags' {
     return this.currentUserProp.usePresetValuesOnly ? 'multiple' : 'tags';
