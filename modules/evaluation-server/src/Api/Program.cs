@@ -18,8 +18,7 @@ try
 
             options.IncludedData = IncludedData.MessageTemplateTextAttribute
                                 | IncludedData.TraceIdField
-                                | IncludedData.SpanIdField
-                                | IncludedData.MessageTemplateMD5HashAttribute;
+                                | IncludedData.SpanIdField;
             options.BatchingOptions.BatchSizeLimit = 2;
             options.BatchingOptions.Period = TimeSpan.FromSeconds(2);
             options.BatchingOptions.QueueLimit = 10;
