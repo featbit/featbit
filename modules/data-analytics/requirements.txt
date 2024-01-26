@@ -19,3 +19,9 @@ Flask-PyMongo
 Flask-APScheduler
 python-dotenv
 pytest
+opentelemetry-api==1.20.0
+opentelemetry-exporter-otlp==1.20.0
+opentelemetry-instrumentation==0.41b0
+opentelemetry-instrumentation-flask==0.41b0
+opentelemetry-instrumentation-wsgi==0.41b0
+opentelemetry-sdk==1.20.0

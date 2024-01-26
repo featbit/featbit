@@ -1,27 +1,31 @@
 import os
 import logging
 from opentelemetry import metrics, trace, _logs
-# import logging
+
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
     OTLPMetricExporter,
 )
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
     OTLPSpanExporter,
 )
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
-    OTLPLogExporter,
-)
+
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
+    OTLPLogExporter,
+)
 from opentelemetry._logs import LoggerProvider
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
 
 bind = '0.0.0.0:10000'
+
 
 workers = 2
 worker_class = 'gthread'
@@ -29,7 +33,7 @@ threads = 4
 worker_tmp_dir = os.getenv('GUNICORN_WORKER_TMP_DIR', '/tmp')
 
 otel_endpoint = os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://otel-collector:4318')
-otel_service_name = os.getenv('OTEL_SERVICE_NAME', 'das')
+otel_service_name = os.getenv('OTEL_SERVICE_NAME', 'featbit-das')
 otel_python_log_level = os.getenv('OTEL_PYTHON_LOG_LEVEL', 'info')
 otel_log_format = os.getenv('OTEL_PYTHON_LOG_FORMAT', '%(msg)s [span_id=%(span_id)s]')
 
@@ -46,13 +50,17 @@ access_log_format = (
 
 raw_env = ['WSGI=y']
 
+LoggingInstrumentor().instrument(set_logging_format=True)
+
+logging.basicConfig()
+
 def post_fork(server, worker):
     server.log.info("Worker spawned (pid: %s)", worker.pid)
     
 
     resource = Resource.create(
         attributes={
-            "service.name": "featbit-das",
+            "service.name": otel_service_name,
             # If workers are not distinguished within attributes, traces and
             # metrics exported from each worker will be indistinguishable. While
             # not necessarily an issue for traces, it is confusing for almost
@@ -64,27 +72,7 @@ def post_fork(server, worker):
         }
     )
 
-    logging_provider = LoggerProvider(resource=resource)
-    _logs.set_logger_provider(logging_provider)
-    log_processor = BatchLogRecordProcessor(
-        OTLPLogExporter(endpoint=otel_endpoint, insecure=True)
-    )
-    _logs.get_logger_provider().add_log_record_processor(log_processor)
-    handler = LoggingHandler(level=logging.DEBUG, logger_provider=logging_provider)
-    logging.getLogger('gunicorn.error').addHandler(handler)
-
-    logging.info("starting up with logging configured")
-    logging.getLogger('gunicorn.error').info("starting up with logging configured 2")
-
     trace.set_tracer_provider(TracerProvider(resource=resource))
-
-    # test trace
-
-    tracer = trace.get_tracer("prefork.tracer")
-
-    with tracer.start_as_current_span("startTrace") as traceSpan:
-        traceSpan.set_attribute("started", True)
-        logging.getLogger().info("Worker spawned (pid: %s)", worker.pid)
     
     # This uses insecure connection for the purpose of example. Please see the
     # OTLP Exporter documentation for other options.
@@ -96,10 +84,20 @@ def post_fork(server, worker):
     reader = PeriodicExportingMetricReader(
         OTLPMetricExporter(endpoint=otel_endpoint, insecure=True)
     )
+    
     metrics.set_meter_provider(
         MeterProvider(
             resource=resource,
             metric_readers=[reader],
         )
     )
+
+    logging_provider = LoggerProvider(resource=resource)
+    _logs.set_logger_provider(logging_provider)
+    log_processor = BatchLogRecordProcessor(
+        OTLPLogExporter(endpoint=otel_endpoint, insecure=True)
+    )
+    _logs.get_logger_provider().add_log_record_processor(log_processor)
+    handler = LoggingHandler(level=logging.DEBUG, logger_provider=logging_provider)
+    logging.getLogger('gunicorn.error').addHandler(handler)
 
