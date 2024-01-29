@@ -10,7 +10,8 @@
 
     <ItemGroup>
         <!-- Api Versioning -->
-        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="6.0.0"/>
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="1.1.0" />
 
         <!-- Swagger -->
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0"/>
@@ -21,6 +22,7 @@
         <!-- Serilog -->
         <PackageReference Include="Serilog.AspNetCore" Version="6.1.0"/>
         <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.0.0"/>
+        <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
     </ItemGroup>
 
     <ItemGroup>

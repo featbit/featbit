@@ -12,3 +12,6 @@ benchmark/k6-scripts/test-results/
 .vs/
 /.vs/VSWorkspaceState.json
 /.vs/featbit/v17/.wsuo
+
+#Ignore dev logs
+.logs/

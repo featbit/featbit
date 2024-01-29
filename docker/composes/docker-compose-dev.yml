@@ -27,6 +27,8 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - SSOEnabled=true
+    env_file:
+      - ./infra/otel/env/otel-api.env
     depends_on:
       - mongodb
       - redis
@@ -45,6 +47,11 @@ services:
     depends_on:
       - mongodb
       - redis
+    environment:
+      - LOGGING__LOGLEVEL__DEFAULT=Debug
+      - LOGGING__LOGLEVEL__Microsoft_ASPNETCORE=Debug
+    env_file:
+      - ./infra/otel/env/otel-els.env
     ports:
       - "5100:5100"
     networks:
@@ -69,6 +76,8 @@ services:
       MONGO_URI: mongodb://admin:password@mongodb:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: mongodb
+    env_file:
+      - ./infra/otel/env/otel-das.env
 
   mongodb:
     image: mongo:5.0.14

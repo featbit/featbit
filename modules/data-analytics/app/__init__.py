@@ -1,8 +1,11 @@
 import socket
+import logging
 from logging.config import dictConfig
 from typing import List, Tuple
 
 from flask import Flask
+from opentelemetry import metrics, trace, _logs
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
 from app.config import DevelopmentConfig, ProductionConfig
 from app.extensions import get_cache, get_mongodb, get_scheduler
