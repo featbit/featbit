@@ -47,9 +47,6 @@ services:
     depends_on:
       - mongodb
       - redis
-    environment:
-      - LOGGING__LOGLEVEL__DEFAULT=Debug
-      - LOGGING__LOGLEVEL__Microsoft_ASPNETCORE=Debug
     env_file:
       - ./infra/otel/env/otel-els.env
     ports:
