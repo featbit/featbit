@@ -6,30 +6,7 @@ using Serilog.Sinks.OpenTelemetry;
 
 try
 {
-    var otel_exporter = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT_GRPC") ?? "http://otel-collector:4317";
-    Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-        .Enrich.FromLogContext()
-        .Enrich.WithClientIp("X-Forwarded-For")
-        .Enrich.WithRequestHeader("User-Agent")
-        .WriteTo.Console(new CompactJsonFormatter())
-        .WriteTo.OpenTelemetry(options =>
-        {
-            options.Endpoint = otel_exporter;
-
-            options.IncludedData = IncludedData.MessageTemplateTextAttribute
-                                   | IncludedData.TraceIdField
-                                   | IncludedData.SpanIdField;
-            options.BatchingOptions.BatchSizeLimit = 2;
-            options.BatchingOptions.Period = TimeSpan.FromSeconds(2);
-            options.BatchingOptions.QueueLimit = 10;
-
-            options.ResourceAttributes = new Dictionary<string, object>
-            {
-                ["service.name"] = "featbit-api"
-            };
-        })
-        .CreateLogger();
+    InitializeSerilog();
 
     WebApplication.CreateBuilder(args)
         .ConfigureHost()
@@ -45,6 +22,39 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+void InitializeSerilog()
+{
+    var configuration = new LoggerConfiguration()
+        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .Enrich.FromLogContext()
+        .Enrich.WithClientIp("X-Forwarded-For")
+        .Enrich.WithRequestHeader("User-Agent")
+        .WriteTo.Console(new CompactJsonFormatter());
+
+    var enableOpenTelemetry = Environment.GetEnvironmentVariable("ENABLE_OPENTELEMETRY");
+    if (enableOpenTelemetry?.ToLower() == "true")
+    {
+        configuration.WriteTo.OpenTelemetry(options =>
+        {
+            options.Endpoint =
+                Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT_GRPC") ?? "http://otel-collector:4317";
+            options.IncludedData = IncludedData.MessageTemplateTextAttribute
+                                   | IncludedData.TraceIdField
+                                   | IncludedData.SpanIdField;
+            options.BatchingOptions.BatchSizeLimit = 2;
+            options.BatchingOptions.Period = TimeSpan.FromSeconds(2);
+            options.BatchingOptions.QueueLimit = 10;
+
+            options.ResourceAttributes = new Dictionary<string, object>
+            {
+                ["service.name"] = "featbit-api"
+            };
+        });
+    }
+
+    Log.Logger = configuration.CreateLogger();
 }
 
 // https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-6.0#basic-tests-with-the-default-webapplicationfactory

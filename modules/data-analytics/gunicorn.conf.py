@@ -46,6 +46,9 @@ LoggingInstrumentor().instrument(set_logging_format=True)
 logging.basicConfig()
 
 def post_fork(server, worker):
+    if os.getenv('ENABLE_OPENTELEMETRY', 'false').lower() != 'true':
+        return
+
     server.log.info("Worker spawned (pid: %s)", worker.pid)
     
     resource = Resource.create(
