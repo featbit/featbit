@@ -41,7 +41,6 @@ ENV ASPNETCORE_URLS=http://*:5000
 EXPOSE 5000
 
 # health check
-
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD curl --fail --silent http://localhost:5000/health/liveness || exit 1
 
