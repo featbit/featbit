@@ -5,4 +5,8 @@ export FLASK_APP='flasky:app'
 
 flask migrate-database
 
-gunicorn 'flasky:app'
+if [ "$ENABLE_OPENTELEMETRY" = "true" ]; then
+    opentelemetry-instrument gunicorn 'flasky:app'
+else
+    gunicorn 'flasky:app'
+fi
