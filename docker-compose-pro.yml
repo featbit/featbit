@@ -65,6 +65,9 @@ services:
       KAFKA_HOSTS: kafka:9092
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      MONGO_URI: mongodb://admin:password@mongodb:27017
+      MONGO_INITDB_DATABASE: featbit
+      MONGO_HOST: mongodb
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
       IS_PRO: true
