@@ -23,7 +23,7 @@ worker_class = 'gthread'
 threads = 4
 worker_tmp_dir = os.getenv('GUNICORN_WORKER_TMP_DIR', '/tmp')
 
-otel_endpoint = os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://otel-collector:4317')
+otel_endpoint = os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://otel-collector:4318')
 otel_service_name = os.getenv('OTEL_SERVICE_NAME', 'featbit-das')
 otel_python_log_level = os.getenv('OTEL_PYTHON_LOG_LEVEL', 'info')
 otel_log_format = os.getenv('OTEL_PYTHON_LOG_FORMAT', '%(msg)s [span_id=%(span_id)s]')
