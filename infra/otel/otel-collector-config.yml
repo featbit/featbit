@@ -36,32 +36,14 @@ processors:
             - favicon\.ico
           enabled_regex_matching: true
           invert_match: true
-  # use the following to filter out traces from the api service
-  filter/api:
+  # exclude traces from otel-collector
+  filter/trace-denylist:
     spans:
-      include:
-        match_type: strict
-        services:
-        - featbit-api
       exclude:
-        match_type: regexp
+        match_type: strict
         attributes:
           - key: net.peer.name
             value: otel-collector
-  # use the following to filter out traces from the das service            
-  filter/das:
-    spans:
-      include:
-        match_type: strict
-        services:
-        - featbit-das
-  # use the following to filter out traces from the els service
-  filter/els:
-    spans:
-      include:
-        match_type: strict
-        services:
-        - featbit-els
 
 exporters:
 
@@ -134,7 +116,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch, tail_sampling, attributes/dev]
+      processors: [batch, tail_sampling, filter/trace-denylist, attributes/dev]
       exporters: [file/traces, otlp/jaeger]
     metrics:
       receivers: [otlp]
