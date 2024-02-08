@@ -157,6 +157,8 @@ FeatBit offers a range of features including:
 
 - **[ChatGPT Tech Debt Reduction](https://github.com/featbit/featbit/tree/main/llm)** (experimental features): Utilize ChatGPT4 and FeatBit's VSCode extension to minimize technical debt associated with feature flagging.
 
+- **[OpenTelemetry Integration](https://docs.featbit.co/integrations/observability/opentelemetry)**: Enhance system visibility with OpenTelemetry for logs, traces, and metrics.
+
 - **[Helm Charts Installation](https://github.com/featbit/featbit-charts/)**, FeatBit can be installed on-premises, in the cloud, or in a hybrid environment through Helm Charts.
 
 ![featbit-readme-new-2](https://user-images.githubusercontent.com/68597908/211645725-391777fa-b5c0-4a0c-88e9-df9f05af9c61.gif)
