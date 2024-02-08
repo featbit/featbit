@@ -37,7 +37,11 @@ void InitializeSerilog()
         configuration.WriteTo.OpenTelemetry(options =>
         {
             options.Endpoint =
-                Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT_GRPC") ?? "http://otel-collector:4317";
+                Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT") ?? "http://otel-collector:4318";
+            options.Protocol =
+                Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_PROTOCOL") == "grpc"
+                    ? OtlpProtocol.Grpc
+                    : OtlpProtocol.HttpProtobuf;
 
             options.IncludedData = IncludedData.MessageTemplateTextAttribute
                                    | IncludedData.TraceIdField
