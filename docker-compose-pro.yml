@@ -92,8 +92,6 @@ services:
       - ALLOW_EMPTY_PASSWORD=yes
     networks:
       - featbit-network
-    ports:
-      - "6379:6379"
     volumes:
       - redis:/data
 
