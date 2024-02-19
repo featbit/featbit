@@ -14,6 +14,7 @@ expt.register_error_handler(500, internal_error_handler)
 
 @expt.route('/results', methods=['POST'])
 def get_result():
+    current_app.logger.info(f'POST {request.path}')
     json_str = request.get_data()
     try:
         if not json_str:
