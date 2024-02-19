@@ -25,6 +25,8 @@ docker compose up da-server -d
 | `CACHE_TYPE`       | Type of cache used                                       | `"RedisCache"` |
 | `TEST`             | If `true`, runs the application in test mode             | `"false"`      |
 
+Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or clickhouse
+
 ### Kafka Settings
 
 | Name                      | Description                     | Value          |

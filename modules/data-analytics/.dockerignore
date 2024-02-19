@@ -1,6 +1,5 @@
 *
 !app
-!integration_tests
 !utils
 !.env
 !flasky.py

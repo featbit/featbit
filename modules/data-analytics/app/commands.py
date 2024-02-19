@@ -21,7 +21,6 @@ from app.mongodb.commands import migrate as migrate_mongo
 @with_appcontext
 def migrate_clickhouse(upto, check, plan, print_sql):
     migrate_ch(upto, check, plan, print_sql)
-    migrate_mongo()
 
 
 @click.command()

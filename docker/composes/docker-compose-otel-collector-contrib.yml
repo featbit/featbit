@@ -42,6 +42,7 @@ services:
     container_name: prometheus
     volumes:
       - ./infra/otel/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
     networks:
       - featbit-network
     ports:
@@ -54,6 +55,8 @@ services:
     ports:
       - 8082:80
       - 5341:5341
+    volumes:
+      - seq:/data
     environment:
       - ACCEPT_EULA=Y 
 networks:
@@ -63,3 +66,7 @@ networks:
     ipam:
       config:
         - subnet: 172.10.0.0/16
+
+volumes:
+  prometheus:
+  seq:

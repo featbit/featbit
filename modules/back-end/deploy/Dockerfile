@@ -31,6 +31,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
 ARG OTEL_VERSION=1.1.0
+ARG DOTNET_SHARED_STORE=/app/store
+
 ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v${OTEL_VERSION}/otel-dotnet-auto-install.sh otel-dotnet-auto-install.sh
 RUN chmod +x otel-dotnet-auto-install.sh
 RUN export OTEL_DOTNET_AUTO_HOME="/app" && ./otel-dotnet-auto-install.sh
@@ -40,6 +42,9 @@ COPY --from=publish /app ./
 # ensure we listen on any IP Address
 ENV ASPNETCORE_URLS=http://*:5000
 EXPOSE 5000
+
+RUN mkdir -p $DOTNET_SHARED_STORE/arm64 && \
+    cp -a $DOTNET_SHARED_STORE/x64/. $DOTNET_SHARED_STORE/arm64
 
 # health check
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \

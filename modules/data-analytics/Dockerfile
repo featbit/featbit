@@ -35,6 +35,12 @@ ARG MONGO_URI=mongodb://admin:password@mongodb:27017
 ARG MONGO_INITDB_DATABASE=featbit
 ARG IS_PRO=false
 ARG CHECK_DB_LIVNESS=true
+ARG ENABLE_OPENTELEMETRY=false
+ARG OTEL_SERVICE_NAME=featbit-das
+ARG OTEL_TRACES_EXPORTER=otlp
+ARG OTEL_METRICS_EXPORTER=otlp
+ARG OTEL_LOGS_EXPORTER=otlp
+ARG OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 ENV KAFKA_HOSTS=${KAFKA_HOSTS} \
     KAFKA_SECURITY_PROTOCOL=${KAFKA_SECURITY_PROTOCOL} \
     KAFKA_SASL_MECHANISM=${KAFKA_SASL_MECHANISM} \
@@ -70,17 +76,28 @@ ENV KAFKA_HOSTS=${KAFKA_HOSTS} \
     MONGO_URI=${MONGO_URI} \
     MONGO_DB=${MONGO_INITDB_DATABASE} \
     IS_PRO=${IS_PRO} \
-    CHECK_DB_LIVNESS=${CHECK_DB_LIVNESS}
-RUN apt update && apt install -y nginx && apt install -y supervisor && apt install -y git
+    CHECK_DB_LIVNESS=${CHECK_DB_LIVNESS} \
+    ENABLE_OPENTELEMETRY=${ENABLE_OPENTELEMETRY} \
+    OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME} \
+    OTEL_TRACES_EXPORTER=${OTEL_TRACES_EXPORTER} \
+    OTEL_METRICS_EXPORTER=${OTEL_METRICS_EXPORTER} \
+    OTEL_LOGS_EXPORTER=${OTEL_LOGS_EXPORTER} \
+    OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT}
+RUN apt update && \
+    apt install -y nginx && \ 
+    apt install -y supervisor && \ 
+    apt install -y git && \ 
+    rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /var/log/nginx && \
     touch /var/log/nginx/access.log && \
     touch /var/log/nginx/error.log
-EXPOSE 80
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY . /featbit_da
 WORKDIR /featbit_da
 RUN chmod +x start.sh docker-entrypoint.sh wait-for-it.sh
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 RUN opentelemetry-bootstrap -a install
+EXPOSE 80
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["/usr/bin/supervisord","-c","supervisord.conf"]

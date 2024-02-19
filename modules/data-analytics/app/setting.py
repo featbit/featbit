@@ -78,3 +78,5 @@ DEFAULT_LOGGING_CONFIG = {
         'handlers': ['wsgi']
     }
 }
+
+ENABLE_OPENTELEMETRY = get_from_env("ENABLE_OPENTELEMETRY", False, type_cast=str_to_bool)
