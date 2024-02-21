@@ -1,5 +1,7 @@
 ﻿# build stage
 # https://hub.docker.com/_/microsoft-dotnet
+ARG INSTALL_DIR=/app
+
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /source
 
@@ -26,27 +28,53 @@ RUN dotnet build -c Release --no-restore && dotnet test
 
 # publish stage
 FROM build AS publish
+ARG INSTALL_DIR
 WORKDIR /source/src/Api
-RUN dotnet publish -c Release --no-build -o /app
+RUN dotnet publish -c Release --no-build -o $INSTALL_DIR
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
+ARG INSTALL_DIR
 ARG OTEL_VERSION=1.1.0
-ARG DOTNET_SHARED_STORE=/app/store
+ARG ENABLE_OPENTELEMETRY=false
+ARG OTEL_SERVICE_NAME=featbit-els
+ARG OTEL_TRACES_EXPORTER=otlp
+ARG OTEL_METRICS_EXPORTER=otlp
+ARG OTEL_LOGS_EXPORTER=otlp
+ARG OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+ARG OTEL_EXPORTER_OTLP_ENDPOINT=http://locahost:4317
+ARG OTEL_EXPORTER_OTLP_INSECURE=true
+
+
+# ensure we listen on any IP Address
+ENV ASPNETCORE_URLS=http://*:5100 \
+    INSTALL_DIR=$INSTALL_DIR \
+    DOTNET_ADDITIONAL_DEPS=$INSTALL_DIR/AdditionalDeps \
+    DOTNET_SHARED_STORE=$INSTALL_DIR/store \
+    ENABLE_OPENTELEMETRY=$ENABLE_OPENTELEMETRY \
+    OTEL_DOTNET_AUTO_HOME=$INSTALL_DIR \
+    OTEL_SERVICE_NAME=$OTEL_SERVICE_NAME \
+    OTEL_TRACES_EXPORTER=$OTEL_TRACES_EXPORTER \
+    OTEL_METRICS_EXPORTER=$OTEL_METRICS_EXPORTER \
+    OTEL_LOGS_EXPORTER=$OTEL_LOGS_EXPORTER \
+    OTEL_EXPORTER_OTLP_ENDPOINT=$OTEL_EXPORTER_OTLP_ENDPOINT \
+    OTEL_EXPORTER_OTLP_PROTOCOL=$OTEL_EXPORTER_OTLP_PROTOCOL \
+    OTEL_EXPORTER_OTLP_INSECURE=$OTEL_EXPORTER_OTLP_INSECURE
 
 ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v${OTEL_VERSION}/otel-dotnet-auto-install.sh otel-dotnet-auto-install.sh
 RUN chmod +x otel-dotnet-auto-install.sh
-RUN export OTEL_DOTNET_AUTO_HOME="/app" && sh otel-dotnet-auto-install.sh
+RUN ./otel-dotnet-auto-install.sh
 
-WORKDIR /app
-COPY --from=publish /app ./
-# ensure we listen on any IP Address
-ENV ASPNETCORE_URLS=http://*:5100
+WORKDIR $INSTALL_DIR
+COPY --from=publish $INSTALL_DIR ./
+COPY --from=build /source/start.sh ./start.sh
+RUN chmod +x ./start.sh
 EXPOSE 5100
 
+# temporal workaround for Automatic Instrumentation in ARM arch
 RUN mkdir -p $DOTNET_SHARED_STORE/arm64 && \
     cp -a $DOTNET_SHARED_STORE/x64/. $DOTNET_SHARED_STORE/arm64
 
@@ -54,4 +82,4 @@ RUN mkdir -p $DOTNET_SHARED_STORE/arm64 && \
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD curl --fail --silent http://localhost:5100/health/liveness || exit 1
 
-ENTRYPOINT ["dotnet", "Api.dll"]
+ENTRYPOINT ["./start.sh"]
