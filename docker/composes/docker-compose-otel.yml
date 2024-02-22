@@ -27,8 +27,9 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - SSOEnabled=true
-    env_file:
-      - ./infra/otel/env/otel-api.env
+      - ENABLE_OPENTELEMETRY=true
+      - OTEL_SERVICE_NAME=featbit-api
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
       - mongodb
       - redis
@@ -47,8 +48,10 @@ services:
     depends_on:
       - mongodb
       - redis
-    env_file:
-      - ./infra/otel/env/otel-els.env
+    environment:
+      - ENABLE_OPENTELEMETRY=true
+      - OTEL_SERVICE_NAME=featbit-els
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     ports:
       - "5100:5100"
     networks:
@@ -73,6 +76,9 @@ services:
       MONGO_URI: mongodb://admin:password@mongodb:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: mongodb
+      ENABLE_OPENTELEMETRY: true
+      OTEL_SERVICE_NAME: featbit-das
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
     env_file:
       - ./infra/otel/env/otel-das.env
 
