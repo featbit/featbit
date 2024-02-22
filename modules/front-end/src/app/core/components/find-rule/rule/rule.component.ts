@@ -56,8 +56,9 @@ export class RuleComponent  {
   filteredProps: IUserProp[] = [];
 
   get currentUserProp(): IUserProp {
+    const userProp = this.userProps.find(prop => prop.name === this.condition.property);
 
-    if(!this.condition.property) {
+    if(!userProp) {
       const newProp: IUserProp = {
         id: uuidv4(),
         name: "",
@@ -68,9 +69,9 @@ export class RuleComponent  {
         remark: '',
         isNew: true
       }
+      
       return newProp;
     }else{
-      const userProp = this.userProps.find(prop => prop.name === this.condition.property);
       // adapt to existing value that preset values don't contain
       if (userProp.usePresetValuesOnly) {
         if (this.condition.value && userProp.presetValues.findIndex(x => x.value === this.condition.value) === -1) {
