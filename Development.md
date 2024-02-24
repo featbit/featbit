@@ -72,7 +72,7 @@ npm run start:zh // Chinese, available at localhost:4201
 FeatBit should be available to everyone everywhere, and we don't want language to be a barrier. So for this reason we
 have implemented internationalization features into our codebase.
 
-FeatBit UI uses offical [@angular/localize
+FeatBit UI uses official [@angular/localize
 ](https://www.npmjs.com/package/@angular/localize) package to implement the i18n, please read
 the [official doc](https://angular.io/guide/i18n-overview) for how to use it. The language resource files are under *
 *modules/front-end/src/locale** folder, with following format messages.xx.xlf, xx is the language code.
@@ -81,8 +81,8 @@ Currently only English and Chinese are available, we would be very grateful to h
 too.
 
 If you put a text in the UI, at the end of the developing work, you need to put its translations into the corresponding
-resource file. This work could be very tedius, we created
-a [library](https://github.com/featbit/angular-locales-generator) to faciliate the job, you need to run the command
+resource file. This work could be very tedious, we created
+a [library](https://github.com/featbit/angular-locales-generator) to facilitate the job, you need to run the command
 
 ```bash
 npm run i18n
