@@ -67,11 +67,11 @@ But of course, you can finish your contribution and create a PR without notifyin
 - **Step 1** - [Fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks) this repository.
 - **Step 2** - Clone the repository to your local machine.
 - **Step 3** - Add the changes to your repository.
-- **Step 4** - Create a PULL Request from forked project to FeatBit. We may ask for changes to be made before a PR can be merge.
+- **Step 4** - Create a PULL Request from forked project to FeatBit. We may ask for changes to be made before a PR can be merged.
 - **Step 5** - Congratulations 🎉🎉 Your PR is approved and Merged !!! 
-- **Step 6** - FeatBit team thanks you. You becomes one of the contributor of FeatBit 🎉🎉 .
+- **Step 6** - FeatBit team thanks you. You become one of the contributors of FeatBit 🎉🎉 .
 
-If the steps above isn't very clear, you can search ["GitHub Forks and Pull Requests" on Youtube](https://www.youtube.com/watch?v=a_FLqX3vGR4).
+If the steps above aren't very clear, you can search ["GitHub Forks and Pull Requests" on Youtube](https://www.youtube.com/watch?v=a_FLqX3vGR4).
 
 
 ----------------------------------------------------
