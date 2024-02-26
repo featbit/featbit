@@ -44,6 +44,13 @@ processors:
         attributes:
           - key: net.peer.name
             value: otel-collector
+  # temporary measure until description is fixed in Python
+  # see: https://github.com/open-telemetry/opentelemetry-demo/pull/738
+  transform:
+    metric_statements:
+      - context: metric
+        statements:
+          - set(description, "Measures the duration of inbound HTTP requests") where name == "http.server.duration"
 
 exporters:
 
@@ -120,7 +127,7 @@ service:
       exporters: [file/traces, otlp/jaeger]
     metrics:
       receivers: [otlp]
-      processors: [batch, attributes/dev]
+      processors: [batch, transform, attributes/dev]
       exporters: [file/metrics, prometheus]
     logs:
       receivers: [otlp]
