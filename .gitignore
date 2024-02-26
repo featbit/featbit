@@ -15,3 +15,6 @@ benchmark/k6-scripts/test-results/
 
 #Ignore dev logs
 .logs/
+
+#Ignore IntelliJ IDEA files
+.idea/

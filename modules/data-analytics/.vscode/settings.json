@@ -21,5 +21,8 @@
         ".vscode test": true
     },
     "python.analysis.typeCheckingMode": "basic",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    }
 }

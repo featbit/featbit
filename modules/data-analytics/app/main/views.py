@@ -20,12 +20,14 @@ main.register_error_handler(500, internal_error_handler)
 
 @main.route('', methods=['GET'])
 def index():
+    current_app.logger.info(f'GET {request.path}')
     return jsonify(code=200, error='', data={'state': f'{current_app.config["ENV"]} OK'})
 
 
 @main.route('/events', methods=['POST'])
 def create_events():
     # this api is only for internal test, not use in prod
+    current_app.logger.info(f'POST {request.path}')
     json_str = request.get_data()
     try:
         if not json_str:
@@ -47,6 +49,7 @@ def _create_events(json_events: Union[str, bytes]) -> None:
 
 @main.route('/events/stat/<event>', methods=['POST'])
 def get_event_stat(event: str):
+    current_app.logger.info(f'POST {request.path}')
     json_str = request.get_data()
     try:
         if not json_str:
