@@ -51,7 +51,6 @@ export class RuleComponent {
     this.selectedProp = this.userProps.find(prop => prop.name === this.condition.property);
   }
 
-
   userProps: IUserProp[] = [];
   filteredProps: IUserProp[] = [];
 
