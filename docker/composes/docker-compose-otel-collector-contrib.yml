@@ -2,7 +2,7 @@ name: featbit-otel-collector
 version: "3"
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib
+    image: otel/opentelemetry-collector-contrib:latest
     container_name: otel-collector
     volumes:
       - ./infra/otel/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
@@ -25,7 +25,7 @@ services:
       seq:
         condition: service_started
   jaeger:
-    image: jaegertracing/all-in-one:1.46.0
+    image: jaegertracing/all-in-one:latest
     container_name: jaeger
     environment:
       - COLLECTOR_OTLP_ENABLED=true
@@ -38,7 +38,7 @@ services:
       - "14250"
 
   prometheus:
-    image: prom/prometheus:v2.42.0
+    image: prom/prometheus:latest
     container_name: prometheus
     volumes:
       - ./infra/otel/prometheus.yml:/etc/prometheus/prometheus.yml
