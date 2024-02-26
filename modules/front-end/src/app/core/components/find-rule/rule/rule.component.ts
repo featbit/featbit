@@ -1,19 +1,19 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
-import {isSegmentCondition, uuidv4} from '@utils/index';
+import { isSegmentCondition, uuidv4 } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { IRuleOp, ruleOps, findIndex } from '../ruleConfig';
+import { findIndex, IRuleOp, ruleOps } from '../ruleConfig';
 import { ISegment, ISegmentListModel, SegmentListFilter } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { IUserProp } from "@shared/types";
-import {ICondition} from "@shared/rules";
+import { ICondition } from "@shared/rules";
 
 @Component({
   selector: 'app-rule',
   templateUrl: './rule.component.html',
   styleUrls: ['./rule.component.less']
 })
-export class RuleComponent  {
+export class RuleComponent {
 
   private inputs = new Subject<any>();
 
@@ -57,9 +57,8 @@ export class RuleComponent  {
 
   get currentUserProp(): IUserProp {
     const userProp = this.userProps.find(prop => prop.name === this.condition.property);
-
-    if(!userProp) {
-      const newProp: IUserProp = {
+    if (!userProp) {
+      return {
         id: uuidv4(),
         name: "",
         presetValues: [],
@@ -68,38 +67,35 @@ export class RuleComponent  {
         isDigestField: false,
         remark: '',
         isNew: true
-      }
-      
-      return newProp;
-    }else{
-      // adapt to existing value that preset values don't contain
-      if (userProp.usePresetValuesOnly) {
-        if (this.condition.value && userProp.presetValues.findIndex(x => x.value === this.condition.value) === -1) {
-          userProp.presetValues.push({
-            id: '',
-            value: this.condition.value,
-            description: this.condition.value
-          })
-        }
-
-        if (this.condition.multipleValue) {
-          this.condition.multipleValue.forEach(value => {
-            if (userProp.presetValues.findIndex(x => x.value === value) === -1) {
-              userProp.presetValues.push({
-                id: '',
-                value: value,
-                description: value
-              })
-            }
-          });
-        }
-      }
-
-      return userProp;
+      };
     }
 
+    // adapt to existing value that preset values don't contain
+    if (userProp.usePresetValuesOnly) {
+      if (this.condition.value && userProp.presetValues.findIndex(x => x.value === this.condition.value) === -1) {
+        userProp.presetValues.push({
+          id: '',
+          value: this.condition.value,
+          description: this.condition.value
+        })
+      }
 
+      if (this.condition.multipleValue) {
+        this.condition.multipleValue.forEach(value => {
+          if (userProp.presetValues.findIndex(x => x.value === value) === -1) {
+            userProp.presetValues.push({
+              id: '',
+              value: value,
+              description: value
+            })
+          }
+        });
+      }
+    }
+
+    return userProp;
   }
+
   get multiSelectMode(): 'multiple' | 'tags' {
     return this.currentUserProp.usePresetValuesOnly ? 'multiple' : 'tags';
   }
@@ -136,7 +132,7 @@ export class RuleComponent  {
       });
   }
 
-  onSearchSegments(value: string = ''){
+  onSearchSegments(value: string = '') {
     this.isLoadingSegments = true;
     this.inputs.next(value);
   }
@@ -185,7 +181,7 @@ export class RuleComponent  {
 
   public onPropertyChange() {
     if (this.selectedProp.isNew) {
-      this.addProperty.emit({...this.selectedProp, isNew: false});
+      this.addProperty.emit({ ...this.selectedProp, isNew: false });
     }
 
     this.condition.property = this.selectedProp.name;
