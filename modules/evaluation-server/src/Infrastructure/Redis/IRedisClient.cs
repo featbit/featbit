@@ -4,7 +4,7 @@ namespace Infrastructure.Redis;
 
 public interface IRedisClient
 {
-    bool IsConnected { get; }
+    Task<bool> IsHealthyAsync();
 
     IDatabase GetDatabase();
 

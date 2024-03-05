@@ -15,7 +15,7 @@ public class RedisStore : IStore
         _redis = redisClient.GetDatabase();
     }
 
-    public ValueTask<bool> IsAvailableAsync() => ValueTask.FromResult(_redisClient.IsConnected);
+    public async Task<bool> IsAvailableAsync() => await _redisClient.IsHealthyAsync();
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {

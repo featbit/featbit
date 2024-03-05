@@ -16,7 +16,7 @@ public class HybridStore : IStore
         _stores = new IStore[] { redis, mongodb };
     }
 
-    public async ValueTask<bool> IsAvailableAsync()
+    public async Task<bool> IsAvailableAsync()
     {
         foreach (var store in _stores)
         {
