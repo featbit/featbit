@@ -8,17 +8,18 @@ namespace Infrastructure.Store;
 public class MongoDbStore : IStore
 {
     private readonly IMongoDatabase _mongodb;
+    private static readonly BsonDocumentCommand<BsonDocument> Ping = new(BsonDocument.Parse("{ping:1}"));
 
     public MongoDbStore(IMongoDbClient mongoDbClient)
     {
         _mongodb = mongoDbClient.Database;
     }
 
-    public async ValueTask<bool> IsAvailableAsync()
+    public async Task<bool> IsAvailableAsync()
     {
         try
         {
-            await _mongodb.RunCommandAsync((Command<BsonDocument>)"{ping:1}");
+            await _mongodb.RunCommandAsync(Ping);
             return true;
         }
         catch (Exception)

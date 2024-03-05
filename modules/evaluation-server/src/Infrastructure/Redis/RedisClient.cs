@@ -27,7 +27,46 @@ public class RedisClient : IRedisClient
         );
     }
 
-    public bool IsConnected => ConnectionMultiplexer.IsConnected;
+    // ReSharper disable once CognitiveComplexity
+    public async Task<bool> IsHealthyAsync()
+    {
+        // reference: https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/blob/master/src/HealthChecks.Redis/RedisHealthCheck.cs
+        try
+        {
+            foreach (var endPoint in ConnectionMultiplexer!.GetEndPoints(configuredOnly: true))
+            {
+                var server = ConnectionMultiplexer.GetServer(endPoint);
+                if (server.ServerType != ServerType.Cluster)
+                {
+                    await ConnectionMultiplexer.GetDatabase().PingAsync().ConfigureAwait(false);
+                    await server.PingAsync().ConfigureAwait(false);
+                }
+                else
+                {
+                    var clusterInfo = await server.ExecuteAsync("CLUSTER", "INFO").ConfigureAwait(false);
+                    if (clusterInfo is object && !clusterInfo.IsNull)
+                    {
+                        if (!clusterInfo.ToString()!.Contains("cluster_state:ok"))
+                        {
+                            // $"INFO CLUSTER is not on OK state for endpoint {endPoint}"
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        // $"INFO CLUSTER is null or can't be read for endpoint {endPoint}"
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     public IDatabase GetDatabase() => ConnectionMultiplexer.GetDatabase();
 

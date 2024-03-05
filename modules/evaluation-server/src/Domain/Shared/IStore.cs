@@ -2,7 +2,7 @@ namespace Domain.Shared;
 
 public interface IStore
 {
-    ValueTask<bool> IsAvailableAsync();
+    Task<bool> IsAvailableAsync();
 
     Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp);
 
