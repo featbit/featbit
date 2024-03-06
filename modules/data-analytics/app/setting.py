@@ -36,7 +36,7 @@ CLICKHOUSE_KAFKA_HOSTS = os.getenv("CLICKHOUSE_KAFKA_HOSTS", "kafka:9092")
 CLICKHOUSE_REPLICATION = get_from_env("CLICKHOUSE_REPLICATION", True, type_cast=str_to_bool)
 
 CACHE_TYPE = os.getenv("CACHE_TYPE", "RedisCache")
-CACHE_KEY_PREFIX = "da-server"
+CACHE_KEY_PREFIX = "featbit:das:"
 REDIS_USER = os.getenv("REDIS_USER", None)
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
 REDIS_DB = get_from_env("REDIS_DB", 0, type_cast=int)
