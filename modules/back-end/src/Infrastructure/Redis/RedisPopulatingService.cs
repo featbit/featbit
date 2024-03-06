@@ -9,8 +9,8 @@ namespace Infrastructure.Redis;
 
 public class RedisPopulatingService : ICachePopulatingService
 {
-    private const string IsPopulatedKey = "featbit:redis.is.populated";
-    private const string PopulateLockKey = "featbit:populate.redis";
+    private const string IsPopulatedKey = "featbit:redis-is-populated";
+    private const string PopulateLockKey = "featbit:populate-redis";
     private static readonly string PopulateLockValue = Environment.MachineName;
 
     private readonly IDatabase _redis;

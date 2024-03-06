@@ -5,9 +5,9 @@ namespace Infrastructure.Redis;
 public static class RedisKeys
 {
     private const string FlagPrefix = "featbit:flag:";
-    private const string FlagIndexPrefix = "featbit:flag.index:";
+    private const string FlagIndexPrefix = "featbit:flag-index:";
     private const string SegmentPrefix = "featbit:segment:";
-    private const string SegmentIndexPrefix = "featbit:segment.index:";
+    private const string SegmentIndexPrefix = "featbit:segment-index:";
 
     public static RedisKey FlagIndex(Guid envId) => new($"{FlagIndexPrefix}{envId}");
 
