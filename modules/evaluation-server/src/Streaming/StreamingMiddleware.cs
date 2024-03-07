@@ -1,4 +1,6 @@
-﻿using System.Net.WebSockets;
+﻿using System.Net;
+using System.Net.WebSockets;
+using Infrastructure.MongoDb;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Internal;
@@ -42,9 +44,11 @@ public class StreamingMiddleware
         // try accept request
         var query = request.Query;
         var currentTimestamp = _systemClock.UtcNow.ToUnixTimeMilliseconds();
+        var clientIpAddress = GetClientIpAddress(context);
+        var clientHost = await GetClientHost(clientIpAddress);
 
         var connection =
-            RequestHandler.TryAcceptRequest(ws, query["type"], query["version"], query["token"], currentTimestamp);
+            RequestHandler.TryAcceptRequest(ws, query["type"], query["version"], query["token"], currentTimestamp, clientIpAddress, clientHost);
         if (connection == null)
         {
             await ws.CloseOutputAsync(
@@ -57,5 +61,47 @@ public class StreamingMiddleware
 
         // use ApplicationStopping token
         await handler.OnConnectedAsync(connection, _applicationLifetime.ApplicationStopping);
+    }
+
+    private string GetClientIpAddress(HttpContext context)
+    {
+        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardForHeaders))
+        {
+            return forwardForHeaders.First();
+        }
+        // cloudflare connecting IP header
+        // https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip
+        if (context.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfConnectingIpHeaders))
+        {
+            return cfConnectingIpHeaders.First();
+        }
+        
+        var remoteIpAddr = context.Connection.RemoteIpAddress?.ToString();
+        if (!string.IsNullOrWhiteSpace(remoteIpAddr))
+        {
+            return remoteIpAddr;
+        }
+
+        return "";
+    }
+
+    private async Task<string> GetClientHost(string clientIpAddress)
+    {
+        var clientHost = "";
+        if (string.IsNullOrEmpty(clientIpAddress))
+        {
+            return clientHost;
+        }
+        
+        try
+        {
+            clientHost = (await Dns.GetHostEntryAsync(clientIpAddress)).HostName;
+        }
+        catch (Exception)
+        {
+            // allow clientHost to stay empty without failing the connection.
+            clientHost = "";
+        }
+        return clientHost;
     }
 }
