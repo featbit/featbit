@@ -3,23 +3,24 @@
     <PropertyGroup>
         <AssemblyName>FeatBit.EvaluationServer.Infrastructure</AssemblyName>
         <PackageId>FeatBit.EvaluationServer.Infrastructure</PackageId>
+		<TargetFrameworks>net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Domain\Domain.csproj"/>
+        <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Confluent.Kafka" Version="1.9.3"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0"/>
-        <PackageReference Include="MongoDB.Driver" Version="2.22.0"/>
-        <PackageReference Include="StackExchange.Redis" Version="2.6.70"/>
+        <PackageReference Include="Confluent.Kafka" Version="2.3.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+        <PackageReference Include="MongoDB.Driver" Version="2.24.0" />
+        <PackageReference Include="StackExchange.Redis" Version="2.7.23" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Fakes\flags.json" CopyToOutputDirectory="Always"/>
-        <None Update="Fakes\segments.json" CopyToOutputDirectory="Always"/>
+        <None Update="Fakes\flags.json" CopyToOutputDirectory="Always" />
+        <None Update="Fakes\segments.json" CopyToOutputDirectory="Always" />
     </ItemGroup>
 
 </Project>

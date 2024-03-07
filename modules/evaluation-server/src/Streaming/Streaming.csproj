@@ -3,6 +3,7 @@
     <PropertyGroup>
         <AssemblyName>FeatBit.EvaluationServer.Streaming</AssemblyName>
         <PackageId>FeatBit.EvaluationServer.Streaming</PackageId>
+		<TargetFrameworks>net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>

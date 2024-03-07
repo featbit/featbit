@@ -2,15 +2,16 @@
 
     <PropertyGroup>
         <IsPackable>false</IsPackable>
+		<TargetFrameworks>net8.0</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-        <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
-        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="1.1.0" />
-        <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="1.2.0" />
+        <PackageReference Include="System.Drawing.Common" Version="8.0.2" />
 
-        <PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
+        <PackageReference Include="Grpc.Net.Client" Version="2.61.0" />
     </ItemGroup>
 
     <ItemGroup>
