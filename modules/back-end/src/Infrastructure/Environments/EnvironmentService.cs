@@ -31,7 +31,7 @@ public class EnvironmentService : MongoDbService<Environment>, IEnvironmentServi
                     Id = organization.Id,
                     Name = organization.Name,
                     // there is no organization key yet
-                    Key = string.Empty
+                    Key = ""
                 },
                 Project = new IdNameKeyProps
                 {
