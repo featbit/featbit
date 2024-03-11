@@ -63,7 +63,7 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
         var segment = request.AsSegment();
         await _service.AddOneAsync(segment);
 
-        // publish on segment created message
+        // publish on segment created notification
         var dataChange = new DataChange(null).To(segment);
         var notification = new OnSegmentChange(segment, Operations.Create, dataChange, _currentUser.Id);
         await _publisher.Publish(notification, cancellationToken);

@@ -33,10 +33,12 @@ public class AddSecretValidator : AbstractValidator<AddSecret>
 public class AddSecretHandler : IRequestHandler<AddSecret, Secret>
 {
     private readonly IEnvironmentService _service;
+    private readonly IPublisher _publisher;
 
-    public AddSecretHandler(IEnvironmentService service)
+    public AddSecretHandler(IEnvironmentService service, IPublisher publisher)
     {
         _service = service;
+        _publisher = publisher;
     }
 
     public async Task<Secret> Handle(AddSecret request, CancellationToken cancellationToken)
@@ -45,6 +47,9 @@ public class AddSecretHandler : IRequestHandler<AddSecret, Secret>
         var secret = request.AsSecret();
         environment.AddSecret(secret);
         await _service.UpdateAsync(environment);
+
+        // publish on secret added notification
+        await _publisher.Publish(new OnSecretAdded(request.EnvId, secret), cancellationToken);
 
         return secret;
     }

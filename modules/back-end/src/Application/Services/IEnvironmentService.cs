@@ -7,6 +7,8 @@ public interface IEnvironmentService : IService<Environment>
 {
     Task<ResourceDescriptor> GetResourceDescriptorAsync(Guid envId);
 
+    Task AddWithBuiltInPropsAsync(Environment env);
+
     Task DeleteAsync(Guid id);
 
     Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type);
