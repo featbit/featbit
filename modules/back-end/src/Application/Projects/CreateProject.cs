@@ -28,10 +28,12 @@ public class CreateProjectValidator : AbstractValidator<CreateProject>
 public class CreateProjectHandler : IRequestHandler<CreateProject, ProjectWithEnvs>
 {
     private readonly IProjectService _service;
+    private readonly IPublisher _publisher;
 
-    public CreateProjectHandler(IProjectService service)
+    public CreateProjectHandler(IProjectService service, IPublisher publisher)
     {
         _service = service;
+        _publisher = publisher;
     }
 
     public async Task<ProjectWithEnvs> Handle(CreateProject request, CancellationToken cancellationToken)
@@ -43,8 +45,11 @@ public class CreateProjectHandler : IRequestHandler<CreateProject, ProjectWithEn
         }
 
         var project = new Project(request.OrganizationId, request.Name, request.Key);
-
         var projectWithEnvs = await _service.AddWithEnvsAsync(project, new[] { "Prod", "Dev" });
+
+        // publish on project added notification
+        await _publisher.Publish(new OnProjectAdded(projectWithEnvs), cancellationToken);
+
         return projectWithEnvs;
     }
 }

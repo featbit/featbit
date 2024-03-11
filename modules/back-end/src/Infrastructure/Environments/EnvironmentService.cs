@@ -55,8 +55,17 @@ public class EnvironmentService : MongoDbService<Environment>, IEnvironmentServi
     {
         await Collection.InsertOneAsync(env);
 
-        // add built-in properties
+        // add end-user built-in properties
         var builtInProperties = EndUserConsts.BuiltInUserProperties(env.Id);
+        await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(builtInProperties);
+    }
+
+    public async Task AddManyWithBuiltInPropsAsync(ICollection<Environment> envs)
+    {
+        await Collection.InsertManyAsync(envs);
+
+        // add end-user built-in properties
+        var builtInProperties = envs.SelectMany(x => EndUserConsts.BuiltInUserProperties(x.Id));
         await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(builtInProperties);
     }
 
@@ -71,7 +80,21 @@ public class EnvironmentService : MongoDbService<Environment>, IEnvironmentServi
         await MongoDb.CollectionOf<EndUserProperty>().DeleteManyAsync(x => x.EnvId == id);
 
         // delete environment events
-        await MongoDb.CollectionOf("Events").DeleteManyAsync(x => x["env_id"] == id);
+        await MongoDb.CollectionOf("Events").DeleteManyAsync(x => x["env_id"].AsGuid == id);
+    }
+
+    public async Task DeleteManyAsync(ICollection<Guid> ids)
+    {
+        await Collection.DeleteManyAsync(x => ids.Contains(x.Id));
+
+        // delete end users
+        await MongoDb.CollectionOf<EndUser>().DeleteManyAsync(x => ids.Contains(x.EnvId));
+
+        // delete end user properties
+        await MongoDb.CollectionOf<EndUserProperty>().DeleteManyAsync(x => ids.Contains(x.EnvId));
+
+        // delete environment events
+        await MongoDb.CollectionOf("Events").DeleteManyAsync(x => ids.Contains(x["env_id"].AsGuid));
     }
 
     public async Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type)
