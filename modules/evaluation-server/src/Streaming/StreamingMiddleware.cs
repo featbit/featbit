@@ -88,7 +88,8 @@ public class StreamingMiddleware
         
         try
         {
-            return (await Dns.GetHostEntryAsync(clientIpAddress)).HostName;
+            var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token;
+            return (await Dns.GetHostEntryAsync(clientIpAddress, cancellationToken)).HostName;
         }
         catch (Exception)
         {
