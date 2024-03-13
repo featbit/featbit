@@ -19,6 +19,10 @@ public class Connection
     /// </summary>
     public EndUser? User { get; set; }
 
+    public string ClientIpAddress { get; }
+    
+    public string ClientHost { get; }
+    
     public string Type { get; }
 
     public string Version { get; }
@@ -33,7 +37,9 @@ public class Connection
         string type,
         string version,
         long? connectAt = null,
-        long? closeAt = null)
+        long? closeAt = null,
+        string clientIpAddress = "",
+        string clientHost = "")
     {
         Id = Guid.NewGuid().ToString("D");
 
@@ -43,6 +49,8 @@ public class Connection
         Version = version;
         ConnectAt = connectAt ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         CloseAt = closeAt ?? 0;
+        ClientIpAddress = clientIpAddress;
+        ClientHost = clientHost;
     }
 
     public async Task SendAsync(Message message, CancellationToken cancellationToken)

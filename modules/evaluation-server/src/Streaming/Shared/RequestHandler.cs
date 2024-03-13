@@ -11,7 +11,9 @@ public class RequestHandler
         string version,
         string tokenString,
         // for testability
-        long? currentTimestamp = null)
+        long? currentTimestamp = null,
+        string clientIpAddress = "",
+        string clientHost = "")
     {
         // connection type
         if (!ConnectionType.IsRegistered(sdkType))
@@ -45,7 +47,7 @@ public class RequestHandler
             return null;
         }
 
-        var connection = new Connection(webSocket, token.Secret.EnvId, sdkType, version, current);
+        var connection = new Connection(webSocket, token.Secret.EnvId, sdkType, version, current, null, clientIpAddress, clientHost);
         return connection;
     }
 }

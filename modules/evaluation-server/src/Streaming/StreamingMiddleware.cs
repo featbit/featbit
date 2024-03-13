@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using System.Net;
+using System.Net.WebSockets;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Internal;
@@ -42,9 +43,11 @@ public class StreamingMiddleware
         // try accept request
         var query = request.Query;
         var currentTimestamp = _systemClock.UtcNow.ToUnixTimeMilliseconds();
+        var clientIpAddress = GetClientIpAddress(context);
+        var clientHost = await GetClientHostAsync(clientIpAddress);
 
         var connection =
-            RequestHandler.TryAcceptRequest(ws, query["type"], query["version"], query["token"], currentTimestamp);
+            RequestHandler.TryAcceptRequest(ws, query["type"], query["version"], query["token"], currentTimestamp, clientIpAddress, clientHost);
         if (connection == null)
         {
             await ws.CloseOutputAsync(
@@ -57,5 +60,41 @@ public class StreamingMiddleware
 
         // use ApplicationStopping token
         await handler.OnConnectedAsync(connection, _applicationLifetime.ApplicationStopping);
+    }
+
+    private string GetClientIpAddress(HttpContext context)
+    {
+        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardForHeaders))
+        {
+            return forwardForHeaders.FirstOrDefault(string.Empty);
+        }
+        // cloudflare connecting IP header
+        // https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip
+        if (context.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfConnectingIpHeaders))
+        {
+            return cfConnectingIpHeaders.FirstOrDefault(string.Empty);
+        }
+        
+        var remoteIpAddr = context.Connection.RemoteIpAddress?.ToString();
+        return remoteIpAddr ?? string.Empty;
+    }
+
+    private async Task<string> GetClientHostAsync(string clientIpAddress)
+    {
+        if (string.IsNullOrEmpty(clientIpAddress))
+        {
+            return string.Empty;
+        }
+        
+        try
+        {
+            var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token;
+            return (await Dns.GetHostEntryAsync(clientIpAddress, cancellationToken)).HostName;
+        }
+        catch (Exception)
+        {
+            // allow clientHost to stay empty without failing the connection.
+            return string.Empty;
+        }
     }
 }
