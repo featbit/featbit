@@ -67,15 +67,16 @@ public class Environment : AuditedEntity
         Settings.Remove(setting);
     }
 
-    public void RemoveSecret(string secretId)
+    public Secret RemoveSecret(string secretId)
     {
         var secret = Secrets.FirstOrDefault(x => x.Id == secretId);
         if (secret == null)
         {
-            return;
+            return null;
         }
 
         Secrets.Remove(secret);
+        return secret;
     }
 
     public void AddSecret(Secret secret)

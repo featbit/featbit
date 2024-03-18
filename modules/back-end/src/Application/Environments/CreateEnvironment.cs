@@ -30,14 +30,14 @@ public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
 public class CreateEnvironmentHandler : IRequestHandler<CreateEnvironment, EnvironmentVm>
 {
     private readonly IEnvironmentService _service;
-    private readonly IEndUserService _endUserService;
     private readonly IMapper _mapper;
+    private readonly IPublisher _publisher;
 
-    public CreateEnvironmentHandler(IEnvironmentService service, IMapper mapper, IEndUserService endUserService)
+    public CreateEnvironmentHandler(IEnvironmentService service, IMapper mapper, IPublisher publisher)
     {
         _service = service;
         _mapper = mapper;
-        _endUserService = endUserService;
+        _publisher = publisher;
     }
 
     public async Task<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
@@ -49,10 +49,10 @@ public class CreateEnvironmentHandler : IRequestHandler<CreateEnvironment, Envir
         }
 
         var env = new Environment(request.ProjectId, request.Name, request.Key, request.Description);
-        await _service.AddOneAsync(env);
+        await _service.AddWithBuiltInPropsAsync(env);
 
-        // add env built-in end-user properties
-        await _endUserService.AddBuiltInPropertiesAsync(env.Id);
+        // publish on environment added notification
+        await _publisher.Publish(new OnEnvironmentAdded(env), cancellationToken);
 
         return _mapper.Map<EnvironmentVm>(env);
     }

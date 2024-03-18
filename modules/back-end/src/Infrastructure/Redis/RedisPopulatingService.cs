@@ -4,6 +4,7 @@ using Domain.Segments;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using StackExchange.Redis;
+using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Redis;
 
@@ -11,19 +12,24 @@ public class RedisPopulatingService : ICachePopulatingService
 {
     private const string IsPopulatedKey = "featbit:redis-is-populated";
     private const string PopulateLockKey = "featbit:populate-redis";
-    private static readonly string PopulateLockValue = Environment.MachineName;
 
     private readonly IDatabase _redis;
     private readonly MongoDbClient _mongodb;
+    private readonly ICacheService _cache;
+    private readonly IEnvironmentService _envService;
     private readonly ILogger<RedisPopulatingService> _logger;
 
     public RedisPopulatingService(
         IRedisClient redis,
         MongoDbClient mongodb,
+        ICacheService cache,
+        IEnvironmentService envService,
         ILogger<RedisPopulatingService> logger)
     {
         _redis = redis.GetDatabase();
         _mongodb = mongodb;
+        _cache = cache;
+        _envService = envService;
         _logger = logger;
     }
 
@@ -36,89 +42,60 @@ public class RedisPopulatingService : ICachePopulatingService
             return;
         }
 
-        if (await _redis.LockTakeAsync(PopulateLockKey, PopulateLockValue, TimeSpan.FromSeconds(5)))
+        var lockValue = Guid.NewGuid().ToString();
+        if (await _redis.LockTakeAsync(PopulateLockKey, lockValue, TimeSpan.FromSeconds(5)))
         {
             try
             {
-                var flagPopulated = await PopulateFlagsAsync();
-                var segmentPopulated = await PopulateSegmentAsync();
+                await PopulateFlagsAsync();
+                await PopulateSegmentAsync();
+                await PopulateSecretsAsync();
 
                 // mark redis as populated
-                await _redis.StringSetAsync(IsPopulatedKey, flagPopulated && segmentPopulated ? "true" : "false");
+                await _redis.StringSetAsync(IsPopulatedKey, "true");
             }
             finally
             {
-                await _redis.LockReleaseAsync(PopulateLockKey, PopulateLockValue);
+                await _redis.LockReleaseAsync(PopulateLockKey, lockValue);
             }
         }
     }
 
-    public async Task<bool> PopulateFlagsAsync()
+    public async Task PopulateFlagsAsync()
     {
-        var success = false;
-
         var flags = await _mongodb.QueryableOf<FeatureFlag>().ToListAsync();
-        var caches = flags.Select(RedisCaches.Flag).Select(x => _redis.StringSetAsync(x.Key, x.Value));
-
-        var populateResults = await Task.WhenAll(caches);
-        if (populateResults.Any(x => x == false))
+        foreach (var flag in flags)
         {
-            _logger.LogError(
-                "populate flag failed, failed count: {FailedCount}, success count: {SuccessCount}.",
-                populateResults.Count(x => !x), populateResults.Count(x => x)
-            );
-        }
-        else
-        {
-            _logger.LogInformation("populate flag success, total count: {Total}", populateResults.Length);
-            success = true;
+            await _cache.UpsertFlagAsync(flag);
         }
 
-        // populate flag indexes
-        var indexCaches = flags
-            .Select(RedisCaches.FlagIndex)
-            .Select(index => _redis.SortedSetAddAsync(index.Key, index.Member, index.Score));
-        var populateIndexResults = await Task.WhenAll(indexCaches);
-        _logger.LogInformation(
-            "populate flag index, added count: {Added}, score updated count: {Updated}",
-            populateIndexResults.Count(x => x), populateIndexResults.Count(x => !x)
-        );
-
-        return success;
+        _logger.LogInformation("populate flag success, total count: {Total}", flags.Count);
     }
 
-    private async Task<bool> PopulateSegmentAsync()
+    private async Task PopulateSegmentAsync()
     {
-        var success = false;
-
         // populate segments
         var segments = await _mongodb.QueryableOf<Segment>().ToListAsync();
-        var caches = segments.Select(RedisCaches.Segment).Select(x => _redis.StringSetAsync(x.Key, x.Value));
-
-        var populateResults = await Task.WhenAll(caches);
-        if (populateResults.Any(x => x == false))
+        foreach (var segment in segments)
         {
-            _logger.LogError(
-                "populate segment failed, failed count: {FailedCount}, success count: {SuccessCount}.",
-                populateResults.Count(x => !x), populateResults.Count(x => x)
-            );
-        }
-        else
-        {
-            _logger.LogInformation("populate segment success, total count: {Total}", populateResults.Length);
-            success = true;
+            await _cache.UpsertSegmentAsync(segment);
         }
 
-        // populate segment indexes
-        var indexCaches = segments
-            .Select(RedisCaches.SegmentIndex)
-            .Select(index => _redis.SortedSetAddAsync(index.Key, index.Member, index.Score));
-        var populateIndexResults = await Task.WhenAll(indexCaches);
-        _logger.LogInformation(
-            "populate segment index, added count: {Added}, score updated count: {Updated}",
-            populateIndexResults.Count(x => x), populateIndexResults.Count(x => !x)
-        );
+        _logger.LogInformation("populate segment success, total count: {Total}", segments.Count);
+    }
 
-        return success;
+    private async Task PopulateSecretsAsync()
+    {
+        var envs = await _mongodb.QueryableOf<Environment>().ToListAsync();
+        foreach (var env in envs)
+        {
+            var descriptor = await _envService.GetResourceDescriptorAsync(env.Id);
+            foreach (var secret in env.Secrets)
+            {
+                await _cache.UpsertSecretAsync(descriptor, secret);
+            }
+        }
+
+        _logger.LogInformation("populate secrets success, total count: {Total}", envs.Sum(x => x.Secrets.Count));
     }
 }

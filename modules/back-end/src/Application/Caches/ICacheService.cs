@@ -1,3 +1,4 @@
+using Domain.Environments;
 using Domain.Segments;
 using Domain.FeatureFlags;
 using Domain.Workspaces;
@@ -15,6 +16,10 @@ public interface ICacheService
     Task DeleteSegmentAsync(Guid envId, Guid segmentId);
 
     Task UpsertLicenseAsync(Workspace workspace);
+
+    Task UpsertSecretAsync(ResourceDescriptor resourceDescriptor, Secret secret);
+
+    Task DeleteSecretAsync(Secret secret);
 
     Task<string> GetLicenseAsync(Guid workspaceId);
 }

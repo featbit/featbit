@@ -1,4 +1,5 @@
 using Application.Caches;
+using Domain.Environments;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using Domain.Workspaces;
@@ -68,6 +69,35 @@ public class RedisCacheService : ICacheService
         var value = workspace.License;
 
         await _redis.StringSetAsync(key, value);
+    }
+
+    public async Task UpsertSecretAsync(ResourceDescriptor resourceDescriptor, Secret secret)
+    {
+        var key = RedisKeys.Secret(secret.Value);
+
+        var organization = resourceDescriptor.Organization;
+        var project = resourceDescriptor.Project;
+        var environment = resourceDescriptor.Environment;
+
+        var fields = new HashEntry[]
+        {
+            new("type", secret.Type),
+            new("organizationId", organization.Id.ToString()),
+            new("organizationKey", organization.Key),
+            new("projectId", project.Id.ToString()),
+            new("projectKey", project.Key),
+            new("envId", environment.Id.ToString()),
+            new("envKey", environment.Key)
+        };
+
+        await _redis.HashSetAsync(key, fields);
+    }
+
+    public async Task DeleteSecretAsync(Secret secret)
+    {
+        var key = RedisKeys.Secret(secret.Value);
+
+        await _redis.KeyDeleteAsync(key);
     }
 
     public async Task<string> GetLicenseAsync(Guid workspaceId)
