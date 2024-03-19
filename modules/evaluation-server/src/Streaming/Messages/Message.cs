@@ -35,4 +35,9 @@ public class Message
             _ => throw new InvalidOperationException("invalid message type")
         };
     }
+
+    public override string ToString()
+    {
+        return Encoding.UTF8.GetString(Bytes.Span);
+    }
 }

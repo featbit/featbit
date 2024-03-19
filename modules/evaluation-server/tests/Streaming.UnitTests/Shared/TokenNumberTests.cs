@@ -1,4 +1,4 @@
-﻿using Streaming.Shared;
+﻿using Domain.Shared;
 
 namespace Streaming.UnitTests.Shared;
 

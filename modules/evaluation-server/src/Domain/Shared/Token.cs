@@ -1,4 +1,4 @@
-﻿namespace Streaming.Shared;
+﻿namespace Domain.Shared;
 
 public struct Token
 {
@@ -8,7 +8,7 @@ public struct Token
 
     public long Timestamp { get; set; }
 
-    public Secret Secret { get; set; }
+    public string SecretString { get; set; }
 
     public bool IsValid { get; set; }
 
@@ -18,7 +18,7 @@ public struct Token
         Position = 0;
         ContentLength = 0;
         Timestamp = 0;
-        Secret = default;
+        SecretString = string.Empty;
         IsValid = false;
 
         #region token header
@@ -76,18 +76,17 @@ public struct Token
             Array.Fill(padding, '=');
         }
 
-        var envSecret = string.Concat(
+        var secretString = string.Concat(
             payloadSpan[..Position],
             payloadSpan[(Position + ContentLength)..],
             padding
         );
-        var isValidSecret = Secret.TryParse(envSecret, out var secret);
-        if (!isValidSecret)
+        if (string.IsNullOrWhiteSpace(secretString) || secretString.Length != 44)
         {
             // invalid token: invalid secret
             return;
         }
-        Secret = secret;
+        SecretString = secretString;
 
         #endregion
 

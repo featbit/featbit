@@ -63,4 +63,21 @@ public class RedisStore : IStore
 
         return jsonBytes;
     }
+
+    public async Task<Secret> GetSecretAsync(string secretString)
+    {
+        var key = RedisKeys.Secret(secretString);
+        if (!await _redis.KeyExistsAsync(key))
+        {
+            return Secret.Empty;
+        }
+
+        var entries = await _redis.HashGetAsync(key, new RedisValue[] { "type", "projectKey", "envId", "envKey" });
+        return new Secret(
+            type: entries[0].ToString(),
+            entries[1].ToString(),
+            Guid.Parse(entries[2].ToString()),
+            entries[3].ToString()
+        );
+    }
 }

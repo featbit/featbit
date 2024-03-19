@@ -1,39 +1,34 @@
-using System.Net.WebSockets;
 using Streaming.Connections;
-using Moq;
 
 namespace Streaming.UnitTests.Connections;
 
 public class ConnectionStoreTests
 {
-    private readonly Mock<WebSocket> _webSocketMock = new();
+    private readonly Connection _connection = new ConnectionBuilder().Build();
 
     [Fact]
     public void AddConnection()
     {
         var store = new ConnectionStore();
-        var connection =
-            new Connection(_webSocketMock.Object, Guid.NewGuid(), ConnectionType.Client, ConnectionVersion.V1);
 
-        Assert.Null(store[connection.Id]);
+        Assert.Null(store[_connection.Id]);
 
-        store.Add(connection);
+        store.Add(_connection);
 
-        Assert.NotNull(store[connection.Id]);
+        Assert.NotNull(store[_connection.Id]);
     }
 
     [Fact]
     public void RemoveConnection()
     {
         var store = new ConnectionStore();
-        var connection =
-            new Connection(_webSocketMock.Object, Guid.NewGuid(), ConnectionType.Client, ConnectionVersion.V1);
-        store.Add(connection);
 
-        Assert.NotNull(store[connection.Id]);
+        store.Add(_connection);
 
-        store.Remove(connection);
+        Assert.NotNull(store[_connection.Id]);
 
-        Assert.Null(store[connection.Id]);
+        store.Remove(_connection);
+
+        Assert.Null(store[_connection.Id]);
     }
 }

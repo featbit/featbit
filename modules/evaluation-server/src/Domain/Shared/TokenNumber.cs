@@ -1,4 +1,4 @@
-﻿namespace Streaming.Shared;
+﻿namespace Domain.Shared;
 
 public static class TokenNumber
 {

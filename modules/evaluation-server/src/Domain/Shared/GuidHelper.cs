@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Streaming.Shared;
+namespace Domain.Shared;
 
 // reference: modules/back-end/src/Domain/Utils/GuidHelper.cs
 [ExcludeFromCodeCoverage]

@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using System.Text;
+using Domain.Shared;
 using Moq;
 using Streaming.Connections;
 using Streaming.Messages;
@@ -9,36 +10,34 @@ namespace Streaming.UnitTests.Connections;
 
 public class ConnectionHandlerTests
 {
+    private readonly Connection _connection = new ConnectionBuilder()
+        .WithId("this-connection-id")
+        .WithSecret(new Secret("server", "webapp", Guid.NewGuid(), "dev"))
+        .WithClient(new Client("10.0.0.7", "my.client.host"))
+        .Build();
+
+    // [{ProjectKey}:{EnvKey}:{ClientIpAddress}:{ClientHost}:{ConnectionId}]
+    private const string LogPrefix = "[webapp:dev:10.0.0.7:my.client.host:this-connection-id]";
+
     [Fact]
     public void OnMessageErrorLogTests()
     {
-        var (handler, logger) = Arrange();
-        var connection = new ConnectionBuilder()
-            .WithClientIp("10.0.0.7")
-            .WithClientHost("my.client.host")
-            .WithEnvId(TestData.DevEnvId)
-            .Build();
-        
-        handler.OnMessageError(connection, "error");
-            
-        Assert.NotNull(logger.Message);
-        Assert.Contains("10.0.0.7", logger.Message);
-        Assert.Contains("my.client.host", logger.Message);
-        Assert.Contains(TestData.DevEnvId.ToString(), logger.Message);
+        var logger = new InMemoryFakeLogger<ConnectionHandler>();
+        var handler = new ConnectionHandler(null!, Array.Empty<IMessageHandler>(), logger);
+
+        handler.OnMessageError(_connection, "ERROR!");
+
+        Assert.StartsWith(LogPrefix, logger.Message);
     }
 
     [Theory]
     [ClassData(typeof(Messages))]
     public async Task OnMessageAsyncLogTests(Message message, bool threwException)
     {
-        var (handler, logger) = Arrange(new ErrorThrowingMessageHandler());
-        var connection = new ConnectionBuilder()
-            .WithClientIp("10.0.0.7")
-            .WithClientHost("my.client.host")
-            .WithEnvId(TestData.DevEnvId)
-            .Build();
-        
-        await handler.OnMessageAsync(connection, message,default);
+        var logger = new InMemoryFakeLogger<ConnectionHandler>();
+        var handler = new ConnectionHandler(null!, new[] { new ErrorThrowingMessageHandler() }, logger);
+
+        await handler.OnMessageAsync(_connection, message, default);
 
         Assert.NotNull(logger.Message);
         if (threwException)
@@ -49,20 +48,10 @@ public class ConnectionHandlerTests
         {
             Assert.Null(logger.Ex);
         }
-        Assert.Contains("10.0.0.7", logger.Message);
-        Assert.Contains("my.client.host", logger.Message);
-        Assert.Contains(TestData.DevEnvId.ToString(), logger.Message);
-    }
 
-    private (ConnectionHandler handler, InMemoryFakeLogger<ConnectionHandler> logger) Arrange(params IMessageHandler[] handlers)
-    {
-        var logger = new InMemoryFakeLogger<ConnectionHandler>();
-        var mockManager = new Mock<IConnectionManager>();
-        var handler = new ConnectionHandler(mockManager.Object, handlers, logger);
-        return (handler, logger);
+        Assert.StartsWith(LogPrefix, logger.Message);
     }
 }
-
 
 public class Messages : TheoryData<Message, bool>
 {
@@ -77,21 +66,21 @@ public class Messages : TheoryData<Message, bool>
 
         // missing handler message log scenario
         var missingHandlerMessage = new Message(
-            Encoding.UTF8.GetBytes("{\"messageType\":\"unregistered\",\"data\":{}}"), 
+            Encoding.UTF8.GetBytes("{\"messageType\":\"unregistered\",\"data\":{}}"),
             WebSocketMessageType.Text
         );
         Add(missingHandlerMessage, false);
-        
+
         // invalid json message log scenario
         var invalidJsonMessage = new Message(
             Encoding.UTF8.GetBytes("{this is not ][valid json}"),
-            WebSocketMessageType.Text 
+            WebSocketMessageType.Text
         );
         Add(invalidJsonMessage, true);
-        
+
         // error-throwing message log scenario
         var errorThrowingMessage = new Message(
-            Encoding.UTF8.GetBytes("{\"messageType\":\"error-throwing\",\"data\":{}}"), 
+            Encoding.UTF8.GetBytes("{\"messageType\":\"error-throwing\",\"data\":{}}"),
             WebSocketMessageType.Text
         );
         Add(errorThrowingMessage, true);
