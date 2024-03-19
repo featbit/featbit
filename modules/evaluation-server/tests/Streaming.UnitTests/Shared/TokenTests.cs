@@ -14,6 +14,7 @@ public class TokenTests
         Assert.Equal(token.ContentLength, expected.ContentLength);
         Assert.Equal(token.Timestamp, expected.Timestamp);
         Assert.Equal(token.SecretString, expected.SecretString);
+        Assert.True(Secret.TryParse(token.SecretString, out _));
 
         Assert.True(expected.IsValid);
     }
