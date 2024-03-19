@@ -30,13 +30,13 @@ public static class TestData
         IsValid = true
     };
 
-    public static Secret GetSecret(string secretString)
+    public static Secret? GetSecret(string secretString)
     {
         return secretString switch
         {
             ClientSecretString => ClientSecret,
             ServerSecretString => ServerSecret,
-            _ => Secret.Empty
+            _ => null
         };
     }
 }

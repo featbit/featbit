@@ -10,8 +10,6 @@ public class Secret
 
     public string EnvKey { get; set; }
 
-    public static Secret Empty => new(string.Empty, string.Empty, Guid.Empty, string.Empty);
-
     public Secret(string type, string projectKey, Guid envId, string envKey)
     {
         Type = type;

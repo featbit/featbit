@@ -64,11 +64,11 @@ public class MongoDbStore : IStore
         return segments.Select(x => x.ToJsonBytes());
     }
 
-    public async Task<Secret> GetSecretAsync(string secretString)
+    public async Task<Secret?> GetSecretAsync(string secretString)
     {
-        if (!Secret.TryParse(secretString, out Guid envId))
+        if (!Secret.TryParse(secretString, out var envId))
         {
-            return Secret.Empty;
+            return null;
         }
 
         var pipeline = new BsonDocument[]
@@ -96,13 +96,13 @@ public class MongoDbStore : IStore
         var document = await query.FirstOrDefaultAsync();
         if (document is null)
         {
-            return Secret.Empty;
+            return null;
         }
 
         var secret = document["env"]["secrets"].AsBsonArray.FirstOrDefault(x => x["value"] == secretString);
         if (secret == null)
         {
-            return Secret.Empty;
+            return null;
         }
 
         return new Secret(

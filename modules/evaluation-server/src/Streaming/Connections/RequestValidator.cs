@@ -31,7 +31,7 @@ public class RequestValidator : IRequestValidator
         }
 
         var secret = await _store.GetSecretAsync(token.SecretString);
-        if (secret.Type != type)
+        if (secret is null || secret.Type != type)
         {
             return null;
         }

@@ -126,12 +126,12 @@ public partial class ConnectionHandler : IConnectionHandler
         catch (JsonException ex)
         {
             // ignore invalid json
-            Log.ReceiveInvalidMessage(_logger, connection, json.ToString(), ex);
+            Log.ReceiveInvalidMessage(_logger, connection, message.ToString(), ex);
         }
         catch (Exception ex)
         {
             // error when handle message
-            Log.ErrorHandleMessage(_logger, connection, json.ToString(), ex);
+            Log.ErrorHandleMessage(_logger, connection, message.ToString(), ex);
         }
     }
 }

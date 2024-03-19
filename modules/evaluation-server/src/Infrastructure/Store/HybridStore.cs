@@ -85,7 +85,7 @@ public class HybridStore : IStore
         return Array.Empty<byte[]>();
     }
 
-    public async Task<Secret> GetSecretAsync(string secretString)
+    public async Task<Secret?> GetSecretAsync(string secretString)
     {
         foreach (var store in _stores)
         {
@@ -96,6 +96,6 @@ public class HybridStore : IStore
             }
         }
 
-        return Secret.Empty;
+        return null;
     }
 }

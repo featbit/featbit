@@ -12,5 +12,5 @@ public interface IStore
 
     Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp);
 
-    Task<Secret> GetSecretAsync(string secretString);
+    Task<Secret?> GetSecretAsync(string secretString);
 }
