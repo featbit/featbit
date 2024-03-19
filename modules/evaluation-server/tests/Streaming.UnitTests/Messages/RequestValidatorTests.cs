@@ -1,4 +1,5 @@
-﻿using System.Net.WebSockets;
+﻿using TestBase;
+using System.Net.WebSockets;
 using Domain.Shared;
 using Microsoft.Extensions.Internal;
 using Moq;

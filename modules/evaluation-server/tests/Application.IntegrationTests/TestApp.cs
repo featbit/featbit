@@ -1,5 +1,5 @@
-﻿using System.Net.WebSockets;
-using Domain.Shared;
+﻿using TestBase;
+using System.Net.WebSockets;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;

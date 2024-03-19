@@ -19,4 +19,8 @@
         <PackageReference Include="Verify.Xunit" Version="19.6.0" />
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
+    </ItemGroup>
+
 </Project>

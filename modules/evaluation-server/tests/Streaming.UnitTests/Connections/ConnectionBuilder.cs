@@ -1,3 +1,4 @@
+using TestBase;
 using System.Net.WebSockets;
 using Domain.Shared;
 using Moq;
