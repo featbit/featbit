@@ -28,5 +28,5 @@ public class FakeStore : IStore
         return Task.FromResult(FakeData.AllSegments);
     }
 
-    public Task<Secret> GetSecretAsync(string secretString) => Task.FromResult(TestData.GetSecret(secretString));
+    public Task<Secret?> GetSecretAsync(string secretString) => Task.FromResult(TestData.GetSecret(secretString));
 }
