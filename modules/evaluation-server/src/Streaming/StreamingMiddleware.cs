@@ -25,7 +25,7 @@ public class StreamingMiddleware
         // if not streaming request
         if (!request.Path.StartsWithSegments(StreamingPath) || !context.WebSockets.IsWebSocketRequest)
         {
-            await _next(context);
+            await _next.Invoke(context);
             return;
         }
 
