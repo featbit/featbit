@@ -1,6 +1,4 @@
-using Domain.Shared;
-
-namespace TestBase;
+namespace Domain.Shared;
 
 public static class TestData
 {

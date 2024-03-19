@@ -1,5 +1,4 @@
-﻿using TestBase;
-using Domain.Shared;
+﻿using Domain.Shared;
 
 namespace Streaming.UnitTests.Shared;
 
