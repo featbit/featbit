@@ -14,6 +14,9 @@ public static class StreamingServiceCollectionExtensions
         // system clock
         services.AddSingleton<ISystemClock, SystemClock>();
 
+        // request validator
+        services.AddSingleton<IRequestValidator, RequestValidator>();
+
         // data-sync service
         services
             .AddEvaluator()

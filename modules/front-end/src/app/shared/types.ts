@@ -121,7 +121,7 @@ export interface IProjectEnv {
   envId: string,
   envKey: string,
   envName: string,
-  envSecret: string
+  envSecrets: ISecret[]
 }
 
 export interface IProject {

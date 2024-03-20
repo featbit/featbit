@@ -84,4 +84,18 @@ public class HybridStore : IStore
 
         return Array.Empty<byte[]>();
     }
+
+    public async Task<Secret?> GetSecretAsync(string secretString)
+    {
+        foreach (var store in _stores)
+        {
+            var isStoreAvailable = await store.IsAvailableAsync();
+            if (isStoreAvailable)
+            {
+                return await store.GetSecretAsync(secretString);
+            }
+        }
+
+        return null;
+    }
 }

@@ -12,33 +12,9 @@ public class ConnectionTests
 
     public ConnectionTests()
     {
-        _connection =
-            new Connection(_webSocketMock.Object, _envId, ConnectionType.Client, ConnectionVersion.V1, 1662395291241);
-    }
-
-    [Fact]
-    public void CreateConnection()
-    {
-        _webSocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
-
-        Assert.True(Guid.TryParse(_connection.Id, out _));
-        Assert.Equal(WebSocketState.Open, _connection.WebSocket.State);
-        Assert.Equal(_envId, _connection.EnvId);
-        Assert.Equal(ConnectionType.Client, _connection.Type);
-        Assert.Equal(ConnectionVersion.V1, _connection.Version);
-        Assert.Equal(1662395291241, _connection.ConnectAt);
-        Assert.Equal(0, _connection.CloseAt);
-    }
-
-    [Fact]
-    public void ConnectionToString()
-    {
-        _webSocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
-
-        Assert.Equal(
-            $"id={_connection.Id},envId={_envId},sdkType=client,version=1,status=Open,connectAt=1662395291241,closeAt=0",
-            _connection.ToString()
-        );
+        _connection = new ConnectionBuilder()
+            .WithWebSocket(_webSocketMock.Object)
+            .Build();
     }
 
     [Fact]

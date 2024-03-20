@@ -16,7 +16,7 @@ public partial class ConnectionManager : IConnectionManager
     {
         _connectionStore.Add(connection);
 
-        Log.ConnectionAdded(_logger, connection.Id, connection.ToString());
+        Log.ConnectionAdded(_logger, connection.Id);
     }
 
     public void Remove(Connection connection)

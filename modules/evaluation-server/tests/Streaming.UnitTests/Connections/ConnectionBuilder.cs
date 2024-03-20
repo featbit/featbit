@@ -1,4 +1,5 @@
 using System.Net.WebSockets;
+using Domain.Shared;
 using Moq;
 using Streaming.Connections;
 
@@ -6,71 +7,75 @@ namespace Streaming.UnitTests.Connections;
 
 public class ConnectionBuilder
 {
-    private Mock<WebSocket> _wsMock = new();
-    private string _ip = "10.0.0.7";
-    private string _host = "test.client.host";
-    private string _connectionType = ConnectionType.Server;
-    private Guid _envId = TestData.DevEnvId;
-    private long _connectAt = DateTime.UtcNow.Ticks;
-    private string _version = "1.0";
+    private string _id;
+    private WebSocket _websocket;
+    private Secret _secret;
+    private Client _client;
+    private string _type;
+    private string _version;
+    private long _connectAt;
 
-    public ConnectionBuilder WithClientIp(string ip)
+    public ConnectionBuilder()
     {
-        _ip = ip;
+        _id = Guid.NewGuid().ToString("D");
+
+        var websocketMock = new Mock<WebSocket>();
+        websocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
+        _websocket = websocketMock.Object;
+
+        _secret = TestData.ClientSecret;
+        _client = new Client("127.0.0.1", "localhost");
+        _type = ConnectionType.Client;
+        _version = ConnectionVersion.V2;
+        _connectAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    }
+
+    public Connection Build()
+    {
+        var connection = new Connection(_id, _websocket, _secret, _type, _version, _connectAt);
+        connection.AttachClient(_client);
+        return connection;
+    }
+
+    public ConnectionBuilder WithId(string id)
+    {
+        _id = id;
         return this;
     }
 
-    public ConnectionBuilder WithClientHost(string host)
+    public ConnectionBuilder WithWebSocket(WebSocket webSocket)
     {
-        _host = host;
+        _websocket = webSocket;
         return this;
     }
 
-    public ConnectionBuilder WithEnvId(Guid envId)
+    public ConnectionBuilder WithSecret(Secret secret)
     {
-        _envId = envId;
+        _secret = secret;
         return this;
     }
 
-    public ConnectionBuilder WithMockWebSocket(Mock<WebSocket> ws)
+    public ConnectionBuilder WithClient(Client client)
     {
-        _wsMock = ws;
+        _client = client;
         return this;
     }
 
-    public ConnectionBuilder WithConnectionType(string connectionType)
+    public ConnectionBuilder WithType(string type)
     {
-        if (!ConnectionType.IsRegistered(connectionType))
-        {
-            throw new Exception("Invalid ConnectionType.");
-        }
-
-        _connectionType = connectionType;
+        _type = type;
         return this;
     }
 
-    public ConnectionBuilder WithConnectAt(long connectAt)
-    {
-        this._connectAt = connectAt;
-        return this;
-    }
-    
     public ConnectionBuilder WithVersion(string version)
     {
         _version = version;
         return this;
     }
 
-    public Connection Build()
+    public ConnectionBuilder WithConnectAt(long connectAt)
     {
-        return new Connection(
-            _wsMock.Object, 
-            _envId, 
-            _connectionType, 
-            _version,
-            _connectAt,
-            null, 
-            _ip, 
-            _host);
+        _connectAt = connectAt;
+        return this;
     }
 }

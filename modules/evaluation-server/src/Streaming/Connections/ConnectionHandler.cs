@@ -55,7 +55,7 @@ public partial class ConnectionHandler : IConnectionHandler
             }
             catch (Exception ex)
             {
-                Log.ErrorProcessMessage(_logger, connection.Id, ex.Message, connection.EnvId, connection.ClientIpAddress, connection.ClientHost);
+                Log.ErrorProcessMessage(_logger, connection, ex);
             }
         }
 
@@ -74,13 +74,13 @@ public partial class ConnectionHandler : IConnectionHandler
     {
         if (message.Type == WebSocketMessageType.Close)
         {
-            Log.ReceiveCloseMessage(_logger, connection.Id, connection.EnvId, connection.ClientIpAddress, connection.ClientHost);
+            Log.ReceiveCloseMessage(_logger, connection);
             return;
         }
 
         if (message.Bytes.IsEmpty)
         {
-            Log.ReceiveEmptyMessage(_logger, connection.Id, connection.EnvId, connection.ClientIpAddress, connection.ClientHost);
+            Log.ReceiveEmptyMessage(_logger, connection);
             return;
         }
 
@@ -93,7 +93,7 @@ public partial class ConnectionHandler : IConnectionHandler
 
     public void OnMessageError(Connection connection, string error)
     {
-        Log.ErrorReadMessage(_logger, connection.Id, error, connection.EnvId, connection.ClientIpAddress, connection.ClientHost);
+        Log.ErrorReadMessage(_logger, connection, error);
     }
 
     public async Task HandleMessageAsync(Connection connection, Message message, CancellationToken token)
@@ -116,7 +116,7 @@ public partial class ConnectionHandler : IConnectionHandler
             var handler = _messageHandlers.FirstOrDefault(x => x.Type == messageType);
             if (handler == null)
             {
-                Log.CannotFindMessageHandler(_logger, connection.Id, messageType ?? "", connection.EnvId, connection.ClientIpAddress, connection.ClientHost);
+                Log.CannotFindMessageHandler(_logger, connection, messageType ?? "");
                 return;
             }
 
@@ -126,12 +126,12 @@ public partial class ConnectionHandler : IConnectionHandler
         catch (JsonException ex)
         {
             // ignore invalid json
-            Log.ReceiveInvalidMessage(_logger, connection.Id, connection.EnvId, connection.ClientIpAddress, connection.ClientHost, ex);
+            Log.ReceiveInvalidMessage(_logger, connection, message.ToString(), ex);
         }
         catch (Exception ex)
         {
             // error when handle message
-            Log.ErrorHandleMessage(_logger, connection.Id, connection.EnvId, connection.ClientIpAddress, connection.ClientHost, ex);
+            Log.ErrorHandleMessage(_logger, connection, message.ToString(), ex);
         }
     }
 }
