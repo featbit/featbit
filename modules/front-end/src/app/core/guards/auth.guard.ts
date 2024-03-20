@@ -10,7 +10,7 @@ import {
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { IEnvironment, IOrganization, IProject } from "@shared/types";
+import { IEnvironment, IOrganization, IProject, IProjectEnv, SecretTypeEnum } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
@@ -90,17 +90,18 @@ export const authGuard = async (
   return true;
 }
 
-const setProjectEnv = (project: IProject, env: IEnvironment) => {
-  const projectEnv = {
+const setProjectEnv = (projectService: ProjectService, project: IProject, env: IEnvironment) => {
+  const projectEnv: IProjectEnv = {
     projectId: project.id,
+    projectKey: project.key,
     projectName: project.name,
     envId: env.id,
     envKey: env.key,
     envName: env.name,
-    envSecret: env.secrets[0].value
+    envSecrets: env.secrets
   };
 
-  localStorage.setItem(CURRENT_PROJECT(), JSON.stringify(projectEnv));
+  projectService.upsertCurrentProjectEnvLocally(projectEnv);
 }
 
 const showDenyMessage = (notification: NzNotificationService) => {
@@ -133,7 +134,7 @@ const trySetAccessibleProjectEnv = async (projectService: ProjectService): Promi
 
   // set project env if it's accessible
   if (canAccessEnv) {
-    setProjectEnv(project, env);
+    setProjectEnv(projectService, project, env);
   }
 
   return canAccessEnv;
