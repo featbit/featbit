@@ -35,7 +35,6 @@ public class HybridStore : IStore
 
         IStore GetAvailableStore(string store)
         {
-            logger.LogInformation("hello...");
             return store switch
             {
                 "Redis" => _redis,
