@@ -11,7 +11,7 @@ namespace Infrastructure.Store;
 public class StoreAvailableSentinel : IHostedService
 {
     private readonly PeriodicTimer _periodicTimer = new(TimeSpan.FromSeconds(5));
-    private readonly TimeSpan _checkTimeout = TimeSpan.FromSeconds(1);
+    private readonly TimeSpan _checkAvailableTimeout = TimeSpan.FromSeconds(1);
     private readonly IStore[] _stores;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<StoreAvailableSentinel> _logger;
@@ -36,13 +36,13 @@ public class StoreAvailableSentinel : IHostedService
         _ = _serviceProvider.GetRequiredService<IStore>();
 
         // set initial store availability
-        await SetAvailableStoreAsync(cancellationToken);
+        await SetAvailableStoreAsync(_checkAvailableTimeout, cancellationToken);
 
         // start checking store availability loop
         _ = StartCheckLoop(cancellationToken);
     }
 
-    private async Task StartCheckLoop(CancellationToken cancellationToken)
+    public async Task StartCheckLoop(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Start checking store availability loop.");
 
@@ -50,7 +50,7 @@ public class StoreAvailableSentinel : IHostedService
         {
             try
             {
-                await SetAvailableStoreAsync(cancellationToken);
+                await SetAvailableStoreAsync(_checkAvailableTimeout, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -64,17 +64,17 @@ public class StoreAvailableSentinel : IHostedService
         }
     }
 
-    private async Task SetAvailableStoreAsync(CancellationToken cancellationToken)
+    public async Task SetAvailableStoreAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
         foreach (var store in _stores)
         {
-            var workTask = store.IsAvailableAsync();
-            var timeoutTask = Task.Delay(_checkTimeout, cancellationToken);
+            var checkAvailableTask = store.IsAvailableAsync();
+            var checkAvailableTaskTimeout = Task.Delay(timeout, cancellationToken);
 
-            var completedTask = await Task.WhenAny(workTask, timeoutTask);
-            if (completedTask == workTask)
+            var completedTask = await Task.WhenAny(checkAvailableTask, checkAvailableTaskTimeout);
+            if (completedTask == checkAvailableTask)
             {
-                var isAvailable = await workTask;
+                var isAvailable = await checkAvailableTask;
                 if (isAvailable)
                 {
                     StoreAvailabilityListener.Instance.SetAvailable(store.Name);
@@ -83,7 +83,8 @@ public class StoreAvailableSentinel : IHostedService
             }
             else
             {
-                workTask.Ignore();
+                _logger.LogDebug("Store availability check timed out for {Store}.", store.Name);
+                checkAvailableTask.Ignore();
             }
         }
 

@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streaming", "src\Streaming\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Streaming.UnitTests", "tests\Streaming.UnitTests\Streaming.UnitTests.csproj", "{29325784-C5E3-4252-A886-B0B4F63DF50B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure.UnitTests", "tests\Infrastructure.UnitTests\Infrastructure.UnitTests.csproj", "{8BC087B5-ED4B-4D30-A737-EC0389595A21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,7 @@ Global
 		{F587EA9E-3453-45AF-9CD5-F4FBE8B7C7B2} = {3A631AD4-F16D-49F4-B3E7-D46F47F38782}
 		{3B776534-62A6-4AAF-BCF8-CCEC544E2DDD} = {AD53E1CB-8316-4423-86F5-BA6679005839}
 		{29325784-C5E3-4252-A886-B0B4F63DF50B} = {3A631AD4-F16D-49F4-B3E7-D46F47F38782}
+		{8BC087B5-ED4B-4D30-A737-EC0389595A21} = {3A631AD4-F16D-49F4-B3E7-D46F47F38782}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6303837C-13DC-45E3-A8DE-632FC304E87E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -74,5 +77,9 @@ Global
 		{29325784-C5E3-4252-A886-B0B4F63DF50B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29325784-C5E3-4252-A886-B0B4F63DF50B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29325784-C5E3-4252-A886-B0B4F63DF50B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BC087B5-ED4B-4D30-A737-EC0389595A21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BC087B5-ED4B-4D30-A737-EC0389595A21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BC087B5-ED4B-4D30-A737-EC0389595A21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BC087B5-ED4B-4D30-A737-EC0389595A21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

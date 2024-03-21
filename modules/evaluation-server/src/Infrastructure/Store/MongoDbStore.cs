@@ -9,26 +9,16 @@ public class MongoDbStore : IStore
 {
     public string Name => Stores.MongoDb;
 
+    private readonly IMongoDbClient _mongoDbClient;
     private readonly IMongoDatabase _mongodb;
-    private static readonly BsonDocumentCommand<BsonDocument> Ping = new(BsonDocument.Parse("{ping:1}"));
 
     public MongoDbStore(IMongoDbClient mongoDbClient)
     {
+        _mongoDbClient = mongoDbClient;
         _mongodb = mongoDbClient.Database;
     }
 
-    public async Task<bool> IsAvailableAsync()
-    {
-        try
-        {
-            await _mongodb.RunCommandAsync(Ping);
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
+    public async Task<bool> IsAvailableAsync() => await _mongoDbClient.IsHealthyAsync();
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {
