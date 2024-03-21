@@ -36,7 +36,7 @@ public class StoreAvailableSentinel : IHostedService
         // see HybridStore constructor for more details
         _ = _serviceProvider.GetRequiredService<IStore>();
 
-        // set initial store availability
+        // set available store for the first time
         await SetAvailableStoreAsync(_checkAvailableTimeout, cancellationToken);
 
         // start checking store availability loop
