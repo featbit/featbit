@@ -87,6 +87,7 @@ public static class StreamingBuilderExtensions
         services.TryAddSingleton<IRedisClient, RedisClient>();
         services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
         services.AddSingleton<IStore, HybridStore>();
+        services.AddHostedService<StoreAvailableSentinel>();
 
         return builder;
     }

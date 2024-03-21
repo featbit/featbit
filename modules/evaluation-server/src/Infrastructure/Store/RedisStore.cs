@@ -6,6 +6,8 @@ namespace Infrastructure.Store;
 
 public class RedisStore : IStore
 {
+    public string Name => Stores.Redis;
+
     private readonly IRedisClient _redisClient;
     private readonly IDatabase _redis;
 

@@ -7,6 +7,8 @@ namespace Infrastructure.Store;
 
 public class MongoDbStore : IStore
 {
+    public string Name => Stores.MongoDb;
+
     private readonly IMongoDatabase _mongodb;
     private static readonly BsonDocumentCommand<BsonDocument> Ping = new(BsonDocument.Parse("{ping:1}"));
 

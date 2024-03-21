@@ -1,101 +1,64 @@
 using Domain.Shared;
 using Infrastructure.MongoDb;
 using Infrastructure.Redis;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Store;
 
 public class HybridStore : IStore
 {
-    private readonly IStore[] _stores;
+    public string Name => Stores.Hybrid;
 
-    public HybridStore(IRedisClient redisClient, IMongoDbClient mongodbClient)
+    private readonly IStore _redis;
+    private readonly IStore _mongodb;
+
+    private IStore AvailableStore { get; set; }
+    private static StoreAvailabilityListener Listener => StoreAvailabilityListener.Instance;
+
+    public HybridStore(IRedisClient redisClient, IMongoDbClient mongodbClient, ILogger<HybridStore> logger)
     {
-        var redis = new RedisStore(redisClient);
-        var mongodb = new MongoDbStore(mongodbClient);
+        _redis = new RedisStore(redisClient);
+        _mongodb = new MongoDbStore(mongodbClient);
 
-        _stores = new IStore[] { redis, mongodb };
-    }
+        AvailableStore = GetAvailableStore(Listener.AvailableStore);
 
-    public async Task<bool> IsAvailableAsync()
-    {
-        foreach (var store in _stores)
+        // no need to unsubscribe from the event, as this store instance is singleton
+        // check `StreamingBuilderExtensions.UseHybridStore` method
+        Listener.OnStoreAvailabilityChanged += (prev, current) =>
         {
-            if (await store.IsAvailableAsync())
-            {
-                return true;
-            }
-        }
+            // log store availability change
+            logger.LogWarning("Store availability changed from {prev} to {current}", prev, current);
+            AvailableStore = GetAvailableStore(current);
+        };
 
-        return false;
-    }
+        return;
 
-    public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
-    {
-        foreach (var store in _stores)
+        IStore GetAvailableStore(string store)
         {
-            var isStoreAvailable = await store.IsAvailableAsync();
-            if (isStoreAvailable)
+            logger.LogInformation("hello...");
+            return store switch
             {
-                return await store.GetFlagsAsync(envId, timestamp);
-            }
+                "Redis" => _redis,
+                "MongoDb" => _mongodb,
+                _ => throw new InvalidOperationException("No available store can be used")
+            };
         }
-
-        return Array.Empty<byte[]>();
     }
 
-    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
-    {
-        foreach (var store in _stores)
-        {
-            var isStoreAvailable = await store.IsAvailableAsync();
-            if (isStoreAvailable)
-            {
-                return await store.GetFlagsAsync(ids);
-            }
-        }
+    public Task<bool> IsAvailableAsync() => Task.FromResult(Listener.AvailableStore != Stores.None);
 
-        return Array.Empty<byte[]>();
-    }
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp) =>
+        await AvailableStore.GetFlagsAsync(envId, timestamp);
 
-    public async Task<byte[]> GetSegmentAsync(string id)
-    {
-        foreach (var store in _stores)
-        {
-            var isStoreAvailable = await store.IsAvailableAsync();
-            if (isStoreAvailable)
-            {
-                return await store.GetSegmentAsync(id);
-            }
-        }
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids) =>
+        await AvailableStore.GetFlagsAsync(ids);
 
-        return Array.Empty<byte>();
-    }
+    public async Task<byte[]> GetSegmentAsync(string id) =>
+        await AvailableStore.GetSegmentAsync(id);
 
-    public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
-    {
-        foreach (var store in _stores)
-        {
-            var isStoreAvailable = await store.IsAvailableAsync();
-            if (isStoreAvailable)
-            {
-                return await store.GetSegmentsAsync(envId, timestamp);
-            }
-        }
+    public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp) =>
+        await AvailableStore.GetSegmentsAsync(envId, timestamp);
 
-        return Array.Empty<byte[]>();
-    }
-
-    public async Task<Secret?> GetSecretAsync(string secretString)
-    {
-        foreach (var store in _stores)
-        {
-            var isStoreAvailable = await store.IsAvailableAsync();
-            if (isStoreAvailable)
-            {
-                return await store.GetSecretAsync(secretString);
-            }
-        }
-
-        return null;
-    }
+    public async Task<Secret?> GetSecretAsync(string secretString) =>
+        await AvailableStore.GetSecretAsync(secretString);
 }
