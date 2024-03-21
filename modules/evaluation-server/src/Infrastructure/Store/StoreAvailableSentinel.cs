@@ -70,9 +70,9 @@ public class StoreAvailableSentinel : IHostedService
         foreach (var store in _stores)
         {
             var checkAvailableTask = store.IsAvailableAsync();
-            var checkAvailableTaskTimeout = Task.Delay(timeout, cancellationToken);
+            var checkAvailableTimeoutTask = Task.Delay(timeout, cancellationToken);
 
-            var completedTask = await Task.WhenAny(checkAvailableTask, checkAvailableTaskTimeout);
+            var completedTask = await Task.WhenAny(checkAvailableTask, checkAvailableTimeoutTask);
             if (completedTask == checkAvailableTask)
             {
                 var isAvailable = await checkAvailableTask;
