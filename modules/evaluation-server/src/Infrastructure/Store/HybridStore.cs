@@ -23,7 +23,7 @@ public class HybridStore : IStore
         AvailableStore = GetAvailableStore(Listener.AvailableStore);
 
         // no need to unsubscribe from the event, as this store instance is singleton
-        // check `StreamingBuilderExtensions.UseHybridStore` method
+        // see `StreamingBuilderExtensions.UseHybridStore` method for more details
         Listener.OnStoreAvailabilityChanged += (prev, current) =>
         {
             // log store availability change

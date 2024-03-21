@@ -32,7 +32,8 @@ public class StoreAvailableSentinel : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        // eager resolve HybirdStore
+        // eager resolve HybridStore to attach **OnStoreAvailabilityChanged** event handler
+        // see HybridStore constructor for more details
         _ = _serviceProvider.GetRequiredService<IStore>();
 
         // set initial store availability
