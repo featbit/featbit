@@ -37,8 +37,8 @@ public class HybridStore : IStore
         {
             return store switch
             {
-                "Redis" => _redis,
-                "MongoDb" => _mongodb,
+                Stores.Redis => _redis,
+                Stores.MongoDb => _mongodb,
                 _ => throw new InvalidOperationException("No available store can be used")
             };
         }
