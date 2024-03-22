@@ -38,10 +38,19 @@ public class InsightController : PublicApiControllerBase
         var insightMessages = new List<InsightMessage>();
         foreach (var insight in validInsights)
         {
-            var endUserMessage = insight.EndUserMessage(envId);
-            if (!_redis.KeyExists(RedisKeys.EndUser(envId, endUserMessage.KeyId)))
+            var userCacheKey = RedisKeys.EndUser(envId, insight.User!.KeyId);
+            if (!_redis.KeyExists(userCacheKey))
             {
-                endUserMessages.Add(endUserMessage);
+                endUserMessages.Add(insight.EndUserMessage(envId));
+            }
+            else
+            {
+                await _redis.StringSetAsync(
+                    key: userCacheKey,
+                    value: RedisValue.Null,
+                    expiry: TimeSpan.FromSeconds(30),
+                    when: When.NotExists
+                );
             }
 
             insightMessages.AddRange(insight.InsightMessages(envId));
