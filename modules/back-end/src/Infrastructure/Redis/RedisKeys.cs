@@ -1,3 +1,4 @@
+using Domain.EndUsers;
 using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
@@ -10,6 +11,7 @@ public static class RedisKeys
     private const string SegmentIndexPrefix = "featbit:segment-index:";
     private const string LicensePrefix = "featbit:license:";
     private const string SecretPrefix = "featbit:secret:";
+    private const string EndUserPrefix = "featbit:enduser:";
 
     public static RedisKey License(Guid id) => new($"{LicensePrefix}{id}");
 
@@ -22,4 +24,6 @@ public static class RedisKeys
     public static RedisKey SegmentIndex(Guid envId) => new($"{SegmentIndexPrefix}{envId}");
 
     public static RedisKey Secret(string secretString) => new($"{SecretPrefix}{secretString}");
+
+    public static RedisKey EndUser(EndUser endUser) => new($"{EndUserPrefix}{endUser.EnvId}:{endUser.KeyId}");
 }

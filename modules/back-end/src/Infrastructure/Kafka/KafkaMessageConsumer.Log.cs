@@ -16,5 +16,11 @@ public partial class KafkaMessageConsumer
 
         [LoggerMessage(3, LogLevel.Error, "Exception occurred when store offset.", EventName = "ErrorStoreOffset")]
         public static partial void ErrorStoreOffset(ILogger logger, Exception ex);
+
+        [LoggerMessage(4, LogLevel.Warning, "No message handler for topic: {Topic}", EventName = "NoHandlerForTopic")]
+        public static partial void NoHandlerForTopic(ILogger logger, string topic);
+
+        [LoggerMessage(5, LogLevel.Debug, "Message {Message} was handled successfully.", EventName = "MessageHandled")]
+        public static partial void MessageHandled(ILogger logger, string message);
     }
 }

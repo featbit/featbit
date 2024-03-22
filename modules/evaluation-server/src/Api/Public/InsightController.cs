@@ -1,17 +1,21 @@
 using Domain.EndUsers;
 using Domain.Insights;
 using Domain.Messages;
+using Infrastructure.Redis;
 using Microsoft.AspNetCore.Mvc;
+using StackExchange.Redis;
 
 namespace Api.Public;
 
 public class InsightController : PublicApiControllerBase
 {
     private readonly IMessageProducer _producer;
+    private readonly IDatabase _redis;
 
-    public InsightController(IMessageProducer producer)
+    public InsightController(IMessageProducer producer, IRedisClient redisClient)
     {
         _producer = producer;
+        _redis = redisClient.GetDatabase();
     }
 
     [HttpPost("track")]
@@ -34,7 +38,12 @@ public class InsightController : PublicApiControllerBase
         var insightMessages = new List<InsightMessage>();
         foreach (var insight in validInsights)
         {
-            endUserMessages.Add(insight.EndUserMessage(envId));
+            var endUserMessage = insight.EndUserMessage(envId);
+            if (!_redis.KeyExists(RedisKeys.EndUser(envId, endUserMessage.KeyId)))
+            {
+                endUserMessages.Add(endUserMessage);
+            }
+
             insightMessages.AddRange(insight.InsightMessages(envId));
         }
 

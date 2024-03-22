@@ -1,8 +1,5 @@
-using System.Text.Json;
 using Confluent.Kafka;
-using Domain.EndUsers;
 using Domain.Messages;
-using Domain.Utils;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -11,17 +8,17 @@ namespace Infrastructure.Kafka;
 public partial class KafkaMessageConsumer : BackgroundService
 {
     private readonly IConsumer<Null, string> _consumer;
-    private readonly IEndUserService _service;
+    private readonly Dictionary<string, IMessageHandler> _handlers;
     private readonly ILogger<KafkaMessageConsumer> _logger;
 
     public KafkaMessageConsumer(
         ConsumerConfig config,
-        IEndUserService service,
+        IEnumerable<IMessageHandler> handlers,
         ILogger<KafkaMessageConsumer> logger)
     {
-        _service = service;
-        _logger = logger;
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
+        _handlers = handlers.ToDictionary(x => x.Topic, x => x);
+        _logger = logger;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -46,26 +43,21 @@ public partial class KafkaMessageConsumer : BackgroundService
                 consumeResult = _consumer.Consume(cancellationToken);
                 if (consumeResult.IsPartitionEOF)
                 {
+                    // reached end of topic
                     continue;
                 }
 
-                message = consumeResult.Message.Value;
-                if (string.IsNullOrWhiteSpace(message))
+                var topic = consumeResult.Topic;
+                if (!_handlers.TryGetValue(topic, out var handler))
                 {
+                    Log.NoHandlerForTopic(_logger, topic);
                     continue;
                 }
 
-                var endUserMessage =
-                    JsonSerializer.Deserialize<EndUserMessage>(message, ReusableJsonSerializerOptions.Web);
-                if (endUserMessage == null)
-                {
-                    continue;
-                }
+                message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
+                await handler.HandleAsync(message, cancellationToken);
 
-                // upsert endUser and it's properties
-                var endUser = endUserMessage.AsEndUser();
-                await _service.UpsertAsync(endUser);
-                await _service.AddNewPropertiesAsync(endUser);
+                Log.MessageHandled(_logger, message);
             }
             catch (ConsumeException ex)
             {

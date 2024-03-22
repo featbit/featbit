@@ -7,20 +7,21 @@ namespace Infrastructure.Kafka;
 
 public partial class KafkaMessageConsumer : BackgroundService
 {
-    private readonly ILogger<KafkaMessageConsumer> _logger;
     private readonly IConsumer<Null, string> _consumer;
-    private readonly IEnumerable<IMessageConsumer> _messageHandlers;
+    private readonly Dictionary<string, IMessageConsumer> _handlers;
+    private readonly ILogger<KafkaMessageConsumer> _logger;
 
     public KafkaMessageConsumer(
         ConsumerConfig config,
-        ILogger<KafkaMessageConsumer> logger,
-        IEnumerable<IMessageConsumer> messageHandlers)
+        IEnumerable<IMessageConsumer> handlers,
+        ILogger<KafkaMessageConsumer> logger)
     {
-        _logger = logger;
-        _messageHandlers = messageHandlers;
+        _handlers = handlers.ToDictionary(x => x.Topic, x => x);
 
         config.GroupId = $"evaluation-server-{Guid.NewGuid()}";
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
+
+        _logger = logger;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,15 +55,17 @@ public partial class KafkaMessageConsumer : BackgroundService
                     continue;
                 }
 
-                var handler = _messageHandlers.FirstOrDefault(x => x.Topic == consumeResult.Topic);
-                if (handler == null)
+                var topic = consumeResult.Topic;
+                if (!_handlers.TryGetValue(topic, out var handler))
                 {
-                    Log.NoHandlerForTopic(_logger, consumeResult.Topic);
+                    Log.NoHandlerForTopic(_logger, topic);
                     continue;
                 }
 
                 message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
                 await handler.HandleAsync(message, cancellationToken);
+
+                Log.MessageHandled(_logger, message);
             }
             catch (ConsumeException ex)
             {
