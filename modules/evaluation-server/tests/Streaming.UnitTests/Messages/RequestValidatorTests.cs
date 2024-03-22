@@ -1,5 +1,6 @@
 ﻿using System.Net.WebSockets;
 using Domain.Shared;
+using Infrastructure.Store;
 using Microsoft.Extensions.Internal;
 using Moq;
 using Streaming.Connections;
@@ -37,19 +38,12 @@ internal class TestSystemClock : ISystemClock
     public DateTimeOffset UtcNow { get; }
 }
 
-internal class TestStore : IStore
+internal class TestStore : EmptyStore
 {
-    public Task<bool> IsAvailableAsync() => Task.FromResult(true);
+    public override string Name => "Test";
 
-    public Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp) => Task.FromResult(Enumerable.Empty<byte[]>());
-
-    public Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids) => Task.FromResult(Enumerable.Empty<byte[]>());
-
-    public Task<byte[]> GetSegmentAsync(string id) => Task.FromResult(Array.Empty<byte>());
-
-    public Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp) => Task.FromResult(Enumerable.Empty<byte[]>());
-
-    public Task<Secret> GetSecretAsync(string secretString) => Task.FromResult(TestData.GetSecret(secretString));
+    public override Task<Secret?> GetSecretAsync(string secretString) =>
+        Task.FromResult(TestData.GetSecret(secretString));
 }
 
 public class Requests : TheoryData<WebSocket, string, string, string, long, bool>
