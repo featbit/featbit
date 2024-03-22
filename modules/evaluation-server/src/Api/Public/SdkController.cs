@@ -33,7 +33,7 @@ public class SdkController : PublicApiControllerBase
     }
 
     [HttpPost("client/latest-all")]
-    public async Task<IActionResult> GetClientSdkPayloadAsync(EndUser endUser)
+    public async Task<IActionResult> GetClientSdkPayloadAsync(EndUser endUser, [FromQuery] long timestamp = 0)
     {
         if (!Authenticated)
         {
@@ -45,7 +45,7 @@ public class SdkController : PublicApiControllerBase
             return BadRequest("invalid end user");
         }
 
-        var payload = await _dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, 0);
+        var payload = await _dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, timestamp);
 
         var bootstrap = payload.FeatureFlags.Select(x => new
         {
