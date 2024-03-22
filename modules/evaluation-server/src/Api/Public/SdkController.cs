@@ -51,7 +51,8 @@ public class SdkController : PublicApiControllerBase
         {
             x.Id,
             x.Variation,
-            x.VariationType
+            x.VariationType,
+            x.Timestamp
         });
 
         return new JsonResult(bootstrap);
