@@ -38,7 +38,7 @@ internal class TestSystemClock : ISystemClock
     public DateTimeOffset UtcNow { get; }
 }
 
-internal class TestStore : NoneStore
+internal class TestStore : EmptyStore
 {
     public override string Name => "Test";
 

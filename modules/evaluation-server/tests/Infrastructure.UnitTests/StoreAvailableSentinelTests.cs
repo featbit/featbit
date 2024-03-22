@@ -23,7 +23,7 @@ public class StoreAvailableSentinelTests
     public StoreAvailableSentinelTests()
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddSingleton<IStore, NoneStore>();
+        serviceCollection.AddSingleton<IStore, EmptyStore>();
         _serviceProvider = serviceCollection.BuildServiceProvider();
     }
 

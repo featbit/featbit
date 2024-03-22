@@ -11,6 +11,7 @@ public class HybridStore : IStore
 
     private readonly IStore _redis;
     private readonly IStore _mongodb;
+    private readonly IStore _none = new NoneStore();
 
     private IStore AvailableStore { get; set; }
     private static StoreAvailabilityListener Listener => StoreAvailabilityListener.Instance;
@@ -39,7 +40,7 @@ public class HybridStore : IStore
             {
                 Stores.Redis => _redis,
                 Stores.MongoDb => _mongodb,
-                _ => throw new InvalidOperationException("No available store can be used")
+                _ => _none
             };
         }
     }
