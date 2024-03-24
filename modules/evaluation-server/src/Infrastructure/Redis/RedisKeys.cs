@@ -9,7 +9,6 @@ public static class RedisKeys
     private const string SegmentPrefix = "featbit:segment:";
     private const string SegmentIndexPrefix = "featbit:segment-index:";
     private const string SecretPrefix = "featbit:secret:";
-    private const string EndUserPrefix = "featbit:enduser:";
 
     public static RedisKey FlagIndex(Guid envId) => new($"{FlagIndexPrefix}{envId}");
 
@@ -20,6 +19,4 @@ public static class RedisKeys
     public static RedisKey Segment(string id) => new($"{SegmentPrefix}{id}");
 
     public static RedisKey Secret(string secretString) => new($"{SecretPrefix}{secretString}");
-
-    public static RedisKey EndUser(Guid envId, string keyId) => new($"{EndUserPrefix}{envId}:{keyId}");
 }
