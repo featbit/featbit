@@ -1,6 +1,7 @@
 using Domain.EndUsers;
 using Domain.Insights;
 using Domain.Messages;
+using Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Public;
@@ -8,10 +9,12 @@ namespace Api.Public;
 public class InsightController : PublicApiControllerBase
 {
     private readonly IMessageProducer _producer;
+    private readonly SimplifiedMemoryCache _cache;
 
-    public InsightController(IMessageProducer producer)
+    public InsightController(IMessageProducer producer, SimplifiedMemoryCache cache)
     {
         _producer = producer;
+        _cache = cache;
     }
 
     [HttpPost("track")]
@@ -34,7 +37,13 @@ public class InsightController : PublicApiControllerBase
         var insightMessages = new List<InsightMessage>();
         foreach (var insight in validInsights)
         {
-            endUserMessages.Add(insight.EndUserMessage(envId));
+            var key = $"{envId:N}:{insight.User!.KeyId}";
+            if (!_cache.Exists(key))
+            {
+                _cache.TryAdd(key, TimeSpan.FromMinutes(3));
+                endUserMessages.Add(insight.EndUserMessage(envId));
+            }
+
             insightMessages.AddRange(insight.InsightMessages(envId));
         }
 
