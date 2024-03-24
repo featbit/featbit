@@ -29,7 +29,7 @@ public static class ServicesRegister
                 .AllowAnyMethod();
         }));
 
-        // add singleton memory cache
+        // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();
 
         // build streaming service
