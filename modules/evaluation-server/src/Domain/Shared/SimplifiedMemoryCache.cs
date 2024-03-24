@@ -14,13 +14,14 @@ public sealed class SimplifiedMemoryCache
     private readonly ConcurrentDictionary<string, long> _concurrentDictionary = new();
     private readonly Timer _evictTimer;
 
-    private long _currentSize;
-    private readonly long _sizeLimit;
+    // internal for testing
+    internal long _currentSize;
+    internal readonly long _sizeLimit;
 
     public SimplifiedMemoryCache(long? sizeLimit = null, TimeSpan? evictInterval = null)
     {
         var interval = evictInterval ?? TimeSpan.FromSeconds(30);
-        _sizeLimit = sizeLimit ?? 100 * 0000;
+        _sizeLimit = sizeLimit ?? 100_0000;
 
         _evictTimer = new Timer(
             _ => EvictExpiredInternal(),
