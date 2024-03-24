@@ -41,7 +41,7 @@ public class InsightController : PublicApiControllerBase
             var key = $"{envId:N}:{insight.User!.KeyId}";
             if (!_cache.TryGetValue(key, out _))
             {
-                _cache.Set(key, true, new MemoryCacheEntryOptions
+                _cache.Set(key, string.Empty, new MemoryCacheEntryOptions
                 {
                     Size = 1,
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
