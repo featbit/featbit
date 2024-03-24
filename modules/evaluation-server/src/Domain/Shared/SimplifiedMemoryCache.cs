@@ -13,7 +13,7 @@ public sealed class SimplifiedMemoryCache
 {
     private readonly ConcurrentDictionary<string, long> _concurrentDictionary = new();
     private readonly Timer _evictTimer;
-    private readonly TimeSpan _evictInterval = TimeSpan.FromSeconds(10);
+    private readonly TimeSpan _evictInterval = TimeSpan.FromSeconds(30);
 
     private long _currentSize;
     private const long SizeLimit = 100 * 0000;
