@@ -73,28 +73,14 @@ public sealed class SimplifiedMemoryCache
 
     private void EvictExpiredInternal()
     {
-        // Eviction already started by another thread? forget it, lets move on
-        // use the timer-object for our lock, it's local, private and instance-type, so its ok
-        if (!Monitor.TryEnter(_evictTimer))
+        var current = Environment.TickCount64;
+        foreach (var kvPair in _concurrentDictionary)
         {
-            return;
-        }
-
-        try
-        {
-            var current = Environment.TickCount64;
-            foreach (var kvPair in _concurrentDictionary)
+            if (current > kvPair.Value)
             {
-                if (current > kvPair.Value)
-                {
-                    _concurrentDictionary.TryRemove(kvPair);
-                    Interlocked.Add(ref _currentSize, -1);
-                }
+                _concurrentDictionary.TryRemove(kvPair);
+                Interlocked.Add(ref _currentSize, -1);
             }
-        }
-        finally
-        {
-            Monitor.Exit(_evictTimer);
         }
     }
 }
