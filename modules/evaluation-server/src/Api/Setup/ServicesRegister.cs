@@ -1,5 +1,4 @@
 using Confluent.Kafka;
-using Domain.Shared;
 using Infrastructure.Fakes;
 using Streaming.DependencyInjection;
 
@@ -30,8 +29,8 @@ public static class ServicesRegister
                 .AllowAnyMethod();
         }));
 
-        // simplified in-memory cache
-        services.AddSingleton<SimplifiedMemoryCache>();
+        // add singleton memory cache
+        services.AddSingleton<BoundedMemoryCache>();
 
         // build streaming service
         var streamingBuilder = services.AddStreamingCore();

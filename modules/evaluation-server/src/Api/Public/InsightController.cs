@@ -1,20 +1,21 @@
+using Api.Setup;
 using Domain.EndUsers;
 using Domain.Insights;
 using Domain.Messages;
-using Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Public;
 
 public class InsightController : PublicApiControllerBase
 {
     private readonly IMessageProducer _producer;
-    private readonly SimplifiedMemoryCache _cache;
+    private readonly MemoryCache _cache;
 
-    public InsightController(IMessageProducer producer, SimplifiedMemoryCache cache)
+    public InsightController(IMessageProducer producer, BoundedMemoryCache boundedMemoryCache)
     {
         _producer = producer;
-        _cache = cache;
+        _cache = boundedMemoryCache.Instance;
     }
 
     [HttpPost("track")]
@@ -38,9 +39,14 @@ public class InsightController : PublicApiControllerBase
         foreach (var insight in validInsights)
         {
             var key = $"{envId:N}:{insight.User!.KeyId}";
-            if (!_cache.Exists(key))
+            if (!_cache.TryGetValue(key, out _))
             {
-                _cache.TryAdd(key, TimeSpan.FromMinutes(3));
+                _cache.Set(key, true, new MemoryCacheEntryOptions
+                {
+                    Size = 1,
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+                });
+
                 endUserMessages.Add(insight.EndUserMessage(envId));
             }
 
