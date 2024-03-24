@@ -13,18 +13,20 @@ public sealed class SimplifiedMemoryCache
 {
     private readonly ConcurrentDictionary<string, long> _concurrentDictionary = new();
     private readonly Timer _evictTimer;
-    private readonly TimeSpan _evictInterval = TimeSpan.FromSeconds(30);
 
     private long _currentSize;
-    private const long SizeLimit = 100 * 0000;
+    private readonly long _sizeLimit;
 
-    public SimplifiedMemoryCache()
+    public SimplifiedMemoryCache(long? sizeLimit = null, TimeSpan? evictInterval = null)
     {
+        var interval = evictInterval ?? TimeSpan.FromSeconds(30);
+        _sizeLimit = sizeLimit ?? 100 * 0000;
+
         _evictTimer = new Timer(
             _ => EvictExpiredInternal(),
             null,
-            _evictInterval,
-            _evictInterval
+            interval,
+            interval
         );
     }
 
@@ -50,7 +52,7 @@ public sealed class SimplifiedMemoryCache
         for (var i = 0; i < 100; i++)
         {
             var newSize = sizeRead + 1;
-            if ((ulong)newSize > (ulong)SizeLimit)
+            if ((ulong)newSize > (ulong)_sizeLimit)
             {
                 // Overflow occurred, return true without updating the cache size
                 return true;
