@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Application.Caches;
 using Domain.FeatureFlags;
 using Domain.Segments;
@@ -45,6 +46,8 @@ public class RedisPopulatingService : ICachePopulatingService
         var lockValue = Guid.NewGuid().ToString();
         if (await _redis.LockTakeAsync(PopulateLockKey, lockValue, TimeSpan.FromSeconds(5)))
         {
+            _logger.LogInformation("Start to populate redis.");
+            var stopWatch = Stopwatch.StartNew();
             try
             {
                 await PopulateFlagsAsync();
@@ -54,8 +57,13 @@ public class RedisPopulatingService : ICachePopulatingService
                 // mark redis as populated
                 await _redis.StringSetAsync(IsPopulatedKey, "true");
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while populating redis");
+            }
             finally
             {
+                _logger.LogInformation("Populate redis finished in {Elapsed} ms.", stopWatch.ElapsedMilliseconds);
                 await _redis.LockReleaseAsync(PopulateLockKey, lockValue);
             }
         }
