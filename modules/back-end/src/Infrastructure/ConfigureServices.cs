@@ -107,10 +107,6 @@ public static class ConfigureServices
 
     private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
     {
-        // add message handlers
-        services.AddTransient<IMessageHandler, EndUserMessageHandler>();
-        services.AddTransient<IMessageHandler, InsightMessageHandler>();
-
         var isProVersion = configuration["IS_PRO"];
         if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
         {
@@ -132,6 +128,9 @@ public static class ConfigureServices
         {
             // use redis as message queue
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
+
+            services.AddTransient<IMessageHandler, EndUserMessageHandler>();
+            services.AddTransient<IMessageHandler, InsightMessageHandler>();
             services.AddHostedService<RedisMessageConsumer>();
         }
     }
