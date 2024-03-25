@@ -29,6 +29,9 @@ public static class ServicesRegister
                 .AllowAnyMethod();
         }));
 
+        // add bounded memory cache
+        services.AddSingleton<BoundedMemoryCache>();
+
         // build streaming service
         var streamingBuilder = services.AddStreamingCore();
         if (configuration.GetValue("IntegrationTests", false))
