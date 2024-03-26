@@ -86,14 +86,13 @@
       <div class="option-line" *ngFor="let variation of featureFlag.variations; let key=index; trackBy: trackById;">
           <div class="left">
             <span class="variation-tip {{'tip-' + key % 9}}"></span>
-            <span class="name">{{variation.name}}</span>
+            <span class="name" nz-tooltip="{{variation.name}}">{{variation.name}}</span>
           </div>
         <div class="right">
-          <nz-tag nz-tooltip="{{variation.value}}">{{variation.value}}</nz-tag>
+          <nz-tag nz-tooltip="{{variation.value}}" (click)="copyText(variation.value)">{{variation.value}}</nz-tag>
           <i *ngIf="['json', 'string'].includes(featureFlag.variationType)"
              class="expand-icon" nz-icon nzType="expand" (click)="expandVariation(variation, true)">
           </i>
-          <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(variation.value)"></i>
         </div>
       </div>
     </div>
