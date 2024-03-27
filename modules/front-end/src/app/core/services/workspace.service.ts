@@ -26,7 +26,9 @@ export class WorkspaceService {
   }
 
   getWorkspace(): Promise<IWorkspace> {
-    return firstValueFrom(this.http.get<IWorkspace>(this.baseUrl));
+    return firstValueFrom(
+      this.http.get<IWorkspace>(this.baseUrl).pipe(catchError(() => of(undefined)))
+    );
   }
 
   isKeyUsed(key: string): Observable<boolean> {
@@ -45,10 +47,5 @@ export class WorkspaceService {
     } else {
       localStorage.setItem(CURRENT_WORKSPACE(), '');
     }
-  }
-
-  async refreshWorkspace() {
-    const workspace = await this.getWorkspace();
-    this.setWorkspace(workspace);
   }
 }
