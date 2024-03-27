@@ -3,14 +3,13 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/ro
 import { getProfile } from '@shared/utils';
 import {
   CURRENT_ORGANIZATION,
-  CURRENT_PROJECT,
   IS_SSO_FIRST_LOGIN,
   LOGIN_REDIRECT_URL
 } from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { IEnvironment, IOrganization, IProject, IProjectEnv, SecretTypeEnum } from "@shared/types";
+import { IEnvironment, IOrganization, IProject, IProjectEnv } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
@@ -36,7 +35,14 @@ export const authGuard = async (
     return router.parseUrl('/login');
   }
 
-  await workspaceService.refreshWorkspace();
+  // if workspaceId is invalid, logout user
+  const workspace = await workspaceService.getWorkspace();
+  if (!workspace) {
+    identityService.doLogoutUser(false);
+    return router.parseUrl('/login');
+  }
+
+  workspaceService.setWorkspace(workspace);
   const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN) === 'true';
   const organizations = await organizationService.getListAsync(isSsoFirstLogin);
   organizationService.organizations = organizations;
