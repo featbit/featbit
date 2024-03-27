@@ -9,8 +9,8 @@
     <a href="https://twitter.com/RealFeatBit">
       <img src="https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white"/>
     </a>  
-    <a href="https://medium.com/@featbit">
-      <img src="https://img.shields.io/badge/Medium-grey?style=flat-square&logo=medium&logoColor=white" alt="Read about RATH on medium"/>
+    <a href="https://awsmfoss.com/featbit/">
+      <img src="https://img.shields.io/badge/Awesome_F%2FOSS-Certified-purple?style=flat-square" alt="Read about RATH on medium"/>
     </a>
     <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">
       <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join FeatBit on Slack"/>
