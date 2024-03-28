@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ResourceFilter, ResourceTypeEnum } from "@shared/policy";
+import { ResourceFilterV2, ResourceTypeEnum } from "@shared/policy";
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
@@ -31,7 +31,7 @@ export class ResourceFinderComponent implements OnInit {
   groupedItems: GroupedItem[] = [];
   $search = new Subject<void>();
   isLoading = true;
-  filter: ResourceFilter = {
+  filter: ResourceFilterV2 = {
     name: '',
     types: []
   };
@@ -53,7 +53,7 @@ export class ResourceFinderComponent implements OnInit {
   private fetchResources() {
     this.groupedItems = [];
     this.isLoading = true;
-    this.resourceService.getResources(this.filter).subscribe(resources => {
+    this.resourceService.getResourcesV2(this.filter).subscribe(resources => {
       for (const resource of resources) {
         // filter out general resources
         if (resource.rn.includes('*')) {

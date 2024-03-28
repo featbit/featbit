@@ -16,6 +16,11 @@ export interface Resource {
 }
 
 export interface ResourceFilter {
+  type: ResourceTypeEnum;
+  name: string;
+}
+
+export interface ResourceFilterV2 {
   types: ResourceTypeEnum[];
   name: string;
 }

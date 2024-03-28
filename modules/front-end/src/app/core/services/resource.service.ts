@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { Resource, ResourceFilter } from "@shared/policy";
+import { Resource, ResourceFilter, ResourceFilterV2 } from "@shared/policy";
 import { Observable } from "rxjs";
 import { Injectable } from "@angular/core";
 
@@ -15,14 +15,30 @@ export class ResourceService {
     return `${environment.url}/api/v1/resources`;
   }
 
+  get baseUrlV2() {
+    return `${environment.url}/api/v2/resources`;
+  }
+
   getResources(filter: ResourceFilter): Observable<Resource[]> {
+    const queryParam = {
+      name: filter.name ?? '',
+      type: filter.type ?? ''
+    };
+
+    return this.http.get<Resource[]>(
+      this.baseUrl,
+      {params: new HttpParams({fromObject: queryParam})}
+    );
+  }
+
+  getResourcesV2(filter: ResourceFilterV2): Observable<Resource[]> {
     const queryParam = {
       name: filter.name ?? '',
       types: filter.types ?? []
     };
 
     return this.http.get<Resource[]>(
-      this.baseUrl,
+      this.baseUrlV2,
       {params: new HttpParams({fromObject: queryParam})}
     );
   }

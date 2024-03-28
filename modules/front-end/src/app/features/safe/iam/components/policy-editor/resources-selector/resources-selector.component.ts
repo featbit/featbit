@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, ViewChild } from "@angular/core
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import {
   isResourceGeneral,
-  Resource,
+  Resource, ResourceFilter,
   ResourceParamViewModel,
   ResourceType,
   RNViewModel,
@@ -68,9 +68,9 @@ export class ResourcesSelectorComponent {
   isResourceLoading = false;
   onSearchResources(query: string) {
     this.isResourceLoading = true;
-    const filter = {
+    const filter: ResourceFilter = {
       name: query,
-      types: [this.resourceType?.type]
+      type: this.resourceType?.type
     };
     this.resourceService.getResources(filter).subscribe({
       next: resources => {
