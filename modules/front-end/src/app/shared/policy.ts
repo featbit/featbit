@@ -15,6 +15,11 @@ export interface Resource {
   type: ResourceTypeEnum;
 }
 
+export interface ResourceFilter {
+  types: ResourceTypeEnum[];
+  name: string;
+}
+
 export interface ValPlaceholder {
   displayName: string,
   name: string

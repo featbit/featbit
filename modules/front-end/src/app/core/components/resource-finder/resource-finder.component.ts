@@ -1,4 +1,8 @@
-import {Component, Input, OnInit} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { ResourceFilter, ResourceTypeEnum } from "@shared/policy";
+import { ResourceService } from "@services/resource.service";
+import { debounceTime } from "rxjs/operators";
+import { Subject } from "rxjs";
 
 interface GroupedItem {
   name: string;
@@ -19,32 +23,77 @@ export class ResourceFinderComponent implements OnInit {
   @Input()
   isVisible = false;
   @Input()
-  resources: string[] = ['Projects', 'Environments', 'Flags', 'Segments']
+  resources: ResourceTypeEnum[] = [ResourceTypeEnum.Project, ResourceTypeEnum.Env, ResourceTypeEnum.Flag, ResourceTypeEnum.Segment];
 
-  groupedItems: GroupedItem[] = [];
-
-  constructor() {
+  constructor(private resourceService: ResourceService) {
   }
 
+  groupedItems: GroupedItem[] = [];
+  $search = new Subject<void>();
+  isLoading = true;
+  filter: ResourceFilter = {
+    name: '',
+    types: []
+  };
+
   ngOnInit(): void {
-    this.groupedItems = this.resources.map(resource => {
-      return {
-        name: resource,
-        items: [
-          {
-            id: "1",
-            name: 'Resource 1',
-          },
-          {
-            id: "2",
-            name: 'Resource 2',
-          },
-          {
-            id: "3",
-            name: 'Resource 3',
-          }
-        ]
-      };
+    this.filter.types = this.resources;
+    this.$search.pipe(
+      debounceTime(200)
+    ).subscribe(() => {
+      this.fetchResources();
     });
+    this.$search.next();
+  }
+
+  onSearch() {
+    this.$search.next();
+  }
+
+  private fetchResources() {
+    this.groupedItems = [];
+    this.isLoading = true;
+    this.resourceService.getResources(this.filter).subscribe(resources => {
+      for (const resource of resources) {
+        // filter out general resources
+        if (resource.rn.includes('*')) {
+          continue;
+        }
+
+        const type = this.mapResourceType(resource.type);
+        const group = this.groupedItems.find(x => x.name === type);
+        if (group) {
+          group.items.push({
+            id: resource.id,
+            name: resource.name
+          });
+        } else {
+          this.groupedItems.push({
+            name: type,
+            items: [{
+              id: resource.id,
+              name: resource.name
+            }]
+          });
+        }
+      }
+
+      this.isLoading = false;
+    });
+  }
+
+  private mapResourceType(type: ResourceTypeEnum): string {
+    switch (type) {
+      case ResourceTypeEnum.Project:
+        return 'Project';
+      case ResourceTypeEnum.Env:
+        return 'Environment';
+      case ResourceTypeEnum.Flag:
+        return 'Feature Flag';
+      case ResourceTypeEnum.Segment:
+        return 'Segment';
+      default:
+        return '';
+    }
   }
 }

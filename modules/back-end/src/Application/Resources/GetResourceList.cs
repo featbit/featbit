@@ -1,24 +1,15 @@
-using Application.Bases;
+using Domain.Resources;
 
 namespace Application.Resources;
 
-public class GetResourceList : IRequest<IEnumerable<ResourceVm>>
+public class GetResourceList : IRequest<IEnumerable<Resource>>
 {
     public Guid OrganizationId { get; set; }
 
     public ResourceFilter Filter { get; set; }
 }
 
-public class GetResourceListValidator : AbstractValidator<GetResourceList>
-{
-    public GetResourceListValidator()
-    {
-        RuleFor(x => x.Filter.Type)
-            .NotEmpty().WithErrorCode(ErrorCodes.TypeIsRequired);
-    }
-}
-
-public class GetResourceListHandler : IRequestHandler<GetResourceList, IEnumerable<ResourceVm>>
+public class GetResourceListHandler : IRequestHandler<GetResourceList, IEnumerable<Resource>>
 {
     private readonly IResourceService _service;
     private readonly IMapper _mapper;
@@ -29,10 +20,10 @@ public class GetResourceListHandler : IRequestHandler<GetResourceList, IEnumerab
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<ResourceVm>> Handle(GetResourceList request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Resource>> Handle(GetResourceList request, CancellationToken cancellationToken)
     {
         var resources = await _service.GetResourcesAsync(request.OrganizationId, request.Filter);
 
-        return _mapper.Map<IEnumerable<ResourceVm>>(resources);
+        return _mapper.Map<IEnumerable<Resource>>(resources);
     }
 }

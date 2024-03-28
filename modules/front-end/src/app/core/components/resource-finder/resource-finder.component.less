@@ -15,6 +15,19 @@
   flex-direction: column;
   gap: 8px;
 
+  .loading-spinner {
+    position: relative;
+    height: 200px;
+    border-radius: 8px;
+    background-color: @grey5-color;
+
+    .spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+    }
+  }
+
   .resources {
     border: 1px solid @grey30-color;
     border-radius: 8px;

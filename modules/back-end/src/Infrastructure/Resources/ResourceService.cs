@@ -20,20 +20,28 @@ public class ResourceService : IResourceService
     public async Task<IEnumerable<Resource>> GetResourcesAsync(Guid organizationId, ResourceFilter filter)
     {
         var name = filter.Name;
+        var result = new List<Resource>();
 
-        return filter.Type switch
+        foreach (var type in filter.Types)
         {
-            ResourceTypes.All => new[] { Resource.All },
-            ResourceTypes.Organization => new[] { Resource.AllOrganizations },
-            ResourceTypes.Iam => new[] { Resource.AllIam },
-            ResourceTypes.AccessToken => new[] { Resource.AllAccessToken },
-            ResourceTypes.RelayProxy => new[] { Resource.AllRelayProxies },
-            ResourceTypes.FeatureFlag => new[] { Resource.AllFeatureFlag },
-            ResourceTypes.Segment => new[] { Resource.AllSegments },
-            ResourceTypes.Env => await GetEnvsAsync(organizationId, name),
-            ResourceTypes.Project => await GetProjectsAsync(organizationId, name),
-            _ => Array.Empty<Resource>()
-        };
+            var resources = type switch
+            {
+                ResourceTypes.All => new[] { Resource.All },
+                ResourceTypes.Organization => new[] { Resource.AllOrganizations },
+                ResourceTypes.Iam => new[] { Resource.AllIam },
+                ResourceTypes.AccessToken => new[] { Resource.AllAccessToken },
+                ResourceTypes.RelayProxy => new[] { Resource.AllRelayProxies },
+                ResourceTypes.FeatureFlag => new[] { Resource.AllFeatureFlag },
+                ResourceTypes.Segment => new[] { Resource.AllSegments },
+                ResourceTypes.Env => await GetEnvsAsync(organizationId, name),
+                ResourceTypes.Project => await GetProjectsAsync(organizationId, name),
+                _ => Array.Empty<Resource>()
+            };
+
+            result.AddRange(resources);
+        }
+
+        return result;
     }
 
     public async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)
