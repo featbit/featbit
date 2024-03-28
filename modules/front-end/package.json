@@ -25,7 +25,7 @@
     "handlebars": "4.7.8",
     "lodash-es": "^4.17.21",
     "monaco-editor": "0.39.0",
-    "ng-zorro-antd": "16.0.0",
+    "ng-zorro-antd": "16.2.2",
     "prismjs": "^1.29.0",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.0",
