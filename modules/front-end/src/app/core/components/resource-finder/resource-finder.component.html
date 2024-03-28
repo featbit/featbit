@@ -6,8 +6,8 @@
   [nzFooter]="modalFooter"
 >
   <ng-template #modalTitle>
-    <span class="title">Find a resource</span>
-    <p class="description">Resources include projects, environments, feature flags, and segments.</p>
+    <span i18n="@@common.resource-finder.title" class="title">Find a resource</span>
+    <p i18n="@@common.resource-finder.description" class="description">Resources include projects, environments, feature flags, and segments.</p>
   </ng-template>
 
   <ng-template #modalContent>
@@ -17,7 +17,8 @@
           <input
             nz-input
             type="text"
-            placeholder="Find a resource"
+            i18n-placeholder="@@common.resource-finder.search-placeholder"
+            placeholder="Search by resource name"
             [(ngModel)]="filter.name"
             (ngModelChange)="onSearch()"
           />

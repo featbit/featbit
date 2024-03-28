@@ -85,13 +85,13 @@ export class ResourceFinderComponent implements OnInit {
   private mapResourceType(type: ResourceTypeEnum): string {
     switch (type) {
       case ResourceTypeEnum.Project:
-        return 'Project';
+        return $localize`:@@common.project:Project`;
       case ResourceTypeEnum.Env:
-        return 'Environment';
+        return $localize`:@@common.environment:Environment`;
       case ResourceTypeEnum.Flag:
-        return 'Feature Flag';
+        return $localize`:@@common.flag:Flag`;
       case ResourceTypeEnum.Segment:
-        return 'Segment';
+        return $localize`:@@common.segment:Segment`;
       default:
         return '';
     }
