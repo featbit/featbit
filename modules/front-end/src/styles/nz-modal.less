@@ -1,0 +1,53 @@
+@import "variables";
+
+// resource-finder modal
+.resource-finder-modal {
+  .ant-modal-header {
+    padding: 24px 24px 0 24px;
+  }
+
+  .ant-modal-header::after {
+    content: none;
+  }
+
+  .ant-modal-body {
+    padding: 0 24px;
+  }
+
+  nz-input-group {
+    border-radius: 8px;
+
+    span {
+      padding: 0 1px 0 0;
+      font-size: 18px;
+      color: @grey40-color;
+    }
+
+    input {
+      height: 24px;
+    }
+  }
+
+  nz-list {
+    padding: 4px 8px;
+
+    nz-list-header {
+      padding: 4px;
+      border-radius: 4px;
+      background-color: @grey5-color;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+    }
+
+    nz-list-item {
+      padding: 4px;
+      cursor: pointer;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: @primary-color;
+      }
+    }
+  }
+}

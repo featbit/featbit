@@ -1,4 +1,5 @@
 using Application.Resources;
+using Domain.Resources;
 
 namespace Api.Controllers;
 
@@ -6,7 +7,7 @@ namespace Api.Controllers;
 public class ResourceController : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ApiResponse<IEnumerable<ResourceVm>>> GetListAsync([FromQuery] ResourceFilter filter)
+    public async Task<ApiResponse<IEnumerable<Resource>>> GetListAsync([FromQuery] ResourceFilter filter)
     {
         var request = new GetResourceList
         {
@@ -14,7 +15,7 @@ public class ResourceController : ApiControllerBase
             Filter = filter
         };
 
-        var vms = await Mediator.Send(request);
-        return Ok(vms);
+        var resources = await Mediator.Send(request);
+        return Ok(resources);
     }
 }
