@@ -1,0 +1,39 @@
+<nz-modal
+  nzClassName="resource-finder-modal"
+  [(nzVisible)]="isVisible"
+  [nzTitle]="modalTitle"
+  [nzContent]="modalContent"
+  [nzFooter]="modalFooter"
+>
+  <ng-template #modalTitle>
+    <span class="title">Find a resource</span>
+    <p class="description">Resources include projects, environments, feature flags, and segments.</p>
+  </ng-template>
+
+  <ng-template #modalContent>
+    <div class="content">
+      <div class="search">
+        <nz-input-group [nzPrefix]="prefixIconSearch">
+          <input type="text" nz-input placeholder="Find a resource"/>
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <span nz-icon nzType="icons:icon-search"></span>
+        </ng-template>
+      </div>
+
+      <div class="resources">
+        <ng-container *ngFor="let itemsGroup of groupedItems">
+          <nz-list [nzHeader]="listHeader">
+            <nz-list-item *ngFor="let item of itemsGroup.items">{{ item.name }}</nz-list-item>
+          </nz-list>
+          <ng-template #listHeader>
+            {{ itemsGroup.name }}
+          </ng-template>
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template #modalFooter>
+  </ng-template>
+</nz-modal>
