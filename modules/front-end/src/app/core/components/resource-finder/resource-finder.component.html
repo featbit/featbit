@@ -36,8 +36,8 @@
         <ng-container *ngFor="let itemsGroup of groupedItems">
           <nz-list [nzHeader]="listHeader">
             <nz-list-item *ngFor="let item of itemsGroup.items">
-              {{ item.name }}
-              <nz-tag>{{ item.rn }}</nz-tag>
+              <div>{{ item.name }}</div>
+              <div class="rn">{{ item.rn }}</div>
             </nz-list-item>
           </nz-list>
           <ng-template #listHeader>
