@@ -15,6 +15,14 @@ export interface Resource {
   type: ResourceTypeEnum;
 }
 
+export interface ResourceV2 {
+  id: string;
+  name: string;
+  pathName: string;
+  rn: string;
+  type: ResourceTypeEnum;
+}
+
 export interface ResourceFilter {
   type: ResourceTypeEnum;
   name: string;

@@ -53,17 +53,12 @@ public class ResourceServiceV2 : IResourceServiceV2
             {
                 Id = x.Id,
                 Name = x.Name,
+                PathName = x.Name,
                 Rn = "organization/" + x.Name,
                 Type = ResourceTypes.Organization
             });
 
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
-        }
-
-        var items = await query.ToListAsync();
-        items.Insert(0, ResourceV2.AllOrganizations);
+        var items = await HandleQueryAsync(query, name, ResourceV2.AllOrganizations);
         return items;
     }
 
@@ -73,13 +68,7 @@ public class ResourceServiceV2 : IResourceServiceV2
             ? GetWorkspaceProjectsQuery()
             : GetOrganizationProjectsQuery();
 
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
-        }
-
-        var items = await query.ToListAsync();
-        items.Insert(0, ResourceV2.AllProject);
+        var items = await HandleQueryAsync(query, name, ResourceV2.AllProject);
         return items;
 
         IMongoQueryable<ResourceV2> GetWorkspaceProjectsQuery()
@@ -92,7 +81,8 @@ public class ResourceServiceV2 : IResourceServiceV2
                 select new ResourceV2
                 {
                     Id = project.Id,
-                    Name = organization.Name + "/" + project.Name,
+                    Name = project.Name,
+                    PathName = organization.Name + "/" + project.Name,
                     Rn = "organization/" + organization.Name + ":project/" + project.Key,
                     Type = ResourceTypes.Project
                 };
@@ -110,6 +100,7 @@ public class ResourceServiceV2 : IResourceServiceV2
                 {
                     Id = project.Id,
                     Name = project.Name,
+                    PathName = project.Name,
                     Rn = "organization/" + organization.Name + ":project/" + project.Key,
                     Type = ResourceTypes.Project
                 };
@@ -124,13 +115,7 @@ public class ResourceServiceV2 : IResourceServiceV2
             ? GetWorkspaceEnvsQuery()
             : GetOrganizationEnvsQuery();
 
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
-        }
-
-        var items = await query.ToListAsync();
-        items.Insert(0, ResourceV2.AllProjectEnv);
+        var items = await HandleQueryAsync(query, name, ResourceV2.AllProjectEnv);
         return items;
 
         IMongoQueryable<ResourceV2> GetWorkspaceEnvsQuery()
@@ -144,7 +129,8 @@ public class ResourceServiceV2 : IResourceServiceV2
                 select new ResourceV2
                 {
                     Id = env.Id,
-                    Name = organization.Name + "/" + project.Name + "/" + env.Name,
+                    Name = env.Name,
+                    PathName = organization.Name + "/" + project.Name + "/" + env.Name,
                     Rn = "organization/" + organization.Name + ":project/" + project.Key + ":env/" + env.Key,
                     Type = ResourceTypes.Env
                 };
@@ -162,12 +148,33 @@ public class ResourceServiceV2 : IResourceServiceV2
                 select new ResourceV2
                 {
                     Id = env.Id,
-                    Name = project.Name + "/" + env.Name,
+                    Name = env.Name,
+                    PathName = project.Name + "/" + env.Name,
                     Rn = "organization/" + organization.Name + ":project/" + project.Key + ":env/" + env.Key,
                     Type = ResourceTypes.Env
                 };
 
             return organizationLevelQuery;
         }
+    }
+
+    private static async Task<IEnumerable<ResourceV2>> HandleQueryAsync(
+        IMongoQueryable<ResourceV2> query,
+        string name,
+        ResourceV2 allResource)
+    {
+        var hasNameFilter = !string.IsNullOrWhiteSpace(name);
+        if (hasNameFilter)
+        {
+            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+        }
+
+        var items = await query.ToListAsync();
+        if (!hasNameFilter)
+        {
+            items.Insert(0, allResource);
+        }
+
+        return items;
     }
 }

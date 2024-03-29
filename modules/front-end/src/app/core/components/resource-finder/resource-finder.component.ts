@@ -60,23 +60,19 @@ export class ResourceFinderComponent implements OnInit {
     this.isLoading = true;
     this.resourceService.getResourcesV2(this.filter).subscribe(resources => {
       for (const resource of resources) {
-        if (resource.rn.includes('*')) {
-          resource.name = $localize`:@@common.all:All`;
-        }
-
         const type = this.mapResourceType(resource.type);
         const group = this.groupedItems.find(x => x.name === type);
         if (group) {
           group.items.push({
             rn: resource.rn,
-            name: resource.name
+            name: resource.pathName
           });
         } else {
           this.groupedItems.push({
             name: type,
             items: [{
               rn: resource.rn,
-              name: resource.name
+              name: resource.pathName
             }]
           });
         }
