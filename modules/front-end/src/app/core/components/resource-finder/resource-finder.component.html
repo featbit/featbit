@@ -35,7 +35,10 @@
         <nz-list-empty *ngIf="groupedItems.length === 0"></nz-list-empty>
         <ng-container *ngFor="let itemsGroup of groupedItems">
           <nz-list [nzHeader]="listHeader">
-            <nz-list-item *ngFor="let item of itemsGroup.items">{{ item.name }}</nz-list-item>
+            <nz-list-item *ngFor="let item of itemsGroup.items">
+              {{ item.name }}
+              <nz-tag>{{ item.rn }}</nz-tag>
+            </nz-list-item>
           </nz-list>
           <ng-template #listHeader>
             {{ itemsGroup.name }}

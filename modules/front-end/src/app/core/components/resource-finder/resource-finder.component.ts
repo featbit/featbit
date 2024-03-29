@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ResourceFilterV2, ResourceTypeEnum } from "@shared/policy";
+import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum } from "@shared/policy";
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
@@ -10,7 +10,7 @@ interface GroupedItem {
 }
 
 interface Item {
-  id: string;
+  rn: string;
   name: string;
 }
 
@@ -24,6 +24,8 @@ export class ResourceFinderComponent implements OnInit {
   isVisible = false;
   @Input()
   resources: ResourceTypeEnum[] = [ResourceTypeEnum.Project, ResourceTypeEnum.Env, ResourceTypeEnum.Flag, ResourceTypeEnum.Segment];
+  @Input()
+  spaceLevel: ResourceSpaceLevel = ResourceSpaceLevel.Organization;
 
   constructor(private resourceService: ResourceService) {
   }
@@ -33,11 +35,14 @@ export class ResourceFinderComponent implements OnInit {
   isLoading = true;
   filter: ResourceFilterV2 = {
     name: '',
+    spaceLevel: ResourceSpaceLevel.Organization,
     types: []
   };
 
   ngOnInit(): void {
     this.filter.types = this.resources;
+    this.filter.spaceLevel = this.spaceLevel;
+
     this.$search.pipe(
       debounceTime(200)
     ).subscribe(() => {
@@ -55,23 +60,22 @@ export class ResourceFinderComponent implements OnInit {
     this.isLoading = true;
     this.resourceService.getResourcesV2(this.filter).subscribe(resources => {
       for (const resource of resources) {
-        // filter out general resources
         if (resource.rn.includes('*')) {
-          continue;
+          resource.name = $localize`:@@common.all:All`;
         }
 
         const type = this.mapResourceType(resource.type);
         const group = this.groupedItems.find(x => x.name === type);
         if (group) {
           group.items.push({
-            id: resource.id,
+            rn: resource.rn,
             name: resource.name
           });
         } else {
           this.groupedItems.push({
             name: type,
             items: [{
-              id: resource.id,
+              rn: resource.rn,
               name: resource.name
             }]
           });
@@ -84,6 +88,8 @@ export class ResourceFinderComponent implements OnInit {
 
   private mapResourceType(type: ResourceTypeEnum): string {
     switch (type) {
+      case ResourceTypeEnum.organization:
+        return $localize`:@@common.organization:Organization`;
       case ResourceTypeEnum.Project:
         return $localize`:@@common.project:Project`;
       case ResourceTypeEnum.Env:

@@ -12,18 +12,15 @@ public class GetResourceList : IRequest<IEnumerable<Resource>>
 public class GetResourceListHandler : IRequestHandler<GetResourceList, IEnumerable<Resource>>
 {
     private readonly IResourceService _service;
-    private readonly IMapper _mapper;
 
-    public GetResourceListHandler(IResourceService service, IMapper mapper)
+    public GetResourceListHandler(IResourceService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
     public async Task<IEnumerable<Resource>> Handle(GetResourceList request, CancellationToken cancellationToken)
     {
         var resources = await _service.GetResourcesAsync(request.OrganizationId, request.Filter);
-
-        return _mapper.Map<IEnumerable<Resource>>(resources);
+        return resources;
     }
 }

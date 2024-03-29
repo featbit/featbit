@@ -21,6 +21,7 @@ export interface ResourceFilter {
 }
 
 export interface ResourceFilterV2 {
+  spaceLevel: ResourceSpaceLevel;
   types: ResourceTypeEnum[];
   name: string;
 }
@@ -50,6 +51,11 @@ export enum ResourceTypeEnum {
   Env = 'env',
   Flag = 'flag',
   Segment = 'segment'
+}
+
+export enum ResourceSpaceLevel {
+  Workspace = 'workspace',
+  Organization = 'organization'
 }
 
 export enum EffectEnum {

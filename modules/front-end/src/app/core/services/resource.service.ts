@@ -33,6 +33,7 @@ export class ResourceService {
 
   getResourcesV2(filter: ResourceFilterV2): Observable<Resource[]> {
     const queryParam = {
+      spaceLevel: filter.spaceLevel ?? '',
       name: filter.name ?? '',
       types: filter.types ?? []
     };
