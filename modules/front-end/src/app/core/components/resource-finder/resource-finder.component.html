@@ -31,11 +31,19 @@
       <div *ngIf="isLoading" class="loading-spinner">
         <nz-spin class="spinner"></nz-spin>
       </div>
+      <div *ngIf="selectedItems.length > 0" class="selected-items">
+        <div class="text">Selected Items</div>
+        <div class="tags">
+          <ng-container *ngFor="let item of selectedItems">
+            <nz-tag nzMode="closeable" (nzOnClose)="removeFromSelected(item)">{{ item.name }}</nz-tag>
+          </ng-container>
+        </div>
+      </div>
       <div *ngIf="!isLoading" class="resources">
         <nz-list-empty *ngIf="groupedItems.length === 0"></nz-list-empty>
         <ng-container *ngFor="let itemsGroup of groupedItems">
           <nz-list [nzHeader]="listHeader">
-            <nz-list-item *ngFor="let item of itemsGroup.items">
+            <nz-list-item (click)="toggleSelected(item)" *ngFor="let item of itemsGroup.items">
               <div>{{ item.name }}</div>
               <div class="rn">{{ item.rn }}</div>
             </nz-list-item>

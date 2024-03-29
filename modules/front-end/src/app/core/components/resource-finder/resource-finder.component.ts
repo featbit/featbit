@@ -55,6 +55,25 @@ export class ResourceFinderComponent implements OnInit {
     this.$search.next();
   }
 
+  selectedItems: Item[] = [];
+
+  toggleSelected(item: Item) {
+    let existedItem = this.selectedItems.find(x => x.rn === item.rn);
+    if (existedItem) {
+      this.removeFromSelected(existedItem);
+    } else {
+      this.addToSelected(item);
+    }
+  }
+
+  addToSelected(item: Item) {
+    this.selectedItems.push(item);
+  }
+
+  removeFromSelected(item: Item) {
+    this.selectedItems = this.selectedItems.filter(x => x.rn !== item.rn);
+  }
+
   private fetchResources() {
     this.groupedItems = [];
     this.isLoading = true;
