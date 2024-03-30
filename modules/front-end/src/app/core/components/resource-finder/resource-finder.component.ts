@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum } from "@shared/policy";
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
@@ -26,6 +26,8 @@ export class ResourceFinderComponent implements OnInit {
   resources: ResourceTypeEnum[] = [ResourceTypeEnum.Project, ResourceTypeEnum.Env, ResourceTypeEnum.Flag, ResourceTypeEnum.Segment];
   @Input()
   spaceLevel: ResourceSpaceLevel = ResourceSpaceLevel.Organization;
+  @Output()
+  onClose: EventEmitter<string[]> = new EventEmitter<string[]>();
 
   constructor(private resourceService: ResourceService) {
   }
@@ -72,6 +74,16 @@ export class ResourceFinderComponent implements OnInit {
 
   removeFromSelected(item: Item) {
     this.selectedItems = this.selectedItems.filter(x => x.rn !== item.rn);
+  }
+
+  onCancel() {
+    this.isVisible = false;
+    this.onClose.emit([]);
+  }
+
+  onContinue() {
+    this.isVisible = false;
+    this.onClose.emit(this.selectedItems.map(x => x.rn));
   }
 
   private fetchResources() {
