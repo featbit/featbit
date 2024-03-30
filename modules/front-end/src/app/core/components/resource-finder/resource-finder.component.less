@@ -16,14 +16,19 @@
   gap: 8px;
 
   .selected-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
     .text {
-      margin: 0 0 4px 4px;
+      font-size: 14px;
+      margin-left: 5px;
     }
 
     .tags {
       display: flex;
       flex-wrap: wrap;
-      row-gap: 4px;
+      row-gap: 8px;
     }
   }
 
@@ -48,5 +53,13 @@
     .rn {
       color: @grey40-color;
     }
+  }
+}
+
+.actions {
+  button {
+    height: unset;
+    width: unset;
+    border-radius: 10px;
   }
 }

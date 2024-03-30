@@ -1,4 +1,86 @@
 @import "variables";
+@import "standards";
+
+// custom modal
+.ant-modal {
+  min-width: 600px;
+  min-height: 400px;
+}
+
+.ant-modal-content,
+.ant-modal-header {
+  border-radius: 20px;
+}
+
+.ant-modal-header {
+  padding: 24px 40px 0 40px;
+  border: none;
+
+  .ant-modal-title {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    color: @grey70-color;
+  }
+
+  &::after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    margin-top: 16px;
+    border-bottom: 1px solid @divider-color;
+  }
+}
+
+.ant-modal-close-x {
+  font-size: 24px;
+  color: @grey40-color;
+  padding-top: 8px;
+  padding-right: 35px;
+  width: unset;
+
+  i,
+  .ant-modal-close-icon {
+    display: none;
+  }
+
+  &::before {
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    content: url("../assets/icons/icon-close.svg");
+  }
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(0.5);
+  }
+}
+
+.ant-modal-body {
+  padding: 16px 40px;
+  .standard-form;
+}
+
+.ant-modal-footer {
+  border: none;
+  padding: 0 40px 24px 40px;
+
+  .ant-btn {
+    .standard-btn;
+
+    &:not(.ant-btn-primary) {
+      color: @grey50-color;
+      border-radius: 36px;
+      border: 1px solid @grey40-color;
+
+      &:hover {
+        background-color: @grey10-color;
+      }
+    }
+  }
+}
 
 // resource-finder modal
 .resource-finder-modal {
@@ -12,6 +94,10 @@
 
   .ant-modal-body {
     padding: 0 24px;
+  }
+
+  .ant-modal-footer {
+    padding: 10px 16px;
   }
 
   nz-input-group {

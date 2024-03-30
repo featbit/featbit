@@ -27,7 +27,6 @@
           <span nz-icon nzType="icons:icon-search"></span>
         </ng-template>
       </div>
-
       <div *ngIf="isLoading" class="loading-spinner">
         <nz-spin class="spinner"></nz-spin>
       </div>
@@ -57,5 +56,9 @@
   </ng-template>
 
   <ng-template #modalFooter>
+    <div *ngIf="selectedItems.length > 0" class="actions">
+      <button nz-button nzType="default">Cancel</button>
+      <button nz-button nzType="primary">Continue</button>
+    </div>
   </ng-template>
 </nz-modal>
