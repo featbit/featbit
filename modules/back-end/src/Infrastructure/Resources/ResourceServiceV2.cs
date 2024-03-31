@@ -42,7 +42,7 @@ public class ResourceServiceV2 : IResourceServiceV2
 
     private async Task<IEnumerable<ResourceV2>> GetOrganizationsAsync(Guid spaceId, string spaceLevel, string name)
     {
-        if (spaceLevel == ResourceSpaceLevel.Organization)
+        if (spaceLevel != ResourceSpaceLevel.Workspace)
         {
             return Enumerable.Empty<ResourceV2>();
         }
