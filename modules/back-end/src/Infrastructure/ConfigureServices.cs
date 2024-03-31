@@ -84,6 +84,7 @@ public static class ConfigureServices
         services.AddTransient<IPolicyService, PolicyService>();
         services.AddTransient<IEnvironmentService, EnvironmentService>();
         services.AddTransient<IResourceService, ResourceService>();
+        services.AddTransient<IResourceServiceV2, ResourceServiceV2>();
         services.AddTransient<IEndUserService, EndUserService>();
         services.AddTransient<ISegmentService, SegmentService>();
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();

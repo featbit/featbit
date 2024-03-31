@@ -15,6 +15,25 @@ export interface Resource {
   type: ResourceTypeEnum;
 }
 
+export interface ResourceV2 {
+  id: string;
+  name: string;
+  pathName: string;
+  rn: string;
+  type: ResourceTypeEnum;
+}
+
+export interface ResourceFilter {
+  type: ResourceTypeEnum;
+  name: string;
+}
+
+export interface ResourceFilterV2 {
+  spaceLevel: ResourceSpaceLevel;
+  types: ResourceTypeEnum[];
+  name: string;
+}
+
 export interface ValPlaceholder {
   displayName: string,
   name: string
@@ -40,6 +59,11 @@ export enum ResourceTypeEnum {
   Env = 'env',
   Flag = 'flag',
   Segment = 'segment'
+}
+
+export enum ResourceSpaceLevel {
+  Workspace = 'workspace',
+  Organization = 'organization'
 }
 
 export enum EffectEnum {

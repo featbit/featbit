@@ -1,7 +1,6 @@
-import { HttpClient } from "@angular/common/http";
-import { getCurrentOrganization } from "@utils/project-env";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { Resource, ResourceTypeEnum } from "@shared/policy";
+import { Resource, ResourceFilter, ResourceFilterV2, ResourceV2 } from "@shared/policy";
 import { Observable } from "rxjs";
 import { Injectable } from "@angular/core";
 
@@ -9,13 +8,39 @@ import { Injectable } from "@angular/core";
   providedIn: 'root'
 })
 export class ResourceService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
   get baseUrl() {
     return `${environment.url}/api/v1/resources`;
   }
 
-  getAll(type: ResourceTypeEnum, name: string): Observable<Resource[]> {
-    return this.http.get<Resource[]>(`${this.baseUrl}?type=${type}&name=${name}`);
+  get baseUrlV2() {
+    return `${environment.url}/api/v2/resources`;
+  }
+
+  getResources(filter: ResourceFilter): Observable<Resource[]> {
+    const queryParam = {
+      name: filter.name ?? '',
+      type: filter.type ?? ''
+    };
+
+    return this.http.get<Resource[]>(
+      this.baseUrl,
+      {params: new HttpParams({fromObject: queryParam})}
+    );
+  }
+
+  getResourcesV2(filter: ResourceFilterV2): Observable<ResourceV2[]> {
+    const queryParam = {
+      spaceLevel: filter.spaceLevel ?? '',
+      name: filter.name ?? '',
+      types: filter.types ?? []
+    };
+
+    return this.http.get<ResourceV2[]>(
+      this.baseUrlV2,
+      {params: new HttpParams({fromObject: queryParam})}
+    );
   }
 }

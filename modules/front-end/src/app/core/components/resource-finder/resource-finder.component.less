@@ -1,0 +1,65 @@
+@import "variables";
+
+.title {
+  font-weight: bold;
+}
+
+.description {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.content {
+  max-height: 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .selected-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .text {
+      font-size: 14px;
+      margin-left: 5px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+  }
+
+  .loading-spinner {
+    position: relative;
+    height: 200px;
+    border-radius: 8px;
+    background-color: @grey5-color;
+
+    .spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+    }
+  }
+
+  .resources {
+    border: 1px solid @grey30-color;
+    border-radius: 8px;
+    overflow: auto;
+
+    .rn {
+      color: @grey40-color;
+    }
+  }
+}
+
+.actions {
+  button {
+    height: unset;
+    width: unset;
+    border-radius: 10px;
+  }
+}
