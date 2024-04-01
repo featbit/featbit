@@ -24,7 +24,7 @@ public partial class RedisMessageProducer : IMessageProducer
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
 
             // Publish message to topic
-            await _database.PublishAsync(topic, jsonMessage);
+            await _database.PublishAsync(RedisChannel.Literal(topic), jsonMessage);
 
             Log.MessagePublished(_logger, jsonMessage);
         }
