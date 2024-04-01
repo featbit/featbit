@@ -16,7 +16,7 @@
         <PackageReference Include="Confluent.Kafka" Version="1.9.3"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9"/>
         <PackageReference Include="MongoDB.Driver" Version="2.24.0"/>
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.23.1"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.35.0" />
         <PackageReference Include="Handlebars.Net" Version="2.1.4"/>
         <PackageReference Include="StackExchange.Redis" Version="2.7.33"/>
     </ItemGroup>
