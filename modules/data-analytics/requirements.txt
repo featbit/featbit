@@ -2,7 +2,7 @@ certifi>=2018.4.16
 urllib3>=1.22.0
 python-dateutil==2.8.2
 flask==2.1.2
-werkzeug==2.2.3
+werkzeug==2.3.8
 clickhouse-pool==0.5.3
 clickhouse-driver==0.2.6
 kafka-python==2.0.2
