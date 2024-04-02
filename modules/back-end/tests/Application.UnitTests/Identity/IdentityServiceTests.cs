@@ -11,19 +11,12 @@ public class IdentityServiceTests
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock = new();
     private readonly IdentityService _identityService;
 
-    private readonly JwtOptions _jwtOptions = new()
-    {
-        Issuer = "test runner",
-        Audience = "test",
-        Key = "featbit-identity-key"
-    };
-
     public IdentityServiceTests()
     {
         _identityService = new IdentityService(
             null!,
             _passwordHasherMock.Object,
-            Options.Create(_jwtOptions)
+            Options.Create(new JwtOptions())
         );
     }
 
