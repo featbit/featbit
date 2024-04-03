@@ -30,6 +30,8 @@ public class ClientSdkFlag
 
     public string VariationType { get; set; }
 
+    public string VariationId { get; set; }
+
     public string MatchReason { get; set; }
 
     public Variation[] VariationOptions { get; set; }
@@ -42,6 +44,7 @@ public class ClientSdkFlag
     {
         Id = flag.GetProperty("key").GetString()!;
         Variation = userVariation.Variation.Value;
+        VariationId = userVariation.Variation.Id;
         VariationType = flag.GetProperty("variationType").GetString() ?? "string";
         MatchReason = userVariation.MatchReason;
         VariationOptions = allVariations;
