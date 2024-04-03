@@ -52,7 +52,7 @@ public class SdkController : PublicApiControllerBase
             x.Id,
             x.Variation,
             x.VariationType,
-            VariationId = x.VariationOptions.FirstOrDefault(y => y.Value == x.Variation)?.Id,
+            x.VariationId,
             x.SendToExperiment
         });
 
