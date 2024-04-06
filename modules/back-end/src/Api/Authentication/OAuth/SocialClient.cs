@@ -28,43 +28,47 @@ public class SocialClient
         var response = await httpclient.PostAsync(provider.AccessTokenUrl, authParams.HttpContent);
         response.EnsureSuccessStatusCode();
 
-        if (provider.Name == OAuthProviderNames.Google)
+        switch (provider.Name)
         {
-            await using var stream = await response.Content.ReadAsStreamAsync();
-            using var json = await JsonDocument.ParseAsync(stream);
-            var idToken = json.RootElement.GetProperty("id_token").GetString()!;
-
-            // parse idToken
-            var handler = new JwtSecurityTokenHandler();
-            var jwt = handler.ReadJwtToken(idToken);
-
-            var email = jwt.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
-            return email;
-        }
-
-        if (provider.Name == OAuthProviderNames.GitHub)
-        {
-            var resStr = await response.Content.ReadAsStringAsync();
-            var resDict = QueryHelpers.ParseQuery(resStr);
-
-            if (resDict.TryGetValue("access_token", out var accessToken))
+            case OAuthProviderNames.Google:
             {
-                httpclient.DefaultRequestHeaders.UserAgent.ParseAdd("FeatBit");
-                
-                httpclient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", accessToken);
-                
-                var res = await httpclient.GetAsync(provider.ProfileUrl);
-                
-                res.EnsureSuccessStatusCode();
-                
-                await using var stream = await res.Content.ReadAsStreamAsync();
+                await using var stream = await response.Content.ReadAsStreamAsync();
                 using var json = await JsonDocument.ParseAsync(stream);
-                var email = json.RootElement.EnumerateArray()
-                    .FirstOrDefault(x => x.GetProperty("primary").GetBoolean())
-                    .GetProperty("email").GetString()!;
+                var idToken = json.RootElement.GetProperty("id_token").GetString()!;
 
+                // parse idToken
+                var handler = new JwtSecurityTokenHandler();
+                var jwt = handler.ReadJwtToken(idToken);
+
+                var email = jwt.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
                 return email;
+            }
+            case OAuthProviderNames.GitHub:
+            {
+                var resStr = await response.Content.ReadAsStringAsync();
+                var resDict = QueryHelpers.ParseQuery(resStr);
+
+                if (resDict.TryGetValue("access_token", out var accessToken))
+                {
+                    httpclient.DefaultRequestHeaders.UserAgent.ParseAdd("FeatBit");
+                
+                    httpclient.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", accessToken);
+                
+                    var res = await httpclient.GetAsync(provider.ProfileUrl);
+                
+                    res.EnsureSuccessStatusCode();
+                
+                    await using var stream = await res.Content.ReadAsStreamAsync();
+                    using var json = await JsonDocument.ParseAsync(stream);
+                    var email = json.RootElement.EnumerateArray()
+                        .FirstOrDefault(x => x.GetProperty("primary").GetBoolean())
+                        .GetProperty("email").GetString()!;
+
+                    return email;
+                }
+
+                break;
             }
         }
 
