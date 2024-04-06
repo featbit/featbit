@@ -17,8 +17,8 @@ public class OAuthProvider
     {
         return Name switch
         {
-            "Google" => new GoogleProvider { Name = Name, ClientId = ClientId, ClientSecret = ClientSecret },
-            "GitHub" => new GitHubProvider { Name = Name, ClientId = ClientId, ClientSecret = ClientSecret },
+            OAuthProviderNames.Google => new GoogleProvider { Name = Name, ClientId = ClientId, ClientSecret = ClientSecret },
+            OAuthProviderNames.GitHub => new GitHubProvider { Name = Name, ClientId = ClientId, ClientSecret = ClientSecret },
             _ => throw new NotImplementedException()
         };
     }

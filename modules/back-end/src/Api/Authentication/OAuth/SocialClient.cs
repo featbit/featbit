@@ -28,7 +28,7 @@ public class SocialClient
         var response = await httpclient.PostAsync(provider.AccessTokenUrl, authParams.HttpContent);
         response.EnsureSuccessStatusCode();
 
-        if (provider.Name == "Google")
+        if (provider.Name == OAuthProviderNames.Google)
         {
             await using var stream = await response.Content.ReadAsStreamAsync();
             using var json = await JsonDocument.ParseAsync(stream);
@@ -42,7 +42,7 @@ public class SocialClient
             return email;
         }
 
-        if (provider.Name == "GitHub")
+        if (provider.Name == OAuthProviderNames.GitHub)
         {
             var resStr = await response.Content.ReadAsStringAsync();
             var resDict = QueryHelpers.ParseQuery(resStr);
@@ -57,8 +57,6 @@ public class SocialClient
                 var res = await httpclient.GetAsync(provider.ProfileUrl);
                 
                 res.EnsureSuccessStatusCode();
-                
-                var tt = await res.Content.ReadAsStringAsync();
                 
                 await using var stream = await res.Content.ReadAsStreamAsync();
                 using var json = await JsonDocument.ParseAsync(stream);
