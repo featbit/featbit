@@ -1,11 +1,11 @@
-using System.Text.Json;
 using Api.Authentication.OAuth;
-using Api.Authentication.OpenIdConnect;
 using Application.CloudConfig;
 using Application.Identity;
 using Application.Services;
 using AutoMapper;
 using Domain.CloudConfig;
+using Domain.Organizations;
+using Domain.Policies;
 using Domain.Users;
 using Domain.Workspaces;
 
@@ -13,21 +13,23 @@ namespace Api.Controllers;
 
 [AllowAnonymous]
 [Route("api/v{version:apiVersion}/social")]
-public class SosialController : ApiControllerBase
+public class SocialController : ApiControllerBase
 {
     private readonly SocialClient _client;
     private readonly IUserService _userService;
     private readonly IIdentityService _identityService;
     private readonly IWorkspaceService _workspaceService;
+    private readonly IOrganizationService _organizationService;
     private readonly ILogger<SsoController> _logger;
     private readonly ICollection<SocialProvider> _socialProviders;
     private readonly IMapper _mapper;
 
-    public SosialController(
+    public SocialController(
         SocialClient client,
         IUserService userService,
         IIdentityService identityService,
         IWorkspaceService workspaceService,
+        IOrganizationService organizationService,
         IConfiguration configuration,
         ILogger<SsoController> logger,
         IMapper mapper)
@@ -37,6 +39,7 @@ public class SosialController : ApiControllerBase
         _userService = userService;
         _identityService = identityService;
         _workspaceService = workspaceService;
+        _organizationService = organizationService;
         _logger = logger;
         _mapper = mapper;
     }
@@ -44,7 +47,7 @@ public class SosialController : ApiControllerBase
     [HttpPost("login")]
     public async Task<ApiResponse<LoginToken>> OidcLoginByCode(LoginBySocial request)
     {
-        var (error, provider) = ValidateSocialLoginParam(request.ProviderName);
+        var (error, provider) = ValidateLoginParam(request.ProviderName);
         if (!string.IsNullOrWhiteSpace(error))
         {
             return Error<LoginToken>(error);
@@ -66,14 +69,15 @@ public class SosialController : ApiControllerBase
             var user = await _userService.FindOneAsync(x => x.Email == email);
             if (user == null)
             {
-                var workspace = new Workspace
-                {
-                    Name = "Default Workspace",
-                    Key = "default-workspace"
-                };
-                await _workspaceService.AddOneAsync(workspace);
+                var workspace = await InitWorkspace();
                 var registerResult = await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
                 token = new LoginToken(true, registerResult.Token);
+                
+                // add user to organization
+                var organizationUser = new OrganizationUser(organization.Id, _currentUser.Id);
+                var policies = new[] { BuiltInPolicy.Owner };
+                await _organizationService.AddUserAsync(organizationUser, policies: policies);
+                
             }
             else
             {
@@ -100,15 +104,27 @@ public class SosialController : ApiControllerBase
         return Ok(providers);
     }
 
-    private (string error, SocialProvider?) ValidateSocialLoginParam(string providerName)
+    private async Task<Workspace> InitWorkspace()
+    {
+        var workspace = new Workspace
+        {
+            Name = "Default Workspace",
+            Key = "default-workspace"
+        };
+        
+        await _workspaceService.AddOneAsync(workspace);
+        
+        // add new organization
+        var organization = new Organization(workspace.Id, "Default Organization");
+        await _organizationService.AddOneAsync(organization);
+        
+        return workspace;
+    }
+
+    private (string error, SocialProvider?) ValidateLoginParam(string providerName)
     {
         var provider = _socialProviders?.FirstOrDefault(x => x.Name == providerName);
         
-        if (provider == null)
-        {
-            return ("Social login is not enabled", null);
-        }
-        
-        return (string.Empty, provider);
+        return provider == null ? ("Social login is not enabled", null) : (string.Empty, provider);
     }
 }
