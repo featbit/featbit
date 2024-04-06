@@ -5,8 +5,10 @@ import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
-import { IS_SSO_FIRST_LOGIN } from "@utils/localstorage-keys";
+import { IS_FIRST_LOGIN } from "@utils/localstorage-keys";
 import { UserService } from "@services/user.service";
+import { SocialService } from "@services/social.service";
+import { SocialProvider } from "@shared/types";
 
 enum LoginStep {
   Step1 = 'step1', // email
@@ -31,16 +33,23 @@ export class DoLoginComponent implements OnInit {
   isSsoEnabled: boolean = false;
   isSpinning: boolean = false;
 
+  isSocialEnabled: boolean = false;
+  socialProviders: SocialProvider[] = [];
+
   constructor(
     private fb: FormBuilder,
     private activatedRoute: ActivatedRoute,
     private identityService: IdentityService,
     private ssoService: SsoService,
+    private socialService: SocialService,
     private message: NzMessageService,
     private userService: UserService
   ) { }
 
   async ngOnInit() {
+    this.socialProviders = await this.socialService.getProviders();
+    this.isSocialEnabled = this.socialProviders.length > 0;
+
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
       password: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]],
@@ -53,6 +62,7 @@ export class DoLoginComponent implements OnInit {
 
     this.isSsoEnabled = await this.ssoService.isEnabled();
     this.subscribeSsoLogin();
+    this.subscribeSocialLogin();
   }
 
   requiredWhenLoginVerifiedValidator = (step: LoginStep): ValidatorFn => {
@@ -96,6 +106,10 @@ export class DoLoginComponent implements OnInit {
     const { workspaceKey } = this.ssoForm.value;
 
     window.location.href = this.ssoService.getAuthorizeUrl(workspaceKey);
+  }
+
+  socialLogin(provider: SocialProvider) {
+    window.location.href = provider.getAuthorizeUrl(this.socialService.redirectUri, provider.name);
   }
 
   async passwordLogin() {
@@ -154,25 +168,39 @@ export class DoLoginComponent implements OnInit {
 
         this.ssoService.oidcLogin(params['code'], params['state'])
           .subscribe({
-            next: response => this.handleSsoResponse(response),
+            next: response => this.handleExternalLoginResponse(response),
             error: error => this.handleError(error)
           })
       }
     });
   }
 
-  async handleSsoResponse(response) {
+  subscribeSocialLogin() {
+    this.activatedRoute.queryParams.subscribe(params => {
+      if (params["social-logged-in"] && params['code'] && params['state']) {
+        this.isSpinning = true;
+
+        this.socialService.login(params['code'], params['state'])
+          .subscribe({
+            next: response => this.handleExternalLoginResponse(response),
+            error: error => this.handleError(error)
+          })
+      }
+    });
+  }
+
+  async handleExternalLoginResponse(response) {
     if (!response.success) {
       if (response.errors) {
         this.message.error(response.errors[0]);
       } else {
-        this.message.error($localize`:@@common.cannot-login-by-oidc-code:Failed to login by OpenID Connect SSO.`);
+        this.message.error($localize`:@@common.cannot-login-by-code:Failed to login.`);
       }
 
       return;
     }
 
-    localStorage.setItem(IS_SSO_FIRST_LOGIN, response.data.isSsoFirstLogin);
+    localStorage.setItem(IS_FIRST_LOGIN, response.data.isFirstLogin);
     await this.identityService.doLoginUser(response.data.token);
     this.message.success($localize`:@@common.login-success:Login with success`);
   }

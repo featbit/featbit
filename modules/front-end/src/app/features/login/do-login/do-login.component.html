@@ -54,6 +54,16 @@
           <ng-container *ngIf="step !== LoginStep.Step2" i18n="@@common.continue">Continue</ng-container>
           <ng-container *ngIf="step === LoginStep.Step2" i18n="@@common.login">Login</ng-container>
         </button>
+        <div class="social-buttons" *ngIf="isSocialEnabled">
+          <div i18n="@@common.or">OR</div>
+          <button *ngFor="let provider of socialProviders"  nz-button nzType="default" class="btn social-btn" (click)="socialLogin(provider)">
+            <span nz-icon [nzType]="provider.icon" nzTheme="outline"></span>
+            <span>
+              <span i18n="@@common.continue-with">Continue with</span>
+              {{provider.name}}
+            </span>
+          </button>
+        </div>
       </form>
     </nz-tab>
     <nz-tab i18n-nzTitle="@@common.sso" nzTitle="SSO" *ngIf="isSsoEnabled">

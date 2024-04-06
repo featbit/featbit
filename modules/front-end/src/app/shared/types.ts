@@ -164,3 +164,35 @@ export interface EnvironmentSetting {
 export const EnvironmentSettingTypes = {
   SyncUrls: 'sync-urls',
 }
+
+export enum SocialProviderEnum {
+  Google = 'Google',
+  Github = 'Github'
+}
+
+export class SocialProvider {
+  constructor(public name: string, public clientId: string) {
+  }
+
+  get icon(): string {
+    switch (this.name) {
+      case SocialProviderEnum.Google:
+        return 'google';
+      case SocialProviderEnum.Github:
+        return 'github';
+      default:
+        return null;
+    }
+  }
+
+  getAuthorizeUrl(redirectUri: string, providerName: string): string {
+    switch (this.name) {
+      case SocialProviderEnum.Google:
+        return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.clientId}&redirect_uri=${redirectUri}&response_type=code&scope=profile email&state=${providerName}`;
+      case SocialProviderEnum.Github:
+        return '';
+      default:
+        return null;
+    }
+  }
+}

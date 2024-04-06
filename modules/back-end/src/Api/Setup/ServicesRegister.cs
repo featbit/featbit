@@ -131,6 +131,9 @@ public static class ServicesRegister
 
         // SSO
         builder.Services.AddSso();
+        
+        // OAuth
+        builder.Services.AddOAuth();
 
         // replace default authorization result handler
         var authorizationResultHandler =

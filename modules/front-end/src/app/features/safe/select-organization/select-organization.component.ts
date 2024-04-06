@@ -3,7 +3,7 @@ import { IdentityService } from "@services/identity.service";
 import { IProfile, IOrganization } from "@shared/types";
 import { OrganizationService } from "@services/organization.service";
 import { Router } from "@angular/router";
-import { IS_SSO_FIRST_LOGIN, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
+import { IS_FIRST_LOGIN, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
 import { getProfile } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
 
@@ -35,7 +35,7 @@ export class SelectOrganizationComponent {
     this.organizationService.switchOrganization(organization);
     this.organizationService.addUser({ method: 'Email', email: this.profile.email, policyIds: [], groupIds: [] }).subscribe(
       async () => {
-        localStorage.removeItem(IS_SSO_FIRST_LOGIN);
+        localStorage.removeItem(IS_FIRST_LOGIN);
         const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
         if (redirectUrl) {
           localStorage.removeItem(LOGIN_REDIRECT_URL);
