@@ -36,8 +36,8 @@ public class SocialController : ApiControllerBase
     {
         _oauthProviders = configuration
             .GetSection("OAuthProviders")
-            .Get<OAuthProvider[]>()
-            .Select(x => x.GetProvider());
+            .Get<OAuthProvider[]>()?
+            .Select(x => x.GetProvider()) ?? Array.Empty<OAuthProvider>();
         
         _client = client;
         _userService = userService;

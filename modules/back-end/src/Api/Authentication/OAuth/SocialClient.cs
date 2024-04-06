@@ -49,16 +49,22 @@ public class SocialClient
 
             if (resDict.TryGetValue("access_token", out var accessToken))
             {
-                var res = await httpclient.GetAsync(provider.ProfileUrl);
+                httpclient.DefaultRequestHeaders.UserAgent.ParseAdd("FeatBit");
                 
                 httpclient.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("bearer", accessToken);
+                    new AuthenticationHeaderValue("Bearer", accessToken);
+                
+                var res = await httpclient.GetAsync(provider.ProfileUrl);
                 
                 res.EnsureSuccessStatusCode();
                 
-                await using var stream = await response.Content.ReadAsStreamAsync();
+                var tt = await res.Content.ReadAsStringAsync();
+                
+                await using var stream = await res.Content.ReadAsStreamAsync();
                 using var json = await JsonDocument.ParseAsync(stream);
-                var email = json.RootElement.GetProperty("email").GetString()!;
+                var email = json.RootElement.EnumerateArray()
+                    .FirstOrDefault(x => x.GetProperty("primary").GetBoolean())
+                    .GetProperty("email").GetString()!;
 
                 return email;
             }
