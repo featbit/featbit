@@ -58,10 +58,8 @@
           <div i18n="@@common.or">OR</div>
           <button *ngFor="let provider of socialProviders"  nz-button nzType="default" class="btn social-btn" (click)="socialLogin(provider)">
             <span nz-icon [nzType]="provider.icon" nzTheme="outline"></span>
-            <span>
-              <span i18n="@@common.continue-with">Continue with</span>
-              {{provider.name}}
-            </span>
+            <span i18n="@@common.continue-with-google" *ngIf="provider.name === 'Google'">Continue with Google</span>
+            <span i18n="@@common.continue-with-github" *ngIf="provider.name === 'GitHub'">Continue with GitHub</span>
           </button>
         </div>
       </form>

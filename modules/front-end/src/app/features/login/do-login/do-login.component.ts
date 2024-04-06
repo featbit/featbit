@@ -61,8 +61,7 @@ export class DoLoginComponent implements OnInit {
     });
 
     this.isSsoEnabled = await this.ssoService.isEnabled();
-    this.subscribeSsoLogin();
-    this.subscribeSocialLogin();
+    this.subscribeExternalLogin();
   }
 
   requiredWhenLoginVerifiedValidator = (step: LoginStep): ValidatorFn => {
@@ -160,31 +159,28 @@ export class DoLoginComponent implements OnInit {
     this.message.error($localize `:@@common.login-error:Error occurred, please contact the support.`);
   }
 
-  subscribeSsoLogin() {
+  subscribeExternalLogin() {
     this.activatedRoute.queryParams.subscribe(params => {
-      if (params["sso-logged-in"] && params['code']) {
-        this.isSSO = true;
+      if (params['code'] && params['state']) {
         this.isSpinning = true;
 
-        this.ssoService.oidcLogin(params['code'], params['state'])
+        if (params["social-logged-in"]) {
+          this.isSSO = true;
+  
+          this.ssoService.oidcLogin(params['code'], params['state'])
+            .subscribe({
+              next: response => this.handleExternalLoginResponse(response),
+              error: error => this.handleError(error)
+            })
+        } else if (params["sso-logged-in"]) {
+          this.socialService.login(params['code'], params['state'])
           .subscribe({
             next: response => this.handleExternalLoginResponse(response),
             error: error => this.handleError(error)
           })
-      }
-    });
-  }
-
-  subscribeSocialLogin() {
-    this.activatedRoute.queryParams.subscribe(params => {
-      if (params["social-logged-in"] && params['code'] && params['state']) {
-        this.isSpinning = true;
-
-        this.socialService.login(params['code'], params['state'])
-          .subscribe({
-            next: response => this.handleExternalLoginResponse(response),
-            error: error => this.handleError(error)
-          })
+        } else {
+          this.isSpinning = false;
+        }
       }
     });
   }
