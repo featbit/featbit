@@ -1,14 +1,11 @@
-using System.Text;
-using Api.Authentication.OpenIdConnect;
 using Application.Identity;
-using Domain.CloudConfig;
-using Domain.Workspaces;
+using Domain.OAuthProviders;
 
 namespace Api.Authentication.OAuth;
 
 public interface IClientAuthenticator
 {
-    AuthParameters GetAuthParameters(LoginBySocial request, SocialProvider provider);
+    AuthParameters GetAuthParameters(LoginBySocial request, OAuthProvider provider);
 }
 
 public static class ClientAuthenticator
@@ -21,7 +18,7 @@ public static class ClientAuthenticator
 
 public class Authenticator : IClientAuthenticator
 {
-    public AuthParameters GetAuthParameters(LoginBySocial request, SocialProvider provider)
+    public AuthParameters GetAuthParameters(LoginBySocial request, OAuthProvider provider)
     {
         var kvs = new List<KeyValuePair<string, string>>
         {

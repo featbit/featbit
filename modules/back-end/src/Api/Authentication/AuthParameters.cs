@@ -1,4 +1,4 @@
-namespace Api.Authentication.OpenIdConnect;
+namespace Api.Authentication;
 
 public class AuthParameters
 {

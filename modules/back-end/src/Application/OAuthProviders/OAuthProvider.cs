@@ -1,6 +1,6 @@
-﻿namespace Application.CloudConfig;
+﻿namespace Application.OAuthProviders;
 
-public class SocialProviderVm
+public class OAuthProviderVm
 {
     public string Name { get; set; }
     public string ClientId { get; set; }

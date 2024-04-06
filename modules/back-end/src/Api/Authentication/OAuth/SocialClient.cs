@@ -1,9 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using Application.Identity;
-using Domain.CloudConfig;
-using Domain.Workspaces;
+using Domain.OAuthProviders;
 
 namespace Api.Authentication.OAuth;
 
@@ -16,7 +14,7 @@ public class SocialClient
         _httpClientFactory = httpClientFactory;
     }
 
-    public async Task<string?> GetEmailAsync(LoginBySocial request, SocialProvider provider)
+    public async Task<string?> GetEmailAsync(LoginBySocial request, OAuthProvider provider)
     {
         // get auth parameters
         var authenticator = ClientAuthenticator.GetAuthenticator();
