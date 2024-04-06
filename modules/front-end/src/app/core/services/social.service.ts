@@ -21,7 +21,7 @@ export class SocialService {
 
   async getProviders() {
     const result= await firstValueFrom(this.http.get<any[]>(`${this.baseUrl}/providers`));
-    return result.map((provider: any) => new OAuthProvider(provider.name, provider.clientId));
+    return result.map((provider: any) => new OAuthProvider(provider.name, provider.clientId, provider.authorizeUrl));
   }
 
   isEnabled(): Promise<boolean> {

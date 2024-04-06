@@ -20,7 +20,7 @@ public class SocialController : ApiControllerBase
     private readonly ILogger<SsoController> _logger;
     private readonly IMapper _mapper;
     private readonly IOrganizationService _organizationService;
-    private readonly ICollection<OAuthProvider> _socialProviders;
+    private readonly IEnumerable<OAuthProvider> _oauthProviders;
     private readonly IUserService _userService;
     private readonly IWorkspaceService _workspaceService;
 
@@ -34,7 +34,11 @@ public class SocialController : ApiControllerBase
         ILogger<SsoController> logger,
         IMapper mapper)
     {
-        _socialProviders = configuration.GetSection("SocialProviders").Get<OAuthProvider[]>();
+        _oauthProviders = configuration
+            .GetSection("OAuthProviders")
+            .Get<OAuthProvider[]>()
+            .Select(x => x.GetProvider());
+        
         _client = client;
         _userService = userService;
         _identityService = identityService;
@@ -107,16 +111,16 @@ public class SocialController : ApiControllerBase
     [HttpGet("providers")]
     public ApiResponse<IEnumerable<OAuthProviderVm>> Providers()
     {
-        var providers = _socialProviders?.Any() != true
+        var providers = _oauthProviders?.Any() != true
             ? Array.Empty<OAuthProviderVm>()
-            : _mapper.Map<IEnumerable<OAuthProviderVm>>(_socialProviders);
+            : _mapper.Map<IEnumerable<OAuthProviderVm>>(_oauthProviders);
 
         return Ok(providers);
     }
 
     private (string error, OAuthProvider?) ValidateLoginParam(string providerName)
     {
-        var provider = _socialProviders?.FirstOrDefault(x => x.Name == providerName);
+        var provider = _oauthProviders?.FirstOrDefault(x => x.Name == providerName);
 
         return provider == null ? ("Social login is not enabled", null) : (string.Empty, provider);
     }

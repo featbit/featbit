@@ -171,7 +171,7 @@ export enum OAuthProviderEnum {
 }
 
 export class OAuthProvider {
-  constructor(public name: string, public clientId: string) {
+  constructor(public name: string, public clientId: string, public authorizeUrl: string) {
   }
 
   get icon(): string {
@@ -185,14 +185,7 @@ export class OAuthProvider {
     }
   }
 
-  getAuthorizeUrl(redirectUri: string, providerName: string): string {
-    switch (this.name) {
-      case OAuthProviderEnum.Google:
-        return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.clientId}&redirect_uri=${redirectUri}&response_type=code&scope=profile email&state=${providerName}`;
-      case OAuthProviderEnum.GitHub:
-        return '';
-      default:
-        return null;
-    }
+  getAuthorizeUrl(redirectUri: string): string {
+    return `${this.authorizeUrl}&redirect_uri=${redirectUri}`;
   }
 }

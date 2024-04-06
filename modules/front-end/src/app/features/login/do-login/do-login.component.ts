@@ -109,7 +109,7 @@ export class DoLoginComponent implements OnInit {
   }
 
   socialLogin(provider: OAuthProvider) {
-    window.location.href = provider.getAuthorizeUrl(this.socialService.redirectUri, provider.name);
+    window.location.href = provider.getAuthorizeUrl(this.socialService.redirectUri);
   }
 
   async passwordLogin() {
@@ -165,7 +165,7 @@ export class DoLoginComponent implements OnInit {
       if (params['code'] && params['state']) {
         this.isSpinning = true;
 
-        if (params["social-logged-in"]) {
+        if (params["sso-logged-in"]) {
           this.isSSO = true;
   
           this.ssoService.oidcLogin(params['code'], params['state'])
@@ -173,7 +173,7 @@ export class DoLoginComponent implements OnInit {
               next: response => this.handleExternalLoginResponse(response),
               error: error => this.handleError(error)
             })
-        } else if (params["sso-logged-in"]) {
+        } else if (params["social-logged-in"]) {
           this.socialService.login(params['code'], params['state'])
           .subscribe({
             next: response => this.handleExternalLoginResponse(response),

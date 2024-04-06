@@ -1,7 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using Application.Identity;
 using Domain.OAuthProviders;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Api.Authentication.OAuth;
 
@@ -23,18 +25,45 @@ public class SocialClient
         // exchange access token using code
         var httpclient = _httpClientFactory.CreateClient();
 
-        var response = await httpclient.PostAsync(provider.GetAccessTokenUrl(), authParams.HttpContent);
+        var response = await httpclient.PostAsync(provider.AccessTokenUrl, authParams.HttpContent);
         response.EnsureSuccessStatusCode();
 
-        await using var stream = await response.Content.ReadAsStreamAsync();
-        using var json = await JsonDocument.ParseAsync(stream);
-        var idToken = json.RootElement.GetProperty("id_token").GetString()!;
+        if (provider.Name == "Google")
+        {
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            using var json = await JsonDocument.ParseAsync(stream);
+            var idToken = json.RootElement.GetProperty("id_token").GetString()!;
 
-        // parse idToken
-        var handler = new JwtSecurityTokenHandler();
-        var jwt = handler.ReadJwtToken(idToken);
+            // parse idToken
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(idToken);
 
-        var email = jwt.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
-        return email;
+            var email = jwt.Claims.FirstOrDefault(x => x.Type == "email")?.Value;
+            return email;
+        }
+
+        if (provider.Name == "GitHub")
+        {
+            var resStr = await response.Content.ReadAsStringAsync();
+            var resDict = QueryHelpers.ParseQuery(resStr);
+
+            if (resDict.TryGetValue("access_token", out var accessToken))
+            {
+                var res = await httpclient.GetAsync(provider.ProfileUrl);
+                
+                httpclient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("bearer", accessToken);
+                
+                res.EnsureSuccessStatusCode();
+                
+                await using var stream = await response.Content.ReadAsStreamAsync();
+                using var json = await JsonDocument.ParseAsync(stream);
+                var email = json.RootElement.GetProperty("email").GetString()!;
+
+                return email;
+            }
+        }
+
+        return null;
     }
 }
