@@ -54,17 +54,17 @@
           <ng-container *ngIf="step !== LoginStep.Step2" i18n="@@common.continue">Continue</ng-container>
           <ng-container *ngIf="step === LoginStep.Step2" i18n="@@common.login">Login</ng-container>
         </button>
-        <div class="social-login" *ngIf="isSocialEnabled">
-          <div class="uppercase" i18n="@@common.or">or</div>
-          <div class="social-btns">
-            <button *ngFor="let provider of oauthProviders" nz-button nzType="default" class="btn social-btn" (click)="socialLogin(provider)">
-              <span nz-icon [nzType]="provider.icon" nzTheme="outline"></span>
-              <span i18n="@@common.continue-with-google" *ngIf="provider.name === OAuthProviderEnum.Google">Continue with Google</span>
-              <span i18n="@@common.continue-with-github" *ngIf="provider.name === OAuthProviderEnum.GitHub">Continue with GitHub</span>
-            </button>
-          </div>
-        </div>
       </form>
+      <div class="social-login" *ngIf="isSocialEnabled">
+        <div class="uppercase" i18n="@@common.or">or</div>
+        <div class="social-btns">
+          <button *ngFor="let provider of oauthProviders" nz-button nzType="default" class="btn social-btn" (click)="socialLogin(provider)">
+            <span nz-icon [nzType]="provider.icon" nzTheme="outline"></span>
+            <span i18n="@@common.continue-with-google" *ngIf="provider.name === OAuthProviderEnum.Google">Continue with Google</span>
+            <span i18n="@@common.continue-with-github" *ngIf="provider.name === OAuthProviderEnum.GitHub">Continue with GitHub</span>
+          </button>
+        </div>
+      </div>
     </nz-tab>
     <nz-tab i18n-nzTitle="@@common.sso" nzTitle="SSO" *ngIf="isSsoEnabled">
       <form nz-form [formGroup]="ssoForm" (ngSubmit)="ssoLogin()">

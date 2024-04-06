@@ -167,17 +167,19 @@ export class DoLoginComponent implements OnInit {
 
         if (params["sso-logged-in"]) {
           this.isSSO = true;
-  
+
           this.ssoService.oidcLogin(params['code'], params['state'])
             .subscribe({
               next: response => this.handleExternalLoginResponse(response),
-              error: error => this.handleError(error)
+              error: error => this.handleError(error),
+              complete: () => this.isSpinning = false
             })
         } else if (params["social-logged-in"]) {
           this.socialService.login(params['code'], params['state'])
           .subscribe({
             next: response => this.handleExternalLoginResponse(response),
-            error: error => this.handleError(error)
+            error: error => this.handleError(error),
+            complete: () => this.isSpinning = false
           })
         } else {
           this.isSpinning = false;
