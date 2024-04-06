@@ -5,7 +5,7 @@
         <nz-form-item *ngIf="step === LoginStep.Step1">
           <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
             <nz-input-group [nzPrefix]="emailPrefix">
-              <input type="text" nz-input formControlName="identity" i18n-placeholder="@@common.email" placeholder="Email"/>
+              <input type="text" nz-input formControlName="identity" i18n-placeholder="@@common.email" placeholder="Email" autofocus/>
             </nz-input-group>
             <ng-template #emailPrefix>
               <i nz-icon nzType="icons:icon-email"></i>
