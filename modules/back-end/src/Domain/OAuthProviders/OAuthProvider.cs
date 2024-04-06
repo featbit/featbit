@@ -8,11 +8,10 @@ public class OAuthProvider
 
     public virtual string AccessTokenUrl { get; }
 
-    public virtual string ProfileUrl { get; }
+    public virtual string EmailUrl { get; }
 
     public virtual string AuthorizeUrl { get; }
     
-
     public OAuthProvider GetProvider()
     {
         return Name switch

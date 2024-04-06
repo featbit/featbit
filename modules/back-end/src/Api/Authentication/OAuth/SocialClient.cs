@@ -55,7 +55,7 @@ public class SocialClient
                     httpclient.DefaultRequestHeaders.Authorization =
                         new AuthenticationHeaderValue("Bearer", accessToken);
                 
-                    var res = await httpclient.GetAsync(provider.ProfileUrl);
+                    var res = await httpclient.GetAsync(provider.EmailUrl);
                 
                     res.EnsureSuccessStatusCode();
                 
