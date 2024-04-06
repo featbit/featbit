@@ -3538,7 +3538,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>SSO</target>
       </trans-unit>
@@ -5025,7 +5025,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">84</context>
         </context-group>
         <target>继续</target>
       </trans-unit>
@@ -5857,7 +5857,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <target>Workspace key</target>
       </trans-unit>
@@ -5869,7 +5869,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <target>Workspace key 不可为空</target>
       </trans-unit>
@@ -5890,7 +5890,7 @@
         <target>密码</target>
       </trans-unit>
       <trans-unit id="common.or" datatype="html">
-        <source>OR</source>
+        <source>or</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
           <context context-type="linenumber">58</context>
@@ -5905,7 +5905,7 @@
         <source>Continue with Google</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <target>使用 Google 登录</target>
       </trans-unit>
@@ -5913,7 +5913,7 @@
         <source>Continue with GitHub</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">63</context>
         </context-group>
         <target>使用 GitHub 登录</target>
       </trans-unit>
@@ -5921,7 +5921,7 @@
         <source>Email and/or password incorrect</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">147</context>
+          <context context-type="linenumber">148</context>
         </context-group>
         <target>邮箱或密码错误</target>
       </trans-unit>
@@ -5929,11 +5929,11 @@
         <source>Login with success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">153</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">201</context>
+          <context context-type="linenumber">202</context>
         </context-group>
         <target>登录成功</target>
       </trans-unit>
@@ -5941,7 +5941,7 @@
         <source>Error occurred, please contact the support.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">159</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <target>服务错误，请联系运营人员。</target>
       </trans-unit>
@@ -5949,7 +5949,7 @@
         <source>Failed to login.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">193</context>
+          <context context-type="linenumber">194</context>
         </context-group>
         <target>登录失败</target>
       </trans-unit>
