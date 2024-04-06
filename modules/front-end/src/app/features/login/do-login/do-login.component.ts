@@ -47,9 +47,6 @@ export class DoLoginComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    this.oauthProviders = await this.socialService.getProviders();
-    this.isSocialEnabled = this.oauthProviders.length > 0;
-
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
       password: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]],
@@ -60,7 +57,11 @@ export class DoLoginComponent implements OnInit {
       workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
     });
 
-    this.isSsoEnabled = await this.ssoService.isEnabled();
+    const [providers, ssoEnabled] = await Promise.all([this.socialService.getProviders(), this.ssoService.isEnabled()]);
+
+    this.oauthProviders = providers;
+    this.isSsoEnabled = ssoEnabled;
+    this.isSocialEnabled = this.oauthProviders.length > 0;
     this.subscribeExternalLogin();
   }
 
