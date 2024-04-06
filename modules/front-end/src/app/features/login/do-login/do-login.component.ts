@@ -8,7 +8,7 @@ import { ActivatedRoute } from "@angular/router";
 import { IS_FIRST_LOGIN } from "@utils/localstorage-keys";
 import { UserService } from "@services/user.service";
 import { SocialService } from "@services/social.service";
-import { SocialProvider } from "@shared/types";
+import { OAuthProvider, OAuthProviderEnum } from "@shared/types";
 
 enum LoginStep {
   Step1 = 'step1', // email
@@ -34,7 +34,7 @@ export class DoLoginComponent implements OnInit {
   isSpinning: boolean = false;
 
   isSocialEnabled: boolean = false;
-  socialProviders: SocialProvider[] = [];
+  oauthProviders: OAuthProvider[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -47,8 +47,8 @@ export class DoLoginComponent implements OnInit {
   ) { }
 
   async ngOnInit() {
-    this.socialProviders = await this.socialService.getProviders();
-    this.isSocialEnabled = this.socialProviders.length > 0;
+    this.oauthProviders = await this.socialService.getProviders();
+    this.isSocialEnabled = this.oauthProviders.length > 0;
 
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
@@ -107,7 +107,7 @@ export class DoLoginComponent implements OnInit {
     window.location.href = this.ssoService.getAuthorizeUrl(workspaceKey);
   }
 
-  socialLogin(provider: SocialProvider) {
+  socialLogin(provider: OAuthProvider) {
     window.location.href = provider.getAuthorizeUrl(this.socialService.redirectUri, provider.name);
   }
 
@@ -202,4 +202,5 @@ export class DoLoginComponent implements OnInit {
   }
 
   protected readonly LoginStep = LoginStep;
+  protected readonly OAuthProviderEnum = OAuthProviderEnum;
 }

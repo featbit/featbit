@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from "../../../environments/environment";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
-import { SocialProvider } from "@shared/types";
+import { OAuthProvider } from "@shared/types";
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +21,7 @@ export class SocialService {
 
   async getProviders() {
     const result= await firstValueFrom(this.http.get<any[]>(`${this.baseUrl}/providers`));
-    return result.map((provider: any) => new SocialProvider(provider.name, provider.clientId));
+    return result.map((provider: any) => new OAuthProvider(provider.name, provider.clientId));
   }
 
   isEnabled(): Promise<boolean> {

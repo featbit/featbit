@@ -165,20 +165,20 @@ export const EnvironmentSettingTypes = {
   SyncUrls: 'sync-urls',
 }
 
-export enum SocialProviderEnum {
+export enum OAuthProviderEnum {
   Google = 'Google',
-  Github = 'Github'
+  GitHub = 'GitHub'
 }
 
-export class SocialProvider {
+export class OAuthProvider {
   constructor(public name: string, public clientId: string) {
   }
 
   get icon(): string {
     switch (this.name) {
-      case SocialProviderEnum.Google:
+      case OAuthProviderEnum.Google:
         return 'google';
-      case SocialProviderEnum.Github:
+      case OAuthProviderEnum.GitHub:
         return 'github';
       default:
         return null;
@@ -187,9 +187,9 @@ export class SocialProvider {
 
   getAuthorizeUrl(redirectUri: string, providerName: string): string {
     switch (this.name) {
-      case SocialProviderEnum.Google:
+      case OAuthProviderEnum.Google:
         return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${this.clientId}&redirect_uri=${redirectUri}&response_type=code&scope=profile email&state=${providerName}`;
-      case SocialProviderEnum.Github:
+      case OAuthProviderEnum.GitHub:
         return '';
       default:
         return null;

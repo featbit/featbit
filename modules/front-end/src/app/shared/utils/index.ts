@@ -1,5 +1,5 @@
 import { USER_PROFILE } from "./localstorage-keys";
-import { IProfile, SocialProvider } from "../types";
+import { IProfile } from "../types";
 import { USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT } from "@shared/constants";
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
@@ -153,21 +153,3 @@ export const getTimezoneString = () => {
 export const trimJsonString = (json: string) => {
   return JSON.stringify(JSON.parse(json));
 }
-
-// export const getSocialProviderConfig = (provider: SocialProvider) => {
-//   switch (provider.name) {
-//     case 'google':
-//       return {
-//         icon: 'google',
-//         clientId: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-//         redirectUri: process.env.REACT_APP_GOOGLE_REDIRECT_URI
-//       };
-//     case 'github':
-//       return {
-//         clientId: process.env.REACT_APP_GITHUB_CLIENT_ID,
-//         redirectUri: process.env.REACT_APP_GITHUB_REDIRECT_URI
-//       };
-//     default:
-//       return null;
-//   }
-// }
