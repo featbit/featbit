@@ -10,7 +10,7 @@
     },
     Value: {
       data: {
-        isSsoFirstLogin: false,
+        isFirstLogin: false,
         token: [Scrubbed JWT]
       },
       errors: [],
