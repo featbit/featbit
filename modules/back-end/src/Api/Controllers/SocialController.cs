@@ -80,10 +80,10 @@ public class SocialController : ApiControllerBase
                 // add new workspace
                 await _workspaceService.AddOneAsync(workspace);
 
+                // register user
                 var registerResult =
                     await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.OAuth);
-                token = new LoginToken(true, registerResult.Token);
-
+                
                 // add new organization
                 var organization = new Organization(workspace.Id, "Default Organization");
                 await _organizationService.AddOneAsync(organization);
@@ -92,6 +92,8 @@ public class SocialController : ApiControllerBase
                 var organizationUser = new OrganizationUser(organization.Id, registerResult.UserId);
                 var policies = new[] { BuiltInPolicy.Owner };
                 await _organizationService.AddUserAsync(organizationUser, policies);
+                
+                token = new LoginToken(false, registerResult.Token);
             }
             else
             {
@@ -111,9 +113,7 @@ public class SocialController : ApiControllerBase
     [HttpGet("providers")]
     public ApiResponse<IEnumerable<OAuthProviderVm>> Providers()
     {
-        var providers = _oauthProviders?.Any() != true
-            ? Array.Empty<OAuthProviderVm>()
-            : _mapper.Map<IEnumerable<OAuthProviderVm>>(_oauthProviders);
+        var providers = _mapper.Map<IEnumerable<OAuthProviderVm>>(_oauthProviders);
 
         return Ok(providers);
     }

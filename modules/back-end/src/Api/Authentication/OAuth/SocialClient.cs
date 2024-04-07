@@ -25,14 +25,14 @@ public class SocialClient
         // exchange access token using code
         var httpclient = _httpClientFactory.CreateClient();
 
-        var response = await httpclient.PostAsync(provider.AccessTokenUrl, authParams.HttpContent);
-        response.EnsureSuccessStatusCode();
+        var accessTokenResponse = await httpclient.PostAsync(provider.AccessTokenUrl, authParams.HttpContent);
+        accessTokenResponse.EnsureSuccessStatusCode();
 
         switch (provider.Name)
         {
             case OAuthProviderNames.Google:
             {
-                await using var stream = await response.Content.ReadAsStreamAsync();
+                await using var stream = await accessTokenResponse.Content.ReadAsStreamAsync();
                 using var json = await JsonDocument.ParseAsync(stream);
                 var idToken = json.RootElement.GetProperty("id_token").GetString()!;
 
@@ -45,25 +45,24 @@ public class SocialClient
             }
             case OAuthProviderNames.GitHub:
             {
-                var resStr = await response.Content.ReadAsStringAsync();
-                var resDict = QueryHelpers.ParseQuery(resStr);
+                var responseStr = await accessTokenResponse.Content.ReadAsStringAsync();
+                var responseDict = QueryHelpers.ParseQuery(responseStr);
 
-                if (resDict.TryGetValue("access_token", out var accessToken))
+                if (responseDict.TryGetValue("access_token", out var accessToken))
                 {
                     httpclient.DefaultRequestHeaders.UserAgent.ParseAdd("FeatBit");
-                
                     httpclient.DefaultRequestHeaders.Authorization =
                         new AuthenticationHeaderValue("Bearer", accessToken);
                 
-                    var res = await httpclient.GetAsync(provider.EmailUrl);
+                    var emailResponse = await httpclient.GetAsync(provider.EmailUrl);
+                    emailResponse.EnsureSuccessStatusCode();
                 
-                    res.EnsureSuccessStatusCode();
-                
-                    await using var stream = await res.Content.ReadAsStreamAsync();
+                    await using var stream = await emailResponse.Content.ReadAsStreamAsync();
                     using var json = await JsonDocument.ParseAsync(stream);
                     var email = json.RootElement.EnumerateArray()
                         .FirstOrDefault(x => x.GetProperty("primary").GetBoolean())
-                        .GetProperty("email").GetString()!;
+                        .GetProperty("email")
+                        .GetString()!;
 
                     return email;
                 }

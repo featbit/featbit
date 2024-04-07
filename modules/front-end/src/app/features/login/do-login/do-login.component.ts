@@ -5,7 +5,7 @@ import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import {IdentityService} from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
-import { IS_FIRST_LOGIN } from "@utils/localstorage-keys";
+import { IS_SSO_FIRST_LOGIN } from "@utils/localstorage-keys";
 import { UserService } from "@services/user.service";
 import { SocialService } from "@services/social.service";
 import { OAuthProvider, OAuthProviderEnum } from "@shared/types";
@@ -199,7 +199,7 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
-    localStorage.setItem(IS_FIRST_LOGIN, response.data.isFirstLogin);
+    localStorage.setItem(IS_SSO_FIRST_LOGIN, response.data.isSsoFirstLogin);
     await this.identityService.doLoginUser(response.data.token);
     this.message.success($localize`:@@common.login-success:Login with success`);
   }

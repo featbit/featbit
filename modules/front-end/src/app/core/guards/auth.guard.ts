@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/ro
 import { getProfile } from '@shared/utils';
 import {
   CURRENT_ORGANIZATION,
-  IS_FIRST_LOGIN,
+  IS_SSO_FIRST_LOGIN,
   LOGIN_REDIRECT_URL
 } from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
@@ -43,7 +43,7 @@ export const authGuard = async (
   }
 
   workspaceService.setWorkspace(workspace);
-  const isSsoFirstLogin = localStorage.getItem(IS_FIRST_LOGIN) === 'true';
+  const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN) === 'true';
   const organizations = await organizationService.getListAsync(isSsoFirstLogin);
   organizationService.organizations = organizations;
 
