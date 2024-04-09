@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
-import {IdentityService} from "@services/identity.service";
+import { IdentityService } from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
 import { IS_SSO_FIRST_LOGIN } from "@utils/localstorage-keys";
@@ -162,25 +162,23 @@ export class DoLoginComponent implements OnInit {
 
   subscribeExternalLogin() {
     this.activatedRoute.queryParams.subscribe(params => {
-      if (params['code'] && params['state']) {
+      const code = params['code'];
+      const state = params['state'];
+
+      if (code && state) {
         this.isSpinning = true;
+
+        const observer = {
+          next: response => this.handleExternalLoginResponse(response),
+          error: error => this.handleError(error),
+          complete: () => this.isSpinning = false
+        };
 
         if (params["sso-logged-in"]) {
           this.isSSO = true;
-
-          this.ssoService.oidcLogin(params['code'], params['state'])
-            .subscribe({
-              next: response => this.handleExternalLoginResponse(response),
-              error: error => this.handleError(error),
-              complete: () => this.isSpinning = false
-            })
+          this.ssoService.oidcLogin(code, state).subscribe(observer)
         } else if (params["social-logged-in"]) {
-          this.socialService.login(params['code'], params['state'])
-          .subscribe({
-            next: response => this.handleExternalLoginResponse(response),
-            error: error => this.handleError(error),
-            complete: () => this.isSpinning = false
-          })
+          this.socialService.login(code, state).subscribe(observer)
         } else {
           this.isSpinning = false;
         }
