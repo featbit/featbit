@@ -1,10 +1,10 @@
 namespace Application.Identity;
 
-public class LoginBySocial
+public class LoginByOAuthCode
 {
     public string Code { get; set; }
 
     public string RedirectUri { get; set; }
-    
+
     public string ProviderName { get; set; }
 }

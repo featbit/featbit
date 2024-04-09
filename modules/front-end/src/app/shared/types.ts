@@ -170,22 +170,8 @@ export enum OAuthProviderEnum {
   GitHub = 'GitHub'
 }
 
-export class OAuthProvider {
-  constructor(public name: string, public clientId: string, public authorizeUrl: string) {
-  }
-
-  get icon(): string {
-    switch (this.name) {
-      case OAuthProviderEnum.Google:
-        return 'google';
-      case OAuthProviderEnum.GitHub:
-        return 'github';
-      default:
-        return null;
-    }
-  }
-
-  getAuthorizeUrl(redirectUri: string): string {
-    return `${this.authorizeUrl}&redirect_uri=${redirectUri}`;
-  }
+export interface OAuthProvider {
+  name: string;
+  authorizeUrl: string;
+  icon: string;
 }

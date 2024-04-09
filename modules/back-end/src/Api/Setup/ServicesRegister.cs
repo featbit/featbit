@@ -1,5 +1,7 @@
 using System.Text;
 using Api.Authentication;
+using Api.Authentication.OAuth;
+using Api.Authentication.OpenIdConnect;
 using Api.Authorization;
 using Api.Swagger;
 using Application.Services;
@@ -129,11 +131,9 @@ public static class ServicesRegister
             }
         });
 
-        // SSO
-        builder.Services.AddSso();
-        
-        // OAuth
-        builder.Services.AddOAuth();
+        // add OIDC & OAuth client
+        builder.Services.AddHttpClient<OidcClient>();
+        builder.Services.AddHttpClient<OAuthClient>();
 
         // replace default authorization result handler
         var authorizationResultHandler =

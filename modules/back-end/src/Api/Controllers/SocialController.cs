@@ -1,13 +1,8 @@
 using Api.Authentication.OAuth;
 using Application.Identity;
-using Application.OAuthProviders;
 using Application.Services;
-using AutoMapper;
-using Domain.OAuthProviders;
-using Domain.Organizations;
-using Domain.Policies;
+using Application.Workspaces;
 using Domain.Users;
-using Domain.Workspaces;
 
 namespace Api.Controllers;
 
@@ -15,84 +10,56 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/social")]
 public class SocialController : ApiControllerBase
 {
-    private readonly SocialClient _client;
-    private readonly IIdentityService _identityService;
-    private readonly ILogger<SsoController> _logger;
-    private readonly IMapper _mapper;
-    private readonly IOrganizationService _organizationService;
-    private readonly IEnumerable<OAuthProvider> _oauthProviders;
+    private readonly OAuthClient _oauthClient;
+    private readonly OAuthProviders _oauthProviders;
     private readonly IUserService _userService;
-    private readonly IWorkspaceService _workspaceService;
+    private readonly IIdentityService _identityService;
+    private readonly ILogger<SocialController> _logger;
 
     public SocialController(
-        SocialClient client,
+        OAuthClient oauthClient,
+        IConfiguration configuration,
         IUserService userService,
         IIdentityService identityService,
-        IWorkspaceService workspaceService,
-        IOrganizationService organizationService,
-        IConfiguration configuration,
-        ILogger<SsoController> logger,
-        IMapper mapper)
+        ILogger<SocialController> logger)
     {
-        _oauthProviders = configuration
-            .GetSection("OAuthProviders")
-            .Get<OAuthProvider[]>()?
-            .Select(x => x.GetProvider()) ?? Array.Empty<OAuthProvider>();
-        
-        _client = client;
+        _oauthClient = oauthClient;
+        _oauthProviders = new OAuthProviders(configuration);
         _userService = userService;
         _identityService = identityService;
-        _workspaceService = workspaceService;
-        _organizationService = organizationService;
         _logger = logger;
-        _mapper = mapper;
     }
 
     [HttpPost("login")]
-    public async Task<ApiResponse<LoginToken>> Login(LoginBySocial request)
+    public async Task<ApiResponse<LoginToken>> Login(LoginByOAuthCode request)
     {
-        var (error, provider) = ValidateLoginParam(request.ProviderName);
+        var provider = _oauthProviders.GetProvider(request.ProviderName);
         if (provider == null)
         {
-            return Error<LoginToken>(error);
+            return Error<LoginToken>($"Social login for ‘{request.ProviderName}’ is not supported.");
         }
 
         try
         {
-            // Get access token from code
-            var email = await _client.GetEmailAsync(request, provider);
-
+            var email = await _oauthClient.GetEmailAsync(request, provider);
             if (string.IsNullOrWhiteSpace(email))
             {
-                return Error<LoginToken>("Can not get email from id_token");
+                return Error<LoginToken>("Can not get email by OAuth code.");
             }
-            
+
             LoginToken token;
             var user = await _userService.FindOneAsync(x => x.Email == email);
             if (user == null)
             {
-                var workspace = new Workspace
+                // register user
+                var createWorkspace = new CreateWorkspace
                 {
-                    Name = "Default Workspace",
-                    Key = "default-workspace"
+                    Email = email,
+                    Password = string.Empty,
+                    UserOrigin = UserOrigin.OAuth
                 };
 
-                // add new workspace
-                await _workspaceService.AddOneAsync(workspace);
-
-                // register user
-                var registerResult =
-                    await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.OAuth);
-                
-                // add new organization
-                var organization = new Organization(workspace.Id, "Default Organization");
-                await _organizationService.AddOneAsync(organization);
-
-                // add user to organization
-                var organizationUser = new OrganizationUser(organization.Id, registerResult.UserId);
-                var policies = new[] { BuiltInPolicy.Owner };
-                await _organizationService.AddUserAsync(organizationUser, policies);
-                
+                var registerResult = await Mediator.Send(createWorkspace);
                 token = new LoginToken(false, registerResult.Token);
             }
             else
@@ -104,24 +71,21 @@ public class SocialController : ApiControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred when login by oidc code");
+            _logger.LogError(ex, "Exception occurred when performing OAuth login.");
 
             return Error<LoginToken>(ex.Message);
         }
     }
 
     [HttpGet("providers")]
-    public ApiResponse<IEnumerable<OAuthProviderVm>> Providers()
+    public ApiResponse<IEnumerable<OAuthProviderVm>> Providers(string redirectUri)
     {
-        var providers = _mapper.Map<IEnumerable<OAuthProviderVm>>(_oauthProviders);
+        var vms = _oauthProviders.Select(x => new OAuthProviderVm
+        {
+            Name = x.Name,
+            AuthorizeUrl = x.GetAuthorizeUrl(redirectUri)
+        });
 
-        return Ok(providers);
-    }
-
-    private (string error, OAuthProvider?) ValidateLoginParam(string providerName)
-    {
-        var provider = _oauthProviders?.FirstOrDefault(x => x.Name == providerName);
-
-        return provider == null ? ("Social login is not enabled", null) : (string.Empty, provider);
+        return Ok(vms);
     }
 }

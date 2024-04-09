@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from "../../../environments/environment";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
-import { OAuthProvider } from "@shared/types";
+import { OAuthProvider, OAuthProviderEnum } from "@shared/types";
 
 @Injectable({
   providedIn: 'root'
@@ -19,16 +19,23 @@ export class SocialService {
     return `${location.origin}${location.pathname}?social-logged-in=true`;
   }
 
-  async getProviders() {
-    const result= await firstValueFrom(this.http.get<any[]>(`${this.baseUrl}/providers`));
-    return result.map((provider: any) => new OAuthProvider(provider.name, provider.clientId, provider.authorizeUrl));
-  }
+  async getProviders(): Promise<OAuthProvider[]> {
+    const providers = await firstValueFrom(this.http.get<OAuthProvider[]>(`${this.baseUrl}/providers?redirectUri=${this.redirectUri}`));
 
-  isEnabled(): Promise<boolean> {
-    return firstValueFrom(this.http.get<boolean>(`${this.baseUrl}/check-enabled`));
+    for (const provider of providers) {
+      if (provider.name === OAuthProviderEnum.Google) {
+        provider.icon = 'google';
+      }
+
+      if (provider.name === OAuthProviderEnum.GitHub) {
+        provider.icon = 'github';
+      }
+    }
+
+    return providers;
   }
 
   login(code: string, providerName: string) {
-    return this.http.post(`${this.baseUrl}/login`, { code, providerName, redirectUri: this.redirectUri });
+    return this.http.post(`${this.baseUrl}/login`, {code, providerName, redirectUri: this.redirectUri});
   }
 }

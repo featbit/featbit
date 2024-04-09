@@ -109,7 +109,7 @@ export class DoLoginComponent implements OnInit {
   }
 
   socialLogin(provider: OAuthProvider) {
-    window.location.href = provider.getAuthorizeUrl(this.socialService.redirectUri);
+    window.location.href = provider.authorizeUrl;
   }
 
   async passwordLogin() {
