@@ -34,7 +34,8 @@ public class OrganizationController : ApiControllerBase
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
     {
         request.WorkspaceId = WorkspaceId;
-        
+        request.CurrentUserId = CurrentUser.Id;
+
         var organization = await Mediator.Send(request);
 
         return Ok(organization);

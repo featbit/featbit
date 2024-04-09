@@ -51,7 +51,6 @@ public class SocialController : ApiControllerBase
             var user = await _userService.FindOneAsync(x => x.Email == email);
             if (user == null)
             {
-                // register user
                 var createWorkspace = new CreateWorkspace
                 {
                     Email = email,
