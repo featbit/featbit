@@ -45,7 +45,7 @@ public class OAuthProvider
             case OAuthProviders.Google:
                 AuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
                 TokenEndpoint = "https://oauth2.googleapis.com/token";
-                UserInformationEndpoint = "https://openidconnect.googleapis.com/v1/userinfo";
+                UserInformationEndpoint = "https://www.googleapis.com/oauth2/v3/userinfo";
                 break;
 
             case OAuthProviders.GitHub:
