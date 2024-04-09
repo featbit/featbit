@@ -176,9 +176,9 @@ export class DoLoginComponent implements OnInit {
 
         if (params["sso-logged-in"]) {
           this.isSSO = true;
-          this.ssoService.oidcLogin(code, state).subscribe(observer)
+          this.ssoService.oidcLogin(code, state).subscribe(observer);
         } else if (params["social-logged-in"]) {
-          this.socialService.login(code, state).subscribe(observer)
+          this.socialService.login(code, state).subscribe(observer);
         } else {
           this.isSpinning = false;
         }
