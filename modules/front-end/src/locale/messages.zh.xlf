@@ -3538,7 +3538,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>SSO</target>
       </trans-unit>
@@ -5025,7 +5025,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">84</context>
         </context-group>
         <target>继续</target>
       </trans-unit>
@@ -5857,7 +5857,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <target>Workspace key</target>
       </trans-unit>
@@ -5869,7 +5869,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">70</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <target>Workspace key 不可为空</target>
       </trans-unit>
@@ -5889,11 +5889,35 @@
         </context-group>
         <target>密码</target>
       </trans-unit>
+      <trans-unit id="common.uppercase-or" datatype="html">
+        <source>OR</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <target>或者</target>
+      </trans-unit>
+      <trans-unit id="common.continue-with-google" datatype="html">
+        <source>Continue with Google</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+        <target>使用 Google 登录</target>
+      </trans-unit>
+      <trans-unit id="common.continue-with-github" datatype="html">
+        <source>Continue with GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">64</context>
+        </context-group>
+        <target>使用 GitHub 登录</target>
+      </trans-unit>
       <trans-unit id="common.incorrect-email-or-password" datatype="html">
         <source>Email and/or password incorrect</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">148</context>
         </context-group>
         <target>邮箱或密码错误</target>
       </trans-unit>
@@ -5901,11 +5925,11 @@
         <source>Login with success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">139</context>
+          <context context-type="linenumber">153</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">177</context>
+          <context context-type="linenumber">202</context>
         </context-group>
         <target>登录成功</target>
       </trans-unit>
@@ -5913,17 +5937,17 @@
         <source>Error occurred, please contact the support.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <target>服务错误，请联系运营人员。</target>
       </trans-unit>
-      <trans-unit id="common.cannot-login-by-oidc-code" datatype="html">
-        <source>Failed to login by OpenID Connect SSO.</source>
+      <trans-unit id="common.cannot-login-by-code" datatype="html">
+        <source>Failed to login.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">169</context>
+          <context context-type="linenumber">194</context>
         </context-group>
-        <target>通过 OpenID Connect SSO 登录失败。</target>
+        <target>登录失败</target>
       </trans-unit>
       <trans-unit id="auditlogs.audit-logs" datatype="html">
         <source>Audit Logs</source>

@@ -5,7 +5,7 @@
         <nz-form-item *ngIf="step === LoginStep.Step1">
           <nz-form-control [nzErrorTip]="invalidPhoneNumberOrEmail">
             <nz-input-group [nzPrefix]="emailPrefix">
-              <input type="text" nz-input formControlName="identity" i18n-placeholder="@@common.email" placeholder="Email"/>
+              <input type="text" nz-input formControlName="identity" i18n-placeholder="@@common.email" placeholder="Email" autofocus/>
             </nz-input-group>
             <ng-template #emailPrefix>
               <i nz-icon nzType="icons:icon-email"></i>
@@ -55,6 +55,16 @@
           <ng-container *ngIf="step === LoginStep.Step2" i18n="@@common.login">Login</ng-container>
         </button>
       </form>
+      <div class="social-login" *ngIf="isSocialEnabled">
+        <nz-divider i18n-nzText="@@common.uppercase-or" nzText="OR"></nz-divider>
+        <div class="social-btns">
+          <button *ngFor="let provider of oauthProviders" nz-button nzType="default" class="btn social-btn" (click)="socialLogin(provider)">
+            <span nz-icon [nzType]="provider.icon" nzTheme="outline"></span>
+            <span i18n="@@common.continue-with-google" *ngIf="provider.name === OAuthProviderEnum.Google">Continue with Google</span>
+            <span i18n="@@common.continue-with-github" *ngIf="provider.name === OAuthProviderEnum.GitHub">Continue with GitHub</span>
+          </button>
+        </div>
+      </div>
     </nz-tab>
     <nz-tab i18n-nzTitle="@@common.sso" nzTitle="SSO" *ngIf="isSsoEnabled">
       <form nz-form [formGroup]="ssoForm" (ngSubmit)="ssoLogin()">

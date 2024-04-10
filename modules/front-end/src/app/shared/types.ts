@@ -164,3 +164,14 @@ export interface EnvironmentSetting {
 export const EnvironmentSettingTypes = {
   SyncUrls: 'sync-urls',
 }
+
+export enum OAuthProviderEnum {
+  Google = 'Google',
+  GitHub = 'GitHub'
+}
+
+export interface OAuthProvider {
+  name: string;
+  authorizeUrl: string;
+  icon: string;
+}

@@ -1,5 +1,4 @@
 using Application.Bases;
-using Application.Users;
 using Domain.Organizations;
 using Domain.Policies;
 
@@ -10,6 +9,8 @@ public class CreateOrganization : IRequest<OrganizationVm>
     public Guid WorkspaceId { get; set; }
 
     public string Name { get; set; }
+
+    public Guid CurrentUserId { get; set; }
 }
 
 public class CreateOrganizationValidator : AbstractValidator<CreateOrganization>
@@ -24,16 +25,11 @@ public class CreateOrganizationValidator : AbstractValidator<CreateOrganization>
 public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, OrganizationVm>
 {
     private readonly IOrganizationService _service;
-    private readonly ICurrentUser _currentUser;
     private readonly IMapper _mapper;
 
-    public CreateOrganizationHandler(
-        IOrganizationService service,
-        ICurrentUser currentUser,
-        IMapper mapper)
+    public CreateOrganizationHandler(IOrganizationService service, IMapper mapper)
     {
         _service = service;
-        _currentUser = currentUser;
         _mapper = mapper;
     }
 
@@ -44,7 +40,7 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
         await _service.AddOneAsync(organization);
 
         // add user to organization
-        var organizationUser = new OrganizationUser(organization.Id, _currentUser.Id);
+        var organizationUser = new OrganizationUser(organization.Id, request.CurrentUserId);
         var policies = new[] { BuiltInPolicy.Owner };
         await _service.AddUserAsync(organizationUser, policies: policies);
 
