@@ -26,4 +26,11 @@
       <app-profile></app-profile>
     </ng-template>
   </nz-tab>
+
+  <nz-tab>
+    <a *nzTabLink nz-tab-link [routerLink]="['./global-users']" i18n="@@workspace.global-users.tabtitle">Global Users</a>
+    <ng-template nz-tab>
+      <global-user></global-user>
+    </ng-template>
+  </nz-tab>
 </nz-tabset>

@@ -31,6 +31,7 @@ import { NzTagModule } from "ng-zorro-antd/tag";
 import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspace.component";
+import { GlobalUserComponent } from './global-user/global-user.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspac
     OrganizationComponent,
     ProfileComponent,
     ProjectComponent,
-    ProjectFilterPipe
+    ProjectFilterPipe,
+    GlobalUserComponent
   ],
   imports: [
     CommonModule,
