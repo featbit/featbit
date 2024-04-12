@@ -6,6 +6,8 @@ namespace Domain.FeatureFlags;
 
 public class FeatureFlag : FullAuditedEntity
 {
+    public const string KeyPattern = "^[a-zA-Z0-9._-]+$";
+
     public Guid EnvId { get; set; }
 
     public Guid Revision { get; set; }
@@ -140,7 +142,8 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public DataChange UpdateSetting(string name, string description, bool isEnabled, string disabledVariationId, Guid currentUserId)
+    public DataChange UpdateSetting(string name, string description, bool isEnabled, string disabledVariationId,
+        Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
@@ -230,6 +233,7 @@ public class FeatureFlag : FullAuditedEntity
         {
             instruction.Apply(this);
         }
+
         MarkAsUpdated(draft.CreatorId);
 
         return dataChange.To(this);

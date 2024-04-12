@@ -7,6 +7,7 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { BehaviorSubject } from "rxjs";
 import {
+  FlagKeyPattern,
   IFeatureFlagCreationPayload,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
@@ -115,7 +116,7 @@ export class CreateFeatureFlagComponent implements OnInit {
 
     this.form = this.fb.group({
       name: [name, Validators.required],
-      key: [key, Validators.required, this.flagKeyAsyncValidator],
+      key: [key, [Validators.required, Validators.pattern(FlagKeyPattern)], [this.flagKeyAsyncValidator]],
       description: [description, Validators.maxLength(512)]
     });
 
