@@ -56,14 +56,15 @@
             <nz-form-item>
               <nz-form-label
                 nzRequired
-                i18n-nzTooltipTitle="@@ff.key-description"
-                nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation">Key</nz-form-label>
-              <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..."
-                               [nzErrorTip]="keyErrorTpl">
-                <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name"
-                       placeholder="Key can be auto-generated from name"/>
+                i18n-nzTooltipTitle="@@ff.key-creation-description"
+                nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation. Keys must only contain letters, numbers, ., _ or -.">
+                Key
+              </nz-form-label>
+              <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
+                <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name"/>
                 <ng-template #keyErrorTpl let-control>
                   <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+                  <ng-container *ngIf="control.hasError('pattern')" i18n="@@common.key-format-error">Only allow letters, numbers, '.', '_' or '-'</ng-container>
                   <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
                   <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
                 </ng-template>

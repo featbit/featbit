@@ -56,7 +56,8 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
             .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
 
         RuleFor(x => x.Key)
-            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired)
+            .Matches(FeatureFlag.KeyPattern).WithErrorCode(ErrorCodes.Invalid("key"));
 
         RuleFor(x => x.VariationType)
             .Must(VariationTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidVariationType);

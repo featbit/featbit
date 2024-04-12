@@ -6,6 +6,8 @@ namespace Domain.FeatureFlags;
 
 public class FeatureFlag : FullAuditedEntity
 {
+    public const string KeyPattern = "^[a-zA-Z0-9._-]+$";
+
     public Guid EnvId { get; set; }
 
     public Guid Revision { get; set; }
