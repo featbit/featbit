@@ -98,6 +98,15 @@ public class RedisPopulatingService : ICachePopulatingService
         foreach (var env in envs)
         {
             var descriptor = await _envService.GetResourceDescriptorAsync(env.Id);
+            if (descriptor == null)
+            {
+                _logger.LogWarning(
+                    "Data inconsistency detected: Descriptor not found for environment with ID {EnvironmentId}. Please verify the integrity of the environment data in the database.",
+                    env.Id
+                );
+                continue;
+            }
+
             foreach (var secret in env.Secrets)
             {
                 await _cache.UpsertSecretAsync(descriptor, secret);
