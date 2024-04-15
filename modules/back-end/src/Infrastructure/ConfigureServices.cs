@@ -15,6 +15,7 @@ using Infrastructure.FlagChangeRequests;
 using Infrastructure.FlagDrafts;
 using Infrastructure.FlagRevisions;
 using Infrastructure.FlagSchedules;
+using Infrastructure.GlobalUsers;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
@@ -86,6 +87,7 @@ public static class ConfigureServices
         services.AddTransient<IResourceService, ResourceService>();
         services.AddTransient<IResourceServiceV2, ResourceServiceV2>();
         services.AddTransient<IEndUserService, EndUserService>();
+        services.AddTransient<IGlobalUserService, GlobalUserService>();
         services.AddTransient<ISegmentService, SegmentService>();
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();

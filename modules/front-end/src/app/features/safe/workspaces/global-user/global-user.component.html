@@ -1,1 +1,59 @@
-<p>global-user works!</p>
+<div class="table-content-area">
+  <div class="table-search-area">
+    <div class="search-inputs">
+      <nz-input-group class="query" [nzPrefix]="prefixIconSearch">
+        <input
+          nz-input
+          placeholder="Search User"
+          i18n-placeholder="@@common.search-user"
+          [(ngModel)]="filter.name"
+          (ngModelChange)="onSearch(true)">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+    </div>
+    <button class="import-btn" nz-button nzType="primary" nzSize="large">
+      <span nz-icon nzType="user-add" nzTheme="outline"></span>
+      <span i18n="@@common.import">Import</span>
+    </button>
+  </div>
+  <div class="table-wrapper">
+    <nz-table
+      #basicTable
+      nzSize="small"
+      nzShowSizeChanger
+      [nzData]="users"
+      [nzFrontPagination]="false"
+      [nzLoading]="isLoading"
+      [nzTotal]="totalCount"
+      [(nzPageSize)]="filter.pageSize"
+      (nzPageSizeChange)="onSearch()"
+      [nzPageSizeOptions]="[10,20,30]"
+      (nzPageIndexChange)="onSearch()"
+      [(nzPageIndex)]="filter.pageIndex">
+      <thead>
+      <tr>
+        <th>keyId</th>
+        <th i18n="@@common.name">name</th>
+        <th i18n="@@common.actions">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let user of basicTable.data">
+        <tr>
+          <td>{{ user.keyId }}</td>
+          <td>
+            <span>{{ user.name }}</span>
+          </td>
+          <td>
+            <a class="primary-link-btn" i18n="@@users.idx.ff-segments">Evaluate on flags and segments</a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <a class="primary-link-btn" nz-button nzType="link" i18n="@@common.details">Details</a>
+          </td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </nz-table>
+  </div>
+</div>

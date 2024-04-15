@@ -56,6 +56,7 @@ public class MongoDbClient
         { typeof(Project), "Projects" },
         { typeof(Environment), "Environments" },
         { typeof(EndUser), "EndUsers" },
+        { typeof(GlobalUser), "EndUsers" },
         { typeof(EndUserProperty), "EndUserProperties" },
         { typeof(Segment), "Segments" },
         { typeof(FeatureFlag), "FeatureFlags" },
