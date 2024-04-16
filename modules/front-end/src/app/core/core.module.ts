@@ -99,6 +99,7 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { WebhookDeliveriesComponent } from './components/webhook-deliveries/webhook-deliveries.component';
 import { NzSegmentedModule } from "ng-zorro-antd/segmented";
 import { ResourceFinderComponent } from './components/resource-finder/resource-finder.component';
+import { ImportUserComponent } from './components/import-user/import-user.component';
 
 @NgModule({
   declarations: [
@@ -139,7 +140,8 @@ import { ResourceFinderComponent } from './components/resource-finder/resource-f
     TestWebhookModalComponent,
     WebhookDeliveryComponent,
     WebhookDeliveriesComponent,
-    ResourceFinderComponent
+    ResourceFinderComponent,
+    ImportUserComponent
   ],
   imports: [
     CommonModule,
@@ -240,7 +242,8 @@ import { ResourceFinderComponent } from './components/resource-finder/resource-f
     TestWebhookModalComponent,
     WebhookDeliveryComponent,
     WebhookDeliveriesComponent,
-    ResourceFinderComponent
+    ResourceFinderComponent,
+    ImportUserComponent
   ]
 })
 export class CoreModule {

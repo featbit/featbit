@@ -55,4 +55,12 @@ export class GlobalUserComponent implements OnInit {
 
     this.search$.next();
   }
+
+  importModalVisible = true;
+  openImportModal() {
+    this.importModalVisible = true;
+  }
+  closeImportModal() {
+    this.importModalVisible = false;
+  }
 }

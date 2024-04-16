@@ -13,7 +13,7 @@
         <i nz-icon nzType="icons:icon-search"></i>
       </ng-template>
     </div>
-    <button class="import-btn" nz-button nzType="primary" nzSize="large">
+    <button class="import-btn" nz-button nzType="primary" nzSize="large" (click)="openImportModal()">
       <span nz-icon nzType="user-add" nzTheme="outline"></span>
       <span i18n="@@common.import">Import</span>
     </button>
@@ -57,3 +57,5 @@
     </nz-table>
   </div>
 </div>
+
+<import-user [isVisible]="importModalVisible" (onClose)="closeImportModal()"></import-user>
