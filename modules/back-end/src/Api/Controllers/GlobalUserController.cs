@@ -16,6 +16,7 @@ public class GlobalUserController : ApiControllerBase
     {
         var request = new GetGlobalUserList
         {
+            WorkspaceId = WorkspaceId,
             Filter = filter
         };
 

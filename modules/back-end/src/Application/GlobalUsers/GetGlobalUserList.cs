@@ -5,6 +5,8 @@ namespace Application.GlobalUsers;
 
 public class GetGlobalUserList : IRequest<PagedResult<GlobalUser>>
 {
+    public Guid WorkspaceId { get; set; }
+
     public GlobalUserFilter Filter { get; set; }
 }
 
@@ -19,6 +21,6 @@ public class GetGlobalUserListHandler : IRequestHandler<GetGlobalUserList, Paged
 
     public async Task<PagedResult<GlobalUser>> Handle(GetGlobalUserList request, CancellationToken cancellationToken)
     {
-        return await _service.GetListAsync(request.Filter);
+        return await _service.GetListAsync(request.WorkspaceId, request.Filter);
     }
 }

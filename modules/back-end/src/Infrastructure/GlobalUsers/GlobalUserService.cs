@@ -13,9 +13,9 @@ public class GlobalUserService : MongoDbService<GlobalUser>, IGlobalUserService
     {
     }
 
-    public async Task<PagedResult<GlobalUser>> GetListAsync(GlobalUserFilter filter)
+    public async Task<PagedResult<GlobalUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter)
     {
-        var query = Queryable.Where(x => x.WorkspaceId == filter.WorkspaceId);
+        var query = Queryable.Where(x => x.WorkspaceId == workspaceId);
 
         var name = filter.Name;
         if (!string.IsNullOrEmpty(name))
