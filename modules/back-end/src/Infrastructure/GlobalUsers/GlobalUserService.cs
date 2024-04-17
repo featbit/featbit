@@ -32,7 +32,7 @@ public class GlobalUserService : MongoDbService<GlobalUser>, IGlobalUserService
         return new PagedResult<GlobalUser>(total, data);
     }
 
-    public async Task<ImportUserResult> UpsertAsync(Guid workspaceId, GlobalUser[] users)
+    public async Task<ImportUserResult> UpsertAsync(Guid workspaceId, IEnumerable<GlobalUser> users)
     {
         var total = await Queryable.Where(x => x.WorkspaceId == workspaceId).LongCountAsync();
         if (total > 5 * 10000)

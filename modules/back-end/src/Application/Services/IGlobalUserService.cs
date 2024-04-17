@@ -8,5 +8,5 @@ public interface IGlobalUserService : IService<GlobalUser>
 {
     Task<PagedResult<GlobalUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter);
 
-    Task<ImportUserResult> UpsertAsync(Guid workspaceId, GlobalUser[] users);
+    Task<ImportUserResult> UpsertAsync(Guid workspaceId, IEnumerable<GlobalUser> users);
 }
