@@ -9,4 +9,6 @@ public class SearchEndUser : PagedRequest
     public List<string> Properties { get; set; }
 
     public string[] ExcludedKeyIds { get; set; }
+
+    public bool? IncludeGlobalUser { get; set; }
 }

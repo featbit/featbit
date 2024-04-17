@@ -4,7 +4,7 @@ namespace Domain.EndUsers;
 
 public class EndUser : AuditedEntity
 {
-    public Guid EnvId { get; set; }
+    public Guid? EnvId { get; set; }
 
     public string KeyId { get; set; }
 

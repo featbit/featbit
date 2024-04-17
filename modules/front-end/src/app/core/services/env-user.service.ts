@@ -53,6 +53,7 @@ export class EnvUserService {
       searchText: filter.searchText ?? '',
       properties: filter.properties || [],
       excludedKeyIds: filter.excludedKeyIds || [],
+      includeGlobalUser: filter.includeGlobalUser ?? false,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };

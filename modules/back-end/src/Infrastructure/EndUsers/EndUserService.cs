@@ -18,9 +18,16 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
     {
         var filterBuilder = Builders<EndUser>.Filter;
 
+        var envIdFilter = userFilter.IncludeGlobalUser
+            ? filterBuilder.Or(
+                filterBuilder.Eq(x => x.EnvId, envId),
+                filterBuilder.Eq(x => x.EnvId, null)
+            )
+            : filterBuilder.Eq(x => x.EnvId, envId);
+
         var mustFilters = new List<FilterDefinition<EndUser>>
         {
-            filterBuilder.Eq(x => x.EnvId, envId)
+            envIdFilter
         };
 
         // excluded keyIds
@@ -173,7 +180,7 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
 
         var newProperties = messageProperties
             .Where(x => currentProperties.All(y => y != x))
-            .Select(x => new EndUserProperty(user.EnvId, x, Array.Empty<EndUserPresetValue>()))
+            .Select(x => new EndUserProperty(user.EnvId.GetValueOrDefault(), x, Array.Empty<EndUserPresetValue>()))
             .ToArray();
 
         if (newProperties.Any())
