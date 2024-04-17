@@ -27,6 +27,10 @@ export class EnvUserService {
     return `${environment.url}/api/v1/envs/${envId}/end-users`;
   }
 
+  uploadUrl(): string {
+    return `${this.baseUrl}/upload`;
+  }
+
   get(id: string): Observable<IUserType> {
     const url = `${this.baseUrl}/${id}`;
 

@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NzUploadChangeParam, NzUploadFile } from "ng-zorro-antd/upload";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { DataSyncService } from "@services/data-sync.service";
 import { Observable, Observer } from "rxjs";
+import { GlobalUserService } from "@services/global-user.service";
 
 @Component({
   selector: 'import-user',
@@ -16,11 +16,13 @@ export class ImportUserComponent implements OnInit {
   onClose: EventEmitter<void> = new EventEmitter<void>();
   uploadUrl: string = '';
 
-  constructor(private dataSyncService: DataSyncService, private msg: NzMessageService) {
-  }
+  constructor(
+    private globalUserService: GlobalUserService,
+    private msg: NzMessageService
+  ) { }
 
   ngOnInit(): void {
-    this.uploadUrl = this.dataSyncService.uploadUrl();
+    this.uploadUrl = this.globalUserService.uploadUrl();
   }
 
   beforeUpload = (file: NzUploadFile, _fileList: NzUploadFile[]): Observable<boolean> =>
@@ -44,7 +46,6 @@ export class ImportUserComponent implements OnInit {
     });
 
   onCancel() {
-    this.isVisible = false;
     this.onClose.emit();
   }
 
@@ -55,8 +56,9 @@ export class ImportUserComponent implements OnInit {
     }
     if (status === 'done') {
       this.msg.success(`${file.name} file uploaded successfully.`);
+      this.onCancel();
     } else if (status === 'error') {
-      this.msg.error(`${file.name} file upload failed.`);
+      this.msg.error(`Failed to process ${file.name}.`);
     }
   }
 }

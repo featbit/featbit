@@ -99,7 +99,65 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         return user;
     }
 
-    public async Task<IEnumerable<EndUserProperty>> AddNewPropertiesAsync(EndUser user)
+    public async Task<ImportUserResult> UpsertAsync(Guid envId, IEnumerable<EndUser> endUsers)
+    {
+        var total = await Queryable.Where(x => x.EnvId == envId).LongCountAsync();
+        if (total > 5 * 10000)
+        {
+            throw new BusinessException("The number of end users exceeds the limit.");
+        }
+
+        // load all end users into memory
+        var existUsers = await Queryable
+            .Where(x => x.EnvId == envId)
+            .ToListAsync();
+
+        // https://www.mongodb.com/docs/manual/reference/method/db.collection.bulkWrite/
+        var writeModels = new List<WriteModel<EndUser>>();
+        foreach (var endUser in endUsers)
+        {
+            var existing = existUsers.FirstOrDefault(x => x.KeyId == endUser.KeyId);
+            if (existing == null)
+            {
+                // insert new user
+                var insertOneModel = new InsertOneModel<EndUser>(endUser);
+                writeModels.Add(insertOneModel);
+            }
+            else
+            {
+                // no need to update if value equals
+                if (existing.ValueEquals(endUser))
+                {
+                    continue;
+                }
+
+                // update existing user
+                var filter = Builders<EndUser>.Filter.And(
+                    Builders<EndUser>.Filter.Eq(x => x.EnvId, envId),
+                    Builders<EndUser>.Filter.Eq(x => x.KeyId, endUser.KeyId)
+                );
+
+                var update = Builders<EndUser>.Update
+                    .Set(x => x.Name, endUser.Name)
+                    .Set(x => x.CustomizedProperties, endUser.CustomizedProperties);
+
+                var updateOneModel = new UpdateOneModel<EndUser>(filter, update);
+                writeModels.Add(updateOneModel);
+            }
+        }
+
+        if (!writeModels.Any())
+        {
+            return ImportUserResult.Ok(0, 0);
+        }
+
+        var result = await Collection.BulkWriteAsync(writeModels);
+        return result.IsAcknowledged
+            ? ImportUserResult.Ok(result.InsertedCount, result.ModifiedCount)
+            : ImportUserResult.Fail();
+    }
+
+    public async Task<EndUserProperty[]> AddNewPropertiesAsync(EndUser user)
     {
         var customizedProperties = user.CustomizedProperties;
         if (customizedProperties == null || !customizedProperties.Any())
@@ -116,7 +174,7 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         var newProperties = messageProperties
             .Where(x => currentProperties.All(y => y != x))
             .Select(x => new EndUserProperty(user.EnvId, x, Array.Empty<EndUserPresetValue>()))
-            .ToList();
+            .ToArray();
 
         if (newProperties.Any())
         {
@@ -124,6 +182,27 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         }
 
         return newProperties;
+    }
+
+    public async Task<EndUserProperty[]> AddNewPropertiesAsync(Guid envId, IEnumerable<string> propertyNames,
+        string remark = "")
+    {
+        var existingPropNames = await MongoDb.QueryableOf<EndUserProperty>()
+            .Where(x => x.EnvId == envId)
+            .Select(x => x.Name)
+            .ToListAsync();
+
+        var newProps = propertyNames
+            .Where(propName => !existingPropNames.Contains(propName))
+            .Select(propName => new EndUserProperty(envId, propName, remark: remark))
+            .ToArray();
+
+        if (newProps.Any())
+        {
+            await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(newProps);
+        }
+
+        return newProps;
     }
 
     public async Task<IEnumerable<EndUserProperty>> GetPropertiesAsync(Guid envId)

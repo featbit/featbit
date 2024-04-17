@@ -11,9 +11,17 @@
         {
           "name": "browser",
           "value": "chrome"
+        },
+        {
+          "name": "location",
+          "value": "us"
         }
       ]
     }
   ],
-  "userProperties": [ "role", "browser", "location" ]
+  "userProperties": [
+    "role",
+    "browser",
+    "location"
+  ]
 }

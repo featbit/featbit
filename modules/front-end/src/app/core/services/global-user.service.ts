@@ -16,6 +16,10 @@ export class GlobalUserService {
     return `${environment.url}/api/v1/global-users`;
   }
 
+  uploadUrl(): string {
+    return `${this.baseUrl}/upload`;
+  }
+
   getList(filter: GlobalUserFilter = new GlobalUserFilter()): Observable<PagedGlobalUser> {
     const query = {
       name: filter.name ?? '',

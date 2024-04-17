@@ -17,9 +17,9 @@ public class EndUserProperty : AuditedEntity
     public string Remark { get; set; }
 
     public EndUserProperty(
-        Guid envId, 
+        Guid envId,
         string name,
-        ICollection<EndUserPresetValue> presetValues,
+        ICollection<EndUserPresetValue> presetValues = null,
         bool usePresetValuesOnly = false,
         // built in properties are defined in EndUserConsts.BuiltInProperties
         bool isBuiltIn = false,
