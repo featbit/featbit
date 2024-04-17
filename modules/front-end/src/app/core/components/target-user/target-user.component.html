@@ -34,6 +34,7 @@
           <div class="user-selection-item" [class]="{'creation-selection-item': item.isNew}">
             <div class="title">
               <ng-container *ngIf="item.isNew" i18n="@@common.create-with-comma">Create:</ng-container> {{ item.name }}
+              <nz-tag [nzColor]="item.envId === null ? 'magenta' : 'volcano'">{{item.envId === null ? 'global user' : 'end user' }}</nz-tag>
             </div>
             <div class="digest">{{getUserDigest(item)}}</div>
           </div>

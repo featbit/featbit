@@ -13,6 +13,7 @@ export interface IRuleIdDispatchKey {
 
 export interface IUserType {
   id: string;
+  envId?: string;
   name: string;
   keyId: string;
   customizedProperties?: [{name: string, value: string}];
