@@ -47,7 +47,7 @@
             <span>{{ user.name }}</span>
           </td>
           <td>
-            <a class="primary-link-btn" i18n="@@users.idx.ff-segments">Evaluate on flags and segments</a>
+            <a class="primary-link-btn" i18n="@@users.idx.ff-segments" (click)="openEvaluationDrawer(user)">Evaluate on flags and segments</a>
             <nz-divider nzType="vertical"></nz-divider>
             <a class="primary-link-btn" nz-button nzType="link" i18n="@@common.details">Details</a>
           </td>
@@ -59,3 +59,4 @@
 </div>
 
 <import-user [isVisible]="importModalVisible" (onClose)="closeImportModal()"></import-user>
+<user-segments-flags-drawer [visible]="evaluationDrawerVisible" [user]="selectedUser" (close)="closeEvaluationDrawer()"></user-segments-flags-drawer>

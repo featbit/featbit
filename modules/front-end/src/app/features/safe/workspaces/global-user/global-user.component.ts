@@ -63,4 +63,15 @@ export class GlobalUserComponent implements OnInit {
   closeImportModal() {
     this.importModalVisible = false;
   }
+
+  selectedUser: GlobalUser;
+  evaluationDrawerVisible = false;
+  openEvaluationDrawer(user: GlobalUser) {
+    this.selectedUser = user;
+    this.evaluationDrawerVisible = true;
+  }
+  closeEvaluationDrawer() {
+    this.selectedUser = null;
+    this.evaluationDrawerVisible = false;
+  }
 }
