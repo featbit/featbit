@@ -13,7 +13,7 @@ public class ImportEndUser : IRequest<bool>
     public ImportEndUser(Guid envId, ImportUserData data)
     {
         EnvId = envId;
-        Users = data.Users.Select(x => x.AsEndUser(envId)).ToArray();
+        Users = data.Users.Select(x => x.AsEndUser(null, envId)).ToArray();
         UserProperties = data.UserProperties;
     }
 }
@@ -30,7 +30,7 @@ public class ImportEndUserHandler : IRequestHandler<ImportEndUser, bool>
     public async Task<bool> Handle(ImportEndUser request, CancellationToken cancellationToken)
     {
         // upsert end users
-        await _service.UpsertAsync(request.EnvId, request.Users);
+        await _service.UpsertAsync(null, request.EnvId, request.Users);
 
         // add new user properties
         await _service.AddNewPropertiesAsync(request.EnvId, request.UserProperties);

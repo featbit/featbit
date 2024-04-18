@@ -106,9 +106,9 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         return user;
     }
 
-    public async Task<ImportUserResult> UpsertAsync(Guid envId, IEnumerable<EndUser> endUsers)
+    public async Task<ImportUserResult> UpsertAsync(Guid? workspaceId, Guid? envId, IEnumerable<EndUser> endUsers)
     {
-        var total = await Queryable.Where(x => x.EnvId == envId).LongCountAsync();
+        var total = await Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId).LongCountAsync();
         if (total > 5 * 10000)
         {
             throw new BusinessException("The number of end users exceeds the limit.");
@@ -116,7 +116,7 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
 
         // load all end users into memory
         var existUsers = await Queryable
-            .Where(x => x.EnvId == envId)
+            .Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId)
             .ToListAsync();
 
         // https://www.mongodb.com/docs/manual/reference/method/db.collection.bulkWrite/
@@ -140,6 +140,7 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
 
                 // update existing user
                 var filter = Builders<EndUser>.Filter.And(
+                    Builders<EndUser>.Filter.Eq(x => x.WorkspaceId, workspaceId),
                     Builders<EndUser>.Filter.Eq(x => x.EnvId, envId),
                     Builders<EndUser>.Filter.Eq(x => x.KeyId, endUser.KeyId)
                 );

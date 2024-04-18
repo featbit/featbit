@@ -8,13 +8,8 @@ public class ImportUser
 
     public ICollection<EndUserCustomizedProperty> CustomizedProperties { get; set; }
 
-    public EndUser AsEndUser(Guid envId)
+    public EndUser AsEndUser(Guid? workspaceId, Guid? envId)
     {
-        return new EndUser(envId, KeyId, Name, CustomizedProperties);
-    }
-
-    public GlobalUser AsGlobalUser(Guid workspaceId)
-    {
-        return new GlobalUser(workspaceId, KeyId, Name, CustomizedProperties);
+        return new EndUser(workspaceId, envId, KeyId, Name, CustomizedProperties);
     }
 }

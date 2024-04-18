@@ -15,11 +15,6 @@ public class TestWorkspaceService : NullServiceBase<Workspace>, IWorkspaceServic
         return Task.FromResult<ICollection<Workspace>>(workspaces);
     }
 
-    public Task<ICollection<Guid>> GetAllEnvIdsAsync(Guid workspaceId)
-    {
-        return Task.FromResult<ICollection<Guid>>(Array.Empty<Guid>());
-    }
-
     public Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key)
     {
         var isUsed = workspaceId != TestWorkspace.Id && key == TestWorkspace.Key;

@@ -1,13 +1,9 @@
 {
   "users": [
     {
-      "keyId": "tester-id",
-      "name": "tester",
+      "keyId": "end-user-id",
+      "name": "end-user",
       "customizedProperties": [
-        {
-          "name": "role",
-          "value": "admin"
-        },
         {
           "name": "browser",
           "value": "chrome"
@@ -15,13 +11,17 @@
         {
           "name": "location",
           "value": "us"
+        },
+        {
+          "name": "language",
+          "value": "en"
         }
       ]
     }
   ],
   "userProperties": [
-    "role",
     "browser",
-    "location"
+    "location",
+    "language"
   ]
 }
