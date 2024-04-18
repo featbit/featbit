@@ -40,7 +40,9 @@ public class GlobalUserController : ApiControllerBase
         try
         {
             using var jsonDocument = await JsonDocument.ParseAsync(file.OpenReadStream());
-            var users = jsonDocument.RootElement.Deserialize<ImportUser[]>(ReusableJsonSerializerOptions.Web);
+            var users = jsonDocument.RootElement
+                .GetProperty("users")
+                .Deserialize<ImportUser[]>(ReusableJsonSerializerOptions.Web);
             request = new ImportGlobalUser(WorkspaceId, users);
         }
         catch (JsonException)
