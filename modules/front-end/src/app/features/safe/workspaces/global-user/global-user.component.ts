@@ -20,6 +20,9 @@ export class GlobalUserComponent implements OnInit {
   filter: GlobalUserFilter = new GlobalUserFilter();
   search$ = new Subject<void>();
 
+  extraShowedColumns: string[] = [];
+  allExtraColumns: string[] = [];
+
   constructor(private service: GlobalUserService, private msg: NzMessageService) {
   }
 
@@ -39,6 +42,15 @@ export class GlobalUserComponent implements OnInit {
       next: (result) => {
         this.users = result.items;
         this.totalCount = result.totalCount;
+
+        result.items.forEach(item => {
+          item.customizedProperties.forEach(cp => {
+            if (this.allExtraColumns.indexOf(cp.name) === -1) {
+              this.allExtraColumns.push(cp.name);
+            }
+          });
+        });
+
         this.isLoading = false;
       },
       error: () => {
@@ -60,8 +72,11 @@ export class GlobalUserComponent implements OnInit {
   openImportModal() {
     this.importModalVisible = true;
   }
-  closeImportModal() {
+  closeImportModal(success: boolean) {
     this.importModalVisible = false;
+    if (success) {
+      this.search$.next();
+    }
   }
 
   selectedUser: GlobalUser;
@@ -83,5 +98,15 @@ export class GlobalUserComponent implements OnInit {
   closeEndUserDrawer() {
     this.selectedUser = null;
     this.endUserDrawerVisible = false;
+  }
+
+  getCustomizePropertyValue(user: GlobalUser, property: string): string {
+    for (const customizedProperty of user.customizedProperties) {
+      if (customizedProperty.name === property) {
+        return customizedProperty.value;
+      }
+    }
+
+    return '';
   }
 }

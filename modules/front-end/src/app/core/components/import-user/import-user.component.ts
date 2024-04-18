@@ -13,7 +13,7 @@ export class ImportUserComponent implements OnInit {
   @Input()
   isVisible = false;
   @Output()
-  onClose: EventEmitter<void> = new EventEmitter<void>();
+  close: EventEmitter<boolean> = new EventEmitter<boolean>();
   uploadUrl: string = '';
 
   constructor(
@@ -46,7 +46,7 @@ export class ImportUserComponent implements OnInit {
     });
 
   onCancel() {
-    this.onClose.emit();
+    this.close.emit(false);
   }
 
   handleChange({file, fileList}: NzUploadChangeParam): void {
@@ -56,7 +56,7 @@ export class ImportUserComponent implements OnInit {
     }
     if (status === 'done') {
       this.msg.success(`${file.name} file uploaded successfully.`);
-      this.onCancel();
+      this.close.emit(true);
     } else if (status === 'error') {
       this.msg.error(`Failed to process ${file.name}.`);
     }
