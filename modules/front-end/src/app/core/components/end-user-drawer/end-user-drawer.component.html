@@ -7,13 +7,21 @@
   [nzWidth]="500"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
-    <nz-descriptions [nzColumn]="2" nzTitle="Built In Property">
-      <nz-descriptions-item *ngFor="let prop of builtInProps" nzTitle="{{prop.name}}" [nzSpan]="1">{{ prop.value }}
+    <nz-descriptions [nzColumn]="1" nzTitle="Built In Property">
+      <nz-descriptions-item *ngFor="let prop of builtInProps" [nzTitle]="title" [nzSpan]="1">
+        {{ prop.value }}
+        <ng-template #title>
+          <strong>{{ prop.name }}</strong>
+        </ng-template>
       </nz-descriptions-item>
     </nz-descriptions>
     <nz-divider></nz-divider>
-    <nz-descriptions [nzColumn]="2" nzTitle="Customized Property">
-      <nz-descriptions-item *ngFor="let prop of customizedProperties" nzTitle="{{prop.name}}" [nzSpan]="1">{{ prop.value }}
+    <nz-descriptions [nzColumn]="1" nzTitle="Customized Property">
+      <nz-descriptions-item *ngFor="let prop of customizedProperties" [nzTitle]="title" [nzSpan]="1">
+        {{ prop.value }}
+        <ng-template #title>
+          <strong>{{ prop.name }}</strong>
+        </ng-template>
       </nz-descriptions-item>
     </nz-descriptions>
   </ng-container>
