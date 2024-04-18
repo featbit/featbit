@@ -74,4 +74,14 @@ export class GlobalUserComponent implements OnInit {
     this.selectedUser = null;
     this.evaluationDrawerVisible = false;
   }
+
+  endUserDrawerVisible = false;
+  openEndUserDrawer(user: GlobalUser) {
+    this.selectedUser = user;
+    this.endUserDrawerVisible = true;
+  }
+  closeEndUserDrawer() {
+    this.selectedUser = null;
+    this.endUserDrawerVisible = false;
+  }
 }
