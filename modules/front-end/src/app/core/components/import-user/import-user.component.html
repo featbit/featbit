@@ -10,12 +10,18 @@
   <ng-template #modalContent>
     <div class="note">
       <p>
-        Choose the data file you want to import.
-        <a class="template-link" href="assets/upload-global-users.json" target="_blank">Click to view the template</a>
+        <span i18n="@@users.import.choose-file">Choose the data file you want to import.</span>
+        <a class="template-link" href="assets/upload-global-users.json" target="_blank" i18n="@@users.import.view-template">Click to view the template</a>
       </p>
       <ul>
-        <li><strong>Users</strong>: We will either create new user records or update existing ones based on the keyId.</li>
-        <li><strong>User Properties</strong>: Any new user properties in the file will be added, but existing properties will not be changed.</li>
+        <li>
+          <strong>Users</strong>:
+          <span i18n="@@users.import.users-note">We will either create new user records or update existing ones based on the keyId.</span>
+        </li>
+        <li>
+          <strong>User Properties</strong>:
+          <span i18n="@@users.import.user-properties-note">Any new user properties in the file will be added, but existing properties will not be changed.</span>
+        </li>
       </ul>
     </div>
     <div class="upload">
@@ -31,11 +37,11 @@
         <p class="ant-upload-drag-icon">
           <span nz-icon nzType="inbox"></span>
         </p>
-        <p class="ant-upload-text">Click or drag file to this area to upload</p>
+        <p class="ant-upload-text" i18n="@@users.import.upload-text">Click or drag file to this area to upload</p>
       </nz-upload>
       <div class="hint">
-        <p>Supported format: JSON</p>
-        <p>Maximum file size: 500MB</p>
+        <p i18n="@@users.import.supported-format">Supported format: JSON</p>
+        <p i18n="@@users.import.maximum-file-size">Maximum file size: 500MB</p>
       </div>
     </div>
   </ng-template>

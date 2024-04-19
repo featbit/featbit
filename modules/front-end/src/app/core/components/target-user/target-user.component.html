@@ -8,16 +8,18 @@
     <div class="selected-target-users" nz-row *ngIf="selectedUserDetailList.length">
       <div nz-col class="target-user" *ngFor="let user of selectedUserDetailList">
         <div
+          class="inner-box"
           *ngIf="user.envId !== null"
           i18n-nz-tooltip="@@common.click-to-edit"
-          nz-tooltip="Click to edit" class="inner-box"
+          nz-tooltip="Click to edit"
           (click)="openEditModal(user)">
           {{ user?.name }}
         </div>
         <div
+          class="inner-box"
           *ngIf="user.envId === null"
           i18n-nz-tooltip="@@common.click-to-view"
-          nz-tooltip="Click to view" class="inner-box"
+          nz-tooltip="Click to view"
           (click)="openEditModal(user)">
           {{ user?.name }}
         </div>
@@ -45,7 +47,7 @@
           <div class="user-selection-item" [class]="{'creation-selection-item': item.isNew}">
             <div class="title">
               <ng-container *ngIf="item.isNew" i18n="@@common.create-with-comma">Create:</ng-container> {{ item.name }}
-              <nz-tag *ngIf="item.envId === null">global user</nz-tag>
+              <nz-tag *ngIf="item.envId === null" i18n="@@common.global-user">Global User</nz-tag>
             </div>
             <div class="digest">{{getUserDigest(item)}}</div>
           </div>

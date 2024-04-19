@@ -29,14 +29,14 @@ export class ImportUserComponent implements OnInit {
     new Observable((observer: Observer<boolean>) => {
       const isJson = file.type === 'application/json';
       if (!isJson) {
-        this.msg.error('You can only upload a JSON file.');
+        this.msg.warning($localize`:@@users.import.file-format-error:Invalid file format. Only JSON files are allowed.`);
         observer.complete();
         return;
       }
 
       const isLowerThan500Mb = file.size! / 1024 / 1024 < 500;
       if (!isLowerThan500Mb) {
-        this.msg.error('The JSON file must be smaller than 500MB.');
+        this.msg.warning($localize`:@@users.import.file-size-error:The uploaded file exceeds the size limit of 500MB. Please upload a smaller file.`);
         observer.complete();
         return;
       }
@@ -55,10 +55,10 @@ export class ImportUserComponent implements OnInit {
       console.log(file, fileList);
     }
     if (status === 'done') {
-      this.msg.success(`${file.name} file uploaded successfully.`);
+      this.msg.success($localize`:@@users.import.import-success:User data has been successfully imported.`);
       this.close.emit(true);
     } else if (status === 'error') {
-      this.msg.error(`Failed to process ${file.name}.`);
+      this.msg.error($localize`:@@users.import.import-failed:Failed to import user data. Please check the file and try again.`);
     }
   }
 }

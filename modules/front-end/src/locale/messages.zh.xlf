@@ -98,7 +98,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
@@ -458,7 +458,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -1134,7 +1134,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">55</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -1882,7 +1882,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -1929,6 +1929,30 @@
           <context context-type="linenumber">30</context>
         </context-group>
         <target>计划变更</target>
+      </trans-unit>
+      <trans-unit id="users.user-profile" datatype="html">
+        <source>User Profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>用户信息</target>
+      </trans-unit>
+      <trans-unit id="users.built-in-property" datatype="html">
+        <source>Built In Property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <target>内置属性</target>
+      </trans-unit>
+      <trans-unit id="users.customized-property" datatype="html">
+        <source>Customized Property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <target>自定义属性</target>
       </trans-unit>
       <trans-unit id="org.project.permission-will-become-invalid-if-change-name" datatype="html">
         <source>Permission will become invalid if you change the name</source>
@@ -3090,7 +3114,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -3513,6 +3537,94 @@
           <context context-type="linenumber">52</context>
         </context-group>
         <target>环境</target>
+      </trans-unit>
+      <trans-unit id="users.import.choose-file" datatype="html">
+        <source>Choose the data file you want to import.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>请选择你想要上传的文件</target>
+      </trans-unit>
+      <trans-unit id="users.import.view-template" datatype="html">
+        <source>Click to view the template</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <target>点击查看模板</target>
+      </trans-unit>
+      <trans-unit id="users.import.users-note" datatype="html">
+        <source>We will either create new user records or update existing ones based on the keyId.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <target>根据 keyId 来决定创建新用户或更新已有用户。</target>
+      </trans-unit>
+      <trans-unit id="users.import.user-properties-note" datatype="html">
+        <source>Any new user properties in the file will be added, but existing properties will not be changed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <target>任何新的用户属性会被添加，已存在的用户属性不会受到任何影响。</target>
+      </trans-unit>
+      <trans-unit id="users.import.upload-text" datatype="html">
+        <source>Click or drag file to this area to upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <target>点击或拖动文件到此区域</target>
+      </trans-unit>
+      <trans-unit id="users.import.supported-format" datatype="html">
+        <source>Supported format: JSON</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <target>支持的文件格式：JSON</target>
+      </trans-unit>
+      <trans-unit id="users.import.maximum-file-size" datatype="html">
+        <source>Maximum file size: 500MB</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <target>最大文件大小：500MB</target>
+      </trans-unit>
+      <trans-unit id="users.import.file-format-error" datatype="html">
+        <source>Invalid file format. Only JSON files are allowed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <target>非法的文件类型，仅支持 JSON 文件</target>
+      </trans-unit>
+      <trans-unit id="users.import.file-size-error" datatype="html">
+        <source>The uploaded file exceeds the size limit of 500MB. Please upload a smaller file.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <target>上传的文件超过 500MB，请上传更小的文件</target>
+      </trans-unit>
+      <trans-unit id="users.import.import-success" datatype="html">
+        <source>User data has been successfully imported.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+        <target>成功导入用户信息</target>
+      </trans-unit>
+      <trans-unit id="users.import.import-failed" datatype="html">
+        <source>Failed to import user data. Please check the file and try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <target>导入用户信息失败，请检查文件内容之后再试</target>
       </trans-unit>
       <trans-unit id="common.license-subject" datatype="html">
         <source>Issued To</source>
@@ -5089,7 +5201,7 @@
         <source>Click to edit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">13</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
@@ -5101,7 +5213,7 @@
         <source>Click to view</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <target>点击查看</target>
       </trans-unit>
@@ -5109,15 +5221,23 @@
         <source>Select targeting users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <target>请选择目标用户</target>
+      </trans-unit>
+      <trans-unit id="common.global-user" datatype="html">
+        <source>Global User</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+        <target>全局用户</target>
       </trans-unit>
       <trans-unit id="common.edit-targeting-user" datatype="html">
         <source>Edit targeting user</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>编辑目标用户</target>
       </trans-unit>
@@ -5125,7 +5245,7 @@
         <source>View targeting user</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">70</context>
         </context-group>
         <target>查看目标用户</target>
       </trans-unit>
@@ -6303,7 +6423,7 @@
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
           <context context-type="linenumber">71</context>
         </context-group>
-        <target>评估开关和用户组：</target>
+        <target>评估开关和用户组</target>
       </trans-unit>
       <trans-unit id="expt.expt" datatype="html">
         <source>Experiments</source>
@@ -9441,13 +9561,13 @@
         </context-group>
         <target>未知错误发生，请重新登录！</target>
       </trans-unit>
-      <trans-unit id="common.search-user" datatype="html">
-        <source>Search User</source>
+      <trans-unit id="common.search-by-name" datatype="html">
+        <source>Search by name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
-        <target>查询用户</target>
+        <target>按姓名搜索</target>
       </trans-unit>
       <trans-unit id="common.import" datatype="html">
         <source>Import</source>

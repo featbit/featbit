@@ -98,7 +98,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
@@ -451,7 +451,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -1104,7 +1104,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">55</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -1784,7 +1784,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -1827,6 +1827,27 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
           <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.user-profile" datatype="html">
+        <source>User Profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.built-in-property" datatype="html">
+        <source>Built In Property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.customized-property" datatype="html">
+        <source>Customized Property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">20</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.permission-will-become-invalid-if-change-name" datatype="html">
@@ -2917,7 +2938,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -3292,6 +3313,83 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.choose-file" datatype="html">
+        <source>Choose the data file you want to import.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.view-template" datatype="html">
+        <source>Click to view the template</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.users-note" datatype="html">
+        <source>We will either create new user records or update existing ones based on the keyId.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.user-properties-note" datatype="html">
+        <source>Any new user properties in the file will be added, but existing properties will not be changed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.upload-text" datatype="html">
+        <source>Click or drag file to this area to upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.supported-format" datatype="html">
+        <source>Supported format: JSON</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.maximum-file-size" datatype="html">
+        <source>Maximum file size: 500MB</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.file-format-error" datatype="html">
+        <source>Invalid file format. Only JSON files are allowed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.file-size-error" datatype="html">
+        <source>The uploaded file exceeds the size limit of 500MB. Please upload a smaller file.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.import-success" datatype="html">
+        <source>User data has been successfully imported.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.import.import-failed" datatype="html">
+        <source>Failed to import user data. Please check the file and try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">61</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.license-subject" datatype="html">
@@ -4734,7 +4832,7 @@
         <source>Click to edit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">13</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
@@ -4745,28 +4843,35 @@
         <source>Click to view</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="target-user.select-targeting-users" datatype="html">
         <source>Select targeting users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.global-user" datatype="html">
+        <source>Global User</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">50</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.edit-targeting-user" datatype="html">
         <source>Edit targeting user</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">69</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.view-targeting-user" datatype="html">
         <source>View targeting user</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">70</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.save-success" datatype="html">
@@ -8626,8 +8731,8 @@
           <context context-type="linenumber">48</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.search-user" datatype="html">
-        <source>Search User</source>
+      <trans-unit id="common.search-by-name" datatype="html">
+        <source>Search by name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
           <context context-type="linenumber">7</context>
