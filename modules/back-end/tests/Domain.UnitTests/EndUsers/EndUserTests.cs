@@ -18,14 +18,14 @@ public class EndUsersToString : TheoryData<EndUser, string>
     {
         var envId = Guid.Parse("2907cb3a-fff7-47dc-9ceb-7043a3d9a03f");
 
-        var withNullCustomizedProperties = new EndUser(null, envId, "end-user-key", "end-user", null);
+        var withNullCustomizedProperties = new EndUser(workspaceId: null, envId, "end-user-key", "end-user", customizedProperties: null);
         Add(
             withNullCustomizedProperties,
             "workspaceId:,envId:2907cb3a-fff7-47dc-9ceb-7043a3d9a03f,keyId:end-user-key,name:end-user"
         );
 
         var withCustomizedProperties = new EndUser(
-            null,
+            workspaceId: null,
             envId,
             "end-user-key",
             "end-user",
@@ -49,7 +49,7 @@ public class EndUsersToString : TheoryData<EndUser, string>
         );
 
         var withEmptyCustomizedProperties = new EndUser(
-            null,
+            workspaceId: null,
             envId,
             "end-user-key",
             "end-user",
@@ -61,7 +61,7 @@ public class EndUsersToString : TheoryData<EndUser, string>
         );
 
         var workspaceId = Guid.Parse("2907cb3a-fff7-47dc-9ceb-7043a3d9a03f");
-        var globalUser = new EndUser(workspaceId, null, "global-user-key", "global-user", null);
+        var globalUser = new EndUser(workspaceId, envId: null, "global-user-key", "global-user", customizedProperties: null);
         Add(
             globalUser,
             "workspaceId:2907cb3a-fff7-47dc-9ceb-7043a3d9a03f,envId:,keyId:global-user-key,name:global-user"

@@ -192,8 +192,7 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         return newProperties;
     }
 
-    public async Task<EndUserProperty[]> AddNewPropertiesAsync(Guid envId, IEnumerable<string> propertyNames,
-        string remark = "")
+    public async Task<EndUserProperty[]> AddNewPropertiesAsync(Guid envId, IEnumerable<string> propertyNames)
     {
         var existingPropNames = await MongoDb.QueryableOf<EndUserProperty>()
             .Where(x => x.EnvId == envId)
@@ -202,7 +201,7 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
 
         var newProps = propertyNames
             .Where(propName => !existingPropNames.Contains(propName))
-            .Select(propName => new EndUserProperty(envId, propName, remark: remark))
+            .Select(propName => new EndUserProperty(envId, propName))
             .ToArray();
 
         if (newProps.Any())

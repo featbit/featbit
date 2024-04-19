@@ -8,12 +8,12 @@ public class ImportUserResult
     public bool IsAcknowledged { get; set; }
 
     /// <summary>
-    /// Gets the number of global users that were inserted.
+    /// Gets the number of users that were inserted.
     /// </summary>
     public long InsertedCount { get; set; }
 
     /// <summary>
-    /// Gets the number of global users that were actually modified during an update.
+    /// Gets the number of users that were actually modified during an update.
     /// </summary>
     public long ModifiedCount { get; set; }
 

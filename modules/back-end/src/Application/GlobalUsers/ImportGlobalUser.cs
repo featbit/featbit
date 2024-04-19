@@ -11,7 +11,7 @@ public class ImportGlobalUser : IRequest<bool>
     public ImportGlobalUser(Guid workspaceId, ImportUser[] users)
     {
         WorkspaceId = workspaceId;
-        Users = users.Select(x => x.AsEndUser(workspaceId, null)).ToArray();
+        Users = users.Select(x => x.AsEndUser(workspaceId, envId: null)).ToArray();
     }
 }
 
@@ -26,7 +26,7 @@ public class ImportGlobalUserHandler : IRequestHandler<ImportGlobalUser, bool>
 
     public async Task<bool> Handle(ImportGlobalUser request, CancellationToken cancellationToken)
     {
-        await _endUserService.UpsertAsync(request.WorkspaceId, null, request.Users);
+        await _endUserService.UpsertAsync(request.WorkspaceId, envId: null, request.Users);
 
         return true;
     }
