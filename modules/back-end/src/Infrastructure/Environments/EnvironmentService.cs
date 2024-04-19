@@ -88,7 +88,7 @@ public class EnvironmentService : MongoDbService<Environment>, IEnvironmentServi
         await Collection.DeleteManyAsync(x => ids.Contains(x.Id));
 
         // delete end users
-        await MongoDb.CollectionOf<EndUser>().DeleteManyAsync(x => ids.Contains(x.EnvId.GetValueOrDefault()));
+        await MongoDb.CollectionOf<EndUser>().DeleteManyAsync(x => x.EnvId != null && ids.Contains(x.EnvId.Value));
 
         // delete end user properties
         await MongoDb.CollectionOf<EndUserProperty>().DeleteManyAsync(x => ids.Contains(x.EnvId));
