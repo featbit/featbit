@@ -56,7 +56,7 @@
         </button>
       </form>
       <div class="social-login" *ngIf="isSocialEnabled">
-        <nz-divider i18n-nzText="@@common.uppercase-or" nzText="OR"></nz-divider>
+        <nz-divider i18n-nzText="@@common.social-login-hint" nzText="Sign In / Sign Up with"></nz-divider>
         <div class="social-btns">
           <button *ngFor="let provider of oauthProviders" nz-button nzType="default" class="btn social-btn" (click)="socialLogin(provider)">
             <span nz-icon [nzType]="provider.icon" nzTheme="outline"></span>

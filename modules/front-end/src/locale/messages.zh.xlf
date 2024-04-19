@@ -5905,13 +5905,13 @@
         </context-group>
         <target>密码</target>
       </trans-unit>
-      <trans-unit id="common.uppercase-or" datatype="html">
-        <source>OR</source>
+      <trans-unit id="common.social-login-hint" datatype="html">
+        <source>Sign In / Sign Up with</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <target>或者</target>
+        <target>第三方账号登录</target>
       </trans-unit>
       <trans-unit id="common.continue-with-google" datatype="html">
         <source>Continue with Google</source>
