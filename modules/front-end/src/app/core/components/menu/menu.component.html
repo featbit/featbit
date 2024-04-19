@@ -89,28 +89,34 @@
     </button>
     <nz-dropdown-menu #menu="nzDropdownMenu">
       <ul nz-menu class="dropdown-menu">
-        <li style="justify-content: center">
-          {{ profile.name || profile.email }}
+        <li class="centered">
+          {{ profile.email }}
         </li>
-        <li style="height: 12px; margin: 0 20px">
+        <li class="line-container">
           <span class="line"></span>
         </li>
         <li nz-menu-item (click)="openFeedbackModal()">
-          <i nz-icon nzType="question-circle" nzTheme="outline"></i>
-          <ng-container i18n="@@common.feedback">Feedback</ng-container>
+          <span class="menu-item">
+            <i nz-icon nzType="question-circle" nzTheme="outline"></i>
+            <ng-container i18n="@@common.feedback">Feedback</ng-container>
+          </span>
         </li>
         <li *ngIf="isInitialized" nz-menu-item [routerLink]="['/workspace/profile']">
-          <i nz-icon nzType="icons:icon-user"></i>
-          <ng-container i18n="@@common.profile">Profile</ng-container>
+          <span class="menu-item">
+            <i nz-icon nzType="icons:icon-user"></i>
+            <ng-container i18n="@@common.profile">Profile</ng-container>
+          </span>
         </li>
         <li nz-menu-item (click)="logout.emit()">
-          <i nz-icon nzType="icons:icon-logout"></i>
-          <ng-container i18n="@@common.logout">Logout</ng-container>
+          <span class="menu-item">
+            <i nz-icon nzType="icons:icon-logout"></i>
+            <ng-container i18n="@@common.logout">Logout</ng-container>
+          </span>
         </li>
-        <li style="height: 12px; margin: 0 20px">
+        <li class="line-container bottom">
           <span class="line"></span>
         </li>
-        <li>
+        <li class="centered">
           <app-locale-switcher></app-locale-switcher>
         </li>
       </ul>
