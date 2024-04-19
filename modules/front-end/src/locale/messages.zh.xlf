@@ -1862,7 +1862,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">147</context>
+          <context context-type="linenumber">153</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
@@ -2588,7 +2588,7 @@
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">60</context>
         </context-group>
-        <target>在代码中使用 key （大小写敏感）来获取开关返回值。key 只能包含字母，数字，'.', '_' 和 '-'。</target>
+        <target>在代码中使用 key （大小写敏感）来获取开关返回值。key 只能包含字母，数字，&apos;.&apos;, &apos;_&apos; 和 &apos;-&apos;。</target>
       </trans-unit>
       <trans-unit id="common.key-format-error" datatype="html">
         <source>Only allow letters, numbers, &apos;.&apos;, &apos;_&apos; or &apos;-&apos;</source>
@@ -2600,7 +2600,7 @@
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">67</context>
         </context-group>
-        <target>只允许字母，数字，'.', '_', '-' 字符</target>
+        <target>只允许字母，数字，&apos;.&apos;, &apos;_&apos;, &apos;-&apos; 字符</target>
       </trans-unit>
       <trans-unit id="common.description" datatype="html">
         <source>Description</source>
@@ -3626,7 +3626,7 @@
         <source>Feedback</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <target>反馈</target>
       </trans-unit>
@@ -3634,7 +3634,7 @@
         <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">107</context>
         </context-group>
         <target>个人信息</target>
       </trans-unit>
@@ -3642,7 +3642,7 @@
         <source>Logout</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">113</context>
         </context-group>
         <target>退出</target>
       </trans-unit>
@@ -3650,7 +3650,7 @@
         <source>Send feedback</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">133</context>
         </context-group>
         <target>发送反馈</target>
       </trans-unit>
@@ -3658,7 +3658,7 @@
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">131</context>
+          <context context-type="linenumber">137</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -3686,7 +3686,7 @@
         <source>Invalid Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">132</context>
+          <context context-type="linenumber">138</context>
         </context-group>
         <target>邮箱地址无效</target>
       </trans-unit>
@@ -3694,7 +3694,7 @@
         <source>Message</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">137</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <target>信息</target>
       </trans-unit>
@@ -3702,7 +3702,7 @@
         <source>Message is mandatory</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">138</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <target>信息不能为空</target>
       </trans-unit>
@@ -3710,7 +3710,7 @@
         <source>Have you any feedback for us?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">139</context>
+          <context context-type="linenumber">145</context>
         </context-group>
         <target>反馈信息</target>
       </trans-unit>
@@ -3718,7 +3718,7 @@
         <source>Send</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">148</context>
+          <context context-type="linenumber">154</context>
         </context-group>
         <target>发送</target>
       </trans-unit>
