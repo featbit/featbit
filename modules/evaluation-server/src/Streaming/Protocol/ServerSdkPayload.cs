@@ -16,4 +16,9 @@ public class ServerSdkPayload
         FeatureFlags = featureFlags;
         Segments = segments;
     }
+
+    public bool IsEmpty()
+    {
+        return EventType == DataSyncEventTypes.Patch && !FeatureFlags.Any() && !Segments.Any();
+    }
 }
