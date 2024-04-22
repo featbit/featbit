@@ -23,7 +23,7 @@ public class SdkController : PublicApiControllerBase
 
         var payload = await _dataSyncService.GetServerSdkPayloadAsync(EnvId, timestamp);
 
-        if (!payload.FeatureFlags.Any())
+        if (!payload.FeatureFlags.Any() && !payload.Segments.Any())
         {
             return Ok();
         }
