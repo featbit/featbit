@@ -23,7 +23,7 @@ public class ClientSdkPayload
 
     public bool IsEmpty()
     {
-        return EventType == DataSyncEventTypes.Full && !FeatureFlags.Any();
+        return EventType == DataSyncEventTypes.Patch && !FeatureFlags.Any();
     }
 }
 
