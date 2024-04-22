@@ -23,6 +23,11 @@ public class SdkController : PublicApiControllerBase
 
         var payload = await _dataSyncService.GetServerSdkPayloadAsync(EnvId, timestamp);
 
+        if (!payload.FeatureFlags.Any())
+        {
+            return Ok();
+        }
+        
         var bootstrap = new
         {
             messageType = "data-sync",
@@ -47,14 +52,16 @@ public class SdkController : PublicApiControllerBase
 
         var payload = await _dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, timestamp);
 
-        var bootstrap = payload.FeatureFlags.Select(x => new
+        if (!payload.FeatureFlags.Any())
         {
-            x.Id,
-            x.Variation,
-            x.VariationType,
-            x.VariationId,
-            x.SendToExperiment
-        });
+            return Ok();
+        }
+        
+        var bootstrap = new
+        {
+            messageType = "data-sync",
+            data = payload
+        };
 
         return new JsonResult(bootstrap);
     }
