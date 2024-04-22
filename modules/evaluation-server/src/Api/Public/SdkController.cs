@@ -22,12 +22,11 @@ public class SdkController : PublicApiControllerBase
         }
 
         var payload = await _dataSyncService.GetServerSdkPayloadAsync(EnvId, timestamp);
-
-        if (!payload.FeatureFlags.Any() && !payload.Segments.Any())
+        if (payload.IsEmpty())
         {
             return Ok();
         }
-        
+
         var bootstrap = new
         {
             messageType = "data-sync",
@@ -51,12 +50,11 @@ public class SdkController : PublicApiControllerBase
         }
 
         var payload = await _dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, timestamp);
-
-        if (!payload.FeatureFlags.Any())
+        if (payload.IsEmpty())
         {
             return Ok();
         }
-        
+
         var bootstrap = new
         {
             messageType = "data-sync",

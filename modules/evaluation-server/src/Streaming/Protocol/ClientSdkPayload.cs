@@ -20,6 +20,11 @@ public class ClientSdkPayload
         UserKeyId = userKeyId;
         FeatureFlags = featureFlags;
     }
+
+    public bool IsEmpty()
+    {
+        return EventType == DataSyncEventTypes.Full && !FeatureFlags.Any();
+    }
 }
 
 public class ClientSdkFlag
