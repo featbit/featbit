@@ -84,7 +84,8 @@ export enum LicenseFeatureEnum {
   Sso = 'sso',
   Schedule = 'schedule',
   ChangeRequest = 'change-request',
-  MultiOrg = 'multi-organization'
+  MultiOrg = 'multi-organization',
+  GlobalUser = 'global-user'
 }
 
 export interface ILicense {
