@@ -26,10 +26,9 @@ export class LicenseComponent {
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
 
   getFeatureName(feature: LicenseFeatureEnum): string {
-    // this.title = $localize`:@@relay-proxy.add-title:Add Relay Proxy`;
     switch (feature) {
       case LicenseFeatureEnum.Sso:
-        return $localize`:@@common.sso:Single Sign-On`;
+        return $localize`:@@common.sso:SSO`;
       case LicenseFeatureEnum.Schedule:
         return $localize`:@@common.schedule:Schedule`;
       case LicenseFeatureEnum.ChangeRequest:

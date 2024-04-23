@@ -1733,8 +1733,8 @@
           <context context-type="linenumber">35</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <target>计划变更</target>
       </trans-unit>
@@ -1769,8 +1769,8 @@
           <context context-type="linenumber">98</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -3653,8 +3653,8 @@
       <trans-unit id="common.sso" datatype="html">
         <source>SSO</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -3665,10 +3665,22 @@
       <trans-unit id="common.multi-org" datatype="html">
         <source>Multiple Organization</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <target>多机构</target>
+      </trans-unit>
+      <trans-unit id="common.global-user" datatype="html">
+        <source>Global User</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+        <target>全局用户</target>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.title" datatype="html">
         <source>Add team member</source>
@@ -5224,14 +5236,6 @@
           <context context-type="linenumber">32</context>
         </context-group>
         <target>请选择目标用户</target>
-      </trans-unit>
-      <trans-unit id="common.global-user" datatype="html">
-        <source>Global User</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">50</context>
-        </context-group>
-        <target>全局用户</target>
       </trans-unit>
       <trans-unit id="common.edit-targeting-user" datatype="html">
         <source>Edit targeting user</source>
@@ -7527,6 +7531,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
           <context context-type="linenumber">25</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <target>您没有 License，或者你当前的 License 不包括该功能，请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
@@ -10217,7 +10225,11 @@
         <source>Global Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <target>全局用户</target>
       </trans-unit>
