@@ -152,11 +152,12 @@ export class WorkspaceComponent implements OnInit {
     this.workspaceService.updateLicense(license).subscribe({
       next: (workspace) => {
         this.isLicenseLoading = false;
-        this.workspace = workspace;
-        this.license = new License(workspace.license);
-        this.message.success($localize`:@@org.org.license-update-success:License updated!`);
+
         this.workspaceService.setWorkspace(workspace);
-        this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
+        this.message.success($localize`:@@org.org.license-update-success:License updated!`);
+
+        // reload page to apply new license
+        location.reload();
       },
       error: () => {
         this.message.error($localize`:@@org.org.invalid-license:Invalid license, please contact FeatBit team to get a license!`);
