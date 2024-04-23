@@ -8,7 +8,7 @@ import { environment } from "src/environments/environment";
 import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
 import { License, LicenseFeatureEnum } from "@shared/types";
-import { getCurrentWorkspace } from "@utils/project-env";
+import { getCurrentLicense } from "@utils/project-env";
 import { BehaviorSubject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { TeamService } from "@services/team.service";
@@ -45,8 +45,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
   ) { }
 
   ngOnInit(): void {
-    const workspace = getCurrentWorkspace();
-    this.license = new License(workspace.license);
+    this.license = getCurrentLicense();
 
     const profile = getProfile();
     this.memberSearchChange$.pipe(

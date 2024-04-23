@@ -16,7 +16,7 @@ import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { environment } from "src/environments/environment";
-import { getCurrentWorkspace } from "@utils/project-env";
+import { getCurrentLicense } from "@utils/project-env";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -118,8 +118,7 @@ export class TargetingComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const workspace = getCurrentWorkspace();
-    this.license = new License(workspace.license);
+    this.license = getCurrentLicense();
 
     this.isLoading = true;
     this.route.paramMap.subscribe(paramMap => {

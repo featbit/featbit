@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IOrganization, License, LicenseFeatureEnum } from '@shared/types';
 import { OrganizationService } from '@services/organization.service';
-import { getCurrentOrganization, getCurrentWorkspace } from "@utils/project-env";
+import { getCurrentLicense, getCurrentOrganization } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { MessageQueueService } from '@core/services/message-queue.service';
@@ -41,8 +41,7 @@ export class OrganizationComponent implements OnInit {
 
     const currentOrganizationId = getCurrentOrganization().id;
     this.currentOrganization = this.allOrganizations.find(x => x.id == currentOrganizationId);
-    const workspace = getCurrentWorkspace();
-    this.license = new License(workspace.license);
+    this.license = getCurrentLicense();
     this.initOrgForm();
   }
 
