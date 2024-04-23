@@ -97,6 +97,10 @@
           <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">78</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/user-segments-flags-drawer/user-segments-flags-drawer.component.html</context>
           <context context-type="linenumber">37</context>
         </context-group>
@@ -227,6 +231,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
           <context context-type="linenumber">82</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/profile/profile.component.html</context>
@@ -450,7 +458,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -810,11 +818,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">138</context>
         </context-group>
         <target>操作成功</target>
       </trans-unit>
@@ -918,7 +926,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">169</context>
+          <context context-type="linenumber">168</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/prism/prism.component.ts</context>
@@ -986,7 +994,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <target>复制成功</target>
       </trans-unit>
@@ -1126,7 +1134,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -1725,8 +1733,8 @@
           <context context-type="linenumber">35</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <target>计划变更</target>
       </trans-unit>
@@ -1758,11 +1766,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -1874,7 +1882,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -1898,7 +1906,7 @@
         <source>Review and save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">92</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
@@ -1910,7 +1918,7 @@
         <source>Schedule changes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -1921,6 +1929,30 @@
           <context context-type="linenumber">30</context>
         </context-group>
         <target>计划变更</target>
+      </trans-unit>
+      <trans-unit id="users.user-profile" datatype="html">
+        <source>User Profile</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>用户信息</target>
+      </trans-unit>
+      <trans-unit id="users.built-in-property" datatype="html">
+        <source>Built In Property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <target>内置属性</target>
+      </trans-unit>
+      <trans-unit id="users.customized-property" datatype="html">
+        <source>Customized Property</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/end-user-drawer/end-user-drawer.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <target>自定义属性</target>
       </trans-unit>
       <trans-unit id="org.project.permission-will-become-invalid-if-change-name" datatype="html">
         <source>Permission will become invalid if you change the name</source>
@@ -3098,7 +3130,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -3522,6 +3554,94 @@
         </context-group>
         <target>环境</target>
       </trans-unit>
+      <trans-unit id="users.import.choose-file" datatype="html">
+        <source>Choose the data file you want to import.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>请选择你想要上传的文件</target>
+      </trans-unit>
+      <trans-unit id="users.import.view-template" datatype="html">
+        <source>Click to view the template</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <target>点击查看模板</target>
+      </trans-unit>
+      <trans-unit id="users.import.users-note" datatype="html">
+        <source>We will either create new user records or update existing ones based on the keyId.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <target>根据 keyId 来决定创建新用户或更新已有用户。</target>
+      </trans-unit>
+      <trans-unit id="users.import.user-properties-note" datatype="html">
+        <source>Any new user properties in the file will be added, but existing properties will not be changed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <target>任何新的用户属性会被添加，已存在的用户属性不会受到任何影响。</target>
+      </trans-unit>
+      <trans-unit id="users.import.upload-text" datatype="html">
+        <source>Click or drag file to this area to upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <target>点击或拖动文件到此区域</target>
+      </trans-unit>
+      <trans-unit id="users.import.supported-format" datatype="html">
+        <source>Supported format: JSON</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">43</context>
+        </context-group>
+        <target>支持的文件格式：JSON</target>
+      </trans-unit>
+      <trans-unit id="users.import.maximum-file-size" datatype="html">
+        <source>Maximum file size: 500MB</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <target>最大文件大小：500MB</target>
+      </trans-unit>
+      <trans-unit id="users.import.file-format-error" datatype="html">
+        <source>Invalid file format. Only JSON files are allowed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <target>非法的文件类型，仅支持 JSON 文件</target>
+      </trans-unit>
+      <trans-unit id="users.import.file-size-error" datatype="html">
+        <source>The uploaded file exceeds the size limit of 500MB. Please upload a smaller file.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <target>上传的文件超过 500MB，请上传更小的文件</target>
+      </trans-unit>
+      <trans-unit id="users.import.import-success" datatype="html">
+        <source>User data has been successfully imported.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+        <target>成功导入用户信息</target>
+      </trans-unit>
+      <trans-unit id="users.import.import-failed" datatype="html">
+        <source>Failed to import user data. Please check the file and try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <target>导入用户信息失败，请检查文件内容之后再试</target>
+      </trans-unit>
       <trans-unit id="common.license-subject" datatype="html">
         <source>Issued To</source>
         <context-group purpose="location">
@@ -3549,8 +3669,8 @@
       <trans-unit id="common.sso" datatype="html">
         <source>SSO</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -3561,10 +3681,22 @@
       <trans-unit id="common.multi-org" datatype="html">
         <source>Multiple Organization</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/license/license.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <target>多机构</target>
+      </trans-unit>
+      <trans-unit id="common.global-user" datatype="html">
+        <source>Global User</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license.component.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+        <target>全局用户</target>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.title" datatype="html">
         <source>Add team member</source>
@@ -4500,6 +4632,10 @@
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
           <context context-type="linenumber">37</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
         <target>操作</target>
       </trans-unit>
       <trans-unit id="users.idx.built-in-property" datatype="html">
@@ -5093,7 +5229,7 @@
         <source>Click to edit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">10</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
@@ -5101,11 +5237,19 @@
         </context-group>
         <target>点击编辑</target>
       </trans-unit>
+      <trans-unit id="common.click-to-view" datatype="html">
+        <source>Click to view</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>点击查看</target>
+      </trans-unit>
       <trans-unit id="target-user.select-targeting-users" datatype="html">
         <source>Select targeting users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">19</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <target>请选择目标用户</target>
       </trans-unit>
@@ -5113,9 +5257,17 @@
         <source>Edit targeting user</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">54</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>编辑目标用户</target>
+      </trans-unit>
+      <trans-unit id="common.view-targeting-user" datatype="html">
+        <source>View targeting user</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
+          <context context-type="linenumber">70</context>
+        </context-group>
+        <target>查看目标用户</target>
       </trans-unit>
       <trans-unit id="common.save-success" datatype="html">
         <source>Saved Successfully</source>
@@ -5125,7 +5277,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">308</context>
+          <context context-type="linenumber">307</context>
         </context-group>
         <target>保存与更新成功</target>
       </trans-unit>
@@ -5323,6 +5475,10 @@
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
           <context context-type="linenumber">47</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
         <target>详情</target>
       </trans-unit>
       <trans-unit id="common.segments" datatype="html">
@@ -5433,7 +5589,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">220</context>
+          <context context-type="linenumber">219</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
@@ -6263,6 +6419,10 @@
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">49</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
         <target>选择要在表格中额外显示的列</target>
       </trans-unit>
       <trans-unit id="users.idx.manage-properties" datatype="html">
@@ -6279,7 +6439,11 @@
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">123</context>
         </context-group>
-        <target>评估开关和用户组：</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">71</context>
+        </context-group>
+        <target>评估开关和用户组</target>
       </trans-unit>
       <trans-unit id="expt.expt" datatype="html">
         <source>Experiments</source>
@@ -7380,6 +7544,10 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
           <context context-type="linenumber">25</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
         <target>您没有 License，或者你当前的 License 不包括该功能，请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.setabtestrule" datatype="html">
@@ -7466,7 +7634,7 @@
         <source>Loading pending changes failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">158</context>
+          <context context-type="linenumber">157</context>
         </context-group>
         <target>加载待定变更时发生错误</target>
       </trans-unit>
@@ -7474,7 +7642,7 @@
         <source>Rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">246</context>
+          <context context-type="linenumber">245</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
@@ -7486,7 +7654,7 @@
         <source>Failed to Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">312</context>
+          <context context-type="linenumber">311</context>
         </context-group>
         <target>保存失败</target>
       </trans-unit>
@@ -7494,7 +7662,7 @@
         <source>Fallthrough rule can not be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">341</context>
         </context-group>
         <target>默认返回值不能为空</target>
       </trans-unit>
@@ -7502,7 +7670,7 @@
         <source>The sum of fallthrough rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">354</context>
+          <context context-type="linenumber">353</context>
         </context-group>
         <target>请确认默认返回值的总百分比必须为100%</target>
       </trans-unit>
@@ -7510,11 +7678,11 @@
         <source>The conditions of each rule must be set</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">364</context>
+          <context context-type="linenumber">363</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">380</context>
+          <context context-type="linenumber">379</context>
         </context-group>
         <target>每条规则的所有条件都不能为空</target>
       </trans-unit>
@@ -7522,7 +7690,7 @@
         <source>The sum of each rule&apos;s rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">392</context>
+          <context context-type="linenumber">391</context>
         </context-group>
         <target>请确认匹配条件中每条规则的总百分比必须为100%！</target>
       </trans-unit>
@@ -9413,6 +9581,30 @@
         </context-group>
         <target>未知错误发生，请重新登录！</target>
       </trans-unit>
+      <trans-unit id="common.search-by-name" datatype="html">
+        <source>Search by name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>按姓名搜索</target>
+      </trans-unit>
+      <trans-unit id="common.import" datatype="html">
+        <source>Import</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <target>导入</target>
+      </trans-unit>
+      <trans-unit id="common.failed-to-load-data" datatype="html">
+        <source>Failed to load data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+        <target>加载数据失败</target>
+      </trans-unit>
       <trans-unit id="org.org.orgName" datatype="html">
         <source>Name</source>
         <context-group purpose="location">
@@ -9457,7 +9649,7 @@
         <source>Organization name updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">93</context>
         </context-group>
         <target>机构名称更新成功！</target>
       </trans-unit>
@@ -9753,7 +9945,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">126</context>
+          <context context-type="linenumber">127</context>
         </context-group>
         <target>更新</target>
       </trans-unit>
@@ -9817,7 +10009,7 @@
         <source>SSO (OIDC) settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">81</context>
         </context-group>
         <target>SSO (OIDC) 设置</target>
       </trans-unit>
@@ -9825,11 +10017,11 @@
         <source>Client Id</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">84</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <target>Client Id</target>
       </trans-unit>
@@ -9837,7 +10029,7 @@
         <source>Client Id is mandatory!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <target>Client Id 不可为空</target>
       </trans-unit>
@@ -9845,11 +10037,11 @@
         <source>Client secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">92</context>
         </context-group>
         <target>Client secret</target>
       </trans-unit>
@@ -9857,7 +10049,7 @@
         <source>Client secret is mandatory!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <target>Client secret 不可为空</target>
       </trans-unit>
@@ -9865,11 +10057,11 @@
         <source>Token endpoint</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">96</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">97</context>
+          <context context-type="linenumber">98</context>
         </context-group>
         <target>Token endpoint</target>
       </trans-unit>
@@ -9877,7 +10069,7 @@
         <source>Token endpoint is mandatory!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <target>Token endpoint 不可为空</target>
       </trans-unit>
@@ -9885,11 +10077,11 @@
         <source>Client authentication method</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>Client authentication method</target>
       </trans-unit>
@@ -9897,7 +10089,7 @@
         <source>Client authentication method is mandatory!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">103</context>
         </context-group>
         <target>Client authentication method 不可为空</target>
       </trans-unit>
@@ -9905,11 +10097,11 @@
         <source>Authorization endpoint</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">108</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <target>Authorization endpoint</target>
       </trans-unit>
@@ -9917,7 +10109,7 @@
         <source>Authorization endpoint is mandatory!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">109</context>
         </context-group>
         <target>Authorization endpoint 不可为空</target>
       </trans-unit>
@@ -9925,11 +10117,11 @@
         <source>Scope</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">114</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">115</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <target>Scope</target>
       </trans-unit>
@@ -9937,7 +10129,7 @@
         <source>Scope is mandatory!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">115</context>
         </context-group>
         <target>Scope 不可为空</target>
       </trans-unit>
@@ -9945,11 +10137,11 @@
         <source>User email claim</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">119</context>
+          <context context-type="linenumber">120</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">122</context>
         </context-group>
         <target>User email claim</target>
       </trans-unit>
@@ -9957,7 +10149,7 @@
         <source>User email claim is mandatory!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">120</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>User email claim 不可为空</target>
       </trans-unit>
@@ -9965,7 +10157,7 @@
         <source>License updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">157</context>
+          <context context-type="linenumber">162</context>
         </context-group>
         <target>License 更新成功</target>
       </trans-unit>
@@ -9973,7 +10165,7 @@
         <source>Invalid license, please contact FeatBit team to get a license!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">168</context>
         </context-group>
         <target>无效 License, 请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
@@ -9981,7 +10173,7 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces-routing.module.ts</context>
-          <context context-type="linenumber">17</context>
+          <context context-type="linenumber">18</context>
         </context-group>
         <target>组织机构</target>
       </trans-unit>
@@ -9989,7 +10181,7 @@
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces-routing.module.ts</context>
-          <context context-type="linenumber">23</context>
+          <context context-type="linenumber">24</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -9997,9 +10189,17 @@
         <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces-routing.module.ts</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">30</context>
         </context-group>
         <target>个人信息</target>
+      </trans-unit>
+      <trans-unit id="workspace.routing.global-users" datatype="html">
+        <source>Global Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces-routing.module.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <target>全局用户</target>
       </trans-unit>
       <trans-unit id="workspace.workspace.tabtitle" datatype="html">
         <source>Workspace</source>
@@ -10032,6 +10232,18 @@
           <context context-type="linenumber">24</context>
         </context-group>
         <target>个人信息</target>
+      </trans-unit>
+      <trans-unit id="workspace.global-users.tabtitle" datatype="html">
+        <source>Global Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
+          <context context-type="linenumber">34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <target>全局用户</target>
       </trans-unit>
       <trans-unit id="iam.rsc-type.all" datatype="html">
         <source>All</source>

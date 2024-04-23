@@ -1,0 +1,27 @@
+{
+  "users": [
+    {
+      "keyId": "end-user-id",
+      "name": "end-user",
+      "customizedProperties": [
+        {
+          "name": "browser",
+          "value": "chrome"
+        },
+        {
+          "name": "location",
+          "value": "us"
+        },
+        {
+          "name": "language",
+          "value": "en"
+        }
+      ]
+    }
+  ],
+  "userProperties": [
+    "browser",
+    "location",
+    "language"
+  ]
+}

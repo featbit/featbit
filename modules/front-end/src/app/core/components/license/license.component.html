@@ -1,37 +1,22 @@
 <div class="license">
   <div>
     <div class="title" i18n="@@common.license-subject">Issued To</div>
-    <div class="value">{{license.data?.sub}}</div>
+    <div class="value">{{ license.data?.sub }}</div>
   </div>
   <div>
     <div class="title" i18n="@@common.license-iat">Issued At</div>
-    <div class="value">{{getLocalDate(license.data?.iat) | date: 'YYYY-MM-dd HH:mm'}}</div>
+    <div class="value">{{ getLocalDate(license.data?.iat) | date: 'YYYY-MM-dd HH:mm' }}</div>
   </div>
   <div>
     <div class="title" i18n="@@common.license-exp">Expire At</div>
-    <div class="value">{{getLocalDate(license.data?.exp) | date: 'YYYY-MM-dd HH:mm'}}</div>
+    <div class="value">{{ getLocalDate(license.data?.exp) | date: 'YYYY-MM-dd HH:mm' }}</div>
   </div>
   <div class="features">
     <div>Features</div>
-    <div class="feature">
-      <i *ngIf="license.isGranted(LicenseFeatureEnum.Sso)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
-      <i *ngIf="!license.isGranted(LicenseFeatureEnum.Sso)" nz-icon nzType="close" nzTheme="outline"></i>
-      <span i18n="@@common.sso">SSO</span>
-    </div>
-    <div class="feature">
-      <i *ngIf="license.isGranted(LicenseFeatureEnum.Schedule)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
-      <i *ngIf="!license.isGranted(LicenseFeatureEnum.Schedule)" nz-icon nzType="close" nzTheme="outline"></i>
-      <span i18n="@@common.schedule">Schedule</span>
-    </div>
-    <div class="feature">
-      <i *ngIf="license.isGranted(LicenseFeatureEnum.ChangeRequest)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
-      <i *ngIf="!license.isGranted(LicenseFeatureEnum.ChangeRequest)" nz-icon nzType="close" nzTheme="outline"></i>
-      <span i18n="@@common.change-request">Change Request</span>
-    </div>
-    <div class="feature">
-      <i *ngIf="license.isGranted(LicenseFeatureEnum.MultiOrg)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
-      <i *ngIf="!license.isGranted(LicenseFeatureEnum.MultiOrg)" nz-icon nzType="close" nzTheme="outline"></i>
-      <span i18n="@@common.multi-org">Multiple Organization</span>
+    <div class="feature" *ngFor="let feature of features">
+      <i *ngIf="license.isGranted(feature)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
+      <i *ngIf="!license.isGranted(feature)" nz-icon nzType="close" nzTheme="outline"></i>
+      <span>{{ getFeatureName(feature) }}</span>
     </div>
   </div>
 </div>

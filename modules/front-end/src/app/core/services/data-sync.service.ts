@@ -16,10 +16,6 @@ export class DataSyncService {
 
   constructor(private http: HttpClient) { }
 
-  uploadUrl(): string {
-    return `${this.baseUrl}/upload`;
-  }
-
   download(): Observable<any> {
     return this.http.get(`${this.baseUrl}/download`);
   }

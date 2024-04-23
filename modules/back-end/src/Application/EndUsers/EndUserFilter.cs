@@ -13,6 +13,8 @@ public class EndUserFilter : PagedRequest
 
     public string[] ExcludedKeyIds { get; set; }
 
+    public bool IncludeGlobalUser { get; set; }
+
     public EndUserFilter(SearchEndUser query)
     {
         CustomizedProperties = new List<EndUserCustomizedProperty>();
@@ -23,6 +25,9 @@ public class EndUserFilter : PagedRequest
 
         // excluded keyIds
         ExcludedKeyIds = query.ExcludedKeyIds ?? Array.Empty<string>();
+
+        // whether to include global user
+        IncludeGlobalUser = query.IncludeGlobalUser ?? false;
 
         // search text (value for multiple fields)
         var searchText = query.SearchText;

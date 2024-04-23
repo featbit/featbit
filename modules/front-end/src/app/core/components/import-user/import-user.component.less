@@ -1,0 +1,33 @@
+@import "variables";
+
+.note {
+  ul {
+    padding: 4px 16px;
+
+    li:not(:last-child) {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.upload {
+  padding: 0 12px;
+
+  nz-upload {
+    display: block;
+    height: 200px;
+  }
+
+  .hint {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    font-size: 12px;
+    color: @grey40-color;
+  }
+}
+
+.template-link {
+  color: @green70-color;
+  text-decoration: underline;
+}

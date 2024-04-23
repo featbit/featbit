@@ -1,0 +1,32 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="isVisible"
+  nzPlacement="right"
+  i18n-nzTitle="@@users.user-profile"
+  nzTitle="User Profile"
+  [nzWidth]="500"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    <nz-descriptions [nzColumn]="1" i18n-nzTitle="@@users.built-in-property" nzTitle="Built In Property">
+      <nz-descriptions-item *ngFor="let prop of builtInProps" [nzTitle]="title" [nzSpan]="1">
+        {{ prop.value }}
+        <ng-template #title>
+          <strong>{{ prop.name }}</strong>
+        </ng-template>
+      </nz-descriptions-item>
+    </nz-descriptions>
+    <nz-divider></nz-divider>
+    <nz-descriptions [nzColumn]="1" i18n-nzTitle="@@users.customized-property" nzTitle="Customized Property">
+      <nz-descriptions-item *ngFor="let prop of customizedProperties" [nzTitle]="title" [nzSpan]="1">
+        {{ prop.value }}
+        <ng-template #title>
+          <strong>{{ prop.name }}</strong>
+        </ng-template>
+      </nz-descriptions-item>
+    </nz-descriptions>
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>

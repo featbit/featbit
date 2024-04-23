@@ -1,0 +1,50 @@
+<nz-modal
+  nzClassName="import-user-modal"
+  [(nzVisible)]="isVisible"
+  nzTitle="Import User"
+  [nzContent]="modalContent"
+  [nzFooter]="modalFooter"
+  (nzOnCancel)="onCancel()"
+  nzMaskClosable="true"
+>
+  <ng-template #modalContent>
+    <div class="note">
+      <p>
+        <span i18n="@@users.import.choose-file">Choose the data file you want to import.</span>
+        <a class="template-link" href="assets/upload-global-users.json" target="_blank" i18n="@@users.import.view-template">Click to view the template</a>
+      </p>
+      <ul>
+        <li>
+          <strong>Users</strong>:
+          <span i18n="@@users.import.users-note">We will either create new user records or update existing ones based on the keyId.</span>
+        </li>
+        <li>
+          <strong>User Properties</strong>:
+          <span i18n="@@users.import.user-properties-note">Any new user properties in the file will be added, but existing properties will not be changed.</span>
+        </li>
+      </ul>
+    </div>
+    <div class="upload">
+      <nz-upload
+        nzType="drag"
+        [nzMultiple]="true"
+        nzAccept="application/json"
+        [nzAction]="uploadUrl"
+        [nzBeforeUpload]="beforeUpload"
+        (nzChange)="handleChange($event)"
+        [nzShowUploadList]="false"
+      >
+        <p class="ant-upload-drag-icon">
+          <span nz-icon nzType="inbox"></span>
+        </p>
+        <p class="ant-upload-text" i18n="@@users.import.upload-text">Click or drag file to this area to upload</p>
+      </nz-upload>
+      <div class="hint">
+        <p i18n="@@users.import.supported-format">Supported format: JSON</p>
+        <p i18n="@@users.import.maximum-file-size">Maximum file size: 500MB</p>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #modalFooter>
+  </ng-template>
+</nz-modal>

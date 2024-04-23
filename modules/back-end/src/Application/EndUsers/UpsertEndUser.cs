@@ -15,7 +15,7 @@ public class UpsertEndUser : IRequest<EndUser>
 
     public EndUser AsEndUser()
     {
-        return new EndUser(EnvId, KeyId, Name, CustomizedProperties);
+        return new EndUser(workspaceId: null, EnvId, KeyId, Name, CustomizedProperties);
     }
 }
 

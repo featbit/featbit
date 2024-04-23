@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzUploadChangeParam } from 'ng-zorro-antd/upload';
-import { DataSyncService } from '@services/data-sync.service';
+import { EnvUserService } from "@services/env-user.service";
 
 @Component({
   selector: 'app-upload-drawer',
@@ -17,12 +17,12 @@ export class UploadDrawerComponent implements OnInit {
   @Output() close: EventEmitter<any> = new EventEmitter();
 
   constructor(
+    private endUserService: EnvUserService,
     private message: NzMessageService,
-    private dataSyncService: DataSyncService
   ) { }
 
   ngOnInit(): void {
-    this.uploadUrl = this.dataSyncService.uploadUrl();
+    this.uploadUrl = this.endUserService.uploadUrl();
   }
 
   onClose() {

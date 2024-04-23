@@ -13,6 +13,7 @@ export interface IRuleIdDispatchKey {
 
 export interface IUserType {
   id: string;
+  envId?: string;
   name: string;
   keyId: string;
   customizedProperties?: [{name: string, value: string}];
@@ -83,7 +84,8 @@ export enum LicenseFeatureEnum {
   Sso = 'sso',
   Schedule = 'schedule',
   ChangeRequest = 'change-request',
-  MultiOrg = 'multi-organization'
+  MultiOrg = 'multi-organization',
+  GlobalUser = 'global-user'
 }
 
 export interface ILicense {
