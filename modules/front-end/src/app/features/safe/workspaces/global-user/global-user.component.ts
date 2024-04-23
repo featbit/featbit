@@ -38,7 +38,7 @@ export class GlobalUserComponent implements OnInit {
   private loadData() {
     this.isLoading = true;
 
-    this.service.getList().subscribe({
+    this.service.getList(this.filter).subscribe({
       next: (result) => {
         this.users = result.items;
         this.totalCount = result.totalCount;
@@ -62,7 +62,7 @@ export class GlobalUserComponent implements OnInit {
 
   onSearch(resetPage: boolean = false) {
     if (resetPage) {
-      this.filter.pageIndex = 0;
+      this.filter.pageIndex = 1;
     }
 
     this.search$.next();
