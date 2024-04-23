@@ -23,8 +23,6 @@ export class LicenseComponent {
     return new Date(date);
   }
 
-  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
-
   getFeatureName(feature: LicenseFeatureEnum): string {
     switch (feature) {
       case LicenseFeatureEnum.Sso:
