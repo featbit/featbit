@@ -4,13 +4,17 @@ namespace Api.Authorization;
 
 public static class Permissions
 {
-    public const string ManageFeatureFlag = nameof(ManageFeatureFlag);
-    public const string ManageSegment = nameof(ManageSegment);
+    public const string ReadFeatureFlag = nameof(ReadFeatureFlag);
+    public const string WriteFeatureFlag = nameof(WriteFeatureFlag);
+    public const string ReadSegment = nameof(ReadSegment);
+    public const string WriteSegment = nameof(WriteSegment);
 
     public static readonly Dictionary<string, string> ResourceMap = new(StringComparer.OrdinalIgnoreCase)
     {
-        { ManageFeatureFlag, ResourceTypes.FeatureFlag },
-        { ManageSegment, ResourceTypes.Segment }
+        { ReadFeatureFlag, ResourceTypes.FeatureFlag },
+        { WriteFeatureFlag, ResourceTypes.FeatureFlag },
+        { ReadSegment, ResourceTypes.FeatureFlag },
+        { WriteSegment, ResourceTypes.FeatureFlag }
     };
 
     public static readonly string[] All = ResourceMap.Keys.ToArray();

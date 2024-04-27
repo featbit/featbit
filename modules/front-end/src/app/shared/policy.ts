@@ -211,50 +211,8 @@ export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[
       isInvalid: false
     }
   ],
-  [ResourceTypeEnum.Flag]: [
-    {
-      val: '',
-      resourceType: ResourceTypeEnum.Project,
-      placeholder: {
-        name: '{project}',
-        displayName: $localize`:@@iam.policy.project:Project`
-      },
-      isAnyChecked: false,
-      isInvalid: false
-    },
-    {
-      val: '',
-      resourceType: ResourceTypeEnum.Env,
-      placeholder: {
-        name: '{env}',
-        displayName: $localize`:@@iam.policy.environment:Environment`
-      },
-      isAnyChecked: false,
-      isInvalid: false
-    }
-  ],
-  [ResourceTypeEnum.Segment]: [
-    {
-      val: '',
-      resourceType: ResourceTypeEnum.Project,
-      placeholder: {
-        name: '{project}',
-        displayName: $localize`:@@iam.policy.project:Project`
-      },
-      isAnyChecked: false,
-      isInvalid: false
-    },
-    {
-      val: '',
-      resourceType: ResourceTypeEnum.Env,
-      placeholder: {
-        name: '{env}',
-        displayName: $localize`:@@iam.policy.environment:Environment`
-      },
-      isAnyChecked: false,
-      isInvalid: false
-    }
-  ],
+  [ResourceTypeEnum.Flag]: [],
+  [ResourceTypeEnum.Segment]: [],
 };
 
 export const permissionActions: { [key: string]: IamPolicyAction } = {
@@ -368,16 +326,6 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
   },
 
   // feature flag
-  ManageFeatureFlag: {
-    id: uuidv4(),
-    name: 'ManageFeatureFlag',
-    resourceType: ResourceTypeEnum.Flag,
-    displayName: $localize`:@@iam.action.manage-feature-flag:Manage feature flag`,
-    description: $localize`:@@iam.action.manage-feature-flag:Manage feature flag`,
-    isOpenAPIApplicable: true,
-    isSpecificApplicable: false
-  },
-
   ReadFeatureFlag: {
     id: uuidv4(),
     name: 'ReadFeatureFlag',
@@ -385,30 +333,19 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     displayName: $localize`:@@iam.action.manage-feature-flag:Read feature flag`,
     description: $localize`:@@iam.action.manage-feature-flag:Read feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: false
+    isSpecificApplicable: true
   },
-
   WriteFeatureFlag: {
     id: uuidv4(),
     name: 'WriteFeatureFlag',
     resourceType: ResourceTypeEnum.Flag,
-    displayName: $localize`:@@iam.action.manage-feature-flag:Wirte feature flag`,
-    description: $localize`:@@iam.action.manage-feature-flag:Wirte feature flag`,
+    displayName: $localize`:@@iam.action.manage-feature-flag:Write feature flag`,
+    description: $localize`:@@iam.action.manage-feature-flag:Write feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: false
+    isSpecificApplicable: true
   },
 
   // segment
-  ManageSegment: {
-    id: uuidv4(),
-    name: 'ManageSegment',
-    resourceType: ResourceTypeEnum.Segment,
-    displayName: $localize`:@@iam.action.manage-segment:Manage segment`,
-    description: $localize`:@@iam.action.manage-segment:Manage segment`,
-    isOpenAPIApplicable: true,
-    isSpecificApplicable: false
-  },
-
   ReadSegment: {
     id: uuidv4(),
     name: 'ReadSegment',
@@ -416,17 +353,16 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     displayName: $localize`:@@iam.action.manage-feature-flag:Read segment`,
     description: $localize`:@@iam.action.manage-feature-flag:Read segment`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: false
+    isSpecificApplicable: true
   },
-
   WriteSegment: {
     id: uuidv4(),
     name: 'WriteSegment',
     resourceType: ResourceTypeEnum.Segment,
-    displayName: $localize`:@@iam.action.manage-feature-flag:Wirte segment`,
-    description: $localize`:@@iam.action.manage-feature-flag:Wirte segment`,
+    displayName: $localize`:@@iam.action.manage-feature-flag:Write segment`,
+    description: $localize`:@@iam.action.manage-feature-flag:Write segment`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: false
+    isSpecificApplicable: true
   },
 
   // org

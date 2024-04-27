@@ -12,7 +12,6 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
-[Authorize(Permissions.ManageSegment)]
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/segments")]
 public class SegmentController : ApiControllerBase
 {

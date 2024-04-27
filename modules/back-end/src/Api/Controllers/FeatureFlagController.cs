@@ -12,8 +12,6 @@ using Microsoft.AspNetCore.JsonPatch.Operations;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
-
-[Authorize(Permissions.ManageFeatureFlag)]
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/feature-flags")]
 public class FeatureFlagController : ApiControllerBase
 {
@@ -47,6 +45,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("{key}")]
+    [Authorize(Permissions.ReadFeatureFlag)]
     public async Task<ApiResponse<FeatureFlag>> GetAsync(Guid envId, string key)
     {
         var request = new GetFeatureFlag
@@ -93,6 +92,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </summary>
     [OpenApi]
     [HttpPut("{key}/archive")]
+     [Authorize(Permissions.WriteFeatureFlag)]
     public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, string key)
     {
         var request = new ArchiveFeatureFlag
