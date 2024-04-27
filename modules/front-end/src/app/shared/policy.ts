@@ -141,13 +141,13 @@ export const ResourceTypeEnv = {
 
 export const ResourceTypeFlag = {
   type: ResourceTypeEnum.Flag,
-  pattern: 'project/{project}:env/{env}/flag/*',
+  pattern: 'project/{project}:env/{env}/flag/{flag}',
   displayName: $localize`:@@iam.rsc-type.feature-flag:Feature flag`
 };
 
 export const ResourceTypeSegment = {
   type: ResourceTypeEnum.Segment,
-  pattern: 'project/{project}:env/{env}/segment/*',
+  pattern: 'project/{project}:env/{env}/segment/{segment}',
   displayName: $localize`:@@iam.rsc-type.segment:Segment`
 };
 
@@ -192,7 +192,7 @@ export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[
   [ResourceTypeEnum.Env]: [
     {
       val: '',
-      resourceType: 'project',
+      resourceType: ResourceTypeEnum.Project,
       placeholder: {
         name: '{project}',
         displayName: $localize`:@@iam.policy.project:Project`
@@ -202,7 +202,7 @@ export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[
     },
     {
       val: '',
-      resourceType: 'env',
+      resourceType: ResourceTypeEnum.Env,
       placeholder: {
         name: '{env}',
         displayName: $localize`:@@iam.policy.environment:Environment`
@@ -211,8 +211,50 @@ export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[
       isInvalid: false
     }
   ],
-  [ResourceTypeEnum.Flag]: [],
-  [ResourceTypeEnum.Segment]: [],
+  [ResourceTypeEnum.Flag]: [
+    {
+      val: '',
+      resourceType: ResourceTypeEnum.Project,
+      placeholder: {
+        name: '{project}',
+        displayName: $localize`:@@iam.policy.project:Project`
+      },
+      isAnyChecked: false,
+      isInvalid: false
+    },
+    {
+      val: '',
+      resourceType: ResourceTypeEnum.Env,
+      placeholder: {
+        name: '{env}',
+        displayName: $localize`:@@iam.policy.environment:Environment`
+      },
+      isAnyChecked: false,
+      isInvalid: false
+    }
+  ],
+  [ResourceTypeEnum.Segment]: [
+    {
+      val: '',
+      resourceType: ResourceTypeEnum.Project,
+      placeholder: {
+        name: '{project}',
+        displayName: $localize`:@@iam.policy.project:Project`
+      },
+      isAnyChecked: false,
+      isInvalid: false
+    },
+    {
+      val: '',
+      resourceType: ResourceTypeEnum.Env,
+      placeholder: {
+        name: '{env}',
+        displayName: $localize`:@@iam.policy.environment:Environment`
+      },
+      isAnyChecked: false,
+      isInvalid: false
+    }
+  ],
 };
 
 export const permissionActions: { [key: string]: IamPolicyAction } = {
@@ -336,6 +378,26 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isSpecificApplicable: false
   },
 
+  ReadFeatureFlag: {
+    id: uuidv4(),
+    name: 'ReadFeatureFlag',
+    resourceType: ResourceTypeEnum.Flag,
+    displayName: $localize`:@@iam.action.manage-feature-flag:Read feature flag`,
+    description: $localize`:@@iam.action.manage-feature-flag:Read feature flag`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: false
+  },
+
+  WriteFeatureFlag: {
+    id: uuidv4(),
+    name: 'WriteFeatureFlag',
+    resourceType: ResourceTypeEnum.Flag,
+    displayName: $localize`:@@iam.action.manage-feature-flag:Wirte feature flag`,
+    description: $localize`:@@iam.action.manage-feature-flag:Wirte feature flag`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: false
+  },
+
   // segment
   ManageSegment: {
     id: uuidv4(),
@@ -343,6 +405,26 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Segment,
     displayName: $localize`:@@iam.action.manage-segment:Manage segment`,
     description: $localize`:@@iam.action.manage-segment:Manage segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: false
+  },
+
+  ReadSegment: {
+    id: uuidv4(),
+    name: 'ReadSegment',
+    resourceType: ResourceTypeEnum.Segment,
+    displayName: $localize`:@@iam.action.manage-feature-flag:Read segment`,
+    description: $localize`:@@iam.action.manage-feature-flag:Read segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: false
+  },
+
+  WriteSegment: {
+    id: uuidv4(),
+    name: 'WriteSegment',
+    resourceType: ResourceTypeEnum.Segment,
+    displayName: $localize`:@@iam.action.manage-feature-flag:Wirte segment`,
+    description: $localize`:@@iam.action.manage-feature-flag:Wirte segment`,
     isOpenAPIApplicable: true,
     isSpecificApplicable: false
   },
