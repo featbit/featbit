@@ -118,7 +118,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
                 expt.selectedIteration = this.processIteration({ ...expt.selectedIteration }, expt.baselineVariation.id);
                 if (iteration.updatedAt) {
                   expt.selectedIteration.updatedAt = iteration.updatedAt;
-                  expt.selectedIteration.updatedAtStr = format(iteration.updatedAt, 'yyyy-mm-dd hh:mm');
+                  expt.selectedIteration.updatedAtStr = format(iteration.updatedAt, 'yyyy-MM-dd hh:mm');
                 }
 
                 // update experiment original iterations
@@ -204,7 +204,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     this.experimentService.stopIteration(expt.id, expt.selectedIteration.id).subscribe(res => {
       if (res) {
         expt.selectedIteration.endTime = res.endTime;
-        expt.selectedIteration.dateTimeInterval = `${format(expt.selectedIteration.startTime, 'yyyy-mm-dd hh:mm')} - ${format(expt.selectedIteration.endTime, 'yyyy-mm-dd hh:mm')}`
+        expt.selectedIteration.dateTimeInterval = `${format(expt.selectedIteration.startTime, 'yyyy-MM-dd hh:mm')} - ${format(expt.selectedIteration.endTime, 'yyyy-MM-dd hh:mm')}`
         expt.status = ExperimentStatus.Paused;
       }
 
@@ -244,7 +244,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariation.id);
         if (res[0].updatedAt) {
           expt.selectedIteration.updatedAt = res[0].updatedAt;
-          expt.selectedIteration.updatedAtStr = format(res[0].updatedAt, 'yyyy-mm-dd hh:mm');
+          expt.selectedIteration.updatedAtStr = format(res[0].updatedAt, 'yyyy-MM-dd hh:mm');
         }
 
         this.setExptStatus(expt, res[0]);
@@ -299,11 +299,11 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     const winnerVariation = !!iterationResults.find(e => e.isWinner);
 
     const nowStr = (iteration.isFinish === true) ? "" : "(" + ($localize `:@@common.now:Now`) + ")";
-    const startStr = `${format(iteration.startTime, 'yyyy-mm-dd hh:mm')}`;
+    const startStr = `${format(iteration.startTime, 'yyyy-MM-dd hh:mm')}`;
     const endStr = `${iteration.endTime ?
-      format(iteration.endTime, 'yyyy-mm-dd hh:mm') :
-      format(new Date(), 'yyyy-mm-dd hh:mm')}  ${nowStr}`
-      
+      format(iteration.endTime, 'yyyy-MM-dd hh:mm') :
+      format(new Date(), 'yyyy-MM-dd hh:mm')}  ${nowStr}`
+
     return {
       ...iteration,
       invalidVariation,
