@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
@@ -13,9 +13,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms"
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.less']
 })
-export class IndexComponent implements OnInit, OnDestroy {
-
-  private destory$: Subject<void> = new Subject();
+export class IndexComponent implements OnInit {
 
   createModalVisible: boolean = false;
   isIntoing: boolean = false;
@@ -190,11 +188,6 @@ export class IndexComponent implements OnInit, OnDestroy {
 
   addSegment() {
     this.createModalVisible = true;
-  }
-
-  ngOnDestroy(): void {
-    this.destory$.next();
-    this.destory$.complete();
   }
 
   onIntoSegmentDetail(data: ISegment) {
