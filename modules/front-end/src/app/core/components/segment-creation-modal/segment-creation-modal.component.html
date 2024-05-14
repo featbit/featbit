@@ -1,0 +1,54 @@
+<nz-modal
+  [(nzVisible)]="isVisible"
+  [nzTitle]="modalTitle"
+  [nzCentered]="true"
+  [nzContent]="modalContent"
+  [nzFooter]="modalFooter"
+  (nzOnCancel)="onCancel()">
+  <ng-template #modalTitle>
+    <ng-container i18n="@@segment.creation-modal.add-segment">Add segment</ng-container>
+  </ng-template>
+  <ng-template #modalContent>
+    <nz-segmented [nzOptions]="types"></nz-segmented>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control
+          nzHasFeedback
+          nzValidatingTip="Validating..."
+          i18n-nzValidatingTip="@@common.validating"
+          [nzErrorTip]="segmentNameErrorTpl">
+          <input nz-input formControlName="name"/>
+          <ng-template #segmentNameErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">This name has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@common.description">Description</nz-form-label>
+        <nz-form-control>
+          <textarea
+            style="resize: none"
+            nz-input
+            formControlName="description"
+            placeholder="Description"
+            i18n-placeholder="@@common.description"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-template>
+
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="this.onCancel()" i18n="@@common.cancel">Cancel</button>
+    <button
+      nz-button
+      nzType="primary"
+      [nzLoading]="this.creating"
+      [disabled]="!form.valid"
+      (click)="create()"
+      i18n="@@common.save">Save</button>
+  </ng-template>
+</nz-modal>

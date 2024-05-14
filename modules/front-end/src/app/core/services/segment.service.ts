@@ -68,8 +68,7 @@ export class SegmentService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  // 快速创建新的开关
-  public create(name: string, description: string) {
+  public create(name: string, description: string): Observable<ISegment> {
     const body = {
       name,
       description,
@@ -77,7 +76,7 @@ export class SegmentService {
       excluded: []
     };
 
-    return this.http.post(this.baseUrl, body);
+    return this.http.post<ISegment>(this.baseUrl, body);
   }
 
   delete(id: string): Observable<boolean> {
