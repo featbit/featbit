@@ -36,7 +36,7 @@
         <div class="text" i18n="@@common.resource-finder.selected-items">Selected Items</div>
         <div class="tags">
           <ng-container *ngFor="let item of selectedItems">
-            <nz-tag nzMode="closeable" (nzOnClose)="removeFromSelected(item)">{{ item.name }}</nz-tag>
+            <nz-tag nzMode="closeable" (nzOnClose)="removeFromSelected(item)">{{ item.pathName }}</nz-tag>
           </ng-container>
         </div>
       </div>
@@ -47,7 +47,7 @@
             <nz-list-item (click)="toggleSelected(item)" *ngFor="let item of itemsGroup.items">
               <div class="resource-item">
                 <div class="text">
-                  <span>{{ item.name }}</span>
+                  <span>{{ item.pathName }}</span>
                   <span class="rn">{{ item.rn }}</span>
                 </div>
                 <div *ngIf="isSelected(item)" class="icon">
