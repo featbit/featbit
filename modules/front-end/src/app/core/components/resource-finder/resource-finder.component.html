@@ -45,8 +45,15 @@
         <ng-container *ngFor="let itemsGroup of groupedItems">
           <nz-list [nzHeader]="listHeader">
             <nz-list-item (click)="toggleSelected(item)" *ngFor="let item of itemsGroup.items">
-              <div>{{ item.name }}</div>
-              <div class="rn">{{ item.rn }}</div>
+              <div class="resource-item">
+                <div class="text">
+                  <span>{{ item.name }}</span>
+                  <span class="rn">{{ item.rn }}</span>
+                </div>
+                <div *ngIf="isSelected(item)" class="icon">
+                  <span nz-icon nzType="check" nzTheme="outline"></span>
+                </div>
+              </div>
             </nz-list-item>
           </nz-list>
           <ng-template #listHeader>

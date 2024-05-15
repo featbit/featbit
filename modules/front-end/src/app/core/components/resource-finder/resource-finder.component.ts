@@ -82,6 +82,10 @@ export class ResourceFinderComponent implements OnInit {
     this.selectedItems = this.selectedItems.filter(x => x.rn !== item.rn);
   }
 
+  isSelected(item: ResourceV2) {
+    return this.selectedItems.find(x => x.rn === item.rn) !== undefined;
+  }
+
   onCancel() {
     this.selectedItems = [];
     this.onClose.emit([]);
