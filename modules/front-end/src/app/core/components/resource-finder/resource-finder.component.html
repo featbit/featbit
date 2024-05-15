@@ -58,9 +58,9 @@
   </ng-template>
 
   <ng-template #modalFooter>
-    <div *ngIf="selectedItems.length > 0" class="actions">
+    <div class="actions">
       <button nz-button nzType="default" (click)="onCancel()" i18n="@@common.cancel">Cancel</button>
-      <button nz-button nzType="primary" (click)="onContinue()" i18n="@@common.continue">Continue</button>
+      <button nz-button nzType="primary" (click)="onOk()" i18n="@@common.ok">OK</button>
     </div>
   </ng-template>
 </nz-modal>

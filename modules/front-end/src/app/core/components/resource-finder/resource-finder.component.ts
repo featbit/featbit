@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
+import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum } from "@shared/policy";
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
@@ -77,13 +77,14 @@ export class ResourceFinderComponent implements OnInit {
   }
 
   onCancel() {
-    this.isVisible = false;
+    this.selectedItems = [];
     this.onClose.emit([]);
   }
 
-  onContinue() {
-    this.isVisible = false;
-    this.onClose.emit(this.selectedItems.map(x => x.rn));
+  onOk() {
+    let selectedValues = this.selectedItems.map(x => x.rn);
+    this.selectedItems = [];
+    this.onClose.emit(selectedValues);
   }
 
   private fetchResources() {

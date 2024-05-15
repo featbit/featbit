@@ -4,6 +4,7 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { SegmentService } from "@services/segment.service";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { ResourceSpaceLevel, ResourceTypeEnum } from "@shared/policy";
 
 @Component({
   selector: 'segment-creation-modal',
@@ -11,31 +12,41 @@ import { NzMessageService } from "ng-zorro-antd/message";
   styleUrls: [ './segment-creation-modal.component.less' ]
 })
 export class SegmentCreationModalComponent {
+  private _isVisible: boolean = false;
+  get isVisible() {
+    return this._isVisible;
+  }
   @Input()
-  isVisible: boolean = false;
+  set isVisible(visible: boolean) {
+    this._isVisible = visible;
+    if (visible) {
+      this.initForm();
+    }
+  }
 
   @Output()
   onClose: EventEmitter<ISegment> = new EventEmitter<ISegment>();
 
-  form: FormGroup;
+  form: FormGroup<{
+    name: FormControl<string>,
+    description: FormControl<string>
+  }>;
 
-  types = [
-    { label: 'Environment Specific', value: 'List' },
-    { label: 'Shareable', value: 'Kanban' }
-  ];
-
-  onCancel() {
-    this.onClose.emit(null);
-  }
+  type: number = 0;
+  types: string[] = [ 'Environment Specific', 'Shareable' ];
 
   constructor(
     private fb: FormBuilder,
     private service: SegmentService,
     private msg: NzMessageService
   ) {
-    this.form = this.fb.group({
-      name: [ '', Validators.required, this.segmentNameAsyncValidator ],
-      description: [ '' ]
+    this.initForm();
+  }
+
+  initForm() {
+    this.form = new FormGroup({
+      name: new FormControl('', [ Validators.required ], [ this.segmentNameAsyncValidator ]),
+      description: new FormControl('')
     });
   }
 
@@ -55,6 +66,22 @@ export class SegmentCreationModalComponent {
     first()
   );
 
+  selectedScopes: string[] = [];
+  resourceFinderVisible = false;
+  openResourceFinder() {
+    this.resourceFinderVisible = true;
+  }
+  closeResourceFinder(scopes: string[]) {
+    if (scopes.length > 0) {
+      this.selectedScopes = scopes;
+    }
+
+    this.resourceFinderVisible = false;
+  }
+  removeScope(scope: string) {
+    this.selectedScopes = this.selectedScopes.filter(x => x !== scope);
+  }
+
   creating: boolean = false;
   create() {
     this.creating = true;
@@ -72,4 +99,11 @@ export class SegmentCreationModalComponent {
       }
     });
   }
+
+  onCancel() {
+    this.onClose.emit(null);
+  }
+
+  protected readonly ResourceSpaceLevel = ResourceSpaceLevel;
+  protected readonly ResourceTypeEnum = ResourceTypeEnum;
 }

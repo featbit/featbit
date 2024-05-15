@@ -1,4 +1,5 @@
 <nz-modal
+  nzClassName="segment-creation-modal"
   [(nzVisible)]="isVisible"
   [nzTitle]="modalTitle"
   [nzCentered]="true"
@@ -9,8 +10,12 @@
     <ng-container i18n="@@segment.creation-modal.add-segment">Add segment</ng-container>
   </ng-template>
   <ng-template #modalContent>
-    <nz-segmented [nzOptions]="types"></nz-segmented>
+    <div class="type">
+      <span i18n="@@segment.creation-modal.chose-segment-type">Choose Segment Type</span>
+      <nz-segmented [(ngModel)]="type" [nzOptions]="types"></nz-segmented>
+    </div>
     <form nz-form [formGroup]="form" nzLayout="vertical">
+      <!-- Name  -->
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
         <nz-form-control
@@ -26,6 +31,35 @@
           </ng-template>
         </nz-form-control>
       </nz-form-item>
+
+      <!-- Scopes  -->
+      <nz-form-item *ngIf="type === 1">
+        <nz-form-label nzRequired i18n="@@common.scopes">Scopes</nz-form-label>
+        <nz-form-control
+          nzExtra="Select the environments that this segment will be shared with."
+          i18n-nzExtra="@@segment.creation-modal.scopes-description">
+          <resource-finder
+            [isVisible]="resourceFinderVisible"
+            (onClose)="closeResourceFinder($event)"
+            [resources]="[ResourceTypeEnum.organization, ResourceTypeEnum.Project, ResourceTypeEnum.Env]"
+            [spaceLevel]="ResourceSpaceLevel.Workspace">
+          </resource-finder>
+          <div class="scopes">
+            <nz-tag
+              *ngFor="let scope of selectedScopes"
+              nzMode="closeable"
+              (nzOnClose)="removeScope(scope)">
+              {{ scope }}
+            </nz-tag>
+          </div>
+          <button type="button" class="add-scope-button" nz-button nzType="link" (click)="openResourceFinder()">
+            <i nz-icon nzType="select" nzTheme="outline"></i>
+            <span i18n="@@common.choose-scopes">Choose Scopes</span>
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Description  -->
       <nz-form-item>
         <nz-form-label i18n="@@common.description">Description</nz-form-label>
         <nz-form-control>
