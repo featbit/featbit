@@ -5,7 +5,7 @@
   [nzCentered]="true"
   [nzContent]="modalContent"
   [nzFooter]="modalFooter"
-  (nzOnCancel)="onCancel()">
+  (nzOnCancel)="close(null)">
   <ng-template #modalTitle>
     <ng-container i18n="@@segment.creation-modal.add-segment">Add segment</ng-container>
   </ng-template>
@@ -42,18 +42,19 @@
             [isVisible]="resourceFinderVisible"
             (onClose)="closeResourceFinder($event)"
             [resources]="[ResourceTypeEnum.organization, ResourceTypeEnum.Project, ResourceTypeEnum.Env]"
-            [spaceLevel]="ResourceSpaceLevel.Workspace">
+            [spaceLevel]="ResourceSpaceLevel.Workspace"
+            [defaultSelected]="selectedScopes">
           </resource-finder>
           <div class="scopes">
             <nz-tag
               *ngFor="let scope of selectedScopes"
               nzMode="closeable"
               (nzOnClose)="removeScope(scope)">
-              {{ scope }}
+              {{ scope.pathName }}
             </nz-tag>
           </div>
           <button type="button" class="add-scope-button" nz-button nzType="link" (click)="openResourceFinder()">
-            <i nz-icon nzType="select" nzTheme="outline"></i>
+            <i nz-icon nzType="icons:icon-choose" nzTheme="outline"></i>
             <span i18n="@@common.choose-scopes">Choose Scopes</span>
           </button>
         </nz-form-control>
@@ -76,7 +77,7 @@
   </ng-template>
 
   <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="this.onCancel()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="default" (click)="close(null)" i18n="@@common.cancel">Cancel</button>
     <button
       nz-button
       nzType="primary"

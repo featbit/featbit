@@ -1,17 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum } from "@shared/policy";
+import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
 
 interface GroupedItem {
   name: string;
-  items: Item[];
-}
-
-interface Item {
-  rn: string;
-  name: string;
+  items: ResourceV2[];
 }
 
 @Component({
@@ -20,14 +15,25 @@ interface Item {
   styleUrls: ['./resource-finder.component.less']
 })
 export class ResourceFinderComponent implements OnInit {
+  private _isVisible: boolean = false;
+  get isVisible() {
+    return this._isVisible;
+  }
   @Input()
-  isVisible = false;
+  set isVisible(visible: boolean) {
+    this._isVisible = visible;
+    if (visible) {
+      this.selectedItems = this.defaultSelected.map(x => x);
+    }
+  }
   @Input()
   resources: ResourceTypeEnum[] = [ResourceTypeEnum.Project, ResourceTypeEnum.Env, ResourceTypeEnum.Flag, ResourceTypeEnum.Segment];
   @Input()
   spaceLevel: ResourceSpaceLevel = ResourceSpaceLevel.Organization;
+  @Input()
+  defaultSelected: ResourceV2[] = [];
   @Output()
-  onClose: EventEmitter<string[]> = new EventEmitter<string[]>();
+  onClose: EventEmitter<ResourceV2[]> = new EventEmitter<ResourceV2[]>();
 
   constructor(private resourceService: ResourceService) {
   }
@@ -57,9 +63,9 @@ export class ResourceFinderComponent implements OnInit {
     this.$search.next();
   }
 
-  selectedItems: Item[] = [];
+  selectedItems: ResourceV2[] = [];
 
-  toggleSelected(item: Item) {
+  toggleSelected(item: ResourceV2) {
     let existedItem = this.selectedItems.find(x => x.rn === item.rn);
     if (existedItem) {
       this.removeFromSelected(existedItem);
@@ -68,11 +74,11 @@ export class ResourceFinderComponent implements OnInit {
     }
   }
 
-  addToSelected(item: Item) {
+  addToSelected(item: ResourceV2) {
     this.selectedItems.push(item);
   }
 
-  removeFromSelected(item: Item) {
+  removeFromSelected(item: ResourceV2) {
     this.selectedItems = this.selectedItems.filter(x => x.rn !== item.rn);
   }
 
@@ -82,9 +88,9 @@ export class ResourceFinderComponent implements OnInit {
   }
 
   onOk() {
-    let selectedValues = this.selectedItems.map(x => x.rn);
+    let snapshot = this.selectedItems.map(x => x);
     this.selectedItems = [];
-    this.onClose.emit(selectedValues);
+    this.onClose.emit(snapshot);
   }
 
   private fetchResources() {
@@ -95,17 +101,11 @@ export class ResourceFinderComponent implements OnInit {
         const type = this.mapResourceType(resource.type);
         const group = this.groupedItems.find(x => x.name === type);
         if (group) {
-          group.items.push({
-            rn: resource.rn,
-            name: resource.pathName
-          });
+          group.items.push(resource);
         } else {
           this.groupedItems.push({
             name: type,
-            items: [{
-              rn: resource.rn,
-              name: resource.pathName
-            }]
+            items: [resource]
           });
         }
       }

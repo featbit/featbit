@@ -4,7 +4,7 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { SegmentService } from "@services/segment.service";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { ResourceSpaceLevel, ResourceTypeEnum } from "@shared/policy";
+import { ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
 
 @Component({
   selector: 'segment-creation-modal',
@@ -66,20 +66,20 @@ export class SegmentCreationModalComponent {
     first()
   );
 
-  selectedScopes: string[] = [];
+  selectedScopes: ResourceV2[] = [];
   resourceFinderVisible = false;
   openResourceFinder() {
     this.resourceFinderVisible = true;
   }
-  closeResourceFinder(scopes: string[]) {
-    if (scopes.length > 0) {
-      this.selectedScopes = scopes;
+  closeResourceFinder(resources: ResourceV2[]) {
+    if (resources.length > 0) {
+      this.selectedScopes = resources;
     }
 
     this.resourceFinderVisible = false;
   }
-  removeScope(scope: string) {
-    this.selectedScopes = this.selectedScopes.filter(x => x !== scope);
+  removeScope(scope: ResourceV2) {
+    this.selectedScopes = this.selectedScopes.filter(x => x.rn !== scope.rn);
   }
 
   creating: boolean = false;
@@ -90,18 +90,19 @@ export class SegmentCreationModalComponent {
     this.service.create(name, description).subscribe({
       next: (segment: ISegment) => {
         this.creating = false;
-        this.onClose.emit(segment);
+        this.close(segment);
       },
       error: () => {
         this.msg.error($localize`:@@common.operation-failed:Operation failed`);
         this.creating = false;
-        this.onClose.emit(null);
+        this.close(null);
       }
     });
   }
 
-  onCancel() {
-    this.onClose.emit(null);
+  close(segment: ISegment) {
+    this.selectedScopes = [];
+    this.onClose.emit(segment);
   }
 
   protected readonly ResourceSpaceLevel = ResourceSpaceLevel;
