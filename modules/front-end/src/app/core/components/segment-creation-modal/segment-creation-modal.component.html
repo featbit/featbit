@@ -77,13 +77,15 @@
   </ng-template>
 
   <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="close(null)" i18n="@@common.cancel">Cancel</button>
-    <button
-      nz-button
-      nzType="primary"
-      [nzLoading]="this.creating"
-      [disabled]="!form.valid"
-      (click)="create()"
-      i18n="@@common.save">Save</button>
+    <div class="actions">
+      <button nz-button nzType="default" (click)="close(null)" i18n="@@common.cancel">Cancel</button>
+      <button
+        nz-button
+        nzType="primary"
+        [nzLoading]="this.creating"
+        [disabled]="!form.valid"
+        (click)="create()"
+        i18n="@@common.save">Save</button>
+    </div>
   </ng-template>
 </nz-modal>
