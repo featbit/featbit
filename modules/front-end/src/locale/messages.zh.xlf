@@ -97,6 +97,10 @@
           <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
           <context context-type="linenumber">78</context>
         </context-group>
@@ -229,10 +233,6 @@
           <context context-type="linenumber">35</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">82</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
           <context context-type="linenumber">57</context>
         </context-group>
@@ -289,16 +289,16 @@
           <context context-type="linenumber">14</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">16</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">63</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">83</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
@@ -457,6 +457,10 @@
           <context context-type="linenumber">204</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">90</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
           <context context-type="linenumber">86</context>
         </context-group>
@@ -479,10 +483,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
           <context context-type="linenumber">76</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">104</context>
         </context-group>
         <target>保存</target>
       </trans-unit>
@@ -515,6 +515,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">259</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <target>OK</target>
       </trans-unit>
@@ -806,15 +810,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="linenumber">59</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
@@ -894,7 +898,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">79</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
@@ -1878,7 +1882,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">83</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -1894,11 +1902,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">102</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <target>取消</target>
       </trans-unit>
@@ -2421,6 +2425,10 @@
           <context context-type="linenumber">138</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.ts</context>
+          <context context-type="linenumber">108</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
           <context context-type="linenumber">366</context>
         </context-group>
@@ -2546,11 +2554,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">44</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
-          <context context-type="linenumber">159</context>
+          <context context-type="linenumber">40</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/profile/profile.component.ts</context>
@@ -2581,6 +2585,10 @@
           <context context-type="linenumber">18</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">21</context>
         </context-group>
@@ -2591,10 +2599,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">47</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">86</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
@@ -2693,6 +2697,14 @@
           <context context-type="linenumber">26</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">67</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">73</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.html</context>
           <context context-type="linenumber">110</context>
         </context-group>
@@ -2743,14 +2755,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
           <context context-type="linenumber">25</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">93</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">95</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
@@ -4270,7 +4274,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">115</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
@@ -4804,6 +4808,10 @@
           <context context-type="linenumber">33</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">43</context>
         </context-group>
@@ -4845,7 +4853,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">136</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -5137,7 +5145,7 @@
         <source>Find a resource</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
-          <context context-type="linenumber">11</context>
+          <context context-type="linenumber">10</context>
         </context-group>
         <target>查找资源</target>
       </trans-unit>
@@ -5145,7 +5153,7 @@
         <source>Resources include projects, environments, feature flags, and segments.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="linenumber">11</context>
         </context-group>
         <target>资源包含项目，环境，开关与用户组。</target>
       </trans-unit>
@@ -5153,7 +5161,7 @@
         <source>Search by resource name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
-          <context context-type="linenumber">23</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <target>按资源名称搜索</target>
       </trans-unit>
@@ -5161,31 +5169,23 @@
         <source>Selected Items</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <target>已选择项</target>
       </trans-unit>
-      <trans-unit id="common.continue" datatype="html">
-        <source>Continue</source>
+      <trans-unit id="common.unremovable-item" datatype="html">
+        <source>This item cannot be unselected.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
-          <context context-type="linenumber">63</context>
+          <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.ts</context>
+          <context context-type="linenumber">88</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">54</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">84</context>
-        </context-group>
-        <target>继续</target>
+        <target>该选项无法取消选择。</target>
       </trans-unit>
       <trans-unit id="common.organization" datatype="html">
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.ts</context>
-          <context context-type="linenumber">119</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <target>组织机构</target>
       </trans-unit>
@@ -5193,7 +5193,7 @@
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">138</context>
         </context-group>
         <target>环境</target>
       </trans-unit>
@@ -5201,7 +5201,7 @@
         <source>Flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.ts</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">140</context>
         </context-group>
         <target>开关</target>
       </trans-unit>
@@ -5209,13 +5209,69 @@
         <source>Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.ts</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">142</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">122</context>
+          <context context-type="linenumber">92</context>
         </context-group>
         <target>用户组</target>
+      </trans-unit>
+      <trans-unit id="segment.creation-modal.add-segment" datatype="html">
+        <source>Add segment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <target>创建用户组</target>
+      </trans-unit>
+      <trans-unit id="segment.creation-modal.chose-segment-type" datatype="html">
+        <source>Choose Segment Type</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <target>选择用户组类型</target>
+      </trans-unit>
+      <trans-unit id="common.name-has-been-used" datatype="html">
+        <source>This name has been used</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>该名称已被使用</target>
+      </trans-unit>
+      <trans-unit id="common.name-validation-failed" datatype="html">
+        <source>Name validation failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <target>名称校验失败</target>
+      </trans-unit>
+      <trans-unit id="segment.creation-modal.scopes-description" datatype="html">
+        <source>Select the environments that this segment will be shared with. And by default, current environment (marked as &apos;blue&apos;) is selected and unremovable.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <target>选择该用户组将被共享的环境。当前环境（被标识为蓝色）被默认选中且不能被取消选择。</target>
+      </trans-unit>
+      <trans-unit id="common.choose-scopes" datatype="html">
+        <source>Choose Scopes</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <target>选择范围</target>
       </trans-unit>
       <trans-unit id="common.num-users" datatype="html">
         <source>user(s)</source>
@@ -5604,30 +5660,6 @@
           <context context-type="linenumber">70</context>
         </context-group>
         <target>数据加载失败，请重试</target>
-      </trans-unit>
-      <trans-unit id="common.name-has-been-used" datatype="html">
-        <source>This name has been used</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">22</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">87</context>
-        </context-group>
-        <target>该名称已被使用</target>
-      </trans-unit>
-      <trans-unit id="common.name-validation-failed" datatype="html">
-        <source>Name validation failed</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">23</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">88</context>
-        </context-group>
-        <target>名称校验失败</target>
       </trans-unit>
       <trans-unit id="integrations.webhooks.url" datatype="html">
         <source>URL</source>
@@ -6060,6 +6092,18 @@
           <context context-type="linenumber">41</context>
         </context-group>
         <target>密码</target>
+      </trans-unit>
+      <trans-unit id="common.continue" datatype="html">
+        <source>Continue</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+        <target>继续</target>
       </trans-unit>
       <trans-unit id="common.social-login-hint" datatype="html">
         <source>Sign In / Sign Up with</source>
@@ -7762,7 +7806,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <target>存档（软删除）</target>
       </trans-unit>
@@ -9485,19 +9529,11 @@
         </context-group>
         <target>确定要恢复该用户组吗？</target>
       </trans-unit>
-      <trans-unit id="segment.idx.add-segment" datatype="html">
-        <source>Add segment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">78</context>
-        </context-group>
-        <target>新建用户组</target>
-      </trans-unit>
       <trans-unit id="segment.remove-segment" datatype="html">
         <source>Remove segment: <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegment.name}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <target>删除用户组</target>
       </trans-unit>
@@ -9505,7 +9541,7 @@
         <source>Archive segment: <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegment.name}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>存档用户组：<x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegment.name}}"/></target>
       </trans-unit>
@@ -9513,7 +9549,7 @@
         <source>will be permanently removed, this operation cannot be recovered!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <target>将被永久删除，且删除后不可恢复！</target>
       </trans-unit>
@@ -9521,7 +9557,7 @@
         <source>will be archived!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">95</context>
         </context-group>
         <target>将被存档！</target>
       </trans-unit>
@@ -9529,7 +9565,7 @@
         <source>This segment is used by <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegmentFlagReferences.length}}"/> flags(s), remove all references before this operation!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">131</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <target>该用户组正在被 <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegmentFlagReferences.length}}"/> 个开关所引用，在操作之前需要先移除这些引用！</target>
       </trans-unit>
