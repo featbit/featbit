@@ -24,7 +24,7 @@ namespace Api.Health
             }
             catch (Exception error)
             {
-                return HealthCheckResult.Unhealthy("The MongoDB database is currently not available.", error);
+                return HealthCheckResult.Unhealthy("The MongoDB database is currently unavailable.", error);
             }
 
             return HealthCheckResult.Healthy("The MongoDB database is currently available.");

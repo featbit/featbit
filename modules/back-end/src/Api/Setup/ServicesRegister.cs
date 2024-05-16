@@ -60,7 +60,8 @@ public static class ServicesRegister
 
         // health check dependencies
         builder.Services.AddHealthChecks()
-            .AddCheck<MongoDbHealthCheck>("Check If MongoDB Is Available");
+            .AddCheck<MongoDbHealthCheck>("Check If MongoDB Is Available")
+            .AddCheck<RedisHealthCheck>("Check If Redis Is Available");
 
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
