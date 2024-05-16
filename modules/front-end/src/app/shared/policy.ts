@@ -441,3 +441,20 @@ export function isResourceGeneral(type: ResourceTypeEnum, rn: string): boolean {
 
   return false;
 }
+
+export function getResourceTypeName(type: ResourceTypeEnum): string {
+  switch (type) {
+    case ResourceTypeEnum.organization:
+      return $localize`:@@common.organization:Organization`;
+    case ResourceTypeEnum.Project:
+      return $localize`:@@common.project:Project`;
+    case ResourceTypeEnum.Env:
+      return $localize`:@@common.environment:Environment`;
+    case ResourceTypeEnum.Flag:
+      return $localize`:@@common.flag:Flag`;
+    case ResourceTypeEnum.Segment:
+      return $localize`:@@common.segment:Segment`;
+    default:
+      return '';
+  }
+}

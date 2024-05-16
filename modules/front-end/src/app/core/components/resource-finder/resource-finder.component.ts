@@ -1,5 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
+import {
+  getResourceTypeName,
+  ResourceFilterV2,
+  ResourceSpaceLevel,
+  ResourceTypeEnum,
+  ResourceV2
+} from "@shared/policy";
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
@@ -117,7 +123,7 @@ export class ResourceFinderComponent implements OnInit {
           continue;
         }
 
-        const type = this.mapResourceType(resource.type);
+        const type = getResourceTypeName(resource.type);
         const group = this.groupedItems.find(x => x.name === type);
         if (group) {
           group.items.push(resource);
@@ -131,22 +137,5 @@ export class ResourceFinderComponent implements OnInit {
 
       this.isLoading = false;
     });
-  }
-
-  private mapResourceType(type: ResourceTypeEnum): string {
-    switch (type) {
-      case ResourceTypeEnum.organization:
-        return $localize`:@@common.organization:Organization`;
-      case ResourceTypeEnum.Project:
-        return $localize`:@@common.project:Project`;
-      case ResourceTypeEnum.Env:
-        return $localize`:@@common.environment:Environment`;
-      case ResourceTypeEnum.Flag:
-        return $localize`:@@common.flag:Flag`;
-      case ResourceTypeEnum.Segment:
-        return $localize`:@@common.segment:Segment`;
-      default:
-        return '';
-    }
   }
 }

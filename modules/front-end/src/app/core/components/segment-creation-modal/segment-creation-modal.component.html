@@ -56,15 +56,18 @@
             [defaultSelected]="selectedScopes"
             [unremovableRn]="currentEnvironment.rn">
           </resource-finder>
-          <div class="scopes">
-            <nz-tag
-              *ngFor="let scope of selectedScopes"
-              [nzColor]="scope.id === currentEnvironment.id ? 'blue' : 'default'"
-              [nzMode]="scope.id === currentEnvironment.id ? 'default' : 'closeable'"
-              (nzOnClose)="removeScope(scope)">
-              {{ scope.pathName }}
-            </nz-tag>
-          </div>
+          <ng-container *ngFor="let scopeGroup of groupedSelectedScopes">
+            <div class="scopes-group">
+              <span>{{ scopeGroup.name }}</span>
+              <nz-tag
+                *ngFor="let scope of scopeGroup.items"
+                [nzColor]="scope.id === currentEnvironment.id ? 'blue' : 'default'"
+                [nzMode]="scope.id === currentEnvironment.id ? 'default' : 'closeable'"
+                (nzOnClose)="removeScope(scope)">
+                {{ scope.pathName }}
+              </nz-tag>
+            </div>
+          </ng-container>
           <button type="button" class="add-scope-button" nz-button nzType="link" (click)="openResourceFinder()">
             <i nz-icon nzType="icons:icon-choose" nzTheme="outline"></i>
             <span i18n="@@common.choose-scopes">Choose Scopes</span>
