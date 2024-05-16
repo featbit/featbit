@@ -11,7 +11,17 @@
   </ng-template>
   <ng-template #modalContent>
     <div class="type">
-      <span i18n="@@segment.creation-modal.chose-segment-type">Choose Segment Type</span>
+      <span class="tip">
+        <span i18n="@@segment.creation-modal.chose-segment-type">Choose Segment Type</span>
+        <i
+          nz-icon
+          nzType="question-circle"
+          nzTheme="outline"
+          nz-tooltip
+          nzTooltipTitle="Shared segment can be used across multiple environments while common segment can only be used in current environment."
+          i18n-nzTooltipTitle="@@segment.creation-modal.chose-segment-type-tip">
+        </i>
+      </span>
       <nz-segmented [(ngModel)]="type" [nzOptions]="types"></nz-segmented>
     </div>
     <form nz-form [formGroup]="form" nzLayout="vertical">

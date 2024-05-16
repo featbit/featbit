@@ -34,7 +34,10 @@ export class SegmentCreationModalComponent {
   }>;
 
   type: number = 0;
-  types: string[] = [ 'Environment Specific', 'Shareable' ];
+  types: string[] = [
+    $localize`:@@segment.creation-modal.current-environment:Current Environment`,
+    $localize`:@@segment.creation-modal.shared:Shared`
+  ];
   currentEnvironment: ResourceV2;
 
   constructor(
