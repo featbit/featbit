@@ -112,6 +112,11 @@ export class ResourceFinderComponent implements OnInit {
     this.isLoading = true;
     this.resourceService.getResourcesV2(this.filter).subscribe(resources => {
       for (const resource of resources) {
+        // filter out general resources
+        if (resource.rn.includes('*')) {
+          continue;
+        }
+
         const type = this.mapResourceType(resource.type);
         const group = this.groupedItems.find(x => x.name === type);
         if (group) {
