@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import {
-  getResourceTypeName,
+  GroupedResource,
+  groupResources,
   ResourceFilterV2,
   ResourceSpaceLevel,
   ResourceTypeEnum,
@@ -10,11 +11,6 @@ import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { NzMessageService } from "ng-zorro-antd/message";
-
-interface GroupedItem {
-  name: string;
-  items: ResourceV2[];
-}
 
 @Component({
   selector: 'resource-finder',
@@ -49,7 +45,16 @@ export class ResourceFinderComponent implements OnInit {
     private resourceService: ResourceService
   ) { }
 
-  groupedItems: GroupedItem[] = [];
+  private _items: ResourceV2[] = [];
+  get items() {
+    return this._items;
+  }
+  set items(items: ResourceV2[]) {
+    this._items = items;
+    this.groupedItems = groupResources(items);
+  }
+
+  groupedItems: GroupedResource[] = [];
   $search = new Subject<void>();
   isLoading = true;
   filter: ResourceFilterV2 = {
@@ -114,27 +119,10 @@ export class ResourceFinderComponent implements OnInit {
   }
 
   private fetchResources() {
-    this.groupedItems = [];
     this.isLoading = true;
     this.resourceService.getResourcesV2(this.filter).subscribe(resources => {
-      for (const resource of resources) {
-        // filter out general resources
-        if (resource.rn.includes('*')) {
-          continue;
-        }
-
-        const type = getResourceTypeName(resource.type);
-        const group = this.groupedItems.find(x => x.name === type);
-        if (group) {
-          group.items.push(resource);
-        } else {
-          this.groupedItems.push({
-            name: type,
-            items: [resource]
-          });
-        }
-      }
-
+      // filter out general resources
+      this.items = resources.filter(x => !x.rn.includes('*'));
       this.isLoading = false;
     });
   }

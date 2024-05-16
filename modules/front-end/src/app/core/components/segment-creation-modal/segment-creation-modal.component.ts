@@ -4,13 +4,8 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { SegmentService } from "@services/segment.service";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { getResourceTypeName, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
+import { GroupedResource, groupResources, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
-
-interface GroupedScope {
-  name: string;
-  items: ResourceV2[];
-}
 
 @Component({
   selector: 'segment-creation-modal',
@@ -92,10 +87,10 @@ export class SegmentCreationModalComponent {
   }
   set selectedScopes(scopes: ResourceV2[]) {
     this._selectedScopes = scopes;
-    this.groupedSelectedScopes = this.groupScopes(scopes);
+    this.groupedSelectedScopes = groupResources(scopes);
   }
 
-  groupedSelectedScopes: GroupedScope[] = [];
+  groupedSelectedScopes: GroupedResource[] = [];
   resourceFinderVisible = false;
   openResourceFinder() {
     this.resourceFinderVisible = true;
@@ -109,25 +104,6 @@ export class SegmentCreationModalComponent {
   }
   removeScope(scope: ResourceV2) {
     this.selectedScopes = this.selectedScopes.filter(x => x.rn !== scope.rn);
-  }
-
-  groupScopes(scopes: ResourceV2[]): GroupedScope[] {
-    let groupedScopes: GroupedScope[] = [];
-
-    for (const scope of scopes) {
-      const type = getResourceTypeName(scope.type);
-      const group = groupedScopes.find(x => x.name === type);
-      if (group) {
-        group.items.push(scope);
-      } else {
-        groupedScopes.push({
-          name: type,
-          items: [ scope ]
-        });
-      }
-    }
-
-    return groupedScopes;
   }
 
   creating: boolean = false;

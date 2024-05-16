@@ -458,3 +458,26 @@ export function getResourceTypeName(type: ResourceTypeEnum): string {
       return '';
   }
 }
+
+export interface GroupedResource {
+  name: string;
+  items: ResourceV2[];
+}
+
+export function groupResources(resources: ResourceV2[]): GroupedResource[] {
+  const groupedItems: GroupedResource[] = [];
+  for (const resource of resources) {
+    const type = getResourceTypeName(resource.type);
+    const group = groupedItems.find(x => x.name === type);
+    if (group) {
+      group.items.push(resource);
+    } else {
+      groupedItems.push({
+        name: type,
+        items: [ resource ]
+      });
+    }
+  }
+
+  return groupedItems;
+}
