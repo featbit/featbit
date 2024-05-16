@@ -3,6 +3,7 @@ import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } fr
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 interface GroupedItem {
   name: string;
@@ -32,11 +33,15 @@ export class ResourceFinderComponent implements OnInit {
   spaceLevel: ResourceSpaceLevel = ResourceSpaceLevel.Organization;
   @Input()
   defaultSelected: ResourceV2[] = [];
+  @Input()
+  unremovableRn: string = '';
   @Output()
   onClose: EventEmitter<ResourceV2[]> = new EventEmitter<ResourceV2[]>();
 
-  constructor(private resourceService: ResourceService) {
-  }
+  constructor(
+    private msg: NzMessageService,
+    private resourceService: ResourceService
+  ) { }
 
   groupedItems: GroupedItem[] = [];
   $search = new Subject<void>();
@@ -79,6 +84,11 @@ export class ResourceFinderComponent implements OnInit {
   }
 
   removeFromSelected(item: ResourceV2) {
+    if (item.rn === this.unremovableRn) {
+      this.msg.warning($localize`:@@common.unremovable-item:This item cannot be unselected.`);
+      return;
+    }
+
     this.selectedItems = this.selectedItems.filter(x => x.rn !== item.rn);
   }
 

@@ -36,19 +36,21 @@
       <nz-form-item *ngIf="type === 1">
         <nz-form-label nzRequired i18n="@@common.scopes">Scopes</nz-form-label>
         <nz-form-control
-          nzExtra="Select the environments that this segment will be shared with."
+          nzExtra="Select the environments that this segment will be shared with. And by default, current environment (marked as 'blue') is selected and unremovable."
           i18n-nzExtra="@@segment.creation-modal.scopes-description">
           <resource-finder
             [isVisible]="resourceFinderVisible"
             (onClose)="closeResourceFinder($event)"
             [resources]="[ResourceTypeEnum.organization, ResourceTypeEnum.Project, ResourceTypeEnum.Env]"
             [spaceLevel]="ResourceSpaceLevel.Workspace"
-            [defaultSelected]="selectedScopes">
+            [defaultSelected]="selectedScopes"
+            [unremovableRn]="currentEnvironment.rn">
           </resource-finder>
           <div class="scopes">
             <nz-tag
               *ngFor="let scope of selectedScopes"
-              nzMode="closeable"
+              [nzColor]="scope.id === currentEnvironment.id ? 'blue' : 'default'"
+              [nzMode]="scope.id === currentEnvironment.id ? 'default' : 'closeable'"
               (nzOnClose)="removeScope(scope)">
               {{ scope.pathName }}
             </nz-tag>

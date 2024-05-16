@@ -36,7 +36,12 @@
         <div class="text" i18n="@@common.resource-finder.selected-items">Selected Items</div>
         <div class="tags">
           <ng-container *ngFor="let item of selectedItems">
-            <nz-tag nzMode="closeable" (nzOnClose)="removeFromSelected(item)">{{ item.pathName }}</nz-tag>
+            <nz-tag
+              [nzColor]="item.rn === unremovableRn ? 'blue' : 'default'"
+              [nzMode]="item.rn === unremovableRn ? 'default' : 'closeable'"
+              (nzOnClose)="removeFromSelected(item)">
+              {{ item.pathName }}
+            </nz-tag>
           </ng-container>
         </div>
       </div>

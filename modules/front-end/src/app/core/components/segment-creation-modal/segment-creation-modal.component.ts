@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { SegmentService } from "@services/segment.service";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'segment-creation-modal',
@@ -20,7 +21,7 @@ export class SegmentCreationModalComponent {
   set isVisible(visible: boolean) {
     this._isVisible = visible;
     if (visible) {
-      this.initForm();
+      this.init();
     }
   }
 
@@ -34,20 +35,31 @@ export class SegmentCreationModalComponent {
 
   type: number = 0;
   types: string[] = [ 'Environment Specific', 'Shareable' ];
+  currentEnvironment: ResourceV2;
 
   constructor(
-    private fb: FormBuilder,
     private service: SegmentService,
     private msg: NzMessageService
-  ) {
-    this.initForm();
-  }
+  ) { }
 
-  initForm() {
+  init() {
     this.form = new FormGroup({
       name: new FormControl('', [ Validators.required ], [ this.segmentNameAsyncValidator ]),
       description: new FormControl('')
     });
+
+    const orgName = getCurrentOrganization().name;
+    const curProjectEnv = getCurrentProjectEnv();
+
+    this.currentEnvironment = {
+      id: curProjectEnv.envId,
+      name: curProjectEnv.envName,
+      pathName: `${orgName}/${curProjectEnv.projectName}/${curProjectEnv.envName}`,
+      rn: `organization/${orgName}:project/${curProjectEnv.projectKey}:env/${curProjectEnv.envKey}`,
+      type: ResourceTypeEnum.Env,
+    };
+
+    this.selectedScopes = [ this.currentEnvironment ];
   }
 
   segmentNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -101,7 +113,6 @@ export class SegmentCreationModalComponent {
   }
 
   close(segment: ISegment) {
-    this.selectedScopes = [];
     this.onClose.emit(segment);
   }
 
