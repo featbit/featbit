@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Api.Health;
 
 namespace Api.Setup;
 
@@ -58,7 +59,8 @@ public static class ServicesRegister
         builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies
-        builder.Services.AddHealthChecks();
+        builder.Services.AddHealthChecks()
+            .AddCheck<MongoDbHealthCheck>("Check If MongoDB Is Available");
 
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);

@@ -17,6 +17,7 @@ public static class MiddlewaresRegister
         // health check endpoints
         // external use
         app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
+        app.MapHealthChecks("health/readiness");
 
         // enable swagger
         app.UseSwagger();
