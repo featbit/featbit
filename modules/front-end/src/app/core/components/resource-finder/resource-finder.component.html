@@ -48,13 +48,13 @@
         <nz-list-empty *ngIf="groupedItems.length === 0"></nz-list-empty>
         <ng-container *ngFor="let itemsGroup of groupedItems">
           <nz-list [nzHeader]="listHeader">
-            <nz-list-item (click)="toggleSelected(item)" *ngFor="let item of itemsGroup.items">
+            <nz-list-item [ngClass]="{ 'disabled': item.disabled }" (click)="toggleSelected(item)" *ngFor="let item of itemsGroup.items">
               <div class="resource-item">
                 <div class="text">
                   <span>{{ item.pathName }}</span>
                   <span class="rn">{{ item.rn }}</span>
                 </div>
-                <div *ngIf="isSelected(item)" class="icon">
+                <div *ngIf="item.selected" class="icon">
                   <span nz-icon nzType="check" nzTheme="outline"></span>
                 </div>
               </div>

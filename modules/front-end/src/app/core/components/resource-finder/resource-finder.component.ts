@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import {
-  GroupedResource,
   groupResources,
   ResourceFilterV2,
   ResourceSpaceLevel,
@@ -10,12 +9,21 @@ import {
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
-import { NzMessageService } from "ng-zorro-antd/message";
+
+interface SelectableResourceV2 extends ResourceV2 {
+  selected: boolean;
+  disabled: boolean;
+}
+
+interface GroupedSelectableResource {
+  name: string;
+  items: SelectableResourceV2[];
+}
 
 @Component({
   selector: 'resource-finder',
   templateUrl: './resource-finder.component.html',
-  styleUrls: ['./resource-finder.component.less']
+  styleUrls: [ './resource-finder.component.less' ]
 })
 export class ResourceFinderComponent implements OnInit {
   private _isVisible: boolean = false;
@@ -26,11 +34,22 @@ export class ResourceFinderComponent implements OnInit {
   set isVisible(visible: boolean) {
     this._isVisible = visible;
     if (visible) {
-      this.selectedItems = this.defaultSelected.map(x => x);
+      for (const group of this.groupedItems) {
+        for (const resource of group.items) {
+          resource.selected = this.defaultSelected.find(x => x.rn === resource.rn) !== undefined;
+          resource.disabled = resource.rn === this.unremovableRn;
+        }
+      }
+
+      this.selectedItems = this.defaultSelected.map(x => ({
+        ...x,
+        selected: true,
+        disabled: x.rn === this.unremovableRn
+      }));
     }
   }
   @Input()
-  resources: ResourceTypeEnum[] = [ResourceTypeEnum.Project, ResourceTypeEnum.Env, ResourceTypeEnum.Flag, ResourceTypeEnum.Segment];
+  resources: ResourceTypeEnum[] = [ ResourceTypeEnum.Project, ResourceTypeEnum.Env, ResourceTypeEnum.Flag, ResourceTypeEnum.Segment ];
   @Input()
   spaceLevel: ResourceSpaceLevel = ResourceSpaceLevel.Organization;
   @Input()
@@ -40,21 +59,9 @@ export class ResourceFinderComponent implements OnInit {
   @Output()
   onClose: EventEmitter<ResourceV2[]> = new EventEmitter<ResourceV2[]>();
 
-  constructor(
-    private msg: NzMessageService,
-    private resourceService: ResourceService
-  ) { }
+  constructor(private resourceService: ResourceService) { }
 
-  private _items: ResourceV2[] = [];
-  get items() {
-    return this._items;
-  }
-  set items(items: ResourceV2[]) {
-    this._items = items;
-    this.groupedItems = groupResources(items);
-  }
-
-  groupedItems: GroupedResource[] = [];
+  groupedItems: GroupedSelectableResource[] = [];
   $search = new Subject<void>();
   isLoading = true;
   filter: ResourceFilterV2 = {
@@ -79,42 +86,68 @@ export class ResourceFinderComponent implements OnInit {
     this.$search.next();
   }
 
-  selectedItems: ResourceV2[] = [];
+  selectedItems: SelectableResourceV2[] = [];
 
-  toggleSelected(item: ResourceV2) {
-    let existedItem = this.selectedItems.find(x => x.rn === item.rn);
-    if (existedItem) {
-      this.removeFromSelected(existedItem);
+  toggleSelected(item: SelectableResourceV2) {
+    if (item.disabled) {
+      return;
+    }
+
+    let selectedItem = this.selectedItems.find(x => x.rn === item.rn);
+    if (selectedItem) {
+      this.removeFromSelected(selectedItem);
     } else {
       this.addToSelected(item);
     }
   }
 
-  addToSelected(item: ResourceV2) {
+  addToSelected(item: SelectableResourceV2) {
+    if (item.disabled) {
+      return;
+    }
+
+    // remove all children from selected items and then add the parent
+    this.selectedItems = this.selectedItems.filter(x => !x.rn.startsWith(item.rn) || x.rn == this.unremovableRn);
     this.selectedItems.push(item);
+
+    // mark children as selected and disabled
+    this.groupedItems.forEach(group => {
+      group.items.forEach(listItem => {
+        if (listItem.rn.startsWith(item.rn)) {
+          listItem.selected = true;
+          // disable all children except itself
+          listItem.disabled = listItem.rn !== item.rn;
+        }
+      })
+    });
+
+    console.log(this.groupedItems);
   }
 
-  removeFromSelected(item: ResourceV2) {
-    if (item.rn === this.unremovableRn) {
-      this.msg.warning($localize`:@@common.unremovable-item:This item cannot be unselected.`);
+  removeFromSelected(item: SelectableResourceV2) {
+    if (item.disabled) {
       return;
     }
 
     this.selectedItems = this.selectedItems.filter(x => x.rn !== item.rn);
-  }
 
-  isSelected(item: ResourceV2) {
-    return this.selectedItems.find(x => x.rn === item.rn) !== undefined;
+    // mark children as not selected and not disabled
+    this.groupedItems.forEach(group => {
+      group.items.forEach(resource => {
+        if (resource.rn.startsWith(item.rn) && resource.rn !== this.unremovableRn) {
+          resource.selected = false;
+          resource.disabled = false;
+        }
+      })
+    });
   }
 
   onCancel() {
-    this.selectedItems = [];
     this.onClose.emit([]);
   }
 
   onOk() {
     let snapshot = this.selectedItems.map(x => x);
-    this.selectedItems = [];
     this.onClose.emit(snapshot);
   }
 
@@ -122,7 +155,19 @@ export class ResourceFinderComponent implements OnInit {
     this.isLoading = true;
     this.resourceService.getResourcesV2(this.filter).subscribe(resources => {
       // filter out general resources
-      this.items = resources.filter(x => !x.rn.includes('*'));
+      const concreteResources = resources.filter(x => !x.rn.includes('*'));
+
+      this.groupedItems = groupResources(concreteResources).map(x => ({
+          name: x.name,
+          items: x.items.map(r => ({
+              ...r,
+              selected: false,
+              disabled: false
+            })
+          )
+        })
+      );
+
       this.isLoading = false;
     });
   }
