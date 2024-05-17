@@ -20,7 +20,7 @@ namespace Api.Health
             try
             {
                 var featureFlagCollection = _mongoClient.CollectionOf<FeatureFlag>();
-                var result = (await featureFlagCollection.Database.RunCommandAsync((Command<RawBsonDocument>)"{ping:1}"));
+                await featureFlagCollection.Database.RunCommandAsync((Command<RawBsonDocument>)"{ping:1}");
             }
             catch (Exception error)
             {
