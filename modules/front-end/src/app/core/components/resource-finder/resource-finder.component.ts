@@ -120,8 +120,6 @@ export class ResourceFinderComponent implements OnInit {
         }
       })
     });
-
-    console.log(this.groupedItems);
   }
 
   removeFromSelected(item: SelectableResourceV2) {
