@@ -59,10 +59,8 @@ public static class ServicesRegister
         builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies
-        builder.Services.AddHealthChecks()
-            .AddCheck<MongoDbHealthCheck>("Check If MongoDB Is Available")
-            .AddCheck<RedisHealthCheck>("Check If Redis Is Available");
-
+        builder.Services.AddHealthChecks().AddFeatBitHealthChecks(builder.Configuration);
+        
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
         builder.Services.AddApplicationServices();
