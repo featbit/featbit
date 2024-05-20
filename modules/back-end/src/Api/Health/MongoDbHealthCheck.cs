@@ -22,9 +22,9 @@ namespace Api.Health
                 var featureFlagCollection = _mongoClient.CollectionOf<FeatureFlag>();
                 await featureFlagCollection.Database.RunCommandAsync((Command<RawBsonDocument>)"{ping:1}");
             }
-            catch (Exception error)
+            catch (Exception exception)
             {
-                return HealthCheckResult.Unhealthy("The MongoDB database is currently unavailable.", error);
+                return HealthCheckResult.Unhealthy("The MongoDB database is currently unavailable.", exception);
             }
 
             return HealthCheckResult.Healthy("The MongoDB database is currently available.");

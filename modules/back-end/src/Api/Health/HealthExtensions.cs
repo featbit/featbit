@@ -6,7 +6,7 @@
         private static readonly string _consumerConfigSection = "Kafka:Consumer";
         private static readonly string _serverConfigSection = "bootstrap.servers";
 
-        public static IHealthChecksBuilder AddFeatBitHealthChecks(this IHealthChecksBuilder builder, IConfiguration configuration)
+        public static IHealthChecksBuilder AddReadinessChecks(this IHealthChecksBuilder builder, IConfiguration configuration)
         {            
             builder.AddCheck<MongoDbHealthCheck>("Check If MongoDB Is Available")
                 .AddCheck<RedisHealthCheck>("Check If Redis Is Available");

@@ -59,7 +59,7 @@ public static class ServicesRegister
         builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies
-        builder.Services.AddHealthChecks().AddFeatBitHealthChecks(builder.Configuration);
+        builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
         
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);

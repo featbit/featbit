@@ -18,9 +18,9 @@ namespace Api.Health
             {
                 await _redisClient.GetDatabase().PingAsync();
             }
-            catch (Exception error) 
+            catch (Exception exception) 
             {
-                return HealthCheckResult.Unhealthy("Redis is currently unavailable", error);
+                return HealthCheckResult.Unhealthy("Redis is currently unavailable", exception);
             }
 
             return HealthCheckResult.Healthy("Redis is currently available.");
