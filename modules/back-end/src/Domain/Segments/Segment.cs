@@ -10,6 +10,10 @@ public class Segment : AuditedEntity
 
     public string Name { get; set; }
 
+    public string Type { get; set; }
+
+    public ICollection<string> Scopes { get; set; }
+
     public string Description { get; set; }
 
     public ICollection<string> Included { get; set; }
@@ -23,6 +27,8 @@ public class Segment : AuditedEntity
     public Segment(
         Guid envId,
         string name,
+        string type,
+        ICollection<string> scopes,
         ICollection<string> included,
         ICollection<string> excluded,
         ICollection<MatchRule> rules,
@@ -30,6 +36,8 @@ public class Segment : AuditedEntity
     {
         EnvId = envId;
         Name = name;
+        Type = type;
+        Scopes = scopes;
         Included = included ?? Array.Empty<string>();
         Excluded = excluded ?? Array.Empty<string>();
         Rules = rules;
@@ -68,7 +76,7 @@ public class Segment : AuditedEntity
 
         return dataChange.To(this);
     }
-    
+
     public DataChange Restore()
     {
         var dataChange = new DataChange(this);

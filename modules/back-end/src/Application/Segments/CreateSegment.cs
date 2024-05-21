@@ -2,27 +2,18 @@ using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.Segments;
-using Domain.Targeting;
 
 namespace Application.Segments;
 
-public class CreateSegment : IRequest<Segment>
+public class CreateSegment : SegmentBase, IRequest<Segment>
 {
     public Guid EnvId { get; set; }
 
-    public string Name { get; set; }
-
-    public string Description { get; set; }
-
-    public ICollection<string> Included { get; set; } = Array.Empty<string>();
-
-    public ICollection<string> Excluded { get; set; } = Array.Empty<string>();
-
-    public ICollection<MatchRule> Rules { get; set; } = Array.Empty<MatchRule>();
+    public string Type { get; set; }
 
     public Segment AsSegment()
     {
-        return new Segment(EnvId, Name, Included, Excluded, Rules, Description);
+        return new Segment(EnvId, Name, Type, Scopes, Included, Excluded, Rules, Description);
     }
 }
 
@@ -30,15 +21,10 @@ public class CreateSegmentValidator : AbstractValidator<CreateSegment>
 {
     public CreateSegmentValidator()
     {
-        RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+        Include(new SegmentBaseValidator());
 
-        RuleFor(x => x.Rules)
-            .Must(rules =>
-            {
-                var conditions = rules.SelectMany(x => x.Conditions);
-                return conditions.All(x => !x.IsSegmentCondition());
-            }).WithErrorCode(ErrorCodes.SegmentCannotReferenceSegmentCondition);
+        RuleFor(x => x.Type)
+            .Must(SegmentType.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
     }
 }
 

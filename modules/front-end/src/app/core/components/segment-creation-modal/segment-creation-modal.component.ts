@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { SegmentService } from "@services/segment.service";
-import { ISegment } from "@features/safe/segments/types/segments-index";
+import { CreateSegment, ISegment, SegmentType } from "@features/safe/segments/types/segments-index";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { GroupedResource, groupResources, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
@@ -111,7 +111,25 @@ export class SegmentCreationModalComponent {
     this.creating = true;
 
     const { name, description } = this.form.value;
-    this.service.create(name, description).subscribe({
+
+    const currentEnvRN = this.currentEnvironment.rn;
+    const scopes = this.selectedScopes
+      .map(x => x.rn)
+      .sort((a, b) => b.length - a.length);
+    if (scopes.find(x => x !== currentEnvRN && currentEnvRN.startsWith(x)) !== undefined) {
+      // remove current environment from scopes
+      scopes.splice(scopes.indexOf(currentEnvRN), 1);
+    }
+    const type = this.type === 0 ? SegmentType.EnvironmentSpecific : SegmentType.Shared;
+
+    const payload: CreateSegment = {
+      name,
+      description,
+      type,
+      scopes
+    };
+
+    this.service.create(payload).subscribe({
       next: (segment: ISegment) => {
         this.creating = false;
         this.close(segment);
@@ -119,7 +137,6 @@ export class SegmentCreationModalComponent {
       error: () => {
         this.msg.error($localize`:@@common.operation-failed:Operation failed`);
         this.creating = false;
-        this.close(null);
       }
     });
   }

@@ -32,8 +32,9 @@
                 (nzPageIndexChange)="onSearch()">
         <thead>
           <tr>
-            <th nzWidth="35%" i18n="@@common.name">Name</th>
-            <th nzWidth="35%" i18n="@@common.last-updated">Last updated</th>
+            <th i18n="@@common.name">Name</th>
+            <th i18n="@@common.type">Type</th>
+            <th i18n="@@common.last-updated">Last updated</th>
             <th i18n="@@common.actions">Actions</th>
           </tr>
         </thead>
@@ -42,6 +43,7 @@
             <td style="cursor: pointer;" (click)="onIntoSegmentDetail(item)">
               <span>{{item.name}}</span>
             </td>
+            <td>{{item.type}}</td>
             <td>{{getLocalDate(item.updatedAt) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
             <td>
               <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>
