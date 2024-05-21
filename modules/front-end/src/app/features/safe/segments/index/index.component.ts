@@ -152,7 +152,7 @@ export class IndexComponent implements OnInit {
     window.open(url, '_blank');
   }
 
-  getLocalDate(date: string) {
+  getLocalDate(date: string | Date) {
     if (!date) return '';
     return new Date(date);
   }
