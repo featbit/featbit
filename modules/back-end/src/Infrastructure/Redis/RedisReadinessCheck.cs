@@ -19,7 +19,7 @@ public class RedisReadinessCheck : IHealthCheck
         }
         catch (Exception exception) 
         {
-            return HealthCheckResult.Unhealthy("Redis is currently unavailable", exception);
+            return HealthCheckResult.Unhealthy("Redis is currently unavailable.", exception);
         }
 
         return HealthCheckResult.Healthy("Redis is currently available.");
