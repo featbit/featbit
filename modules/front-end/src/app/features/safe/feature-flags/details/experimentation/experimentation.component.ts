@@ -32,7 +32,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   experimentation: string;
   onGoingExperiments: IExpt[] = [];
   refreshIntervalId;
-  refreshInterval: number = 1000 * 60 * 10; // 1 minute
+  refreshInterval: number = 1000 * 60; // 1 minute
 
   onGoingStatus = [
     ExperimentStatus.Recording
