@@ -82,7 +82,7 @@ public class MongoDbClient
         { typeof(WebhookDelivery), "WebhookDeliveries" }
     };
 
-    public IMongoCollection<TEntity> CollectionOf<TEntity>()
+    public virtual IMongoCollection<TEntity> CollectionOf<TEntity>()
     {
         var collectionName = CollectionNameOf<TEntity>();
         var collection = Database.GetCollection<TEntity>(collectionName);
