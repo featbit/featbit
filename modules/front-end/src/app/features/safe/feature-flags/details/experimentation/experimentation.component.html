@@ -51,7 +51,8 @@
                   <div style="display: flex;flex-direction: row">
                     <div>
                       <span *ngIf="experiment?.selectedIteration?.updatedAt">
-                        <ng-container i18n="@@common.last-updated">Last updated</ng-container>： {{experiment?.selectedIteration?.updatedAt | date: 'YYYY-MM-dd HH:mm'}}</span>
+                        <ng-container i18n="@@common.last-updated">Last updated</ng-container>： {{experiment?.selectedIteration?.updatedAt | date: 'YYYY-MM-dd HH:mm'}}
+                      </span>
                       <button *ngIf="experiment.status !== exptStatusNotStarted" style="margin-left: 15px;border-radius:8px" nz-button nzType="default" nz-tooltip i18n-nzTooltipTitle="@@ff.expt.refresh-every-1-min" nzTooltipTitle="Automatically refresh every 1 minute" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
                         <i *ngIf="!experiment.isLoading" nz-icon nzType="reload" nzTheme="outline"></i>
                         <i *ngIf="experiment.isLoading" nz-icon [nzType]="'sync'" [nzSpin]="true"></i>
@@ -91,11 +92,11 @@
                   <div class="action-wrapper">
                     <button class="status paused" *ngIf="experiment.status === exptStatusPaused" nz-button nzType="default" (click)="onStartIterationClick(experiment)">
                       <i class="status paused" nz-icon nzType="pause-circle" nzTheme="outline"></i>
-                      <ng-container i18n="@@ff.expt.restart-experiment">Restart</ng-container>
+                      <ng-container i18n="@@ff.expt.start-experiment">Start experiment</ng-container>
                     </button>
-                    <button class="status on-going" *ngIf="experiment.status === exptStatusRecording" nz-button nzType="default" (click)="onStopIterationClick(experiment)">
+                    <button class="status on-going" *ngIf="experiment.status === exptStatusRecording" nz-button nzType="default" (click)="onStopExptClick(experiment)">
                       <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
-                      <ng-container i18n="@@ff.expt.pause-experiment">Pause</ng-container>
+                      <ng-container i18n="@@ff.expt.stop-experiment">Stop experiment</ng-container>
                     </button>
                   </div>
                   <div class="right">
@@ -246,7 +247,7 @@
                   </ng-container>
                   <div style="text-align: center; margin-top: 10px; margin-bottom: 10px;"
                        *ngIf="experiment.metricCustomEventTrackOption !== customEventTrackNumeric">
-                    <button nz-button nzType="default" (click)="experiment.isChartExpanded = !experiment.isChartExpanded">
+                    <button nz-button style="border-radius:8px" nz-button nzType="default" nzType="default" (click)="experiment.isChartExpanded = !experiment.isChartExpanded">
                       <ng-container *ngIf="experiment.isChartExpanded" i18n="@@ff.expt.hide-chart">Hide chart</ng-container>
                       <ng-container *ngIf="!experiment.isChartExpanded" i18n="@@ff.expt.show-chart">Show chart</ng-container>
                     </button>

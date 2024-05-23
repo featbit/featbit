@@ -65,7 +65,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         experiment.UpdatedAt = operationTime;
         experiment.Status = ExperimentStatus.Paused;
         experiment.IsArchived = true;
-        await this.UpdateAsync(experiment);
+        await UpdateAsync(experiment);
     }
 
     public async Task ArchiveIterations(Guid envId, Guid experimentId)
@@ -116,26 +116,20 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         }
     }
 
-    public async Task<ExperimentIteration> StopIteration(Guid envId, Guid experimentId, string iterationId)
+    public async Task StopExperiment(Guid envId, Guid experimentId)
     {
         var experiment = await GetAsync(experimentId);
 
         var operationTime = DateTime.UtcNow;
 
-        var iteration = experiment.Iterations.FirstOrDefault(i => i.Id == iterationId);
+        var hasRunningIteration = experiment.Iterations.Any(i => !i.IsFinish);
 
-        if (iteration == null)
+        if (!hasRunningIteration)
         {
-            return null!;
+            return;
         }
 
-        if (experiment.Iterations.Any(it => !it.IsFinish))
-        {
-            experiment.Status = ExperimentStatus.Paused;
-        }
-
-        iteration.EndTime = operationTime;
-        iteration.IsFinish = true;
+        experiment.Status = ExperimentStatus.Paused;
 
         // stop active iterations
         var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
@@ -160,7 +154,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 CustomEventSuccessCriteria = (int)it.CustomEventSuccessCriteria,
                 CustomEventUnit = it.CustomEventUnit,
                 StartExptTime = it.StartTime.ToUnixTimeMilliseconds(),
-                EndExptTime = it.EndTime.HasValue ? iteration.EndTime.Value.ToUnixTimeMilliseconds() : null
+                EndExptTime = it.EndTime.Value.ToUnixTimeMilliseconds()
             };
 
             var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
@@ -172,11 +166,9 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         }
 
         await UpdateAsync(experiment);
-
-        return iteration;
     }
 
-    public async Task<ExperimentIteration> StartIteration(Guid envId, Guid experimentId)
+    public async Task<ExperimentIteration> StartExperiment(Guid envId, Guid experimentId)
     {
         var experiment = await GetAsync(experimentId);
 
@@ -258,8 +250,8 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
             {
                 Id = iteration.IterationId
             };
-
-            if (iteration.IsFinish)
+            
+            if (targetIteration.IsLocked())
             {
                 iterationResults.IsFinish = true;
                 iterationResults.IsUpdated = false;
@@ -268,7 +260,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 
                 continue;
             }
-
+            
             var param = new ExptIterationParam
             {
                 ExptId = iteration.ExptId,
@@ -283,7 +275,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 CustomEventSuccessCriteria = (int)iteration.CustomEventSuccessCriteria,
                 CustomEventUnit = iteration.CustomEventUnit,
                 StartExptTime = iteration.StartTime,
-                EndExptTime = iteration.EndTime,
+                EndExptTime = targetIteration.EndTime?.ToUnixTimeMilliseconds(),
                 Alpha = experiment.Alpha
             };
 

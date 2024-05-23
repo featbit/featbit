@@ -28,6 +28,11 @@ public class ExperimentIteration
     public CustomEventSuccessCriteria CustomEventSuccessCriteria { get; set; }
     public List<IterationResult> Results { get; set; }
     public bool IsFinish { get; set; }
+
+    public bool IsLocked()
+    {
+        return IsFinish && EndTime.HasValue && DateTime.UtcNow - EndTime.Value >= TimeSpan.FromDays(3);
+    }
 }
 
 public class IterationResult
