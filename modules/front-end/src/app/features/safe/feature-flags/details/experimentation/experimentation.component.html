@@ -247,7 +247,7 @@
                   </ng-container>
                   <div style="text-align: center; margin-top: 10px; margin-bottom: 10px;"
                        *ngIf="experiment.metricCustomEventTrackOption !== customEventTrackNumeric">
-                    <button nz-button style="border-radius:8px" nz-button nzType="default" nzType="default" (click)="experiment.isChartExpanded = !experiment.isChartExpanded">
+                    <button nz-button nzType="default" style="border-radius:8px" (click)="experiment.isChartExpanded = !experiment.isChartExpanded">
                       <ng-container *ngIf="experiment.isChartExpanded" i18n="@@ff.expt.hide-chart">Hide chart</ng-container>
                       <ng-container *ngIf="!experiment.isChartExpanded" i18n="@@ff.expt.show-chart">Show chart</ng-container>
                     </button>

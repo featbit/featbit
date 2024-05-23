@@ -1,13 +1,11 @@
-﻿using Domain.Experiments;
+﻿namespace Application.Experiments;
 
-namespace Application.Experiments;
-
-public class StopExperiment: IRequest<bool>
+public class StopExperiment : IRequest<bool>
 {
     public Guid EnvId { get; set; }
+
     public Guid ExperimentId { get; set; }
 }
-
 
 public class StopExperimentHandler : IRequestHandler<StopExperiment, bool>
 {
@@ -20,7 +18,8 @@ public class StopExperimentHandler : IRequestHandler<StopExperiment, bool>
 
     public async Task<bool> Handle(StopExperiment request, CancellationToken cancellationToken)
     {
-        await _service.StopExperiment(request.EnvId, request.ExperimentId);
+        await _service.StopAsync(request.EnvId, request.ExperimentId);
+
         return true;
     }
 }

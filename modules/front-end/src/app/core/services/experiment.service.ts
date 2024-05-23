@@ -65,12 +65,12 @@ export class ExperimentService {
     return this.http.put<IExptIteration[]>(url, params);
   }
 
-  startExperiment(experimentId: string): Observable<any> {
+  start(experimentId: string): Observable<any> {
     const url = `${this.baseUrl}/${experimentId}`;
     return this.http.post(url, {});
   }
 
-  stopExperiment(experimentId: string): Observable<any> {
+  stop(experimentId: string): Observable<any> {
     const url = `${this.baseUrl}/${experimentId}`;
     return this.http.put(url, {});
   }

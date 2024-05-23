@@ -2,12 +2,12 @@
 
 namespace Application.Experiments;
 
-public class StartExperiment: IRequest<ExperimentIteration>
+public class StartExperiment : IRequest<ExperimentIteration>
 {
     public Guid EnvId { get; set; }
+
     public Guid ExperimentId { get; set; }
 }
-
 
 public class StartExperimentHandler : IRequestHandler<StartExperiment, ExperimentIteration>
 {
@@ -20,6 +20,6 @@ public class StartExperimentHandler : IRequestHandler<StartExperiment, Experimen
 
     public async Task<ExperimentIteration> Handle(StartExperiment request, CancellationToken cancellationToken)
     {
-        return await _service.StartExperiment(request.EnvId, request.ExperimentId);
+        return await _service.StartAsync(request.EnvId, request.ExperimentId);
     }
 }

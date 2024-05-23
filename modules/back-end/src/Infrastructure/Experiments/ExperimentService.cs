@@ -116,14 +116,13 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         }
     }
 
-    public async Task StopExperiment(Guid envId, Guid experimentId)
+    public async Task StopAsync(Guid envId, Guid experimentId)
     {
         var experiment = await GetAsync(experimentId);
 
         var operationTime = DateTime.UtcNow;
 
         var hasRunningIteration = experiment.Iterations.Any(i => !i.IsFinish);
-
         if (!hasRunningIteration)
         {
             return;
@@ -168,7 +167,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         await UpdateAsync(experiment);
     }
 
-    public async Task<ExperimentIteration> StartExperiment(Guid envId, Guid experimentId)
+    public async Task<ExperimentIteration> StartAsync(Guid envId, Guid experimentId)
     {
         var experiment = await GetAsync(experimentId);
 
@@ -250,7 +249,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
             {
                 Id = iteration.IterationId
             };
-            
+
             if (targetIteration.IsLocked())
             {
                 iterationResults.IsFinish = true;
@@ -260,7 +259,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 
                 continue;
             }
-            
+
             var param = new ExptIterationParam
             {
                 ExptId = iteration.ExptId,

@@ -182,7 +182,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   onStartIterationClick(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.startExperiment(expt.id).subscribe(res => {
+    this.experimentService.start(expt.id).subscribe(res => {
       if (res) {
         expt.iterations = [this.processIteration(res, expt.baselineVariation.id), ...expt.iterations];
         expt.selectedIteration = expt.iterations[0];
@@ -201,7 +201,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   onStopExptClick(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.stopExperiment(expt.id).subscribe(res => {
+    this.experimentService.stop(expt.id).subscribe(res => {
       expt.status = ExperimentStatus.Paused;
       // reload expt iterations
       this.loadIterationResults(expt, expt.iterations[0].id);

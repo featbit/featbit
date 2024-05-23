@@ -9,11 +9,11 @@ public interface IExperimentService : IService<Experiment>
 {
     Task ArchiveExperiment(Guid envId, Guid experimentId);
     
-    Task StopExperiment(Guid envId, Guid experimentId);
+    Task StopAsync(Guid envId, Guid experimentId);
     
     Task ArchiveIterations(Guid envId, Guid experimentId);
     
-    Task<ExperimentIteration> StartExperiment(Guid envId, Guid experimentId);
+    Task<ExperimentIteration> StartAsync(Guid envId, Guid experimentId);
     
     Task<IEnumerable<ExperimentStatusCountVm>> GetStatusCountAsync(Guid envId);
     

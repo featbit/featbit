@@ -31,7 +31,18 @@ public class ExperimentIteration
 
     public bool IsLocked()
     {
-        return IsFinish && EndTime.HasValue && DateTime.UtcNow - EndTime.Value >= TimeSpan.FromDays(3);
+        if (!IsFinish)
+        {
+            return false;
+        }
+
+        if (!EndTime.HasValue)
+        {
+            return false;
+        }
+
+        var elapsedTimeSinceEnd = DateTime.UtcNow - EndTime.Value;
+        return elapsedTimeSinceEnd >= TimeSpan.FromDays(3);
     }
 }
 
