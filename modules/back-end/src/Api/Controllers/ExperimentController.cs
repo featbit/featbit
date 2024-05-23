@@ -71,11 +71,11 @@ public class ExperimentController : ApiControllerBase
         var results = await Mediator.Send(request);
         return Ok(results);
     }
-    
-    [HttpPost("{experimentId}/iterations")]
-    public async Task<ApiResponse<ExperimentIteration>> StartIterationAsync(Guid envId, Guid experimentId)
+
+    [HttpPost("{experimentId:guid}")]
+    public async Task<ApiResponse<ExperimentIteration>> StartAsync(Guid envId, Guid experimentId)
     {
-        var request = new StartIteration
+        var request = new StartExperiment
         {
             EnvId = envId,
             ExperimentId = experimentId
@@ -84,7 +84,7 @@ public class ExperimentController : ApiControllerBase
         var iteration = await Mediator.Send(request);
         return Ok(iteration);
     }
-    
+
     [HttpDelete("{experimentId}/iterations")]
     public async Task<ApiResponse<bool>> ArchiveExperimentIterations(Guid envId, Guid experimentId)
     {
@@ -97,21 +97,20 @@ public class ExperimentController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
-    [HttpPut("{experimentId}/iterations/{iterationId}")]
-    public async Task<ApiResponse<ExperimentIteration>> StopIterationAsync(Guid envId, Guid experimentId, string iterationId)
+
+    [HttpPut("{experimentId:guid}")]
+    public async Task<ApiResponse<bool>> StopAsync(Guid envId, Guid experimentId)
     {
-        var request = new StopIteration
+        var request = new StopExperiment
         {
             EnvId = envId,
-            ExperimentId = experimentId,
-            IterationId = iterationId
+            ExperimentId = experimentId
         };
 
-        var iteration = await Mediator.Send(request);
-        return Ok(iteration);
+        var success = await Mediator.Send(request);
+        return Ok(success);
     }
-    
+
     [HttpDelete("{experimentId}")]
     public async Task<ApiResponse<bool>> ArchiveExperimentAsync(Guid envId, Guid experimentId)
     {
