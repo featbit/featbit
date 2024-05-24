@@ -16,17 +16,17 @@ public class MongoDbReadinessCheckTests
 
     public MongoDbReadinessCheckTests()
     {
-        _mockedMongoDbClient = new Mock<MongoDbClient>(Options.Create(new MongoDbOptions()
+        _mockedMongoDbClient = new(Options.Create(new MongoDbOptions()
         {
             ConnectionString = "mongodb://test:abcxyz@localhost:27017",
             Database = "DoesNotExist"
         }));
-        
-        _mockedFeatureFlagCollection = new Mock<IMongoCollection<FeatureFlag>>();
+
+        _mockedFeatureFlagCollection = new();
         _mockedMongoDbClient.Setup(mongo => mongo.CollectionOf<FeatureFlag>())
             .Returns(_mockedFeatureFlagCollection.Object);
 
-        _mockedMongoDatabase = new Mock<IMongoDatabase>();
+        _mockedMongoDatabase = new();
         _mockedFeatureFlagCollection.Setup(collection => collection.Database)
             .Returns(_mockedMongoDatabase.Object);
 
@@ -49,14 +49,17 @@ public class MongoDbReadinessCheckTests
     {
         var thrownException = new Exception("Test Mongo Error");
         _mockedMongoDatabase.Setup(database => database.RunCommandAsync(
-            It.IsAny<Command>(), 
-            It.IsAny<ReadPreference>(), 
+            It.IsAny<Command>(),
+            It.IsAny<ReadPreference>(),
             It.IsAny<CancellationToken>()
         )).ThrowsAsync(thrownException);
 
         var mongoDbReadinessCheck = new MongoDbReadinessCheck(_mockedMongoDbClient.Object);
         var actual = await mongoDbReadinessCheck.CheckHealthAsync(_context);
-        var expected = HealthCheckResult.Unhealthy("The MongoDB database is currently unavailable.", thrownException);
+        var expected = HealthCheckResult.Unhealthy(
+            "The MongoDB database is currently unavailable.",
+            thrownException
+        );
 
         Assert.Equal(expected.Status, actual.Status);
         Assert.Equal(expected.Description, actual.Description);

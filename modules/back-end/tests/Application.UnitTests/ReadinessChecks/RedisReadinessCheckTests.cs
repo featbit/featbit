@@ -6,17 +6,20 @@ namespace Application.UnitTests.ReadinessChecks;
 
 public class RedisReadinessCheckTests
 {
-    private static readonly HealthCheckContext _context = new();
-    private static readonly Mock<IRedisClient> _mockedRedisClient = new Mock<IRedisClient>();
-    private static readonly Mock<IDatabase> _mockedRedisDatabase = new Mock<IDatabase>();
+    private readonly HealthCheckContext _context;
+    private readonly Mock<IRedisClient> _mockedRedisClient;
+    private readonly Mock<IDatabase> _mockedRedisDatabase;
 
     public RedisReadinessCheckTests()
     {
+        _context = new();
+        _mockedRedisDatabase = new();
+        _mockedRedisClient = new();
         _mockedRedisClient.Setup(client => client.GetDatabase()).Returns(_mockedRedisDatabase.Object);
     }
 
     [Fact]
-    public async Task ReturnsHealthyIfRedisIsAvailable() 
+    public async Task ReturnsHealthyIfRedisIsAvailable()
     {
         var readinessCheck = new RedisReadinessCheck(_mockedRedisClient.Object);
 
@@ -31,9 +34,9 @@ public class RedisReadinessCheckTests
     public async Task ReturnsUnhealthyIfRedisIsUnavailable()
     {
         var testRedisError = new Exception("Test Redis error");
-        _mockedRedisDatabase.Setup(database 
+        _mockedRedisDatabase.Setup(database
             => database.PingAsync(It.IsAny<CommandFlags>())).ThrowsAsync(testRedisError);
-        
+
         var readinessCheck = new RedisReadinessCheck(_mockedRedisClient.Object);
 
         var expected = HealthCheckResult.Unhealthy("Redis is currently unavailable.", testRedisError);

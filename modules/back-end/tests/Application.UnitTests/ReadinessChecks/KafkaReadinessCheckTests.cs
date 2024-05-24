@@ -25,8 +25,8 @@ public class KafkaReadinessCheckTests
             { "Kafka:Consumer:bootstrap.servers", "ConsumerServer" },
         }).Build();
 
-        _mockedConsumerAdminClientStore = new Mock<KafkaConsumerAdminClientStore>(_configuration);
-        _mockedProducerAdminClientStore = new Mock<KafkaProducerAdminClientStore>(_configuration);
+        _mockedConsumerAdminClientStore = new(_configuration);
+        _mockedProducerAdminClientStore = new(_configuration);
 
         _mockedConsumerAdminClient = new();
         _mockedProducerAdminClient = new();
@@ -41,7 +41,7 @@ public class KafkaReadinessCheckTests
     public async Task ReturnsHealthyIfProducerAndConsumerAreAvailable()
     {
         var kafkaCheck = new KafkaReadinessCheck(
-            _mockedConsumerAdminClientStore.Object, 
+            _mockedConsumerAdminClientStore.Object,
             _mockedProducerAdminClientStore.Object
         );
 
@@ -55,13 +55,13 @@ public class KafkaReadinessCheckTests
     [Theory]
     [ClassData(typeof(ErroredAdminClientTestData))]
     public async Task ReturnsUnhealthyIfConsumerOrProducerIsUnavailable(
-        string errorMessage, 
+        string errorMessage,
         SetupFailingAdminClients setupMocks
     )
     {
         var thrownException = new Exception(errorMessage);
         setupMocks(new(_mockedProducerAdminClient, _mockedConsumerAdminClient, thrownException));
-        
+
         var kafkaCheck = new KafkaReadinessCheck(
             _mockedConsumerAdminClientStore.Object,
             _mockedProducerAdminClientStore.Object
