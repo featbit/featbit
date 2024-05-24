@@ -870,15 +870,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">213</context>
+          <context context-type="linenumber">211</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">270</context>
+          <context context-type="linenumber">273</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">283</context>
+          <context context-type="linenumber">286</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
@@ -1154,7 +1154,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">146</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
@@ -1714,7 +1714,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">167</context>
+          <context context-type="linenumber">168</context>
         </context-group>
         <target>变化</target>
       </trans-unit>
@@ -3994,11 +3994,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">160</context>
+          <context context-type="linenumber">161</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">337</context>
+          <context context-type="linenumber">340</context>
         </context-group>
         <target>转化率</target>
       </trans-unit>
@@ -5405,7 +5405,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">157</context>
+          <context context-type="linenumber">158</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
@@ -5585,7 +5585,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">255</context>
+          <context context-type="linenumber">258</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
@@ -6902,7 +6902,7 @@
         <source>Automatically refresh every 1 minute</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">55</context>
+          <context context-type="linenumber">56</context>
         </context-group>
         <target>每1分钟会自动刷新</target>
       </trans-unit>
@@ -6910,7 +6910,7 @@
         <source>Refresh</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">59</context>
         </context-group>
         <target>刷新</target>
       </trans-unit>
@@ -6918,7 +6918,7 @@
         <source>This would remove all data of this experiment, it cannot be reverted, are you sure to remove it?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>确定删除吗? 将会删除所有实验数据，删除后不可恢复。</target>
       </trans-unit>
@@ -6926,7 +6926,7 @@
         <source>Remove Data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">73</context>
         </context-group>
         <target>删除数据</target>
       </trans-unit>
@@ -6934,7 +6934,7 @@
         <source>This would remove the experiment and all data, it cannot be reverted, are you sure to remove it?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <target>确定删除吗? 将会删除该实验及其相关数据，删除后不可恢复。</target>
       </trans-unit>
@@ -6942,31 +6942,31 @@
         <source>Remove experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">81</context>
+          <context context-type="linenumber">82</context>
         </context-group>
         <target>删除实验</target>
       </trans-unit>
-      <trans-unit id="ff.expt.restart-experiment" datatype="html">
-        <source>Restart</source>
+      <trans-unit id="ff.expt.start-experiment" datatype="html">
+        <source>Start experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">95</context>
         </context-group>
-        <target>重新开始</target>
+        <target>开启实验</target>
       </trans-unit>
-      <trans-unit id="ff.expt.pause-experiment" datatype="html">
-        <source>Pause</source>
+      <trans-unit id="ff.expt.stop-experiment" datatype="html">
+        <source>Stop experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">99</context>
         </context-group>
-        <target>暂停</target>
+        <target>停止实验</target>
       </trans-unit>
       <trans-unit id="ff.expt.default-confidence-level" datatype="html">
         <source>Default confidence level: </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>置信水平</target>
       </trans-unit>
@@ -6974,7 +6974,7 @@
         <source>You need to create a new experiment to change this value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">111</context>
         </context-group>
         <target>若想更换相关值，请重新创建实验</target>
       </trans-unit>
@@ -6982,7 +6982,7 @@
         <source>Period</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">115</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <target>时间区间</target>
       </trans-unit>
@@ -6990,7 +6990,7 @@
         <source>Need more data to confirm the results of the experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">126</context>
+          <context context-type="linenumber">127</context>
         </context-group>
         <target>需要更多的实验数据才能在统计学上确认表格中的结论</target>
       </trans-unit>
@@ -6998,7 +6998,7 @@
         <source>The difference is not significant compared to the baseline</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">130</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <target>该特性相对于基准特性，统计学上差异效果不显著</target>
       </trans-unit>
@@ -7006,7 +7006,7 @@
         <source>Winner</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>胜出</target>
       </trans-unit>
@@ -7014,7 +7014,7 @@
         <source>Start</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <target>开始实验</target>
       </trans-unit>
@@ -7022,7 +7022,7 @@
         <source>Conversion / Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">159</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <target>转化数 / 用户数</target>
       </trans-unit>
@@ -7030,7 +7030,7 @@
         <source>Total events</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">164</context>
         </context-group>
         <target>总事件数</target>
       </trans-unit>
@@ -7038,15 +7038,15 @@
         <source>Average</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">164</context>
+          <context context-type="linenumber">165</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">338</context>
+          <context context-type="linenumber">341</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">338</context>
+          <context context-type="linenumber">341</context>
         </context-group>
         <target>平均值</target>
       </trans-unit>
@@ -7054,7 +7054,7 @@
         <source>Confidence interval</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">166</context>
+          <context context-type="linenumber">167</context>
         </context-group>
         <target>置信区间</target>
       </trans-unit>
@@ -7062,7 +7062,7 @@
         <source>P-Value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">169</context>
+          <context context-type="linenumber">170</context>
         </context-group>
         <target>P-值</target>
       </trans-unit>
@@ -7070,7 +7070,7 @@
         <source>The result is significant if P value is less than α(0.05)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">173</context>
+          <context context-type="linenumber">174</context>
         </context-group>
         <target>P值小于α(0.05)表示实验结果显著</target>
       </trans-unit>
@@ -7078,7 +7078,7 @@
         <source>Data is not available yet</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">186</context>
+          <context context-type="linenumber">187</context>
         </context-group>
         <target>暂时没有实验数据</target>
       </trans-unit>
@@ -7086,11 +7086,11 @@
         <source>Baseline</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">194</context>
+          <context context-type="linenumber">195</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">224</context>
+          <context context-type="linenumber">225</context>
         </context-group>
         <target>基准特性</target>
       </trans-unit>
@@ -7098,7 +7098,7 @@
         <source>Winner</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">203</context>
         </context-group>
         <target>胜出</target>
       </trans-unit>
@@ -7106,7 +7106,7 @@
         <source>It&apos;s not significant compared to baseline</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">205</context>
+          <context context-type="linenumber">206</context>
         </context-group>
         <target>该特性相对于基准特性，统计学上差异效果不显著</target>
       </trans-unit>
@@ -7114,7 +7114,7 @@
         <source>Hide chart</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">250</context>
+          <context context-type="linenumber">251</context>
         </context-group>
         <target>收起图表</target>
       </trans-unit>
@@ -7122,7 +7122,7 @@
         <source>Show chart</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">251</context>
+          <context context-type="linenumber">252</context>
         </context-group>
         <target>查看图表</target>
       </trans-unit>
@@ -7130,7 +7130,7 @@
         <source>Now</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">301</context>
+          <context context-type="linenumber">304</context>
         </context-group>
         <target>现在</target>
       </trans-unit>
@@ -7138,7 +7138,7 @@
         <source>Time</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">332</context>
+          <context context-type="linenumber">335</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>
