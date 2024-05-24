@@ -8,10 +8,10 @@ namespace Infrastructure.Readiness;
 public static class ReadinessExtensions
 {
     public static IHealthChecksBuilder AddReadinessChecks(this IHealthChecksBuilder builder, IConfiguration configuration)
-    {            
+    {
         builder.AddCheck<MongoDbReadinessCheck>("Check If MongoDB Is Available")
             .AddCheck<RedisReadinessCheck>("Check If Redis Is Available");
-        
+
         if (configuration.IsFeatBitPro())
         {
             builder.AddCheck<KafkaReadinessCheck>("Check If Kafka Is Available");

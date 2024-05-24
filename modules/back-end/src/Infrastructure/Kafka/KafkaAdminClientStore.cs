@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 namespace Infrastructure.Kafka;
 
 public enum KafkaHost
-{ 
+{
     Producer,
     Consumer,
 };

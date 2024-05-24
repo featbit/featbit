@@ -10,7 +10,7 @@ public class KafkaReadinessCheck : IHealthCheck
     private readonly IAdminClient _producerAdminClient;
 
     public KafkaReadinessCheck(
-        KafkaConsumerAdminClientStore consumerAdminClientStore, 
+        KafkaConsumerAdminClientStore consumerAdminClientStore,
         KafkaProducerAdminClientStore producerAdminClientStore
     )
     {

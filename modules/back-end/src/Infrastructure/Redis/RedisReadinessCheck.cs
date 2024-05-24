@@ -6,18 +6,18 @@ public class RedisReadinessCheck : IHealthCheck
 {
     private readonly IRedisClient _redisClient;
 
-    public RedisReadinessCheck(IRedisClient redisClient) 
-    {  
-        _redisClient = redisClient; 
+    public RedisReadinessCheck(IRedisClient redisClient)
+    {
+        _redisClient = redisClient;
     }
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        try 
+        try
         {
             await _redisClient.GetDatabase().PingAsync();
         }
-        catch (Exception exception) 
+        catch (Exception exception)
         {
             return HealthCheckResult.Unhealthy("Redis is currently unavailable.", exception);
         }
