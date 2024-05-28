@@ -10,6 +10,7 @@ public static class MiddlewaresRegister
         // reference: https://andrewlock.net/deploying-asp-net-core-applications-to-kubernetes-part-6-adding-health-checks-with-liveness-readiness-and-startup-probes/
         // health check endpoints for external use
         app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
+        app.MapHealthChecks("health/readiness");
 
         // enable swagger in dev mode
         if (app.Environment.IsDevelopment())
