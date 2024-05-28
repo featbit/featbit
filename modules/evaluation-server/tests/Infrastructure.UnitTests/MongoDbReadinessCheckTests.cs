@@ -21,7 +21,7 @@ public class MongoDbReadinessCheckTests : ReadinessTest
 
     [Theory]
     [ClassData(typeof(MongoDbReadinessCheckTestData))]
-    public async override Task ItReturnsTheExpectedStatus(bool isMongoAvailable, HealthCheckResult expecetedCheckResult)
+    public async Task ItReturnsTheExpectedStatus(bool isMongoAvailable, HealthCheckResult expecetedCheckResult)
     {
         _mockedMongoDbClient.Setup(mongoDbClient => mongoDbClient.IsHealthyAsync()).ReturnsAsync(isMongoAvailable);
 

@@ -21,7 +21,7 @@ public class RedisReadinessCheckTests : ReadinessTest
 
     [Theory]
     [ClassData(typeof(RedisReadinessCheckTestData))]
-    public async override Task ItReturnsTheExpectedStatus(bool isRedisAvailable, HealthCheckResult expecetedCheckResult)
+    public async Task ItReturnsTheExpectedStatus(bool isRedisAvailable, HealthCheckResult expecetedCheckResult)
     {
         _mockedRedisClient.Setup(mongoDbClient => mongoDbClient.IsHealthyAsync()).ReturnsAsync(isRedisAvailable);
 
