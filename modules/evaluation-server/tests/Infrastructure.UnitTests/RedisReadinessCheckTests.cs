@@ -1,8 +1,6 @@
 ﻿using Infrastructure.Redis;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -15,38 +13,32 @@ public class RedisReadinessCheckTests : ReadinessTest
 
     public RedisReadinessCheckTests() : base()
     {
-        _mockedRedisClient = new Mock<IRedisClient>();
-        _redisReadinessCheck = new RedisReadinessCheck(_mockedRedisClient.Object);
+        _mockedRedisClient = new();
+        _redisReadinessCheck = new(_mockedRedisClient.Object);
     }
 
-    [Theory]
-    [ClassData(typeof(RedisReadinessCheckTestData))]
-    public async Task ItReturnsTheExpectedStatus(bool isRedisAvailable, HealthCheckResult expecetedCheckResult)
+    [Fact]
+    public async Task ItReturnsHealthyWhenRedisIsAvailable()
     {
-        _mockedRedisClient.Setup(mongoDbClient => mongoDbClient.IsHealthyAsync()).ReturnsAsync(isRedisAvailable);
+        _mockedRedisClient.Setup(mongoDbClient => mongoDbClient.IsHealthyAsync()).ReturnsAsync(true);
 
         var actual = await _redisReadinessCheck.CheckHealthAsync(healthCheckContext);
+        var expected = HealthCheckResult.Healthy("Redis is currently available.");
 
-        Assert.Equal(expecetedCheckResult.Status, actual.Status);
-        Assert.Equal(expecetedCheckResult.Description, actual.Description);
-        Assert.Equal(expecetedCheckResult.Exception, actual.Exception);
+        Assert.Equal(expected.Description, actual.Description);
+        Assert.Equal(expected.Status, actual.Status);
     }
-}
 
-class RedisReadinessCheckTestData : IEnumerable<object[]>
-{
-    public IEnumerator<object[]> GetEnumerator()
+    [Fact]
+    public async Task ItReturnsUnhealthyWhenRedisIsUnavailable()
     {
-        yield return new object[] {
-            true,
-            HealthCheckResult.Healthy("Redis is currently available.")
-        };
+        _mockedRedisClient.Setup(mongoDbClient => mongoDbClient.IsHealthyAsync()).ReturnsAsync(false);
 
-        yield return new object[] {
-            false,
-            HealthCheckResult.Unhealthy("Redis is currently unavailable.")
-        };
+        var actual = await _redisReadinessCheck.CheckHealthAsync(healthCheckContext);
+        var expected = HealthCheckResult.Unhealthy("Redis is currently unavailable.");
+
+        Assert.Equal(expected.Status, actual.Status);
+        Assert.Equal(expected.Description, actual.Description);
+        Assert.Equal(expected.Exception, actual.Exception);
     }
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

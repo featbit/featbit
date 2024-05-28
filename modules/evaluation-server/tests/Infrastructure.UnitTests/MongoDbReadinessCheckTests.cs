@@ -1,8 +1,6 @@
 ﻿using Infrastructure.MongoDb;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -19,34 +17,28 @@ public class MongoDbReadinessCheckTests : ReadinessTest
         _mongoDbReadinessCheck = new(_mockedMongoDbClient.Object);
     }
 
-    [Theory]
-    [ClassData(typeof(MongoDbReadinessCheckTestData))]
-    public async Task ItReturnsTheExpectedStatus(bool isMongoAvailable, HealthCheckResult expecetedCheckResult)
+    [Fact]
+    public async Task ItReturnsHealthyWhenMongoIsAvailable()
     {
-        _mockedMongoDbClient.Setup(mongoDbClient => mongoDbClient.IsHealthyAsync()).ReturnsAsync(isMongoAvailable);
+        _mockedMongoDbClient.Setup(mongoDbClient => mongoDbClient.IsHealthyAsync()).ReturnsAsync(true);
 
         var actual = await _mongoDbReadinessCheck.CheckHealthAsync(healthCheckContext);
+        var expected = HealthCheckResult.Healthy("The MongoDB database is currently available.");
 
-        Assert.Equal(expecetedCheckResult.Status, actual.Status);
-        Assert.Equal(expecetedCheckResult.Description, actual.Description);
-        Assert.Equal(expecetedCheckResult.Exception, actual.Exception);
+        Assert.Equal(expected.Description, actual.Description);
+        Assert.Equal(expected.Status, actual.Status);
     }
-}
 
-class MongoDbReadinessCheckTestData : IEnumerable<object[]>
-{
-    public IEnumerator<object[]> GetEnumerator()
+    [Fact]
+    public async Task ItReturnsUnhealthyWhenMongoIsUnavailable()
     {
-        yield return new object[] { 
-            true,
-            HealthCheckResult.Healthy("The MongoDB database is currently available.")
-        };
+        _mockedMongoDbClient.Setup(mongoDbClient => mongoDbClient.IsHealthyAsync()).ReturnsAsync(false);
 
-        yield return new object[] {
-            false,
-            HealthCheckResult.Unhealthy("The MongoDB database is currently unavailable.")
-        };
+        var actual = await _mongoDbReadinessCheck.CheckHealthAsync(healthCheckContext);
+        var expected = HealthCheckResult.Unhealthy("The MongoDB database is currently unavailable.");
+
+        Assert.Equal(expected.Status, actual.Status);
+        Assert.Equal(expected.Description, actual.Description);
+        Assert.Equal(expected.Exception, actual.Exception);
     }
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
