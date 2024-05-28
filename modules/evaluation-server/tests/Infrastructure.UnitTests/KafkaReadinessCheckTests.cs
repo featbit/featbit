@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using Infrastructure.Kafka;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
 using System;
@@ -17,13 +18,27 @@ public class KafkaReadinessCheckTests : ReadinessTest
 {
     private readonly Mock<IAdminClient> _mockConsumerAdminClient;
     private readonly Mock<IAdminClient> _mockProducerAdminClient;
+    private readonly Mock<KafkaConsumerAdminClientStore> _mockConsumerAdminClientStore;
+    private readonly Mock<KafkaProducerAdminClientStore> _mockProducerAdminClientStore;
     private readonly KafkaReadinessCheck _kafkaReadinessCheck;
 
     public KafkaReadinessCheckTests() : base()
     {
         _mockConsumerAdminClient = new();
         _mockProducerAdminClient = new();
-        _kafkaReadinessCheck = new(_mockConsumerAdminClient.Object, _mockProducerAdminClient.Object);
+
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string> {
+            { "Kafka:Producer:bootstrap.servers", "ProducerServer" },
+            { "Kafka:Consumer:bootstrap.servers", "ConsumerServer" },
+        }).Build();
+
+        _mockConsumerAdminClientStore = new(configuration);
+        _mockConsumerAdminClientStore.Setup(store => store.GetClient()).Returns(_mockConsumerAdminClient.Object);
+
+        _mockProducerAdminClientStore = new(configuration);
+        _mockProducerAdminClientStore.Setup(store => store.GetClient()).Returns(_mockProducerAdminClient.Object);
+
+        _kafkaReadinessCheck = new(_mockConsumerAdminClientStore.Object, _mockProducerAdminClientStore.Object);
     }
 
     [Fact]

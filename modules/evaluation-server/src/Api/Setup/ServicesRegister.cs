@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Infrastructure.Fakes;
+using Infrastructure.Kafka;
 using Infrastructure.Readiness;
 using Streaming.DependencyInjection;
 
@@ -50,11 +51,13 @@ public static class ServicesRegister
                 configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
                 var producerConfig = new ProducerConfig(producerConfigDictionary);
                 services.AddSingleton(producerConfig);
+                services.AddSingleton<KafkaProducerAdminClientStore>();
 
                 var consumerConfigDictionary = new Dictionary<string, string>();
                 configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
                 var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
                 services.AddSingleton(consumerConfig);
+                services.AddSingleton<KafkaConsumerAdminClientStore>();
 
                 // use kafka as message queue in pro version
                 streamingBuilder.UseKafkaMessageQueue();
