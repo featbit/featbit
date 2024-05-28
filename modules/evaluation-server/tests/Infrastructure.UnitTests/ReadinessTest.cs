@@ -6,7 +6,7 @@ public class ReadinessTest
 {
     protected readonly HealthCheckContext healthCheckContext;
 
-    public ReadinessTest() 
+    public ReadinessTest()
     {
         healthCheckContext = new();
     }

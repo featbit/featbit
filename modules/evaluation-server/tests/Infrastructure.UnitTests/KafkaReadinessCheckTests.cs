@@ -53,10 +53,7 @@ public class KafkaReadinessCheckTests : ReadinessTest
 
     [Theory]
     [ClassData(typeof(KafkaDbReadinessCheckTestData))]
-    public async Task ItReturnsUnhealthyWhenEitherConsumerOrProducerIsUnavailable
-    (
-        SetupFailingAdminClients setupAdminClients
-    )
+    public async Task ItReturnsUnhealthyWhenEitherConsumerOrProducerIsUnavailable(SetupFailingAdminClients setupAdminClients)
     {
         setupAdminClients(new(_mockConsumerAdminClient, _mockProducerAdminClient));
 
@@ -93,7 +90,7 @@ class KafkaDbReadinessCheckTestData : IEnumerable<object[]>
         {
             var consumerAdminClient = setupParameters.Item2;
             var producerAdminClient = setupParameters.Item1;
-            
+
             MakeAdminClientMockThrow(consumerAdminClient, _consumerClientException);
             MakeAdminClientMockThrow(producerAdminClient, _producerClientException);
         };

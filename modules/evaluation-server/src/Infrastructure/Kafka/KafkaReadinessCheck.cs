@@ -6,12 +6,8 @@ namespace Infrastructure.Kafka;
 public class KafkaReadinessCheck : ReadinessCheck
 {
     private static readonly TimeSpan _timeoutFifteenSeconds = TimeSpan.FromSeconds(15);
-    
-    public KafkaReadinessCheck
-    (
-        KafkaConsumerAdminClientStore consumerAdminClientStore,
-        KafkaProducerAdminClientStore producerAdminClientStore
-    )
+
+    public KafkaReadinessCheck(KafkaConsumerAdminClientStore consumerAdminClientStore, KafkaProducerAdminClientStore producerAdminClientStore)
         : base(healthyCheck: IsKafkaHealthy(consumerAdminClientStore.GetClient(), producerAdminClientStore.GetClient()), serviceName: "Kafka")
     {  }
 
