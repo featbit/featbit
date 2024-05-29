@@ -30,7 +30,7 @@ public class ReadinessCheckTests : ReadinessTest
     [InlineData("Service 1")]
     [InlineData("Service 2")]
     [InlineData("Service 3")]
-    public async Task ItReturnsHealthyWhenTheTestReturnsFalse(string serviceName)
+    public async Task ItReturnsUnhealthyWhenTheTestReturnsFalse(string serviceName)
     {
         var healthyCheck = () => Task.FromResult(false);
         var readinessCheck = new ReadinessCheck(healthyCheck, serviceName);
