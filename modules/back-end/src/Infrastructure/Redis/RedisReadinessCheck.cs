@@ -15,7 +15,7 @@ public class RedisReadinessCheck : IHealthCheck
     {
         try
         {
-            await _redisClient.GetDatabase().PingAsync();
+            await _redisClient.PingAsync();
         }
         catch (Exception exception)
         {

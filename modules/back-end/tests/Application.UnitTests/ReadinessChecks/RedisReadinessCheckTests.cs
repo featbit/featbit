@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Infrastructure.Redis;
-using StackExchange.Redis;
 
 namespace Application.UnitTests.ReadinessChecks;
 
@@ -8,14 +7,11 @@ public class RedisReadinessCheckTests
 {
     private readonly HealthCheckContext _context;
     private readonly Mock<IRedisClient> _mockedRedisClient;
-    private readonly Mock<IDatabase> _mockedRedisDatabase;
 
     public RedisReadinessCheckTests()
     {
-        _context = new();
-        _mockedRedisDatabase = new();
         _mockedRedisClient = new();
-        _mockedRedisClient.Setup(client => client.GetDatabase()).Returns(_mockedRedisDatabase.Object);
+        _context = new();
     }
 
     [Fact]
@@ -34,8 +30,7 @@ public class RedisReadinessCheckTests
     public async Task ReturnsUnhealthyIfRedisIsUnavailable()
     {
         var testRedisError = new Exception("Test Redis error");
-        _mockedRedisDatabase.Setup(database
-            => database.PingAsync(It.IsAny<CommandFlags>())).ThrowsAsync(testRedisError);
+        _mockedRedisClient.Setup(client => client.PingAsync()).ThrowsAsync(testRedisError);
 
         var readinessCheck = new RedisReadinessCheck(_mockedRedisClient.Object);
 
