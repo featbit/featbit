@@ -18,8 +18,7 @@ public class MongoDbReadinessCheck : IHealthCheck
     {
         try
         {
-            var featureFlagCollection = _mongoClient.CollectionOf<FeatureFlag>();
-            await featureFlagCollection.Database.RunCommandAsync((Command<RawBsonDocument>)"{ping:1}");
+            await _mongoClient.PingAsync();
         }
         catch (Exception exception)
         {

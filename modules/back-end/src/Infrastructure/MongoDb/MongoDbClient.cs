@@ -33,6 +33,9 @@ public class MongoDbClient
 
     protected IMongoDatabase Database { get; }
 
+    private static readonly BsonDocumentCommand<BsonDocument> PingCommand
+        = new(BsonDocument.Parse("{ping:1}"));
+
     public MongoDbClient(IOptions<MongoDbOptions> options)
     {
         var value = options.Value;
@@ -82,7 +85,7 @@ public class MongoDbClient
         { typeof(WebhookDelivery), "WebhookDeliveries" }
     };
 
-    public virtual IMongoCollection<TEntity> CollectionOf<TEntity>()
+    public IMongoCollection<TEntity> CollectionOf<TEntity>()
     {
         var collectionName = CollectionNameOf<TEntity>();
         var collection = Database.GetCollection<TEntity>(collectionName);
@@ -112,4 +115,6 @@ public class MongoDbClient
     {
         return CollectionOf<TEntity>().AsQueryable();
     }
+
+    public virtual Task PingAsync() => Database.RunCommandAsync(PingCommand);
 }

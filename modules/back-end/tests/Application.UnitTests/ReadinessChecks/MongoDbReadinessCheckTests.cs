@@ -1,17 +1,12 @@
-﻿using Domain.FeatureFlags;
-using Infrastructure.MongoDb;
+﻿using Infrastructure.MongoDb;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
-using Command = MongoDB.Driver.Command<MongoDB.Bson.RawBsonDocument>;
 
 namespace Application.UnitTests.ReadinessChecks;
 
 public class MongoDbReadinessCheckTests
 {
     private readonly Mock<MongoDbClient> _mockedMongoDbClient;
-    private readonly Mock<IMongoCollection<FeatureFlag>> _mockedFeatureFlagCollection;
-    private readonly Mock<IMongoDatabase> _mockedMongoDatabase;
     private readonly HealthCheckContext _context;
 
     public MongoDbReadinessCheckTests()
@@ -22,20 +17,14 @@ public class MongoDbReadinessCheckTests
             Database = "DoesNotExist"
         }));
 
-        _mockedFeatureFlagCollection = new();
-        _mockedMongoDbClient.Setup(mongo => mongo.CollectionOf<FeatureFlag>())
-            .Returns(_mockedFeatureFlagCollection.Object);
-
-        _mockedMongoDatabase = new();
-        _mockedFeatureFlagCollection.Setup(collection => collection.Database)
-            .Returns(_mockedMongoDatabase.Object);
-
         _context = new();
     }
 
     [Fact]
     public async Task ItReturnsHealthyWhenMongoIsAvailable()
     {
+        _mockedMongoDbClient.Setup(client => client.PingAsync()).Returns(Task.CompletedTask);
+
         var mongoDbReadinessCheck = new MongoDbReadinessCheck(_mockedMongoDbClient.Object);
         var actual = await mongoDbReadinessCheck.CheckHealthAsync(_context);
         var expected = HealthCheckResult.Healthy("The MongoDB database is currently available.");
@@ -48,11 +37,7 @@ public class MongoDbReadinessCheckTests
     public async Task ItReturnsUnhealthyWhenMongoIsUnavailable()
     {
         var thrownException = new Exception("Test Mongo Error");
-        _mockedMongoDatabase.Setup(database => database.RunCommandAsync(
-            It.IsAny<Command>(),
-            It.IsAny<ReadPreference>(),
-            It.IsAny<CancellationToken>()
-        )).ThrowsAsync(thrownException);
+        _mockedMongoDbClient.Setup(client => client.PingAsync()).ThrowsAsync(thrownException);
 
         var mongoDbReadinessCheck = new MongoDbReadinessCheck(_mockedMongoDbClient.Object);
         var actual = await mongoDbReadinessCheck.CheckHealthAsync(_context);
