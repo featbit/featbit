@@ -8,14 +8,18 @@ namespace Infrastructure.Readiness;
 
 public static class ReadinessExtensions
 {
+    public const string ReadinessTag = "Readiness";
+
     public static IHealthChecksBuilder AddReadinessChecks(this IHealthChecksBuilder builder, IConfiguration configuration)
     {
-        builder.AddCheck<MongoDbReadinessCheck>("Check If MongoDB Is Available")
-            .AddCheck<RedisReadinessCheck>("Check If Redis Is Available");
+        var tags = new string[] { ReadinessTag };
+
+        builder.AddCheck<MongoDbReadinessCheck>("Check If MongoDB Is Available", tags: tags)
+            .AddCheck<RedisReadinessCheck>("Check If Redis Is Available", tags: tags);
 
         if (configuration.IsFeatBitPro())
         {
-            builder.AddCheck<KafkaReadinessCheck>("Check If Kafka Is Available");
+            builder.AddCheck<KafkaReadinessCheck>("Check If Kafka Is Available", tags: tags);
         }
 
         return builder;
