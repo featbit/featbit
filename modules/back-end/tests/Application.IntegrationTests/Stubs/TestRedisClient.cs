@@ -12,6 +12,4 @@ public class TestRedisClient : IRedisClient
 
         return mockedDb.Object;
     }
-
-    public Task<TimeSpan> PingAsync() => Task.FromResult(TimeSpan.Zero);
 }
