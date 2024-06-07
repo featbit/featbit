@@ -8,13 +8,13 @@ using Application.Services;
 using Domain.Workspaces;
 using Domain.Identity;
 using Infrastructure.License;
+using Infrastructure.Readiness;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using Api.Readiness;
 
 namespace Api.Setup;
 

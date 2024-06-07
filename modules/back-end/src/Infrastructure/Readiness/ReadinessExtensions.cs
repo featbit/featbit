@@ -1,13 +1,17 @@
 ﻿using Confluent.Kafka;
 using Infrastructure.Kafka;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Api.Readiness;
+namespace Infrastructure.Readiness;
 
 public static class ReadinessExtensions
 {
+    public const string ReadinessTag = "Readiness";
+
     public static IHealthChecksBuilder AddReadinessChecks(this IHealthChecksBuilder builder, IConfiguration configuration)
     {
-        var readinessTags = new string[] { ReadinessConstants.ReadinessTag };
+        var readinessTags = new string[] { ReadinessTag };
         var timeoutFiveSeconds = TimeSpan.FromSeconds(5);
 
         var mongoDbConnectionString = configuration.GetValue<string>("MongoDb:ConnectionString");
