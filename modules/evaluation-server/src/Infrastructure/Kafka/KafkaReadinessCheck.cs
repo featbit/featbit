@@ -1,31 +1,31 @@
 ﻿using Confluent.Kafka;
-using Infrastructure.Readiness;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Infrastructure.Kafka;
 
-public class KafkaReadinessCheck : ReadinessCheck
+public class KafkaReadinessCheck : IHealthCheck
 {
     private static readonly TimeSpan _timeoutFifteenSeconds = TimeSpan.FromSeconds(15);
+    private readonly IAdminClient _consumerAdminClient;
 
-    public KafkaReadinessCheck(KafkaConsumerAdminClientStore consumerAdminClientStore, KafkaProducerAdminClientStore producerAdminClientStore)
-        : base(healthyCheck: IsKafkaHealthy(consumerAdminClientStore.GetClient(), producerAdminClientStore.GetClient()), serviceName: "Kafka")
-    {  }
-
-    private static Func<Task<bool>> IsKafkaHealthy(IAdminClient consumerAdminClient, IAdminClient producerAdminClient)
+    public KafkaReadinessCheck(KafkaConsumerAdminClientStore consumerAdminClientStore)
     {
-        return () =>
-        {
+        _consumerAdminClient = consumerAdminClientStore.GetAdminClient();
+    }
+
+    public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+    {
+        return Task.Run(() => {
             try
             {
-                consumerAdminClient.GetMetadata(_timeoutFifteenSeconds);
-                producerAdminClient.GetMetadata(_timeoutFifteenSeconds);
+                _consumerAdminClient.GetMetadata(_timeoutFifteenSeconds);
 
-                return Task.FromResult(true);
+                return Task.FromResult(HealthCheckResult.Healthy("The Kafka consumer is available."));
             }
-            catch(Exception)
+            catch (Exception exception)
             {
-                return Task.FromResult(false);
+                return Task.FromResult(HealthCheckResult.Unhealthy("The Kafka consumer is unavailable.", exception));
             }
-        };
+        }).WaitAsync(cancellationToken);
     }
 }

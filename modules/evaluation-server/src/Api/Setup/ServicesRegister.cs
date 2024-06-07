@@ -51,7 +51,6 @@ public static class ServicesRegister
                 configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
                 var producerConfig = new ProducerConfig(producerConfigDictionary);
                 services.AddSingleton(producerConfig);
-                services.AddSingleton<KafkaProducerAdminClientStore>();
 
                 var consumerConfigDictionary = new Dictionary<string, string>();
                 configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
