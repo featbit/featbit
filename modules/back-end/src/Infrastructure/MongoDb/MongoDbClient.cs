@@ -33,9 +33,6 @@ public class MongoDbClient
 
     protected IMongoDatabase Database { get; }
 
-    private static readonly BsonDocumentCommand<BsonDocument> PingCommand
-        = new(BsonDocument.Parse("{ping:1}"));
-
     public MongoDbClient(IOptions<MongoDbOptions> options)
     {
         var value = options.Value;
@@ -115,6 +112,4 @@ public class MongoDbClient
     {
         return CollectionOf<TEntity>().AsQueryable();
     }
-
-    public virtual Task PingAsync() => Database.RunCommandAsync(PingCommand);
 }

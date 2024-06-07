@@ -26,6 +26,4 @@ public class DefaultRedisClient : IRedisClient
             () => ConnectionMultiplexer.Connect(options)
         );
     }
-
-    public Task<TimeSpan> PingAsync() => GetDatabase().PingAsync();
 }

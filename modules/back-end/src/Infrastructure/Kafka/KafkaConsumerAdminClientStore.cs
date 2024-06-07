@@ -1,9 +1,15 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Confluent.Kafka;
 
 namespace Infrastructure.Kafka;
 
-public class KafkaConsumerAdminClientStore : KafkaAdminClientStore
+public class KafkaConsumerAdminClientStore
 {
-    public KafkaConsumerAdminClientStore(IConfiguration configuration) : base(KafkaHost.Consumer, configuration)
-    {  }
+    private readonly IAdminClient _adminClient;
+
+    public KafkaConsumerAdminClientStore(ConsumerConfig consumerConfig)
+    {
+        _adminClient = new AdminClientBuilder(consumerConfig).Build();
+    }
+
+    public virtual IAdminClient GetAdminClient() => _adminClient;
 }

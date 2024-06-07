@@ -11,6 +11,9 @@
     <ItemGroup>
         <!-- Api Versioning -->
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="6.0.0" />
+        <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="6.0.3" />
+        <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="6.0.2" />
+        <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="6.0.4" />
 
         <!-- Swagger -->
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
