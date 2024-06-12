@@ -1,11 +1,10 @@
 ﻿using Confluent.Kafka;
-using Infrastructure.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure.Readiness;
+namespace Infrastructure;
 
-public static class ReadinessExtensions
+public static class HealthCheckBuilderExtensions
 {
     public const string ReadinessTag = "Readiness";
 
@@ -19,7 +18,8 @@ public static class ReadinessExtensions
         var mongoDbConnectionString = configuration.GetValue<string>("MongoDb:ConnectionString");
         var redisConnectionString = configuration.GetValue<string>("Redis:ConnectionString");
 
-        builder.Services.AddHealthChecks()
+        builder.Services
+            .AddHealthChecks()
             .AddMongoDb(
                 mongoDbConnectionString,
                 tags: readinessTags,
@@ -31,18 +31,25 @@ public static class ReadinessExtensions
                 timeout: timeoutFiveSeconds
             );
 
-        if (configuration.IsFeatBitPro())
+        if (configuration.IsProVersion())
         {
-            var kafkaProducerHost = configuration.GetValue<string>("Kafka:Producer:bootstrap.servers");
+            var producerHost = configuration.GetValue<string>("Kafka:Producer:bootstrap.servers");
+            var consumerHost = configuration.GetValue<string>("Kafka:Consumer:bootstrap.servers");
+
             builder
-                .AddCheck<KafkaReadinessCheck>(
-                    "Check if Kafka consumer is available.",
-                    tags: readinessTags,
-                    timeout: timeoutFiveSeconds
-                ).AddKafka(
+                .AddKafka(
                     new ProducerConfig
                     {
-                        BootstrapServers = kafkaProducerHost
+                        BootstrapServers = consumerHost
+                    },
+                    name: "Check if Kafka consumer is available.",
+                    tags: readinessTags,
+                    timeout: timeoutFiveSeconds
+                )
+                .AddKafka(
+                    new ProducerConfig
+                    {
+                        BootstrapServers = producerHost
                     },
                     name: "Check if Kafka producer is available.",
                     tags: readinessTags,
@@ -51,11 +58,5 @@ public static class ReadinessExtensions
         }
 
         return builder;
-    }
-
-    private static bool IsFeatBitPro(this IConfiguration configuration)
-    {
-        var configValue = configuration["IS_PRO"];
-        return configValue != null && configValue.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
     }
 }

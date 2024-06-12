@@ -1,5 +1,5 @@
 using Api.Middlewares;
-using Infrastructure.Readiness;
+using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 using Serilog.Events;
@@ -20,7 +20,7 @@ public static class MiddlewaresRegister
         app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
         app.MapHealthChecks("health/readiness", new HealthCheckOptions()
         {
-            Predicate = registration => registration.Tags.Contains(ReadinessExtensions.ReadinessTag)
+            Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
         // enable swagger

@@ -2,6 +2,7 @@ using Application.Caches;
 using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
+using Infrastructure;
 using Infrastructure.AccessTokens;
 using Infrastructure.Workspaces;
 using Infrastructure.AuditLogs;
@@ -110,8 +111,7 @@ public static class ConfigureServices
 
     private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
     {
-        var isProVersion = configuration["IS_PRO"];
-        if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
+        if (configuration.IsProVersion())
         {
             var producerConfigDictionary = new Dictionary<string, string>();
             configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
