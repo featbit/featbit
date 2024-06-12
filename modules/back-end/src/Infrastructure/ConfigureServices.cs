@@ -126,7 +126,6 @@ public static class ConfigureServices
             // use kafka as message queue in pro version
             services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
             services.AddHostedService<KafkaMessageConsumer>();
-            services.AddSingleton<KafkaConsumerAdminClientStore>();
         }
         else
         {
