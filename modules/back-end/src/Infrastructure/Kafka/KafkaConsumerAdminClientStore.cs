@@ -8,7 +8,10 @@ public class KafkaConsumerAdminClientStore
 
     public KafkaConsumerAdminClientStore(ConsumerConfig consumerConfig)
     {
-        _adminClient = new AdminClientBuilder(consumerConfig).Build();
+        _adminClient = new AdminClientBuilder(new AdminClientConfig
+        {
+            BootstrapServers = consumerConfig.BootstrapServers
+        }).Build();
     }
 
     public virtual IAdminClient GetAdminClient() => _adminClient;
