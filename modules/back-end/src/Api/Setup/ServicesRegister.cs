@@ -7,6 +7,7 @@ using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Identity;
+using Infrastructure;
 using Infrastructure.License;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -58,7 +59,7 @@ public static class ServicesRegister
         builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies
-        builder.Services.AddHealthChecks();
+        builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
 
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
