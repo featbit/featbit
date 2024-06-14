@@ -218,82 +218,44 @@
   }
 
   .options {
-    margin-top: 16px;
-    .option-line {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+
+    .option-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
-      width: 100%;
+      gap: 8px;
 
-      .left {
-        width: 30%;
-        display: flex;
-        align-items: center;
-
-        .variation-tip {
-          flex: 0 0 12px;
-        }
-
-        .name {
-          white-space: nowrap;
-          text-overflow: ellipsis;
-          overflow: hidden;
-        }
+      .name {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
 
-      .right {
+      .value {
         display: flex;
         align-items: center;
-        justify-content: flex-end;
         gap: 2px;
 
         nz-tag {
-          width: 100px;
+          flex-grow: 1;
+          min-width: 50px;
+          max-width: 96px;
           text-align: center;
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow: hidden;
+          &:hover{
+            cursor: pointer;
+          }
         }
-      }
-
-      i {
-        cursor: pointer;
-        font-size: 16px;
-      }
-
-      .ant-typography {
-        margin-bottom: 0;
-      }
-
-      ::ng-deep .ant-input-suffix {
-        padding-left: 6px;
-      }
-
-      nz-input-group {
-        padding: 4.8px 11px 4.8px 11px;
-        width: 85%;
-        height: 36px;
-        border-radius: 8px;
-        input {
-          border: none;
-        }
-      }
-
-      input.simple {
-        width: 85%;
-        height: 36px;
-        border-radius: 8px;
-        border: 1px solid @grey20-color;
-      }
-
-      .delete-icon-wrapper {
-        display: inline-block;
-        cursor: pointer;
-        margin-top: 5px;
 
         i {
-          font-size: 18px;
+          cursor: pointer;
+          font-size: 16px;
         }
       }
     }

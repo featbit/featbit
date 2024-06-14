@@ -22,7 +22,7 @@ public class UserService : MongoDbService<User>, IUserService
         var user = await FindOneAsync(x => x.Id == operatorId);
         if (user is not null)
         {
-            return user.Name ?? user.Email;
+            return !string.IsNullOrWhiteSpace(user.Name) ? user.Name : user.Email;
         }
 
         // An operation can also be made by an access token through our Open Api, see "OpenApiHandler"

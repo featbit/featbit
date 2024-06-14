@@ -99,7 +99,7 @@ export class TargetUserComponent implements OnInit {
       .filter(x => x.name.includes(value) || x.keyId.includes(value))
       .map(x => x.keyId);
 
-    const filter = new EnvUserFilter(value, [], excludedKeyIds, 1, 5);
+    const filter = new EnvUserFilter(value, [], excludedKeyIds, true, 1, 5);
     this.debouncer.next(filter);
   }
 

@@ -1,0 +1,84 @@
+<div class="table-content-area">
+  <div class="table-search-area">
+    <div class="search-inputs">
+      <nz-input-group class="query" [nzPrefix]="prefixIconSearch">
+        <input
+          nz-input
+          placeholder="Search by name"
+          i18n-placeholder="@@common.search-by-name"
+          [(ngModel)]="filter.name"
+          (ngModelChange)="onSearch(true)">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
+      <nz-select
+        class="nz-select-40 rounded filter"
+        nzMode="multiple"
+        i18n-nzPlaceHolder="@@users.idx.select-columns-to-add"
+        nzPlaceHolder="Add columns"
+        [nzShowArrow]="true"
+        [(ngModel)]="extraShowedColumns"
+        nzMaxTagCount="1"
+        [nzMaxTagPlaceholder]="morePlaceholder"
+      >
+        <nz-option
+          *ngFor="let item of allExtraColumns"
+          [nzLabel]="item"
+          [nzValue]="item"
+        ></nz-option>
+        <ng-template #morePlaceholder>
+          and {{ extraShowedColumns.length - 1 }} more
+        </ng-template>
+      </nz-select>
+    </div>
+    <button class="import-btn" nz-button nzType="primary" nzSize="large" (click)="openImportModal()">
+      <span nz-icon nzType="user-add" nzTheme="outline"></span>
+      <span i18n="@@common.import">Import</span>
+    </button>
+  </div>
+  <div class="table-wrapper">
+    <nz-table
+      #basicTable
+      nzSize="small"
+      nzShowSizeChanger
+      [nzData]="users"
+      [nzFrontPagination]="false"
+      [nzLoading]="isLoading"
+      [nzTotal]="totalCount"
+      [(nzPageSize)]="filter.pageSize"
+      (nzPageSizeChange)="onSearch()"
+      [nzPageSizeOptions]="[10,20,30]"
+      (nzPageIndexChange)="onSearch()"
+      [(nzPageIndex)]="filter.pageIndex">
+      <thead>
+      <tr>
+        <th>keyId</th>
+        <th i18n="@@common.name">Name</th>
+        <th *ngFor="let prop of extraShowedColumns">{{prop}}</th>
+        <th i18n="@@common.actions">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let user of basicTable.data">
+        <tr>
+          <td>{{ user.keyId }}</td>
+          <td>
+            <span>{{ user.name }}</span>
+          </td>
+          <td *ngFor="let prop of extraShowedColumns">{{getCustomizePropertyValue(user, prop)}}</td>
+          <td>
+            <a class="primary-link-btn" i18n="@@users.idx.ff-segments" (click)="openEvaluationDrawer(user)">Evaluate on flags and segments</a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <a class="primary-link-btn" nz-button nzType="link" i18n="@@common.details" (click)="openEndUserDrawer(user)">Details</a>
+          </td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+<import-user [isVisible]="importModalVisible" (close)="closeImportModal($event)"></import-user>
+<user-segments-flags-drawer [visible]="evaluationDrawerVisible" [user]="selectedUser" (close)="closeEvaluationDrawer()"></user-segments-flags-drawer>
+<end-user-drawer [isVisible]="endUserDrawerVisible" (close)="closeEndUserDrawer()" [user]="selectedUser"></end-user-drawer>

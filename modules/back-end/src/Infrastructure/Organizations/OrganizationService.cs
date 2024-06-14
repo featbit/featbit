@@ -11,8 +11,11 @@ namespace Infrastructure.Organizations;
 
 public class OrganizationService : MongoDbService<Organization>, IOrganizationService
 {
-    public OrganizationService(MongoDbClient mongoDb) : base(mongoDb)
+    private readonly IProjectService _projectService;
+
+    public OrganizationService(MongoDbClient mongoDb, IProjectService projectService) : base(mongoDb)
     {
+        _projectService = projectService;
     }
 
     public async Task<string[]> GetScopesAsync(ScopeString[] scopeStrings)
@@ -122,13 +125,11 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
         await MongoDb.CollectionOf<Group>().DeleteManyAsync(x => x.OrganizationId == id);
         await MongoDb.CollectionOf<GroupMember>().DeleteManyAsync(x => x.OrganizationId == id);
 
-        // delete projects & related environments
+        // delete projects
         var projectIds = await MongoDb.QueryableOf<Project>()
             .Where(x => x.OrganizationId == id)
             .Select(x => x.Id)
             .ToListAsync();
-
-        await MongoDb.CollectionOf<Project>().DeleteManyAsync(x => projectIds.Contains(x.Id));
-        await MongoDb.CollectionOf<Environment>().DeleteManyAsync(x => projectIds.Contains(x.ProjectId));
+        await _projectService.DeleteManyAsync(projectIds);
     }
 }

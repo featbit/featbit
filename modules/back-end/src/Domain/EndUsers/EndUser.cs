@@ -4,7 +4,9 @@ namespace Domain.EndUsers;
 
 public class EndUser : AuditedEntity
 {
-    public Guid EnvId { get; set; }
+    public Guid? WorkspaceId { get; set; }
+
+    public Guid? EnvId { get; set; }
 
     public string KeyId { get; set; }
 
@@ -13,11 +15,13 @@ public class EndUser : AuditedEntity
     public ICollection<EndUserCustomizedProperty> CustomizedProperties { get; set; }
 
     public EndUser(
-        Guid envId,
+        Guid? workspaceId,
+        Guid? envId,
         string keyId,
         string name,
         ICollection<EndUserCustomizedProperty> customizedProperties)
     {
+        WorkspaceId = workspaceId;
         EnvId = envId;
         KeyId = keyId;
         Name = name;
@@ -67,7 +71,7 @@ public class EndUser : AuditedEntity
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.Append($"envId:{EnvId},keyId:{KeyId},name:{Name}");
+        sb.Append($"workspaceId:{WorkspaceId},envId:{EnvId},keyId:{KeyId},name:{Name}");
 
         if (CustomizedProperties != null)
         {

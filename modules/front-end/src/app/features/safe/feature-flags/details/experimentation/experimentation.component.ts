@@ -118,7 +118,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
                 expt.selectedIteration = this.processIteration({ ...expt.selectedIteration }, expt.baselineVariation.id);
                 if (iteration.updatedAt) {
                   expt.selectedIteration.updatedAt = iteration.updatedAt;
-                  expt.selectedIteration.updatedAtStr = format(iteration.updatedAt, 'yyyy-mm-dd hh:mm');
+                  expt.selectedIteration.updatedAtStr = format(iteration.updatedAt, 'yyyy-MM-dd HH:mm');
                 }
 
                 // update experiment original iterations
@@ -153,7 +153,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
             expt.iterations = expt.iterations.map(iteration => this.processIteration(iteration, expt.baselineVariation.id)).reverse();
             expt.selectedIteration = expt.iterations[0];
 
-            this.loadIterationResults(expt);
+            this.loadIterationResults(expt, expt.selectedIteration.id);
           } else {
             expt.isLoading = false;
           }
@@ -182,13 +182,13 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   onStartIterationClick(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.startIteration(expt.id).subscribe(res => {
+    this.experimentService.start(expt.id).subscribe(res => {
       if (res) {
         expt.iterations = [this.processIteration(res, expt.baselineVariation.id), ...expt.iterations];
         expt.selectedIteration = expt.iterations[0];
         expt.status = ExperimentStatus.Recording;
 
-        this.loadIterationResults(expt);
+        this.loadIterationResults(expt, expt.selectedIteration.id);
 
         this.onGoingExperiments = [...this.onGoingExperiments, expt];
       }
@@ -199,14 +199,12 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     });
   }
 
-  onStopIterationClick(expt: IExpt) {
+  onStopExptClick(expt: IExpt) {
     expt.isLoading  = true;
-    this.experimentService.stopIteration(expt.id, expt.selectedIteration.id).subscribe(res => {
-      if (res) {
-        expt.selectedIteration.endTime = res.endTime;
-        expt.selectedIteration.dateTimeInterval = `${format(expt.selectedIteration.startTime, 'yyyy-mm-dd hh:mm')} - ${format(expt.selectedIteration.endTime, 'yyyy-mm-dd hh:mm')}`
-        expt.status = ExperimentStatus.Paused;
-      }
+    this.experimentService.stop(expt.id).subscribe(res => {
+      expt.status = ExperimentStatus.Paused;
+      // reload expt iterations
+      this.loadIterationResults(expt, expt.iterations[0].id);
 
       expt.isLoading  = false;
     }, _ => {
@@ -221,11 +219,11 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     return;
   }
 
-  loadIterationResults(expt: IExpt) {
+  loadIterationResults(expt: IExpt, iterationId: string) {
     expt.isLoading  = true;
     const param = {
       exptId: expt.id,
-      iterationId: expt.selectedIteration.id,
+      iterationId: iterationId,
       flagExptId: `${this.envId}-${expt.featureFlagKey}`,
       baselineVariationId: expt.baselineVariation.id,
       variationIds: this.featureFlag.variations.map(v => v.id),
@@ -240,12 +238,17 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     };
 
     this.experimentService.getIterationResults([param]).subscribe(res => {
-      if (res) {
-        expt.selectedIteration = this.processIteration({...expt.selectedIteration , ...res[0]}, expt.baselineVariation.id);
-        if (res[0].updatedAt) {
-          expt.selectedIteration.updatedAt = res[0].updatedAt;
-          expt.selectedIteration.updatedAtStr = format(res[0].updatedAt, 'yyyy-mm-dd hh:mm');
-        }
+      if (res?.length > 0) {
+        expt.iterations = expt.iterations.map((it) => {
+          if (it.id !== res[0].id) {
+            return it;
+          }
+
+          const targetIteration = expt.iterations.find(iteration => iteration.id === res[0].id);
+          return this.processIteration({...targetIteration , ...res[0]}, expt.baselineVariation.id);
+        });
+
+        expt.selectedIteration = expt.iterations.find(iteration => iteration.id === expt.selectedIteration.id);
 
         this.setExptStatus(expt, res[0]);
       }
@@ -258,7 +261,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   onReloadIterationResultsClick(expt: IExpt) {
-    this.loadIterationResults(expt);
+    this.loadIterationResults(expt, expt.selectedIteration.id);
   }
 
   onDeleteExptClick(expt: IExpt) {
@@ -299,11 +302,11 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     const winnerVariation = !!iterationResults.find(e => e.isWinner);
 
     const nowStr = (iteration.isFinish === true) ? "" : "(" + ($localize `:@@common.now:Now`) + ")";
-    const startStr = `${format(iteration.startTime, 'yyyy-mm-dd hh:mm')}`;
+    const startStr = `${format(iteration.startTime, 'yyyy-MM-dd HH:mm')}`;
     const endStr = `${iteration.endTime ?
-      format(iteration.endTime, 'yyyy-mm-dd hh:mm') :
-      format(new Date(), 'yyyy-mm-dd hh:mm')}  ${nowStr}`
-      
+      format(iteration.endTime, 'yyyy-MM-dd HH:mm') :
+      format(new Date(), 'yyyy-MM-dd HH:mm')}${nowStr === '' ? '' : ' ' + nowStr}`
+
     return {
       ...iteration,
       invalidVariation,
@@ -368,7 +371,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         name: xAxisName,
         position: 'end',
         field: 'time',
-        scale: {type: "timeCat", nice: true, range: [0.05, 0.95], mask: 'yyyy-mm-dd hh:mm'}
+        scale: {type: "timeCat", nice: true, range: [0.05, 0.95], mask: 'yyyy-mm-dd HH:mm'}
       },
       yAxis: {
         name: yAxisName,

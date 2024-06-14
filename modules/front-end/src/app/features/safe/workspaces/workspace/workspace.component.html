@@ -76,57 +76,59 @@
     </form>
   </div>
 </div>
-<div class="standard-div rows" *ngIf="!isLoading; else loadingTem;">
-  <h5 nz-typography i18n="@@common.sso-settings">SSO (OIDC) settings</h5>
-  <form nz-form [formGroup]="ssoForm" [nzLayout]="'vertical'" (ngSubmit)="updateOidcSetting()">
-    <nz-form-item>
-      <nz-form-label i18n="@@workspace.workspace.client-id">Client Id</nz-form-label>
-      <nz-form-control nzErrorTip="Client Id is mandatory!" i18n-nzErrorTip="@@workspace.workspace.client-id-mandatory">
-        <input class="standard-form-input" id="clientId" type="text" nz-input formControlName="clientId" placeholder="Client Id" i18n-placeholder="@@workspace.workspace.client-id"/>
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <nz-form-label i18n="@@workspace.workspace.client-secret">Client secret</nz-form-label>
-      <nz-form-control nzErrorTip="Client secret is mandatory!" i18n-nzErrorTip="@@workspace.workspace.client-secret-mandatory">
-        <input class="standard-form-input" id="clientSecret" type="text" nz-input formControlName="clientSecret" placeholder="Client secret" i18n-placeholder="@@workspace.workspace.client-secret"/>
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <nz-form-label i18n="@@workspace.workspace.token-endpoint">Token endpoint</nz-form-label>
-      <nz-form-control nzErrorTip="Token endpoint is mandatory!" i18n-nzErrorTip="@@workspace.workspace.token-endpoint-mandatory">
-        <input class="standard-form-input" id="tokenEndpoint" type="text" nz-input formControlName="tokenEndpoint" placeholder="Token endpoint" i18n-placeholder="@@workspace.workspace.token-endpoint"/>
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <nz-form-label i18n="@@workspace.workspace.client-authentication-method">Client authentication method</nz-form-label>
-      <nz-form-control nzErrorTip="Client authentication method is mandatory!" i18n-nzErrorTip="@@workspace.workspace.client-authentication-method-mandatory">
-        <input class="standard-form-input" id="clientAuthenticationMethod" type="text" nz-input formControlName="clientAuthenticationMethod" placeholder="Client authentication method" i18n-placeholder="@@workspace.workspace.client-authentication-method"/>
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <nz-form-label i18n="@@workspace.workspace.authorization-endpoint">Authorization endpoint</nz-form-label>
-      <nz-form-control nzErrorTip="Authorization endpoint is mandatory!" i18n-nzErrorTip="@@workspace.workspace.authorization-endpoint-mandatory">
-        <input class="standard-form-input" id="authorizationEndpoint" type="text" nz-input formControlName="authorizationEndpoint" placeholder="Authorization endpoint" i18n-placeholder="@@workspace.workspace.authorization-endpoint"/>
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <nz-form-label i18n="@@workspace.workspace.scope">Scope</nz-form-label>
-      <nz-form-control nzErrorTip="Scope is mandatory!" i18n-nzErrorTip="@@workspace.workspace.scope-mandatory">
-        <input class="standard-form-input" id="scope" type="text" nz-input formControlName="scope" placeholder="Scope" i18n-placeholder="@@workspace.workspace.scope"/>
-      </nz-form-control>
-    </nz-form-item>
-    <nz-form-item>
-      <nz-form-label i18n="@@workspace.workspace.user-email-claim">User email claim</nz-form-label>
-      <nz-form-control nzErrorTip="User email claim is mandatory!" i18n-nzErrorTip="@@workspace.workspace.user-email-claim-mandatory">
-        <input class="standard-form-input" id="userEmailClaim" type="text" nz-input formControlName="userEmailClaim" placeholder="User email claim" i18n-placeholder="@@workspace.workspace.user-email-claim"/>
-      </nz-form-control>
-    </nz-form-item>
-    <button nz-button class="name-key-btn" nzType="primary" [nzLoading]="isSsoLoading">
-      <i nz-icon nzType="icons:icon-sync"></i>
-      <ng-container i18n="@@common.update">Update</ng-container>
-    </button>
-  </form>
-</div>
+<ng-container *ngIf="isSsoGranted">
+  <div class="standard-div rows" *ngIf="!isLoading; else loadingTem;">
+    <h5 nz-typography i18n="@@common.sso-settings">SSO (OIDC) settings</h5>
+    <form nz-form [formGroup]="ssoForm" [nzLayout]="'vertical'" (ngSubmit)="updateOidcSetting()">
+      <nz-form-item>
+        <nz-form-label i18n="@@workspace.workspace.client-id">Client Id</nz-form-label>
+        <nz-form-control nzErrorTip="Client Id is mandatory!" i18n-nzErrorTip="@@workspace.workspace.client-id-mandatory">
+          <input class="standard-form-input" id="clientId" type="text" nz-input formControlName="clientId" placeholder="Client Id" i18n-placeholder="@@workspace.workspace.client-id"/>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@workspace.workspace.client-secret">Client secret</nz-form-label>
+        <nz-form-control nzErrorTip="Client secret is mandatory!" i18n-nzErrorTip="@@workspace.workspace.client-secret-mandatory">
+          <input class="standard-form-input" id="clientSecret" type="text" nz-input formControlName="clientSecret" placeholder="Client secret" i18n-placeholder="@@workspace.workspace.client-secret"/>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@workspace.workspace.token-endpoint">Token endpoint</nz-form-label>
+        <nz-form-control nzErrorTip="Token endpoint is mandatory!" i18n-nzErrorTip="@@workspace.workspace.token-endpoint-mandatory">
+          <input class="standard-form-input" id="tokenEndpoint" type="text" nz-input formControlName="tokenEndpoint" placeholder="Token endpoint" i18n-placeholder="@@workspace.workspace.token-endpoint"/>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@workspace.workspace.client-authentication-method">Client authentication method</nz-form-label>
+        <nz-form-control nzErrorTip="Client authentication method is mandatory!" i18n-nzErrorTip="@@workspace.workspace.client-authentication-method-mandatory">
+          <input class="standard-form-input" id="clientAuthenticationMethod" type="text" nz-input formControlName="clientAuthenticationMethod" placeholder="Client authentication method" i18n-placeholder="@@workspace.workspace.client-authentication-method"/>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@workspace.workspace.authorization-endpoint">Authorization endpoint</nz-form-label>
+        <nz-form-control nzErrorTip="Authorization endpoint is mandatory!" i18n-nzErrorTip="@@workspace.workspace.authorization-endpoint-mandatory">
+          <input class="standard-form-input" id="authorizationEndpoint" type="text" nz-input formControlName="authorizationEndpoint" placeholder="Authorization endpoint" i18n-placeholder="@@workspace.workspace.authorization-endpoint"/>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@workspace.workspace.scope">Scope</nz-form-label>
+        <nz-form-control nzErrorTip="Scope is mandatory!" i18n-nzErrorTip="@@workspace.workspace.scope-mandatory">
+          <input class="standard-form-input" id="scope" type="text" nz-input formControlName="scope" placeholder="Scope" i18n-placeholder="@@workspace.workspace.scope"/>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label i18n="@@workspace.workspace.user-email-claim">User email claim</nz-form-label>
+        <nz-form-control nzErrorTip="User email claim is mandatory!" i18n-nzErrorTip="@@workspace.workspace.user-email-claim-mandatory">
+          <input class="standard-form-input" id="userEmailClaim" type="text" nz-input formControlName="userEmailClaim" placeholder="User email claim" i18n-placeholder="@@workspace.workspace.user-email-claim"/>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button class="name-key-btn" nzType="primary" [nzLoading]="isSsoLoading">
+        <i nz-icon nzType="icons:icon-sync"></i>
+        <ng-container i18n="@@common.update">Update</ng-container>
+      </button>
+    </form>
+  </div>
+</ng-container>
 <ng-template #loadingTem>
   <div class="block" style="margin: auto;text-align: center">
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>

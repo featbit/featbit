@@ -1,4 +1,4 @@
-﻿using Streaming.Shared;
+﻿using Domain.Shared;
 
 namespace Streaming.UnitTests.Shared;
 
@@ -13,7 +13,8 @@ public class TokenTests
         Assert.Equal(token.Position, expected.Position);
         Assert.Equal(token.ContentLength, expected.ContentLength);
         Assert.Equal(token.Timestamp, expected.Timestamp);
-        Assert.Equal(token.Secret, expected.Secret);
+        Assert.Equal(token.SecretString, expected.SecretString);
+        Assert.True(Secret.TryParse(token.SecretString, out _));
 
         Assert.True(expected.IsValid);
     }
@@ -38,7 +39,7 @@ public class ValidTokens : TheoryData<string, Token>
 {
     public ValidTokens()
     {
-        Add(TestData.DevStreamingTokenString, TestData.DevStreamingToken);
-        Add(TestData.ProdStreamingTokenString, TestData.ProdStreamingToken);
+        Add(TestData.ClientTokenString, TestData.ClientToken);
+        Add(TestData.ServerTokenString, TestData.ServerToken);
     }
 }

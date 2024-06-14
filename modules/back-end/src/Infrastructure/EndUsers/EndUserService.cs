@@ -18,9 +18,16 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
     {
         var filterBuilder = Builders<EndUser>.Filter;
 
+        var envIdFilter = userFilter.IncludeGlobalUser
+            ? filterBuilder.Or(
+                filterBuilder.Eq(x => x.EnvId, envId),
+                filterBuilder.Eq(x => x.EnvId, null)
+            )
+            : filterBuilder.Eq(x => x.EnvId, envId);
+
         var mustFilters = new List<FilterDefinition<EndUser>>
         {
-            filterBuilder.Eq(x => x.EnvId, envId)
+            envIdFilter
         };
 
         // excluded keyIds
@@ -99,14 +106,66 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         return user;
     }
 
-    public async Task AddBuiltInPropertiesAsync(Guid envId)
+    public async Task<ImportUserResult> UpsertAsync(Guid? workspaceId, Guid? envId, IEnumerable<EndUser> endUsers)
     {
-        var builtInProperties = EndUserConsts.BuiltInUserProperties(envId);
+        var total = await Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId).LongCountAsync();
+        if (total > 5 * 10000)
+        {
+            throw new BusinessException("The number of end users exceeds the limit.");
+        }
 
-        await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(builtInProperties);
+        // load all end users into memory
+        var existUsers = await Queryable
+            .Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId)
+            .ToListAsync();
+
+        // https://www.mongodb.com/docs/manual/reference/method/db.collection.bulkWrite/
+        var writeModels = new List<WriteModel<EndUser>>();
+        foreach (var endUser in endUsers)
+        {
+            var existing = existUsers.FirstOrDefault(x => x.KeyId == endUser.KeyId);
+            if (existing == null)
+            {
+                // insert new user
+                var insertOneModel = new InsertOneModel<EndUser>(endUser);
+                writeModels.Add(insertOneModel);
+            }
+            else
+            {
+                // no need to update if value equals
+                if (existing.ValueEquals(endUser))
+                {
+                    continue;
+                }
+
+                // update existing user
+                var filter = Builders<EndUser>.Filter.And(
+                    Builders<EndUser>.Filter.Eq(x => x.WorkspaceId, workspaceId),
+                    Builders<EndUser>.Filter.Eq(x => x.EnvId, envId),
+                    Builders<EndUser>.Filter.Eq(x => x.KeyId, endUser.KeyId)
+                );
+
+                var update = Builders<EndUser>.Update
+                    .Set(x => x.Name, endUser.Name)
+                    .Set(x => x.CustomizedProperties, endUser.CustomizedProperties);
+
+                var updateOneModel = new UpdateOneModel<EndUser>(filter, update);
+                writeModels.Add(updateOneModel);
+            }
+        }
+
+        if (!writeModels.Any())
+        {
+            return ImportUserResult.Ok(0, 0);
+        }
+
+        var result = await Collection.BulkWriteAsync(writeModels);
+        return result.IsAcknowledged
+            ? ImportUserResult.Ok(result.InsertedCount, result.ModifiedCount)
+            : ImportUserResult.Fail();
     }
 
-    public async Task<IEnumerable<EndUserProperty>> AddNewPropertiesAsync(EndUser user)
+    public async Task<EndUserProperty[]> AddNewPropertiesAsync(EndUser user)
     {
         var customizedProperties = user.CustomizedProperties;
         if (customizedProperties == null || !customizedProperties.Any())
@@ -122,8 +181,8 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
 
         var newProperties = messageProperties
             .Where(x => currentProperties.All(y => y != x))
-            .Select(x => new EndUserProperty(user.EnvId, x, Array.Empty<EndUserPresetValue>()))
-            .ToList();
+            .Select(x => new EndUserProperty(user.EnvId.GetValueOrDefault(), x, Array.Empty<EndUserPresetValue>()))
+            .ToArray();
 
         if (newProperties.Any())
         {
@@ -131,6 +190,26 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         }
 
         return newProperties;
+    }
+
+    public async Task<EndUserProperty[]> AddNewPropertiesAsync(Guid envId, IEnumerable<string> propertyNames)
+    {
+        var existingPropNames = await MongoDb.QueryableOf<EndUserProperty>()
+            .Where(x => x.EnvId == envId)
+            .Select(x => x.Name)
+            .ToListAsync();
+
+        var newProps = propertyNames
+            .Where(propName => !existingPropNames.Contains(propName))
+            .Select(propName => new EndUserProperty(envId, propName))
+            .ToArray();
+
+        if (newProps.Any())
+        {
+            await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(newProps);
+        }
+
+        return newProps;
     }
 
     public async Task<IEnumerable<EndUserProperty>> GetPropertiesAsync(Guid envId)

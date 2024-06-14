@@ -2,6 +2,7 @@ using Application.Caches;
 using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
+using Infrastructure;
 using Infrastructure.AccessTokens;
 using Infrastructure.Workspaces;
 using Infrastructure.AuditLogs;
@@ -15,6 +16,7 @@ using Infrastructure.FlagChangeRequests;
 using Infrastructure.FlagDrafts;
 using Infrastructure.FlagRevisions;
 using Infrastructure.FlagSchedules;
+using Infrastructure.GlobalUsers;
 using Infrastructure.Groups;
 using Infrastructure.Identity;
 using Infrastructure.Members;
@@ -84,7 +86,9 @@ public static class ConfigureServices
         services.AddTransient<IPolicyService, PolicyService>();
         services.AddTransient<IEnvironmentService, EnvironmentService>();
         services.AddTransient<IResourceService, ResourceService>();
+        services.AddTransient<IResourceServiceV2, ResourceServiceV2>();
         services.AddTransient<IEndUserService, EndUserService>();
+        services.AddTransient<IGlobalUserService, GlobalUserService>();
         services.AddTransient<ISegmentService, SegmentService>();
         services.AddTransient<IFeatureFlagService, FeatureFlagService>();
         services.AddTransient<ITriggerService, TriggerService>();
@@ -107,8 +111,7 @@ public static class ConfigureServices
 
     private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
     {
-        var isProVersion = configuration["IS_PRO"];
-        if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
+        if (configuration.IsProVersion())
         {
             var producerConfigDictionary = new Dictionary<string, string>();
             configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);

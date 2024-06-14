@@ -20,6 +20,11 @@ public class ClientSdkPayload
         UserKeyId = userKeyId;
         FeatureFlags = featureFlags;
     }
+
+    public bool IsEmpty()
+    {
+        return EventType == DataSyncEventTypes.Patch && !FeatureFlags.Any();
+    }
 }
 
 public class ClientSdkFlag
@@ -29,6 +34,8 @@ public class ClientSdkFlag
     public string Variation { get; set; }
 
     public string VariationType { get; set; }
+
+    public string VariationId { get; set; }
 
     public string MatchReason { get; set; }
 
@@ -42,6 +49,7 @@ public class ClientSdkFlag
     {
         Id = flag.GetProperty("key").GetString()!;
         Variation = userVariation.Variation.Value;
+        VariationId = userVariation.Variation.Id;
         VariationType = flag.GetProperty("variationType").GetString() ?? "string";
         MatchReason = userVariation.MatchReason;
         VariationOptions = allVariations;

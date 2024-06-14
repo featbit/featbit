@@ -1,10 +1,13 @@
 using System.Text;
 using Api.Authentication;
+using Api.Authentication.OAuth;
+using Api.Authentication.OpenIdConnect;
 using Api.Authorization;
 using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Identity;
+using Infrastructure;
 using Infrastructure.License;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -56,7 +59,7 @@ public static class ServicesRegister
         builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies
-        builder.Services.AddHealthChecks();
+        builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
 
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -129,8 +132,9 @@ public static class ServicesRegister
             }
         });
 
-        // SSO
-        builder.Services.AddSso();
+        // add OIDC & OAuth client
+        builder.Services.AddHttpClient<OidcClient>();
+        builder.Services.AddHttpClient<OAuthClient>();
 
         // replace default authorization result handler
         var authorizationResultHandler =

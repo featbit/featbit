@@ -7,8 +7,21 @@
     </div>
     <div class="selected-target-users" nz-row *ngIf="selectedUserDetailList.length">
       <div nz-col class="target-user" *ngFor="let user of selectedUserDetailList">
-        <div i18n-nz-tooltip="@@common.click-to-edit" nz-tooltip="Click to edit" class="inner-box" (click)="openEditModal(user)">
-          {{user?.name}}
+        <div
+          class="inner-box"
+          *ngIf="user.envId !== null"
+          i18n-nz-tooltip="@@common.click-to-edit"
+          nz-tooltip="Click to edit"
+          (click)="openEditModal(user)">
+          {{ user?.name }}
+        </div>
+        <div
+          class="inner-box"
+          *ngIf="user.envId === null"
+          i18n-nz-tooltip="@@common.click-to-view"
+          nz-tooltip="Click to view"
+          (click)="openEditModal(user)">
+          {{ user?.name }}
         </div>
         <button nz-button nzType="default" [nzSize]="'large'" (click)="removeUser(user)"><i nz-icon nzType="close"></i></button>
       </div>
@@ -34,6 +47,7 @@
           <div class="user-selection-item" [class]="{'creation-selection-item': item.isNew}">
             <div class="title">
               <ng-container *ngIf="item.isNew" i18n="@@common.create-with-comma">Create:</ng-container> {{ item.name }}
+              <nz-tag *ngIf="item.envId === null" i18n="@@common.global-user">Global User</nz-tag>
             </div>
             <div class="digest">{{getUserDigest(item)}}</div>
           </div>
@@ -51,20 +65,25 @@
           [nzContent]="editModalContent"
           [nzFooter]="editModalFooter"
           (nzOnCancel)="closeEditModal()">
-  <ng-template #modalTitle><ng-container i18n="@@common.edit-targeting-user">Edit targeting user</ng-container></ng-template>
+  <ng-template #modalTitle>
+    <span *ngIf="currentEditingUser.envId !== null" i18n="@@common.edit-targeting-user">Edit targeting user</span>
+    <span *ngIf="currentEditingUser.envId === null" i18n="@@common.view-targeting-user">View targeting user</span>
+  </ng-template>
   <ng-template #editModalContent>
     <div class="info-item">
       <div class="label">KeyId</div>
-      <input nz-input placeholder="KeyId..." [disabled]="true" [(ngModel)]="currentEditingUser.keyId"/>
+      <input nz-input [disabled]="true" [(ngModel)]="currentEditingUser.keyId"/>
     </div>
     <div class="info-item">
-      <div class="label">name</div>
-      <input nz-input placeholder="name..." [(ngModel)]="currentEditingUser.name"/>
+      <div class="label" i18n="@@common.name">Name</div>
+      <input nz-input [disabled]="currentEditingUser.envId === null" [(ngModel)]="currentEditingUser.name"/>
     </div>
   </ng-template>
 
   <ng-template #editModalFooter>
-    <button nz-button nzType="default" (click)="closeEditModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="saving" (click)="save()" i18n="@@common.save">Save</button>
+    <div *ngIf="currentEditingUser.envId !== null">
+      <button nz-button nzType="default" (click)="closeEditModal()" i18n="@@common.cancel">Cancel</button>
+      <button nz-button nzType="primary" [nzLoading]="saving" (click)="save()" i18n="@@common.save">Save</button>
+    </div>
   </ng-template>
 </nz-modal>

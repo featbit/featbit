@@ -19,6 +19,8 @@ export class WorkspaceComponent implements OnInit {
   ssoForm!: FormGroup;
   licenseForm!: FormGroup;
 
+  isSsoGranted: boolean = false;
+
   workspace: IWorkspace;
 
   license: License;
@@ -38,6 +40,7 @@ export class WorkspaceComponent implements OnInit {
     const workspace = await this.workspaceService.getWorkspace();
     this.workspace = workspace;
     this.license = new License(workspace.license);
+    this.isSsoGranted = this.license.isGranted(LicenseFeatureEnum.Sso);
     this.initForm();
     this.isLoading = false;
   }
@@ -64,15 +67,17 @@ export class WorkspaceComponent implements OnInit {
       key: new FormControl(this.workspace.key, Validators.required, this.keyAsyncValidator)
     });
 
-    this.ssoForm = new FormGroup({
-      clientId: new FormControl(this.workspace.sso?.oidc?.clientId, [Validators.required]),
-      clientSecret: new FormControl(this.workspace.sso?.oidc?.clientSecret, [Validators.required]),
-      tokenEndpoint: new FormControl(this.workspace.sso?.oidc?.tokenEndpoint, [Validators.required]),
-      clientAuthenticationMethod: new FormControl(this.workspace.sso?.oidc?.clientAuthenticationMethod, [Validators.required]),
-      authorizationEndpoint: new FormControl(this.workspace.sso?.oidc?.authorizationEndpoint, [Validators.required]),
-      scope: new FormControl(this.workspace.sso?.oidc?.scope, [Validators.required]),
-      userEmailClaim: new FormControl(this.workspace.sso?.oidc?.userEmailClaim, [Validators.required]),
-    });
+    if (this.isSsoGranted) {
+      this.ssoForm = new FormGroup({
+        clientId: new FormControl(this.workspace.sso?.oidc?.clientId, [Validators.required]),
+        clientSecret: new FormControl(this.workspace.sso?.oidc?.clientSecret, [Validators.required]),
+        tokenEndpoint: new FormControl(this.workspace.sso?.oidc?.tokenEndpoint, [Validators.required]),
+        clientAuthenticationMethod: new FormControl(this.workspace.sso?.oidc?.clientAuthenticationMethod, [Validators.required]),
+        authorizationEndpoint: new FormControl(this.workspace.sso?.oidc?.authorizationEndpoint, [Validators.required]),
+        scope: new FormControl(this.workspace.sso?.oidc?.scope, [Validators.required]),
+        userEmailClaim: new FormControl(this.workspace.sso?.oidc?.userEmailClaim, [Validators.required]),
+      });
+    }
 
     this.licenseForm = new FormGroup({
       license: new FormControl(this.workspace.license, [Validators.required]),
@@ -152,11 +157,12 @@ export class WorkspaceComponent implements OnInit {
     this.workspaceService.updateLicense(license).subscribe({
       next: (workspace) => {
         this.isLicenseLoading = false;
-        this.workspace = workspace;
-        this.license = new License(workspace.license);
-        this.message.success($localize`:@@org.org.license-update-success:License updated!`);
+
         this.workspaceService.setWorkspace(workspace);
-        this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
+        this.message.success($localize`:@@org.org.license-update-success:License updated!`);
+
+        // reload page to apply new license
+        location.reload();
       },
       error: () => {
         this.message.error($localize`:@@org.org.invalid-license:Invalid license, please contact FeatBit team to get a license!`);
@@ -164,6 +170,4 @@ export class WorkspaceComponent implements OnInit {
       }
     });
   }
-
-  protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
 }

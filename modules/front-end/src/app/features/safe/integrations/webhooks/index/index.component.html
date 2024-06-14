@@ -118,7 +118,7 @@
             {{ item.events?.join('; ') }}
           </span>
           <ng-template #eventsTooltip>
-            <ul>
+            <ul style="max-height: 100px; overflow: auto">
               <li *ngFor="let event of item.events;">{{ event }}</li>
             </ul>
           </ng-template>

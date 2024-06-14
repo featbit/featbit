@@ -1,4 +1,4 @@
-import { IOrganization, IProjectEnv, IWorkspace } from "@shared/types";
+import { IOrganization, IProjectEnv, IWorkspace, License } from "@shared/types";
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT, CURRENT_WORKSPACE } from "./localstorage-keys";
 
 export function getCurrentWorkspace(): IWorkspace {
@@ -26,4 +26,9 @@ export function getCurrentProjectEnv(): IProjectEnv {
   }
 
   return undefined;
+}
+
+export function getCurrentLicense(): License {
+  const workspace = getCurrentWorkspace();
+  return workspace ? new License(workspace.license) : undefined;
 }

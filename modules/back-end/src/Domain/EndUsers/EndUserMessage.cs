@@ -12,7 +12,7 @@ public class EndUserMessage
 
     public EndUser AsEndUser()
     {
-        var user = new EndUser(EnvId, KeyId, Name, CustomizedProperties);
+        var user = new EndUser(workspaceId: null, EnvId, KeyId, Name, CustomizedProperties);
         return user;
     }
 }

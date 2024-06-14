@@ -36,7 +36,7 @@ export class RequestResponseInterceptor implements HttpInterceptor {
         .set('Workspace', currentWorkspaceId)
     });
 
-    const excludeUrls = ['/login-by-email', '/oidc/login'];
+    const excludeUrls = ['/login-by-email', '/oidc/login', '/social/login'];
     return next.handle(authedReq)
       .pipe(
         map(event => {

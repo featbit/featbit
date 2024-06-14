@@ -6,6 +6,8 @@ namespace Infrastructure.Store;
 
 public class RedisStore : IStore
 {
+    public string Name => Stores.Redis;
+
     private readonly IRedisClient _redisClient;
     private readonly IDatabase _redis;
 
@@ -15,7 +17,7 @@ public class RedisStore : IStore
         _redis = redisClient.GetDatabase();
     }
 
-    public ValueTask<bool> IsAvailableAsync() => ValueTask.FromResult(_redisClient.IsConnected);
+    public async Task<bool> IsAvailableAsync() => await _redisClient.IsHealthyAsync();
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {
@@ -62,5 +64,22 @@ public class RedisStore : IStore
         var jsonBytes = values.Select(x => (byte[])x!);
 
         return jsonBytes;
+    }
+
+    public async Task<Secret?> GetSecretAsync(string secretString)
+    {
+        var key = RedisKeys.Secret(secretString);
+        if (!await _redis.KeyExistsAsync(key))
+        {
+            return null;
+        }
+
+        var entries = await _redis.HashGetAsync(key, new RedisValue[] { "type", "projectKey", "envId", "envKey" });
+        return new Secret(
+            type: entries[0].ToString(),
+            entries[1].ToString(),
+            Guid.Parse(entries[2].ToString()),
+            entries[3].ToString()
+        );
     }
 }

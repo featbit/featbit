@@ -2,16 +2,18 @@ namespace Domain.Environments;
 
 public record ResourceDescriptor
 {
-    public IdNameProps Organization { get; init; }
+    public IdNameKeyProps Organization { get; init; }
 
-    public IdNameProps Project { get; init; }
+    public IdNameKeyProps Project { get; init; }
 
-    public IdNameProps Environment { get; set; }
+    public IdNameKeyProps Environment { get; set; }
 }
 
-public record IdNameProps
+public record IdNameKeyProps
 {
     public Guid Id { get; init; }
 
     public string Name { get; init; }
+
+    public string Key { get; init; }
 }

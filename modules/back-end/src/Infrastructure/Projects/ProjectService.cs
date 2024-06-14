@@ -1,4 +1,3 @@
-using Domain.EndUsers;
 using Domain.Projects;
 using MongoDB.Driver;
 using Environment = Domain.Environments.Environment;
@@ -8,8 +7,11 @@ namespace Infrastructure.Projects;
 
 public class ProjectService : MongoDbService<Project>, IProjectService
 {
-    public ProjectService(MongoDbClient mongoDb) : base(mongoDb)
+    private readonly IEnvironmentService _envService;
+
+    public ProjectService(MongoDbClient mongoDb, IEnvironmentService envService) : base(mongoDb)
     {
+        _envService = envService;
     }
 
     public async Task<ProjectWithEnvs> GetWithEnvsAsync(Guid id)
@@ -57,14 +59,14 @@ public class ProjectService : MongoDbService<Project>, IProjectService
 
     public async Task<ProjectWithEnvs> AddWithEnvsAsync(Project project, IEnumerable<string> envNames)
     {
+        // add project
         await MongoDb.CollectionOf<Project>().InsertOneAsync(project);
 
-        var envs = envNames.Select(envName => new Environment(project.Id, envName, envName.ToLower())).ToList();
-        await MongoDb.CollectionOf<Environment>().InsertManyAsync(envs);
-
-        // add env built-in end-user properties
-        var builtInProperties = envs.SelectMany(x => EndUserConsts.BuiltInUserProperties(x.Id));
-        await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(builtInProperties);
+        // add environments
+        var envs = envNames
+            .Select(envName => new Environment(project.Id, envName, envName.ToLower()))
+            .ToArray();
+        await _envService.AddManyWithBuiltInPropsAsync(envs);
 
         return new ProjectWithEnvs
         {
@@ -88,9 +90,26 @@ public class ProjectService : MongoDbService<Project>, IProjectService
         // delete project
         await MongoDb.CollectionOf<Project>().DeleteOneAsync(x => x.Id == id);
 
-        // delete all related environments
-        await MongoDb.CollectionOf<Environment>().DeleteManyAsync(x => x.ProjectId == id);
+        // delete environments
+        var envIds = await MongoDb.QueryableOf<Environment>()
+            .Where(x => x.ProjectId == id)
+            .Select(x => x.Id)
+            .ToListAsync();
+        await _envService.DeleteManyAsync(envIds);
 
         return true;
+    }
+
+    public async Task DeleteManyAsync(ICollection<Guid> projectIds)
+    {
+        // delete projects
+        await MongoDb.CollectionOf<Project>().DeleteManyAsync(x => projectIds.Contains(x.Id));
+
+        // delete environments
+        var envIds = await MongoDb.QueryableOf<Environment>()
+            .Where(x => projectIds.Contains(x.ProjectId))
+            .Select(x => x.Id)
+            .ToListAsync();
+        await _envService.DeleteManyAsync(envIds);
     }
 }

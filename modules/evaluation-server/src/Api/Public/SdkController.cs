@@ -22,6 +22,10 @@ public class SdkController : PublicApiControllerBase
         }
 
         var payload = await _dataSyncService.GetServerSdkPayloadAsync(EnvId, timestamp);
+        if (payload.IsEmpty())
+        {
+            return Ok();
+        }
 
         var bootstrap = new
         {
@@ -33,7 +37,7 @@ public class SdkController : PublicApiControllerBase
     }
 
     [HttpPost("client/latest-all")]
-    public async Task<IActionResult> GetClientSdkPayloadAsync(EndUser endUser)
+    public async Task<IActionResult> GetClientSdkPayloadAsync(EndUser endUser, [FromQuery] long timestamp = 0)
     {
         if (!Authenticated)
         {
@@ -45,14 +49,17 @@ public class SdkController : PublicApiControllerBase
             return BadRequest("invalid end user");
         }
 
-        var payload = await _dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, 0);
-
-        var bootstrap = payload.FeatureFlags.Select(x => new
+        var payload = await _dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, timestamp);
+        if (payload.IsEmpty())
         {
-            x.Id,
-            x.Variation,
-            x.VariationType
-        });
+            return Ok();
+        }
+
+        var bootstrap = new
+        {
+            messageType = "data-sync",
+            data = payload
+        };
 
         return new JsonResult(bootstrap);
     }

@@ -8,11 +8,11 @@ namespace Api.Authentication.OpenIdConnect;
 
 public class OidcClient
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly HttpClient _httpClient;
 
-    public OidcClient(IHttpClientFactory httpClientFactory)
+    public OidcClient(HttpClient httpClient)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClient = httpClient;
     }
 
     public string GetAuthorizeUrl(string redirectUri, string workspaceKey, OidcConfig config)
@@ -34,14 +34,13 @@ public class OidcClient
         var authParams = authenticator.GetAuthParameters(request, config);
 
         // exchange idToken using code
-        var httpclient = _httpClientFactory.CreateClient();
         if (!string.IsNullOrEmpty(authParams.BasicAuthorizationString))
         {
-            httpclient.DefaultRequestHeaders.Authorization =
+            _httpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Basic", authParams.BasicAuthorizationString);
         }
 
-        var response = await httpclient.PostAsync(config.TokenEndpoint, authParams.HttpContent);
+        var response = await _httpClient.PostAsync(config.TokenEndpoint, authParams.HttpContent);
         response.EnsureSuccessStatusCode();
 
         await using var stream = await response.Content.ReadAsStreamAsync();

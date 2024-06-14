@@ -3,14 +3,13 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/ro
 import { getProfile } from '@shared/utils';
 import {
   CURRENT_ORGANIZATION,
-  CURRENT_PROJECT,
   IS_SSO_FIRST_LOGIN,
   LOGIN_REDIRECT_URL
 } from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { IEnvironment, IOrganization, IProject } from "@shared/types";
+import { IEnvironment, IOrganization, IProject, IProjectEnv } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
@@ -36,7 +35,14 @@ export const authGuard = async (
     return router.parseUrl('/login');
   }
 
-  await workspaceService.refreshWorkspace();
+  // if workspaceId is invalid, logout user
+  const workspace = await workspaceService.getWorkspace();
+  if (!workspace) {
+    identityService.doLogoutUser(false);
+    return router.parseUrl('/login');
+  }
+
+  workspaceService.setWorkspace(workspace);
   const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN) === 'true';
   const organizations = await organizationService.getListAsync(isSsoFirstLogin);
   organizationService.organizations = organizations;
@@ -90,17 +96,18 @@ export const authGuard = async (
   return true;
 }
 
-const setProjectEnv = (project: IProject, env: IEnvironment) => {
-  const projectEnv = {
+const setProjectEnv = (projectService: ProjectService, project: IProject, env: IEnvironment) => {
+  const projectEnv: IProjectEnv = {
     projectId: project.id,
+    projectKey: project.key,
     projectName: project.name,
     envId: env.id,
     envKey: env.key,
     envName: env.name,
-    envSecret: env.secrets[0].value
+    envSecrets: env.secrets
   };
 
-  localStorage.setItem(CURRENT_PROJECT(), JSON.stringify(projectEnv));
+  projectService.upsertCurrentProjectEnvLocally(projectEnv);
 }
 
 const showDenyMessage = (notification: NzNotificationService) => {
@@ -133,7 +140,7 @@ const trySetAccessibleProjectEnv = async (projectService: ProjectService): Promi
 
   // set project env if it's accessible
   if (canAccessEnv) {
-    setProjectEnv(project, env);
+    setProjectEnv(projectService, project, env);
   }
 
   return canAccessEnv;

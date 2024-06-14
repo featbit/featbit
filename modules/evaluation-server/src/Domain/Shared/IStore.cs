@@ -2,7 +2,9 @@ namespace Domain.Shared;
 
 public interface IStore
 {
-    ValueTask<bool> IsAvailableAsync();
+    string Name { get; }
+
+    Task<bool> IsAvailableAsync();
 
     Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp);
 
@@ -11,4 +13,6 @@ public interface IStore
     Task<byte[]> GetSegmentAsync(string id);
 
     Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp);
+
+    Task<Secret?> GetSecretAsync(string secretString);
 }

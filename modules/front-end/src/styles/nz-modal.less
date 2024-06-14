@@ -1,0 +1,152 @@
+@import "variables";
+@import "standards";
+
+// custom modal
+.ant-modal {
+  min-width: 600px;
+  min-height: 400px;
+}
+
+.ant-modal-content,
+.ant-modal-header {
+  border-radius: 20px;
+}
+
+.ant-modal-header {
+  padding: 24px 40px 0 40px;
+  border: none;
+
+  .ant-modal-title {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    color: @grey70-color;
+  }
+
+  &::after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    margin-top: 16px;
+    border-bottom: 1px solid @divider-color;
+  }
+}
+
+.ant-modal-close-x {
+  font-size: 24px;
+  color: @grey40-color;
+  padding-top: 8px;
+  padding-right: 35px;
+  width: unset;
+
+  i,
+  .ant-modal-close-icon {
+    display: none;
+  }
+
+  &::before {
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    content: url("../assets/icons/icon-close.svg");
+  }
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(0.5);
+  }
+}
+
+.ant-modal-body {
+  padding: 16px 40px;
+  .standard-form;
+}
+
+.ant-modal-footer {
+  border: none;
+  padding: 0 40px 24px 40px;
+
+  .ant-btn {
+    .standard-btn;
+
+    &:not(.ant-btn-primary) {
+      color: @grey50-color;
+      border-radius: 36px;
+      border: 1px solid @grey40-color;
+
+      &:hover {
+        background-color: @grey10-color;
+      }
+    }
+  }
+}
+
+// resource-finder modal
+.resource-finder-modal {
+  .ant-modal-header {
+    padding: 24px 24px 0 24px;
+  }
+
+  .ant-modal-header::after {
+    content: none;
+  }
+
+  .ant-modal-body {
+    padding: 0 24px;
+  }
+
+  .ant-modal-footer {
+    padding: 10px 16px;
+  }
+
+  nz-input-group {
+    border-radius: 8px;
+
+    span {
+      padding: 0 1px 0 0;
+      font-size: 18px;
+      color: @grey40-color;
+    }
+
+    input {
+      height: 24px;
+    }
+  }
+
+  nz-list {
+    padding: 4px 8px;
+
+    nz-list-header {
+      padding: 4px;
+      border-radius: 4px;
+      background-color: @grey5-color;
+      font-size: 14px;
+      font-weight: bold;
+      border: none;
+    }
+
+    nz-list-item {
+      display: block;
+      margin: 2px 0;
+      padding: 4px 4px 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: @grey10-color;
+      }
+    }
+  }
+}
+
+// import-user modal
+.import-user-modal {
+  .ant-modal-body {
+    padding: 36px 40px 12px 40px;
+  }
+
+  .ant-modal-header::after {
+    content: none;
+  }
+}

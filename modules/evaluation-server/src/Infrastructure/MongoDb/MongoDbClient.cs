@@ -7,6 +7,8 @@ namespace Infrastructure.MongoDb;
 
 public class MongoDbClient : IMongoDbClient
 {
+    private static readonly BsonDocumentCommand<BsonDocument> Ping = new(BsonDocument.Parse("{ping:1}"));
+
     public IMongoDatabase Database { get; }
 
     public MongoDbClient(IOptions<MongoDbOptions> options)
@@ -22,5 +24,18 @@ public class MongoDbClient : IMongoDbClient
         clientSettings.LinqProvider = LinqProvider.V3;
 
         Database = new MongoClient(clientSettings).GetDatabase(value.Database);
+    }
+
+    public async Task<bool> IsHealthyAsync()
+    {
+        try
+        {
+            await Database.RunCommandAsync(Ping);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

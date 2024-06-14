@@ -6,7 +6,5 @@ public interface IDataSyncService
 {
     Task<SyncData> GetSyncDataAsync(Guid envId);
 
-    Task SaveAsync(Guid envId, SyncData data);
-
     Task<RemoteSyncPayload> GetRemoteSyncPayloadAsync(Guid envId);
 }

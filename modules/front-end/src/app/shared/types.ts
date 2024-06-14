@@ -13,6 +13,7 @@ export interface IRuleIdDispatchKey {
 
 export interface IUserType {
   id: string;
+  envId?: string;
   name: string;
   keyId: string;
   customizedProperties?: [{name: string, value: string}];
@@ -83,7 +84,8 @@ export enum LicenseFeatureEnum {
   Sso = 'sso',
   Schedule = 'schedule',
   ChangeRequest = 'change-request',
-  MultiOrg = 'multi-organization'
+  MultiOrg = 'multi-organization',
+  GlobalUser = 'global-user'
 }
 
 export interface ILicense {
@@ -121,7 +123,7 @@ export interface IProjectEnv {
   envId: string,
   envKey: string,
   envName: string,
-  envSecret: string
+  envSecrets: ISecret[]
 }
 
 export interface IProject {
@@ -163,4 +165,15 @@ export interface EnvironmentSetting {
 
 export const EnvironmentSettingTypes = {
   SyncUrls: 'sync-urls',
+}
+
+export enum OAuthProviderEnum {
+  Google = 'Google',
+  GitHub = 'GitHub'
+}
+
+export interface OAuthProvider {
+  name: string;
+  authorizeUrl: string;
+  icon: string;
 }

@@ -98,6 +98,10 @@ import { WebhookDeliveryComponent } from './components/webhook-delivery/webhook-
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { WebhookDeliveriesComponent } from './components/webhook-deliveries/webhook-deliveries.component';
 import { NzSegmentedModule } from "ng-zorro-antd/segmented";
+import { ResourceFinderComponent } from './components/resource-finder/resource-finder.component';
+import { ImportUserComponent } from './components/import-user/import-user.component';
+import { EndUserDrawerComponent } from './components/end-user-drawer/end-user-drawer.component';
+import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 
 @NgModule({
   declarations: [
@@ -137,7 +141,10 @@ import { NzSegmentedModule } from "ng-zorro-antd/segmented";
     WebhookDrawerComponent,
     TestWebhookModalComponent,
     WebhookDeliveryComponent,
-    WebhookDeliveriesComponent
+    WebhookDeliveriesComponent,
+    ResourceFinderComponent,
+    ImportUserComponent,
+    EndUserDrawerComponent
   ],
   imports: [
     CommonModule,
@@ -188,7 +195,8 @@ import { NzSegmentedModule } from "ng-zorro-antd/segmented";
     NzSwitchModule,
     ChangeListModule,
     NzSkeletonModule,
-    NzSegmentedModule
+    NzSegmentedModule,
+    NzDescriptionsModule
   ],
   exports: [
     SlugifyPipe,
@@ -237,7 +245,10 @@ import { NzSegmentedModule } from "ng-zorro-antd/segmented";
     WebhookDrawerComponent,
     TestWebhookModalComponent,
     WebhookDeliveryComponent,
-    WebhookDeliveriesComponent
+    WebhookDeliveriesComponent,
+    ResourceFinderComponent,
+    ImportUserComponent,
+    EndUserDrawerComponent
   ]
 })
 export class CoreModule {

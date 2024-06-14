@@ -8,6 +8,7 @@
         id: returns-true,
         variation: true,
         variationType: boolean,
+        variationId: Guid_2,
         matchReason: default,
         variationOptions: [
           {
@@ -26,14 +27,15 @@
         id: return-10p-true,
         variation: false,
         variationType: boolean,
+        variationId: Guid_4,
         matchReason: default,
         variationOptions: [
           {
-            id: Guid_4,
+            id: Guid_5,
             value: true
           },
           {
-            id: Guid_5,
+            id: Guid_4,
             value: false
           }
         ],
@@ -44,6 +46,7 @@
         id: individual-targeting,
         variation: true,
         variationType: boolean,
+        variationId: Guid_6,
         matchReason: default,
         variationOptions: [
           {
@@ -62,6 +65,7 @@
         id: two-custom-rules,
         variation: true,
         variationType: boolean,
+        variationId: Guid_8,
         matchReason: default,
         variationOptions: [
           {
@@ -80,6 +84,7 @@
         id: custom-rule-with-segment,
         variation: true,
         variationType: boolean,
+        variationId: Guid_10,
         matchReason: default,
         variationOptions: [
           {

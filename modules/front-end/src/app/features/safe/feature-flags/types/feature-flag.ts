@@ -71,3 +71,5 @@ export interface IFeatureFlagCreationPayload {
   disabledVariationId: string;
   variations: IVariation[];
 }
+
+export const FlagKeyPattern: RegExp = /^[a-zA-Z0-9._-]+$/;

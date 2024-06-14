@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using Domain.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -36,8 +37,13 @@ public class TestApp : WebApplicationFactory<Program>
 
     public async Task<WebSocket> ConnectWithTokenAsync(string type = "client")
     {
-        const string token = "QWSBHgpnOV3wI3kKAO9q9viC0wQWQQBDDDQBZWPXDQSdKZrVAf2U6gAnxl4lSH3w";
-        const long tokenCreatedAt = 1666018247603;
+        var token = type == "client"
+            ? TestData.ClientTokenString
+            : TestData.ServerTokenString;
+
+        var tokenCreatedAt = type == "client"
+            ? TestData.ClientToken.Timestamp
+            : TestData.ServerToken.Timestamp;
 
         return await ConnectAsync(tokenCreatedAt, $"?type={type}&version=2&token={token}");
     }

@@ -4,27 +4,87 @@ namespace Streaming.Connections;
 
 public partial class ConnectionHandler
 {
-    public static partial class Log
+    public static class Log
     {
-        [LoggerMessage(1, LogLevel.Error, "{ConnectionId}: exception occurred when process message. {Error}", EventName = "ErrorProcessMessage")]
-        public static partial void ErrorProcessMessage(ILogger logger, string connectionId, string error);
-        
-        [LoggerMessage(2, LogLevel.Trace, "{ConnectionId}: receive empty message", EventName = "ReceiveEmptyMessage")]
-        public static partial void ReceiveEmptyMessage(ILogger logger, string connectionId);
+        public static void ErrorProcessMessage(ILogger logger, Connection connection, Exception exception) =>
+            _errorProcessMessage(logger, connection.ProjectKey, connection.EnvKey, connection.ClientIpAddress,
+                connection.ClientHost, connection.Id, exception);
 
-        [LoggerMessage(3, LogLevel.Trace, "{ConnectionId}: receive close message", EventName = "ReceiveCloseMessage")]
-        public static partial void ReceiveCloseMessage(ILogger logger, string connectionId);
-        
-        [LoggerMessage(4, LogLevel.Warning, "{ConnectionId}: error occurred while read message. {Error}", EventName = "ErrorReadMessage")]
-        public static partial void ErrorReadMessage(ILogger logger, string connectionId, string error);
-        
-        [LoggerMessage(5, LogLevel.Warning, "{ConnectionId}: receive invalid message.", EventName = "ReceiveInvalidMessage")]
-        public static partial void ReceiveInvalidMessage(ILogger logger, string connectionId, Exception exception);
+        public static void ReceiveEmptyMessage(ILogger logger, Connection connection) =>
+            _receiveEmptyMessage(logger, connection.ProjectKey, connection.EnvKey, connection.ClientIpAddress,
+                connection.ClientHost, connection.Id, null);
 
-        [LoggerMessage(6, LogLevel.Error, "{ConnectionId}: failed handle message.", EventName = "ErrorHandleMessage")]
-        public static partial void ErrorHandleMessage(ILogger logger, string connectionId, Exception exception);
+        public static void ReceiveCloseMessage(ILogger logger, Connection connection) =>
+            _receiveCloseMessage(logger, connection.ProjectKey, connection.EnvKey, connection.ClientIpAddress,
+                connection.ClientHost, connection.Id, null);
 
-        [LoggerMessage(7, LogLevel.Warning, "{ConnectionId}: cannot find message handler for type {MessageType}", EventName = "CannotFindMessageHandler")]
-        public static partial void CannotFindMessageHandler(ILogger logger, string connectionId, string messageType);
+        public static void ErrorReadMessage(ILogger logger, Connection connection, string error) =>
+            _errorReadMessage(logger, connection.ProjectKey, connection.EnvKey, connection.ClientIpAddress,
+                connection.ClientHost, connection.Id, error, null);
+
+        public static void CannotFindMessageHandler(ILogger logger, Connection connection, string messageType) =>
+            _cannotFindMessageHandler(logger, connection.ProjectKey, connection.EnvKey, connection.ClientIpAddress,
+                connection.ClientHost, connection.Id, messageType, null);
+
+        public static void ReceiveInvalidMessage(ILogger logger, Connection connection, string message,
+            Exception exception) =>
+            _receiveInvalidMessage(logger, connection.ProjectKey, connection.EnvKey, connection.ClientIpAddress,
+                connection.ClientHost, connection.Id, message, exception);
+
+        public static void ErrorHandleMessage(ILogger logger, Connection connection, string message,
+            Exception exception) =>
+            _errorHandleMessage(logger, connection.ProjectKey, connection.EnvKey, connection.ClientIpAddress,
+                connection.ClientHost, connection.Id, message, exception);
+
+        private static readonly Action<ILogger, string, string, string, string, string, Exception?>
+            _errorProcessMessage = LoggerMessage.Define<string, string, string, string, string>(
+                LogLevel.Error,
+                new EventId(1, "ErrorProcessMessage"),
+                "[{ProjectKey}:{EnvKey}:{ClientIpAddress}:{ClientHost}:{ConnectionId}] An exception occurred while processing message."
+            );
+
+        private static readonly Action<ILogger, string, string, string, string, string, Exception?>
+            _receiveEmptyMessage = LoggerMessage.Define<string, string, string, string, string>(
+                LogLevel.Trace,
+                new EventId(2, "ReceiveEmptyMessage"),
+                "[{ProjectKey}:{EnvKey}:{ClientIpAddress}:{ClientHost}:{ConnectionId}] Received empty message."
+            );
+
+        private static readonly Action<ILogger, string, string, string, string, string, Exception?>
+            _receiveCloseMessage =
+                LoggerMessage.Define<string, string, string, string, string>(
+                    LogLevel.Trace,
+                    new EventId(3, "ReceiveCloseMessage"),
+                    "[{ProjectKey}:{EnvKey}:{ClientIpAddress}:{ClientHost}:{ConnectionId}] Received close message."
+                );
+
+        private static readonly Action<ILogger, string, string, string, string, string, string, Exception?>
+            _errorReadMessage =
+                LoggerMessage.Define<string, string, string, string, string, string>(
+                    LogLevel.Warning,
+                    new EventId(4, "ErrorReadMessage"),
+                    "[{ProjectKey}:{EnvKey}:{ClientIpAddress}:{ClientHost}:{ConnectionId}] An error occurred while reading message, Error: {Error}."
+                );
+
+        private static readonly Action<ILogger, string, string, string, string, string, string, Exception?>
+            _cannotFindMessageHandler = LoggerMessage.Define<string, string, string, string, string, string>(
+                LogLevel.Warning,
+                new EventId(5, "CannotFindMessageHandler"),
+                "[{ProjectKey}:{EnvKey}:{ClientIpAddress}:{ClientHost}:{ConnectionId}] Cannot find message handler for type {MessageType}."
+            );
+
+        private static readonly Action<ILogger, string, string, string, string, string, string, Exception?>
+            _receiveInvalidMessage = LoggerMessage.Define<string, string, string, string, string, string>(
+                LogLevel.Warning,
+                new EventId(6, "ReceiveInvalidMessage"),
+                "[{ProjectKey}:{EnvKey}:{ClientIpAddress}:{ClientHost}:{ConnectionId}] Received invalid message: {Message}."
+            );
+
+        private static readonly Action<ILogger, string, string, string, string, string, string, Exception?>
+            _errorHandleMessage = LoggerMessage.Define<string, string, string, string, string, string>(
+                LogLevel.Error,
+                new EventId(7, "ErrorHandleMessage"),
+                "[{ProjectKey}:{EnvKey}:{ClientIpAddress}:{ClientHost}:{ConnectionId}] Failed handle message: {Message}."
+            );
     }
 }
