@@ -1,6 +1,6 @@
 using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Infrastructure.Readiness;
+using Infrastructure;
 
 namespace Api.Setup;
 
@@ -13,7 +13,7 @@ public static class MiddlewaresRegister
         app.MapHealthChecks("health/liveness", new HealthCheckOptions { Predicate = _ => false });
         app.MapHealthChecks("health/readiness", new HealthCheckOptions
         {
-            Predicate = registration => registration.Tags.Contains(ReadinessExtensions.ReadinessTag)
+            Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
         // enable swagger in dev mode
