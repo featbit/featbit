@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Infrastructure.Fakes;
+using Infrastructure;
 using Streaming.DependencyInjection;
 
 namespace Api.Setup;
@@ -18,7 +19,7 @@ public static class ServicesRegister
         services.AddSwaggerGen();
 
         // health check dependencies
-        services.AddHealthChecks();
+        services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
 
         // cors
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
