@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from "../../../environments/environment";
 import { HttpClient } from "@angular/common/http";
 import { firstValueFrom } from "rxjs";
+import { SsoPrecheck } from "@shared/types";
 
 @Injectable({
   providedIn: 'root'
@@ -22,8 +23,8 @@ export class SsoService {
     return `${this.baseUrl}/oidc-authorize-url?redirect_uri=${this.redirectUri}&workspace_key=${workspaceKey}`;
   }
 
-  isEnabled(): Promise<boolean> {
-    return firstValueFrom(this.http.get<boolean>(`${this.baseUrl}/check-enabled`));
+  preCheck(): Promise<SsoPrecheck> {
+    return firstValueFrom(this.http.get<SsoPrecheck>(`${this.baseUrl}/pre-check`));
   }
 
   oidcLogin(code: string, workspaceKey: string) {

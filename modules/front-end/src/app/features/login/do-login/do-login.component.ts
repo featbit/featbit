@@ -53,15 +53,17 @@ export class DoLoginComponent implements OnInit {
       workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
     });
 
+    const [providers, preCheck] = await Promise.all([this.socialService.getProviders(), this.ssoService.preCheck()]);
+
+    this.isSsoEnabled = preCheck.isEnabled;
+    this.oauthProviders = providers;
+    this.isSocialEnabled = this.oauthProviders.length > 0;
+
     this.ssoForm = this.fb.group({
-      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
+      workspaceKey: [{value: preCheck.workspaceKey, disabled: preCheck.workspaceKey?.length > 0}, [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
     });
 
-    const [providers, ssoEnabled] = await Promise.all([this.socialService.getProviders(), this.ssoService.isEnabled()]);
 
-    this.oauthProviders = providers;
-    this.isSsoEnabled = ssoEnabled;
-    this.isSocialEnabled = this.oauthProviders.length > 0;
     this.subscribeExternalLogin();
   }
 

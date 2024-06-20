@@ -94,9 +94,15 @@ public class SsoController : ApiControllerBase
         }
     }
 
-    [HttpGet("check-enabled")]
-    public ApiResponse<bool> Enabled() => Ok(_isEnabled);
-
+    [HttpGet("pre-check")]
+    public async Task<ApiResponse<SsoPrecheck>> PreCheck()
+    {
+        var workspaceKey = await _workspaceService.GetDefaultWorkspaceAsync();
+        var result = new SsoPrecheck(_isEnabled, workspaceKey);
+        
+        return Ok(result);
+    }
+    
     private async Task<(string error, Workspace? workspace)> ValidateOidcAsync(string workspaceKey)
     {
         if (!_isEnabled)
