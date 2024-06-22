@@ -177,3 +177,8 @@ export interface OAuthProvider {
   authorizeUrl: string;
   icon: string;
 }
+
+export interface SsoPreCheck {
+  isEnabled: boolean;
+  workspaceKey?: string;
+}
