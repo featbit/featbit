@@ -19,12 +19,12 @@ public class WorkspaceService : MongoDbService<Workspace>, IWorkspaceService
 
     public async Task<string> GetDefaultWorkspaceAsync()
     {
-        if (await Queryable.CountAsync() == 1)
+        if (await Queryable.CountAsync() != 1)
         {
-            var first = await Queryable.FirstAsync();
-            return first.Key;
+            return string.Empty;
         }
 
-        return string.Empty;
+        var first = await Queryable.FirstAsync();
+        return first.Key;
     }
 }

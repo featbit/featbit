@@ -24,6 +24,6 @@ public class TestWorkspaceService : NullServiceBase<Workspace>, IWorkspaceServic
 
     public Task<string> GetDefaultWorkspaceAsync()
     {
-        return Task.FromResult(TestWorkspace.Instance().Key);
+        return Task.FromResult(TestWorkspace.Key);
     }
 }
