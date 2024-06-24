@@ -7,9 +7,23 @@ export interface ISegmentListModel {
   totalCount: number;
 }
 
+export enum SegmentType {
+  EnvironmentSpecific = "environment-specific",
+  Shared = "shared"
+}
+
+export interface CreateSegment {
+  name: string;
+  type: SegmentType;
+  scopes: string[];
+  description: string;
+}
+
 export interface ISegment {
   id: string;
   name: string;
+  type: SegmentType;
+  scopes: string[];
   description: string;
   updatedAt: Date;
   included: string[];
