@@ -154,26 +154,56 @@ export class FeatureFlagDrawerComponent implements OnInit {
     return this.variationForm.get('variationType')!.value;
   }
 
+  onInputVariationName(variation: FormGroup) {
+    const nameLc = variation.value.name.toLowerCase().replace(/[-\s]+/g, '')
+    const nameSlug = slugify(variation.value.name);
+    const nameOnlyNumbers = variation.value.name.replace(/\D+/g, '');
+    const valueSlug = slugify(variation.value.value)
+    const valueLc = variation.value.value.toLowerCase().replace(/-/g, '')
+
+    if (this.variationType === 'string' &&
+      (valueLc === ''
+        || nameLc.slice(0, -1) === valueLc
+        || nameLc === valueLc.slice(0, -1)
+      )
+    ) {
+      variation.patchValue({ value: nameSlug });
+    }
+    else if (this.variationType === 'number' &&
+      (valueSlug === ''
+        || +nameOnlyNumbers.slice(0, -1) === +valueSlug
+        || +nameOnlyNumbers === +valueSlug.slice(0, -1))
+    ) {
+      variation.patchValue({ value: nameOnlyNumbers });
+    }
+  }
+
   setVariations(variationType: string) {
     if (variationType === 'boolean') {
       this.variations.clear();
       this.addVariation('True', 'true', true);
       this.addVariation('False', 'false', true);
+    }
+    else if (['string', 'number', 'json'].includes(variationType)) {
+      this.variations.clear();
+      const valueA = variationType === 'string' ? 'variation-a' : variationType === 'number' ? '1' : '{}';
+      const valueB = variationType === 'string' ? 'variation-b' : variationType === 'number' ? '2' : '{}';
+      this.addVariation(`Variation ${ variationType === 'number' ? `1` : `A` }`, valueA);
+      this.addVariation(`Variation ${ variationType === 'number' ? `2` : `B` }`, valueB);
 
-      this.setBooleanDefaultVariations();
-      return;
+      // enable value inputs
+      this.enableVariations();
     }
 
-    // enable value inputs
-    this.enableVariations();
+    this.setDefaultVariations();
   }
 
-  private setBooleanDefaultVariations() {
-    const trueId = this.variations.at(0).value['id'];
-    const falseId = this.variations.at(1).value['id'];
+  private setDefaultVariations() {
+    const firstVariationId = this.variations.at(0).value['id'];
+    const secondVariationId = this.variations.at(1).value['id'];
 
-    this.defaultRuleForm.get('enabledVariationId').setValue(trueId);
-    this.defaultRuleForm.get('disabledVariationId').setValue(falseId);
+    this.defaultRuleForm.get('enabledVariationId').setValue(firstVariationId);
+    this.defaultRuleForm.get('disabledVariationId').setValue(secondVariationId);
   }
 
   private enableVariations() {
@@ -332,4 +362,5 @@ export class FeatureFlagDrawerComponent implements OnInit {
   public navigateToFlagDetail(key: string) {
     this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`).then();
   }
+
 }
