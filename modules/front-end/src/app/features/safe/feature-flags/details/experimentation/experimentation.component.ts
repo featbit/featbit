@@ -371,7 +371,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         name: xAxisName,
         position: 'end',
         field: 'time',
-        scale: {type: "timeCat", nice: true, range: [0.05, 0.95], mask: 'yyyy-mm-dd HH:mm'}
+        scale: {type: "timeCat", nice: true, range: [0.05, 0.95], mask: 'YYYY-MM-DD HH:mm'}
       },
       yAxis: {
         name: yAxisName,
