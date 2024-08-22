@@ -81,7 +81,7 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
         }
 
         var existed =
-            await _service.FindOneAsync(at => string.Equals(at.Name, request.Name, StringComparison.OrdinalIgnoreCase));
+            await _service.FindOneAsync(at => at.OrganizationId == request.OrganizationId && string.Equals(at.Name, request.Name, StringComparison.OrdinalIgnoreCase));
         if (existed != null)
         {
             throw new BusinessException(ErrorCodes.EntityExistsAlready);
