@@ -49,7 +49,7 @@ void InitializeSerilog()
                                    | IncludedData.TraceIdField
                                    | IncludedData.SpanIdField;
             options.BatchingOptions.BatchSizeLimit = 2;
-            options.BatchingOptions.Period = TimeSpan.FromSeconds(2);
+            options.BatchingOptions.BufferingTimeLimit = TimeSpan.FromSeconds(2);
             options.BatchingOptions.QueueLimit = 10;
 
             options.ResourceAttributes = new Dictionary<string, object>
@@ -64,4 +64,5 @@ void InitializeSerilog()
 
 // https://docs.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-6.0#basic-tests-with-the-default-webapplicationfactory
 // Make the implicit Program class public so test projects can access it
-public partial class Program { }
+public partial class Program
+{ }

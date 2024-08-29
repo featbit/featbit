@@ -48,7 +48,13 @@ public static class KafkaHealthCheckBuilderExtensions
             BootstrapServers = bootstrapServers
         };
 
-        var checker = new KafkaHealthCheck(producerConfig, DefaultTopic);
+        var kafkaConfig = new KafkaHealthCheckOptions
+        {
+            Configuration = producerConfig,
+            Topic = DefaultTopic
+        };
+
+        var checker = new KafkaHealthCheck(kafkaConfig);
         var registration = new HealthCheckRegistration(
             name,
             checker,

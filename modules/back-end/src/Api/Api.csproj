@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -10,21 +10,21 @@
 
     <ItemGroup>
         <!-- Api Versioning -->
-        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="6.0.0" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
 
         <!-- Swagger -->
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
-        <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="6.5.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="6.7.3" />
 
         <!-- Serilog -->
-        <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
-        <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.0.0" />
-        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="1.1.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
+        <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.1.1" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.0.0" />
 
-        <PackageReference Include="Grpc.Net.Client" Version="2.60.0" />
-        <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
+        <PackageReference Include="Grpc.Net.Client" Version="2.65.0" />
+        <PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
