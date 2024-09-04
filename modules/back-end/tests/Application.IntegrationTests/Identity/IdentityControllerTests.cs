@@ -3,7 +3,6 @@ using Application.Identity;
 namespace Application.IntegrationTests.Identity;
 
 [Collection(nameof(TestApp))]
-[UsesVerify]
 public class IdentityControllerTests
 {
     private readonly TestApp _app;

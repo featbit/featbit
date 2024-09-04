@@ -7,7 +7,7 @@ public static class Initialization
     [ModuleInitializer]
     public static void Run()
     {
-        VerifierSettings.DerivePathInfo((sourceFile, projectDirectory, type, method) => new PathInfo(
+        Verifier.DerivePathInfo((sourceFile, projectDirectory, type, method) => new PathInfo(
             directory: Path.Combine(projectDirectory, "Snapshots"),
             typeName: type.Name,
             methodName: method.Name)
@@ -17,7 +17,16 @@ public static class Initialization
             x => x.StartsWith("eyJ") && x.Split('.').Length == 3 ? "[Scrubbed JWT]" : x
         );
         VerifierSettings.ScrubLinesWithReplace(x => x.StartsWith("Bearer ") ? "Bearer [Scrubbed Token]" : x);
-        
-        VerifyHttp.Enable();
+
+        // needed for errors[]
+        VerifierSettings.DontIgnoreEmptyCollections();
+        // needed to ignore cookies that could be added along with empty errors[]
+        VerifierSettings.IgnoreMember("Cookies");
+
+        // Sort properties and json objects alphabetically to make the snapshot matching more accurate
+        VerifierSettings.SortPropertiesAlphabetically();
+        VerifierSettings.SortJsonObjects();
+
+        VerifyHttp.Initialize();
     }
 }
