@@ -1,5 +1,4 @@
 ﻿{
-  Version: 1.1,
   Status: 400 Bad Request,
   Headers: {
     api-supported-versions: 1.0,
@@ -18,17 +17,6 @@
         password_is_required
       ],
       success: false
-    }
-  },
-  Request: {
-    Method: POST,
-    Uri: http://localhost/api/v1/identity/login-by-email,
-    Content: {
-      Headers: {
-        Content-Length: 44,
-        Content-Type: application/json; charset=utf-8
-      },
-      Value: 
     }
   }
 }
