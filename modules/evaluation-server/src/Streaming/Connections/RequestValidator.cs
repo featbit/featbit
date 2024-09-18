@@ -15,7 +15,7 @@ public class RequestValidator : IRequestValidator
         _store = store;
     }
 
-    public async Task<Connection?> ValidateAsync(WebSocket ws, string type, string version, string tokenString)
+    public async Task<Connection?> ValidateAsync(WebSocket ws, string? type, string? version, string? tokenString)
     {
         if (!ConnectionType.IsRegistered(type) || !ConnectionVersion.IsSupported(version))
         {
@@ -43,7 +43,7 @@ public class RequestValidator : IRequestValidator
             return null;
         }
 
-        var connection = new Connection(Guid.NewGuid().ToString("D"), ws, secret, type, version, current);
+        var connection = new Connection(Guid.NewGuid().ToString("D"), ws, secret, type, version!, current);
         return connection;
     }
 }
