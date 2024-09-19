@@ -12,7 +12,6 @@ using Infrastructure.License;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -78,7 +77,7 @@ public static class ServicesRegister
             {
                 options.ForwardDefaultSelector = context =>
                 {
-                    string authorization = context.Request.Headers[HeaderNames.Authorization];
+                    string? authorization = context.Request.Headers.Authorization;
                     if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
                     {
                         return Schemes.JwtBearer;
@@ -100,7 +99,7 @@ public static class ServicesRegister
                     ValidAudience = jwtOption["Audience"],
 
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!))
                 };
             })
             .AddOpenApi(Schemes.OpenApi);
