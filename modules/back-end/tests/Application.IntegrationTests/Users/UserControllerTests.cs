@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Application.IntegrationTests.Users;
 
 [Collection(nameof(TestApp))]
-[UsesVerify]
 public class UserControllerTests
 {
     private readonly TestApp _app;

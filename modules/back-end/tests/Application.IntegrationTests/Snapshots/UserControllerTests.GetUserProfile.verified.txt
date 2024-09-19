@@ -1,5 +1,4 @@
 ﻿{
-  Version: 1.1,
   Status: 200 OK,
   Headers: {
     api-supported-versions: 1.0
@@ -18,12 +17,6 @@
       },
       errors: [],
       success: true
-    }
-  },
-  Request: {
-    Uri: http://localhost/api/v1/user/profile,
-    Headers: {
-      Authorization: Bearer [Scrubbed Token]
     }
   }
 }

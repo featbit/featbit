@@ -2,7 +2,8 @@ using System.Text;
 using Application.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
 using Application.Bases;
 using Domain.Identity;
 using Domain.Users;
@@ -53,16 +54,17 @@ public class IdentityService : IIdentityService
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
         var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
-        var jwt = new JwtSecurityToken(
-            _options.Issuer,
-            _options.Audience,
-            expires: DateTime.Now.AddMonths(1),
-            claims: user.Claims(),
-            signingCredentials: credentials
-        );
+        var descriptor = new SecurityTokenDescriptor
+        {
+            Issuer = _options.Issuer,
+            Audience = _options.Audience,
+            Expires = DateTime.Now.AddMonths(1),
+            Subject = new ClaimsIdentity(user.Claims()),
+            SigningCredentials = credentials
+        };
 
-        var handler = new JwtSecurityTokenHandler();
-        return handler.WriteToken(jwt);
+        var handler = new JsonWebTokenHandler();
+        return handler.CreateToken(descriptor);
     }
 
     public async Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password)

@@ -1,5 +1,4 @@
 ﻿{
-  Version: 1.1,
   Status: 200 OK,
   Headers: {
     api-supported-versions: 1.0
@@ -15,17 +14,6 @@
       },
       errors: [],
       success: true
-    }
-  },
-  Request: {
-    Method: POST,
-    Uri: http://localhost/api/v1/identity/login-by-email,
-    Content: {
-      Headers: {
-        Content-Length: 67,
-        Content-Type: application/json; charset=utf-8
-      },
-      Value: 
     }
   }
 }

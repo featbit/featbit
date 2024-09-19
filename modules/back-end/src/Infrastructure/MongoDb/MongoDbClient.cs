@@ -37,11 +37,7 @@ public class MongoDbClient
     {
         var value = options.Value;
 
-        // linq provider v3 has many improvement in version 2.14.x we should use it
-        var clientSettings = MongoClientSettings.FromConnectionString(value.ConnectionString);
-        clientSettings.LinqProvider = LinqProvider.V3;
-
-        MongoClient = new MongoClient(clientSettings);
+        MongoClient = new MongoClient(value.ConnectionString);
         Database = MongoClient.GetDatabase(value.Database);
     }
 

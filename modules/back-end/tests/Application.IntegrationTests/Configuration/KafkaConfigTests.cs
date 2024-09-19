@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Application.IntegrationTests.Configuration;
 
 [Collection(nameof(TestApp))]
-[UsesVerify]
 public class KafkaConfigTests
 {
     private readonly TestApp _app;

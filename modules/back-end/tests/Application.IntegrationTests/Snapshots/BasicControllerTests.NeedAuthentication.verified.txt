@@ -1,5 +1,4 @@
 ﻿{
-  Version: 1.1,
   Status: 401 Unauthorized,
   Headers: {
     WWW-Authenticate: Bearer
@@ -15,6 +14,5 @@
       ],
       success: false
     }
-  },
-  Request: http://localhost/api/v1/basic/authorized
+  }
 }
