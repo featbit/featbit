@@ -6,8 +6,8 @@ public interface IRequestValidator
 {
     Task<Connection?> ValidateAsync(
         WebSocket ws,
-        string type,
-        string version,
-        string tokenString
+        string? type,
+        string? version,
+        string? tokenString
     );
 }

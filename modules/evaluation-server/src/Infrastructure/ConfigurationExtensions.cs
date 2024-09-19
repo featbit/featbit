@@ -8,6 +8,6 @@ public static class ConfigurationExtensions
     {
         var isPro = configuration["IS_PRO"];
 
-        return isPro.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase);
+        return string.Equals(isPro, bool.TrueString, StringComparison.OrdinalIgnoreCase);
     }
 }

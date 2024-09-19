@@ -59,6 +59,9 @@ public class Connection
         ProjectKey = secret.ProjectKey;
         EnvId = secret.EnvId;
         EnvKey = secret.EnvKey;
+
+        ClientIpAddress = string.Empty;
+        ClientHost = string.Empty;
     }
 
     public async Task SendAsync(Message message, CancellationToken cancellationToken)

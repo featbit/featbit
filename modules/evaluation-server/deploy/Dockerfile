@@ -2,7 +2,7 @@
 # https://hub.docker.com/_/microsoft-dotnet
 ARG INSTALL_DIR=/app
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /source
 
 # copy sln
@@ -33,7 +33,7 @@ WORKDIR /source/src/Api
 RUN dotnet publish -c Release --no-build -o $INSTALL_DIR
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 

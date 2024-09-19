@@ -16,8 +16,13 @@ public static class KafkaHealthCheckBuilderExtensions
         string[] tags,
         TimeSpan timeout)
     {
-        var producerServer = configuration.GetValue<string>("Kafka:Producer:bootstrap.servers");
-        var consumerServer = configuration.GetValue<string>("Kafka:Consumer:bootstrap.servers");
+        var producerServer = configuration["Kafka:Producer:bootstrap.servers"];
+        var consumerServer = configuration["Kafka:Consumer:bootstrap.servers"];
+
+        if (string.IsNullOrEmpty(producerServer) || string.IsNullOrEmpty(consumerServer))
+        {
+            throw new InvalidOperationException("Kafka producer and consumer servers must be configured.");
+        }
 
         builder
             .AddKafka(
@@ -48,7 +53,13 @@ public static class KafkaHealthCheckBuilderExtensions
             BootstrapServers = bootstrapServers
         };
 
-        var checker = new KafkaHealthCheck(producerConfig, DefaultTopic);
+        var kafkaOptions = new KafkaHealthCheckOptions
+        {
+            Configuration = producerConfig,
+            Topic = DefaultTopic
+        };
+
+        var checker = new KafkaHealthCheck(kafkaOptions);
         var registration = new HealthCheckRegistration(
             name,
             checker,

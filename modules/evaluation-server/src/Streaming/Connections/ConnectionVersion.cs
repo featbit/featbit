@@ -6,9 +6,9 @@ public class ConnectionVersion
 
     public const string V2 = "2";
 
-    public static readonly string[] SupportedVersions = { V1, V2 };
+    public static readonly string[] SupportedVersions = [V1, V2];
 
-    public static bool IsSupported(string version)
+    public static bool IsSupported(string? version)
     {
         if (string.IsNullOrWhiteSpace(version))
         {

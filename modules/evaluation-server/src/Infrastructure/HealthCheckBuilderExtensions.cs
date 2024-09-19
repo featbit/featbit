@@ -16,8 +16,13 @@ public static class HealthCheckBuilderExtensions
     {
         var tags = new[] { ReadinessTag };
 
-        var mongoDbConnectionString = configuration.GetValue<string>("MongoDb:ConnectionString");
-        var redisConnectionString = configuration.GetValue<string>("Redis:ConnectionString");
+        var mongoDbConnectionString = configuration["MongoDb:ConnectionString"];
+        var redisConnectionString = configuration["Redis:ConnectionString"];
+
+        if (string.IsNullOrEmpty(mongoDbConnectionString) || string.IsNullOrEmpty(redisConnectionString))
+        {
+            throw new InvalidOperationException("MongoDb and Redis connection strings must be configured.");
+        }
 
         builder.Services
             .AddHealthChecks()
@@ -32,7 +37,7 @@ public static class HealthCheckBuilderExtensions
                 timeout: Timeout
             );
 
-        if(configuration.IsProVersion())
+        if (configuration.IsProVersion())
         {
             builder.AddKafka(configuration, tags, Timeout);
         }

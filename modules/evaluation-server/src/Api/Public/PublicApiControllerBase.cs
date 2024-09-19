@@ -11,7 +11,7 @@ public class PublicApiControllerBase : ControllerBase
     {
         get
         {
-            string secretString = Request.Headers.Authorization;
+            string? secretString = Request.Headers.Authorization;
             return Secret.TryParse(secretString, out var envId) ? envId : Guid.Empty;
         }
     }
