@@ -32,7 +32,7 @@ public class TokenNumberTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
-    public void Should_Decode_Null_Or_WhiteSpace_As_Zero(string encoded)
+    public void Should_Decode_Null_Or_WhiteSpace_As_Zero(string? encoded)
     {
         var byteParseResult = TokenNumber.TryDecodeByte(encoded, out var byteActual);
         var longParseResult = TokenNumber.TryDecodeLong(encoded, out var longActual);

@@ -21,7 +21,7 @@ public class SecretTests
     [InlineData("random-string")]
     [InlineData("ZGY1LTUxYTQtNCUyMDIyMDkwNTAwNTQxOV9fNDZfXzkzX18tMV9fZGVmYXVsdF82MjdhMg==")]
     [InlineData("aGVsbG8gd29ybGQ=")]
-    public void ParseInvalidSecret(string secretString)
+    public void ParseInvalidSecret(string? secretString)
     {
         var isValid = Secret.TryParse(secretString, out var actual);
 

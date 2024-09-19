@@ -10,7 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.8" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     </ItemGroup>
 
     <ItemGroup>

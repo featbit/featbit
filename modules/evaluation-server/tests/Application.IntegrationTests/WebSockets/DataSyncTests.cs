@@ -4,7 +4,6 @@ using Streaming.Connections;
 
 namespace Application.IntegrationTests.WebSockets;
 
-[UsesVerify]
 [Collection(nameof(TestApp))]
 public class DataSyncTests
 {

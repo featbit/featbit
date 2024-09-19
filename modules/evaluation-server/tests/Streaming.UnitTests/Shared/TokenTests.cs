@@ -27,7 +27,7 @@ public class TokenTests
     [InlineData("5chars")]
     [InlineData("QDUBHYWVkLWNiZT")]
     [InlineData("QQQQS123")]
-    public void GetInvalidToken(string tokenString)
+    public void GetInvalidToken(string? tokenString)
     {
         var token = new Token(tokenString);
 

@@ -10,7 +10,7 @@ public class ConnectionTypeTests
     [InlineData("another", false)]
     [InlineData(" ", false)]
     [InlineData(null, false)]
-    public void Should_Check_SdkType_Registration_Status(string type, bool registered)
+    public void Should_Check_SdkType_Registration_Status(string? type, bool registered)
     {
         Assert.Equal(registered, ConnectionType.IsRegistered(type));
     }
