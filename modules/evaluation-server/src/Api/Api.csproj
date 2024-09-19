@@ -8,7 +8,7 @@
     <ItemGroup>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
         <PackageReference Include="Serilog.AspNetCore" Version="8.0.2" />
-        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="1.2.0" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.1.0" />
 
         <PackageReference Include="Grpc.Net.Client" Version="2.65.0" />
     </ItemGroup>
