@@ -16,12 +16,12 @@
         <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="8.0.1" />
         <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="8.1.0" />
         <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
-        <PackageReference Include="Confluent.Kafka" Version="2.5.2" />
+        <PackageReference Include="Confluent.Kafka" Version="2.5.3" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
-        <PackageReference Include="MongoDB.Driver" Version="2.28.0" />
+        <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
         <PackageReference Include="Handlebars.Net" Version="2.1.6" />
-        <PackageReference Include="StackExchange.Redis" Version="2.8.0" />
+        <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
     </ItemGroup>
 
 </Project>
