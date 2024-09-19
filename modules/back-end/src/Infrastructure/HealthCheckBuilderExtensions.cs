@@ -19,6 +19,11 @@ public static class HealthCheckBuilderExtensions
         var mongoDbConnectionString = configuration.GetValue<string>("MongoDb:ConnectionString");
         var redisConnectionString = configuration.GetValue<string>("Redis:ConnectionString");
 
+        if (string.IsNullOrEmpty(mongoDbConnectionString) || string.IsNullOrEmpty(redisConnectionString))
+        {
+            throw new InvalidOperationException("MongoDb and Redis connection strings must be configured.");
+        }
+
         builder.Services
             .AddHealthChecks()
             .AddMongoDb(

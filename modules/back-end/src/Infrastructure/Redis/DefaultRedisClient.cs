@@ -13,9 +13,9 @@ public class DefaultRedisClient : IRedisClient
     public DefaultRedisClient(IConfiguration configuration)
     {
         var connectionString = configuration["Redis:ConnectionString"];
-        var options = ConfigurationOptions.Parse(connectionString);
+        var options = ConfigurationOptions.Parse(connectionString!);
 
-        // if user has specified a password in the configuration, use it
+        // if we specified a password in the configuration, use it
         var password = configuration["Redis:Password"];
         if (!string.IsNullOrWhiteSpace(password))
         {

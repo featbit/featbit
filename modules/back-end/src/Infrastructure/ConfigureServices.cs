@@ -71,7 +71,7 @@ public static class ConfigureServices
         // typed http clients
         services.AddHttpClient<IOlapService, OlapService>(httpClient =>
         {
-            httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]);
+            httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]!);
         });
         services.AddHttpClient<IAgentService, AgentService>();
         services.AddHttpClient<IWebhookSender, WebhookSender>();

@@ -19,6 +19,11 @@ public static class KafkaHealthCheckBuilderExtensions
         var producerServer = configuration.GetValue<string>("Kafka:Producer:bootstrap.servers");
         var consumerServer = configuration.GetValue<string>("Kafka:Consumer:bootstrap.servers");
 
+        if (string.IsNullOrEmpty(producerServer) || string.IsNullOrEmpty(consumerServer))
+        {
+            throw new InvalidOperationException("Kafka producer and consumer servers must be configured.");
+        }
+
         builder
             .AddKafka(
                 "Kafka Producer Cluster",
