@@ -2,7 +2,9 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
       http:
+        endpoint: 0.0.0.0:4318
         cors:
           allowed_origins:
             - "*" # allow all origins will not work when allow_credentials is true
@@ -52,13 +54,6 @@ exporters:
     const_labels:
       label1: featbit
 
-  prometheusremotewrite:
-    endpoint: "https://<YOUR HOST>/api/prom/push"
-    tls:
-      insecure: true
-
-  debug:
-
   otlp/jaeger:
     endpoint: "jaeger:4317"
     tls:
@@ -68,18 +63,6 @@ exporters:
     endpoint: "http://seq:80/ingest/otlp"
     tls:
       insecure: true
-  
-  otlp/newrelic:
-    endpoint: "https://otlp.nr-data.net:4317"
-    headers:
-      api-key: "<YOUR API KEY>"
-
-  # sentry:
-  #   dsn: "<YOUR DSN HERE>"
-  #   environment: <YOUR ENV HERE>
-
-  # otlp:
-  #   endpoint: otelcol:4317
 
   file/metrics:
     path: /otel/metrics/metrics.json

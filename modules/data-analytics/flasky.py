@@ -2,6 +2,8 @@
 import os
 import logging
 
+import app.otel.sdk  # noqa: F401
+
 from dotenv import load_dotenv
 load_dotenv()
 
