@@ -2,7 +2,8 @@
 # https://hub.docker.com/_/microsoft-dotnet
 ARG INSTALL_DIR=/app
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG TARGETARCH
 WORKDIR /source
 
 # copy sln
@@ -16,17 +17,17 @@ RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${fi
 COPY tests/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
 
-RUN dotnet restore
+RUN dotnet restore -a $TARGETARCH
 
 # copy all source, build and test
 COPY . .
-RUN dotnet build -c Release --no-restore && dotnet test
+RUN dotnet build -c Release -a $TARGETARCH --no-restore && dotnet test
 
 # publish stage
 FROM build AS publish
 ARG INSTALL_DIR
 WORKDIR /source/src/Api
-RUN dotnet publish -c Release --no-build -o $INSTALL_DIR
+RUN dotnet publish -c Release -a $TARGETARCH --no-build -o $INSTALL_DIR
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
@@ -65,4 +66,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD curl --fail --silent http://localhost:5000/health/liveness || exit 1
 
+USER $APP_UID
 ENTRYPOINT ["./start.sh"]
