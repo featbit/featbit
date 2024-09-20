@@ -70,4 +70,5 @@ EXPOSE 5100
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD curl --fail --silent http://localhost:5100/health/liveness || exit 1
 
+USER $APP_UID
 ENTRYPOINT ["./start.sh"]
