@@ -65,10 +65,6 @@ COPY --from=build /source/start.sh ./start.sh
 RUN chmod +x ./start.sh
 EXPOSE 5100
 
-# temporal workaround for Automatic Instrumentation in ARM arch
-RUN mkdir -p $DOTNET_SHARED_STORE/arm64 && \
-    cp -a $DOTNET_SHARED_STORE/x64/. $DOTNET_SHARED_STORE/arm64
-
 # health check
 HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD curl --fail --silent http://localhost:5100/health/liveness || exit 1
