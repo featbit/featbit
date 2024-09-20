@@ -1,5 +1,4 @@
 name: featbit-otel
-version: "3"
 services:
   ui:
     image: featbit/ui:dev

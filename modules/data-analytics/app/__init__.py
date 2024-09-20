@@ -1,3 +1,5 @@
+import app.otel.sdk  # noqa: F401
+
 import socket
 from logging.config import dictConfig
 from typing import List, Tuple

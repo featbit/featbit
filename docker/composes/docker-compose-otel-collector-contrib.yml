@@ -1,8 +1,7 @@
 name: featbit-otel-collector
-version: "3"
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
+    image: otel/opentelemetry-collector-contrib:0.108.0
     container_name: otel-collector
     volumes:
       - ./infra/otel/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
