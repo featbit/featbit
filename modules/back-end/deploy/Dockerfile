@@ -34,7 +34,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
 ARG INSTALL_DIR
-ARG OTEL_VERSION=1.1.0
+ARG OTEL_VERSION=1.7.0
 
 # ensure we listen on any IP Address
 ENV ASPNETCORE_URLS=http://*:5000 \
