@@ -55,10 +55,6 @@ ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/relea
 RUN chmod +x otel-dotnet-auto-install.sh
 RUN ./otel-dotnet-auto-install.sh
 
-# temporal workaround for Automatic Instrumentation in ARM arch
-RUN mkdir -p $DOTNET_SHARED_STORE/arm64 && \
-    cp -a $DOTNET_SHARED_STORE/x64/. $DOTNET_SHARED_STORE/arm64
-
 WORKDIR $INSTALL_DIR
 COPY --from=publish $INSTALL_DIR ./
 COPY --from=build /source/start.sh ./start.sh
