@@ -27,7 +27,7 @@ RUN dotnet build -p:TargetArch=$TARGETARCH -c Release --no-restore && dotnet tes
 FROM build AS publish
 ARG INSTALL_DIR
 WORKDIR /source/src/Api
-RUN dotnet publish -c Release -a $TARGETARCH --no-build -o $INSTALL_DIR
+RUN dotnet publish -a $TARGETARCH --no-build -o $INSTALL_DIR
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
