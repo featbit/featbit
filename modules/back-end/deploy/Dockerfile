@@ -8,7 +8,7 @@ WORKDIR /source
 # restore packages
 COPY src/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
-RUN dotnet restore -a $TARGETARCH src/Api/Api.csproj
+RUN dotnet restore src/Api/Api.csproj -a $TARGETARCH
 
 # copy src files
 COPY src/ ./
