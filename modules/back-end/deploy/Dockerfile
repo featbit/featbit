@@ -1,35 +1,33 @@
 # build stage
+# https://hub.docker.com/_/microsoft-dotnet
 ARG INSTALL_DIR=/app
 
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG TARGETARCH
 WORKDIR /source
 
-# restore packages
+# copy sln
+COPY *.sln .
+
+# copy src project files
 COPY src/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
-RUN dotnet restore -a $TARGETARCH src/Api/Api.csproj
 
-# copy src files
-COPY src/ ./
-
-# test stage
-# target entrypoint with: docker build --target test
-FROM build AS test
+# copy test project files
 COPY tests/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
-WORKDIR /source/tests
+
 RUN dotnet restore -a $TARGETARCH
 
-COPY tests/ .
-RUN dotnet build --no-restore -a $TARGETARCH
-ENTRYPOINT ["dotnet", "test", "--logger:trx", "--no-build"]
+# copy all source, build and test
+COPY . .
+RUN dotnet build -c Release -a $TARGETARCH --no-restore && dotnet test
 
 # publish stage
 FROM build AS publish
 ARG INSTALL_DIR
 WORKDIR /source/src/Api
-RUN dotnet publish Api.csproj -a $TARGETARCH --no-build -o $INSTALL_DIR
+RUN dotnet publish -c Release -a $TARGETARCH --no-build -o $INSTALL_DIR
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
