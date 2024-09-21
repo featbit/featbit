@@ -25,7 +25,7 @@ RUN dotnet restore -a $TARGETARCH
 
 # copy all source, build and test
 COPY . .
-RUN dotnet build -c Release -a $TARGETARCH -p:TargetArch=$TARGETARCH --no-restore && dotnet test
+RUN dotnet build -p:TargetArch=$TARGETARCH -c Release --no-restore && dotnet test
 
 # publish stage
 FROM build AS publish
