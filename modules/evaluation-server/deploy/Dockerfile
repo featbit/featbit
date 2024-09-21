@@ -9,10 +9,6 @@ WORKDIR /source
 # copy sln
 COPY *.sln .
 
-# copy Directory.Build.props and icon
-COPY src/Directory.Build.props .
-COPY src/icon.png .
-
 # copy src project files
 COPY src/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
