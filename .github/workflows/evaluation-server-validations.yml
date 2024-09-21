@@ -34,4 +34,5 @@ jobs:
           context: "{{defaultContext}}:modules/evaluation-server"
           file: ./deploy/Dockerfile
           platforms: linux/amd64
+          target: test
           push: false

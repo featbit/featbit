@@ -33,4 +33,5 @@ jobs:
           context: "{{defaultContext}}:modules/back-end"
           file: ./deploy/Dockerfile
           platforms: linux/amd64
+          target: test
           push: false
