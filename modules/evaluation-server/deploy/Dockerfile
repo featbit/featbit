@@ -10,8 +10,8 @@ WORKDIR /source
 COPY *.sln .
 
 # copy Directory.Build.props and icon
-COPY src/Directory.Build.props .
-COPY src/icon.png .
+COPY src/Directory.Build.props src/Directory.Build.props
+COPY src/icon.png src/icon.png
 
 # copy src project files
 COPY src/*/*.csproj ./
