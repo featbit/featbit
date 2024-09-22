@@ -5,4 +5,10 @@
     <PropertyGroup Condition="'$(TargetArch)' == 'arm64'">
         <RuntimeIdentifier>linux-arm64</RuntimeIdentifier>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
 </Project>
