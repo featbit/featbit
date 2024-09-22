@@ -12,7 +12,7 @@ public class InMemoryFakeLogger<T> : ILogger<T>
     public Exception? Ex { get; private set; }
     public string? Message { get; private set; }
 
-    public IDisposable BeginScope<TState>(TState state)
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull
     {
         return NullScope.Instance;
     }
