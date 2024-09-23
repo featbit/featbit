@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>FeatBit.EvaluationServer.Streaming</AssemblyName>
         <PackageId>FeatBit.EvaluationServer.Streaming</PackageId>
-		<TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
