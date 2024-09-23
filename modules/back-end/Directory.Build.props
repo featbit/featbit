@@ -5,4 +5,9 @@
     <PropertyGroup Condition="'$(TargetArch)' == 'arm64'">
         <RuntimeIdentifier>linux-arm64</RuntimeIdentifier>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 </Project>
