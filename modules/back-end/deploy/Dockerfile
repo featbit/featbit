@@ -19,10 +19,12 @@ RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/
 
 RUN dotnet restore -a $TARGETARCH
 
+# copy everything else
+COPY . .
+
 # publish stage
 FROM build AS publish
 ARG INSTALL_DIR
-COPY . .
 WORKDIR /source/src/Api
 RUN dotnet publish -a $TARGETARCH --no-restore -o $INSTALL_DIR
 
