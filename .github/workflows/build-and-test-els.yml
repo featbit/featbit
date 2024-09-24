@@ -1,0 +1,37 @@
+name: Build and Test Evaluation-Server
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/evaluation-server/**'
+      - '.github/build-and-test-els.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'modules/evaluation-server/**'
+      - '.github/build-and-test-els.yml'
+
+jobs:
+  validate:
+    name: build-and-test-els
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore Packages
+        run: dotnet restore
+
+      - name: Build Solution
+        run: dotnet build -c Release --no-restore
+
+      - name: Run Tests
+        run: dotnet test -c Release --no-build --verbosity normal --logger GitHubActions
