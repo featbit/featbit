@@ -18,6 +18,9 @@ jobs:
   validate:
     name: build-and-test-els
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/evaluation-server
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,12 +32,9 @@ jobs:
 
       - name: Restore Packages
         run: dotnet restore
-        working-directory: modules/evaluation-server
 
       - name: Build Solution
         run: dotnet build -c Release --no-restore
-        working-directory: modules/evaluation-server
 
       - name: Run Tests
-        run: dotnet test -c Release --no-build --verbosity normal --logger GitHubActions
-        working-directory: modules/evaluation-server
+        run: dotnet test -c Release --no-build --verbosity normal
