@@ -19,15 +19,12 @@ RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/
 
 RUN dotnet restore -a $TARGETARCH
 
-# copy all source, build and test
-COPY . .
-RUN dotnet build -p:TargetArch=$TARGETARCH -c Release --no-restore && dotnet test
-
 # publish stage
 FROM build AS publish
 ARG INSTALL_DIR
+COPY . .
 WORKDIR /source/src/Api
-RUN dotnet publish -a $TARGETARCH --no-build -o $INSTALL_DIR
+RUN dotnet publish -a $TARGETARCH --no-restore -o $INSTALL_DIR
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
