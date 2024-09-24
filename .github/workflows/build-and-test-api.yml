@@ -29,9 +29,12 @@ jobs:
 
       - name: Restore Packages
         run: dotnet restore
+        working-directory: modules/back-end
 
       - name: Build Solution
         run: dotnet build -c Release --no-restore
+        working-directory: modules/back-end
 
       - name: Run Tests
         run: dotnet test -c Release --no-build --verbosity normal --logger GitHubActions
+        working-directory: modules/back-end
