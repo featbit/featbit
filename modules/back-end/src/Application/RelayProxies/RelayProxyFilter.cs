@@ -4,5 +4,5 @@ namespace Application.RelayProxies;
 
 public class RelayProxyFilter : PagedRequest
 {
-    public string Name { get; set; }
+    public string? Name { get; set; }
 }

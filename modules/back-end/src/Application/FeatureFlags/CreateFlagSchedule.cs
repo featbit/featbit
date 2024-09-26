@@ -17,7 +17,7 @@ public class CreateFlagSchedule : IRequest<bool>
 
     public Guid EnvId { get; set; }
 
-    public string Key { get; set; }
+    public string? Key { get; set; }
 
     public FlagTargeting Targeting { get; set; }
 
@@ -27,9 +27,9 @@ public class CreateFlagSchedule : IRequest<bool>
 
     public bool WithChangeRequest { get; set; }
 
-    public string Reason { get; set; }
+    public string? Reason { get; set; }
 
-    public ICollection<Guid> Reviewers { get; set; }
+    public ICollection<Guid>? Reviewers { get; set; }
 }
 
 public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, bool>

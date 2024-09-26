@@ -2,8 +2,8 @@
 
 public class StatsByVariationFilter
 {
-    public string FeatureFlagKey { get; set; }
-    public string IntervalType { get; set; }
+    public string? FeatureFlagKey { get; set; }
+    public string? IntervalType { get; set; }
     public long From { get; set; }
     public long To { get; set; }
 }

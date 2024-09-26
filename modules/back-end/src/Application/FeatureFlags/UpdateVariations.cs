@@ -9,7 +9,7 @@ public class UpdateVariations : IRequest<bool>
 {
     public Guid EnvId { get; set; }
 
-    public string Key { get; set; }
+    public string? Key { get; set; }
 
     public ICollection<Variation> Variations { get; set; }
 }

@@ -5,6 +5,6 @@ namespace Application.ExperimentMetrics;
 
 public class ExperimentMetricFilter : PagedRequest
 {
-    public string metricName { get; set; }
+    public string? metricName { get; set; }
     public EventType? EventType { get; set; }
 }

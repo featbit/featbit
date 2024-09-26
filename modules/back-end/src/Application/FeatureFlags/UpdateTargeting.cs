@@ -10,11 +10,11 @@ public class UpdateTargeting : IRequest<bool>
 
     public Guid EnvId { get; set; }
 
-    public string Key { get; set; }
+    public string? Key { get; set; }
 
     public FlagTargeting Targeting { get; set; }
 
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
 }
 
 public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>

@@ -2,7 +2,7 @@ namespace Domain.FeatureFlags;
 
 public class Fallthrough
 {
-    public string DispatchKey { get; set; }
+    public string? DispatchKey { get; set; }
 
     public bool IncludedInExpt { get; set; }
 

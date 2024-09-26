@@ -8,7 +8,7 @@ public class UpdateSetting : IRequest<bool>
 {
     public Guid EnvId { get; set; }
 
-    public string Key { get; set; }
+    public string? Key { get; set; }
 
     public string Name { get; set; }
 

@@ -4,7 +4,7 @@ namespace Application.Groups;
 
 public class GroupMemberFilter : PagedRequest
 {
-    public string SearchText { get; set; }
+    public string? SearchText { get; set; }
 
     public bool GetAllMembers { get; set; }
 }

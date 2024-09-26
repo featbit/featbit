@@ -4,5 +4,5 @@ namespace Application.Members;
 
 public class MemberFilter : PagedRequest
 {
-    public string SearchText { get; set; }
+    public string? SearchText { get; set; }
 }

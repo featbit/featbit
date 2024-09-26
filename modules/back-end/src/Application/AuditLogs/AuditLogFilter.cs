@@ -4,13 +4,13 @@ namespace Application.AuditLogs;
 
 public class AuditLogFilter : PagedRequest
 {
-    public string Query { get; set; }
+    public string? Query { get; set; }
 
     public Guid? CreatorId { get; set; }
 
-    public string RefId { get; set; }
+    public string? RefId { get; set; }
 
-    public string RefType { get; set; }
+    public string? RefType { get; set; }
 
     public long? From { get; set; }
 

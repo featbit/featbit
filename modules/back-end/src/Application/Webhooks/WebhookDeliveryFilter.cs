@@ -4,7 +4,7 @@ namespace Application.Webhooks;
 
 public class WebhookDeliveryFilter : PagedRequest
 {
-    public string Event { get; set; }
+    public string? Event { get; set; }
 
     public bool? Success { get; set; }
 

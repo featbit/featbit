@@ -4,5 +4,5 @@ namespace Application.Groups;
 
 public class GroupFilter : PagedRequest
 {
-    public string Name { get; set; }
+    public string? Name { get; set; }
 }

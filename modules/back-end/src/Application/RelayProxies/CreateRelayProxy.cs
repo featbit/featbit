@@ -9,7 +9,7 @@ public class CreateRelayProxy : IRequest<RelayProxy>
 
     public string Name { get; set; }
 
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
     public bool IsAllEnvs { get; set; }
 

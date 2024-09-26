@@ -7,7 +7,7 @@ public class FeatureFlagFilter : PagedRequest
     /// <summary>
     /// The name or part of the name of the feature flag
     /// </summary>
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     /// <summary>
     /// The list of tags, you must use the complete name of tags

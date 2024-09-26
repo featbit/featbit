@@ -11,7 +11,7 @@ public class UpsertEndUser : IRequest<EndUser>
 
     public string Name { get; set; }
 
-    public ICollection<EndUserCustomizedProperty> CustomizedProperties { get; set; }
+    public ICollection<EndUserCustomizedProperty>? CustomizedProperties { get; set; }
 
     public EndUser AsEndUser()
     {
