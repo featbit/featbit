@@ -289,6 +289,16 @@ class OnlineTTest(OnlineABTesting):
         return np.ceil(tt_ind_solve_power(effect_size=abs_effect_size, nobs1=None, alpha=self._settings.alpha, power=self._settings.power, ratio=ratio, alternative='two-sided'))
 
     def get_result(self) -> TTestResult:
+        if self._control.count < self._settings.min_sample_size or self._traitement.count < self._settings.min_sample_size:
+            return TTestResult(delta=None,
+                               ci=None,
+                               p_value=None,
+                               is_significant=False,
+                               is_baseline=self._is_baseline,
+                               is_winner=False,
+                               traitment_group=self._traitement,
+                               reason="quantity of control or traitement is too small")
+
         if self._control.variance == 0:
             return TTestResult(delta=None,
                                ci=None,
