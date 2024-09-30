@@ -15,7 +15,7 @@ public class TestLogger<TName> : ILogger<TName>, ITestLogger
 {
     public List<string> LogMessages { get; } = new();
 
-    public IDisposable BeginScope<TState>(TState state)
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull
     {
         LogMessages.Add(state?.ToString());
         return null;
