@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
     
     <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+
         <AssemblyName>FeatBit.EvaluationServer.Domain</AssemblyName>
         <PackageId>FeatBit.EvaluationServer.Domain</PackageId>
     </PropertyGroup>
