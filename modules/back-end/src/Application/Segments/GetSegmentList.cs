@@ -1,4 +1,5 @@
 using Application.Bases.Models;
+using Domain.Resources;
 
 namespace Application.Segments;
 
@@ -11,18 +12,24 @@ public class GetSegmentList : IRequest<PagedResult<SegmentVm>>
 
 public class GetSegmentListHandler : IRequestHandler<GetSegmentList, PagedResult<SegmentVm>>
 {
-    private readonly ISegmentService _service;
+    private readonly ISegmentService _segmentService;
+    private readonly IResourceServiceV2 _resourceService;
     private readonly IMapper _mapper;
 
-    public GetSegmentListHandler(ISegmentService service, IMapper mapper)
+    public GetSegmentListHandler(
+        ISegmentService segmentService,
+        IResourceServiceV2 resourceService,
+        IMapper mapper)
     {
-        _service = service;
+        _segmentService = segmentService;
         _mapper = mapper;
+        _resourceService = resourceService;
     }
 
     public async Task<PagedResult<SegmentVm>> Handle(GetSegmentList request, CancellationToken cancellationToken)
     {
-        var segments = await _service.GetListAsync(request.EnvId, request.Filter);
+        var rn = await _resourceService.GetRNAsync(request.EnvId, ResourceTypes.Env);
+        var segments = await _segmentService.GetListAsync(rn, request.Filter);
 
         return _mapper.Map<PagedResult<SegmentVm>>(segments);
     }

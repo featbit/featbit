@@ -6,7 +6,7 @@ namespace Application.Services;
 
 public interface ISegmentService : IService<Segment>
 {
-    Task<PagedResult<Segment>> GetListAsync(Guid envId, SegmentFilter filter);
+    Task<PagedResult<Segment>> GetListAsync(string rn, SegmentFilter filter);
 
     Task<IEnumerable<Segment>> GetListAsync(Guid[] ids);
 

@@ -13,14 +13,14 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
     {
     }
 
-    public async Task<PagedResult<Segment>> GetListAsync(Guid envId, SegmentFilter userFilter)
+    public async Task<PagedResult<Segment>> GetListAsync(string rn, SegmentFilter userFilter)
     {
         var filterBuilder = Builders<Segment>.Filter;
 
         var filters = new List<FilterDefinition<Segment>>
         {
-            // envId
-            filterBuilder.Eq(segment => segment.EnvId, envId),
+            // rn filter
+            filterBuilder.Where(x => x.Scopes.Any(y => rn.StartsWith(y)))
         };
 
         // name filter
