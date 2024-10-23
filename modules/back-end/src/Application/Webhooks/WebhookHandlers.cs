@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.Json;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
@@ -88,10 +89,13 @@ public class WebhookHandler : IWebhookHandler
 
         foreach (var webhook in activeWebhooks)
         {
-            var delivery = await _webhookSender.SendAsync(webhook, dataObject);
+            if (webhook.Scopes.Contains(flag.EnvId.ToString()))
+            {
+                var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
-            webhook.LastDelivery = new LastDelivery(delivery);
-            await _webhookService.UpdateAsync(webhook);
+                webhook.LastDelivery = new LastDelivery(delivery);
+                await _webhookService.UpdateAsync(webhook);
+            }
         }
     }
 
@@ -148,10 +152,13 @@ public class WebhookHandler : IWebhookHandler
 
         foreach (var webhook in activeWebhooks)
         {
-            var delivery = await _webhookSender.SendAsync(webhook, dataObject);
+            if (webhook.Scopes.Contains(segment.EnvId.ToString()))
+            {
+                var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
-            webhook.LastDelivery = new LastDelivery(delivery);
-            await _webhookService.UpdateAsync(webhook);
+                webhook.LastDelivery = new LastDelivery(delivery);
+                await _webhookService.UpdateAsync(webhook);
+            }
         }
     }
 }
