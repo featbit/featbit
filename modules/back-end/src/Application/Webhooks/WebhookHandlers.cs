@@ -37,6 +37,16 @@ public class WebhookHandler : IWebhookHandler
         _segmentService = segmentService;
     }
 
+    private static string RemoveProjectPrefix(string input)
+    {
+        int index = input.IndexOf('/');
+        if (index >= 0)
+        {
+            return input.Substring(index + 1);
+        }
+        return input; // Return the original string if '/' is not found
+    }
+
     public async Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId)
     {
         string[] events;
@@ -89,7 +99,8 @@ public class WebhookHandler : IWebhookHandler
 
         foreach (var webhook in activeWebhooks)
         {
-            if (webhook.Scopes.Contains(flag.EnvId.ToString()))
+            var scopes = RemoveProjectPrefix(webhook.Scopes[0]).Split(',');
+            if (scopes.Contains(resourceDescriptor.Environment.Id.ToString()))
             {
                 var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
@@ -152,7 +163,8 @@ public class WebhookHandler : IWebhookHandler
 
         foreach (var webhook in activeWebhooks)
         {
-            if (webhook.Scopes.Contains(segment.EnvId.ToString()))
+            var scopes = RemoveProjectPrefix(webhook.Scopes[0]).Split(',');
+            if (scopes.Contains(resourceDescriptor.Environment.Id.ToString()))
             {
                 var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
