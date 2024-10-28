@@ -37,16 +37,6 @@ public class WebhookHandler : IWebhookHandler
         _segmentService = segmentService;
     }
 
-    private static string RemoveProjectPrefix(string input)
-    {
-        int index = input.IndexOf('/');
-        if (index >= 0)
-        {
-            return input.Substring(index + 1);
-        }
-        return input; // Return the original string if '/' is not found
-    }
-
     public async Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId)
     {
         string[] events;
@@ -83,7 +73,9 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var activeWebhooks = webhooks.Where(x => x.IsActive).ToArray();
+        var environmentScopeStr = $"{resourceDescriptor.Project.Id}.{resourceDescriptor.Project.Name}";
+        var activeWebhooks = webhooks.Where(x => x.IsActive && x.Scopes.Any(y => string.Equals(y,
+            environmentScopeStr, StringComparison.OrdinalIgnoreCase))).ToArray();
         if (!activeWebhooks.Any())
         {
             return;
@@ -99,14 +91,10 @@ public class WebhookHandler : IWebhookHandler
 
         foreach (var webhook in activeWebhooks)
         {
-            var scopes = RemoveProjectPrefix(webhook.Scopes[0]).Split(',');
-            if (scopes.Contains(resourceDescriptor.Environment.Id.ToString()))
-            {
-                var delivery = await _webhookSender.SendAsync(webhook, dataObject);
+            var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
-                webhook.LastDelivery = new LastDelivery(delivery);
-                await _webhookService.UpdateAsync(webhook);
-            }
+            webhook.LastDelivery = new LastDelivery(delivery);
+            await _webhookService.UpdateAsync(webhook);
         }
     }
 
@@ -146,7 +134,11 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var activeWebhooks = webhooks.Where(x => x.IsActive).ToArray();
+        var environmentScopeStr = $"{resourceDescriptor.Project.Id}/{resourceDescriptor.Environment.Id}";
+        var activeWebhooks = webhooks.Where(x =>
+                x.IsActive && x.Scopes.Any(y =>
+                    string.Equals(y, environmentScopeStr, StringComparison.OrdinalIgnoreCase)))
+            .ToArray();
         if (!activeWebhooks.Any())
         {
             return;
@@ -163,14 +155,10 @@ public class WebhookHandler : IWebhookHandler
 
         foreach (var webhook in activeWebhooks)
         {
-            var scopes = RemoveProjectPrefix(webhook.Scopes[0]).Split(',');
-            if (scopes.Contains(resourceDescriptor.Environment.Id.ToString()))
-            {
-                var delivery = await _webhookSender.SendAsync(webhook, dataObject);
+            var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
-                webhook.LastDelivery = new LastDelivery(delivery);
-                await _webhookService.UpdateAsync(webhook);
-            }
+            webhook.LastDelivery = new LastDelivery(delivery);
+            await _webhookService.UpdateAsync(webhook);
         }
     }
 }
