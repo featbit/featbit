@@ -113,9 +113,7 @@ export class HeaderComponent implements OnInit {
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
 
-    if (this.router.url.indexOf("/feature-flags") > -1) {
-      await this.router.navigateByUrl("/feature-flags");
-    }
+    await this.router.navigateByUrl("/");
 
     setTimeout(() => window.location.reload(), 200);
   }
