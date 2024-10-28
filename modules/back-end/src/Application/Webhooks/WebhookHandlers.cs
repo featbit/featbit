@@ -72,7 +72,7 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var environmentScopeStr = $"{resourceDescriptor.Project.Id}.{resourceDescriptor.Project.Name}";
+        var environmentScopeStr = $"{resourceDescriptor.Project.Id}/{resourceDescriptor.Environment.Id}";
         var activeWebhooks = webhooks.Where(x => x.IsActive && x.Scopes.Any(y => string.Equals(y,
             environmentScopeStr, StringComparison.OrdinalIgnoreCase))).ToArray();
         if (!activeWebhooks.Any())
