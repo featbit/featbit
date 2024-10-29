@@ -36,6 +36,24 @@ public class WebhookHandler : IWebhookHandler
         _segmentService = segmentService;
     }
 
+    private bool MatchScope(Guid projectId, Guid envId, string scopeString)
+    {
+        var parts = scopeString.Split("/");
+        if (parts.Length != 2)
+        {
+            return false;
+        }
+
+        var proId = parts[0];
+        if (!string.Equals(projectId.ToString(), proId, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var envIds = parts[1].Split(",");
+        return envIds.Any(id => string.Equals(envId.ToString(), id, StringComparison.OrdinalIgnoreCase));
+    }
+
     public async Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId)
     {
         string[] events;
@@ -72,9 +90,9 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var environmentScopeStr = $"{resourceDescriptor.Project.Id}/{resourceDescriptor.Environment.Id}";
-        var activeWebhooks = webhooks.Where(x => x.IsActive && x.Scopes.Any(y => string.Equals(y,
-            environmentScopeStr, StringComparison.OrdinalIgnoreCase))).ToArray();
+        var activeWebhooks = webhooks.Where(x =>
+            x.IsActive && x.Scopes.Any(y =>
+                MatchScope(resourceDescriptor.Project.Id, resourceDescriptor.Environment.Id, y))).ToArray();
         if (!activeWebhooks.Any())
         {
             return;
@@ -133,11 +151,9 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var environmentScopeStr = $"{resourceDescriptor.Project.Id}/{resourceDescriptor.Environment.Id}";
         var activeWebhooks = webhooks.Where(x =>
-                x.IsActive && x.Scopes.Any(y =>
-                    string.Equals(y, environmentScopeStr, StringComparison.OrdinalIgnoreCase)))
-            .ToArray();
+            x.IsActive && x.Scopes.Any(y =>
+                MatchScope(resourceDescriptor.Project.Id, resourceDescriptor.Environment.Id, y))).ToArray();
         if (!activeWebhooks.Any())
         {
             return;
