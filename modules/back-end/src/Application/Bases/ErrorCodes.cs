@@ -26,15 +26,11 @@ public static class ErrorCodes
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
 
-    // resource
-    public const string TypeIsRequired = nameof(TypeIsRequired);
-
     // end user
     public const string KeyIdIsRequired = nameof(KeyIdIsRequired);
     public const string CannotModifyBuiltInProperty = nameof(CannotModifyBuiltInProperty);
 
     // segment
-    public const string SegmentCannotReferenceSegmentCondition = nameof(SegmentCannotReferenceSegmentCondition);
     public const string CannotDeleteUnArchivedSegment = nameof(CannotDeleteUnArchivedSegment);
 
     // feature flag

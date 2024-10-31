@@ -6,7 +6,8 @@ import {
   SegmentListFilter,
   ISegmentListModel,
   ISegment,
-  ISegmentFlagReference
+  ISegmentFlagReference,
+  CreateSegment
 } from "@features/safe/segments/types/segments-index";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
@@ -68,16 +69,8 @@ export class SegmentService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  // 快速创建新的开关
-  public create(name: string, description: string) {
-    const body = {
-      name,
-      description,
-      included: [],
-      excluded: []
-    };
-
-    return this.http.post(this.baseUrl, body);
+  public create(payload: CreateSegment): Observable<ISegment> {
+    return this.http.post<ISegment>(this.baseUrl, payload);
   }
 
   delete(id: string): Observable<boolean> {
