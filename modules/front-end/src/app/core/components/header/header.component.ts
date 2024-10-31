@@ -113,9 +113,8 @@ export class HeaderComponent implements OnInit {
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
 
-    await this.router.navigateByUrl("/");
-
-    setTimeout(() => window.location.reload(), 200);
+    const url = this.router.url.split('/').slice(0, 2).join('/');
+    this.router.navigateByUrl(url).then(() => window.location.reload());
   }
 
   private setCurrentEnv() {
