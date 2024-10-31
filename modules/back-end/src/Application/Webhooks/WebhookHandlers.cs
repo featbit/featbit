@@ -36,24 +36,6 @@ public class WebhookHandler : IWebhookHandler
         _segmentService = segmentService;
     }
 
-    private bool MatchScope(Guid projectId, Guid envId, string scopeString)
-    {
-        var parts = scopeString.Split("/");
-        if (parts.Length != 2)
-        {
-            return false;
-        }
-
-        var proId = parts[0];
-        if (!string.Equals(projectId.ToString(), proId, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var envIds = parts[1].Split(",");
-        return envIds.Any(id => string.Equals(envId.ToString(), id, StringComparison.OrdinalIgnoreCase));
-    }
-
     public async Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId)
     {
         string[] events;
@@ -90,10 +72,11 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var activeWebhooks = webhooks.Where(x =>
-            x.IsActive && x.Scopes.Any(y =>
-                MatchScope(resourceDescriptor.Project.Id, resourceDescriptor.Environment.Id, y))).ToArray();
-        if (!activeWebhooks.Any())
+        var availableWebhooks = webhooks.Where(x =>
+            x.IsActive &&
+            x.Scopes.Any(scope => resourceDescriptor.MatchScope(scope))
+        ).ToArray();
+        if (availableWebhooks.Length == 0)
         {
             return;
         }
@@ -106,7 +89,7 @@ public class WebhookHandler : IWebhookHandler
             .AddFeatureFlag(flag)
             .AddChanges(changes);
 
-        foreach (var webhook in activeWebhooks)
+        foreach (var webhook in availableWebhooks)
         {
             var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
@@ -151,10 +134,11 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var activeWebhooks = webhooks.Where(x =>
-            x.IsActive && x.Scopes.Any(y =>
-                MatchScope(resourceDescriptor.Project.Id, resourceDescriptor.Environment.Id, y))).ToArray();
-        if (!activeWebhooks.Any())
+        var availableWebhooks = webhooks.Where(x =>
+            x.IsActive &&
+            x.Scopes.Any(scope => resourceDescriptor.MatchScope(scope))
+        ).ToArray();
+        if (availableWebhooks.Length == 0)
         {
             return;
         }
@@ -168,7 +152,7 @@ public class WebhookHandler : IWebhookHandler
             .AddSegment(segment, flagReferences)
             .AddChanges(changes);
 
-        foreach (var webhook in activeWebhooks)
+        foreach (var webhook in availableWebhooks)
         {
             var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
