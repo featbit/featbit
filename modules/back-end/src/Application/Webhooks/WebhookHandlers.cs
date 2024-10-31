@@ -72,8 +72,11 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var activeWebhooks = webhooks.Where(x => x.IsActive).ToArray();
-        if (!activeWebhooks.Any())
+        var availableWebhooks = webhooks.Where(x =>
+            x.IsActive &&
+            x.Scopes.Any(scope => resourceDescriptor.MatchScope(scope))
+        ).ToArray();
+        if (availableWebhooks.Length == 0)
         {
             return;
         }
@@ -86,7 +89,7 @@ public class WebhookHandler : IWebhookHandler
             .AddFeatureFlag(flag)
             .AddChanges(changes);
 
-        foreach (var webhook in activeWebhooks)
+        foreach (var webhook in availableWebhooks)
         {
             var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 
@@ -131,8 +134,11 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var activeWebhooks = webhooks.Where(x => x.IsActive).ToArray();
-        if (!activeWebhooks.Any())
+        var availableWebhooks = webhooks.Where(x =>
+            x.IsActive &&
+            x.Scopes.Any(scope => resourceDescriptor.MatchScope(scope))
+        ).ToArray();
+        if (availableWebhooks.Length == 0)
         {
             return;
         }
@@ -146,7 +152,7 @@ public class WebhookHandler : IWebhookHandler
             .AddSegment(segment, flagReferences)
             .AddChanges(changes);
 
-        foreach (var webhook in activeWebhooks)
+        foreach (var webhook in availableWebhooks)
         {
             var delivery = await _webhookSender.SendAsync(webhook, dataObject);
 

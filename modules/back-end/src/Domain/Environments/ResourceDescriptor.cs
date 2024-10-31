@@ -1,3 +1,5 @@
+using Domain.Organizations;
+
 namespace Domain.Environments;
 
 public record ResourceDescriptor
@@ -7,6 +9,14 @@ public record ResourceDescriptor
     public IdNameKeyProps Project { get; init; }
 
     public IdNameKeyProps Environment { get; set; }
+
+    public bool MatchScope(string scope)
+    {
+        var scopeString = new ScopeString(scope);
+
+        return scopeString.ProjectId == Project.Id &&
+               scopeString.EnvIds.Any(id => Environment.Id == id);
+    }
 }
 
 public record IdNameKeyProps
