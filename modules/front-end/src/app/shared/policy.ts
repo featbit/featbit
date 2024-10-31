@@ -347,6 +347,18 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isSpecificApplicable: false
   },
 
+  // project
+  ManageProject: {
+    id: uuidv4(),
+    name: 'ManageProject',
+    resourceType: ResourceTypeEnum.Project,
+    displayName: $localize`:@@iam.action.manage-project:Manage project`,
+    description: $localize`:@@iam.action.manage-project:Manage project`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: false
+  },
+
+
   // org
   UpdateOrgName: {
     id: uuidv4(),
