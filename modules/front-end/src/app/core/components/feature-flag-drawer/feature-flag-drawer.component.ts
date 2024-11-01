@@ -207,15 +207,11 @@ export class FeatureFlagDrawerComponent implements OnInit {
       this.addVariation(variation.name, variation.value, valueDisabled);
     });
 
-    this.setDefaultRuleVariations();
-  }
-
-  private setDefaultRuleVariations() {
-    const firstVariationId = this.variations.at(0).value['id'];
-    const secondVariationId = this.variations.at(1).value['id'];
-
-    this.defaultRuleForm.get('enabledVariationId').setValue(firstVariationId);
-    this.defaultRuleForm.get('disabledVariationId').setValue(secondVariationId);
+    // set default rule variations
+    this.defaultRuleForm.patchValue({
+      enabledVariationId: this.variations.at(0).value['id'],
+      disabledVariationId: this.variations.at(1).value['id']
+    });
   }
 
   private enableVariations() {
