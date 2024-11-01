@@ -132,7 +132,7 @@ export const instructionCategories: ICategoryInstruction[] = [
   },
   {
     category: CategoryEnum.DefaultRule,
-    label: $localize`:@@common.default-rule:Default rule`,
+    label: $localize`:@@common.default-rule:Default Rule`,
     instructions: [
       { component: UpdateRuleVariationOrRolloutComponent, kind: InstructionKindEnum.UpdateDefaultRuleVariationOrRollouts },
       { component: UpdateDefaultRuleDispatchKeyComponent, kind: InstructionKindEnum.UpdateDefaultRuleDispatchKey },

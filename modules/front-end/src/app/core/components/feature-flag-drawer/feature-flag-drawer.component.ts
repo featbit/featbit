@@ -72,10 +72,10 @@ export class FeatureFlagDrawerComponent implements OnInit {
     });
 
     this.variationForm.get('variationType').valueChanges.subscribe((event)=>{
-      this.setVariations(event);
+      this.onVariationTypeChanged(event);
     })
 
-    this.setVariations('boolean');
+    this.onVariationTypeChanged('boolean');
   }
 
   flagKeyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -154,51 +154,63 @@ export class FeatureFlagDrawerComponent implements OnInit {
     return this.variationForm.get('variationType')!.value;
   }
 
-  onInputVariationName(variation: FormGroup) {
-    const nameLc = variation.value.name.toLowerCase().replace(/[-\s]+/g, '')
-    const nameSlug = slugify(variation.value.name);
-    const nameOnlyNumbers = variation.value.name.replace(/\D+/g, '');
-    const valueSlug = slugify(variation.value.value)
-    const valueLc = variation.value.value.toLowerCase().replace(/-/g, '')
-
-    if (this.variationType === 'string' &&
-      (valueLc === ''
-        || nameLc.slice(0, -1) === valueLc
-        || nameLc === valueLc.slice(0, -1)
-      )
-    ) {
-      variation.patchValue({ value: nameSlug });
-    }
-    else if (this.variationType === 'number' &&
-      (valueSlug === ''
-        || +nameOnlyNumbers.slice(0, -1) === +valueSlug
-        || +nameOnlyNumbers === +valueSlug.slice(0, -1))
-    ) {
-      variation.patchValue({ value: nameOnlyNumbers });
-    }
+  private defaultVariationPairs = {
+    "boolean": [
+      {
+        name: 'True',
+        value: 'true',
+        valueDisabled: true
+      },
+      {
+        name: 'False',
+        value: 'false',
+        valueDisabled: true
+      }
+    ],
+    "string": [
+      {
+        name: 'Variation A',
+        value: 'variation-a'
+      },
+      {
+        name: 'Variation B',
+        value: 'variation-b'
+      }
+    ],
+    "number": [
+      {
+        name: 'Variation 1',
+        value: '1'
+      },
+      {
+        name: 'Variation 2',
+        value: '2'
+      }
+    ],
+    "json": [
+      {
+        name: 'Variation A',
+        value: '{}'
+      },
+      {
+        name: 'Variation B',
+        value: '{}'
+      }
+    ]
   }
 
-  setVariations(variationType: string) {
-    if (variationType === 'boolean') {
-      this.variations.clear();
-      this.addVariation('True', 'true', true);
-      this.addVariation('False', 'false', true);
-    }
-    else if (['string', 'number', 'json'].includes(variationType)) {
-      this.variations.clear();
-      const valueA = variationType === 'string' ? 'variation-a' : variationType === 'number' ? '1' : '{}';
-      const valueB = variationType === 'string' ? 'variation-b' : variationType === 'number' ? '2' : '{}';
-      this.addVariation(`Variation ${ variationType === 'number' ? `1` : `A` }`, valueA);
-      this.addVariation(`Variation ${ variationType === 'number' ? `2` : `B` }`, valueB);
+  onVariationTypeChanged(variationType: string) {
+    this.variations.clear();
 
-      // enable value inputs
-      this.enableVariations();
-    }
+    this.defaultVariationPairs[variationType].forEach((variation) => {
+      const valueDisabled = variation.valueDisabled ?? false;
+      this.addVariation(variation.name, variation.value, valueDisabled);
+    });
 
-    this.setDefaultVariations();
+    this.setDefaultRuleVariations();
   }
 
-  private setDefaultVariations() {
+  private setDefaultRuleVariations() {
     const firstVariationId = this.variations.at(0).value['id'];
     const secondVariationId = this.variations.at(1).value['id'];
 
@@ -333,7 +345,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
 
     this.creating = true;
 
-    // enable value inputs, so we can get the variaton values for boolean variation type
+    // enable value inputs, so we can get the variation values for boolean variation type
     this.enableVariations();
 
     const { name, key, description } = this.basicForm.value;

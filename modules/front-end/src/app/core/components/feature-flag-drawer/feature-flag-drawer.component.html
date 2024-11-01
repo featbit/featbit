@@ -109,8 +109,7 @@
           <nz-form-item>
             <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
             <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
-              <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"
-                     (input)="onInputVariationName(variation)" />
+              <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name" />
             </nz-form-control>
           </nz-form-item>
           <nz-form-item>
@@ -141,7 +140,7 @@
 
     <nz-divider [nzText]="defaultRules">
       <ng-template #defaultRules>
-        <label i18n="@@common.default-rule">Default rule</label>
+        <label i18n="@@common.default-rule">Default Rule</label>
         <i [nz-tooltip]="defaultRuleTooltip" nz-icon nzType="icons:icon-info-outline">
           <ng-template #defaultRuleTooltip>
             <ng-container i18n="@@common.default-serve-tooltip">Define which variation users will see by default when the flag is Enabled or Disabled</ng-container>
