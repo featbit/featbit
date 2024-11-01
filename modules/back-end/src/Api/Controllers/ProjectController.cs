@@ -5,10 +5,10 @@ using Domain.Projects;
 
 namespace Api.Controllers;
 
-[Authorize(Permissions.ManageProject)]
 [Route("api/v{version:apiVersion}/projects")]
 public class ProjectController : ApiControllerBase
 {
+    [Authorize(Permissions.ReadProject)]
     [OpenApi]
     [HttpGet]
     [Route("{projectId:guid}")]
@@ -23,6 +23,7 @@ public class ProjectController : ApiControllerBase
         return Ok(project);
     }
 
+    [Authorize(Permissions.ListProjects)]
     [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync()

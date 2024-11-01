@@ -225,13 +225,22 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: false
   },
-  CanAccessProject: {
+  ListProjects: {
     id: uuidv4(),
-    name: 'CanAccessProject',
+    name: 'ListProjects',
     resourceType: ResourceTypeEnum.Project,
-    displayName: $localize`:@@iam.action.can-access-project:Can access project`,
-    description: $localize`:@@iam.action.can-access-project:Can access project`,
-    isOpenAPIApplicable: false,
+    displayName: $localize`:@@iam.action.list-projects:List projects`,
+    description: $localize`:@@iam.action.list-projects:List projects`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: false
+  },
+  ReadProject: {
+    id: uuidv4(),
+    name: 'ReadProject',
+    resourceType: ResourceTypeEnum.Project,
+    displayName: $localize`:@@iam.action.read-project:Read project`,
+    description: $localize`:@@iam.action.read-project:Read project`,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true
   },
   CreateProject: {
@@ -346,18 +355,6 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: true,
     isSpecificApplicable: false
   },
-
-  // project
-  ManageProject: {
-    id: uuidv4(),
-    name: 'ManageProject',
-    resourceType: ResourceTypeEnum.Project,
-    displayName: $localize`:@@iam.action.manage-project:Manage project`,
-    description: $localize`:@@iam.action.manage-project:Manage project`,
-    isOpenAPIApplicable: true,
-    isSpecificApplicable: false
-  },
-
 
   // org
   UpdateOrgName: {
