@@ -370,5 +370,4 @@ export class FeatureFlagDrawerComponent implements OnInit {
   public navigateToFlagDetail(key: string) {
     this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`).then();
   }
-
 }
