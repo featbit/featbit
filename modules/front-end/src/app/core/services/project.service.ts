@@ -7,7 +7,7 @@ import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
 import { catchError } from "rxjs/operators";
 import { PermissionsService } from "@services/permissions.service";
-import {permissionActions, ResourceTypeEnum} from "@shared/policy";
+import { permissionActions } from "@shared/policy";
 
 @Injectable({
   providedIn: 'root'
@@ -22,17 +22,11 @@ export class ProjectService {
   ) { }
 
   async getListAsync(): Promise<IProject[]> {
-    const generalProjectsRn = `${ResourceTypeEnum.Project}/*`;
-    const canListProjects = this.permissionsService.isGranted(generalProjectsRn, permissionActions.ListProjects);
-    if (!canListProjects) {
-      return []
-    }
-
     const projects = await firstValueFrom(this.http.get<IProject[]>(this.baseUrl));
 
     return projects.filter((project) => {
       const rn = this.permissionsService.getProjectRN(project);
-      return this.permissionsService.isGranted(rn, permissionActions.ReadProject)
+      return this.permissionsService.isGranted(rn, permissionActions.CanAccessProject)
     }).map((project) => {
       project.environments = project.environments.filter((env) => {
         const envRN = this.permissionsService.getEnvRN(project, env);

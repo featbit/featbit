@@ -225,21 +225,12 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: false
   },
-  ListProjects: {
+  CanAccessProject: {
     id: uuidv4(),
-    name: 'ListProjects',
+    name: 'CanAccessProject',
     resourceType: ResourceTypeEnum.Project,
-    displayName: $localize`:@@iam.action.list-projects:List projects`,
-    description: $localize`:@@iam.action.list-projects:List projects`,
-    isOpenAPIApplicable: true,
-    isSpecificApplicable: false
-  },
-  ReadProject: {
-    id: uuidv4(),
-    name: 'ReadProject',
-    resourceType: ResourceTypeEnum.Project,
-    displayName: $localize`:@@iam.action.read-project:Read project`,
-    description: $localize`:@@iam.action.read-project:Read project`,
+    displayName: $localize`:@@iam.action.can-access-project:Can access project`,
+    description: $localize`:@@iam.action.can-access-project:Can access project`,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true
   },

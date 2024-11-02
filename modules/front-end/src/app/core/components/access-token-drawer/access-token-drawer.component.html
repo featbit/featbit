@@ -40,39 +40,38 @@
     </form>
     <!-- Permissions -->
     <div *ngIf="isServiceAccessToken" class="permissions">
-      <nz-form-label nzRequired i18n="@@common.permissions">Permissions</nz-form-label>
-      <div class="">
-        <nz-collapse nzExpandIconPosition="right">
-          <nz-collapse-panel class="resource-type"
-                             *ngFor="let rt of authorizedResourceTypes; let first=first;"
-                             [nzHeader]="rt.displayName"
-                             [nzActive]="first"
-          >
-            <div class="permissions">
-              <label *ngIf="!isEditing"
-                nz-checkbox
-                [(ngModel)]="permissions[rt.type].allChecked"
-                (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
-                [nzIndeterminate]="permissions[rt.type].indeterminate"
-                i18n="@@common.all"
-              >All</label>
-              <div *ngFor="let permission of permissions[rt.type].statements" class="permission">
-                <div class="permission-header">
-                  <label *ngIf="isEditing">{{permission.action.displayName}} ({{permission.action.name}})</label>
-                  <label *ngIf="!isEditing" nz-checkbox [(ngModel)]="permission.checked" (ngModelChange)="updatePermissionSingleChecked(permissions[rt.type])">{{permission.action.displayName}} ({{permission.action.name}})</label>
-                  <i nz-icon [nz-tooltip]="permission.action.description" nzType="icons:icon-info-outline"></i>
-                </div>
+      <nz-form-label nzNoColon nzRequired i18n="@@common.permissions">Permissions</nz-form-label>
+      <nz-collapse nzExpandIconPosition="right">
+        <nz-collapse-panel
+          class="resource-type"
+          *ngFor="let rt of authorizedResourceTypes; let first=first;"
+          [nzHeader]="rt.displayName"
+          [nzActive]="first"
+        >
+          <div class="permissions">
+            <label *ngIf="!isEditing"
+                   nz-checkbox
+                   [(ngModel)]="permissions[rt.type].allChecked"
+                   (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
+                   [nzIndeterminate]="permissions[rt.type].indeterminate"
+                   i18n="@@common.all"
+            >All</label>
+            <div *ngFor="let permission of permissions[rt.type].statements" class="permission">
+              <div class="permission-header">
+                <label *ngIf="isEditing">{{permission.action.displayName}} ({{permission.action.name}})</label>
+                <label *ngIf="!isEditing" nz-checkbox [(ngModel)]="permission.checked" (ngModelChange)="updatePermissionSingleChecked(permissions[rt.type])">{{permission.action.displayName}} ({{permission.action.name}})</label>
+                <i nz-icon [nz-tooltip]="permission.action.description" nzType="icons:icon-info-outline"></i>
+              </div>
 
-                <div class="permission-resources">
-                  <div *ngFor="let resource of permission['resources']" class="permission-resource">
-                    {{resource}}
-                  </div>
+              <div class="permission-resources">
+                <div *ngFor="let resource of permission['resources']" class="permission-resource">
+                  {{resource}}
                 </div>
               </div>
             </div>
-          </nz-collapse-panel>
-        </nz-collapse>
-      </div>
+          </div>
+        </nz-collapse-panel>
+      </nz-collapse>
     </div>
     <button *ngIf="!readonly" (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
   </ng-container>
