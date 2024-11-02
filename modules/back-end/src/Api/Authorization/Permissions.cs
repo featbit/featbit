@@ -6,11 +6,13 @@ public static class Permissions
 {
     public const string ManageFeatureFlag = nameof(ManageFeatureFlag);
     public const string ManageSegment = nameof(ManageSegment);
+    public const string CanAccessProject = nameof(CanAccessProject);
 
     public static readonly Dictionary<string, string> ResourceMap = new(StringComparer.OrdinalIgnoreCase)
     {
         { ManageFeatureFlag, ResourceTypes.FeatureFlag },
-        { ManageSegment, ResourceTypes.Segment }
+        { ManageSegment, ResourceTypes.Segment },
+        { CanAccessProject, ResourceTypes.Project }
     };
 
     public static readonly string[] All = ResourceMap.Keys.ToArray();

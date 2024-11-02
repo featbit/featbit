@@ -231,7 +231,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Project,
     displayName: $localize`:@@iam.action.can-access-project:Can access project`,
     description: $localize`:@@iam.action.can-access-project:Can access project`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true
   },
   CreateProject: {
