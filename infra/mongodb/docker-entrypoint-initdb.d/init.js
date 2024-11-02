@@ -154,6 +154,7 @@ db.Policies.insertOne(
                 resourceType: "project",
                 effect: "allow",
                 actions: [
+                    "ListProjects",
                     "CanAccessProject",
                     "CreateProject",
                     "DeleteProject",
@@ -214,6 +215,7 @@ db.Policies.insertOne(
                 resourceType: "project",
                 effect: "allow",
                 actions: [
+                    "ListProjects",
                     "CanAccessProject"
                 ],
                 resources: ["project/*"]

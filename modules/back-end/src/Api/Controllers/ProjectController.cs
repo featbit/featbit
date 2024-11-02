@@ -1,3 +1,5 @@
+using Api.Authentication;
+using Api.Authorization;
 using Application.Projects;
 using Domain.Projects;
 
@@ -6,6 +8,8 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/projects")]
 public class ProjectController : ApiControllerBase
 {
+    [Authorize(Permissions.ReadProject)]
+    [OpenApi]
     [HttpGet]
     [Route("{projectId:guid}")]
     public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(Guid projectId)
@@ -19,6 +23,8 @@ public class ProjectController : ApiControllerBase
         return Ok(project);
     }
 
+    [Authorize(Permissions.ListProjects)]
+    [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync()
     {

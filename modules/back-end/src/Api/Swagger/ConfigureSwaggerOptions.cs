@@ -53,6 +53,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 
         // open api doc
         options.SwaggerDoc(OpenApiConstants.ApiGroupName, CreateOpenApiInfo("FeatBit Open Api", "1.0"));
+        options.OperationFilter<OrganizationHeaderParameter>();
 
         OpenApiInfo CreateOpenApiInfo(string title, string version, bool isDeprecated = false)
         {
