@@ -387,7 +387,7 @@
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">76</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
@@ -482,21 +482,21 @@
         <source>Access token created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">86</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.access-token.copy-token-warning" datatype="html">
         <source>Copy and save this token now, the token value will be masked once you leave the page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">95</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.ok" datatype="html">
         <source>OK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">110</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -9429,8 +9429,8 @@
           <context context-type="linenumber">224</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.list-projects" datatype="html">
-        <source>List projects</source>
+      <trans-unit id="iam.action.can-access-project" datatype="html">
+        <source>Can access project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">232</context>
@@ -9440,8 +9440,8 @@
           <context context-type="linenumber">233</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.read-project" datatype="html">
-        <source>Read project</source>
+      <trans-unit id="iam.action.create-projects" datatype="html">
+        <source>Create projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">241</context>
@@ -9451,8 +9451,8 @@
           <context context-type="linenumber">242</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.create-projects" datatype="html">
-        <source>Create projects</source>
+      <trans-unit id="iam.action.delete-projects" datatype="html">
+        <source>Delete projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">250</context>
@@ -9462,8 +9462,8 @@
           <context context-type="linenumber">251</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.delete-projects" datatype="html">
-        <source>Delete projects</source>
+      <trans-unit id="iam.action.update-project-settings" datatype="html">
+        <source>Update project settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">259</context>
@@ -9473,8 +9473,8 @@
           <context context-type="linenumber">260</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.update-project-settings" datatype="html">
-        <source>Update project settings</source>
+      <trans-unit id="iam.action.create-env" datatype="html">
+        <source>Create environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">268</context>
@@ -9484,8 +9484,8 @@
           <context context-type="linenumber">269</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.create-env" datatype="html">
-        <source>Create environment</source>
+      <trans-unit id="iam.action.can-access-env" datatype="html">
+        <source>Can access environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">277</context>
@@ -9495,8 +9495,8 @@
           <context context-type="linenumber">278</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.can-access-env" datatype="html">
-        <source>Can access environment</source>
+      <trans-unit id="iam.action.delete-envs" datatype="html">
+        <source>Delete environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">286</context>
@@ -9506,8 +9506,8 @@
           <context context-type="linenumber">287</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.delete-envs" datatype="html">
-        <source>Delete environments</source>
+      <trans-unit id="iam.action.update-env-settings" datatype="html">
+        <source>Update environment settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">295</context>
@@ -9517,8 +9517,8 @@
           <context context-type="linenumber">296</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.update-env-settings" datatype="html">
-        <source>Update environment settings</source>
+      <trans-unit id="iam.action.delete-env-secret" datatype="html">
+        <source>Delete environment secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">304</context>
@@ -9528,8 +9528,8 @@
           <context context-type="linenumber">305</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.delete-env-secret" datatype="html">
-        <source>Delete environment secret</source>
+      <trans-unit id="iam.action.create-env-secret" datatype="html">
+        <source>Create environment secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">313</context>
@@ -9539,8 +9539,8 @@
           <context context-type="linenumber">314</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.create-env-secret" datatype="html">
-        <source>Create environment secret</source>
+      <trans-unit id="iam.action.update-env-secret" datatype="html">
+        <source>Update environment secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">322</context>
@@ -9550,63 +9550,63 @@
           <context context-type="linenumber">323</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.update-env-secret" datatype="html">
-        <source>Update environment secret</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">331</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">332</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="iam.action.manage-feature-flag" datatype="html">
         <source>Manage feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">333</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">343</context>
+          <context context-type="linenumber">334</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.action.manage-segment" datatype="html">
         <source>Manage segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">353</context>
+          <context context-type="linenumber">344</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">354</context>
+          <context context-type="linenumber">345</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.action.update-org-name" datatype="html">
         <source>Update org name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">364</context>
+          <context context-type="linenumber">355</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">365</context>
+          <context context-type="linenumber">356</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.action.iam" datatype="html">
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">375</context>
+          <context context-type="linenumber">366</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">376</context>
+          <context context-type="linenumber">367</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.action.list-access-tokens" datatype="html">
         <source>List access tokens</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">377</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">378</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.manage-service-access-tokens" datatype="html">
+        <source>Manage service access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">386</context>
@@ -9616,8 +9616,8 @@
           <context context-type="linenumber">387</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.manage-service-access-tokens" datatype="html">
-        <source>Manage service access tokens</source>
+      <trans-unit id="iam.action.manage-personal-access-tokens" datatype="html">
+        <source>Manage personal access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">395</context>
@@ -9627,19 +9627,19 @@
           <context context-type="linenumber">396</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.manage-personal-access-tokens" datatype="html">
-        <source>Manage personal access tokens</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">404</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">405</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="iam.action.list-relay-proxies" datatype="html">
         <source>List relay proxies</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">406</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">407</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.action.manage-relay-proxies" datatype="html">
+        <source>Manage relay proxies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">415</context>
@@ -9647,17 +9647,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">416</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.action.manage-relay-proxies" datatype="html">
-        <source>Manage relay proxies</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">424</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">425</context>
         </context-group>
       </trans-unit>
     </body>
