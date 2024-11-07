@@ -113,8 +113,14 @@ export class HeaderComponent implements OnInit {
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
 
-    window.location.href = `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+    let path = this.router.url.split('/').slice(0, 2);
+    const match = window.location.pathname.match(/^\/(en|zh)\//);
 
+    if (match) {
+      path = [match[1], ...path].filter(x => x !== '');
+    }
+
+    window.location.href = `${window.location.protocol}//${window.location.host}/${path.join('/')}`;
   }
 
   private setCurrentEnv() {
