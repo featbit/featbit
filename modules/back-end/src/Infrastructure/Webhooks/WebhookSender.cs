@@ -93,7 +93,8 @@ public partial class WebhookSender : IWebhookSender
     {
         var delivery = new WebhookDelivery(request.Id, request.Events);
 
-        var shouldPreventPayload = request.PreventEmptyPayloads && EmptyPayloadRegex().IsMatch(request.Payload);
+        request.PreventEmptyPayloads ??= await FetchPreventEmptyPayloadStatus(request.Id);
+        var shouldPreventPayload = request.PreventEmptyPayloads.Value && EmptyPayloadRegex().IsMatch(request.Payload);
         if (shouldPreventPayload)
         {
             return await PreventEmptyPayload(request.Id, request.Events);
@@ -178,6 +179,12 @@ public partial class WebhookSender : IWebhookSender
                 return builder.ToString();
             }
         }
+    }
+    
+    private async Task<bool> FetchPreventEmptyPayloadStatus(Guid id)
+    {
+        var webhook = await _webhookService.GetAsync(id);
+        return webhook.PreventEmptyPayloads;
     }
     
     private async Task<WebhookDelivery> PreventEmptyPayload(Guid id, string events, Dictionary<string, object>? dataObject = null)
