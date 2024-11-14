@@ -6,10 +6,11 @@ using System.Text.Json;
 using Domain.Webhooks;
 using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace Infrastructure.Webhooks;
 
-public class WebhookSender : IWebhookSender
+public partial class WebhookSender : IWebhookSender
 {
     private readonly HttpClient _client;
     private readonly IWebhookService _webhookService;
@@ -33,11 +34,12 @@ public class WebhookSender : IWebhookSender
         var events = dataObject["events"].ToString()!;
 
         string payload;
+        JsonDocument jsonDocument;
         try
         {
             var template = Handlebars.Compile(webhook.PayloadTemplate);
             payload = template(dataObject);
-            JsonDocument.Parse(payload);
+            jsonDocument = JsonDocument.Parse(payload);
         }
         catch (Exception ex)
         {
@@ -53,6 +55,14 @@ public class WebhookSender : IWebhookSender
 
             await AddDeliveryAsync(delivery);
             return delivery;
+        }
+
+        var shouldPreventPayload = webhook.PreventEmptyPayloads
+                                   && jsonDocument.RootElement.ValueKind == JsonValueKind.Object
+                                   && !jsonDocument.RootElement.EnumerateObject().Any();
+        if (shouldPreventPayload)
+        {
+            return await PreventEmptyPayload(webhook.Id, events);
         }
 
         var deliveryId = Guid.NewGuid().ToString("D");
@@ -82,6 +92,12 @@ public class WebhookSender : IWebhookSender
     public async Task<WebhookDelivery> SendAsync(WebhookRequest request)
     {
         var delivery = new WebhookDelivery(request.Id, request.Events);
+
+        var shouldPreventPayload = request.PreventEmptyPayloads && EmptyPayloadRegex().IsMatch(request.Payload);
+        if (shouldPreventPayload)
+        {
+            return await PreventEmptyPayload(request.Id, request.Events);
+        }
 
         var httpRequest = CreateWebhookHttpRequest();
         delivery.AddRequest(request.Url, httpRequest.Headers, request.Payload);
@@ -163,6 +179,19 @@ public class WebhookSender : IWebhookSender
             }
         }
     }
+    
+    private async Task<WebhookDelivery> PreventEmptyPayload(Guid id, string events, Dictionary<string, object>? dataObject = null)
+    {
+        var delivery = new WebhookDelivery(id,  events);
+        var error = new
+        {
+            message = "Not allowed to send an empty object payload per webhook settings",
+            dataObject = dataObject ?? new Dictionary<string, object>(),
+        };
+        delivery.SetError(error);
+        await AddDeliveryAsync(delivery);
+        return delivery;
+    }
 
     private async Task AddDeliveryAsync(WebhookDelivery theDelivery)
     {
@@ -175,4 +204,7 @@ public class WebhookSender : IWebhookSender
             _logger.LogError(ex, "Failed to add webhook delivery log");
         }
     }
+
+    [GeneratedRegex(@"^\s*\{\s*\}\s*$")]
+    private static partial Regex EmptyPayloadRegex();
 }
