@@ -12,6 +12,7 @@ export interface Webhook {
   payloadTemplateType: string;
   payloadTemplate: string;
   isActive: boolean;
+  preventEmptyPayloads: boolean;
   creator: SimpleUser;
   lastDelivery?: LastDelivery;
 }

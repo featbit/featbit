@@ -39,6 +39,7 @@ export class WebhookDrawerComponent implements OnInit {
     payloadTemplate: FormControl<string>;
     secret: FormControl<string>;
     isActive: FormControl<boolean>;
+    preventEmptyPayloads: FormControl<boolean>;
   }>;
 
   constructor(
@@ -85,7 +86,8 @@ export class WebhookDrawerComponent implements OnInit {
       payloadTemplateType: new FormControl(this._webhook?.payloadTemplateType ?? 'default'),
       payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? WebhookDefaultPayloadTemplate, [this.jsonHandlebarsTemplateValidator]),
       secret: new FormControl(this._webhook?.secret),
-      isActive: new FormControl(this._webhook?.isActive ?? true)
+      isActive: new FormControl(this._webhook?.isActive ?? true),
+      preventEmptyPayloads: new FormControl(this._webhook?.preventEmptyPayloads ?? false),
     });
 
     if (this._webhook) {
@@ -366,7 +368,7 @@ export class WebhookDrawerComponent implements OnInit {
   }
 
   doSubmit() {
-    const { name, url, scopes, events, headers, payloadTemplateType, payloadTemplate, secret, isActive } = this.form.value;
+    const { name, url, scopes, events, headers, payloadTemplateType, payloadTemplate, secret, isActive, preventEmptyPayloads } = this.form.value;
     const payload = {
       name,
       url,
@@ -380,7 +382,8 @@ export class WebhookDrawerComponent implements OnInit {
       payloadTemplateType,
       payloadTemplate,
       secret,
-      isActive
+      isActive,
+      preventEmptyPayloads,
     };
 
     let responseHandler = {
