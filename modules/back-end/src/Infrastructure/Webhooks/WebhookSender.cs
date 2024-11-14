@@ -62,7 +62,7 @@ public partial class WebhookSender : IWebhookSender
                                    && !jsonDocument.RootElement.EnumerateObject().Any();
         if (shouldPreventPayload)
         {
-            return await PreventEmptyPayload(webhook.Id, events);
+            return await PreventEmptyPayload(webhook.Id, events, webhook.PayloadTemplate, dataObject);
         }
 
         var deliveryId = Guid.NewGuid().ToString("D");
@@ -187,7 +187,7 @@ public partial class WebhookSender : IWebhookSender
         return webhook.PreventEmptyPayloads;
     }
     
-    private async Task<WebhookDelivery> PreventEmptyPayload(Guid id, string events, Dictionary<string, object>? dataObject = null)
+    private async Task<WebhookDelivery> PreventEmptyPayload(Guid id, string events, string? payloadTemplate = default, Dictionary<string, object>? dataObject = default)
     {
         var delivery = new WebhookDelivery(id, events);
         delivery.Started();
@@ -195,6 +195,7 @@ public partial class WebhookSender : IWebhookSender
         {
             message = "Not allowed to send an empty object payload per webhook settings",
             dataObject = dataObject ?? new Dictionary<string, object>(),
+            payloadTempate = payloadTemplate ?? string.Empty,
         };
         delivery.SetError(error);
         delivery.Ended();
