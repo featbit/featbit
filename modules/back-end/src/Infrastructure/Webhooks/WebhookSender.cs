@@ -182,13 +182,15 @@ public partial class WebhookSender : IWebhookSender
     
     private async Task<WebhookDelivery> PreventEmptyPayload(Guid id, string events, Dictionary<string, object>? dataObject = null)
     {
-        var delivery = new WebhookDelivery(id,  events);
+        var delivery = new WebhookDelivery(id, events);
+        delivery.Started();
         var error = new
         {
             message = "Not allowed to send an empty object payload per webhook settings",
             dataObject = dataObject ?? new Dictionary<string, object>(),
         };
         delivery.SetError(error);
+        delivery.Ended();
         await AddDeliveryAsync(delivery);
         return delivery;
     }
