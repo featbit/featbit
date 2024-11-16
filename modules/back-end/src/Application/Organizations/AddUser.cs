@@ -79,7 +79,9 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         // if no policies or groups are specified, give user the Developer policy
         if (!request.PolicyIds.Any() && !request.GroupIds.Any())
         {
-            request.PolicyIds = new[] { BuiltInPolicy.Developer };
+            var organization = await _organizationService.GetAsync(request.OrganizationId);
+            request.PolicyIds = organization.DefaultPermissions?.PolicyIds ?? new[] { BuiltInPolicy.Developer };
+            request.GroupIds = organization.DefaultPermissions?.GroupIds ?? Array.Empty<Guid>();
         }
 
         var organizationUser = new OrganizationUser(request.OrganizationId, userId, _currentUser.Id, initialPwd);

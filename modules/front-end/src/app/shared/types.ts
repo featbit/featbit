@@ -73,10 +73,16 @@ export interface IWorkspace {
   sso?: ISso
 }
 
+export interface IOrganizationPermissions {
+  policyIds: string[];
+  groupIds: string[];
+}
+
 export interface IOrganization {
   id: string,
   initialized: boolean,
   name: string,
+  defaultPermissions: IOrganizationPermissions
 }
 
 export enum LicenseFeatureEnum {

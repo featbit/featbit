@@ -31,5 +31,59 @@
     </div>
   </div>
 </div>
-
+<div class="standard-div rows">
+  <h5 nz-typography i18n="@@common.default-permissions">Default permissions</h5>
+  <div *ngIf="defaultPermissionsForm.errors?.bothEmpty">
+    <p style="color: red;">Either Policy or Group must be filled.</p>
+  </div>
+  <form nz-form [formGroup]="defaultPermissionsForm" [nzLayout]="'vertical'" (ngSubmit)="updateDefaultPermissions()">
+    <nz-form-item>
+      <nz-form-label i18n="@@org.org.policy">Policy</nz-form-label>
+      <nz-form-control>
+        <nz-select
+          class="nz-select-40"
+          nzShowSearch
+          nzServerSearch
+          i18n-nzPlaceholder="@@org.org.policy-placeholder"
+          nzPlaceHolder="Policy"
+          (nzOnSearch)="getPolicies($event)"
+          formControlName="policyId">
+          <ng-container *ngFor="let policy of policies.items">
+            <nz-option nzCustomContent *ngIf="!isPoliciesLoading" [nzLabel]="policy.name" [nzValue]="policy.id">
+              <i *ngIf="policy.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+              {{ policy.name }}
+            </nz-option>
+          </ng-container>
+          <nz-option *ngIf="isPoliciesLoading" nzDisabled nzCustomContent>
+            <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+          </nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label i18n="@@org.org.group">Group</nz-form-label>
+      <nz-form-control style="margin-top: 10px;">
+        <nz-select
+          class="nz-select-40"
+          nzShowSearch
+          nzServerSearch
+          i18n-nzPlaceholder="@@org.org.group-placeholder"
+          nzPlaceHolder="Group"
+          (nzOnSearch)="getGroups($event)"
+          formControlName="groupId">
+          <ng-container *ngFor="let group of groups.items">
+            <nz-option *ngIf="!isGroupsLoading" [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
+          </ng-container>
+          <nz-option *ngIf="isGroupsLoading" nzDisabled nzCustomContent>
+            <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+          </nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <button nz-button class="name-key-btn" nzType="primary" [nzLoading]="isDefaultPermissionsLoading">
+      <i nz-icon nzType="icons:icon-sync"></i>
+      <ng-container i18n="@@common.update">Update</ng-container>
+    </button>
+  </form>
+</div>
 <organization-drawer [visible]="creatOrganizationFormVisible" (close)="onCreateOrganizationClosed($event)"></organization-drawer>
