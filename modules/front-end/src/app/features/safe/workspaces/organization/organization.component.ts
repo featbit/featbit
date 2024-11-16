@@ -7,11 +7,10 @@ import { getCurrentLicense, getCurrentOrganization } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { MessageQueueService } from '@core/services/message-queue.service';
-import {IPagedPolicy, PolicyFilter} from "@features/safe/iam/types/policy";
-import {GroupListFilter, IPagedGroup} from "@features/safe/iam/types/group";
-import {PolicyService} from "@services/policy.service";
-import {GroupService} from "@services/group.service";
-import {phoneNumberOrEmailValidator} from "@utils/form-validators";
+import { IPagedPolicy, PolicyFilter } from "@features/safe/iam/types/policy";
+import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
+import { PolicyService } from "@services/policy.service";
+import { GroupService } from "@services/group.service";
 
 @Component({
   selector: 'organization',
