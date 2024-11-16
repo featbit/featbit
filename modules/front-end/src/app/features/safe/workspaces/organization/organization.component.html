@@ -32,10 +32,10 @@
   </div>
 </div>
 <div class="standard-div rows">
-  <h5 nz-typography i18n="@@common.default-permissions">Default permissions</h5>
-  <div *ngIf="defaultPermissionsForm.errors?.bothEmpty">
-    <p style="color: red;">Either Policy or Group must be filled.</p>
-  </div>
+  <h5 nz-typography>
+    <ng-container i18n="@@common.default-permissions">Default permissions</ng-container>
+    <span style="margin-left: 4px; color: #ff4d4f" *ngIf="defaultPermissionsForm.errors?.empty" i18n="@@org.org.policy-group-set-at-least-one">(Policy and group cannot be both empty)</span>
+  </h5>
   <form nz-form [formGroup]="defaultPermissionsForm" [nzLayout]="'vertical'" (ngSubmit)="updateDefaultPermissions()">
     <nz-form-item>
       <nz-form-label i18n="@@org.org.policy">Policy</nz-form-label>

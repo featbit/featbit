@@ -123,7 +123,7 @@ export class OrganizationComponent implements OnInit {
     const group = form.get('groupId')?.value;
 
     if (policy.length ===0 && group.length === 0) {
-      return { bothEmpty: true }; // Return an error object
+      return { empty: true }; // Return an error object
     }
     return null; // No errors
   }
