@@ -1,6 +1,3 @@
-using Domain.Organizations;
-using Domain.Policies;
-
 namespace Application.Organizations;
 
 public class GetOrganizationList : IRequest<IEnumerable<OrganizationVm>>
@@ -32,14 +29,6 @@ public class GetOrganizationListHandler : IRequestHandler<GetOrganizationList, I
         if (!organizations.Any() && request.IsSsoFirstLogin)
         {
             organizations = await _service.FindManyAsync(x => x.WorkspaceId == request.WorkspaceId);
-        }
-
-        foreach (var organization in organizations)
-        {
-            organization.DefaultPermissions ??= new OrganizationPermissions
-            {
-                PolicyIds = new[] { BuiltInPolicy.Developer }
-            };
         }
 
         return _mapper.Map<IEnumerable<OrganizationVm>>(organizations);

@@ -17,12 +17,11 @@ public class UpdateOrganizationValidator : AbstractValidator<UpdateOrganization>
     public UpdateOrganizationValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
+
         RuleFor(x => x.DefaultPermissions)
-            .NotNull()
-            .Must(permissions => permissions.GroupIds.Any() || permissions.GroupIds.Any())
-            .WithErrorCode(ErrorCodes.Invalid("Policies or Groups"));
+            .NotNull().WithErrorCode(ErrorCodes.Required("defaultPermissions"))
+            .Must(x => x.IsValid()).WithErrorCode(ErrorCodes.Invalid("defaultPermissions"));
     }
 }
 
@@ -40,10 +39,6 @@ public class UpdateOrganizationHandler : IRequestHandler<UpdateOrganization, Org
     public async Task<OrganizationVm> Handle(UpdateOrganization request, CancellationToken cancellationToken)
     {
         var organization = await _service.GetAsync(request.Id);
-        if (organization == null)
-        {
-            return null;
-        }
 
         organization.UpdateName(request.Name);
         organization.UpdateDefaultPermissions(request.DefaultPermissions);

@@ -1,7 +1,6 @@
 using Application.Bases;
 using Application.Users;
 using Domain.Organizations;
-using Domain.Policies;
 using Domain.Users;
 
 namespace Application.Organizations;
@@ -80,8 +79,8 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         if (!request.PolicyIds.Any() && !request.GroupIds.Any())
         {
             var organization = await _organizationService.GetAsync(request.OrganizationId);
-            request.PolicyIds = organization.DefaultPermissions?.PolicyIds ?? new[] { BuiltInPolicy.Developer };
-            request.GroupIds = organization.DefaultPermissions?.GroupIds ?? Array.Empty<Guid>();
+            request.PolicyIds = organization.DefaultPermissions.PolicyIds;
+            request.GroupIds = organization.DefaultPermissions.GroupIds;
         }
 
         var organizationUser = new OrganizationUser(request.OrganizationId, userId, _currentUser.Id, initialPwd);
