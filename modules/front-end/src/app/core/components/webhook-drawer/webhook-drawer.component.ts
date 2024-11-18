@@ -347,7 +347,7 @@ export class WebhookDrawerComponent implements OnInit {
   testWebhook: TestWebhook = null;
   testModalVisible: boolean = false;
   openTestModal() {
-    const { name, url, payloadTemplate, headers, secret } = this.form.value;
+    const { name, url, payloadTemplate, headers, secret, preventEmptyPayloads } = this.form.value;
     this.testWebhook = {
       id: uuidv4(),
       name,
@@ -356,7 +356,8 @@ export class WebhookDrawerComponent implements OnInit {
         .filter(header => header.key)
         .map(header => ({ key: header.key, value: header.value })),
       payloadTemplate,
-      secret
+      secret,
+      preventEmptyPayloads
     };
 
     this.testModalVisible = true;

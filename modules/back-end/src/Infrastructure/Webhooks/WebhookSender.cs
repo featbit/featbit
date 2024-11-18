@@ -7,6 +7,7 @@ using Domain.Webhooks;
 using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
+using Domain.Utils;
 
 namespace Infrastructure.Webhooks;
 
@@ -57,10 +58,7 @@ public partial class WebhookSender : IWebhookSender
             return delivery;
         }
 
-        var shouldPreventPayload = webhook.PreventEmptyPayloads
-                                   && jsonDocument.RootElement.ValueKind == JsonValueKind.Object
-                                   && !jsonDocument.RootElement.EnumerateObject().Any();
-        if (shouldPreventPayload)
+        if (webhook.PreventEmptyPayloads && jsonDocument.RootElement.IsEmptyObject())
         {
             return await PreventEmptyPayload(webhook.Id, events, webhook.PayloadTemplate, dataObject);
         }
@@ -93,9 +91,7 @@ public partial class WebhookSender : IWebhookSender
     {
         var delivery = new WebhookDelivery(request.Id, request.Events);
 
-        request.PreventEmptyPayloads ??= await FetchPreventEmptyPayloadStatus(request.Id);
-        var shouldPreventPayload = request.PreventEmptyPayloads.Value && EmptyPayloadRegex().IsMatch(request.Payload);
-        if (shouldPreventPayload)
+        if (request.PreventEmptyPayloads && EmptyPayloadRegex().IsMatch(request.Payload))
         {
             return await PreventEmptyPayload(request.Id, request.Events);
         }
@@ -180,13 +176,7 @@ public partial class WebhookSender : IWebhookSender
             }
         }
     }
-    
-    private async Task<bool> FetchPreventEmptyPayloadStatus(Guid id)
-    {
-        var webhook = await _webhookService.GetAsync(id);
-        return webhook.PreventEmptyPayloads;
-    }
-    
+
     private async Task<WebhookDelivery> PreventEmptyPayload(Guid id, string events, string? payloadTemplate = default, Dictionary<string, object>? dataObject = default)
     {
         var delivery = new WebhookDelivery(id, events);

@@ -161,7 +161,7 @@ export interface PagedWebhookDelivery {
   items: WebhookDelivery[];
 }
 
-export type TestWebhook = Pick<Webhook, 'id' | 'url' | 'name' | 'secret' | 'headers' | 'payloadTemplate'>;
+export type TestWebhook = Pick<Webhook, 'id' | 'url' | 'name' | 'secret' | 'headers' | 'payloadTemplate' | 'preventEmptyPayloads'>;
 
 export interface WebhookRequest {
   id: string;
@@ -172,4 +172,5 @@ export interface WebhookRequest {
   headers: { key: string; value: string; }[];
   events: string;
   payload: string;
+  preventEmptyPayloads: boolean;
 }

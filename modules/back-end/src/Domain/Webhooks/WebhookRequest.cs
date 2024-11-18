@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Domain.Webhooks;
 
 public class WebhookRequest
@@ -19,9 +17,8 @@ public class WebhookRequest
     public string Events { get; set; }
 
     public string Payload { get; set; }
-    
-    [JsonIgnore]
-    public bool? PreventEmptyPayloads { get; set; }
+
+    public bool PreventEmptyPayloads { get; set; }
 
     public WebhookRequest()
     {

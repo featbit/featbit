@@ -630,11 +630,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
-          <context context-type="linenumber">65</context>
+          <context context-type="linenumber">66</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">391</context>
+          <context context-type="linenumber">392</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
@@ -858,11 +858,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
-          <context context-type="linenumber">67</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.ts</context>
-          <context context-type="linenumber">394</context>
+          <context context-type="linenumber">395</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
@@ -5813,21 +5813,21 @@
         </context-group>
         <target>用于生成 Webhook JSON 请求正文的 Handlebars 模板。</target>
       </trans-unit>
-      <trans-unit id="integrations.webhooks.preventEmptyPayloads" datatype="html">
+      <trans-unit id="integrations.webhooks.prevent-empty-payloads" datatype="html">
         <source>Prevent Empty Payloads</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">181</context>
         </context-group>
-        <target>防止空负载</target>
+        <target>阻止发送空的消息体负载</target>
       </trans-unit>
-      <trans-unit id="integrations.webhooks.preventEmptyPayloads-description" datatype="html">
+      <trans-unit id="integrations.webhooks.prevent-empty-payloads-description" datatype="html">
         <source>Prevents sending a request if the payload is an empty JSON object.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
           <context context-type="linenumber">183</context>
         </context-group>
-        <target>如果有效负载是空 JSON 对象，则阻止发送请求。</target>
+        <target>消息体负载如果是空的 JSON 对象则不发送请求。</target>
       </trans-unit>
       <trans-unit id="integrations.webhooks.secret" datatype="html">
         <source>Secret</source>
