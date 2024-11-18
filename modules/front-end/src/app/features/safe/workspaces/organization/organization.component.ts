@@ -122,7 +122,7 @@ export class OrganizationComponent implements OnInit {
     const policy = form.get('policyId')?.value;
     const group = form.get('groupId')?.value;
 
-    if (policy.length ===0 && group.length === 0) {
+    if (policy.length === 0 && group.length === 0) {
       return { empty: true }; // Return an error object
     }
     return null; // No errors
@@ -140,23 +140,26 @@ export class OrganizationComponent implements OnInit {
     const { policyId, groupId } = this.defaultPermissionsForm.value;
 
     const defaultPermissions = {
-      policyIds: [policyId],
-      groupIds: [groupId],
+      policyIds: policyId ? [ policyId ] : [],
+      groupIds: groupId ? [ groupId ] : [],
     }
 
     const { id, initialized, name } = this.currentOrganization;
 
     this.isDefaultPermissionsLoading = true;
     this.organizationService.update({ name, defaultPermissions })
-      .subscribe({
-        next: () => {
-          this.isDefaultPermissionsLoading = false;
-          this.message.success($localize`:@@org.org.orgDefaultPermissionsUpdateSuccess:Default permissions updated!`);
-          this.organizationService.setOrganization({ id, initialized, name, defaultPermissions });
-          this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
-        },
-        error: () => this.isDefaultPermissionsLoading = false
-      });
+    .subscribe({
+      next: () => {
+        this.isDefaultPermissionsLoading = false;
+        this.message.success($localize`:@@org.org.orgDefaultPermissionsUpdateSuccess:Default permissions updated!`);
+        this.organizationService.setOrganization({ id, initialized, name, defaultPermissions });
+        this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
+      },
+      error: () => {
+        this.message.error($localize`:@@common.operation-failed:Operation failed`);
+        this.isDefaultPermissionsLoading = false;
+      }
+    });
   }
 
   onCreateOrganizationClick() {
@@ -202,7 +205,10 @@ export class OrganizationComponent implements OnInit {
           this.organizationService.setOrganization({ id, initialized, name, defaultPermissions });
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
-        error: () => this.isLoading = false
+        error: () => {
+          this.message.error($localize`:@@common.operation-failed:Operation failed`);
+          this.isLoading = false;
+        }
       });
   }
 
