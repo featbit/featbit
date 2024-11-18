@@ -1,3 +1,5 @@
+using Domain.Organizations;
+
 namespace Application.Organizations;
 
 public class OrganizationVm
@@ -9,4 +11,6 @@ public class OrganizationVm
     public bool Initialized { get; set; }
 
     public string License { get; set; }
+
+    public OrganizationPermissions DefaultPermissions { get; set; }
 }

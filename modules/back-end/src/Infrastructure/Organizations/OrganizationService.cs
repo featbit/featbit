@@ -73,7 +73,7 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
         await MongoDb.CollectionOf<OrganizationUser>().InsertOneAsync(organizationUser);
 
         // add member policies
-        if (policies != null && policies.Any())
+        if (policies != null && policies.Count != 0)
         {
             var memberPolicies = policies.Select(
                 policyId => new MemberPolicy(organizationId, userId, policyId)
@@ -83,7 +83,7 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
         }
 
         // add member to groups
-        if (groups != null && groups.Any())
+        if (groups != null && groups.Count != 0)
         {
             var groupMembers = groups.Select(
                 groupId => new GroupMember(groupId, organizationId, userId)

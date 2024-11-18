@@ -72,7 +72,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpPut]
-    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganizationName request)
+    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganization request)
     {
         request.Id = OrgId;
 
