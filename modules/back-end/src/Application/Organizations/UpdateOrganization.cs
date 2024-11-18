@@ -40,8 +40,7 @@ public class UpdateOrganizationHandler : IRequestHandler<UpdateOrganization, Org
     {
         var organization = await _service.GetAsync(request.Id);
 
-        organization.UpdateName(request.Name);
-        organization.UpdateDefaultPermissions(request.DefaultPermissions);
+        organization.Update(request.Name, request.DefaultPermissions);
 
         await _service.UpdateAsync(organization);
 

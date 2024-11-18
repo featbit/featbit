@@ -21,15 +21,9 @@ public class Organization : AuditedEntity
         DefaultPermissions = new OrganizationPermissions();
     }
 
-    public void UpdateName(string name)
+    public void Update(string name, OrganizationPermissions permissions)
     {
         Name = name;
-
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void UpdateDefaultPermissions(OrganizationPermissions permissions)
-    {
         DefaultPermissions = permissions;
 
         UpdatedAt = DateTime.UtcNow;
