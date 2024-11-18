@@ -1,6 +1,3 @@
-using Domain.Organizations;
-using Domain.Policies;
-
 namespace Application.Organizations;
 
 public class GetOrganization : IRequest<OrganizationVm>
@@ -18,15 +15,10 @@ public class GetOrganizationHandler : IRequestHandler<GetOrganization, Organizat
         _organizationService = organizationService;
         _mapper = mapper;
     }
-    
+
     public async Task<OrganizationVm> Handle(GetOrganization request, CancellationToken cancellationToken)
     {
         var organization = await _organizationService.GetAsync(request.Id);
-        organization.DefaultPermissions ??= new OrganizationPermissions
-        {
-            PolicyIds = new[] { BuiltInPolicy.Developer }
-        };
-
         return _mapper.Map<OrganizationVm>(organization);
     }
 }

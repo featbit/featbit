@@ -9,7 +9,7 @@ public class Organization : AuditedEntity
     public bool Initialized { get; set; }
 
     public string License { get; set; }
-    
+
     public OrganizationPermissions DefaultPermissions { get; set; }
 
     public Organization(Guid workspaceId, string name)
@@ -27,11 +27,11 @@ public class Organization : AuditedEntity
 
         UpdatedAt = DateTime.UtcNow;
     }
-    
+
     public void UpdateDefaultPermissions(OrganizationPermissions permissions)
     {
         DefaultPermissions = permissions;
-        
+
         UpdatedAt = DateTime.UtcNow;
     }
 

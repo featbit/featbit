@@ -11,6 +11,6 @@ public class OrganizationVm
     public bool Initialized { get; set; }
 
     public string License { get; set; }
-    
+
     public OrganizationPermissions DefaultPermissions { get; set; }
 }

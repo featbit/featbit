@@ -1,13 +1,10 @@
-﻿namespace Domain.Organizations;
+﻿using Domain.Policies;
+
+namespace Domain.Organizations;
 
 public class OrganizationPermissions
 {
-    public ICollection<Guid> PolicyIds { get; set; }
-    public ICollection<Guid> GroupIds { get; set;  }
+    public ICollection<Guid> PolicyIds { get; set; } = [BuiltInPolicy.Developer];
 
-    public OrganizationPermissions()
-    {
-        PolicyIds = new List<Guid>();
-        GroupIds = new List<Guid>();
-    }
+    public ICollection<Guid> GroupIds { get; set; } = Array.Empty<Guid>();
 }
