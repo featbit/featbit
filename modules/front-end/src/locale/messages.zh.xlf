@@ -2561,6 +2561,14 @@
           <context context-type="linenumber">159</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
+          <context context-type="linenumber">159</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
+          <context context-type="linenumber">209</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/profile/profile.component.ts</context>
           <context context-type="linenumber">114</context>
         </context-group>
@@ -9713,7 +9721,7 @@
         <source>Organization name updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">201</context>
+          <context context-type="linenumber">204</context>
         </context-group>
         <target>机构名称更新成功！</target>
       </trans-unit>
