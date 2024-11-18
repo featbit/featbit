@@ -6,12 +6,11 @@ using System.Text.Json;
 using Domain.Webhooks;
 using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
 using Domain.Utils;
 
 namespace Infrastructure.Webhooks;
 
-public partial class WebhookSender : IWebhookSender
+public class WebhookSender : IWebhookSender
 {
     private readonly HttpClient _client;
     private readonly IWebhookService _webhookService;
@@ -60,7 +59,7 @@ public partial class WebhookSender : IWebhookSender
 
         if (webhook.PreventEmptyPayloads && jsonDocument.RootElement.IsEmptyObject())
         {
-            return await PreventEmptyPayload(webhook.Id, events, webhook.PayloadTemplate, dataObject);
+            return WebhookDelivery.Ignored("Not allowed to send an empty JSON object", webhook.Url, payload);
         }
 
         var deliveryId = Guid.NewGuid().ToString("D");
@@ -90,11 +89,6 @@ public partial class WebhookSender : IWebhookSender
     public async Task<WebhookDelivery> SendAsync(WebhookRequest request)
     {
         var delivery = new WebhookDelivery(request.Id, request.Events);
-
-        if (request.PreventEmptyPayloads && EmptyPayloadRegex().IsMatch(request.Payload))
-        {
-            return await PreventEmptyPayload(request.Id, request.Events);
-        }
 
         var httpRequest = CreateWebhookHttpRequest();
         delivery.AddRequest(request.Url, httpRequest.Headers, request.Payload);
@@ -177,22 +171,6 @@ public partial class WebhookSender : IWebhookSender
         }
     }
 
-    private async Task<WebhookDelivery> PreventEmptyPayload(Guid id, string events, string? payloadTemplate = default, Dictionary<string, object>? dataObject = default)
-    {
-        var delivery = new WebhookDelivery(id, events);
-        delivery.Started();
-        var error = new
-        {
-            message = "Not allowed to send an empty object payload per webhook settings",
-            dataObject = dataObject ?? new Dictionary<string, object>(),
-            payloadTempate = payloadTemplate ?? string.Empty,
-        };
-        delivery.SetError(error);
-        delivery.Ended();
-        await AddDeliveryAsync(delivery);
-        return delivery;
-    }
-
     private async Task AddDeliveryAsync(WebhookDelivery theDelivery)
     {
         try
@@ -204,7 +182,4 @@ public partial class WebhookSender : IWebhookSender
             _logger.LogError(ex, "Failed to add webhook delivery log");
         }
     }
-
-    [GeneratedRegex(@"^\s*\{\s*\}\s*$")]
-    private static partial Regex EmptyPayloadRegex();
 }

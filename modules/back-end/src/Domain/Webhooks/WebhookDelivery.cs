@@ -65,4 +65,19 @@ public class WebhookDelivery : Entity
         Error = error;
         Success = false;
     }
+
+    public bool IsIgnored() => WebhookId == Guid.Empty;
+
+    public static WebhookDelivery Ignored(string reason, string url, string payload) =>
+        new(Guid.Empty, string.Empty)
+        {
+            Request = new
+            {
+                url,
+                headers = new { },
+                payload
+            },
+            Success = false,
+            Error = new { message = reason }
+        };
 }

@@ -89,13 +89,7 @@ public class WebhookHandler : IWebhookHandler
             .AddFeatureFlag(flag)
             .AddChanges(changes);
 
-        foreach (var webhook in availableWebhooks)
-        {
-            var delivery = await _webhookSender.SendAsync(webhook, dataObject);
-
-            webhook.LastDelivery = new LastDelivery(delivery);
-            await _webhookService.UpdateAsync(webhook);
-        }
+        await SendWebhooksAsync(availableWebhooks, dataObject);
     }
 
     public async Task HandleAsync(Segment segment, DataChange dataChange, Guid operatorId)
@@ -152,9 +146,18 @@ public class WebhookHandler : IWebhookHandler
             .AddSegment(segment, flagReferences)
             .AddChanges(changes);
 
-        foreach (var webhook in availableWebhooks)
+        await SendWebhooksAsync(availableWebhooks, dataObject);
+    }
+
+    private async Task SendWebhooksAsync(Webhook[] webhooks, Dictionary<string, object> dataObject)
+    {
+        foreach (var webhook in webhooks)
         {
             var delivery = await _webhookSender.SendAsync(webhook, dataObject);
+            if (delivery.IsIgnored())
+            {
+                continue;
+            }
 
             webhook.LastDelivery = new LastDelivery(delivery);
             await _webhookService.UpdateAsync(webhook);
