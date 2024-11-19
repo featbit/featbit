@@ -22,6 +22,8 @@ public class WebhookBase
     public string Secret { get; set; }
 
     public bool IsActive { get; set; }
+
+    public bool PreventEmptyPayloads { get; set; }
 }
 
 public class WebhookBaseValidator : AbstractValidator<WebhookBase>

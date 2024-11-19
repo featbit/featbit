@@ -6,6 +6,7 @@ using System.Text.Json;
 using Domain.Webhooks;
 using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
+using Domain.Utils;
 
 namespace Infrastructure.Webhooks;
 
@@ -33,11 +34,12 @@ public class WebhookSender : IWebhookSender
         var events = dataObject["events"].ToString()!;
 
         string payload;
+        JsonDocument jsonDocument;
         try
         {
             var template = Handlebars.Compile(webhook.PayloadTemplate);
             payload = template(dataObject);
-            JsonDocument.Parse(payload);
+            jsonDocument = JsonDocument.Parse(payload);
         }
         catch (Exception ex)
         {
@@ -53,6 +55,11 @@ public class WebhookSender : IWebhookSender
 
             await AddDeliveryAsync(delivery);
             return delivery;
+        }
+
+        if (webhook.PreventEmptyPayloads && jsonDocument.RootElement.IsEmptyObject())
+        {
+            return WebhookDelivery.Ignored("Not allowed to send an empty JSON object", webhook.Url, payload);
         }
 
         var deliveryId = Guid.NewGuid().ToString("D");

@@ -11,7 +11,7 @@ public class CreateWebhook : WebhookBase, IRequest<WebhookVm>
 
     public Webhook AsWebhook(Guid creatorId)
     {
-        var webhook = new Webhook(OrgId, Name, Scopes, Url, Events, Headers, PayloadTemplateType, PayloadTemplate, Secret, IsActive, creatorId);
+        var webhook = new Webhook(OrgId, Name, Scopes, Url, Events, Headers, PayloadTemplateType, PayloadTemplate, Secret, IsActive, PreventEmptyPayloads, creatorId);
         return webhook;
     }
 }

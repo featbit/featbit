@@ -18,6 +18,8 @@ public class WebhookRequest
 
     public string Payload { get; set; }
 
+    public bool PreventEmptyPayloads { get; set; }
+
     public WebhookRequest()
     {
     }
@@ -36,5 +38,6 @@ public class WebhookRequest
         Headers = webhook.Headers;
         Events = events;
         Payload = payload;
+        PreventEmptyPayloads = webhook.PreventEmptyPayloads;
     }
 }

@@ -54,7 +54,8 @@ export class TestWebhookModalComponent {
       secret: this.webhook.secret,
       headers: this.webhook.headers,
       events: this.event,
-      payload: payload
+      payload: payload,
+      preventEmptyPayloads: this.webhook.preventEmptyPayloads
     };
 
     this.sendSubscription = this.webhookService.send(request)
