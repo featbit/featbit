@@ -4,7 +4,6 @@
 // custom modal
 .ant-modal {
   min-width: 600px;
-  min-height: 400px;
 }
 
 .ant-modal-content,
@@ -133,6 +132,15 @@
       cursor: pointer;
       border-radius: 4px;
 
+      &.disabled {
+        opacity: .5;
+
+        &:hover {
+          cursor: default;
+          background-color: unset;
+        }
+      }
+
       &:hover {
         background-color: @grey10-color;
       }
@@ -144,6 +152,20 @@
 .import-user-modal {
   .ant-modal-body {
     padding: 36px 40px 12px 40px;
+  }
+
+  .ant-modal-header::after {
+    content: none;
+  }
+}
+
+.segment-creation-modal {
+  &.ant-modal {
+    min-width: 550px;
+  }
+
+  .ant-modal-body {
+    padding: 16px 40px 12px 40px;
   }
 
   .ant-modal-header::after {
