@@ -1,10 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Domain.Evaluation;
 
 public class Variation
 {
-    [RegularExpression("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")]
     public string Id { get; set; }
 
     public string Value { get; set; }
@@ -16,4 +13,6 @@ public class Variation
     }
 
     public static readonly Variation Empty = new(string.Empty, string.Empty);
+
+    public bool IsValid() => Guid.TryParse(Id, out _);
 }

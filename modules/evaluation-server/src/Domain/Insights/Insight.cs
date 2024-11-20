@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using Domain.EndUsers;
 
@@ -14,33 +13,22 @@ public class Insight
 
     public virtual bool IsValid()
     {
-        foreach (var variation in Variations)
+        if (User == null || !User.IsValid())
         {
-            var validationResults = ValidateModel(variation);
-            if (validationResults.Any())
-            {
-                return false;
-            }
+            return false;
         }
 
-        foreach (var metric in Metrics)
+        if (Variations.Any(x => !x.IsValid()))
         {
-            var validationResults = ValidateModel(metric);
-            if (validationResults.Any())
-            {
-                return false;
-            }
+            return false;
         }
 
-        return User != null && User.IsValid();
-    }
+        if (Metrics.Any(x => !x.IsValid()))
+        {
+            return false;
+        }
 
-    private IList<ValidationResult> ValidateModel(object model)
-    {
-        var validationResults = new List<ValidationResult>();
-        var validationContext = new ValidationContext(model, null, null);
-        Validator.TryValidateObject(model, validationContext, validationResults, true);
-        return validationResults;
+        return true;
     }
 
     public virtual EndUserMessage EndUserMessage(Guid envId)

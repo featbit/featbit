@@ -1,14 +1,16 @@
 #nullable disable
 
-using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 using Domain.Evaluation;
 
 namespace Domain.Insights;
 
-public class VariationInsight
+public partial class VariationInsight
 {
-    [Required]
-    [RegularExpression("^(?![a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})([a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*)$")]
+    // see also: modules/back-end/src/Domain/FeatureFlags/FeatureFlag.cs#L9
+    [GeneratedRegex("^[a-zA-Z0-9._-]+$")]
+    private static partial Regex KeyRegex();
+
     public string FeatureFlagKey { get; set; }
 
     public Variation Variation { get; set; }
@@ -16,4 +18,19 @@ public class VariationInsight
     public bool SendToExperiment { get; set; }
 
     public long Timestamp { get; set; }
+
+    public bool IsValid()
+    {
+        if (string.IsNullOrWhiteSpace(FeatureFlagKey) || !KeyRegex().IsMatch(FeatureFlagKey))
+        {
+            return false;
+        }
+
+        if (!Variation.IsValid())
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

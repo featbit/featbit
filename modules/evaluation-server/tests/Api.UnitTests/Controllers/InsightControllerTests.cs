@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Api.Public;
+﻿using Api.Public;
 using Api.Setup;
 using Domain.EndUsers;
 using Domain.Insights;
@@ -11,7 +7,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using Xunit;
 
 namespace Api.UnitTests.Controllers
 {
