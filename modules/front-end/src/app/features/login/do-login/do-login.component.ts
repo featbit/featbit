@@ -67,7 +67,7 @@ export class DoLoginComponent implements OnInit {
     this.ssoForm = this.fb.group({
       workspaceKey: [
         { value: preCheck.workspaceKey, disabled: preCheck.workspaceKey?.length > 0 },
-        [ this.requiredWhenLoginVerifiedValidator(LoginStep.Step2) ]
+        [ Validators.required ]
       ]
     });
 
