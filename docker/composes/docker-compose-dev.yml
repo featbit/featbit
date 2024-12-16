@@ -1,5 +1,4 @@
 name: featbit-dev
-version: "3"
 services:
   ui:
     image: featbit/ui:dev

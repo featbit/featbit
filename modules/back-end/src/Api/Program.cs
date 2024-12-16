@@ -49,7 +49,7 @@ void InitializeSerilog()
                                    | IncludedData.TraceIdField
                                    | IncludedData.SpanIdField;
             options.BatchingOptions.BatchSizeLimit = 2;
-            options.BatchingOptions.Period = TimeSpan.FromSeconds(2);
+            options.BatchingOptions.BufferingTimeLimit = TimeSpan.FromSeconds(2);
             options.BatchingOptions.QueueLimit = 10;
 
             options.ResourceAttributes = new Dictionary<string, object>

@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Infrastructure.Fakes;
+using Infrastructure;
 using Streaming.DependencyInjection;
 
 namespace Api.Setup;
@@ -18,7 +19,7 @@ public static class ServicesRegister
         services.AddSwaggerGen();
 
         // health check dependencies
-        services.AddHealthChecks();
+        services.AddHealthChecks().AddReadinessChecks(configuration);
 
         // cors
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
@@ -42,8 +43,7 @@ public static class ServicesRegister
         {
             streamingBuilder.UseHybridStore(configuration);
 
-            var isProVersion = configuration["IS_PRO"];
-            if (isProVersion.Equals(bool.TrueString, StringComparison.OrdinalIgnoreCase))
+            if (configuration.IsProVersion())
             {
                 var producerConfigDictionary = new Dictionary<string, string>();
                 configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);

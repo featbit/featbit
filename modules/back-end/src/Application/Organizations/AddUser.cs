@@ -1,7 +1,6 @@
 using Application.Bases;
 using Application.Users;
 using Domain.Organizations;
-using Domain.Policies;
 using Domain.Users;
 
 namespace Application.Organizations;
@@ -76,10 +75,12 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
             userId = user.Id;
         }
 
-        // if no policies or groups are specified, give user the Developer policy
+        // if no policies or groups are specified, use the organization's default permissions
         if (!request.PolicyIds.Any() && !request.GroupIds.Any())
         {
-            request.PolicyIds = new[] { BuiltInPolicy.Developer };
+            var organization = await _organizationService.GetAsync(request.OrganizationId);
+            request.PolicyIds = organization.DefaultPermissions.PolicyIds;
+            request.GroupIds = organization.DefaultPermissions.GroupIds;
         }
 
         var organizationUser = new OrganizationUser(request.OrganizationId, userId, _currentUser.Id, initialPwd);

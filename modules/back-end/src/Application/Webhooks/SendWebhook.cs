@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Application.Bases;
+using Domain.Utils;
 using Domain.Webhooks;
 
 namespace Application.Webhooks;
@@ -21,7 +23,19 @@ public class SendWebhookValidator : AbstractValidator<SendWebhook>
             .NotEmpty().WithErrorCode(ErrorCodes.Required("events"));
 
         RuleFor(x => x.Payload)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("payload"));
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("payload"))
+            .Must(x =>
+            {
+                try
+                {
+                    JsonDocument.Parse(x);
+                    return true;
+                }
+                catch (JsonException)
+                {
+                    return false;
+                }
+            }).WithErrorCode(ErrorCodes.Invalid("payload"));
     }
 }
 
@@ -36,6 +50,12 @@ public class SendWebhookHandler : IRequestHandler<SendWebhook, WebhookDelivery>
 
     public async Task<WebhookDelivery> Handle(SendWebhook request, CancellationToken cancellationToken)
     {
+        var json = JsonDocument.Parse(request.Payload);
+        if (request.PreventEmptyPayloads && json.RootElement.IsEmptyObject())
+        {
+            return WebhookDelivery.Ignored("Not allowed to send an empty JSON object", request.Url, request.Payload);
+        }
+
         var delivery = await _webhookSender.SendAsync(request);
         return delivery;
     }

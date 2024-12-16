@@ -113,11 +113,14 @@ export class HeaderComponent implements OnInit {
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
 
-    if (this.router.url.indexOf("/feature-flags") > -1) {
-      await this.router.navigateByUrl("/feature-flags");
+    let path = this.router.url.split('/').slice(0, 2);
+    const match = window.location.pathname.match(/^\/(en|zh)\//);
+
+    if (match) {
+      path = [match[1], ...path].filter(x => x !== '');
     }
 
-    setTimeout(() => window.location.reload(), 200);
+    window.location.href = `${window.location.protocol}//${window.location.host}/${path.join('/')}`;
   }
 
   private setCurrentEnv() {

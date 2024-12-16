@@ -18,10 +18,9 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
         IOptionsMonitor<OpenApiOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        ISystemClock clock,
         IOrganizationService organizationService,
         IAccessTokenService accessTokenService,
-        IMemberService memberService) : base(options, logger, encoder, clock)
+        IMemberService memberService) : base(options, logger, encoder)
     {
         _organizationService = organizationService;
         _accessTokenService = accessTokenService;
@@ -32,7 +31,7 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
     {
         try
         {
-            string token = Request.Headers.Authorization;
+            string? token = Request.Headers.Authorization;
 
             // If no authorization header found, nothing to process further
             if (string.IsNullOrEmpty(token))
@@ -49,8 +48,8 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
 
             // set workspace, organization id header & store permissions
             var org = await _organizationService.GetAsync(accessToken.OrganizationId);
-            Context.Request.Headers.Add(ApiConstants.WorkspaceHeaderKey, org.WorkspaceId.ToString());
-            Context.Request.Headers.Add(ApiConstants.OrgIdHeaderKey, org.ToString());
+            Context.Request.Headers.TryAdd(ApiConstants.WorkspaceHeaderKey, org.WorkspaceId.ToString());
+            Context.Request.Headers.TryAdd(ApiConstants.OrgIdHeaderKey, org.Id.ToString());
             if (accessToken.Type == AccessTokenTypes.Service)
             {
                 Context.Items[OpenApiConstants.PermissionStoreKey] = accessToken.Permissions;

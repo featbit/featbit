@@ -72,8 +72,11 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var activeWebhooks = webhooks.Where(x => x.IsActive).ToArray();
-        if (!activeWebhooks.Any())
+        var availableWebhooks = webhooks.Where(x =>
+            x.IsActive &&
+            x.Scopes.Any(scope => resourceDescriptor.MatchScope(scope))
+        ).ToArray();
+        if (availableWebhooks.Length == 0)
         {
             return;
         }
@@ -86,13 +89,7 @@ public class WebhookHandler : IWebhookHandler
             .AddFeatureFlag(flag)
             .AddChanges(changes);
 
-        foreach (var webhook in activeWebhooks)
-        {
-            var delivery = await _webhookSender.SendAsync(webhook, dataObject);
-
-            webhook.LastDelivery = new LastDelivery(delivery);
-            await _webhookService.UpdateAsync(webhook);
-        }
+        await SendWebhooksAsync(availableWebhooks, dataObject);
     }
 
     public async Task HandleAsync(Segment segment, DataChange dataChange, Guid operatorId)
@@ -131,8 +128,11 @@ public class WebhookHandler : IWebhookHandler
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
-        var activeWebhooks = webhooks.Where(x => x.IsActive).ToArray();
-        if (!activeWebhooks.Any())
+        var availableWebhooks = webhooks.Where(x =>
+            x.IsActive &&
+            x.Scopes.Any(scope => resourceDescriptor.MatchScope(scope))
+        ).ToArray();
+        if (availableWebhooks.Length == 0)
         {
             return;
         }
@@ -146,9 +146,18 @@ public class WebhookHandler : IWebhookHandler
             .AddSegment(segment, flagReferences)
             .AddChanges(changes);
 
-        foreach (var webhook in activeWebhooks)
+        await SendWebhooksAsync(availableWebhooks, dataObject);
+    }
+
+    private async Task SendWebhooksAsync(Webhook[] webhooks, Dictionary<string, object> dataObject)
+    {
+        foreach (var webhook in webhooks)
         {
             var delivery = await _webhookSender.SendAsync(webhook, dataObject);
+            if (delivery.IsIgnored())
+            {
+                continue;
+            }
 
             webhook.LastDelivery = new LastDelivery(delivery);
             await _webhookService.UpdateAsync(webhook);

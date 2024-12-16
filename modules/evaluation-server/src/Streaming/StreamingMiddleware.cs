@@ -63,14 +63,14 @@ public class StreamingMiddleware
         {
             if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardForHeaders))
             {
-                return forwardForHeaders.FirstOrDefault(string.Empty);
+                return forwardForHeaders.FirstOrDefault(string.Empty)!;
             }
 
             // cloudflare connecting IP header
             // https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip
             if (context.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfConnectingIpHeaders))
             {
-                return cfConnectingIpHeaders.FirstOrDefault(string.Empty);
+                return cfConnectingIpHeaders.FirstOrDefault(string.Empty)!;
             }
 
             var remoteIpAddr = context.Connection.RemoteIpAddress?.ToString();

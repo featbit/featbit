@@ -239,3 +239,18 @@ db.MemberPolicies.insertOne(
     }
 )
 print('collection seeded: MemberPolicies')
+
+// add indexes
+print('add indexes...')
+db.AuditLogs.createIndex({ createdAt: 1 });
+db.EndUsers.createIndex({ updatedAt: 1 });
+db.ExperimentMetrics.createIndex({ updatedAt: 1 });
+db.FeatureFlags.createIndex({ updatedAt: 1 });
+db.Segments.createIndex({ updatedAt: 1 });
+db.AccessTokens.createIndex({ createdAt: 1 });
+db.Policies.createIndex({ createdAt: 1 });
+db.Projects.createIndex({ createdAt: 1 });
+db.RelayProxies.createIndex({ createdAt: 1 });
+db.Webhooks.createIndex({ createdAt: 1 });
+db.Webhooks.createIndex({ startedAt: 1 });
+print('indexes added')

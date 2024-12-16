@@ -76,7 +76,8 @@ public class SsoController : ApiControllerBase
             var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspace.Id);
             if (user == null)
             {
-                var registerResult = await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
+                var registerResult =
+                    await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
                 token = new LoginToken(true, registerResult.Token);
             }
             else
@@ -94,8 +95,14 @@ public class SsoController : ApiControllerBase
         }
     }
 
-    [HttpGet("check-enabled")]
-    public ApiResponse<bool> Enabled() => Ok(_isEnabled);
+    [HttpGet("pre-check")]
+    public async Task<ApiResponse<SsoPreCheck>> PreCheck()
+    {
+        var workspaceKey = await _workspaceService.GetDefaultWorkspaceAsync();
+        var preCheck = new SsoPreCheck(_isEnabled, workspaceKey);
+
+        return Ok(preCheck);
+    }
 
     private async Task<(string error, Workspace? workspace)> ValidateOidcAsync(string workspaceKey)
     {

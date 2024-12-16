@@ -1,38 +1,30 @@
 ﻿{
-  producerConfig: [
-    {
-      Key: bootstrap.servers,
-      Value: localhost:29092
-    },
-    {
-      Key: linger.ms,
-      Value: 50
-    }
-  ],
   consumerConfig: [
     {
-      Key: auto.commit.interval.ms,
-      Value: 5000
+      auto.commit.interval.ms: 5000
     },
     {
-      Key: auto.offset.reset,
-      Value: earliest
+      auto.offset.reset: earliest
     },
     {
-      Key: bootstrap.servers,
-      Value: localhost:29092
+      bootstrap.servers: localhost:29092
     },
     {
-      Key: enable.auto.commit,
-      Value: True
+      enable.auto.commit: True
     },
     {
-      Key: enable.auto.offset.store,
-      Value: False
+      enable.auto.offset.store: False
     },
     {
-      Key: group.id,
-      Value: featbit-api
+      group.id: featbit-api
+    }
+  ],
+  producerConfig: [
+    {
+      bootstrap.servers: localhost:29092
+    },
+    {
+      linger.ms: 50
     }
   ]
 }

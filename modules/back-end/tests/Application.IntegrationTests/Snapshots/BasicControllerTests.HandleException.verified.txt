@@ -1,5 +1,4 @@
 {
-  Version: 1.1,
   Status: 500 Internal Server Error,
   Headers: {
     api-supported-versions: 1.0, 2.0,
@@ -17,12 +16,6 @@
         InternalServerError
       ],
       success: false
-    }
-  },
-  Request: {
-    Uri: http://localhost/api/v1/basic/exception,
-    Headers: {
-      Authorization: Bearer [Scrubbed Token]
     }
   }
 }

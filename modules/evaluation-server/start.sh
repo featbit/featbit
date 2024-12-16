@@ -1,8 +1,6 @@
 #!/bin/bash
 set -e
 
-ARCH=$(uname -m)
-
 if [ "$ENABLE_OPENTELEMETRY" = "true" ]; then
     if [ "$OTEL_TRACES_EXPORTER" = "otlp" ]; then
         export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4317}
@@ -25,13 +23,9 @@ if [ "$ENABLE_OPENTELEMETRY" = "true" ]; then
         export OTEL_EXPORTER_OTLP_LOGS_INSECURE=${OTEL_EXPORTER_OTLP_INSECURE:-true}
     fi
     export DOTNET_STARTUP_HOOKS="$INSTALL_DIR/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
-    if [ "$ARCH" = "arm64" ]; then
-        export CORECLR_ENABLE_PROFILING="0"
-    else
-        export CORECLR_ENABLE_PROFILING="1"
-        export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
-        export CORECLR_PROFILER_PATH="$INSTALL_DIR/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so"
-    fi
+    export CORECLR_ENABLE_PROFILING="1"
+    export CORECLR_PROFILER="{918728DD-259F-4A6A-AC2B-B85E1B658318}"
+    export CORECLR_PROFILER_PATH="$INSTALL_DIR/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so"
 fi
 
 dotnet Api.dll

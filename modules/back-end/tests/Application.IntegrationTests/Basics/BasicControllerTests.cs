@@ -3,7 +3,6 @@ using Api.Controllers;
 namespace Application.IntegrationTests.Basics;
 
 [Collection(nameof(TestApp))]
-[UsesVerify]
 public class BasicControllerTests
 {
     private readonly TestApp _app;

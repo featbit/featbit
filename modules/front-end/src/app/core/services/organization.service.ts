@@ -46,6 +46,7 @@ export class OrganizationService {
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(org));
       const currentOrganization = this.organizations.find(ws => ws.id == org.id);
       currentOrganization.name = org.name;
+      currentOrganization.defaultPermissions = org.defaultPermissions;
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
@@ -58,6 +59,7 @@ export class OrganizationService {
       const currentOrganization = this.organizations.find(ws => ws.id == organization.id);
       currentOrganization.name = organization.name;
       currentOrganization.initialized = organization.initialized;
+      currentOrganization.defaultPermissions = organization.defaultPermissions;
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrganization));
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');

@@ -1,6 +1,5 @@
 {
   v1: {
-    Version: 1.1,
     Status: 200 OK,
     Headers: {
       api-supported-versions: 1.0, 2.0
@@ -14,16 +13,9 @@
         errors: [],
         success: true
       }
-    },
-    Request: {
-      Uri: http://localhost/api/v1/basic/string,
-      Headers: {
-        Authorization: Bearer [Scrubbed Token]
-      }
     }
   },
   v2: {
-    Version: 1.1,
     Status: 200 OK,
     Headers: {
       api-supported-versions: 1.0, 2.0
@@ -36,12 +28,6 @@
         data: v2,
         errors: [],
         success: true
-      }
-    },
-    Request: {
-      Uri: http://localhost/api/v2/basic/string,
-      Headers: {
-        Authorization: Bearer [Scrubbed Token]
       }
     }
   }

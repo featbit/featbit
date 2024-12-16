@@ -63,13 +63,13 @@ Bind the port 8081 or any other available port to 80.
 
 ### Build docker image and run container from the source code
 ```
-docker build -t featbit/ui .
-docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/ui
+docker build -t featbit/ui:local .
+docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/ui:local
 ```
 
 ### Run docker container from our prebuilt docker hub image
 ```
-docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbitdocker/featbit-ui:latest
+docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/featbit-ui:latest
 ```
 
 Then go to http://localhost:8081
