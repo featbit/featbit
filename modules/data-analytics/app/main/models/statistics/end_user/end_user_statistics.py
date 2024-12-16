@@ -25,7 +25,7 @@ class EndUserParams:
         self.__start = to_UTC_datetime(start_time)
         self.__end = to_UTC_datetime(end_time) if end_time else datetime.utcnow()
         self.__variation = variation
-        self.__user_search_key = f'%{user_search_key}%' if user_search_key else None
+        self.__user_search_key = f'{user_search_key}' if user_search_key else None
         self.__page = page if page is not None else 0
         self.__limit = limit if limit is not None else 10
 
