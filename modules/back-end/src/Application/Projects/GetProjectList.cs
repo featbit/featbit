@@ -18,6 +18,7 @@ public class GetProjectListHandler : IRequestHandler<GetProjectList, IEnumerable
     
     public async Task<IEnumerable<ProjectWithEnvs>> Handle(GetProjectList request, CancellationToken cancellationToken)
     {
-        return await _service.GetListAsync(request.OrganizationId);
+        var projects = await _service.GetListAsync(request.OrganizationId);
+        return projects.OrderBy(x => x.Name);
     }
 }
