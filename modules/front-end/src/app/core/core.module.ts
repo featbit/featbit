@@ -102,6 +102,7 @@ import { ResourceFinderComponent } from './components/resource-finder/resource-f
 import { ImportUserComponent } from './components/import-user/import-user.component';
 import { EndUserDrawerComponent } from './components/end-user-drawer/end-user-drawer.component';
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
+import { SegmentCreationModalComponent } from './components/segment-creation-modal/segment-creation-modal.component';
 
 @NgModule({
   declarations: [
@@ -144,7 +145,8 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     WebhookDeliveriesComponent,
     ResourceFinderComponent,
     ImportUserComponent,
-    EndUserDrawerComponent
+    EndUserDrawerComponent,
+    SegmentCreationModalComponent
   ],
   imports: [
     CommonModule,
@@ -248,7 +250,8 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     WebhookDeliveriesComponent,
     ResourceFinderComponent,
     ImportUserComponent,
-    EndUserDrawerComponent
+    EndUserDrawerComponent,
+    SegmentCreationModalComponent
   ]
 })
 export class CoreModule {
