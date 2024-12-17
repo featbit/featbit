@@ -15,7 +15,7 @@ AND timestamp < %(end)s
 ORDER BY timestamp DESC"""
 
 VARIATION_CLAUSE = """AND tag_1 = %(variation)s"""
-USER_CLAUSE = """AND (tag_0 ILIKE '%%' || %(user_search_key)s || '%%' OR tag_3 ILIKE '%%' || %(user_search_key)s || '%%'"""
+USER_CLAUSE = """AND (tag_0 ILIKE %(user_search_key)s OR tag_3 ILIKE %(user_search_key)s"""
 
 GET_USERS_STATISTICS_SQL = """WITH users_cte AS
 (
