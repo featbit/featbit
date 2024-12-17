@@ -34,7 +34,8 @@ export class ProjectService {
       });
 
       return project;
-    }).filter((project) => project.environments.length);
+    }).filter((project) => project.environments.length)
+    .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   get(projectId: string): Observable<IProject> {
