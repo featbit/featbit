@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Domain.Organizations;
 using Domain.Policies;
 
@@ -10,6 +11,8 @@ public class CreateOrganization : IRequest<OrganizationVm>
 
     public string Name { get; set; }
 
+    public string Key { get; set; }
+
     public Guid CurrentUserId { get; set; }
 }
 
@@ -19,6 +22,9 @@ public class CreateOrganizationValidator : AbstractValidator<CreateOrganization>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
+
+        RuleFor(x => x.Key)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("key"));
     }
 }
 
@@ -35,8 +41,14 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
 
     public async Task<OrganizationVm> Handle(CreateOrganization request, CancellationToken cancellationToken)
     {
+        var keyHasBeenUsed = await _service.HasKeyBeenUsedAsync(request.WorkspaceId, request.Key);
+        if (keyHasBeenUsed)
+        {
+            throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
+        }
+
         // add new organization
-        var organization = new Organization(request.WorkspaceId, request.Name);
+        var organization = new Organization(request.WorkspaceId, request.Name, request.Key);
         await _service.AddOneAsync(organization);
 
         // add user to organization

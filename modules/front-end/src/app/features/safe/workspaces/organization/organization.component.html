@@ -1,9 +1,13 @@
 <div class="standard-div rows">
   <div class="row">
-    <div class="row-title" i18n="@@org.org.orgName">Name</div>
-    <form class="row-content" nz-form [formGroup]="validateOrgForm" [nzLayout]="'inline'" (ngSubmit)="submitOrgForm()">
+    <div class="row-title">
+      <span i18n="@@common.name">Name</span>
+      <nz-tag nzColor="blue">Key: {{currentOrganization.key}}</nz-tag>
+    </div>
+
+    <form class="row-content" nz-form [formGroup]="organizationForm" [nzLayout]="'inline'" (ngSubmit)="updateOrganizationName()">
       <nz-form-item class="extend">
-        <nz-form-control nzErrorTip="Organization name is mandatory!" i18n-nzErrorTip="@@org.org.orgMandatory">
+        <nz-form-control nzErrorTip="Name cannot be empty" i18n-nzErrorTip="@@common.name-cannot-be-empty">
           <nz-input-group class="row-input-group" [nzPrefix]="orgIcon">
             <input type="text" nz-input formControlName="name" placeholder="Organization name" i18n-placeholder="@@org.org.orgNamePlaceholder"/>
             <ng-template #orgIcon>

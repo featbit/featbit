@@ -21,7 +21,7 @@ export class OrganizationComponent implements OnInit {
 
   creatOrganizationFormVisible: boolean = false;
 
-  validateOrgForm!: FormGroup;
+  organizationForm!: FormGroup;
   defaultPermissionsForm!: FormGroup;
 
   currentOrganization: IOrganization;
@@ -68,8 +68,18 @@ export class OrganizationComponent implements OnInit {
     const currentOrganizationId = getCurrentOrganization().id;
     this.currentOrganization = this.allOrganizations.find(x => x.id == currentOrganizationId);
     this.license = getCurrentLicense();
-    this.initOrgForm();
-    this.initDefaultPermissionsForm();
+
+    this.organizationForm = new FormGroup({
+      name: new FormControl(this.currentOrganization.name, [ Validators.required ]),
+    });
+
+    this.defaultPermissionsForm = new FormGroup(
+      {
+        policyId: new FormControl(this.currentOrganization.defaultPermissions.policyIds?.[0], []),
+        groupId: new FormControl(this.currentOrganization.defaultPermissions.groupIds?.[0], []),
+      },
+      { validators: this.permissionsValidator }
+    );
   }
 
   getPolicies(query?: string) {
@@ -96,22 +106,6 @@ export class OrganizationComponent implements OnInit {
       },
       error: () => this.isGroupsLoading = false
     });
-  }
-
-  initOrgForm() {
-    this.validateOrgForm = new FormGroup({
-      name: new FormControl(this.currentOrganization.name, [Validators.required]),
-    });
-  }
-
-  initDefaultPermissionsForm() {
-    this.defaultPermissionsForm = new FormGroup(
-      {
-        policyId: new FormControl(this.currentOrganization.defaultPermissions.policyIds?.[0], []),
-        groupId: new FormControl(this.currentOrganization.defaultPermissions.groupIds?.[0], []),
-      },
-      { validators: this.permissionsValidator }
-    );
   }
 
   permissionsValidator(form: FormGroup) {
@@ -144,7 +138,7 @@ export class OrganizationComponent implements OnInit {
       groupIds: groupId ? [ groupId ] : [],
     }
 
-    const { id, initialized, name } = this.currentOrganization;
+    const { id, initialized, name, key } = this.currentOrganization;
 
     this.isDefaultPermissionsLoading = true;
     this.organizationService.update({ name, defaultPermissions })
@@ -152,7 +146,7 @@ export class OrganizationComponent implements OnInit {
       next: () => {
         this.isDefaultPermissionsLoading = false;
         this.message.success($localize`:@@org.org.orgDefaultPermissionsUpdateSuccess:Default permissions updated!`);
-        this.organizationService.setOrganization({ id, initialized, name, defaultPermissions });
+        this.organizationService.setOrganization({ id, initialized, name, key, defaultPermissions });
         this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
       },
       error: () => {
@@ -180,21 +174,22 @@ export class OrganizationComponent implements OnInit {
     window.location.reload();
   }
 
-  submitOrgForm() {
+  updateOrganizationName() {
     if (!this.canUpdateOrgName) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
     }
 
-    if (this.validateOrgForm.invalid) {
-      for (const i in this.validateOrgForm.controls) {
-        this.validateOrgForm.controls[i].markAsDirty();
-        this.validateOrgForm.controls[i].updateValueAndValidity();
+    if (this.organizationForm.invalid) {
+      for (const i in this.organizationForm.controls) {
+        this.organizationForm.controls[i].markAsDirty();
+        this.organizationForm.controls[i].updateValueAndValidity();
       }
       return;
     }
-    const { name } = this.validateOrgForm.value;
-    const { id, initialized, defaultPermissions} = this.currentOrganization;
+
+    const { name } = this.organizationForm.value;
+    const { id, initialized, key, defaultPermissions} = this.currentOrganization;
 
     this.isLoading = true;
     this.organizationService.update({ name, defaultPermissions })
@@ -202,7 +197,7 @@ export class OrganizationComponent implements OnInit {
         next: () => {
           this.isLoading = false;
           this.message.success($localize`:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
-          this.organizationService.setOrganization({ id, initialized, name, defaultPermissions });
+          this.organizationService.setOrganization({ id, initialized, name, key, defaultPermissions });
           this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
         },
         error: () => {

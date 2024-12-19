@@ -27,7 +27,7 @@
                     <div class="desc-content">{{env.name}}</div>
                   </div>
                   <div>
-                    <div class="desc-name"><span>Key</span> <i nz-icon i18n-nz-tooltip="@@common.key-input-description" nz-tooltip="We use the key to give you friendly URLs. Keys should only contain letters, numbers, ., _ or -." nzType="icons:icon-info-outline"></i></div>
+                    <div class="desc-name"><span>Key</span> <i nz-icon i18n-nz-tooltip="@@common.key-input-description" nz-tooltip="We use the key to give you friendly URLs & RNs. Keys should only contain letters, numbers, ., _ or -." nzType="icons:icon-info-outline"></i></div>
                     <div class="desc-content">{{env.key}}</div>
                   </div>
                   <div>
@@ -96,7 +96,7 @@
       <ng-template #titleTemplate>
         <div class="project-header">
           <span>{{project.name}}</span>
-          <nz-tag nzColor="blue">key: {{project.key}}</nz-tag>
+          <nz-tag nzColor="blue">Key: {{project.key}}</nz-tag>
           <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
         </div>
       </ng-template>

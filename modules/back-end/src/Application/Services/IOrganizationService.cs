@@ -8,6 +8,8 @@ public interface IOrganizationService : IService<Organization>
 
     Task<ICollection<Organization>> GetListAsync(Guid userId);
 
+    Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key);
+
     Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid> policies = null,

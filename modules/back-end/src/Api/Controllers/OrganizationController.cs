@@ -29,6 +29,19 @@ public class OrganizationController : ApiControllerBase
         return Ok(vms);
     }
 
+    [HttpGet("is-key-used")]
+    public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
+    {
+        var request = new IsKeyUsed
+        {
+            WorkspaceId = WorkspaceId,
+            Key = key
+        };
+
+        var isUsed = await Mediator.Send(request);
+        return Ok(isUsed);
+    }
+
     [HttpPost]
     [Authorize(LicenseFeatures.MultiOrg)]
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)

@@ -82,6 +82,7 @@ export interface IOrganization {
   id: string,
   initialized: boolean,
   name: string,
+  key: string,
   defaultPermissions: IOrganizationPermissions
 }
 
@@ -106,7 +107,7 @@ export interface ILicense {
 
 export class License {
   data: ILicense;
-  constructor(private licenseStr: string) {
+  constructor(licenseStr: string) {
     this.data = licenseStr ? JSON.parse(atob(licenseStr.split('.')[1])): null;
   }
 
