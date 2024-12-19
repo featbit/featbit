@@ -1,10 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IOnboarding, IOrganization } from '@shared/types';
 import { ProjectService } from './project.service';
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
+import { catchError } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,12 @@ export class OrganizationService {
 
   async getListAsync(isSsoFirstLogin: boolean = false): Promise<IOrganization[]> {
     return firstValueFrom(this.http.get<IOrganization[]>(`${this.baseUrl}?isSsoFirstLogin=${isSsoFirstLogin}`));
+  }
+
+  isKeyUsed(key: string): Observable<boolean> {
+    const url = `${this.baseUrl}/is-key-used?key=${key}`;
+
+    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
   create(params: any): Observable<any> {
@@ -58,6 +65,7 @@ export class OrganizationService {
     if (!!organization) {
       const currentOrganization = this.organizations.find(ws => ws.id == organization.id);
       currentOrganization.name = organization.name;
+      currentOrganization.key = organization.key;
       currentOrganization.initialized = organization.initialized;
       currentOrganization.defaultPermissions = organization.defaultPermissions;
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrganization));

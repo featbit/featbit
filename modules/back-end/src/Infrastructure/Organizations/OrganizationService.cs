@@ -52,6 +52,14 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
         return await query.ToListAsync();
     }
 
+    public async Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key)
+    {
+        return await AnyAsync(organization =>
+            organization.WorkspaceId == workspaceId &&
+            string.Equals(organization.Key, key, StringComparison.OrdinalIgnoreCase)
+        );
+    }
+
     public async Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid>? policies,

@@ -6,16 +6,19 @@ public class Organization : AuditedEntity
 
     public string Name { get; set; }
 
+    public string Key { get; set; }
+
     public bool Initialized { get; set; }
 
     public string License { get; set; }
 
     public OrganizationPermissions DefaultPermissions { get; set; }
 
-    public Organization(Guid workspaceId, string name)
+    public Organization(Guid workspaceId, string name, string key)
     {
         WorkspaceId = workspaceId;
         Name = name;
+        Key = key;
         Initialized = false;
         License = string.Empty;
         DefaultPermissions = new OrganizationPermissions();
@@ -29,9 +32,10 @@ public class Organization : AuditedEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Initialize(string name)
+    public void Initialize(string name, string key)
     {
         Name = name;
+        Key = key;
         Initialized = true;
 
         UpdatedAt = DateTime.UtcNow;
