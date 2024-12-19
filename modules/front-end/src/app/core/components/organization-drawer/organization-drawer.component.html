@@ -8,14 +8,33 @@
   nzTitle="Create organization"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
-    <form nz-form [formGroup]="orgForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+    <form nz-form [formGroup]="form" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control i18n-nzErrorTip="@@org.org.orgMandatory" nzErrorTip="Organization name is mandatory!">
+        <nz-form-control
+          nzHasFeedback
+          nzErrorTip="Name cannot be empty"
+          i18n-nzErrorTip="@@common.name-cannot-be-empty">
           <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-form-control>
       </nz-form-item>
-      <button nz-button class="submit-btn" nzType="primary" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
+      <nz-form-item>
+        <nz-form-label
+          nzRequired
+          i18n-nzTooltipTitle="@@common.key-input-description"
+          nzTooltipTitle="We use the key to give you friendly URLs & RNs. Keys should only contain letters, numbers, ., _ or -.">
+          Key
+        </nz-form-label>
+        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
+          <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name"/>
+          <ng-template #keyErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+      <button [disabled]="!form.valid" nz-button class="submit-btn" nzType="primary" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
     </form>
   </ng-container>
   <ng-template #extra>

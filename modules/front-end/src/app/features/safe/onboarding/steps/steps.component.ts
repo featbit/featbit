@@ -61,6 +61,7 @@ export class StepsComponent implements OnInit {
           id: this.currentOrganizationId,
           initialized: true,
           name: organizationName,
+          key: slugify(organizationName),
           defaultPermissions: this.organizationPermission
         });
 
