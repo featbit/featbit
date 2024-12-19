@@ -48,10 +48,12 @@ export class StepsComponent implements OnInit {
 
   done(): void {
     const { organizationName, projectKey, projectName } = this.form.value;
+    const organizationKey = slugify(organizationName);
     const payload = {
       organizationName,
       projectName,
       projectKey,
+      organizationKey,
       environments: ['Dev', 'Prod']
     };
 
@@ -61,7 +63,7 @@ export class StepsComponent implements OnInit {
           id: this.currentOrganizationId,
           initialized: true,
           name: organizationName,
-          key: slugify(organizationName),
+          key: organizationKey,
           defaultPermissions: this.organizationPermission
         });
 
