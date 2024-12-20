@@ -118,6 +118,7 @@ export class License {
 
 export interface IOnboarding {
   organizationName: string,
+  organizationKey: string,
   projectName: string,
   projectKey: string,
   environments: string[]

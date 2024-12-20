@@ -51,9 +51,9 @@ export class StepsComponent implements OnInit {
     const organizationKey = slugify(organizationName);
     const payload = {
       organizationName,
+      organizationKey,
       projectName,
       projectKey,
-      organizationKey,
       environments: ['Dev', 'Prod']
     };
 
