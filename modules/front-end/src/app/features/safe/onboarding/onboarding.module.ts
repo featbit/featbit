@@ -11,8 +11,6 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
 import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import {CoreModule} from "@core/core.module";
-import { NzFormModule } from "ng-zorro-antd/form";
-import { NzGridModule } from "ng-zorro-antd/grid";
 
 @NgModule({
   declarations: [
@@ -29,9 +27,7 @@ import { NzGridModule } from "ng-zorro-antd/grid";
     OnboardingRoutingModule,
     NzDividerModule,
     NzIconModule,
-    NzToolTipModule,
-    NzFormModule,
-    NzGridModule
+    NzToolTipModule
   ],
   providers: [
   ]

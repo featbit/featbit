@@ -217,22 +217,6 @@
           <context context-type="linenumber">59</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">20</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">43</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">48</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
           <context context-type="linenumber">31</context>
         </context-group>
@@ -318,14 +302,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">63</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">58</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -910,7 +886,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">77</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -1927,14 +1903,6 @@
           <context context-type="linenumber">32</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">27</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">55</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
           <context context-type="linenumber">30</context>
         </context-group>
@@ -1961,14 +1929,6 @@
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">64</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
       </trans-unit>
       <trans-unit id="common.key-cannot-be-empty" datatype="html">
         <source>Key cannot be empty</source>
@@ -1991,14 +1951,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">66</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">33</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">61</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
@@ -2028,14 +1980,6 @@
           <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">34</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">62</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
           <context context-type="linenumber">26</context>
         </context-group>
@@ -2061,14 +2005,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">69</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">35</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">63</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
@@ -2569,14 +2505,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
           <context context-type="linenumber">47</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">46</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -4641,7 +4569,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">16</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.agents" datatype="html">
@@ -8584,7 +8512,7 @@
         <source>Complete</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">26</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.click-to-view-agents-status" datatype="html">
