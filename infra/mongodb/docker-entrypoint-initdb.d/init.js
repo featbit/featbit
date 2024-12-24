@@ -60,6 +60,7 @@ db.Organizations.insertOne(
         _id: organizationId,
         workspaceId: workspaceId,
         name: "playground",
+        key: "playground",
         initialized: false,
         createdAt: new Date(),
         updatedAt: new Date()
