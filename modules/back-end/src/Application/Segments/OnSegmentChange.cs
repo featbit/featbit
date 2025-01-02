@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Application.Caches;
 using Domain.AuditLogs;
 using Domain.Messages;
@@ -9,8 +11,6 @@ public class OnSegmentChange : INotification
 {
     public Segment Segment { get; set; }
 
-    public IEnumerable<Guid> AffectedFlagIds { get; set; }
-
     public string Operation { get; set; }
 
     public DataChange DataChange { get; set; }
@@ -19,26 +19,14 @@ public class OnSegmentChange : INotification
 
     public string Comment { get; set; }
 
-    public OnSegmentChange(Segment segment, string operation, DataChange dataChange, Guid operatorId, string comment = "")
-    {
-        Segment = segment;
-        AffectedFlagIds = Array.Empty<Guid>();
-        Operation = operation;
-        DataChange = dataChange;
-        OperatorId = operatorId;
-        Comment = comment;
-    }
-
     public OnSegmentChange(
         Segment segment,
-        IEnumerable<Guid> affectedFlagIds,
         string operation,
         DataChange dataChange,
         Guid operatorId,
         string comment = "")
     {
         Segment = segment;
-        AffectedFlagIds = affectedFlagIds;
         Operation = operation;
         DataChange = dataChange;
         OperatorId = operatorId;
@@ -55,17 +43,23 @@ public class OnSegmentChange : INotification
 
 public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
 {
+    private readonly ISegmentService _segmentService;
+    private readonly ISegmentAppService _segmentAppService;
     private readonly IMessageProducer _messageProducer;
     private readonly ICacheService _cache;
     private readonly IAuditLogService _auditLogService;
     private readonly IWebhookHandler _webhookHandler;
 
     public OnSegmentChangeHandler(
+        ISegmentService segmentService,
+        ISegmentAppService segmentAppService,
         IMessageProducer messageProducer,
         ICacheService cache,
         IAuditLogService auditLogService,
         IWebhookHandler webhookHandler)
     {
+        _segmentService = segmentService;
+        _segmentAppService = segmentAppService;
         _messageProducer = messageProducer;
         _cache = cache;
         _auditLogService = auditLogService;
@@ -77,13 +71,46 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
         // write audit log
         await _auditLogService.AddOneAsync(notification.GetAuditLog());
 
-        // update cache
-        await _cache.UpsertSegmentAsync(notification.Segment);
+        var segment = notification.Segment;
 
-        // publish segment change message
-        await _messageProducer.PublishAsync(Topics.SegmentChange, notification);
+        // update cache and publish change message
+        var envIds = await _segmentAppService.GetEnvironmentIdsAsync(segment);
+        await _cache.UpsertSegmentAsync(envIds, segment);
+
+        foreach (var envId in envIds)
+        {
+            await PublishSegmentChangeMessage(envId);
+        }
 
         // handle webhooks
-        _ = _webhookHandler.HandleAsync(notification.Segment, notification.DataChange, notification.OperatorId);
+        if (segment.IsEnvironmentSpecific)
+        {
+            _ = _webhookHandler.HandleAsync(
+                segment,
+                notification.DataChange,
+                notification.OperatorId
+            );
+        }
+
+        return;
+
+        async Task PublishSegmentChangeMessage(Guid envId)
+        {
+            var hasNoFlagReferences =
+                notification.Operation is Operations.Archive or Operations.Restore or Operations.Create;
+
+            var flagReferences = hasNoFlagReferences
+                ? []
+                : await _segmentService.GetFlagReferencesAsync(envId, segment.Id);
+
+            JsonObject message = new()
+            {
+                ["envId"] = envId.ToString(),
+                ["segment"] = segment.SerializeAsEnvironmentSpecific(),
+                ["affectedFlagIds"] = JsonSerializer.SerializeToNode(flagReferences)
+            };
+
+            await _messageProducer.PublishAsync(Topics.SegmentChange, message);
+        }
     }
 }

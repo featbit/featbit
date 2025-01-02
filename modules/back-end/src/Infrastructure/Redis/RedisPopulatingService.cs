@@ -18,6 +18,7 @@ public class RedisPopulatingService : ICachePopulatingService
     private readonly MongoDbClient _mongodb;
     private readonly ICacheService _cache;
     private readonly IEnvironmentService _envService;
+    private readonly ISegmentAppService _segmentAppService;
     private readonly ILogger<RedisPopulatingService> _logger;
 
     public RedisPopulatingService(
@@ -25,12 +26,14 @@ public class RedisPopulatingService : ICachePopulatingService
         MongoDbClient mongodb,
         ICacheService cache,
         IEnvironmentService envService,
+        ISegmentAppService segmentAppService,
         ILogger<RedisPopulatingService> logger)
     {
         _redis = redis.GetDatabase();
         _mongodb = mongodb;
         _cache = cache;
         _envService = envService;
+        _segmentAppService = segmentAppService;
         _logger = logger;
     }
 
@@ -86,7 +89,8 @@ public class RedisPopulatingService : ICachePopulatingService
         var segments = await _mongodb.QueryableOf<Segment>().ToListAsync();
         foreach (var segment in segments)
         {
-            await _cache.UpsertSegmentAsync(segment);
+            var envIds = await _segmentAppService.GetEnvironmentIdsAsync(segment);
+            await _cache.UpsertSegmentAsync(envIds, segment);
         }
 
         _logger.LogInformation("populate segment success, total count: {Total}", segments.Count);

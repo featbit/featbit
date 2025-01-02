@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Domain.AuditLogs;
 using Domain.EndUsers;
 using Domain.Targeting;
@@ -6,6 +8,8 @@ namespace Domain.Segments;
 
 public class Segment : AuditedEntity
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Name { get; set; }
@@ -24,7 +28,10 @@ public class Segment : AuditedEntity
 
     public bool IsArchived { get; set; }
 
+    public bool IsEnvironmentSpecific => Type == SegmentType.EnvironmentSpecific;
+
     public Segment(
+        Guid workspaceId,
         Guid envId,
         string name,
         string type,
@@ -34,6 +41,7 @@ public class Segment : AuditedEntity
         ICollection<MatchRule> rules,
         string description)
     {
+        WorkspaceId = workspaceId;
         EnvId = envId;
         Name = name;
         Type = type;
@@ -103,5 +111,19 @@ public class Segment : AuditedEntity
         return Rules.Any(
             rule => rule.Conditions.All(condition => condition.IsMatch(user))
         );
+    }
+
+    public JsonObject SerializeAsEnvironmentSpecific()
+    {
+        var json = JsonSerializer.SerializeToNode(this, ReusableJsonSerializerOptions.Web)!.AsObject();
+
+        var envId = Type == SegmentType.EnvironmentSpecific ? EnvId.ToString() : string.Empty;
+        json["envId"] = envId;
+
+        json.Remove("workspaceId");
+        json.Remove("scopes");
+        json.Remove("isEnvironmentSpecific");
+
+        return json;
     }
 }

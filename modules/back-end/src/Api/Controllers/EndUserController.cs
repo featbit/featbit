@@ -79,6 +79,7 @@ public class EndUserController : ApiControllerBase
     {
         var request = new GetEndUserSegments
         {
+            WorkspaceId = WorkspaceId,
             EnvId = envId,
             Id = id
         };

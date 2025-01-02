@@ -7,13 +7,15 @@ namespace Application.Segments;
 
 public class CreateSegment : SegmentBase, IRequest<Segment>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Type { get; set; }
 
     public Segment AsSegment()
     {
-        return new Segment(EnvId, Name, Type, Scopes, Included, Excluded, Rules, Description);
+        return new Segment(WorkspaceId, EnvId, Name, Type, Scopes, Included, Excluded, Rules, Description);
     }
 }
 

@@ -42,10 +42,7 @@ public class UpdateSegmentHandler : IRequestHandler<UpdateSegment, Segment>
         await _service.UpdateAsync(segment);
 
         // publish segment updated notification
-        var flagReferences = await _service.GetFlagReferencesAsync(segment.EnvId, segment.Id);
-        var notification = new OnSegmentChange(
-            segment, flagReferences.Select(x => x.Id), Operations.Update, dataChange, _currentUser.Id, request.Comment
-        );
+        var notification = new OnSegmentChange(segment, Operations.Update, dataChange, _currentUser.Id, request.Comment);
         await _publisher.Publish(notification, cancellationToken);
 
         return segment;
