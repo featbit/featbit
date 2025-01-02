@@ -54,9 +54,9 @@ export class PermissionsService {
   //   return regex.test(str);
   // }
 
-  getProjectRN = (project: IProject) => `${ResourceTypeEnum.Project}/${project.name}`;
+  getProjectRN = (project: IProject) => `${ResourceTypeEnum.Project}/${project.key}`;
 
-  getEnvRN = (project: IProject, env: IEnvironment) => `${ResourceTypeEnum.Project}/${project.name}:${ResourceTypeEnum.Env}/${env.name}`;
+  getEnvRN = (project: IProject, env: IEnvironment) => `${ResourceTypeEnum.Project}/${project.key}:${ResourceTypeEnum.Env}/${env.key}`;
 
   private getMatchedPermissions(rn: string, action: IamPolicyAction): IPolicyStatement[] {
     return this.userPermissions.filter(permission => {

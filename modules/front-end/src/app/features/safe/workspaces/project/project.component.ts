@@ -319,7 +319,11 @@ export class ProjectComponent implements OnInit {
       return '';
     }
 
-    return this.permissionsService.getEnvRN(project, env as IEnvironment);
+    if (!!env.id) { // editing
+      return this.permissionsService.getEnvRN(project, env as IEnvironment);
+    }
+
+    return this.permissionsService.getProjectRN(project);
   }
 
   private envSecretsChanged(env: IEnvironment) {
