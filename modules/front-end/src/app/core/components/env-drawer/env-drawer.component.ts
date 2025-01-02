@@ -3,7 +3,6 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IEnvironment } from '@shared/types';
 import { EnvService } from '@services/env.service';
-import { ProjectService } from "@services/project.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
@@ -25,18 +24,18 @@ export class EnvDrawerComponent {
   isLoading: boolean = false;
 
   @Input()
-  set env(env: IEnvironment) {
-    this.isEditing = env && !!env.id;
+  set env(data: IEnvironment) {
+    this.isEditing = data && !!data.id;
     if (this.isEditing) {
       this.title = $localize`:@@org.project.editEnv:Edit environment`;
       this.initForm(true);
-      this.patchForm(env);
+      this.patchForm(data);
     } else {
       this.title = $localize`:@@org.project.addEnv:Add environment`;
       this.initForm(false);
       this.resetForm();
     }
-    this._env = env;
+    this._env = data;
   }
 
   get env() {
@@ -52,7 +51,6 @@ export class EnvDrawerComponent {
     private fb: FormBuilder,
     private envService: EnvService,
     private message: NzMessageService,
-    private projectSrv: ProjectService,
     private permissionsService: PermissionsService
   ) {
   }
@@ -120,7 +118,7 @@ export class EnvDrawerComponent {
 
     this.isLoading = true;
 
-    const {name, key, description} = this.envForm.value;
+    const {name, key, description} = this.envForm.getRawValue();
     const projectId = this.env.projectId;
 
     if (this.isEditing) {
@@ -163,7 +161,7 @@ export class EnvDrawerComponent {
     }
 
     if (!this.isEditing) { // creation
-      return this.permissionsService.isGranted(generalResourceRNPattern.project, permissionActions.CreateEnv);
+      return this.permissionsService.isGranted(this.rn, permissionActions.CreateEnv);
     } else {
       return this.permissionsService.isGranted(this.rn, permissionActions.UpdateEnvSettings);
     }

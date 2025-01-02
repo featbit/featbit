@@ -8,15 +8,6 @@
   <ng-container *nzDrawerContent>
     <message *ngIf="!isGranted()" [type]="'warning'" [content]="permissionDenyMsg"></message>
 
-    <nz-alert
-      *ngIf="isEditing"
-      nzType="warning"
-      i18n-nzDescription="@@org.project.permission-will-become-invalid-if-change-name"
-      nzDescription="Permission will become invalid if you change the name"
-      nzShowIcon
-      nzIconType="icons:icon-warning"
-    ></nz-alert>
-
     <form nz-form [formGroup]="envForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
