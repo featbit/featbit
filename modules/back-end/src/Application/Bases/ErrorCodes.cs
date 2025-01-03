@@ -12,6 +12,7 @@ public static class ErrorCodes
     public const string InvalidJson = nameof(InvalidJson);
     public const string NameHasBeenUsed = nameof(NameHasBeenUsed);
     public const string EntityExistsAlready = nameof(EntityExistsAlready);
+    public const string InconsistentData = nameof(InconsistentData);
 
     // identity error codes
     public const string EmailPasswordMismatch = nameof(EmailPasswordMismatch);
@@ -26,16 +27,13 @@ public static class ErrorCodes
     // policy
     public const string CannotModifySysManagedPolicy = nameof(CannotModifySysManagedPolicy);
 
-    // resource
-    public const string TypeIsRequired = nameof(TypeIsRequired);
-
     // end user
     public const string KeyIdIsRequired = nameof(KeyIdIsRequired);
     public const string CannotModifyBuiltInProperty = nameof(CannotModifyBuiltInProperty);
 
     // segment
-    public const string SegmentCannotReferenceSegmentCondition = nameof(SegmentCannotReferenceSegmentCondition);
     public const string CannotDeleteUnArchivedSegment = nameof(CannotDeleteUnArchivedSegment);
+    public const string SegmentIsBeingUsed = nameof(SegmentIsBeingUsed);
 
     // feature flag
     public const string CannotDeleteUnArchivedFeatureFlag = nameof(CannotDeleteUnArchivedFeatureFlag);

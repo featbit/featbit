@@ -38,7 +38,16 @@
 
   .edit-save {
     cursor: pointer;
-    margin-left: 8px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+
+    i {
+      cursor: pointer;
+    }
   }
 
   .title {
@@ -49,6 +58,7 @@
     line-height: 150%;
     color: @grey70-color;
     height: 30px;
+    gap: 8px;
 
     .text {
       display: inline-block;
@@ -58,7 +68,6 @@
       max-width: 221px;
     }
     input {
-      width: 221px;
       border-radius: 8px;
     }
   }
@@ -133,11 +142,11 @@
     .edit-save {
       width: 100%;
       text-align: right;
-      padding-right:14px;
     }
 
     textarea {
       border-radius: 8px;
+      margin-bottom: 8px;
     }
   }
 

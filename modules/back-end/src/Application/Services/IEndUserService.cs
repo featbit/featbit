@@ -6,7 +6,7 @@ namespace Application.Services;
 
 public interface IEndUserService : IService<EndUser>
 {
-    Task<PagedResult<EndUser>> GetListAsync(Guid envId, EndUserFilter filter);
+    Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter filter);
 
     Task<EndUser> UpsertAsync(EndUser user);
 

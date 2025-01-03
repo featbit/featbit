@@ -33,12 +33,4 @@ export class EnvUserPropService {
   archiveProp(id: string) {
     return this.http.delete(`${this.baseUrl}/${id}`, {});
   }
-
-  upsertTag(tagId: string, source: string, requestProperty: string, userProperty: string) {
-    return this.http.put(`${this.baseUrl}/tags/${tagId}/upsert`, { source, requestProperty, userProperty });
-  }
-
-  archiveTag(tagId: string) {
-    return this.http.put(`${this.baseUrl}/tags/${tagId}/archive`, {});
-  }
 }

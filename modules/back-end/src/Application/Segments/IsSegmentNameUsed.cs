@@ -1,7 +1,13 @@
+using Domain.Segments;
+
 namespace Application.Segments;
 
 public class IsSegmentNameUsed : IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public string Type { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Name { get; set; }
@@ -18,6 +24,19 @@ public class IsSegmentNameUsedHandler : IRequestHandler<IsSegmentNameUsed, bool>
 
     public async Task<bool> Handle(IsSegmentNameUsed request, CancellationToken cancellationToken)
     {
-        return await _service.AnyAsync(x => !x.IsArchived && x.EnvId == request.EnvId && string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase));
+        if (request.Type == SegmentType.EnvironmentSpecific)
+        {
+            return await _service.AnyAsync(x =>
+                x.EnvId == request.EnvId &&
+                x.Type == SegmentType.EnvironmentSpecific &&
+                string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase)
+            );
+        }
+
+        return await _service.AnyAsync(x =>
+            x.WorkspaceId == request.WorkspaceId &&
+            x.Type == SegmentType.Shared &&
+            string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase)
+        );
     }
 }

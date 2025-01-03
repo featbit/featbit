@@ -49,11 +49,50 @@ public class MongoDbStore : IStore
 
     public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
     {
+        var envRN = await GetEnvRN();
+        if (string.IsNullOrWhiteSpace(envRN))
+        {
+            return [];
+        }
+
         var query = _mongodb.GetCollection<BsonDocument>("Segments")
-            .Find(x => x["envId"].AsGuid == envId && x["updatedAt"] > DateTime.UnixEpoch.AddMilliseconds(timestamp));
+            .Find(x => x["updatedAt"] > DateTime.UnixEpoch.AddMilliseconds(timestamp) &&
+                       ((BsonArray)x["scopes"]).Any(y => $"{envRN}:".StartsWith(string.Concat(y, ":"))));
 
         var segments = await query.ToListAsync();
         return segments.Select(x => x.ToJsonBytes());
+
+        async Task<string> GetEnvRN()
+        {
+            var rnQuery = _mongodb.GetCollection<BsonDocument>("Organizations").Aggregate()
+                .Lookup("Projects", "_id", "organizationId", "project")
+                .Unwind("project")
+                .Lookup("Environments", "project._id", "projectId", "env")
+                .Unwind("env")
+                .Match(x => x["env"]["_id"].AsGuid == envId)
+                .Project(new BsonDocument
+                {
+                    {
+                        "rn", new BsonDocument
+                        {
+                            {
+                                "$concat", new BsonArray
+                                {
+                                    "organization/",
+                                    "$key",
+                                    ":project/",
+                                    "$project.key",
+                                    ":env/",
+                                    "$env.key"
+                                }
+                            }
+                        }
+                    }
+                });
+
+            var document = await rnQuery.FirstOrDefaultAsync();
+            return document?["rn"].AsString ?? string.Empty;
+        }
     }
 
     public async Task<Secret?> GetSecretAsync(string secretString)

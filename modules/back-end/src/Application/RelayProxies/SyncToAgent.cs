@@ -1,9 +1,12 @@
 ﻿using Application.Bases.Exceptions;
+using Domain.Segments;
 
 namespace Application.RelayProxies;
 
 public class SyncToAgent : IRequest<SyncResult>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid RelayProxyId { get; set; }
 
     public string AgentId { get; set; }
@@ -13,21 +16,21 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
 {
     private readonly IRelayProxyService _relayProxyService;
     private readonly IProjectService _projectService;
+    private readonly IEnvironmentAppService _envAppService;
     private readonly IFeatureFlagService _featureFlagService;
-    private readonly ISegmentService _segmentService;
     private readonly IAgentService _agentService;
 
     public SyncToAgentHandler(
         IRelayProxyService relayProxyService,
         IProjectService projectService,
+        IEnvironmentAppService envAppService,
         IFeatureFlagService featureFlagService,
-        ISegmentService segmentService,
         IAgentService agentService)
     {
         _relayProxyService = relayProxyService;
         _projectService = projectService;
+        _envAppService = envAppService;
         _featureFlagService = featureFlagService;
-        _segmentService = segmentService;
         _agentService = agentService;
     }
 
@@ -73,14 +76,20 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
         async Task PerformSyncAsync()
         {
             var flags = await _featureFlagService.FindManyAsync(flag => envIds.Contains(flag.EnvId));
-            var segments = await _segmentService.FindManyAsync(segment => envIds.Contains(segment.EnvId));
+
+            var segments = new Dictionary<Guid, ICollection<Segment>>();
+            foreach (var envId in envIds)
+            {
+                var envSegments = await _envAppService.GetSegmentsAsync(request.WorkspaceId, envId);
+                segments[envId] = envSegments;
+            }
 
             var payload = envIds.Select(envId => new
             {
                 EnvId = envId,
                 Flags = flags.Where(flag => flag.EnvId == envId),
-                Segments = segments.Where(segment => segment.EnvId == envId)
-            }).ToList();
+                Segments = segments[envId]
+            });
 
             await _agentService.BootstrapAsync(agent.Host, relayProxy.Key, payload);
         }

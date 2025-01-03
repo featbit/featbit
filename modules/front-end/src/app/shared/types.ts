@@ -92,7 +92,8 @@ export enum LicenseFeatureEnum {
   Schedule = 'schedule',
   ChangeRequest = 'change-request',
   MultiOrg = 'multi-organization',
-  GlobalUser = 'global-user'
+  GlobalUser = 'global-user',
+  ShareableSegment = 'shareable-segment',
 }
 
 export interface ILicense {

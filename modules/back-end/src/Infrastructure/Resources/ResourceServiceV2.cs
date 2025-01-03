@@ -18,6 +18,17 @@ public class ResourceServiceV2 : IResourceServiceV2
         MongoDb = mongoDb;
     }
 
+    public async Task<string> GetRNAsync(Guid resourceId, string resourceType)
+    {
+        var rn = resourceType switch
+        {
+            ResourceTypes.Env => await GetEnvRnAsync(resourceId),
+            _ => string.Empty
+        };
+
+        return rn;
+    }
+
     public async Task<IEnumerable<ResourceV2>> GetResourcesAsync(Guid spaceId, ResourceFilterV2 filter)
     {
         var name = filter.Name;
@@ -54,7 +65,7 @@ public class ResourceServiceV2 : IResourceServiceV2
                 Id = x.Id,
                 Name = x.Name,
                 PathName = x.Name,
-                Rn = "organization/" + x.Name,
+                Rn = "organization/" + x.Key,
                 Type = ResourceTypes.Organization
             });
 
@@ -83,7 +94,7 @@ public class ResourceServiceV2 : IResourceServiceV2
                     Id = project.Id,
                     Name = project.Name,
                     PathName = organization.Name + "/" + project.Name,
-                    Rn = "organization/" + organization.Name + ":project/" + project.Key,
+                    Rn = "organization/" + organization.Key + ":project/" + project.Key,
                     Type = ResourceTypes.Project
                 };
 
@@ -101,7 +112,7 @@ public class ResourceServiceV2 : IResourceServiceV2
                     Id = project.Id,
                     Name = project.Name,
                     PathName = project.Name,
-                    Rn = "organization/" + organization.Name + ":project/" + project.Key,
+                    Rn = "organization/" + organization.Key + ":project/" + project.Key,
                     Type = ResourceTypes.Project
                 };
 
@@ -131,7 +142,7 @@ public class ResourceServiceV2 : IResourceServiceV2
                     Id = env.Id,
                     Name = env.Name,
                     PathName = organization.Name + "/" + project.Name + "/" + env.Name,
-                    Rn = "organization/" + organization.Name + ":project/" + project.Key + ":env/" + env.Key,
+                    Rn = "organization/" + organization.Key + ":project/" + project.Key + ":env/" + env.Key,
                     Type = ResourceTypes.Env
                 };
 
@@ -150,7 +161,7 @@ public class ResourceServiceV2 : IResourceServiceV2
                     Id = env.Id,
                     Name = env.Name,
                     PathName = project.Name + "/" + env.Name,
-                    Rn = "organization/" + organization.Name + ":project/" + project.Key + ":env/" + env.Key,
+                    Rn = "organization/" + organization.Key + ":project/" + project.Key + ":env/" + env.Key,
                     Type = ResourceTypes.Env
                 };
 
@@ -176,5 +187,21 @@ public class ResourceServiceV2 : IResourceServiceV2
         }
 
         return items;
+    }
+
+    private async Task<string> GetEnvRnAsync(Guid envId)
+    {
+        var query =
+            from organization in MongoDb.QueryableOf<Organization>()
+            join project in MongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
+            join env in MongoDb.QueryableOf<Environment>() on project.Id equals env.ProjectId
+            where env.Id == envId
+            select new
+            {
+                Rn = "organization/" + organization.Key + ":project/" + project.Key + ":env/" + env.Key,
+            };
+
+        var resource = await query.FirstOrDefaultAsync();
+        return resource.Rn;
     }
 }

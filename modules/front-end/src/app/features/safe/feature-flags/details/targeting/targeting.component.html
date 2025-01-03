@@ -86,7 +86,6 @@
           <div class="content" *ngFor="let variation of featureFlag.variations; let i = index">
             <target-user
               [type]="variation.name"
-              [tipIdx]="i"
               [userList]="userList"
               [selectedUserDetailList]="targetingUsersByVariation[variation.id]"
               (search)="onSearchUser($event)"

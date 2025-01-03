@@ -15,4 +15,6 @@ public class AuditLogFilter : PagedRequest
     public long? From { get; set; }
 
     public long? To { get; set; }
+
+    public bool? CrossEnvironment { get; set; }
 }

@@ -54,6 +54,7 @@ export class EnvUserService {
       properties: filter.properties || [],
       excludedKeyIds: filter.excludedKeyIds || [],
       includeGlobalUser: filter.includeGlobalUser ?? false,
+      globalUserOnly: filter.globalUserOnly ?? false,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };

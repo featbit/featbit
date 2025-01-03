@@ -31,16 +31,18 @@ public static class RedisCaches
     public static KeyValuePair<RedisKey, RedisValue> Segment(Segment segment)
     {
         var key = RedisKeys.Segment(segment.Id);
-        var value = JsonSerializer.SerializeToUtf8Bytes(segment, ReusableJsonSerializerOptions.Web);
+
+        var json = segment.SerializeAsEnvironmentSpecific();
+        var value = JsonSerializer.SerializeToUtf8Bytes(json);
 
         return new KeyValuePair<RedisKey, RedisValue>(key, value);
     }
 
-    public static RedisIndex SegmentIndex(Segment segment)
+    public static RedisIndex SegmentIndex(Guid envId, Segment segment)
     {
         var index = new RedisIndex
         {
-            Key = RedisKeys.SegmentIndex(segment.EnvId),
+            Key = RedisKeys.SegmentIndex(envId),
             Member = segment.Id.ToString(),
             Score = new DateTimeOffset(segment.UpdatedAt).ToUnixTimeMilliseconds()
         };

@@ -1,1 +1,6 @@
-<audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
+<ng-container *ngIf="!isLoading; else loading">
+  <audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
+</ng-container>
+<ng-template #loading>
+  <nz-skeleton [nzActive]="true"></nz-skeleton>
+</ng-template>

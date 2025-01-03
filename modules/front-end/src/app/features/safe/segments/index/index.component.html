@@ -11,7 +11,7 @@
         </ng-template>
       </div>
       <div class="middle-btn">
-        <button nz-button nzType="primary" (click)="addSegment()">
+        <button nz-button nzType="primary" (click)="showCreationModal()">
           <i nz-icon nzType="icons:icon-add"></i>
           <ng-container i18n="@@common.add">Add</ng-container>
         </button>
@@ -32,8 +32,17 @@
                 (nzPageIndexChange)="onSearch()">
         <thead>
           <tr>
-            <th nzWidth="35%" i18n="@@common.name">Name</th>
-            <th nzWidth="35%" i18n="@@common.last-updated">Last updated</th>
+            <th i18n="@@common.name">Name</th>
+            <th>
+              <span i18n="@@common.type" style="margin-right: 2px">Type</span>
+              <i style="cursor: pointer"
+                 nz-icon
+                 nz-tooltip="Shareable segment can be used across multiple environments while common segment can only be used in current environment."
+                 i18n-nz-tooltip="@@segment.segment-type-tip"
+                 nzType="icons:icon-info-outline">
+              </i>
+            </th>
+            <th i18n="@@common.last-updated">Last updated</th>
             <th i18n="@@common.actions">Actions</th>
           </tr>
         </thead>
@@ -41,6 +50,31 @@
           <tr *ngFor="let item of table.data">
             <td style="cursor: pointer;" (click)="onIntoSegmentDetail(item)">
               <span>{{item.name}}</span>
+            </td>
+            <td>
+              <nz-tag *ngIf="item.type === SegmentType.EnvironmentSpecific"
+                      style="cursor: pointer"
+                      nz-tooltip
+                      nzTooltipPlacement="topLeft"
+                      nzTooltipTitle="This segment can only be used in current environment"
+                      i18n-nzTooltipTitle="@@segment.index.current-segment-tooltip">
+                <span i18n="@@segment.current-environment">Current Environment</span>
+              </nz-tag>
+              <nz-tag *ngIf="item.type === SegmentType.Shared"
+                      style="cursor: pointer"
+                      nzColor="#23AD7F"
+                      nz-tooltip
+                      nzTooltipPlacement="topLeft"
+                      [nzTooltipOverlayStyle]="{'max-width': '300px'}"
+                      [nzTooltipTitle]="scopesTooltip">
+                <span i18n="@@segment.shareable">Shareable</span>
+              </nz-tag>
+              <ng-template #scopesTooltip>
+                <span i18n="@@common.shared-scopes">Shared Scopes</span>
+                <ul style="max-height: 100px; overflow: auto">
+                  <li *ngFor="let event of item.scopes;">{{ event }}</li>
+                </ul>
+              </ng-template>
             </td>
             <td>{{getLocalDate(item.updatedAt) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
             <td>
@@ -70,40 +104,10 @@
   </div>
 </section>
 
-<nz-modal [(nzVisible)]="createModalVisible"
-          [nzTitle]="modalTitle"
-          [nzCentered]="true"
-          [nzContent]="modalContent"
-  [nzFooter]="modalFooter" (nzOnCancel)="closeCreateModal()">
-  <ng-template #modalTitle><ng-container i18n="@@segment.idx.add-segment">Add segment</ng-container></ng-template>
-  <ng-template #modalContent>
-    <form nz-form [formGroup]="segmentForm" nzLayout="vertical">
-      <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="segmentNameErrorTpl">
-          <input nz-input formControlName="name" />
-          <ng-template #segmentNameErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">This name has been used</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
-          </ng-template>
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label i18n="@@common.description">Description</nz-form-label>
-        <nz-form-control>
-          <textarea style="resize: none" nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description"></textarea>
-        </nz-form-control>
-      </nz-form-item>
-    </form>
-  </ng-template>
-
-  <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!segmentForm.valid"
-      (click)="createSegment()" i18n="@@common.save">Save</button>
-  </ng-template>
-</nz-modal>
+<segment-creation-modal
+  [isVisible]="creationModalVisible"
+  (onClose)="closeCreationModal($event)"
+></segment-creation-modal>
 
 <nz-modal [(nzVisible)]="deleteArchiveModalVisible"
           [nzTitle]="deleteArchiveModalTitle"

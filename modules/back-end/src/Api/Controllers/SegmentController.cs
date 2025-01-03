@@ -47,6 +47,7 @@ public class SegmentController : ApiControllerBase
     {
         var request = new GetSegmentList
         {
+            WorkspaceId = WorkspaceId,
             EnvId = envId,
             Filter = filter
         };
@@ -77,6 +78,7 @@ public class SegmentController : ApiControllerBase
     [HttpPost]
     public async Task<ApiResponse<Segment>> CreateAsync(Guid envId, CreateSegment request)
     {
+        request.WorkspaceId = WorkspaceId;
         request.EnvId = envId;
 
         var segment = await Mediator.Send(request);
@@ -119,10 +121,11 @@ public class SegmentController : ApiControllerBase
     /// </summary>
     [OpenApi]
     [HttpPut("{id:guid}/archive")]
-    public async Task<ApiResponse<bool>> ArchiveAsync(Guid id)
+    public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, Guid id)
     {
         var request = new ArchiveSegment
         {
+            EnvId = envId,
             Id = id
         };
 
@@ -151,11 +154,10 @@ public class SegmentController : ApiControllerBase
     /// </summary>
     [OpenApi]
     [HttpDelete("{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
         var request = new DeleteSegment
         {
-            EnvId = envId,
             Id = id
         };
 
@@ -164,11 +166,13 @@ public class SegmentController : ApiControllerBase
     }
 
     [HttpGet("is-name-used")]
-    public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid envId, string name)
+    public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid envId, string name, string type)
     {
         var request = new IsSegmentNameUsed
         {
+            WorkspaceId = WorkspaceId,
             EnvId = envId,
+            Type = type,
             Name = name
         };
 

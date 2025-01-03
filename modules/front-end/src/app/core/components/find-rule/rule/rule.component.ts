@@ -3,7 +3,12 @@ import { isSegmentCondition, uuidv4 } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { findIndex, IRuleOp, ruleOps } from '../ruleConfig';
-import { ISegment, ISegmentListModel, SegmentListFilter } from '@features/safe/segments/types/segments-index';
+import {
+  ISegment,
+  ISegmentListModel,
+  SegmentListFilter,
+  SegmentType
+} from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { IUserProp } from "@shared/types";
 import { ICondition } from "@shared/rules";
@@ -215,4 +220,6 @@ export class RuleComponent {
 
     return description ?? value;
   }
+
+  protected readonly SegmentType = SegmentType;
 }

@@ -30,8 +30,7 @@ public class EnvironmentService : MongoDbService<Environment>, IEnvironmentServi
                 {
                     Id = organization.Id,
                     Name = organization.Name,
-                    // there is no organization key yet
-                    Key = ""
+                    Key = organization.Key
                 },
                 Project = new IdNameKeyProps
                 {

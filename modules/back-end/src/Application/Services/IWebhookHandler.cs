@@ -8,5 +8,5 @@ public interface IWebhookHandler
 {
     Task HandleAsync(FeatureFlag flag, DataChange dataChange, Guid operatorId);
 
-    Task HandleAsync(Segment segment, DataChange dataChange, Guid operatorId);
+    Task HandleAsync(Guid envId, Segment segment, DataChange dataChange, Guid operatorId);
 }

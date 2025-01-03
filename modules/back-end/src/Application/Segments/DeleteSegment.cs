@@ -6,8 +6,6 @@ namespace Application.Segments;
 
 public class DeleteSegment : IRequest<bool>
 {
-    public Guid EnvId { get; set; }
-
     public Guid Id { get; set; }
 }
 
