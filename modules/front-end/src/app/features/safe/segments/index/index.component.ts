@@ -3,7 +3,13 @@ import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { encodeURIComponentFfc, getPathPrefix } from '@shared/utils';
-import { SegmentListFilter, ISegment, ISegmentListModel, ISegmentFlagReference } from "../types/segments-index";
+import {
+  SegmentListFilter,
+  ISegment,
+  ISegmentListModel,
+  ISegmentFlagReference,
+  SegmentType
+} from "../types/segments-index";
 import { SegmentService } from "@services/segment.service";
 import { debounceTime } from 'rxjs/operators';
 
@@ -169,4 +175,6 @@ export class IndexComponent implements OnInit {
       }, 50);
     }
   }
+
+  protected readonly SegmentType = SegmentType;
 }

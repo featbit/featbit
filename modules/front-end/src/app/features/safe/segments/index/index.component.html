@@ -33,7 +33,15 @@
         <thead>
           <tr>
             <th i18n="@@common.name">Name</th>
-            <th i18n="@@common.type">Type</th>
+            <th>
+              <span i18n="@@common.type" style="margin-right: 2px">Type</span>
+              <i style="cursor: pointer"
+                 nz-icon
+                 nz-tooltip="Shared segment can be used across multiple environments while common segment can only be used in current environment."
+                 i18n-nz-tooltip="@@segment.segment-type-tip"
+                 nzType="icons:icon-info-outline">
+              </i>
+            </th>
             <th i18n="@@common.last-updated">Last updated</th>
             <th i18n="@@common.actions">Actions</th>
           </tr>
@@ -43,7 +51,31 @@
             <td style="cursor: pointer;" (click)="onIntoSegmentDetail(item)">
               <span>{{item.name}}</span>
             </td>
-            <td>{{item.type}}</td>
+            <td>
+              <nz-tag *ngIf="item.type === SegmentType.EnvironmentSpecific"
+                      style="cursor: pointer"
+                      nz-tooltip
+                      nzTooltipPlacement="topLeft"
+                      nzTooltipTitle="This segment can only be used in current environment"
+                      i18n-nzTooltipTitle="@@segment.index.current-segment-tooltip">
+                <span i18n="@@segment.current-environment">Current Environment</span>
+              </nz-tag>
+              <nz-tag *ngIf="item.type === SegmentType.Shared"
+                      style="cursor: pointer"
+                      nzColor="#23AD7F"
+                      nz-tooltip
+                      nzTooltipPlacement="topLeft"
+                      [nzTooltipOverlayStyle]="{'max-width': '300px'}"
+                      [nzTooltipTitle]="scopesTooltip">
+                <span i18n="@@segment.shared">Shared</span>
+              </nz-tag>
+              <ng-template #scopesTooltip>
+                <span i18n="@@common.shared-scopes">Shared Scopes</span>
+                <ul style="max-height: 100px; overflow: auto">
+                  <li *ngFor="let event of item.scopes;">{{ event }}</li>
+                </ul>
+              </ng-template>
+            </td>
             <td>{{getLocalDate(item.updatedAt) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
             <td>
               <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>

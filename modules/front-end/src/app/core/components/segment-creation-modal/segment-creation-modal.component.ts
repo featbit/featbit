@@ -35,8 +35,8 @@ export class SegmentCreationModalComponent {
 
   selectedType: SegmentType = SegmentType.EnvironmentSpecific;
   types: string[] = [
-    $localize`:@@segment.creation-modal.current-environment:Current Environment`,
-    $localize`:@@segment.creation-modal.shared:Shared`
+    $localize`:@@segment.current-environment:Current Environment`,
+    $localize`:@@segment.shared:Shared`
   ]
 
   typeChanged(type: number) {

@@ -7,14 +7,20 @@
 
   <div class="block" *ngIf="!isLoading; else loadingTem;">
     <div class="title">
-      <ng-container *ngIf="!isEditingTitle">
-        <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
-        <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
-      </ng-container>
-      <ng-container *ngIf="isEditingTitle">
-        <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
-        <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
-      </ng-container>
+      <nz-tag *ngIf="segmentDetail.type === SegmentType.Shared" nzColor="#23AD7F" i18n="@@segment.shared">Shared</nz-tag>
+      <div class="name">
+        <ng-container *ngIf="!isEditingTitle">
+          <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
+          <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+        </ng-container>
+        <ng-container *ngIf="isEditingTitle">
+          <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
+          <div class="actions">
+            <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
+            <i nz-icon nzType="icons:icon-save" (click)="saveTitle()" ></i>
+          </div>
+        </ng-container>
+      </div>
     </div>
     <div class="description" [class]="{editing: isEditingDescription}">
       <ng-container *ngIf="!isEditingDescription">
@@ -22,9 +28,20 @@
         <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
       </ng-container>
       <ng-container *ngIf="isEditingDescription">
-        <textarea nz-input i18n-placeholder="@@common.description" placeholder="Description" [(ngModel)]="segmentDetail.description" [nzAutosize]="{ minRows: 3 }"></textarea>
-        <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
+        <textarea nz-input i18n-placeholder="@@common.description" placeholder="Description" [(ngModel)]="segmentDetail.description" [nzAutosize]="{ minRows: 2 }"></textarea>
+        <div class="actions">
+          <i nz-icon nzType="close" (click)="toggleDescriptionEditState()"></i>
+          <i nz-icon nzType="icons:icon-save" (click)="saveDescription()"></i>
+        </div>
       </ng-container>
+    </div>
+    <div *ngIf="segmentDetail.type === SegmentType.Shared">
+      <div class="shared-scopes">
+        <span i18n="@@common.shared-scopes">Shared Scopes</span>
+        <ul>
+          <li *ngFor="let scope of segmentDetail.scopes">{{scope}}</li>
+        </ul>
+      </div>
     </div>
   </div>
 </section>
