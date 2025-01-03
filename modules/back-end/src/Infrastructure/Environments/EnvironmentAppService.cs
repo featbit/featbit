@@ -20,7 +20,12 @@ public class EnvironmentAppService : IEnvironmentAppService
     public async Task<PagedResult<Segment>> GetPagedSegmentsAsync(GetSegmentList request)
     {
         var rn = await _resourceService.GetRNAsync(request.EnvId, ResourceTypes.Env);
+
         var segments = await _segmentService.GetListAsync(request.WorkspaceId, rn, request.Filter);
+        foreach (var segment in segments.Items)
+        {
+            segment.EnvId = request.EnvId;
+        }
 
         return segments;
     }
@@ -28,7 +33,12 @@ public class EnvironmentAppService : IEnvironmentAppService
     public async Task<ICollection<Segment>> GetSegmentsAsync(Guid workspaceId, Guid envId)
     {
         var rn = await _resourceService.GetRNAsync(envId, ResourceTypes.Env);
+
         var segments = await _segmentService.GetListAsync(workspaceId, rn);
+        foreach (var segment in segments)
+        {
+            segment.EnvId = envId;
+        }
 
         return segments;
     }

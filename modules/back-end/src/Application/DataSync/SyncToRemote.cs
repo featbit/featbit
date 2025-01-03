@@ -94,10 +94,6 @@ public class SyncToRemoteHandler : IRequestHandler<SyncToRemote, string>
 
         // segments
         var segments = await _envAppService.GetSegmentsAsync(workspaceId, envId);
-        foreach (var segment in segments)
-        {
-            segment.EnvId = envId;
-        }
 
         var payload = new RemoteSyncPayload
         {
