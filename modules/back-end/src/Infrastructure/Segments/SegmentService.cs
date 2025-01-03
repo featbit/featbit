@@ -30,8 +30,9 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
         var name = userFilter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            var nameFilter = filterBuilder.Where(segment =>
-                segment.Name.StartsWith(name, StringComparison.CurrentCultureIgnoreCase));
+            var nameFilter = filterBuilder.Where(
+                segment => segment.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase)
+            );
             filters.Add(nameFilter);
         }
 
