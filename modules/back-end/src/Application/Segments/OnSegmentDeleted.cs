@@ -57,9 +57,10 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
         await _cache.DeleteSegmentAsync(envIds, segment.Id);
 
         // handle webhooks
-        if (segment.IsEnvironmentSpecific)
+        foreach (var envId in envIds)
         {
             _ = _webhookHandler.HandleAsync(
+                envId,
                 notification.Segment,
                 notification.DataChange,
                 notification.OperatorId
