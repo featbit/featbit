@@ -12,7 +12,7 @@ namespace Application.DataSync;
 public class SyncToRemote : IRequest<string>
 {
     public Guid WorkspaceId { get; set; }
-    
+
     public Guid EnvId { get; set; }
 
     public string SettingId { get; set; }
@@ -94,6 +94,10 @@ public class SyncToRemoteHandler : IRequestHandler<SyncToRemote, string>
 
         // segments
         var segments = await _envAppService.GetSegmentsAsync(workspaceId, envId);
+        foreach (var segment in segments)
+        {
+            segment.EnvId = envId;
+        }
 
         var payload = new RemoteSyncPayload
         {
