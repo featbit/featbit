@@ -15,11 +15,15 @@ public class AuditLogService : MongoDbService<AuditLog>, IAuditLogService
     {
         var filterBuilder = Builders<AuditLog>.Filter;
 
-        var filters = new List<FilterDefinition<AuditLog>>
+        var filters = new List<FilterDefinition<AuditLog>>();
+
+        // env filter, by default we only query logs in the specified environment
+        var crossEnvironment = userFilter.CrossEnvironment ?? false;
+        if (!crossEnvironment)
         {
-            // envId filter
-            filterBuilder.Eq(log => log.EnvId, envId)
-        };
+            var envFilter = filterBuilder.Eq(log => log.EnvId, envId);
+            filters.Add(envFilter);
+        }
 
         // query(keyword/comment) filter
         var query = userFilter.Query;
