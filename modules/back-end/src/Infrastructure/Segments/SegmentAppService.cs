@@ -49,7 +49,7 @@ public class SegmentAppService : ISegmentAppService
                 throw new BusinessException(ErrorCodes.InconsistentData);
             }
 
-            var match = new Dictionary<string, object>();
+            var match = new Dictionary<string, string>();
 
             var envProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
             if (envProp != null && envProp.Key != "*")
@@ -60,23 +60,31 @@ public class SegmentAppService : ISegmentAppService
             var projectProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Project);
             if (projectProp != null && projectProp.Key != "*")
             {
-                match.Add("projects.Key", projectProp.Key);
+                match.Add("projects.key", projectProp.Key);
             }
 
             var orgProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Organization);
             if (orgProp != null && orgProp.Key != "*")
             {
-                match.Add("organizations.Key", orgProp.Key);
+                match.Add("organizations.key", orgProp.Key);
             }
 
             var query = _mongodb.CollectionOf<Environment>().Aggregate()
                 .Lookup("Projects", "projectId", "_id", "projects")
+                .Unwind("projects")
                 .Lookup("Organizations", "projects.organizationId", "_id", "organizations")
-                .Match(new BsonDocument(match))
-                .Project(new BsonDocument("id", 1));
+                .Unwind("organizations")
+                .Match(new BsonDocument
+                {
+                    {
+                        "$and",
+                        new BsonArray(match.Select(x => new BsonDocument(x.Key, x.Value)))
+                    }
+                })
+                .Project(new BsonDocument("_id", 1));
 
             var documents = await query.ToListAsync();
-            return documents.Select(x => x["id"].AsGuid).ToList();
+            return documents.Select(x => x["_id"].AsGuid).ToList();
         }
     }
 }

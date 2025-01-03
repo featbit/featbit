@@ -12,7 +12,7 @@ public interface ISegmentService : IService<Segment>
 
     Task<IEnumerable<Segment>> GetListAsync(Guid[] ids);
 
-    Task<IEnumerable<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id);
+    Task<ICollection<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id);
 
     Task DeleteAsync(Guid id);
 }

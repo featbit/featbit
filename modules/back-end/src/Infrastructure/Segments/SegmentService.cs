@@ -81,7 +81,7 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
         await Collection.DeleteOneAsync(x => x.Id == id);
     }
 
-    public async Task<IEnumerable<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id)
+    public async Task<ICollection<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id)
     {
         var segmentId = id.ToString();
 
