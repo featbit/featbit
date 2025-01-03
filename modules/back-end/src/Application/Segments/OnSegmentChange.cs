@@ -73,19 +73,18 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
 
         var segment = notification.Segment;
 
-        // update cache and publish change message
         var envIds = await _segmentAppService.GetEnvironmentIdsAsync(segment);
+        // update cache
         await _cache.UpsertSegmentAsync(envIds, segment);
 
         foreach (var envId in envIds)
         {
+            // publish segment change message
             await PublishSegmentChangeMessage(envId);
-        }
 
-        // handle webhooks
-        if (segment.IsEnvironmentSpecific)
-        {
+            // handle webhook
             _ = _webhookHandler.HandleAsync(
+                envId,
                 segment,
                 notification.DataChange,
                 notification.OperatorId
