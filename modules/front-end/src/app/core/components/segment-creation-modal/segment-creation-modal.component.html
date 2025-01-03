@@ -10,6 +10,7 @@
     <ng-container i18n="@@segment.creation-modal.add-segment">Add segment</ng-container>
   </ng-template>
   <ng-template #modalContent>
+    <!-- Segment Type -->
     <div class="type">
       <span class="tip">
         <span i18n="@@segment.creation-modal.chose-segment-type">Choose Segment Type</span>
@@ -18,13 +19,17 @@
           nzType="question-circle"
           nzTheme="outline"
           nz-tooltip
-          nzTooltipTitle="Shared segment can be used across multiple environments while common segment can only be used in current environment."
+          nzTooltipTitle="Shareable segment can be used across multiple environments while common segment can only be used in current environment."
           i18n-nzTooltipTitle="@@segment.segment-type-tip">
         </i>
       </span>
       <nz-segmented [nzOptions]="types" (nzValueChange)="typeChanged($event)"></nz-segmented>
     </div>
-    <form nz-form [formGroup]="form" nzLayout="vertical">
+
+    <!-- Segment Form -->
+    <form
+      *ngIf="selectedType === SegmentType.EnvironmentSpecific || (selectedType == SegmentType.Shared && isShareableSegmentGranted)"
+      nz-form [formGroup]="form" nzLayout="vertical">
       <!-- Name  -->
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
@@ -89,6 +94,17 @@
         </nz-form-control>
       </nz-form-item>
     </form>
+
+    <div *ngIf="selectedType === SegmentType.Shared && !isShareableSegmentGranted">
+      <nz-alert
+        nzType="info"
+        i18n-nzDescription="@@segment.creation-modal.shareable-segment-description"
+        nzDescription="Shareable segment can be used across multiple environments, projects and organizations."
+      ></nz-alert>
+      <div class="need-license-description">
+        <p i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</p>
+      </div>
+    </div>
   </ng-template>
 
   <ng-template #modalFooter>

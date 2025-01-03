@@ -5,7 +5,8 @@ import { SegmentService } from "@services/segment.service";
 import { CreateSegment, ISegment, SegmentType } from "@features/safe/segments/types/segments-index";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { GroupedResource, groupResources, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
-import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { LicenseFeatureEnum } from "@shared/types";
 
 @Component({
   selector: 'segment-creation-modal',
@@ -36,7 +37,7 @@ export class SegmentCreationModalComponent {
   selectedType: SegmentType = SegmentType.EnvironmentSpecific;
   types: string[] = [
     $localize`:@@segment.current-environment:Current Environment`,
-    $localize`:@@segment.shared:Shared`
+    $localize`:@@segment.shareable:Shareable`
   ]
 
   typeChanged(type: number) {
@@ -44,6 +45,7 @@ export class SegmentCreationModalComponent {
     this.form.reset();
   }
 
+  isShareableSegmentGranted: boolean = false;
   currentEnvironment: ResourceV2;
 
   constructor(
@@ -67,6 +69,9 @@ export class SegmentCreationModalComponent {
       rn: `organization/${currentOrg.key}:project/${curProjectEnv.projectKey}:env/${curProjectEnv.envKey}`,
       type: ResourceTypeEnum.Env,
     };
+
+    const license = getCurrentLicense();
+    this.isShareableSegmentGranted = license.isGranted(LicenseFeatureEnum.ShareableSegment);
 
     this.selectedType = SegmentType.EnvironmentSpecific;
     this.selectedScopes = [ this.currentEnvironment ];

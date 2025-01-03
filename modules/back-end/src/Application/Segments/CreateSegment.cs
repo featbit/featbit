@@ -1,7 +1,9 @@
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.Segments;
+using Domain.Workspaces;
 
 namespace Application.Segments;
 
@@ -32,24 +34,37 @@ public class CreateSegmentValidator : AbstractValidator<CreateSegment>
 
 public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
 {
-    private readonly ISegmentService _service;
+    private readonly ISegmentService _segmentService;
+    private readonly ILicenseService _licenseService;
     private readonly IPublisher _publisher;
     private readonly ICurrentUser _currentUser;
 
     public CreateSegmentHandler(
-        ISegmentService service,
+        ISegmentService segmentService,
+        ILicenseService licenseService,
         IPublisher publisher,
         ICurrentUser currentUser)
     {
-        _service = service;
+        _segmentService = segmentService;
+        _licenseService = licenseService;
         _publisher = publisher;
         _currentUser = currentUser;
     }
 
     public async Task<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
     {
+        if (request.Type == SegmentType.Shared)
+        {
+            var isShareableSegmentGranted =
+                await _licenseService.IsFeatureGrantedAsync(request.WorkspaceId, LicenseFeatures.ShareableSegment);
+            if (!isShareableSegmentGranted)
+            {
+                throw new BusinessException(ErrorCodes.Unauthorized);
+            }
+        }
+
         var segment = request.AsSegment();
-        await _service.AddOneAsync(segment);
+        await _segmentService.AddOneAsync(segment);
 
         // publish on segment created notification
         var dataChange = new DataChange(null).To(segment);
