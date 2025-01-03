@@ -15,6 +15,8 @@ public class EndUserFilter : PagedRequest
 
     public bool IncludeGlobalUser { get; set; }
 
+    public bool GlobalUserOnly { get; set; }
+
     public EndUserFilter(SearchEndUser query)
     {
         CustomizedProperties = new List<EndUserCustomizedProperty>();
@@ -26,8 +28,11 @@ public class EndUserFilter : PagedRequest
         // excluded keyIds
         ExcludedKeyIds = query.ExcludedKeyIds ?? Array.Empty<string>();
 
-        // whether to include global user
+        // by default, we only search for env users
+        // if IncludeGlobalUser is true, we search for both env & global users
+        // if GloalUserOnly is true, we only search for global users 
         IncludeGlobalUser = query.IncludeGlobalUser ?? false;
+        GlobalUserOnly = query.GlobalUserOnly ?? false;
 
         // search text (value for multiple fields)
         var searchText = query.SearchText;

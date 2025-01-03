@@ -24,8 +24,7 @@ export class TargetUserComponent implements OnInit {
   };
 
   @Input() type: string = '';
-  @Input() tipIdx: number = 0;
-  @Input() tipColor: string = '#7FFFD4';
+  @Input() disableCreation: boolean = false;
   @Input() selectedUserDetailList: IUserType[];
 
   get isLoading() {
@@ -37,7 +36,7 @@ export class TargetUserComponent implements OnInit {
   @Input("userList")
   set list(data: IUserType[]) {
     this.isLoadingUsers = false;
-    if (this.selectNode['searchValue'] && data.length === 0) {
+    if (!this.disableCreation && this.selectNode['searchValue'] && data.length === 0) {
       this.userList = [{
         keyId: this.selectNode['searchValue'],
         name: this.selectNode['searchValue'],
@@ -99,7 +98,8 @@ export class TargetUserComponent implements OnInit {
       .filter(x => x.name.includes(value) || x.keyId.includes(value))
       .map(x => x.keyId);
 
-    const filter = new EnvUserFilter(value, [], excludedKeyIds, true, 1, 5);
+    // by default, we search for both env & global users
+    const filter = new EnvUserFilter(value, [], excludedKeyIds, true, false, 1, 5);
     this.debouncer.next(filter);
   }
 

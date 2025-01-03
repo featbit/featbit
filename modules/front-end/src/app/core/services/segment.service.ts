@@ -7,7 +7,8 @@ import {
   ISegmentListModel,
   ISegment,
   ISegmentFlagReference,
-  CreateSegment
+  CreateSegment,
+  SegmentType
 } from "@features/safe/segments/types/segments-index";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
@@ -63,8 +64,8 @@ export class SegmentService {
     return this.http.get<ISegment>(`${this.baseUrl}/${id}`);
   }
 
-  public isNameUsed(name: string): Observable<boolean> {
-    const url = `${this.baseUrl}/is-name-used?name=${name}`;
+  public isNameUsed(name: string, type: SegmentType): Observable<boolean> {
+    const url = `${this.baseUrl}/is-name-used?name=${name}&type=${type}`;
 
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }

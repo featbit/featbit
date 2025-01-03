@@ -33,11 +33,17 @@ export class SegmentCreationModalComponent {
     description: FormControl<string>
   }>;
 
-  type: number = 0;
+  selectedType: SegmentType = SegmentType.EnvironmentSpecific;
   types: string[] = [
     $localize`:@@segment.creation-modal.current-environment:Current Environment`,
     $localize`:@@segment.creation-modal.shared:Shared`
-  ];
+  ]
+
+  typeChanged(type: number) {
+    this.selectedType = type == 0 ? SegmentType.EnvironmentSpecific : SegmentType.Shared;
+    this.form.reset();
+  }
+
   currentEnvironment: ResourceV2;
 
   constructor(
@@ -51,23 +57,24 @@ export class SegmentCreationModalComponent {
       description: new FormControl('')
     });
 
-    const orgName = getCurrentOrganization().name;
+    const currentOrg = getCurrentOrganization();
     const curProjectEnv = getCurrentProjectEnv();
 
     this.currentEnvironment = {
       id: curProjectEnv.envId,
       name: curProjectEnv.envName,
-      pathName: `${orgName}/${curProjectEnv.projectName}/${curProjectEnv.envName}`,
-      rn: `organization/${orgName}:project/${curProjectEnv.projectKey}:env/${curProjectEnv.envKey}`,
+      pathName: `${currentOrg.name}/${curProjectEnv.projectName}/${curProjectEnv.envName}`,
+      rn: `organization/${currentOrg.key}:project/${curProjectEnv.projectKey}:env/${curProjectEnv.envKey}`,
       type: ResourceTypeEnum.Env,
     };
 
+    this.selectedType = SegmentType.EnvironmentSpecific;
     this.selectedScopes = [ this.currentEnvironment ];
   }
 
   segmentNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
-    switchMap(value => this.service.isNameUsed(value as string)),
+    switchMap(value => this.service.isNameUsed(value as string, this.selectedType)),
     map(isNameUsed => {
       switch (isNameUsed) {
         case true:
@@ -89,6 +96,9 @@ export class SegmentCreationModalComponent {
     this._selectedScopes = scopes;
     this.groupedSelectedScopes = groupResources(scopes);
   }
+  removeScope(scope: ResourceV2) {
+    this.selectedScopes = this.selectedScopes.filter(x => x.rn !== scope.rn);
+  }
 
   groupedSelectedScopes: GroupedResource[] = [];
   resourceFinderVisible = false;
@@ -102,15 +112,13 @@ export class SegmentCreationModalComponent {
 
     this.resourceFinderVisible = false;
   }
-  removeScope(scope: ResourceV2) {
-    this.selectedScopes = this.selectedScopes.filter(x => x.rn !== scope.rn);
-  }
 
   creating: boolean = false;
   create() {
     this.creating = true;
 
     const { name, description } = this.form.value;
+    const type = this.selectedType;
 
     const currentEnvRN = this.currentEnvironment.rn;
     const scopes = this.selectedScopes
@@ -120,7 +128,6 @@ export class SegmentCreationModalComponent {
       // remove current environment from scopes
       scopes.splice(scopes.indexOf(currentEnvRN), 1);
     }
-    const type = this.type === 0 ? SegmentType.EnvironmentSpecific : SegmentType.Shared;
 
     const payload: CreateSegment = {
       name,
@@ -147,4 +154,5 @@ export class SegmentCreationModalComponent {
 
   protected readonly ResourceSpaceLevel = ResourceSpaceLevel;
   protected readonly ResourceTypeEnum = ResourceTypeEnum;
+  protected readonly SegmentType = SegmentType;
 }

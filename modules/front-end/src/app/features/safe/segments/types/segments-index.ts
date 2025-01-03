@@ -115,6 +115,10 @@ export class Segment {
     return this._data.rules;
   }
 
+  get isShared(): boolean {
+    return this._data.type == SegmentType.Shared;
+  }
+
   newRule() {
     this.rules.push({
       id: uuidv4(),

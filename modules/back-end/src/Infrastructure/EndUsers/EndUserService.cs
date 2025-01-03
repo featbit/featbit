@@ -21,9 +21,11 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
         var globalUserFilter = filterBuilder.Eq(x => x.WorkspaceId, workspaceId) & filterBuilder.Eq(x => x.EnvId, null);
         var envUserFilter = filterBuilder.Eq(x => x.EnvId, envId);
 
-        var baseFilter = userFilter.IncludeGlobalUser
-            ? globalUserFilter | envUserFilter
-            : envUserFilter;
+        var baseFilter = userFilter.GlobalUserOnly
+            ? globalUserFilter
+            : userFilter.IncludeGlobalUser
+                ? globalUserFilter | envUserFilter
+                : envUserFilter;
 
         var mustFilters = new List<FilterDefinition<EndUser>>
         {

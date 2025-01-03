@@ -1,18 +1,18 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NzMessageService} from 'ng-zorro-antd/message';
-import {EnvUserService} from '@services/env-user.service';
-import {SegmentService} from '@services/segment.service';
-import {IUserProp, IUserType} from '@shared/types';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { EnvUserService } from '@services/env-user.service';
+import { SegmentService } from '@services/segment.service';
+import { IUserProp, IUserType } from '@shared/types';
 
-import {ISegment, ISegmentFlagReference, Segment} from '../../types/segments-index';
-import {CdkDragDrop, moveItemInArray} from "@angular/cdk/drag-drop";
-import {EnvUserPropService} from "@services/env-user-prop.service";
-import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
-import {ICondition, IRule} from "@shared/rules";
-import {getPathPrefix} from "@utils/index";
-import {RefTypeEnum} from "@core/components/audit-log/types";
-import {MessageQueueService} from "@services/message-queue.service";
+import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments-index';
+import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
+import { EnvUserPropService } from "@services/env-user-prop.service";
+import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { ICondition, IRule } from "@shared/rules";
+import { getPathPrefix } from "@utils/index";
+import { RefTypeEnum } from "@core/components/audit-log/types";
+import { MessageQueueService } from "@services/message-queue.service";
 
 @Component({
   selector: 'segment-targeting',
@@ -119,6 +119,9 @@ export class TargetingComponent implements OnInit {
   }
 
   public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
+    // shared segment can only reference global users
+    filter.globalUserOnly = this.segmentDetail.isShared;
+
     this.envUserService.search(filter).subscribe(pagedResult => {
       this.userList = [...pagedResult.items];
     })
