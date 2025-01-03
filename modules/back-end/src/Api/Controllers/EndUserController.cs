@@ -30,6 +30,7 @@ public class EndUserController : ApiControllerBase
 
         var request = new GetEndUserList
         {
+            WorkspaceId = WorkspaceId,
             EnvId = envId,
             Filter = filter
         };
