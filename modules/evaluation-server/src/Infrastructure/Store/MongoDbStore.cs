@@ -49,21 +49,26 @@ public class MongoDbStore : IStore
 
     public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
     {
-        var envRN = await GetEnvRN();
-        if (string.IsNullOrWhiteSpace(envRN))
+        var (envRN, wsId) = await GetEnvRNAndWorkspaceId();
+        if (string.IsNullOrWhiteSpace(envRN) || wsId == Guid.Empty)
         {
             return [];
         }
 
-        // maybe has conflict since we don't have WorkspaceId filter here, for Sass version
         var query = _mongodb.GetCollection<BsonDocument>("Segments")
             .Find(x => x["updatedAt"] > DateTime.UnixEpoch.AddMilliseconds(timestamp) &&
+                       x["workspaceId"].AsGuid == wsId &&
                        ((BsonArray)x["scopes"]).Any(y => $"{envRN}:".StartsWith(string.Concat(y, ":"))));
 
         var segments = await query.ToListAsync();
+        foreach (var segment in segments)
+        {
+            segment["envId"] = new BsonBinaryData(envId, GuidRepresentation.Standard);
+        }
+
         return segments.Select(x => x.ToJsonBytes());
 
-        async Task<string> GetEnvRN()
+        async Task<(string rn, Guid workspaceId)> GetEnvRNAndWorkspaceId()
         {
             var rnQuery = _mongodb.GetCollection<BsonDocument>("Organizations").Aggregate()
                 .Lookup("Projects", "_id", "organizationId", "project")
@@ -88,11 +93,17 @@ public class MongoDbStore : IStore
                                 }
                             }
                         }
+                    },
+                    {
+                        "workspaceId", "$workspaceId"
                     }
                 });
 
             var document = await rnQuery.FirstOrDefaultAsync();
-            return document?["rn"].AsString ?? string.Empty;
+            var rn = document?["rn"].AsString ?? string.Empty;
+            var workspaceId = document?["workspaceId"].AsGuid ?? Guid.Empty;
+
+            return (rn, workspaceId);
         }
     }
 
