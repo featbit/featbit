@@ -55,6 +55,7 @@ public class MongoDbStore : IStore
             return [];
         }
 
+        // maybe has conflict since we don't have WorkspaceId filter here, for Sass version
         var query = _mongodb.GetCollection<BsonDocument>("Segments")
             .Find(x => x["updatedAt"] > DateTime.UnixEpoch.AddMilliseconds(timestamp) &&
                        ((BsonArray)x["scopes"]).Any(y => $"{envRN}:".StartsWith(string.Concat(y, ":"))));

@@ -72,8 +72,8 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
         await _auditLogService.AddOneAsync(notification.GetAuditLog());
 
         var segment = notification.Segment;
-
         var envIds = await _segmentAppService.GetEnvironmentIdsAsync(segment);
+
         // update cache
         await _cache.UpsertSegmentAsync(envIds, segment);
 

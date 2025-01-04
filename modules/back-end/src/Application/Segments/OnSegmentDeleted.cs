@@ -50,10 +50,10 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
         // write audit log
         await _auditLogService.AddOneAsync(notification.GetAuditLog());
 
-        // delete cache
         var segment = notification.Segment;
-
         var envIds = await _segmentAppService.GetEnvironmentIdsAsync(segment);
+
+        // delete cache
         await _cache.DeleteSegmentAsync(envIds, segment.Id);
 
         // handle webhooks

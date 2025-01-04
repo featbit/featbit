@@ -120,6 +120,7 @@ public class Segment : AuditedEntity
         var envId = Type == SegmentType.EnvironmentSpecific ? EnvId.ToString() : string.Empty;
         json["envId"] = envId;
 
+        json.Remove("type");
         json.Remove("workspaceId");
         json.Remove("scopes");
         json.Remove("isEnvironmentSpecific");
