@@ -34,6 +34,7 @@ export interface ISegment {
 }
 
 export interface ISegmentFlagReference {
+  envId: string,
   id: string,
   name: string,
   key: string

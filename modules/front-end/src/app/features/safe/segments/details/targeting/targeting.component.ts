@@ -13,6 +13,7 @@ import { ICondition, IRule } from "@shared/rules";
 import { getPathPrefix } from "@utils/index";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { MessageQueueService } from "@services/message-queue.service";
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'segment-targeting',
@@ -44,6 +45,8 @@ export class TargetingComponent implements OnInit {
     this.reviewModalVisible = false;
   }
 
+  currentEnvId: string = '';
+
   constructor(
     private router: Router,
     private route:ActivatedRoute,
@@ -61,6 +64,8 @@ export class TargetingComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.currentEnvId = getCurrentProjectEnv().envId;
+
     this.route.paramMap.subscribe( paramMap => {
       this.id = decodeURIComponent(paramMap.get('id'));
       this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.refreshData());
@@ -90,9 +95,13 @@ export class TargetingComponent implements OnInit {
     })
   }
 
-  public openFlagPage(flagKey: string) {
+  public openFlagPage(flag: ISegmentFlagReference) {
+    if (flag.envId !== this.currentEnvId) {
+      return;
+    }
+
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flagKey}/targeting`])
+      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flag.key}/targeting`])
     );
 
     window.open(url, '_blank');
