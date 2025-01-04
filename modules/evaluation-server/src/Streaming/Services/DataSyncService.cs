@@ -67,7 +67,6 @@ public class DataSyncService : IDataSyncService
         foreach (var flag in flagsBytes)
         {
             var jsonObject = JsonNode.Parse(flag)!.AsObject();
-            jsonObject.Remove("");
             featureFlags.Add(jsonObject);
         }
 

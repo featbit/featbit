@@ -89,12 +89,13 @@ public class WebhookSender : IWebhookSender
     public async Task<WebhookDelivery> SendAsync(WebhookRequest request)
     {
         var delivery = new WebhookDelivery(request.Id, request.Events);
-
-        var httpRequest = CreateWebhookHttpRequest();
-        delivery.AddRequest(request.Url, httpRequest.Headers, request.Payload);
         delivery.Started();
+
         try
         {
+            var httpRequest = CreateWebhookHttpRequest();
+            delivery.AddRequest(request.Url, httpRequest.Headers, request.Payload);
+
             var response = await _client.SendAsync(httpRequest);
             await delivery.AddResponseAsync(response);
         }

@@ -8,12 +8,15 @@ public class EndUserSegmentVm
 
     public string Name { get; set; }
 
+    public string Type { get; set; }
+
     public DateTime UpdatedAt { get; set; }
 
     public EndUserSegmentVm(Segment segment)
     {
         Id = segment.Id.ToString();
         Name = segment.Name;
+        Type = segment.Type;
         UpdatedAt = segment.UpdatedAt;
     }
 }

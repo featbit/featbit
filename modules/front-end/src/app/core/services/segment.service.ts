@@ -6,7 +6,9 @@ import {
   SegmentListFilter,
   ISegmentListModel,
   ISegment,
-  ISegmentFlagReference
+  ISegmentFlagReference,
+  CreateSegment,
+  SegmentType
 } from "@features/safe/segments/types/segments-index";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
@@ -38,19 +40,6 @@ export class SegmentService {
     );
   }
 
-  public getSegmentListForUser(filter: SegmentListFilter = new SegmentListFilter()): Observable<ISegmentListModel> {
-    const queryParam = {
-      name: filter.name ?? '',
-      pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
-    };
-
-    return this.http.get<ISegmentListModel>(
-      `${this.baseUrl}/users/${filter.userKeyId}`,
-      {params: new HttpParams({fromObject: queryParam})}
-    );
-  }
-
   public getByIds(ids: string[]): Observable<ISegment[]> {
     const url = `${this.baseUrl}/by-ids`;
     const queryParam = { ids: ids };
@@ -62,22 +51,14 @@ export class SegmentService {
     return this.http.get<ISegment>(`${this.baseUrl}/${id}`);
   }
 
-  public isNameUsed(name: string): Observable<boolean> {
-    const url = `${this.baseUrl}/is-name-used?name=${name}`;
+  public isNameUsed(name: string, type: SegmentType): Observable<boolean> {
+    const url = `${this.baseUrl}/is-name-used?name=${name}&type=${type}`;
 
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  // 快速创建新的开关
-  public create(name: string, description: string) {
-    const body = {
-      name,
-      description,
-      included: [],
-      excluded: []
-    };
-
-    return this.http.post(this.baseUrl, body);
+  public create(payload: CreateSegment): Observable<ISegment> {
+    return this.http.post<ISegment>(this.baseUrl, payload);
   }
 
   delete(id: string): Observable<boolean> {

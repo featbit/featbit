@@ -41,26 +41,32 @@ public class RedisCacheService : ICacheService
         await _redis.SortedSetRemoveAsync(index, flagId.ToString());
     }
 
-    public async Task UpsertSegmentAsync(Segment segment)
+    public async Task UpsertSegmentAsync(ICollection<Guid> envIds, Segment segment)
     {
         // upsert cache
         var cache = RedisCaches.Segment(segment);
         await _redis.StringSetAsync(cache.Key, cache.Value);
 
         // upsert index
-        var index = RedisCaches.SegmentIndex(segment);
-        await _redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
+        foreach (var envId in envIds)
+        {
+            var index = RedisCaches.SegmentIndex(envId, segment);
+            await _redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
+        }
     }
 
-    public async Task DeleteSegmentAsync(Guid envId, Guid segmentId)
+    public async Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId)
     {
         // delete cache
         var cacheKey = RedisKeys.Segment(segmentId);
         await _redis.KeyDeleteAsync(cacheKey);
 
         // delete index
-        var index = RedisKeys.SegmentIndex(envId);
-        await _redis.SortedSetRemoveAsync(index, segmentId.ToString());
+        foreach (var envId in envIds)
+        {
+            var index = RedisKeys.SegmentIndex(envId);
+            await _redis.SortedSetRemoveAsync(index, segmentId.ToString());
+        }
     }
 
     public async Task UpsertLicenseAsync(Workspace workspace)

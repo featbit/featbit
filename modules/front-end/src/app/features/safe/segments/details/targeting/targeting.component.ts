@@ -1,18 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NzMessageService} from 'ng-zorro-antd/message';
-import {EnvUserService} from '@services/env-user.service';
-import {SegmentService} from '@services/segment.service';
-import {IUserProp, IUserType} from '@shared/types';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { EnvUserService } from '@services/env-user.service';
+import { SegmentService } from '@services/segment.service';
+import { IUserProp, IUserType } from '@shared/types';
 
-import {ISegment, ISegmentFlagReference, Segment} from '../../types/segments-index';
-import {CdkDragDrop, moveItemInArray} from "@angular/cdk/drag-drop";
-import {EnvUserPropService} from "@services/env-user-prop.service";
-import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
-import {ICondition, IRule} from "@shared/rules";
-import {getPathPrefix} from "@utils/index";
-import {RefTypeEnum} from "@core/components/audit-log/types";
-import {MessageQueueService} from "@services/message-queue.service";
+import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments-index';
+import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
+import { EnvUserPropService } from "@services/env-user-prop.service";
+import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { ICondition, IRule } from "@shared/rules";
+import { getPathPrefix } from "@utils/index";
+import { RefTypeEnum } from "@core/components/audit-log/types";
+import { MessageQueueService } from "@services/message-queue.service";
+import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
   selector: 'segment-targeting',
@@ -44,6 +45,8 @@ export class TargetingComponent implements OnInit {
     this.reviewModalVisible = false;
   }
 
+  currentEnvId: string = '';
+
   constructor(
     private router: Router,
     private route:ActivatedRoute,
@@ -61,6 +64,8 @@ export class TargetingComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.currentEnvId = getCurrentProjectEnv().envId;
+
     this.route.paramMap.subscribe( paramMap => {
       this.id = decodeURIComponent(paramMap.get('id'));
       this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.refreshData());
@@ -90,9 +95,13 @@ export class TargetingComponent implements OnInit {
     })
   }
 
-  public openFlagPage(flagKey: string) {
+  public openFlagPage(flag: ISegmentFlagReference) {
+    if (flag.envId !== this.currentEnvId) {
+      return;
+    }
+
     const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flagKey}/targeting`])
+      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flag.key}/targeting`])
     );
 
     window.open(url, '_blank');
@@ -104,8 +113,8 @@ export class TargetingComponent implements OnInit {
     const userKeyIds = [...segment.included, ...segment.excluded];
     if (userKeyIds.length > 0) {
       this.envUserService.getByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
-        this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
-        this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
+        this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId) ?? this.createGlobalUser(keyId));
+        this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId) ?? this.createGlobalUser(keyId));
 
         this.isLoading = false;
       });
@@ -114,11 +123,14 @@ export class TargetingComponent implements OnInit {
     }
   }
 
-  private createTemporaryUser(keyId: string): IUserType {
-    return { id: '', keyId, name: keyId };
+  private createGlobalUser(keyId: string): IUserType {
+    return { id: '', keyId, name: keyId, envId: null };
   }
 
   public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
+    // shared segment can only reference global users
+    filter.globalUserOnly = this.segmentDetail.isShared;
+
     this.envUserService.search(filter).subscribe(pagedResult => {
       this.userList = [...pagedResult.items];
     })

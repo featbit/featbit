@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ISegment, ISegmentFlagReference } from '@features/safe/segments/types/segments-index';
+import { ISegment, ISegmentFlagReference, SegmentType } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { MessageQueueService } from "@services/message-queue.service";
@@ -77,4 +77,6 @@ export class SettingComponent implements OnInit {
   toggleDescriptionEditState(): void {
     this.isEditingDescription = !this.isEditingDescription;
   }
+
+  protected readonly SegmentType = SegmentType;
 }
