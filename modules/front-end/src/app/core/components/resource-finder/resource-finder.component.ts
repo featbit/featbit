@@ -107,13 +107,13 @@ export class ResourceFinderComponent implements OnInit {
     }
 
     // remove all children from selected items and then add the parent
-    this.selectedItems = this.selectedItems.filter(x => !x.rn.startsWith(item.rn) || x.rn == this.unremovableRn);
+    this.selectedItems = this.selectedItems.filter(x => !`${x.rn}:`.startsWith(`${item.rn}:`) || x.rn == this.unremovableRn);
     this.selectedItems.push(item);
 
     // mark children as selected and disabled
     this.groupedItems.forEach(group => {
       group.items.forEach(listItem => {
-        if (listItem.rn.startsWith(item.rn)) {
+        if (`${listItem.rn}:`.startsWith(`${item.rn}:`)) {
           listItem.selected = true;
           // disable all children except itself
           listItem.disabled = listItem.rn !== item.rn;
@@ -132,7 +132,7 @@ export class ResourceFinderComponent implements OnInit {
     // mark children as not selected and not disabled
     this.groupedItems.forEach(group => {
       group.items.forEach(resource => {
-        if (resource.rn.startsWith(item.rn) && resource.rn !== this.unremovableRn) {
+        if (`${resource.rn}:`.startsWith(`${item.rn}:`) && resource.rn !== this.unremovableRn) {
           resource.selected = false;
           resource.disabled = false;
         }
