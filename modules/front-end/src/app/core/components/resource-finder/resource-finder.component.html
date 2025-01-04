@@ -5,7 +5,6 @@
   [nzContent]="modalContent"
   [nzFooter]="modalFooter"
   (nzOnCancel)="onCancel()"
-  nzMaskClosable="false"
 >
   <ng-template #modalTitle>
     <span i18n="@@common.resource-finder.title" class="title">Find a resource</span>
@@ -36,7 +35,12 @@
         <div class="text" i18n="@@common.resource-finder.selected-items">Selected Items</div>
         <div class="tags">
           <ng-container *ngFor="let item of selectedItems">
-            <nz-tag nzMode="closeable" (nzOnClose)="removeFromSelected(item)">{{ item.name }}</nz-tag>
+            <nz-tag
+              [nzColor]="item.rn === unremovableRn ? 'blue' : 'default'"
+              [nzMode]="item.rn === unremovableRn ? 'default' : 'closeable'"
+              (nzOnClose)="removeFromSelected(item)">
+              {{ item.pathName }}
+            </nz-tag>
           </ng-container>
         </div>
       </div>
@@ -44,9 +48,16 @@
         <nz-list-empty *ngIf="groupedItems.length === 0"></nz-list-empty>
         <ng-container *ngFor="let itemsGroup of groupedItems">
           <nz-list [nzHeader]="listHeader">
-            <nz-list-item (click)="toggleSelected(item)" *ngFor="let item of itemsGroup.items">
-              <div>{{ item.name }}</div>
-              <div class="rn">{{ item.rn }}</div>
+            <nz-list-item [ngClass]="{ 'disabled': item.disabled }" (click)="toggleSelected(item)" *ngFor="let item of itemsGroup.items">
+              <div class="resource-item">
+                <div class="text">
+                  <span>{{ item.pathName }}</span>
+                  <span class="rn">{{ item.rn }}</span>
+                </div>
+                <div *ngIf="item.selected" class="icon">
+                  <span nz-icon nzType="check" nzTheme="outline"></span>
+                </div>
+              </div>
             </nz-list-item>
           </nz-list>
           <ng-template #listHeader>
@@ -58,9 +69,9 @@
   </ng-template>
 
   <ng-template #modalFooter>
-    <div *ngIf="selectedItems.length > 0" class="actions">
+    <div class="actions">
       <button nz-button nzType="default" (click)="onCancel()" i18n="@@common.cancel">Cancel</button>
-      <button nz-button nzType="primary" (click)="onContinue()" i18n="@@common.continue">Continue</button>
+      <button nz-button nzType="primary" (click)="onOk()" i18n="@@common.ok">OK</button>
     </div>
   </ng-template>
 </nz-modal>

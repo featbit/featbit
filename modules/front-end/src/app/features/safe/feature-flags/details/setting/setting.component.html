@@ -29,7 +29,10 @@
       </ng-container>
       <ng-container *ngIf="isEditingTitle">
         <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="featureFlag.name" />
-        <i class="edit-save" (click)="onSaveSettings()" nz-icon nzType="icons:icon-save"></i>
+        <div class="actions">
+          <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
+          <i nz-icon nzType="icons:icon-save" (click)="onSaveSettings()" ></i>
+        </div>
       </ng-container>
     </div>
     <div class="flag-description" [class]="{editing: isEditingDescription}">
@@ -39,7 +42,10 @@
       </ng-container>
       <ng-container *ngIf="isEditingDescription">
         <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="featureFlag.description" [nzAutosize]="{ minRows: 3 }"></textarea>
-        <i class="edit-save" (click)="onSaveDescription()" nz-icon nzType="icons:icon-save"></i>
+        <div class="actions">
+          <i nz-icon nzType="close" (click)="toggleDescriptionEditState()"></i>
+          <i nz-icon nzType="icons:icon-save" (click)="onSaveSettings()" ></i>
+        </div>
       </ng-container>
     </div>
     <div class="flag-key">

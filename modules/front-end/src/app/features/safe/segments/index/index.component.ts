@@ -1,23 +1,25 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { encodeURIComponentFfc, getPathPrefix } from '@shared/utils';
-import { SegmentListFilter, ISegment, ISegmentListModel, ISegmentFlagReference } from "../types/segments-index";
+import {
+  SegmentListFilter,
+  ISegment,
+  ISegmentListModel,
+  ISegmentFlagReference,
+  SegmentType
+} from "../types/segments-index";
 import { SegmentService } from "@services/segment.service";
-import { debounceTime, first, map, switchMap } from 'rxjs/operators';
-import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'segments-index',
   templateUrl: './index.component.html',
   styleUrls: ['./index.component.less']
 })
-export class IndexComponent implements OnInit, OnDestroy {
+export class IndexComponent implements OnInit {
 
-  private destory$: Subject<void> = new Subject();
-
-  createModalVisible: boolean = false;
   isIntoing: boolean = false;
   isDelete: boolean = false; // to differencing delete and archive
   deleteArchiveModalVisible: boolean = false;
@@ -126,75 +128,16 @@ export class IndexComponent implements OnInit, OnDestroy {
     });
   }
 
-  segmentForm: FormGroup;
-
-  segmentNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
-    debounceTime(300),
-    switchMap(value => this.segmentService.isNameUsed(value as string)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
-        case true:
-          return {error: true, duplicated: true};
-        case undefined:
-          return {error: true, unknown: true};
-        default:
-          return null;
-      }
-    }),
-    first()
-  );
-
-  creating: boolean = false;
-
-  createSegment() {
-    this.creating = true;
-
-    const { name, description } = this.segmentForm.value;
-    this.segmentService.create(name, description).subscribe({
-      next: (segment: ISegment) => {
-        this.toRouter(segment.id);
-        this.creating = false;
-      },
-      error: () => {
-        this.msg.error($localize `:@@common.operation-failed:Operation failed`);
-        this.creating = false;
-      }
-    });
-  }
-
-  closeCreateModal() {
-    this.createModalVisible = false;
-    this.segmentForm.reset({
-      name: '',
-      description: ''
-    });
-  }
-
   //#endregion
   constructor(
     private router: Router,
     private segmentService: SegmentService,
-    private msg: NzMessageService,
-    private fb: FormBuilder,
-  ) {
-    this.segmentForm = this.fb.group({
-      name: ['', Validators.required, this.segmentNameAsyncValidator],
-      description: ['']
-    });
-  }
+    private msg: NzMessageService
+  ) { }
 
   ngOnInit(): void {
     this.subscribeSearch();
     this.$search.next();
-  }
-
-  addSegment() {
-    this.createModalVisible = true;
-  }
-
-  ngOnDestroy(): void {
-    this.destory$.next();
-    this.destory$.complete();
   }
 
   onIntoSegmentDetail(data: ISegment) {
@@ -215,8 +158,23 @@ export class IndexComponent implements OnInit, OnDestroy {
     window.open(url, '_blank');
   }
 
-  getLocalDate(date: string) {
+  getLocalDate(date: string | Date) {
     if (!date) return '';
     return new Date(date);
   }
+
+  creationModalVisible: boolean = false;
+  showCreationModal() {
+    this.creationModalVisible = true;
+  }
+  closeCreationModal(segment: ISegment) {
+    this.creationModalVisible = false;
+    if (segment) {
+      setTimeout(() => {
+        this.toRouter(segment.id);
+      }, 50);
+    }
+  }
+
+  protected readonly SegmentType = SegmentType;
 }

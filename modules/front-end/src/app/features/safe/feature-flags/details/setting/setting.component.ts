@@ -141,10 +141,6 @@ export class SettingComponent {
     }, () => this.isLoading = false)
   }
 
-  onSaveDescription() {
-    this.onSaveSettings();
-  }
-
   onChangeStatus() {
     this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
     this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));

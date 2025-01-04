@@ -1,3 +1,4 @@
+using System.Text;
 using Domain.Shared;
 using Infrastructure.Redis;
 using StackExchange.Redis;
@@ -61,7 +62,24 @@ public class RedisStore : IStore
         // get segments
         var tasks = keys.Select(key => _redis.StringGetAsync(key));
         var values = await Task.WhenAll(tasks);
-        var jsonBytes = values.Select(x => (byte[])x!);
+
+        // for shared segments, replace empty envId with actual envId
+        const string emptyEnvId = "\"envId\":\"\",";
+
+        List<byte[]> jsonBytes = [];
+        foreach (var value in values)
+        {
+            var strValue = (string)value!;
+            if (strValue.Contains(emptyEnvId))
+            {
+                var newStrValue = strValue.Replace(emptyEnvId, $"\"envId\":\"{envId}\",");
+                jsonBytes.Add(Encoding.UTF8.GetBytes(newStrValue));
+            }
+            else
+            {
+                jsonBytes.Add((byte[])value!);
+            }
+        }
 
         return jsonBytes;
     }

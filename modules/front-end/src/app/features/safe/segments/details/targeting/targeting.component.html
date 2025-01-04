@@ -12,8 +12,9 @@
       </div>
       <nz-dropdown-menu #menu="nzDropdownMenu">
         <ul nz-menu>
-          <li nz-menu-item *ngFor="let flag of flagReferences" (click)="openFlagPage(flag.key)">
-            {{flag.name}}
+          <li [nzDisabled]="flag.envId !== currentEnvId" nz-menu-item *ngFor="let flag of flagReferences" (click)="openFlagPage(flag)">
+            {{ flag.name }}
+            <span i18n="@@segment.details.in-other-environment" *ngIf="flag.envId !== currentEnvId">(in other environment)</span>
           </li>
         </ul>
       </nz-dropdown-menu>
@@ -36,7 +37,7 @@
             <target-user
               i18n-type="@@common.including-users"
               type="Including users"
-              [tipIdx]="0"
+              [disableCreation]="segmentDetail.isShared"
               [userList]="userList"
               [selectedUserDetailList]="segmentDetail.includedUsers"
               (search)="onSearchUser($event)"
@@ -47,7 +48,7 @@
             <target-user
               i18n-type="@@common.excluding-users"
               type="Excluding users"
-              [tipIdx]="1"
+              [disableCreation]="segmentDetail.isShared"
               [userList]="userList"
               [selectedUserDetailList]="segmentDetail.excludedUsers"
               (search)="onSearchUser($event)"

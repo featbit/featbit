@@ -14,20 +14,22 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
     {
     }
 
-    public async Task<PagedResult<EndUser>> GetListAsync(Guid envId, EndUserFilter userFilter)
+    public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
     {
         var filterBuilder = Builders<EndUser>.Filter;
 
-        var envIdFilter = userFilter.IncludeGlobalUser
-            ? filterBuilder.Or(
-                filterBuilder.Eq(x => x.EnvId, envId),
-                filterBuilder.Eq(x => x.EnvId, null)
-            )
-            : filterBuilder.Eq(x => x.EnvId, envId);
+        var globalUserFilter = filterBuilder.Eq(x => x.WorkspaceId, workspaceId) & filterBuilder.Eq(x => x.EnvId, null);
+        var envUserFilter = filterBuilder.Eq(x => x.EnvId, envId);
+
+        var baseFilter = userFilter.GlobalUserOnly
+            ? globalUserFilter
+            : userFilter.IncludeGlobalUser
+                ? globalUserFilter | envUserFilter
+                : envUserFilter;
 
         var mustFilters = new List<FilterDefinition<EndUser>>
         {
-            envIdFilter
+            baseFilter
         };
 
         // excluded keyIds

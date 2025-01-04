@@ -81,6 +81,7 @@ public class RelayProxyController : ApiControllerBase
     {
         var request = new SyncToAgent
         {
+            WorkspaceId = WorkspaceId,
             RelayProxyId = relayProxyId,
             AgentId = agentId
         };

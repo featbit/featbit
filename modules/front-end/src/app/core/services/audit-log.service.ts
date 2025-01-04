@@ -31,6 +31,7 @@ export class AuditLogService {
     }
 
     const queryParam = {
+      crossEnvironment: filter.crossEnvironment,
       query: filter.query ?? '',
       creatorId: filter.creatorId ?? '',
       refType: filter.refType ?? '',
@@ -38,7 +39,7 @@ export class AuditLogService {
       from,
       to,
       pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
+      pageSize: filter.pageSize
     };
 
     return this.http.get<IAuditLogListModel>(

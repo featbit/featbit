@@ -8,17 +8,29 @@
 
   .edit-save {
     cursor: pointer;
-    margin-left: 16px;
   }
 
   .title {
     display: flex;
     align-items: center;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 150%;
-    color: @grey80-color;
-    height: 30px;
+    gap: 4px;
+
+    .name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 150%;
+      color: @grey80-color;
+      height: 30px;
+    }
+
+    nz-tag {
+      padding: 0 4px;
+      border-radius: 4px;
+      margin: 0;
+    }
 
     .text {
       display: inline-block;
@@ -28,7 +40,6 @@
       max-width: 221px;
     }
     input {
-      width: 221px;
       border-radius: 8px;
     }
   }
@@ -48,11 +59,35 @@
     .edit-save {
       width: 100%;
       text-align: right;
-      padding-right:14px;
     }
 
     textarea {
       border-radius: 8px;
+      margin-bottom: 8px;
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+
+    i {
+      cursor: pointer;
+    }
+  }
+
+  .shared-scopes {
+    margin-top: 8px;
+
+    span {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    ul {
+      margin-top: 4px;
+      padding-inline-start: 24px;
     }
   }
 }

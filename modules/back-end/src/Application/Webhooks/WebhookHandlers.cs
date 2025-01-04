@@ -92,7 +92,7 @@ public class WebhookHandler : IWebhookHandler
         await SendWebhooksAsync(availableWebhooks, dataObject);
     }
 
-    public async Task HandleAsync(Segment segment, DataChange dataChange, Guid operatorId)
+    public async Task HandleAsync(Guid envId, Segment segment, DataChange dataChange, Guid operatorId)
     {
         string[] events;
         string[] changes;
@@ -125,7 +125,7 @@ public class WebhookHandler : IWebhookHandler
                 .ToArray();
         }
 
-        var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(segment.EnvId);
+        var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(envId);
         var webhooks = await _webhookService.GetByEventsAsync(resourceDescriptor.Organization.Id, events);
 
         var availableWebhooks = webhooks.Where(x =>
@@ -138,7 +138,7 @@ public class WebhookHandler : IWebhookHandler
         }
 
         var @operator = await _userService.GetOperatorAsync(operatorId);
-        var flagReferences = await _segmentService.GetFlagReferencesAsync(segment.EnvId, segment.Id);
+        var flagReferences = await _segmentService.GetFlagReferencesAsync(envId, segment.Id);
 
         var dataObject = DataObjectBuilder
             .New(events, @operator, segment.UpdatedAt)

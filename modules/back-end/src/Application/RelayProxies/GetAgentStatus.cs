@@ -36,5 +36,9 @@ public class GetAgentStatusHandler : IRequestHandler<GetAgentStatus, AgentStatus
                 ? AgentStatus.Unauthorized()
                 : AgentStatus.Unreachable();
         }
+        catch (Exception)
+        {
+            return AgentStatus.InternalServerError();
+        }
     }
 }

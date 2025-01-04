@@ -23,6 +23,7 @@ public class DataSyncController : ApiControllerBase
     {
         var request = new SyncToRemote
         {
+            WorkspaceId = WorkspaceId,
             EnvId = envId,
             SettingId = settingId
         };

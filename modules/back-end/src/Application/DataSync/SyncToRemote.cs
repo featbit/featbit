@@ -2,6 +2,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 using Application.Bases.Exceptions;
+using Domain.DataSync;
 using Domain.Environments;
 using Domain.Utils;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,8 @@ namespace Application.DataSync;
 
 public class SyncToRemote : IRequest<string>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string SettingId { get; set; }
@@ -17,19 +20,22 @@ public class SyncToRemote : IRequest<string>
 
 public class SyncToRemoteHandler : IRequestHandler<SyncToRemote, string>
 {
-    private readonly IDataSyncService _dataSyncService;
     private readonly IEnvironmentService _envService;
+    private readonly IEnvironmentAppService _envAppService;
+    private readonly IFeatureFlagService _flagService;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<SyncToRemoteHandler> _logger;
 
     public SyncToRemoteHandler(
-        IDataSyncService dataSyncService,
         IEnvironmentService envService,
+        IEnvironmentAppService envAppService,
+        IFeatureFlagService flagService,
         IHttpClientFactory httpClientFactory,
         ILogger<SyncToRemoteHandler> logger)
     {
-        _dataSyncService = dataSyncService;
         _envService = envService;
+        _envAppService = envAppService;
+        _flagService = flagService;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
     }
@@ -48,7 +54,7 @@ public class SyncToRemoteHandler : IRequestHandler<SyncToRemote, string>
         var remoteUrl = setting.Value;
 
         var client = _httpClientFactory.CreateClient();
-        var payload = await _dataSyncService.GetRemoteSyncPayloadAsync(request.EnvId);
+        var payload = await GetSyncPayloadAsync(request.WorkspaceId, request.EnvId);
         var content = new StringContent(
             JsonSerializer.Serialize(payload, ReusableJsonSerializerOptions.Web),
             Encoding.UTF8,
@@ -58,7 +64,7 @@ public class SyncToRemoteHandler : IRequestHandler<SyncToRemote, string>
         string remark;
         try
         {
-            var response = await client.PostAsync(remoteUrl, content);
+            var response = await client.PostAsync(remoteUrl, content, cancellationToken);
 
             var result = response.IsSuccessStatusCode ? "true" : "false";
             remark = $"{result},{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
@@ -79,5 +85,22 @@ public class SyncToRemoteHandler : IRequestHandler<SyncToRemote, string>
         await _envService.UpdateAsync(env);
 
         return remark;
+    }
+
+    private async Task<RemoteSyncPayload> GetSyncPayloadAsync(Guid workspaceId, Guid envId)
+    {
+        // feature flags
+        var flags = await _flagService.FindManyAsync(x => x.EnvId == envId && !x.IsArchived);
+
+        // segments
+        var segments = await _envAppService.GetSegmentsAsync(workspaceId, envId);
+
+        var payload = new RemoteSyncPayload
+        {
+            FeatureFlags = flags,
+            Segments = segments
+        };
+
+        return payload;
     }
 }
