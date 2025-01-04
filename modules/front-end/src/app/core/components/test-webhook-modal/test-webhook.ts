@@ -59,7 +59,7 @@ const testSegment: ISegment = {
   id: '510766ab-bf7d-4a80-a601-68beced8360e',
   name: 'Test Segment',
   type: SegmentType.EnvironmentSpecific,
-  scopes: ['organization/acme:project/project-name:env/env-name'],
+  scopes: ['organization/organization-key:project/project-key:env/env-key'],
   description: 'This is a test segment',
   rules: [
     {

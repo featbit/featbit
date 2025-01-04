@@ -116,7 +116,7 @@ export class Segment {
   }
 
   get isShared(): boolean {
-    return this._data.type == SegmentType.Shared;
+    return this._data.type === SegmentType.Shared;
   }
 
   newRule() {

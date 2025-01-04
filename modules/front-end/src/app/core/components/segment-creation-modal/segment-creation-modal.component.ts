@@ -129,7 +129,7 @@ export class SegmentCreationModalComponent {
     const scopes = this.selectedScopes
       .map(x => x.rn)
       .sort((a, b) => b.length - a.length);
-    if (scopes.find(x => x !== currentEnvRN && currentEnvRN.startsWith(x)) !== undefined) {
+    if (scopes.find(x => x !== currentEnvRN && `${currentEnvRN}:`.startsWith(`${x}:`)) !== undefined) {
       // remove current environment from scopes
       scopes.splice(scopes.indexOf(currentEnvRN), 1);
     }
