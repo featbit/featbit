@@ -40,19 +40,6 @@ export class SegmentService {
     );
   }
 
-  public getSegmentListForUser(filter: SegmentListFilter = new SegmentListFilter()): Observable<ISegmentListModel> {
-    const queryParam = {
-      name: filter.name ?? '',
-      pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
-    };
-
-    return this.http.get<ISegmentListModel>(
-      `${this.baseUrl}/users/${filter.userKeyId}`,
-      {params: new HttpParams({fromObject: queryParam})}
-    );
-  }
-
   public getByIds(ids: string[]): Observable<ISegment[]> {
     const url = `${this.baseUrl}/by-ids`;
     const queryParam = { ids: ids };
