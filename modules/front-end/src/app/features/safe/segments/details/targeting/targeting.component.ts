@@ -104,8 +104,8 @@ export class TargetingComponent implements OnInit {
     const userKeyIds = [...segment.included, ...segment.excluded];
     if (userKeyIds.length > 0) {
       this.envUserService.getByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
-        this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
-        this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
+        this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId) ?? this.createGlobalUser(keyId));
+        this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId) ?? this.createGlobalUser(keyId));
 
         this.isLoading = false;
       });
@@ -114,8 +114,8 @@ export class TargetingComponent implements OnInit {
     }
   }
 
-  private createTemporaryUser(keyId: string): IUserType {
-    return { id: '', keyId, name: keyId };
+  private createGlobalUser(keyId: string): IUserType {
+    return { id: '', keyId, name: keyId, envId: null };
   }
 
   public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {

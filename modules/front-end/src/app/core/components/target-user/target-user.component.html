@@ -67,16 +67,16 @@
           (nzOnCancel)="closeEditModal()">
   <ng-template #modalTitle>
     <span *ngIf="currentEditingUser.envId !== null" i18n="@@common.edit-targeting-user">Edit targeting user</span>
-    <span *ngIf="currentEditingUser.envId === null" i18n="@@common.view-targeting-user">View targeting user</span>
+    <span *ngIf="currentEditingUser.envId === null" i18n="@@common.global-user">Global User</span>
   </ng-template>
   <ng-template #editModalContent>
     <div class="info-item">
       <div class="label">KeyId</div>
       <input nz-input [disabled]="true" [(ngModel)]="currentEditingUser.keyId"/>
     </div>
-    <div class="info-item">
+    <div class="info-item" *ngIf="currentEditingUser.envId !== null">
       <div class="label" i18n="@@common.name">Name</div>
-      <input nz-input [disabled]="currentEditingUser.envId === null" [(ngModel)]="currentEditingUser.name"/>
+      <input nz-input [(ngModel)]="currentEditingUser.name"/>
     </div>
   </ng-template>
 
