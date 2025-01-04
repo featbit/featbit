@@ -44,7 +44,7 @@ public class ResourceService : IResourceService
             {
                 project.Id,
                 project.Name,
-                Rn = "project/" + project.Name
+                Rn = "project/" + project.Key
             });
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -80,7 +80,7 @@ public class ResourceService : IResourceService
             {
                 env.Id,
                 env.Name,
-                Rn = "project/" + project.Name + ":env/" + env.Name
+                Rn = "project/" + project.Key + ":env/" + env.Key
             };
 
         if (!string.IsNullOrWhiteSpace(name))
