@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IEnvironment, IProject } from "@shared/types";
 import { copyToClipboard, uuidv4 } from "@utils/index";
-import { EnvUserPropService } from "@services/env-user-prop.service";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
@@ -55,7 +54,6 @@ export class RelayProxyDrawerComponent implements OnInit {
   projects: IProject[] = [];
 
   constructor(
-    private envUserPropService: EnvUserPropService,
     private projectService: ProjectService,
     private relayProxyService: RelayProxyService,
     private fb: FormBuilder,

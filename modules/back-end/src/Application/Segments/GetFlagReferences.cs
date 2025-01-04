@@ -29,11 +29,6 @@ public class GetFlagReferencesHandler : IRequestHandler<GetFlagReferences, IEnum
         foreach (var envId in envIds)
         {
             var envReferences = await _service.GetFlagReferencesAsync(envId, request.Id);
-            foreach (var flagReference in envReferences)
-            {
-                flagReference.EnvId = envId;
-            }
-
             references.AddRange(envReferences);
         }
 

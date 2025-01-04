@@ -15,6 +15,15 @@ public class AgentStatus
         };
     }
 
+    public static AgentStatus InternalServerError()
+    {
+        return new AgentStatus
+        {
+            Type = "internal_server_error",
+            LastSyncAt = null
+        };
+    }
+
     public static AgentStatus Unauthorized()
     {
         return new AgentStatus

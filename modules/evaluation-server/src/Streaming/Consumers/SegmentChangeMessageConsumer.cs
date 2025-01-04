@@ -23,15 +23,14 @@ public class SegmentChangeMessageConsumer : IMessageConsumer
     {
         using var document = JsonDocument.Parse(message);
         var root = document.RootElement;
-        if (!root.TryGetProperty("envId", out var envIdProp) ||
-            !root.TryGetProperty("segment", out var segment) ||
+        if (!root.TryGetProperty("segment", out var segment) ||
             !root.TryGetProperty("affectedFlagIds", out var affectedFlagIds))
         {
             throw new InvalidDataException("invalid segment change data");
         }
 
         // push change message to sdk
-        var envId = envIdProp.GetGuid();
+        var envId = segment.GetProperty("envId").GetGuid();
         var flagIds = affectedFlagIds.Deserialize<string[]>()!;
         var connections = _connectionManager.GetEnvConnections(envId);
         foreach (var connection in connections)

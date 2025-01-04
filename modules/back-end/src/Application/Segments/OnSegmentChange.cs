@@ -104,9 +104,8 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
 
             JsonObject message = new()
             {
-                ["envId"] = envId.ToString(),
-                ["segment"] = segment.SerializeAsEnvironmentSpecific(),
-                ["affectedFlagIds"] = JsonSerializer.SerializeToNode(flagReferences)
+                ["segment"] = segment.SerializeAsEnvironmentSpecific(envId),
+                ["affectedFlagIds"] = JsonSerializer.SerializeToNode(flagReferences.Select(x => x.Id))
             };
 
             await _messageProducer.PublishAsync(Topics.SegmentChange, message);

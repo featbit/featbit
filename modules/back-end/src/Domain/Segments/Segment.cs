@@ -113,12 +113,13 @@ public class Segment : AuditedEntity
         );
     }
 
-    public JsonObject SerializeAsEnvironmentSpecific()
+    public JsonObject SerializeAsEnvironmentSpecific(Guid? envId = null)
     {
         var json = JsonSerializer.SerializeToNode(this, ReusableJsonSerializerOptions.Web)!.AsObject();
 
-        var envId = Type == SegmentType.EnvironmentSpecific ? EnvId.ToString() : string.Empty;
-        json["envId"] = envId;
+        json["envId"] = Type == SegmentType.EnvironmentSpecific
+            ? EnvId.ToString()
+            : envId?.ToString() ?? string.Empty;
 
         json.Remove("type");
         json.Remove("workspaceId");

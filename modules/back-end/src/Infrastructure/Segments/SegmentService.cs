@@ -100,7 +100,12 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
             Key = x.Key
         });
 
-        var flags = await query.ToListAsync();
-        return flags;
+        var references = await query.ToListAsync();
+        foreach (var reference in references)
+        {
+            reference.EnvId = envId;
+        }
+
+        return references;
     }
 }
