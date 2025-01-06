@@ -5,9 +5,11 @@ using Application.Bases.Models;
 using Application.GlobalUsers;
 using Domain.EndUsers;
 using Domain.Utils;
+using Domain.Workspaces;
 
 namespace Api.Controllers;
 
+[Authorize(LicenseFeatures.GlobalUser)]
 [Route("api/v{version:apiVersion}/global-users")]
 public class GlobalUserController : ApiControllerBase
 {

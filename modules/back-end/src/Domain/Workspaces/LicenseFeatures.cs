@@ -7,9 +7,11 @@ public static class LicenseFeatures
     public const string Schedule = "schedule";
     public const string MultiOrg = "multi-organization";
     public const string ChangeRequest = "change-request";
+    public const string GlobalUser = "global-user";
     public const string ShareableSegment = "shareable-segment";
 
-    public static readonly string[] All = { Asterisk, Sso, Schedule, MultiOrg, ChangeRequest, ShareableSegment };
+    public static readonly string[] All =
+        { Asterisk, Sso, Schedule, MultiOrg, ChangeRequest, GlobalUser, ShareableSegment };
 
     public static bool IsDefined(string feature)
     {
