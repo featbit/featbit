@@ -210,4 +210,6 @@ The following listed features are protected by a commercial license key, please 
 - Change request
 - SSO
 - Multi-organizations
+- Global User
+- Shareable Segment
 
