@@ -113,6 +113,10 @@ export class License {
   }
 
   isGranted(feature: LicenseFeatureEnum): boolean {
+    if (this.data.exp < new Date().getTime()) {
+      return false;
+    }
+
     return this.data?.features?.includes(feature) || this.data?.features?.includes(LicenseFeatureEnum.Asterisk);
   }
 }
