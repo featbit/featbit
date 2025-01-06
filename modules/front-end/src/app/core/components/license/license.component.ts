@@ -4,7 +4,7 @@ import { License, LicenseFeatureEnum } from "@shared/types";
 @Component({
   selector: 'license',
   templateUrl: './license.component.html',
-  styleUrls: ['./license.component.less']
+  styleUrls: [ './license.component.less' ]
 })
 export class LicenseComponent {
 
@@ -15,7 +15,8 @@ export class LicenseComponent {
     LicenseFeatureEnum.Schedule,
     LicenseFeatureEnum.ChangeRequest,
     LicenseFeatureEnum.MultiOrg,
-    LicenseFeatureEnum.GlobalUser
+    LicenseFeatureEnum.GlobalUser,
+    LicenseFeatureEnum.ShareableSegment
   ];
 
   getLocalDate(date: number) {
@@ -35,6 +36,10 @@ export class LicenseComponent {
         return $localize`:@@common.multi-org:Multiple Organization`;
       case LicenseFeatureEnum.GlobalUser:
         return $localize`:@@common.global-user:Global User`;
+      case LicenseFeatureEnum.ShareableSegment:
+        return $localize`:@@common.shareable-segment:Shareable Segment`;
+      default:
+        return '';
     }
   }
 }

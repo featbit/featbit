@@ -51,7 +51,7 @@
                   <div style="display: flex;flex-direction: row">
                     <div>
                       <span *ngIf="experiment?.selectedIteration?.updatedAt">
-                        <ng-container i18n="@@common.last-updated">Last updated</ng-container>： {{experiment?.selectedIteration?.updatedAt | date: 'YYYY-MM-dd HH:mm'}}
+                        <ng-container i18n="@@common.last-updated">Last updated</ng-container>： {{experiment?.selectedIteration?.updatedAt | date: 'yyyy-MM-dd HH:mm'}}
                       </span>
                       <button *ngIf="experiment.status !== exptStatusNotStarted" style="margin-left: 15px;border-radius:8px" nz-button nzType="default" nz-tooltip i18n-nzTooltipTitle="@@ff.expt.refresh-every-1-min" nzTooltipTitle="Automatically refresh every 1 minute" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
                         <i *ngIf="!experiment.isLoading" nz-icon nzType="reload" nzTheme="outline"></i>
