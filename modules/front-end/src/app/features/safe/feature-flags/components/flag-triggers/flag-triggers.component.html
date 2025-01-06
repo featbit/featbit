@@ -53,8 +53,8 @@
         <ng-template #triggerInfo>
           <div style="color: #9A95CC">
             <div><ng-container i18n="@@ff.triggers.triggered">Triggered</ng-container>&nbsp;<strong>{{trigger.triggeredTimes}}</strong>&nbsp;<ng-container i18n="@@common.times">Times</ng-container></div>
-            <div *ngIf="!!trigger.lastTriggeredAt"><ng-container i18n="@@ff.triggers.last_triggered_at">Last triggered at</ng-container> {{trigger.lastTriggeredAt | date: 'YYYY-MM-dd HH:mm'}}</div>
-            <div><ng-container i18n="@@ff.triggers.updated_at">Last updated at</ng-container> {{trigger.updatedAt | date: 'YYYY-MM-dd HH:mm'}}</div>
+            <div *ngIf="!!trigger.lastTriggeredAt"><ng-container i18n="@@ff.triggers.last_triggered_at">Last triggered at</ng-container> {{trigger.lastTriggeredAt | date: 'yyyy-MM-dd HH:mm'}}</div>
+            <div><ng-container i18n="@@ff.triggers.updated_at">Last updated at</ng-container> {{trigger.updatedAt | date: 'yyyy-MM-dd HH:mm'}}</div>
           </div>
         </ng-template>
         <ng-template #actionStatus>

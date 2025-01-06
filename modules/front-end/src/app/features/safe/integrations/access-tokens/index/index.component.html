@@ -83,7 +83,7 @@
           </ng-container>
           {{ item.status | accessTokenStatus }}
         </td>
-        <td>{{ item.lastUsedAt | date: 'YYYY-MM-dd HH:mm'}}</td>
+        <td>{{ item.lastUsedAt | date: 'yyyy-MM-dd HH:mm'}}</td>
         <td>{{ item.token }}</td>
         <td style="text-align: center">
           <ng-container *ngIf="canTakeActionOnAccessToken(item.type)">
