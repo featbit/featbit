@@ -82,7 +82,9 @@
   </ng-template>
   <ng-template #footer>
     <div class="footer">
-      <span class="footnote">{{selectedFlags.length}} Selected</span>
+      <span class="footnote">
+        {{selectedFlags.length}}&nbsp;<span i18n="@@common.selected">Selected</span>
+      </span>
       <div class="actions">
         <button nz-button nzType="default" (click)="onClose()" i18n="@@common.cancel">Cancel</button>
         <button
