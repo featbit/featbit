@@ -25,15 +25,22 @@ export interface IVariationOverview {
   enabledVariations: string[],
 }
 
-export interface IFeatureFlagListCheckItem {
+export type FeatureFlagListCheckItem = {
   id: string;
   name: string;
   checked: boolean;
 }
 
+export type CopyToEnvPrecheckResult = {
+  id: string;
+  keyCheck: boolean;
+  targetUserCheck: boolean;
+  targetRuleCheck: boolean;
+  passed: boolean;
+}
+
 export interface ICopyToEnvResult {
   copiedCount: number;
-  ignored: string[];
 }
 
 export class IFeatureFlagListFilter {

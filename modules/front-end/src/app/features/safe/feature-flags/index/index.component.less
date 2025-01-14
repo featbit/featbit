@@ -39,68 +39,11 @@ section.body-container {
   }
 
   .copy-icon {
-    margin-left: 0px;
+    margin-left: 0;
 
     &:hover {
       cursor: pointer;
       color: @primary-color;
-    }
-  }
-}
-
-nz-alert {
-  margin-bottom: 12px;
-}
-
-.batch-copy-content {
-  display: flex;
-
-  nz-list {
-    border: 1px solid @grey20-color;
-    border-radius: 20px;
-    width: 340px;
-    padding: 12px 24px;
-
-    nz-list-item {
-      border: none;
-      font-size: 14px;
-      line-height: 150%;
-      color: @grey70-color;
-      padding-left: 8px;
-      cursor: pointer;
-
-      &:first-child {
-        margin-top: 4px;
-      }
-
-      &:not(.item-selected):hover {
-        border-radius: 8px;
-        background-color: @grey5-color;
-      }
-    }
-
-    .item-selected {
-      font-weight: 500;
-      color: @green70-color;
-    }
-  }
-
-  .transfer-text {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0 12px;
-    width: 40px;
-    color: @grey50-color;
-
-    i {
-      display: block;
-      font-size: 32px;
-      margin-bottom: 4px;
-    }
-
-    span {
-      text-align: center;
     }
   }
 }

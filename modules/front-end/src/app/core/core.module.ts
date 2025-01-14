@@ -103,6 +103,7 @@ import { ImportUserComponent } from './components/import-user/import-user.compon
 import { EndUserDrawerComponent } from './components/end-user-drawer/end-user-drawer.component';
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { SegmentCreationModalComponent } from './components/segment-creation-modal/segment-creation-modal.component';
+import { CopyFeatureFlagModalComponent } from '@core/components/copy-feature-flag-modal/copy-feature-flag-modal.component';
 
 @NgModule({
   declarations: [
@@ -146,7 +147,8 @@ import { SegmentCreationModalComponent } from './components/segment-creation-mod
     ResourceFinderComponent,
     ImportUserComponent,
     EndUserDrawerComponent,
-    SegmentCreationModalComponent
+    SegmentCreationModalComponent,
+    CopyFeatureFlagModalComponent
   ],
   imports: [
     CommonModule,
@@ -251,7 +253,8 @@ import { SegmentCreationModalComponent } from './components/segment-creation-mod
     ResourceFinderComponent,
     ImportUserComponent,
     EndUserDrawerComponent,
-    SegmentCreationModalComponent
+    SegmentCreationModalComponent,
+    CopyFeatureFlagModalComponent
   ]
 })
 export class CoreModule {
