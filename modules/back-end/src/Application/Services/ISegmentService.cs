@@ -10,8 +10,6 @@ public interface ISegmentService : IService<Segment>
 
     Task<ICollection<Segment>> GetListAsync(Guid workspaceId, string rn, bool includeArchived = false);
 
-    Task<IEnumerable<Segment>> GetListAsync(Guid[] ids);
-
     Task<ICollection<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id);
 
     Task DeleteAsync(Guid id);

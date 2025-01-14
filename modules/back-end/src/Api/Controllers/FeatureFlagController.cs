@@ -327,16 +327,26 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpPost("copy-to-env/{targetEnvId:guid}")]
-    public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(
+    [HttpPost("copy-to-env-precheck/{targetEnvId:guid}")]
+    public async Task<ApiResponse<ICollection<CopyToEnvPrecheckResult>>> CopyToEnvPrecheckAsync(
         Guid targetEnvId,
         [FromBody] ICollection<Guid> flagIds)
     {
-        var request = new CopyToEnv
+        var request = new CopyToEnvPrecheck
         {
             TargetEnvId = targetEnvId,
             FlagIds = flagIds
         };
+
+        var results = await Mediator.Send(request);
+        return Ok(results);
+    }
+
+
+    [HttpPost("copy-to-env/{targetEnvId:guid}")]
+    public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(Guid targetEnvId, CopyToEnv request)
+    {
+        request.TargetEnvId = targetEnvId;
 
         var copyToEnvResult = await Mediator.Send(request);
         return Ok(copyToEnvResult);
