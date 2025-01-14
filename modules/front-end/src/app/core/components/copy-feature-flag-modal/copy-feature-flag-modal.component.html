@@ -54,7 +54,7 @@
           >
             <ng-template #extraTpl>
               <label *ngIf="!flag.disabled" nz-checkbox [(ngModel)]="flag.checked" (click)="$event.stopPropagation()">
-                {{!flag.passed ? 'Copy Anyway' : ''}}
+                <span i18n="@ff.bulk-copy.copy-anyway" *ngIf="!flag.passed">Copy Anyway</span>
               </label>
             </ng-template>
             <div class="description">
