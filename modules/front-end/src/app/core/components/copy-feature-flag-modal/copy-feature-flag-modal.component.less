@@ -1,0 +1,58 @@
+.content-layout {
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+}
+
+nz-alert {
+  ul {
+    padding-left: 16px;
+    margin-bottom: 0;
+
+    li {
+      margin-bottom: 4px;
+
+      &:last-child {
+        margin-bottom: unset;
+      }
+    }
+  }
+}
+
+nz-collapse {
+  margin-top: 4px;
+
+  .description {
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.collapse-overflow {
+  max-height: 415px;
+  overflow: auto;
+}
+
+.select-environment {
+  nz-select {
+    width: 150px;
+  }
+}
+
+.footer {
+  .footnote {
+    display: inline-block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .actions {
+    button {
+      width: unset;
+      height: unset;
+    }
+  }
+}
+

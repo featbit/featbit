@@ -67,15 +67,6 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
         return await query.ToListAsync();
     }
 
-    public async Task<IEnumerable<Segment>> GetListAsync(Guid[] ids)
-    {
-        var segments = await Queryable
-            .Where(x => ids.Contains(x.Id))
-            .ToListAsync();
-
-        return segments;
-    }
-
     public async Task DeleteAsync(Guid id)
     {
         await Collection.DeleteOneAsync(x => x.Id == id);

@@ -4,17 +4,12 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { encodeURIComponentFfc, getQueryParamsFromObject } from '@shared/utils';
 import {
-  IFeatureFlagListCheckItem,
+  FeatureFlagListCheckItem,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel,
 } from "../types/feature-flag";
-import { debounceTime, map } from 'rxjs/operators';
-import { FormBuilder } from "@angular/forms";
-import { getCurrentProjectEnv } from "@utils/project-env";
-import { ProjectService } from "@services/project.service";
-import { IEnvironment } from "@shared/types";
-import { NzNotificationService } from "ng-zorro-antd/notification";
+import { debounceTime } from 'rxjs/operators';
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
@@ -32,9 +27,6 @@ export class IndexComponent implements OnInit {
     private router: Router,
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService,
-    private fb: FormBuilder,
-    private projectService: ProjectService,
-    private notification: NzNotificationService,
     private modal: NzModalService,
   ) { }
 
@@ -58,8 +50,6 @@ export class IndexComponent implements OnInit {
       });
     });
 
-    let currentProjectEnv = getCurrentProjectEnv();
-
     // get switch list
     this.$search.pipe(
       debounceTime(200)
@@ -73,17 +63,6 @@ export class IndexComponent implements OnInit {
       this.allTags = allTags;
       this.isLoadingTags = false;
     });
-
-    // get current envs
-    const curProjectId = currentProjectEnv.projectId;
-    const curEnvId = currentProjectEnv.envId;
-
-    this.projectService.get(curProjectId)
-      .pipe(map(project => project.environments))
-      .subscribe(envs => {
-        this.envs = envs.filter(x => x.id !== curEnvId);
-        this.targetEnv = this.envs[0];
-      });
   }
 
   // tags
@@ -148,17 +127,7 @@ export class IndexComponent implements OnInit {
 
   // batch copy
   batchCopyVisible: boolean = false;
-  checkedItems: IFeatureFlagListCheckItem[] = [];
-  get totalSelected() {
-    return this.checkedItems.filter(x => x.checked).length;
-  }
-
-  envs: IEnvironment[] = [];
-  targetEnv: IEnvironment;
-  selectTargetEnv(env: IEnvironment) {
-    this.targetEnv = env;
-  }
-
+  checkedItems: FeatureFlagListCheckItem[] = [];
   openBatchCopyModal() {
     if (this.checkedItemKeys.size === 0) {
       this.msg.warning($localize `:@@ff.idx.select-ff-to-copy:Please select at least one feature flag to copy`);
@@ -172,35 +141,6 @@ export class IndexComponent implements OnInit {
     }
 
     this.batchCopyVisible = true;
-  }
-
-  isCopying: boolean = false;
-  batchCopy() {
-    this.isCopying = true;
-
-    this.featureFlagService
-      .copyToEnv(this.targetEnv.id, this.checkedItems.filter(x => x.checked).map(x => x.id))
-      .subscribe(copyToEnvResult => {
-        this.isCopying = false;
-        this.batchCopyVisible = false;
-        this.checkedItemKeys.clear();
-        this.refreshCheckedStatus();
-
-        let msg = $localize `:@@ff.idx.successfully-copied:Successfully copied`
-          + `<strong> ${copyToEnvResult.copiedCount} </strong>`
-          + $localize `:@@ff.idx.ff-to-env:feature flags to environment`
-          + `<strong> ${this.targetEnv.name} </strong>.`;
-
-        if (copyToEnvResult.ignored.length > 0) {
-          msg += '<br/>' + $localize `:@@ff.idx.following-ff-exist-in-targeting-env:Following feature flags have been ignored as they are already in the targeting environment`
-            + `<br/> ${copyToEnvResult.ignored.join(', ')}`;
-          this.notification.warning($localize `:@@ff.idx.copy-result:Copy result`, msg, { nzDuration: 0 });
-        } else {
-          this.notification.success($localize `:@@common.copy-success:Copied`,msg);
-        }
-      }, _ => {
-        this.isCopying = false;
-      });
   }
 
   //#region switch list
@@ -311,7 +251,7 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  getLocalDate(date: string) {
+  getLocalDate(date: string | Date) {
     if (!date) return '';
     return new Date(date);
   }

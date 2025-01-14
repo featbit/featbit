@@ -171,51 +171,8 @@
 </section>
 
 <feature-flag-drawer [visible]="creationDrawerVisible" (onClose)="closeCreationDrawer()"></feature-flag-drawer>
-
-<nz-modal
-  nzAutofocus="cancel"
-  [(nzVisible)]="batchCopyVisible"
-  [nzOkDisabled]="totalSelected === 0"
-  [nzOkLoading]="isCopying"
-  (nzOnOk)="batchCopy()"
-  (nzOnCancel)="batchCopyVisible = false"
-  [nzCentered]="true"
-  i18n-nzTitle="@@common.bulk-copy"
-  nzTitle="Bulk copy"
-  nzWidth="820px"
-  nzMaskClosable="false">
-  <ng-container *nzModalContent>
-    <nz-alert
-      nzType="warning"
-      i18n-nzDescription="@@ff.idx.only-following-fields-are-copied"
-      nzDescription="Targeting user and rules will not be copied."
-      nzShowIcon
-      nzIconType="icons:icon-warning"
-    ></nz-alert>
-    <div class="batch-copy-content">
-      <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="flagHeader">
-        <nz-list-item *ngFor="let item of checkedItems">
-          <label nz-checkbox [(ngModel)]="item.checked">{{ item.name }}</label>
-        </nz-list-item>
-        <ng-template #flagHeader>
-          <span class="header"><ng-container i18n="@@ff.idx.selected-ff">Selected feature flags</ng-container>: {{ totalSelected }}</span>
-        </ng-template>
-      </nz-list>
-      <div class="transfer-text">
-        <i nz-icon nzType="icons:icon-copy-to"></i>
-        <span i18n="@@common.copy-to">Copy</span>
-      </div>
-      <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
-        <nz-list-item
-          *ngFor="let env of envs"
-          (click)="selectTargetEnv(env)"
-          [ngClass]="{'item-selected': env.id === targetEnv.id}">
-          {{ env.name }}
-        </nz-list-item>
-        <ng-template #envHeader>
-          <span class="header" i18n="@@common.targeting-env">Targeting environment</span>
-        </ng-template>
-      </nz-list>
-    </div>
-  </ng-container>
-</nz-modal>
+<copy-feature-flag-modal
+  [flags]="checkedItems"
+  [visible]="batchCopyVisible"
+  (close)="batchCopyVisible = false">
+</copy-feature-flag-modal>

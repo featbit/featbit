@@ -1,0 +1,100 @@
+<nz-modal
+  nzClassName="bulk-copy-flag-modal"
+  [nzVisible]="visible"
+  [nzCentered]="true"
+  nzTitle="Bulk Copy"
+  i18n-nzTitle="@@ff.bulk-copy.title"
+  [nzWidth]="620"
+  [nzContent]="content"
+  [nzFooter]="footer"
+  (nzOnCancel)="onClose()">
+  <ng-template #content>
+    <div class="content-layout">
+      <nz-alert
+        nzType="info"
+        nzMessage="Restrictions"
+        i18n-nzMessage="@@common.restrictions"
+        [nzDescription]="description"
+        nzShowIcon
+        nzIconType="icons:icon-info-outline"
+      >
+        <ng-template #description>
+          <ul>
+            <li>
+              <strong i18n="@@ff.bulk-copy.individual-targeting">Individual Targeting: </strong>
+              <span i18n="@@ff.bulk-copy.target-user-restriction">Cannot be copied as they are environment specific.</span>
+            </li>
+            <li>
+              <strong i18n="@@ff.bulk-copy.targeting-rules">Targeting Rules: </strong>
+              <span i18n="@@ff.bulk-copy.target-rule-restriction">Cannot be copied if any of them has references to environment-specific segments or uses shared segments incompatible with the target environment.</span>
+            </li>
+          </ul>
+        </ng-template>
+      </nz-alert>
+
+      <div class="select-environment">
+        <nz-form-label nzRequired i18n="@@ff.bulk-copy.select-target-environment">Select target environment</nz-form-label>
+        <nz-select nzShowSearch [(ngModel)]="targetEnvId" (ngModelChange)="onSelectTargetEnvironment()">
+          <nz-option *ngFor="let env of envs" [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
+        </nz-select>
+      </div>
+
+      <nz-spin
+        nzTip="Checking if the selected flags can be copied..."
+        i18n-nzTip="@@ff.bulk-copy.checking-tip"
+        [nzSpinning]="checking">
+        <nz-form-label nzNoColon nzRequired i18n="@@ff.bulk-copy.choose-feature-flags-to-copy">Choose feature flags to copy</nz-form-label>
+        <nz-collapse nzBordered="false" [ngClass]="{'collapse-overflow': flags.length >= 10}">
+          <nz-collapse-panel
+            *ngFor="let flag of flags"
+            [nzHeader]="flag.name"
+            [nzExtra]="extraTpl"
+            [nzDisabled]="flag.disabled"
+            [nzActive]="flag.active"
+          >
+            <ng-template #extraTpl>
+              <label *ngIf="!flag.disabled" nz-checkbox [(ngModel)]="flag.checked" (click)="$event.stopPropagation()">
+                <span i18n="@ff.bulk-copy.copy-anyway" *ngIf="!flag.passed">Copy Anyway</span>
+              </label>
+            </ng-template>
+            <div class="description">
+              <p *ngIf="!flag.keyCheck">
+                <span nz-icon nzType="close" nzTheme="outline" style="color: #ff4d4f"></span>&nbsp;
+                <span i18n="@@ff.bulk-copy.key-check-failed">This flag already exists in the target environment.</span>
+              </p>
+              <p *ngIf="!flag.targetUserCheck">
+                <span nz-icon nzType="warning" nzTheme="outline" style="color: #faad14"></span>&nbsp;
+                <span i18n="@@ff.bulk-copy.target-user-will-not-be-copied">Individual Targeting will not be copied.</span>
+              </p>
+              <p *ngIf="!flag.targetRuleCheck">
+                <span nz-icon nzType="warning" nzTheme="outline" style="color: #faad14"></span>&nbsp;
+                <span i18n="@@ff.bulk-copy.target-rules-will-not-be-copied">Targeting Rules will not be copied.</span>
+              </p>
+              <p *ngIf="flag.passed">
+                <span nz-icon nzType="check" nzTheme="outline" style="color: #3CC798"></span>&nbsp;
+                <span i18n="@@ff.bulk-copy.flag-safe-to-copy">This flag is safe to copy.</span>
+              </p>
+            </div>
+          </nz-collapse-panel>
+        </nz-collapse>
+      </nz-spin>
+    </div>
+  </ng-template>
+  <ng-template #footer>
+    <div class="footer">
+      <span class="footnote">
+        {{selectedFlags.length}}&nbsp;<span i18n="@@common.selected">Selected</span>
+      </span>
+      <div class="actions">
+        <button nz-button nzType="default" (click)="onClose()" i18n="@@common.cancel">Cancel</button>
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="this.copying"
+          [disabled]="precheckResults.length === 0 || selectedFlags.length === 0"
+          (click)="batchCopy()"
+          i18n="@@common.save">Save</button>
+      </div>
+    </div>
+  </ng-template>
+</nz-modal>

@@ -45,6 +45,8 @@ public static class RN
 
         return true;
     }
+
+    public static bool IsInScope(string rn, string scope) => $"{rn}:".StartsWith($"{scope}:");
 }
 
 public record TypeKeyProps

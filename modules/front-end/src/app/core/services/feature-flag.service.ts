@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { firstValueFrom, Observable, of } from "rxjs";
 import {
+  CopyToEnvPrecheckResult,
   ICopyToEnvResult,
   IFeatureFlagCreationPayload,
   IFeatureFlagListFilter,
@@ -119,10 +120,19 @@ export class FeatureFlagService {
     return this.http.post(this.baseUrl, payload);
   }
 
-  copyToEnv(targetEnvId: string, flagIds: string[]): Observable<ICopyToEnvResult> {
+  copyToEnvPrecheck(targetEnvId: string, flagIds: string[]): Observable<CopyToEnvPrecheckResult[]> {
+    const url = `${this.baseUrl}/copy-to-env-precheck/${targetEnvId}`;
+
+    return this.http.post<CopyToEnvPrecheckResult[]>(url, flagIds);
+  }
+
+  copyToEnv(targetEnvId: string, flagIds: string[], precheckResults: CopyToEnvPrecheckResult[]): Observable<ICopyToEnvResult> {
     const url = `${this.baseUrl}/copy-to-env/${targetEnvId}`;
 
-    return this.http.post<ICopyToEnvResult>(url, flagIds);
+    return this.http.post<ICopyToEnvResult>(url, {
+      flagIds,
+      precheckResults
+    });
   }
 
   archive(key: string): Observable<any> {

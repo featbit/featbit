@@ -178,7 +178,7 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public void CopyToEnv(Guid targetEnvId, Guid currentUserId)
+    public void CopyToEnv(Guid targetEnvId, Guid currentUserId, bool keepRules = false)
     {
         // clear id
         Id = Guid.Empty;
@@ -186,9 +186,13 @@ public class FeatureFlag : FullAuditedEntity
         // change envId
         EnvId = targetEnvId;
 
-        // clear targeting
+        // clear targeting-users
         TargetUsers = Array.Empty<TargetUser>();
-        Rules = Array.Empty<TargetRule>();
+
+        if (!keepRules)
+        {
+            Rules = Array.Empty<TargetRule>();
+        }
 
         // change audited properties
         CreatedAt = DateTime.UtcNow;
