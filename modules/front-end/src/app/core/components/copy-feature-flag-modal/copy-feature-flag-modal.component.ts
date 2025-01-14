@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { map } from "rxjs/operators";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { IEnvironment } from "@shared/types";
@@ -69,10 +68,9 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   ngOnInit() {
     let currentProjectEnv = getCurrentProjectEnv();
 
-    this.projectService
-    .get(currentProjectEnv.projectId)
-    .pipe(map(project => project.environments))
-    .subscribe(envs => this.envs = envs.filter(x => x.id !== currentProjectEnv.envId));
+    this.projectService.getListAsync().then(projects => {
+      this.envs = projects.flatMap(x => x.environments).filter(x => x.id !== currentProjectEnv.envId);
+    });
   }
 
   onClose() {

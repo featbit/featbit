@@ -64,11 +64,11 @@
               </p>
               <p *ngIf="!flag.targetUserCheck">
                 <span nz-icon nzType="warning" nzTheme="outline" style="color: #faad14"></span>&nbsp;
-                <span i18n="@@ff.bulk-copy.target-user-check-failed">This flag has individual targeting settings that cannot be copied.</span>
+                <span i18n="@@ff.bulk-copy.target-user-will-not-be-copied">Individual Targeting will not be copied.</span>
               </p>
               <p *ngIf="!flag.targetRuleCheck">
                 <span nz-icon nzType="warning" nzTheme="outline" style="color: #faad14"></span>&nbsp;
-                <span i18n="@@ff.bulk-copy.target-rule-check-failed">This flag has references to environment-specific segments or uses shared segments incompatible with the target environment.</span>
+                <span i18n="@@ff.bulk-copy.target-rules-will-not-be-copied">Targeting Rules will not be copied.</span>
               </p>
               <p *ngIf="flag.passed">
                 <span nz-icon nzType="check" nzTheme="outline" style="color: #3CC798"></span>&nbsp;

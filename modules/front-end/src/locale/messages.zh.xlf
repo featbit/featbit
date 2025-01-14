@@ -598,7 +598,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">133</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
@@ -2059,21 +2059,21 @@
         </context-group>
         <target>此开关在目标环境中已存在。</target>
       </trans-unit>
-      <trans-unit id="ff.bulk-copy.target-user-check-failed" datatype="html">
-        <source>This flag has individual targeting settings that cannot be copied.</source>
+      <trans-unit id="ff.bulk-copy.target-user-will-not-be-copied" datatype="html">
+        <source>Individual Targeting will not be copied.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
           <context context-type="linenumber">67</context>
         </context-group>
-        <target>此开关设定了目标用户，目标用户无法复制。</target>
+        <target>目标用户不会被复制。</target>
       </trans-unit>
-      <trans-unit id="ff.bulk-copy.target-rule-check-failed" datatype="html">
-        <source>This flag has references to environment-specific segments or uses shared segments incompatible with the target environment.</source>
+      <trans-unit id="ff.bulk-copy.target-rules-will-not-be-copied" datatype="html">
+        <source>Targeting Rules will not be copied.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
           <context context-type="linenumber">71</context>
         </context-group>
-        <target>此开关使用了当前环境下的用户组或其使用的共享用户组在目标环境无法使用。</target>
+        <target>匹配规则不会被复制。</target>
       </trans-unit>
       <trans-unit id="ff.bulk-copy.flag-safe-to-copy" datatype="html">
         <source>This flag is safe to copy.</source>
@@ -2095,7 +2095,7 @@
         <source>Bulk copy precheck failed. Please try again.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">115</context>
+          <context context-type="linenumber">114</context>
         </context-group>
         <target>批量复制失败，请重试。</target>
       </trans-unit>
@@ -2103,7 +2103,7 @@
         <source>Operation failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">139</context>
+          <context context-type="linenumber">138</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
