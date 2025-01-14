@@ -81,7 +81,6 @@ public class CopyToEnvPrecheckHandler : IRequestHandler<CopyToEnvPrecheck, IColl
                 .ToArray();
 
             var segments = await _segmentService.FindManyAsync(x => segmentIds.Contains(x.Id));
-
             if (segments.Any(x => x.Type == SegmentType.EnvironmentSpecific))
             {
                 // if there are environment-specific segments, return false
