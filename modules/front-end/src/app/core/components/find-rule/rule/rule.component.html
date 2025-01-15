@@ -107,10 +107,12 @@
           (nzOnSearch)="onSearchSegments($event)">
             <ng-container *ngFor="let item of segments;">
               <nz-option *ngIf="!isLoadingSegments" nzCustomContent [nzValue]="item.id" [nzLabel]="item.name">
-                {{item.name}}
-                <nz-tag *ngIf="item.type === SegmentType.Shared" style="padding: 0 4px; float: right" nzColor="#23AD7F">
-                  <span i18n="@@segment.shared">Shared</span>
-                </nz-tag>
+                <div class="segment-option-item">
+                  <span [ngClass]="{'text-overflow': item.type === SegmentType.Shared}">{{ item.name }}</span>
+                  <nz-tag *ngIf="item.type === SegmentType.Shared" nzColor="#23AD7F">
+                    <span i18n="@@segment.shared">Shared</span>
+                  </nz-tag>
+                </div>
               </nz-option>
             </ng-container>
             <ng-template #multipleTemplate let-selected>
