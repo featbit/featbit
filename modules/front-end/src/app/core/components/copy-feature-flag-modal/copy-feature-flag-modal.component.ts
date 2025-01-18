@@ -5,6 +5,7 @@ import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { IEnvironment } from "@shared/types";
 import { CopyToEnvPrecheckResult, FeatureFlagListCheckItem } from "@features/safe/feature-flags/types/feature-flag";
+import { map } from "rxjs/operators";
 
 type BulkCopyCheckItem = {
   id: string;
@@ -62,15 +63,15 @@ export class CopyFeatureFlagModalComponent implements OnInit {
     private projectService: ProjectService,
     private flagService: FeatureFlagService,
     private msg: NzMessageService,
-  ) {
-  }
+  ) { }
 
   ngOnInit() {
     let currentProjectEnv = getCurrentProjectEnv();
 
-    this.projectService.getListAsync().then(projects => {
-      this.envs = projects.flatMap(x => x.environments).filter(x => x.id !== currentProjectEnv.envId);
-    });
+    this.projectService
+    .get(currentProjectEnv.projectId)
+    .pipe(map(project => project.environments))
+    .subscribe(envs => this.envs = envs.filter(x => x.id !== currentProjectEnv.envId));
   }
 
   onClose() {
