@@ -5,7 +5,7 @@ import { environment } from 'src/environments/environment';
 import { IProject, IProjectEnv } from '@shared/types';
 import { CURRENT_PROJECT } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
-import { catchError } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
 import { PermissionsService } from "@services/permissions.service";
 import { permissionActions } from "@shared/policy";
 
@@ -40,7 +40,17 @@ export class ProjectService {
 
   get(projectId: string): Observable<IProject> {
     const url = `${this.baseUrl}/${projectId}`;
-    return this.http.get<IProject>(url);
+
+    return this.http.get<IProject>(url).pipe(
+      map(project => {
+        project.environments = project.environments.filter((env) => {
+          const envRN = this.permissionsService.getEnvRN(project, env);
+          return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
+        });
+
+        return project;
+      })
+    );
   }
 
   create(params): Observable<any> {
