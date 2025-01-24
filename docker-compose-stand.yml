@@ -1,0 +1,28 @@
+name: featbit-stand
+
+services:
+  postgresql:
+    image: postgres:15.10
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 0tJXCokSvOB8
+      POSTGRES_DB: featbit
+    volumes:
+      - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - featbit-network
+
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.10.0.0/16
+
+volumes:
+  postgres_data:
