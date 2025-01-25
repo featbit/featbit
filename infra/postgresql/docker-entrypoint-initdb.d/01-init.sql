@@ -1,4 +1,4 @@
-CREATE TABLE Workspaces (
+CREATE TABLE workspaces (
     Id UUID PRIMARY KEY,
     CreatedAt TIMESTAMP NOT NULL,
     UpdatedAt TIMESTAMP NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE Workspaces (
     CONSTRAINT workspace_key_unique UNIQUE (Key)
 );
 
-CREATE TABLE Users (
+CREATE TABLE users (
     Id UUID PRIMARY KEY,
     CreatedAt TIMESTAMP NOT NULL,
     UpdatedAt TIMESTAMP NOT NULL,
@@ -18,14 +18,14 @@ CREATE TABLE Users (
     Email VARCHAR(255) NOT NULL,
     Password TEXT NOT NULL,
     Origin VARCHAR(255),
-    CONSTRAINT fk_workspace FOREIGN KEY (WorkspaceId) REFERENCES Workspaces(Id) ON DELETE CASCADE
+    CONSTRAINT fk_workspace FOREIGN KEY (WorkspaceId) REFERENCES workspaces(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_user_workspace ON Users (WorkspaceId);
-CREATE INDEX idx_user_email ON Users (Email);
-CREATE UNIQUE INDEX idx_user_email_workspace ON Users (Email, WorkspaceId);
+CREATE INDEX idx_user_workspace ON users (WorkspaceId);
+CREATE INDEX idx_user_email ON users (Email);
+CREATE UNIQUE INDEX idx_user_email_workspace ON users (Email, WorkspaceId);
 
-CREATE TABLE Organizations (
+CREATE TABLE organizations (
     Id UUID PRIMARY KEY,
     CreatedAt TIMESTAMP NOT NULL,
     UpdatedAt TIMESTAMP NOT NULL,
@@ -35,12 +35,12 @@ CREATE TABLE Organizations (
     Initialized BOOLEAN NOT NULL DEFAULT FALSE,
     License TEXT,
     DefaultPermissions JSONB,
-    CONSTRAINT fk_workspace FOREIGN KEY (WorkspaceId) REFERENCES Workspaces(Id) ON DELETE CASCADE
+    CONSTRAINT fk_workspace FOREIGN KEY (WorkspaceId) REFERENCES workspaces(Id) ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX idx_organization_workspace_key ON Organizations (WorkspaceId, Key);
+CREATE UNIQUE INDEX idx_organization_workspace_key ON organizations (WorkspaceId, Key);
 
-CREATE TABLE OrganizationUsers (
+CREATE TABLE organization_users (
     Id UUID PRIMARY KEY,
     CreatedAt TIMESTAMP NOT NULL,
     UpdatedAt TIMESTAMP NOT NULL,
@@ -48,29 +48,29 @@ CREATE TABLE OrganizationUsers (
     UserId UUID NOT NULL,
     InvitorId UUID,
     InitialPassword TEXT,
-    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES Organizations(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_user FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_invitor FOREIGN KEY (InvitorId) REFERENCES Users(Id) ON DELETE SET NULL
+    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES organizations(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_user FOREIGN KEY (UserId) REFERENCES users(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_invitor FOREIGN KEY (InvitorId) REFERENCES users(Id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_organizationuser_organization ON OrganizationUsers (OrganizationId);
-CREATE INDEX idx_organizationuser_user ON OrganizationUsers (UserId);
-CREATE UNIQUE INDEX idx_organizationuser_organization_user ON OrganizationUsers (OrganizationId, UserId);
+CREATE INDEX idx_organizationuser_organization ON organization_users (OrganizationId);
+CREATE INDEX idx_organizationuser_user ON organization_users (UserId);
+CREATE UNIQUE INDEX idx_organizationuser_organization_user ON organization_users (OrganizationId, UserId);
 
-CREATE TABLE Projects (
+CREATE TABLE projects (
     Id UUID PRIMARY KEY,
     CreatedAt TIMESTAMP NOT NULL,
     UpdatedAt TIMESTAMP NOT NULL,
     OrganizationId UUID NOT NULL,
     Name VARCHAR(255) NOT NULL,
     Key VARCHAR(255) NOT NULL,
-    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES Organizations(Id) ON DELETE CASCADE
+    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES organizations(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_project_organization ON Projects (OrganizationId);
-CREATE UNIQUE INDEX idx_project_organization_key ON Projects (OrganizationId, Key);
+CREATE INDEX idx_project_organization ON projects (OrganizationId);
+CREATE UNIQUE INDEX idx_project_organization_key ON projects (OrganizationId, Key);
 
-CREATE TABLE Environments (
+CREATE TABLE environments (
     Id UUID PRIMARY KEY,
     CreatedAt TIMESTAMP NOT NULL,
     UpdatedAt TIMESTAMP NOT NULL,
@@ -80,13 +80,13 @@ CREATE TABLE Environments (
     Description TEXT,
     Secrets JSONB,
     Settings JSONB,
-    CONSTRAINT fk_project FOREIGN KEY (ProjectId) REFERENCES Projects(Id) ON DELETE CASCADE
+    CONSTRAINT fk_project FOREIGN KEY (ProjectId) REFERENCES projects(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_environment_project ON Environments (ProjectId);
-CREATE UNIQUE INDEX idx_environment_project_key ON Environments (ProjectId, Key);
+CREATE INDEX idx_environment_project ON environments (ProjectId);
+CREATE UNIQUE INDEX idx_environment_project_key ON environments (ProjectId, Key);
 
-CREATE TABLE EndUsers (
+CREATE TABLE end_users (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -95,16 +95,16 @@ CREATE TABLE EndUsers (
     KeyId VARCHAR(255) NOT NULL,        -- End user key
     Name VARCHAR(255) NOT NULL,         -- End user name
     CustomizedProperties JSONB,         -- Customized properties stored as JSONB
-    CONSTRAINT fk_workspace FOREIGN KEY (WorkspaceId) REFERENCES Workspaces(Id) ON DELETE SET NULL,
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE SET NULL
+    CONSTRAINT fk_workspace FOREIGN KEY (WorkspaceId) REFERENCES workspaces(Id) ON DELETE SET NULL,
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_enduser_env ON EndUsers (EnvId);
-CREATE INDEX idx_enduser_workspace ON EndUsers (WorkspaceId);
-CREATE INDEX idx_enduser_created ON EndUsers (CreatedAt);
-CREATE INDEX idx_enduser_updated ON EndUsers (UpdatedAt);
+CREATE INDEX idx_enduser_env ON end_users (EnvId);
+CREATE INDEX idx_enduser_workspace ON end_users (WorkspaceId);
+CREATE INDEX idx_enduser_created ON end_users (CreatedAt);
+CREATE INDEX idx_enduser_updated ON end_users (UpdatedAt);
 
-CREATE TABLE EndUserProperties (
+CREATE TABLE end_user_properties (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -115,12 +115,12 @@ CREATE TABLE EndUserProperties (
     IsBuiltIn BOOLEAN NOT NULL,            -- Whether it's a built-in property
     IsDigestField BOOLEAN NOT NULL,        -- Whether it's a digest field
     Remark TEXT,                        -- Optional remark
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_enduserproperty_env ON EndUserProperties (EnvId);
+CREATE INDEX idx_enduserproperty_env ON end_user_properties (EnvId);
 
-CREATE TABLE Segments (
+CREATE TABLE segments (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -134,14 +134,14 @@ CREATE TABLE Segments (
     Excluded TEXT[],                    -- Array of excluded items (TEXT[])
     Rules JSONB,                        -- Match rules stored as JSONB
     IsArchived BOOLEAN NOT NULL,        -- Whether the segment is archived
-    CONSTRAINT fk_workspace FOREIGN KEY (WorkspaceId) REFERENCES Workspaces(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE
+    CONSTRAINT fk_workspace FOREIGN KEY (WorkspaceId) REFERENCES workspaces(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_segment_workspace ON Segments (WorkspaceId);
-CREATE INDEX idx_segment_env ON Segments (EnvId);
+CREATE INDEX idx_segment_workspace ON segments (WorkspaceId);
+CREATE INDEX idx_segment_env ON segments (EnvId);
 
-CREATE TABLE FeatureFlags (
+CREATE TABLE feature_flags (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -162,13 +162,13 @@ CREATE TABLE FeatureFlags (
     ExptIncludeAllTargets BOOLEAN NOT NULL,  -- Whether to include all targets in the experiment
     Tags TEXT[],                        -- Tags for categorizing feature flags
     IsArchived BOOLEAN NOT NULL,        -- Whether the feature flag is archived
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_featureflag_env ON FeatureFlags (EnvId);
-CREATE UNIQUE INDEX idx_featureflag_env_key ON FeatureFlags (EnvId, Key);
+CREATE INDEX idx_featureflag_env ON feature_flags (EnvId);
+CREATE UNIQUE INDEX idx_featureflag_env_key ON feature_flags (EnvId, Key);
 
-CREATE TABLE FlagRevisions (
+CREATE TABLE flag_revisions (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -176,7 +176,7 @@ CREATE TABLE FlagRevisions (
     Comment TEXT                        -- Comment for the revision
 );
 
-CREATE TABLE FlagDrafts (
+CREATE TABLE flag_drafts (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -187,14 +187,14 @@ CREATE TABLE FlagDrafts (
     Status VARCHAR(255) NOT NULL,       -- Draft status (e.g., 'pending', 'approved')
     Comment TEXT,                       -- Optional comment
     DataChange JSONB,                   -- Data change stored as JSONB
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_flag FOREIGN KEY (FlagId) REFERENCES FeatureFlags(Id) ON DELETE CASCADE
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag FOREIGN KEY (FlagId) REFERENCES feature_flags(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_flagdraft_env ON FlagDrafts (EnvId);
-CREATE INDEX idx_flagdraft_flag ON FlagDrafts (FlagId);
+CREATE INDEX idx_flagdraft_env ON flag_drafts (EnvId);
+CREATE INDEX idx_flagdraft_flag ON flag_drafts (FlagId);
 
-CREATE TABLE Triggers (
+CREATE TABLE triggers (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -206,12 +206,12 @@ CREATE TABLE Triggers (
     IsEnabled BOOLEAN NOT NULL,         -- Whether the trigger is enabled or not
     TriggeredTimes INT DEFAULT 0,       -- The number of times the trigger has been activated
     LastTriggeredAt TIMESTAMP,          -- Timestamp of the last time the trigger was activated (nullable)
-    CONSTRAINT fk_target FOREIGN KEY (TargetId) REFERENCES FeatureFlags(Id) ON DELETE CASCADE
+    CONSTRAINT fk_target FOREIGN KEY (TargetId) REFERENCES feature_flags(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_trigger_targetid ON Triggers (TargetId);
+CREATE INDEX idx_trigger_targetid ON triggers (TargetId);
 
-CREATE TABLE AuditLogs (
+CREATE TABLE audit_logs (
     Id UUID PRIMARY KEY,                -- Primary key
     EnvId UUID NOT NULL,                -- Foreign key to Environment
     RefId VARCHAR(255) NOT NULL,        -- Reference ID related to the operation
@@ -222,28 +222,28 @@ CREATE TABLE AuditLogs (
     Comment TEXT,                       -- Optional comment about the operation
     CreatorId UUID NOT NULL,            -- ID of the user who created the audit log
     CreatedAt TIMESTAMP NOT NULL,       -- Timestamp of when the log was created
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_creator FOREIGN KEY (CreatorId) REFERENCES Users(Id) ON DELETE CASCADE
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_creator FOREIGN KEY (CreatorId) REFERENCES users(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_auditlog_envid ON AuditLogs (EnvId);
-CREATE INDEX idx_auditlog_creatorid ON AuditLogs (CreatorId);
-CREATE INDEX idx_auditlog_refid ON AuditLogs (RefId);
-CREATE INDEX idx_auditlog_reftype ON AuditLogs (RefType);
+CREATE INDEX idx_auditlog_envid ON audit_logs (EnvId);
+CREATE INDEX idx_auditlog_creatorid ON audit_logs (CreatorId);
+CREATE INDEX idx_auditlog_refid ON audit_logs (RefId);
+CREATE INDEX idx_auditlog_reftype ON audit_logs (RefType);
 
-CREATE TABLE Groups (
+CREATE TABLE groups (
     Id UUID PRIMARY KEY,               -- Primary key
     CreatedAt TIMESTAMP NOT NULL,      -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,      -- Audit field: UpdatedAt
     OrganizationId UUID NOT NULL,      -- Foreign key to Organization
     Name VARCHAR(255) NOT NULL,        -- Name of the group
     Description TEXT,                  -- Description of the group (optional)
-    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES Organizations(Id) ON DELETE CASCADE
+    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES organizations(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_group_org ON Groups (OrganizationId);
+CREATE INDEX idx_group_org ON groups (OrganizationId);
 
-CREATE TABLE Policies (
+CREATE TABLE policies (
     Id UUID PRIMARY KEY,               -- Primary key
     CreatedAt TIMESTAMP NOT NULL,      -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,      -- Audit field: UpdatedAt
@@ -252,54 +252,54 @@ CREATE TABLE Policies (
     Description TEXT,                  -- Description of the policy (optional)
     Type VARCHAR(255) NOT NULL,        -- Type of the policy
     Statements JSONB,                  -- JSONB column to store policy statements
-    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES Organizations(Id) ON DELETE SET NULL
+    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES organizations(Id) ON DELETE SET NULL
 );
 
-CREATE INDEX idx_policy_org ON Policies (OrganizationId);
+CREATE INDEX idx_policy_org ON policies (OrganizationId);
 
-CREATE TABLE GroupMembers (
+CREATE TABLE group_members (
     Id UUID PRIMARY KEY,               -- Primary key
     CreatedAt TIMESTAMP NOT NULL,      -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,      -- Audit field: UpdatedAt
     GroupId UUID NOT NULL,             -- Foreign key to Group
     OrganizationId UUID NOT NULL,      -- Foreign key to Organization
     MemberId UUID NOT NULL,            -- ID of the member (could be a user or another entity)
-    CONSTRAINT fk_group FOREIGN KEY (GroupId) REFERENCES Groups(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES Organizations(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_member FOREIGN KEY (MemberId) REFERENCES Groups(Id) ON DELETE CASCADE
+    CONSTRAINT fk_group FOREIGN KEY (GroupId) REFERENCES groups(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES organizations(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_member FOREIGN KEY (MemberId) REFERENCES groups(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_groupmember_org ON GroupMembers (OrganizationId);
-CREATE INDEX idx_groupmember_groupid ON GroupMembers (GroupId);
+CREATE INDEX idx_groupmember_org ON group_members (OrganizationId);
+CREATE INDEX idx_groupmember_groupid ON group_members (GroupId);
 
-CREATE TABLE GroupPolicies (
+CREATE TABLE group_policies (
     Id UUID PRIMARY KEY,               -- Primary key
     CreatedAt TIMESTAMP NOT NULL,      -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,      -- Audit field: UpdatedAt
     GroupId UUID NOT NULL,             -- Foreign key to Group
     PolicyId UUID NOT NULL,            -- Foreign key to Policy
-    CONSTRAINT fk_group FOREIGN KEY (GroupId) REFERENCES Groups(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_policy FOREIGN KEY (PolicyId) REFERENCES Policies(Id) ON DELETE CASCADE
+    CONSTRAINT fk_group FOREIGN KEY (GroupId) REFERENCES groups(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_policy FOREIGN KEY (PolicyId) REFERENCES policies(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_grouppolicy_groupid ON GroupPolicies (GroupId);
+CREATE INDEX idx_grouppolicy_groupid ON group_policies (GroupId);
 
-CREATE TABLE MemberPolicies (
+CREATE TABLE member_policies (
     Id UUID PRIMARY KEY,               -- Primary key
     CreatedAt TIMESTAMP NOT NULL,      -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,      -- Audit field: UpdatedAt
     OrganizationId UUID NOT NULL,      -- Foreign key to Organization
     MemberId UUID NOT NULL,            -- Foreign key to Member (assumed to be in "User" table)
     PolicyId UUID NOT NULL,            -- Foreign key to Policy
-    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES Organizations(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_member FOREIGN KEY (MemberId) REFERENCES Users(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_policy FOREIGN KEY (PolicyId) REFERENCES Policies(Id) ON DELETE CASCADE
+    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES organizations(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_member FOREIGN KEY (MemberId) REFERENCES users(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_policy FOREIGN KEY (PolicyId) REFERENCES policies(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_memberpolicy_org ON MemberPolicies (OrganizationId);
-CREATE INDEX idx_memberpolicy_memberid ON MemberPolicies (MemberId);
+CREATE INDEX idx_memberpolicy_org ON member_policies (OrganizationId);
+CREATE INDEX idx_memberpolicy_memberid ON member_policies (MemberId);
 
-CREATE TABLE ExperimentMetrics (
+CREATE TABLE experiment_metrics (
     Id UUID PRIMARY KEY,                             -- Primary key
     CreatedAt TIMESTAMP NOT NULL,                    -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,                    -- Audit field: UpdatedAt
@@ -315,17 +315,17 @@ CREATE TABLE ExperimentMetrics (
     ElementTargets TEXT,                             -- Targets for the event element
     TargetUrls JSONB,                                -- JSONB column to store target URLs
     IsArvhived BOOLEAN NOT NULL,                     -- Whether the metric is archived
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_maintainer_user FOREIGN KEY (MaintainerUserId) REFERENCES Users(Id) ON DELETE CASCADE
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_maintainer_user FOREIGN KEY (MaintainerUserId) REFERENCES users(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_experimentmetric_env ON ExperimentMetrics (EnvId);
+CREATE INDEX idx_experimentmetric_env ON experiment_metrics (EnvId);
 -- Enum definitions
 CREATE TYPE event_type AS ENUM ('Custom', 'PageView', 'Click');
 CREATE TYPE custom_event_track_option AS ENUM ('Undefined', 'Conversion', 'Numeric');
 CREATE TYPE custom_event_success_criteria AS ENUM ('Undefined', 'Higher', 'Lower');
 
-CREATE TABLE Experiments (
+CREATE TABLE experiments (
     Id UUID PRIMARY KEY,               -- Primary key
     CreatedAt TIMESTAMP NOT NULL,      -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,      -- Audit field: UpdatedAt
@@ -337,15 +337,15 @@ CREATE TABLE Experiments (
     BaselineVariationId VARCHAR(255),  -- ID of the baseline variation (optional)
     Iterations JSONB,                  -- JSONB column to store iterations
     Alpha DOUBLE PRECISION,            -- Alpha value for the experiment (optional)
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_metric FOREIGN KEY (MetricId) REFERENCES ExperimentMetrics(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_feature_flag FOREIGN KEY (FeatureFlagId) REFERENCES FeatureFlags(Id) ON DELETE CASCADE
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_metric FOREIGN KEY (MetricId) REFERENCES experiment_metrics(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_feature_flag FOREIGN KEY (FeatureFlagId) REFERENCES feature_flags(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_experiment_env ON Experiments (EnvId);
-CREATE INDEX idx_experiment_flag ON Experiments (FeatureFlagId);
+CREATE INDEX idx_experiment_env ON experiments (EnvId);
+CREATE INDEX idx_experiment_flag ON experiments (FeatureFlagId);
 
-CREATE TABLE AccessTokens (
+CREATE TABLE access_tokens (
     Id UUID PRIMARY KEY,                               -- Primary key
     CreatedAt TIMESTAMP NOT NULL,                      -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,                      -- Audit field: UpdatedAt
@@ -357,13 +357,13 @@ CREATE TABLE AccessTokens (
     CreatorId UUID NOT NULL,                           -- Foreign key to User (creator)
     Permissions JSONB,                                 -- JSONB column for permissions
     LastUsedAt TIMESTAMP,                              -- Last used timestamp (optional)
-    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES Organizations(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_creator FOREIGN KEY (CreatorId) REFERENCES Users(Id) ON DELETE CASCADE
+    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES organizations(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_creator FOREIGN KEY (CreatorId) REFERENCES users(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_accesstoken_org ON AccessTokens (OrganizationId);
+CREATE INDEX idx_accesstoken_org ON access_tokens (OrganizationId);
 
-CREATE TABLE RelayProxies (
+CREATE TABLE relay_proxies (
     Id UUID PRIMARY KEY,                               -- Primary key
     CreatedAt TIMESTAMP NOT NULL,                      -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,                      -- Audit field: UpdatedAt
@@ -374,12 +374,12 @@ CREATE TABLE RelayProxies (
     IsAllEnvs BOOLEAN NOT NULL,                        -- Flag indicating if it applies to all environments
     Scopes JSONB,                                      -- JSONB column for scopes
     Agents JSONB,                                      -- JSONB column for agents
-    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES Organizations(Id) ON DELETE CASCADE
+    CONSTRAINT fk_organization FOREIGN KEY (OrganizationId) REFERENCES organizations(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_relayproxy_org ON RelayProxies (OrganizationId);
+CREATE INDEX idx_relayproxy_org ON relay_proxies (OrganizationId);
 
-CREATE TABLE Webhooks (
+CREATE TABLE webhooks (
     Id UUID PRIMARY KEY,                                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,                       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,                       -- Audit field: UpdatedAt
@@ -397,14 +397,14 @@ CREATE TABLE Webhooks (
     IsActive BOOLEAN NOT NULL,                          -- Boolean flag indicating if the webhook is active
     PreventEmptyPayloads BOOLEAN NOT NULL,              -- Prevent empty payloads flag
     LastDelivery JSONB,                                 -- JSONB column for the last delivery information
-    CONSTRAINT fk_organization FOREIGN KEY (OrgId) REFERENCES Organizations(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_creator FOREIGN KEY (CreatorId) REFERENCES Users(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_updator FOREIGN KEY (UpdatorId) REFERENCES Users(Id) ON DELETE CASCADE
+    CONSTRAINT fk_organization FOREIGN KEY (OrgId) REFERENCES organizations(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_creator FOREIGN KEY (CreatorId) REFERENCES users(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_updator FOREIGN KEY (UpdatorId) REFERENCES users(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_webhook_org ON Webhooks (OrgId);
+CREATE INDEX idx_webhook_org ON webhooks (OrgId);
 
-CREATE TABLE WebhookDeliveries (
+CREATE TABLE webhook_deliveries (
     Id UUID PRIMARY KEY,                                -- Primary key
     WebhookId UUID NOT NULL,                            -- Foreign key to Webhook
     Success BOOLEAN NOT NULL,                           -- Indicates whether the delivery was successful
@@ -414,12 +414,12 @@ CREATE TABLE WebhookDeliveries (
     Error JSONB,                                        -- JSONB column for error details
     StartedAt TIMESTAMP NOT NULL,                       -- The timestamp when the delivery started
     EndedAt TIMESTAMP NOT NULL,                         -- The timestamp when the delivery ended
-    CONSTRAINT fk_webhook FOREIGN KEY (WebhookId) REFERENCES Webhooks(Id) ON DELETE CASCADE
+    CONSTRAINT fk_webhook FOREIGN KEY (WebhookId) REFERENCES webhooks(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_webhook_webhookid ON WebhookDeliveries (WebhookId);
+CREATE INDEX idx_webhook_webhookid ON webhook_deliveries (WebhookId);
 
-CREATE TABLE FlagSchedules (
+CREATE TABLE flag_schedules (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -433,18 +433,18 @@ CREATE TABLE FlagSchedules (
     Title VARCHAR(255) NOT NULL,        -- Title of the flag schedule
     ScheduledTime TIMESTAMP NOT NULL,   -- Scheduled time for the action
     ChangeRequestId UUID,               -- Optional foreign key for ChangeRequest
-    CONSTRAINT fk_org FOREIGN KEY (OrgId) REFERENCES Organizations(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_flagdraft FOREIGN KEY (FlagDraftId) REFERENCES FlagDrafts(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_flag FOREIGN KEY (FlagId) REFERENCES FeatureFlags(Id) ON DELETE CASCADE
+    CONSTRAINT fk_org FOREIGN KEY (OrgId) REFERENCES organizations(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_flagdraft FOREIGN KEY (FlagDraftId) REFERENCES flag_drafts(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag FOREIGN KEY (FlagId) REFERENCES feature_flags(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_flagschedule_org ON FlagSchedules (OrgId);
-CREATE INDEX idx_flagschedule_env ON FlagSchedules (EnvId);
-CREATE INDEX idx_flagschedule_flag ON FlagSchedules (FlagId);
-CREATE INDEX idx_flagschedule_changerequestid ON FlagSchedules (ChangeRequestId);
+CREATE INDEX idx_flagschedule_org ON flag_schedules (OrgId);
+CREATE INDEX idx_flagschedule_env ON flag_schedules (EnvId);
+CREATE INDEX idx_flagschedule_flag ON flag_schedules (FlagId);
+CREATE INDEX idx_flagschedule_changerequestid ON flag_schedules (ChangeRequestId);
 
-CREATE TABLE FlagChangeRequests (
+CREATE TABLE flag_change_requests (
     Id UUID PRIMARY KEY,                -- Primary key
     CreatedAt TIMESTAMP NOT NULL,       -- Audit field: CreatedAt
     UpdatedAt TIMESTAMP NOT NULL,       -- Audit field: UpdatedAt
@@ -458,21 +458,21 @@ CREATE TABLE FlagChangeRequests (
     Reason TEXT,                        -- Reason for the change request
     Reviewers JSONB,                    -- List of reviewers stored as JSONB
     ScheduleId UUID,                    -- Optional foreign key to FlagSchedule
-    CONSTRAINT fk_org FOREIGN KEY (OrgId) REFERENCES Organizations(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES Environments(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_flagdraft FOREIGN KEY (FlagDraftId) REFERENCES FlagDrafts(Id) ON DELETE CASCADE,
-    CONSTRAINT fk_flag FOREIGN KEY (FlagId) REFERENCES FeatureFlags(Id) ON DELETE CASCADE
+    CONSTRAINT fk_org FOREIGN KEY (OrgId) REFERENCES organizations(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_env FOREIGN KEY (EnvId) REFERENCES environments(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_flagdraft FOREIGN KEY (FlagDraftId) REFERENCES flag_drafts(Id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag FOREIGN KEY (FlagId) REFERENCES feature_flags(Id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_flagchangerequest_org ON FlagChangeRequests (OrgId);
-CREATE INDEX idx_flagchangerequest_env ON FlagChangeRequests (EnvId);
-CREATE INDEX idx_flagchangerequest_flag ON FlagChangeRequests (FlagId);
-CREATE INDEX idx_flagchangerequest_schedule ON FlagChangeRequests (ScheduleId);
+CREATE INDEX idx_flagchangerequest_org ON flag_change_requests (OrgId);
+CREATE INDEX idx_flagchangerequest_env ON flag_change_requests (EnvId);
+CREATE INDEX idx_flagchangerequest_flag ON flag_change_requests (FlagId);
+CREATE INDEX idx_flagchangerequest_schedule ON flag_change_requests (ScheduleId);
 
-ALTER TABLE FlagSchedules
+ALTER TABLE flag_schedules
 ADD CONSTRAINT fk_change_request FOREIGN KEY (ChangeRequestId)
-REFERENCES FlagChangeRequests(Id) ON DELETE SET NULL;
+REFERENCES flag_change_requests(Id) ON DELETE SET NULL;
 
-ALTER TABLE FlagChangeRequests
+ALTER TABLE flag_change_requests
 ADD CONSTRAINT fk_schedule  FOREIGN KEY (ScheduleId)
-REFERENCES FlagSchedules(Id) ON DELETE SET NULL;
+REFERENCES flag_schedules(Id) ON DELETE SET NULL;
