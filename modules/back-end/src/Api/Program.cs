@@ -16,6 +16,8 @@ try
         .Run();
 }
 catch (Exception ex)
+    // see https://github.com/dotnet/efcore/issues/29923
+    when (ex is not HostAbortedException && ex.Source != "Microsoft.EntityFrameworkCore.Design")
 {
     Log.Fatal(ex, "Application terminated unexpectedly");
 }

@@ -25,7 +25,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Environment = Domain.Environments.Environment;
 
-namespace Infrastructure.MongoDb;
+namespace Infrastructure.Persistence.MongoDb;
 
 public class MongoDbClient
 {

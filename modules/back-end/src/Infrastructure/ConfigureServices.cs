@@ -33,6 +33,7 @@ using Infrastructure.Triggers;
 using Infrastructure.Users;
 using Infrastructure.Webhooks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 // ReSharper disable CheckNamespace
@@ -48,6 +49,13 @@ public static class ConfigureServices
         // mongodb
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
+
+        // ef db context
+        services.AddDbContext<AppDbContext>(
+            op => op
+                .UseNpgsql("Host=localhost;Username=postgres;Password=123456;Database=featbit")
+                .UseSnakeCaseNamingConvention()
+        );
 
         // redis
         services.AddSingleton<IRedisClient, DefaultRedisClient>();

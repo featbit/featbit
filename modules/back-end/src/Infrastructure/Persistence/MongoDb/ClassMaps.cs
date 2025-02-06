@@ -3,7 +3,7 @@ using Domain.Organizations;
 using Domain.Users;
 using MongoDB.Bson.Serialization;
 
-namespace Infrastructure.MongoDb;
+namespace Infrastructure.Persistence.MongoDb;
 
 public static class ClassMaps
 {

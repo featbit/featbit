@@ -1,4 +1,4 @@
-namespace Infrastructure.MongoDb;
+namespace Infrastructure.Persistence.MongoDb;
 
 public class MongoDbOptions
 {

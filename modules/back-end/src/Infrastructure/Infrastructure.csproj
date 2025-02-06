@@ -22,6 +22,8 @@
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
         <PackageReference Include="Handlebars.Net" Version="2.1.6" />
         <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+        <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     </ItemGroup>
 
 </Project>
