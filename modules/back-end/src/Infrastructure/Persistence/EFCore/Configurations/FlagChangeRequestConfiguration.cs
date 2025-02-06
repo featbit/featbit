@@ -14,7 +14,7 @@ public class FlagChangeRequestConfiguration : IEntityTypeConfiguration<FlagChang
         builder.HasOne(typeof(Organization))
             .WithMany()
             .HasForeignKey(nameof(FlagChangeRequest.OrgId));
-        builder.HasOne(typeof(Environment))
+        builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(FlagChangeRequest.EnvId));
         builder.HasOne(typeof(FlagDraft))

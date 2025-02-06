@@ -1,5 +1,4 @@
 ﻿using Domain.EndUsers;
-using Domain.Workspaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,7 +8,7 @@ public class EndUserPropertyConfiguration : IEntityTypeConfiguration<EndUserProp
 {
     public void Configure(EntityTypeBuilder<EndUserProperty> builder)
     {
-        builder.HasOne(typeof(Environment))
+        builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(EndUserProperty.EnvId));
 

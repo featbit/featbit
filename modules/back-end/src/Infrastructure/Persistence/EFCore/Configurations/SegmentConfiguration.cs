@@ -12,7 +12,7 @@ public class SegmentConfiguration : IEntityTypeConfiguration<Segment>
         builder.HasOne(typeof(Workspace))
             .WithMany()
             .HasForeignKey(nameof(Segment.WorkspaceId));
-        builder.HasOne(typeof(Environment))
+        builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(Segment.EnvId));
 

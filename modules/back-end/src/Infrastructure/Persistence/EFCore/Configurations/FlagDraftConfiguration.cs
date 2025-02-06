@@ -10,7 +10,7 @@ public class FlagDraftConfiguration : IEntityTypeConfiguration<FlagDraft>
     
     public void Configure(EntityTypeBuilder<FlagDraft> builder)
     {
-        builder.HasOne(typeof(Environment))
+        builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(FlagDraft.EnvId));
         builder.HasOne(typeof(FeatureFlag))

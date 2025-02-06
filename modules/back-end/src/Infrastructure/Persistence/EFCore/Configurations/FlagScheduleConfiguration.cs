@@ -14,7 +14,7 @@ public class FlagScheduleConfiguration : IEntityTypeConfiguration<FlagSchedule>
         builder.HasOne(typeof(Organization))
             .WithMany()
             .HasForeignKey(nameof(FlagSchedule.OrgId));
-        builder.HasOne(typeof(Environment))
+        builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(FlagSchedule.EnvId));
         builder.HasOne(typeof(FeatureFlag))
