@@ -16,9 +16,8 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        //modelBuilder.ApplyConfiguration(new WorkspaceConfiguration());
         //modelBuilder.ApplyConfiguration(new UserConfiguration());
- 
+        //modelBuilder.ApplyConfiguration(new WorkspaceConfiguration());
         //modelBuilder.ApplyConfiguration(new OrganizationConfiguration());
         //modelBuilder.ApplyConfiguration(new OrganizationUserConfiguration());
         //modelBuilder.ApplyConfiguration(new ProjectConfiguration());
