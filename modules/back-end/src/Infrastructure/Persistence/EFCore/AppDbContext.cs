@@ -27,7 +27,6 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new GlobalUserConfiguration());
         modelBuilder.ApplyConfiguration(new EndUserPropertyConfiguration());
         modelBuilder.ApplyConfiguration(new SegmentConfiguration());
-
         modelBuilder.ApplyConfiguration(new FeatureFlagConfiguration());
         modelBuilder.ApplyConfiguration(new FlagRevisionConfiguration());
         modelBuilder.ApplyConfiguration(new FlagDraftConfiguration());

@@ -21,10 +21,7 @@ public class SegmentConfiguration : IEntityTypeConfiguration<Segment>
         builder.Property(x => x.Type).HasMaxLength(255).IsRequired();
         builder.Property(x => x.IsArchived).IsRequired();
         builder.Property(x => x.Scopes).HasMaxLength(255).IsRequired();
-
-        builder.Property(x => x.Scopes).HasColumnType("jsonb");
-        builder.Property(x => x.Included).HasColumnType("jsonb");
-        builder.Property(x => x.Excluded).HasColumnType("jsonb");
+        
         builder.Property(x => x.Rules).HasColumnType("jsonb");
     }
 }

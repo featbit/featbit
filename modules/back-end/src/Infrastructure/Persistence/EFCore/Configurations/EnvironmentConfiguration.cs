@@ -14,15 +14,12 @@ public class EnvironmentConfiguration : IEntityTypeConfiguration<Environment>
             .HasForeignKey(nameof(Environment.ProjectId));
 
         builder.Property(x => x.Name)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(x => x.Key)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
             .IsRequired();
-
-        builder.Property(x => x.Description)
-            .HasMaxLength(512);
 
         builder.Property(x => x.Secrets)
             .HasColumnType("jsonb");

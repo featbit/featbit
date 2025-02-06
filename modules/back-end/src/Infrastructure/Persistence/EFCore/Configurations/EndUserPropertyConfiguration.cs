@@ -13,6 +13,11 @@ public class EndUserPropertyConfiguration : IEntityTypeConfiguration<EndUserProp
             .WithMany()
             .HasForeignKey(nameof(EndUserProperty.EnvId));
 
+        builder.Property(x => x.Name).HasMaxLength(255).IsRequired();
+        builder.Property(x => x.UsePresetValuesOnly).IsRequired();
+        builder.Property(x => x.IsBuiltIn).IsRequired();
+        builder.Property(x => x.IsDigestField).IsRequired();
+
         builder.Property(x => x.PresetValues).HasColumnType("jsonb");
     }
 }

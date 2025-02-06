@@ -9,11 +9,11 @@ public class WorkspaceConfiguration : IEntityTypeConfiguration<Workspace>
     public void Configure(EntityTypeBuilder<Workspace> builder)
     {
         builder.Property(x => x.Name)
-            .HasMaxLength(32)
+            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(x => x.Key)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(x => x.Sso)

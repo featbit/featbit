@@ -15,13 +15,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(nameof(User.WorkspaceId));
 
         builder.Property(x => x.Name)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
             .IsRequired();
         builder.Property(x => x.Email)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
             .IsRequired();
         builder.Property(x => x.Password)
-            .HasMaxLength(128)
             .IsRequired();
+        builder.Property(x => x.Origin)
+            .HasMaxLength(255);
     }
 }

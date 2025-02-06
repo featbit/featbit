@@ -1,4 +1,5 @@
 ﻿using Domain.Organizations;
+using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,8 +13,13 @@ public class OrganizationUserConfiguration : IEntityTypeConfiguration<Organizati
         builder.HasOne(typeof(Organization))
             .WithMany()
             .HasForeignKey(nameof(OrganizationUser.OrganizationId));
-        builder.HasOne(typeof(OrganizationUser))
-            .WithMany()
+        builder.HasOne(typeof(User))
+            .WithOne()
             .HasForeignKey(nameof(OrganizationUser.UserId));
+        builder.HasOne(typeof(User))
+            .WithOne()
+            .HasForeignKey(nameof(OrganizationUser.InvitorId));
+
+        builder.HasIndex(x => new { x.OrganizationId, x.UserId }).IsUnique();
     }
 }

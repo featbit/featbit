@@ -14,11 +14,13 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
             .HasForeignKey(nameof(Organization.WorkspaceId));
 
         builder.Property(x => x.Name)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
             .IsRequired();
-
         builder.Property(x => x.Key)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
+            .IsRequired();
+        builder.Property(x => x.Initialized)
+            .HasDefaultValue(false)
             .IsRequired();
 
         builder.Property(x => x.DefaultPermissions)

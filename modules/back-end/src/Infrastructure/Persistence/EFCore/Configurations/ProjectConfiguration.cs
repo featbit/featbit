@@ -13,12 +13,14 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
             .WithMany()
             .HasForeignKey(nameof(Project.OrganizationId));
 
+        builder.HasIndex(x => new { x.OrganizationId, x.Key }).IsUnique();
+
         builder.Property(x => x.Name)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
             .IsRequired();
 
         builder.Property(x => x.Key)
-            .HasMaxLength(64)
+            .HasMaxLength(255)
             .IsRequired();
     }
 }
