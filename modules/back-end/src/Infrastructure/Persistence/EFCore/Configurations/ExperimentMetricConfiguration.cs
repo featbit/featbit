@@ -10,7 +10,7 @@ public class ExperimentMetricConfiguration : IEntityTypeConfiguration<Experiment
     
     public void Configure(EntityTypeBuilder<ExperimentMetric> builder)
     {
-        builder.HasOne(typeof(Environment))
+        builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(ExperimentMetric.EnvId));
         builder.HasOne(typeof(User))

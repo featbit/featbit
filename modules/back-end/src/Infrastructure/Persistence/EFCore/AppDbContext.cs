@@ -13,6 +13,15 @@ using Domain.FlagDrafts;
 using Domain.FlagSchedules;
 using Domain.FlagChangeRequests;
 using Domain.Triggers;
+using Domain.AuditLogs;
+using Domain.Groups;
+using Domain.Members;
+using Domain.Policies;
+using Domain.Experiments;
+using Domain.ExperimentMetrics;
+using Domain.AccessTokens;
+using Domain.RelayProxies;
+using Domain.Webhooks;
 
 namespace Infrastructure.Persistence.EFCore;
 
@@ -30,10 +39,23 @@ public class AppDbContext : DbContext
     public DbSet<Segment> Segments => Set<Segment>();
     public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
     public DbSet<FlagRevision> FlagRevisions => Set<FlagRevision>();
-    public DbSet<FlagDraft> FlagDrafts => Set<FlagDraft>();
-    public DbSet<FlagSchedule> FlagSchedules => Set<FlagSchedule>();
-    public DbSet<FlagChangeRequest> FlagChangeRequests => Set<FlagChangeRequest>();
+    //public DbSet<FlagDraft> FlagDrafts => Set<FlagDraft>();
+    //public DbSet<FlagSchedule> FlagSchedules => Set<FlagSchedule>();
+    //public DbSet<FlagChangeRequest> FlagChangeRequests => Set<FlagChangeRequest>();
     public DbSet<Trigger> Triggers => Set<Trigger>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<Group> Groups => Set<Group>();
+    public DbSet<Policy> Policies => Set<Policy>();
+    public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
+    public DbSet<GroupPolicy> GroupPolicies => Set<GroupPolicy>();
+    public DbSet<MemberPolicy> MemberPolicies => Set<MemberPolicy>();
+
+    //public DbSet<Experiment> Experiments => Set<Experiment>();
+    //public DbSet<ExperimentMetric> ExperimentMetrics => Set<ExperimentMetric>();
+    public DbSet<AccessToken> AccessTokens => Set<AccessToken>();
+    public DbSet<RelayProxy> RelayProxys => Set<RelayProxy>();
+    public DbSet<Webhook> Webhooks => Set<Webhook>();
+    public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
@@ -55,21 +77,23 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SegmentConfiguration());
         modelBuilder.ApplyConfiguration(new FeatureFlagConfiguration());
         modelBuilder.ApplyConfiguration(new FlagRevisionConfiguration());
-        modelBuilder.ApplyConfiguration(new FlagDraftConfiguration());
-        modelBuilder.ApplyConfiguration(new FlagScheduleConfiguration());
-        modelBuilder.ApplyConfiguration(new FlagChangeRequestConfiguration());
+        //modelBuilder.ApplyConfiguration(new FlagDraftConfiguration());
+        //modelBuilder.ApplyConfiguration(new FlagScheduleConfiguration());
+        //modelBuilder.ApplyConfiguration(new FlagChangeRequestConfiguration());
         modelBuilder.ApplyConfiguration(new TriggerConfiguration());
-        //modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
-        //modelBuilder.ApplyConfiguration(new GroupConfiguration());
-        //modelBuilder.ApplyConfiguration(new PolicyConfiguration());
-        //modelBuilder.ApplyConfiguration(new GroupMemberConfiguration());
-        //modelBuilder.ApplyConfiguration(new GroupPolicyConfiguration());
-        //modelBuilder.ApplyConfiguration(new MemberPolicyConfiguration());
+
+        modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
+        modelBuilder.ApplyConfiguration(new GroupConfiguration());
+        modelBuilder.ApplyConfiguration(new PolicyConfiguration());
+        modelBuilder.ApplyConfiguration(new GroupMemberConfiguration());
+        modelBuilder.ApplyConfiguration(new GroupPolicyConfiguration());
+        modelBuilder.ApplyConfiguration(new MemberPolicyConfiguration());
+
         //modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
         //modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
-        //modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
-        //modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
-        //modelBuilder.ApplyConfiguration(new WebhookConfiguration());
-        //modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());
+        modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
+        modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
+        modelBuilder.ApplyConfiguration(new WebhookConfiguration());
+        modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());
     }
 }

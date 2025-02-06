@@ -10,7 +10,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
     
     public void Configure(EntityTypeBuilder<AuditLog> builder)
     {
-        builder.HasOne(typeof(Environment))
+        builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(AuditLog.EnvId));
         builder.HasOne(typeof(User))

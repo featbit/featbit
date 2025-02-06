@@ -2,7 +2,7 @@ namespace Domain.Policies;
 
 public class Policy : AuditedEntity
 {
-    public Guid? OrganizationId { get; set; }
+    public Guid OrganizationId { get; set; }
 
     public string Name { get; set; }
 
