@@ -9,7 +9,6 @@ namespace Infrastructure.Persistence.EFCore.Configurations;
 
 public class FlagChangeRequestConfiguration : IEntityTypeConfiguration<FlagChangeRequest>
 {
-    
     public void Configure(EntityTypeBuilder<FlagChangeRequest> builder)
     {
         builder.HasOne(typeof(Organization))

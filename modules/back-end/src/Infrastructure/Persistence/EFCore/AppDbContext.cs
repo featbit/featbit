@@ -16,33 +16,34 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.ApplyConfiguration(new UserConfiguration());
-        modelBuilder.ApplyConfiguration(new WorkspaceConfiguration());
-        modelBuilder.ApplyConfiguration(new OrganizationConfiguration());
-        modelBuilder.ApplyConfiguration(new OrganizationUserConfiguration());
-        modelBuilder.ApplyConfiguration(new ProjectConfiguration());
-        modelBuilder.ApplyConfiguration(new EnvironmentConfiguration());
-        modelBuilder.ApplyConfiguration(new EndUserConfiguration());
-        modelBuilder.ApplyConfiguration(new GlobalUserConfiguration());
-        modelBuilder.ApplyConfiguration(new EndUserPropertyConfiguration());
-        modelBuilder.ApplyConfiguration(new SegmentConfiguration());
-        modelBuilder.ApplyConfiguration(new FeatureFlagConfiguration());
-        modelBuilder.ApplyConfiguration(new FlagRevisionConfiguration());
-        modelBuilder.ApplyConfiguration(new FlagDraftConfiguration());
-        modelBuilder.ApplyConfiguration(new FlagScheduleConfiguration());
-        modelBuilder.ApplyConfiguration(new FlagChangeRequestConfiguration());
-        modelBuilder.ApplyConfiguration(new TriggerConfiguration());
-        modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
-        modelBuilder.ApplyConfiguration(new GroupConfiguration());
-        modelBuilder.ApplyConfiguration(new PolicyConfiguration());
-        modelBuilder.ApplyConfiguration(new GroupMemberConfiguration());
-        modelBuilder.ApplyConfiguration(new GroupPolicyConfiguration());
-        modelBuilder.ApplyConfiguration(new MemberPolicyConfiguration());
-        modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
-        modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
-        modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
-        modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
-        modelBuilder.ApplyConfiguration(new WebhookConfiguration());
-        modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());
+        //modelBuilder.ApplyConfiguration(new WorkspaceConfiguration());
+        //modelBuilder.ApplyConfiguration(new UserConfiguration());
+ 
+        //modelBuilder.ApplyConfiguration(new OrganizationConfiguration());
+        //modelBuilder.ApplyConfiguration(new OrganizationUserConfiguration());
+        //modelBuilder.ApplyConfiguration(new ProjectConfiguration());
+        //modelBuilder.ApplyConfiguration(new EnvironmentConfiguration());
+        //modelBuilder.ApplyConfiguration(new EndUserConfiguration());
+        //modelBuilder.ApplyConfiguration(new GlobalUserConfiguration());
+        //modelBuilder.ApplyConfiguration(new EndUserPropertyConfiguration());
+        //modelBuilder.ApplyConfiguration(new SegmentConfiguration());
+        //modelBuilder.ApplyConfiguration(new FeatureFlagConfiguration());
+        //modelBuilder.ApplyConfiguration(new FlagRevisionConfiguration());
+        //modelBuilder.ApplyConfiguration(new FlagDraftConfiguration());
+        //modelBuilder.ApplyConfiguration(new FlagScheduleConfiguration());
+        //modelBuilder.ApplyConfiguration(new FlagChangeRequestConfiguration());
+        //modelBuilder.ApplyConfiguration(new TriggerConfiguration());
+        //modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
+        //modelBuilder.ApplyConfiguration(new GroupConfiguration());
+        //modelBuilder.ApplyConfiguration(new PolicyConfiguration());
+        //modelBuilder.ApplyConfiguration(new GroupMemberConfiguration());
+        //modelBuilder.ApplyConfiguration(new GroupPolicyConfiguration());
+        //modelBuilder.ApplyConfiguration(new MemberPolicyConfiguration());
+        //modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
+        //modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
+        //modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
+        //modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
+        //modelBuilder.ApplyConfiguration(new WebhookConfiguration());
+        //modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());
     }
 }

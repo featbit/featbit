@@ -14,10 +14,10 @@ public class OrganizationUserConfiguration : IEntityTypeConfiguration<Organizati
             .WithMany()
             .HasForeignKey(nameof(OrganizationUser.OrganizationId));
         builder.HasOne(typeof(User))
-            .WithOne()
+            .WithMany()
             .HasForeignKey(nameof(OrganizationUser.UserId));
         builder.HasOne(typeof(User))
-            .WithOne()
+            .WithMany()
             .HasForeignKey(nameof(OrganizationUser.InvitorId));
 
         builder.HasIndex(x => new { x.OrganizationId, x.UserId }).IsUnique();

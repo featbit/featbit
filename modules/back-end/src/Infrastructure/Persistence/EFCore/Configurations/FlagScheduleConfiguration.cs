@@ -21,7 +21,7 @@ public class FlagScheduleConfiguration : IEntityTypeConfiguration<FlagSchedule>
             .WithMany()
             .HasForeignKey(nameof(FlagSchedule.FlagId));
         builder.HasOne(typeof(FlagDraft))
-            .WithOne()
+            .WithMany()
             .HasForeignKey(nameof(FlagSchedule.FlagDraftId));
 
         builder.Property(x => x.Status)
