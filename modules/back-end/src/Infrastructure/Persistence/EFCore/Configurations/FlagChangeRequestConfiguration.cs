@@ -1,9 +1,7 @@
-﻿using Domain.EndUsers;
-using Domain.FeatureFlags;
+﻿using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
 using Domain.Organizations;
-using Domain.Workspaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

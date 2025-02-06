@@ -1,4 +1,3 @@
-using Domain.EndUsers;
 using Domain.FeatureFlags;
 using Infrastructure.Persistence.EFCore.Configurations;
 using Microsoft.EntityFrameworkCore;
@@ -34,5 +33,16 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new FlagChangeRequestConfiguration());
         modelBuilder.ApplyConfiguration(new TriggerConfiguration());
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
+        modelBuilder.ApplyConfiguration(new GroupConfiguration());
+        modelBuilder.ApplyConfiguration(new PolicyConfiguration());
+        modelBuilder.ApplyConfiguration(new GroupMemberConfiguration());
+        modelBuilder.ApplyConfiguration(new GroupPolicyConfiguration());
+        modelBuilder.ApplyConfiguration(new MemberPolicyConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
+        modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
+        modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
+        modelBuilder.ApplyConfiguration(new WebhookConfiguration());
+        modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());
     }
 }
