@@ -13,11 +13,5 @@ public class GroupMemberConfiguration : IEntityTypeConfiguration<GroupMember>
         builder.HasOne(typeof(Organization))
             .WithMany()
             .HasForeignKey(nameof(GroupMember.OrganizationId));
-        builder.HasOne(typeof(Group))
-            .WithMany()
-            .HasForeignKey(nameof(GroupMember.GroupId));
-        builder.HasOne(typeof(Member))
-            .WithMany()
-            .HasForeignKey(nameof(GroupMember.MemberId));
     }
 }

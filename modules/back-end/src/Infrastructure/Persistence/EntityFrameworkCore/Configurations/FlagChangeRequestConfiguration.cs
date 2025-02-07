@@ -17,12 +17,6 @@ public class FlagChangeRequestConfiguration : IEntityTypeConfiguration<FlagChang
         builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(FlagChangeRequest.EnvId));
-        builder.HasOne(typeof(FlagDraft))
-            .WithMany()
-            .HasForeignKey(nameof(FlagChangeRequest.FlagDraftId));
-        builder.HasOne(typeof(FeatureFlag))
-            .WithMany()
-            .HasForeignKey(nameof(FlagChangeRequest.FlagId));
 
         builder.Property(x => x.Status)
             .HasMaxLength(255)

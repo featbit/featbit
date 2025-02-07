@@ -13,9 +13,6 @@ public class ExperimentMetricConfiguration : IEntityTypeConfiguration<Experiment
         builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(ExperimentMetric.EnvId));
-        builder.HasOne(typeof(User))
-            .WithMany()
-            .HasForeignKey(nameof(ExperimentMetric.MaintainerUserId));
 
         builder.Property(x => x.Name).HasMaxLength(255).IsRequired();
         builder.Property(x => x.EventName).HasMaxLength(255);

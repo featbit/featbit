@@ -17,12 +17,6 @@ public class FlagScheduleConfiguration : IEntityTypeConfiguration<FlagSchedule>
         builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(FlagSchedule.EnvId));
-        builder.HasOne(typeof(FeatureFlag))
-            .WithMany()
-            .HasForeignKey(nameof(FlagSchedule.FlagId));
-        builder.HasOne(typeof(FlagDraft))
-            .WithMany()
-            .HasForeignKey(nameof(FlagSchedule.FlagDraftId));
 
         builder.Property(x => x.Status)
             .HasMaxLength(255)

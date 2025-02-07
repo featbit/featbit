@@ -92,6 +92,23 @@ CREATE TABLE users (
 );
 
 
+CREATE TABLE access_tokens (
+    id uuid NOT NULL,
+    organization_id uuid NOT NULL,
+    name character varying(255) NOT NULL,
+    type character varying(255) NOT NULL,
+    status character varying(255) NOT NULL,
+    token text NOT NULL,
+    creator_id uuid NOT NULL,
+    permissions jsonb,
+    last_used_at timestamp with time zone,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT pk_access_tokens PRIMARY KEY (id),
+    CONSTRAINT fk_access_tokens_organizations_organization_id FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE CASCADE
+);
+
+
 CREATE TABLE groups (
     id uuid NOT NULL,
     organization_id uuid NOT NULL,
@@ -143,24 +160,6 @@ CREATE TABLE relay_proxys (
     updated_at timestamp with time zone NOT NULL,
     CONSTRAINT pk_relay_proxys PRIMARY KEY (id),
     CONSTRAINT fk_relay_proxys_organizations_organization_id FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE CASCADE
-);
-
-
-CREATE TABLE access_tokens (
-    id uuid NOT NULL,
-    organization_id uuid NOT NULL,
-    name character varying(255) NOT NULL,
-    type character varying(255) NOT NULL,
-    status character varying(255) NOT NULL,
-    token text NOT NULL,
-    creator_id uuid NOT NULL,
-    permissions jsonb,
-    last_used_at timestamp with time zone,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    CONSTRAINT pk_access_tokens PRIMARY KEY (id),
-    CONSTRAINT fk_access_tokens_organizations_organization_id FOREIGN KEY (organization_id) REFERENCES organizations (id) ON DELETE CASCADE,
-    CONSTRAINT fk_access_tokens_users_creator_id FOREIGN KEY (creator_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 
@@ -286,8 +285,7 @@ CREATE TABLE audit_logs (
     creator_id uuid NOT NULL,
     created_at timestamp with time zone NOT NULL,
     CONSTRAINT pk_audit_logs PRIMARY KEY (id),
-    CONSTRAINT fk_audit_logs_environments_env_id FOREIGN KEY (env_id) REFERENCES environments (id) ON DELETE CASCADE,
-    CONSTRAINT fk_audit_logs_users_creator_id FOREIGN KEY (creator_id) REFERENCES users (id) ON DELETE CASCADE
+    CONSTRAINT fk_audit_logs_environments_env_id FOREIGN KEY (env_id) REFERENCES environments (id) ON DELETE CASCADE
 );
 
 
@@ -472,13 +470,7 @@ CREATE TABLE flag_schedules (
 );
 
 
-CREATE INDEX ix_access_tokens_creator_id ON access_tokens (creator_id);
-
-
 CREATE INDEX ix_access_tokens_organization_id ON access_tokens (organization_id);
-
-
-CREATE INDEX ix_audit_logs_creator_id ON audit_logs (creator_id);
 
 
 CREATE INDEX ix_audit_logs_env_id ON audit_logs (env_id);

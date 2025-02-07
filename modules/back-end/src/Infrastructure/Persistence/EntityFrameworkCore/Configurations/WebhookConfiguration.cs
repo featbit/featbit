@@ -13,12 +13,6 @@ public class WebhookConfiguration : IEntityTypeConfiguration<Webhook>
         builder.HasOne(typeof(Organization))
             .WithMany()
             .HasForeignKey(nameof(Webhook.OrgId));
-        builder.HasOne(typeof(User))
-            .WithMany()
-            .HasForeignKey(nameof(Webhook.CreatorId));
-        builder.HasOne(typeof(User))
-            .WithMany()
-            .HasForeignKey(nameof(Webhook.UpdatorId));
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)

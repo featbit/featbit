@@ -14,9 +14,6 @@ public class AccessTokenConfiguration : IEntityTypeConfiguration<AccessToken>
         builder.HasOne(typeof(Organization))
             .WithMany()
             .HasForeignKey(nameof(AccessToken.OrganizationId));
-        builder.HasOne(typeof(User))
-            .WithMany()
-            .HasForeignKey(nameof(AccessToken.CreatorId));
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)

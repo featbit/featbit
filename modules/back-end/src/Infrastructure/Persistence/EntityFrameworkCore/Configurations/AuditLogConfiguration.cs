@@ -13,9 +13,6 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(AuditLog.EnvId));
-        builder.HasOne(typeof(User))
-            .WithMany()
-            .HasForeignKey(nameof(AuditLog.CreatorId));
 
         builder.HasIndex(x => x.RefId);
         builder.HasIndex(x => x.RefType);

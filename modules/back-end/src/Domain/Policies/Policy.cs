@@ -12,7 +12,8 @@ public class Policy : AuditedEntity
 
     public ICollection<PolicyStatement> Statements { get; set; }
 
-    public Policy()
+    // for ef core
+    protected Policy()
     {
 
     }

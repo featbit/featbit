@@ -11,8 +11,5 @@ public class GroupPolicyConfiguration : IEntityTypeConfiguration<GroupPolicy>
         builder.HasOne(typeof(Group))
             .WithMany()
             .HasForeignKey(nameof(GroupPolicy.GroupId));
-        builder.HasOne(typeof(Domain.Policies.Policy))
-            .WithMany()
-            .HasForeignKey(nameof(GroupPolicy.PolicyId));
     }
 }

@@ -18,7 +18,8 @@ public class FlagSchedule : FullAuditedEntity
 
     public Guid? ChangeRequestId { get; set; }
 
-    public FlagSchedule()
+    // for ef core
+    protected FlagSchedule()
     {
 
     }

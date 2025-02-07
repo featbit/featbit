@@ -13,11 +13,5 @@ public class MemberPolicyConfiguration : IEntityTypeConfiguration<MemberPolicy>
         builder.HasOne(typeof(Organization))
             .WithMany()
             .HasForeignKey(nameof(MemberPolicy.OrganizationId));
-        builder.HasOne(typeof(Member))
-            .WithMany()
-            .HasForeignKey(nameof(MemberPolicy.MemberId));
-        builder.HasOne(typeof(Domain.Policies.Policy))
-            .WithMany()
-            .HasForeignKey(nameof(MemberPolicy.PolicyId));
     }
 }

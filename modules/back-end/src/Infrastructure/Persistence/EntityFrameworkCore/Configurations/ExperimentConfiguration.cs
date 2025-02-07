@@ -13,12 +13,6 @@ public class ExperimentConfiguration : IEntityTypeConfiguration<Experiment>
         builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(Experiment.EnvId));
-        builder.HasOne(typeof(ExperimentMetric))
-            .WithMany()
-            .HasForeignKey(nameof(Experiment.MetricId));
-        builder.HasOne(typeof(FeatureFlag))
-            .WithMany()
-            .HasForeignKey(nameof(Experiment.FeatureFlagId));
 
         builder.Property(x => x.IsArchived).IsRequired();
         builder.Property(x => x.Status).HasMaxLength(255).IsRequired();

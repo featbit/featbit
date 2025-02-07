@@ -13,9 +13,6 @@ public class FlagDraftConfiguration : IEntityTypeConfiguration<FlagDraft>
         builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(FlagDraft.EnvId));
-        builder.HasOne(typeof(FeatureFlag))
-            .WithMany()
-            .HasForeignKey(nameof(FlagDraft.FlagId));
 
         builder.Property(x => x.Status)
             .HasMaxLength(255)
