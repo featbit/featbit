@@ -26,4 +26,8 @@
         <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Services\Postgres\" />
+    </ItemGroup>
+
 </Project>

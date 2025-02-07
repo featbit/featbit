@@ -3,38 +3,15 @@ using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Users;
 using Infrastructure;
-using Infrastructure.AccessTokens;
-using Infrastructure.Workspaces;
-using Infrastructure.AuditLogs;
-using Infrastructure.EndUsers;
-using Infrastructure.Environments;
-using Infrastructure.ExperimentMetrics;
-using Infrastructure.Experiments;
-using Infrastructure.FeatureFlags;
-using Infrastructure.FlagChangeRequests;
-using Infrastructure.FlagDrafts;
-using Infrastructure.FlagRevisions;
-using Infrastructure.FlagSchedules;
-using Infrastructure.GlobalUsers;
-using Infrastructure.Groups;
-using Infrastructure.Identity;
-using Infrastructure.Members;
 using Infrastructure.Kafka;
 using Infrastructure.Messages;
-using Infrastructure.Organizations;
-using Infrastructure.Policies;
-using Infrastructure.Projects;
 using Infrastructure.Redis;
-using Infrastructure.RelayProxies;
-using Infrastructure.Resources;
-using Infrastructure.Segments;
-using Infrastructure.Targeting;
-using Infrastructure.Triggers;
-using Infrastructure.Users;
-using Infrastructure.Webhooks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using AppServices = Infrastructure.AppService;
+using Services = Infrastructure.Services;
+using MongoServices = Infrastructure.Services.MongoDb;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -66,83 +43,85 @@ public static class ConfigureServices
         services.AddHostedService<CachePopulatingHostedService>();
 
         // flag schedule worker
-        services.AddHostedService<FlagScheduleWorker>();
+        services.AddHostedService<AppServices.FlagScheduleWorker>();
 
         // messaging services
-        AddMessagingServices(services, configuration);
+        AddMessagingServices();
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IIdentityService, Services.IdentityService>();
 
         // typed http clients
-        services.AddHttpClient<IOlapService, OlapService>(httpClient =>
+        services.AddHttpClient<IOlapService, Services.OlapService>(httpClient =>
         {
             httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]!);
         });
-        services.AddHttpClient<IAgentService, AgentService>();
-        services.AddHttpClient<IWebhookSender, WebhookSender>();
+        services.AddHttpClient<IAgentService, Services.AgentService>();
+        services.AddHttpClient<IWebhookSender, Services.WebhookSender>();
+        services.AddSingleton<IEvaluator, Services.Evaluator>();
 
         // custom services
-        services.AddTransient<IWorkspaceService, WorkspaceService>();
-        services.AddTransient<IUserService, UserService>();
-        services.AddTransient<IOrganizationService, OrganizationService>();
-        services.AddTransient<IMemberService, MemberService>();
-        services.AddTransient<IProjectService, ProjectService>();
-        services.AddTransient<IGroupService, GroupService>();
-        services.AddTransient<IPolicyService, PolicyService>();
-        services.AddTransient<IEnvironmentService, EnvironmentService>();
-        services.AddTransient<IEnvironmentAppService, EnvironmentAppService>();
-        services.AddTransient<IResourceService, ResourceService>();
-        services.AddTransient<IResourceServiceV2, ResourceServiceV2>();
-        services.AddTransient<IEndUserService, EndUserService>();
-        services.AddTransient<IGlobalUserService, GlobalUserService>();
-        services.AddTransient<ISegmentService, SegmentService>();
-        services.AddTransient<ISegmentAppService, SegmentAppService>();
-        services.AddTransient<IFeatureFlagService, FeatureFlagService>();
-        services.AddTransient<ITriggerService, TriggerService>();
-        services.AddTransient<IExperimentService, ExperimentService>();
-        services.AddTransient<IExperimentMetricService, ExperimentMetricService>();
-        services.AddTransient<IAuditLogService, AuditLogService>();
-        services.AddSingleton<IEvaluator, Evaluator>();
-        services.AddTransient<IAccessTokenService, AccessTokenService>();
-        services.AddTransient<IRelayProxyService, RelayProxyService>();
-        services.AddTransient<IFlagDraftService, FlagDraftService>();
-        services.AddTransient<IFlagScheduleService, FlagScheduleService>();
-        services.AddTransient<IFlagRevisionService, FlagRevisionService>();
-        services.AddTransient<IFlagChangeRequestService, FlagChangeRequestService>();
-        services.AddTransient<IFeatureFlagAppService, FeatureFlagAppService>();
-        services.AddTransient<IWebhookService, WebhookService>();
+        services.AddTransient<IWorkspaceService, MongoServices.WorkspaceService>();
+        services.AddTransient<IUserService, MongoServices.UserService>();
+        services.AddTransient<IOrganizationService, MongoServices.OrganizationService>();
+        services.AddTransient<IMemberService, MongoServices.MemberService>();
+        services.AddTransient<IProjectService, MongoServices.ProjectService>();
+        services.AddTransient<IGroupService, MongoServices.GroupService>();
+        services.AddTransient<IPolicyService, MongoServices.PolicyService>();
+        services.AddTransient<IEnvironmentService, MongoServices.EnvironmentService>();
+        services.AddTransient<IResourceService, MongoServices.ResourceService>();
+        services.AddTransient<IResourceServiceV2, MongoServices.ResourceServiceV2>();
+        services.AddTransient<IEndUserService, MongoServices.EndUserService>();
+        services.AddTransient<IGlobalUserService, MongoServices.GlobalUserService>();
+        services.AddTransient<ISegmentService, MongoServices.SegmentService>();
+        services.AddTransient<IFeatureFlagService, MongoServices.FeatureFlagService>();
+        services.AddTransient<ITriggerService, MongoServices.TriggerService>();
+        services.AddTransient<IExperimentService, MongoServices.ExperimentService>();
+        services.AddTransient<IExperimentMetricService, MongoServices.ExperimentMetricService>();
+        services.AddTransient<IAuditLogService, MongoServices.AuditLogService>();
+        services.AddTransient<IAccessTokenService, MongoServices.AccessTokenService>();
+        services.AddTransient<IRelayProxyService, MongoServices.RelayProxyService>();
+        services.AddTransient<IFlagDraftService, MongoServices.FlagDraftService>();
+        services.AddTransient<IFlagScheduleService, MongoServices.FlagScheduleService>();
+        services.AddTransient<IFlagRevisionService, MongoServices.FlagRevisionService>();
+        services.AddTransient<IFlagChangeRequestService, MongoServices.FlagChangeRequestService>();
+        services.AddTransient<IWebhookService, MongoServices.WebhookService>();
+
+        // app services
+        services.AddTransient<IEnvironmentAppService, AppServices.EnvironmentAppService>();
+        services.AddTransient<ISegmentAppService, AppServices.SegmentAppService>();
+        services.AddTransient<IFeatureFlagAppService, AppServices.FeatureFlagAppService>();
 
         return services;
-    }
 
-    private static void AddMessagingServices(IServiceCollection services, IConfiguration configuration)
-    {
-        if (configuration.IsProVersion())
+        void AddMessagingServices()
         {
-            var producerConfigDictionary = new Dictionary<string, string>();
-            configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
-            var producerConfig = new ProducerConfig(producerConfigDictionary);
-            services.AddSingleton(producerConfig);
+            if (configuration.IsProVersion())
+            {
+                var producerConfigDictionary = new Dictionary<string, string>();
+                configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
+                var producerConfig = new ProducerConfig(producerConfigDictionary);
+                services.AddSingleton(producerConfig);
 
-            var consumerConfigDictionary = new Dictionary<string, string>();
-            configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
-            var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
-            services.AddSingleton(consumerConfig);
+                var consumerConfigDictionary = new Dictionary<string, string>();
+                configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
+                var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
+                services.AddSingleton(consumerConfig);
 
-            // use kafka as message queue in pro version
-            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
-            services.AddHostedService<KafkaMessageConsumer>();
-        }
-        else
-        {
-            // use redis as message queue
-            services.AddSingleton<IMessageProducer, RedisMessageProducer>();
+                // use kafka as message queue in pro version
+                services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+                services.AddHostedService<KafkaMessageConsumer>();
+            }
+            else
+            {
+                // use redis as message queue
+                services.AddSingleton<IMessageProducer, RedisMessageProducer>();
 
-            services.AddTransient<IMessageHandler, EndUserMessageHandler>();
-            services.AddTransient<IMessageHandler, InsightMessageHandler>();
-            services.AddHostedService<RedisMessageConsumer>();
+                services.AddTransient<IMessageHandler, EndUserMessageHandler>();
+                services.AddTransient<IMessageHandler, InsightMessageHandler>();
+                services.AddHostedService<RedisMessageConsumer>();
+            }
         }
     }
 }

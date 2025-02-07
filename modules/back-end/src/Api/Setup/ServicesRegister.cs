@@ -8,7 +8,7 @@ using Application.Services;
 using Domain.Workspaces;
 using Domain.Identity;
 using Infrastructure;
-using Infrastructure.License;
+using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
