@@ -307,6 +307,28 @@ CREATE TABLE end_user_properties (
 );
 
 
+CREATE TABLE experiment_metrics (
+    id uuid NOT NULL,
+    env_id uuid NOT NULL,
+    name character varying(255) NOT NULL,
+    description text,
+    maintainer_user_id uuid NOT NULL,
+    event_name character varying(255),
+    event_type integer NOT NULL,
+    custom_event_track_option integer NOT NULL,
+    custom_event_unit character varying(255),
+    custom_event_success_criteria integer NOT NULL,
+    element_targets text,
+    target_urls jsonb,
+    is_arvhived boolean NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT pk_experiment_metrics PRIMARY KEY (id),
+    CONSTRAINT fk_experiment_metrics_environments_env_id FOREIGN KEY (env_id) REFERENCES environments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_experiment_metrics_users_maintainer_user_id FOREIGN KEY (maintainer_user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+
 CREATE TABLE feature_flags (
     id uuid NOT NULL,
     env_id uuid NOT NULL,
@@ -353,6 +375,42 @@ CREATE TABLE segments (
 );
 
 
+CREATE TABLE experiments (
+    id uuid NOT NULL,
+    env_id uuid NOT NULL,
+    metric_id uuid NOT NULL,
+    feature_flag_id uuid NOT NULL,
+    is_archived boolean NOT NULL,
+    status character varying(255) NOT NULL,
+    baseline_variation_id character varying(255),
+    iterations jsonb,
+    alpha double precision,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    CONSTRAINT pk_experiments PRIMARY KEY (id),
+    CONSTRAINT fk_experiments_environments_env_id FOREIGN KEY (env_id) REFERENCES environments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_experiments_experiment_metrics_metric_id FOREIGN KEY (metric_id) REFERENCES experiment_metrics (id) ON DELETE CASCADE,
+    CONSTRAINT fk_experiments_feature_flags_feature_flag_id FOREIGN KEY (feature_flag_id) REFERENCES feature_flags (id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE flag_drafts (
+    id uuid NOT NULL,
+    env_id uuid NOT NULL,
+    flag_id uuid NOT NULL,
+    status character varying(255) NOT NULL,
+    comment text,
+    data_change jsonb,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    creator_id uuid NOT NULL,
+    updator_id uuid NOT NULL,
+    CONSTRAINT pk_flag_drafts PRIMARY KEY (id),
+    CONSTRAINT fk_flag_drafts_environments_env_id FOREIGN KEY (env_id) REFERENCES environments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag_drafts_feature_flags_flag_id FOREIGN KEY (flag_id) REFERENCES feature_flags (id) ON DELETE CASCADE
+);
+
+
 CREATE TABLE triggers (
     id uuid NOT NULL,
     target_id uuid NOT NULL,
@@ -367,6 +425,50 @@ CREATE TABLE triggers (
     updated_at timestamp with time zone NOT NULL,
     CONSTRAINT pk_triggers PRIMARY KEY (id),
     CONSTRAINT fk_triggers_feature_flags_target_id FOREIGN KEY (target_id) REFERENCES feature_flags (id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE flag_change_requests (
+    id uuid NOT NULL,
+    org_id uuid NOT NULL,
+    env_id uuid NOT NULL,
+    flag_draft_id uuid NOT NULL,
+    flag_id uuid NOT NULL,
+    status character varying(255) NOT NULL,
+    reason text,
+    reviewers jsonb,
+    schedule_id uuid,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    creator_id uuid NOT NULL,
+    updator_id uuid NOT NULL,
+    CONSTRAINT pk_flag_change_requests PRIMARY KEY (id),
+    CONSTRAINT fk_flag_change_requests_environments_env_id FOREIGN KEY (env_id) REFERENCES environments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag_change_requests_feature_flags_flag_id FOREIGN KEY (flag_id) REFERENCES feature_flags (id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag_change_requests_flag_drafts_flag_draft_id FOREIGN KEY (flag_draft_id) REFERENCES flag_drafts (id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag_change_requests_organizations_org_id FOREIGN KEY (org_id) REFERENCES organizations (id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE flag_schedules (
+    id uuid NOT NULL,
+    org_id uuid NOT NULL,
+    env_id uuid NOT NULL,
+    flag_draft_id uuid NOT NULL,
+    flag_id uuid NOT NULL,
+    status character varying(255) NOT NULL,
+    title character varying(255) NOT NULL,
+    scheduled_time timestamp with time zone NOT NULL,
+    change_request_id uuid,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    creator_id uuid NOT NULL,
+    updator_id uuid NOT NULL,
+    CONSTRAINT pk_flag_schedules PRIMARY KEY (id),
+    CONSTRAINT fk_flag_schedules_environments_env_id FOREIGN KEY (env_id) REFERENCES environments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag_schedules_feature_flags_flag_id FOREIGN KEY (flag_id) REFERENCES feature_flags (id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag_schedules_flag_drafts_flag_draft_id FOREIGN KEY (flag_draft_id) REFERENCES flag_drafts (id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag_schedules_organizations_org_id FOREIGN KEY (org_id) REFERENCES organizations (id) ON DELETE CASCADE
 );
 
 
@@ -400,10 +502,55 @@ CREATE INDEX ix_end_users_updated_at ON end_users (updated_at);
 CREATE INDEX ix_environments_project_id ON environments (project_id);
 
 
+CREATE INDEX ix_experiment_metrics_env_id ON experiment_metrics (env_id);
+
+
+CREATE INDEX ix_experiment_metrics_maintainer_user_id ON experiment_metrics (maintainer_user_id);
+
+
+CREATE INDEX ix_experiments_env_id ON experiments (env_id);
+
+
+CREATE INDEX ix_experiments_feature_flag_id ON experiments (feature_flag_id);
+
+
+CREATE INDEX ix_experiments_metric_id ON experiments (metric_id);
+
+
 CREATE INDEX ix_feature_flags_env_id ON feature_flags (env_id);
 
 
 CREATE INDEX ix_feature_flags_key ON feature_flags (key);
+
+
+CREATE INDEX ix_flag_change_requests_env_id ON flag_change_requests (env_id);
+
+
+CREATE INDEX ix_flag_change_requests_flag_draft_id ON flag_change_requests (flag_draft_id);
+
+
+CREATE INDEX ix_flag_change_requests_flag_id ON flag_change_requests (flag_id);
+
+
+CREATE INDEX ix_flag_change_requests_org_id ON flag_change_requests (org_id);
+
+
+CREATE INDEX ix_flag_drafts_env_id ON flag_drafts (env_id);
+
+
+CREATE INDEX ix_flag_drafts_flag_id ON flag_drafts (flag_id);
+
+
+CREATE INDEX ix_flag_schedules_env_id ON flag_schedules (env_id);
+
+
+CREATE INDEX ix_flag_schedules_flag_draft_id ON flag_schedules (flag_draft_id);
+
+
+CREATE INDEX ix_flag_schedules_flag_id ON flag_schedules (flag_id);
+
+
+CREATE INDEX ix_flag_schedules_org_id ON flag_schedules (org_id);
 
 
 CREATE INDEX ix_global_users_env_id ON global_users (env_id);

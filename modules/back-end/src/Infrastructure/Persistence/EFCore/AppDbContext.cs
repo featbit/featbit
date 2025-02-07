@@ -39,9 +39,9 @@ public class AppDbContext : DbContext
     public DbSet<Segment> Segments => Set<Segment>();
     public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
     public DbSet<FlagRevision> FlagRevisions => Set<FlagRevision>();
-    //public DbSet<FlagDraft> FlagDrafts => Set<FlagDraft>();
-    //public DbSet<FlagSchedule> FlagSchedules => Set<FlagSchedule>();
-    //public DbSet<FlagChangeRequest> FlagChangeRequests => Set<FlagChangeRequest>();
+    public DbSet<FlagDraft> FlagDrafts => Set<FlagDraft>();
+    public DbSet<FlagSchedule> FlagSchedules => Set<FlagSchedule>();
+    public DbSet<FlagChangeRequest> FlagChangeRequests => Set<FlagChangeRequest>();
     public DbSet<Trigger> Triggers => Set<Trigger>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<Group> Groups => Set<Group>();
@@ -50,8 +50,8 @@ public class AppDbContext : DbContext
     public DbSet<GroupPolicy> GroupPolicies => Set<GroupPolicy>();
     public DbSet<MemberPolicy> MemberPolicies => Set<MemberPolicy>();
 
-    //public DbSet<Experiment> Experiments => Set<Experiment>();
-    //public DbSet<ExperimentMetric> ExperimentMetrics => Set<ExperimentMetric>();
+    public DbSet<Experiment> Experiments => Set<Experiment>();
+    public DbSet<ExperimentMetric> ExperimentMetrics => Set<ExperimentMetric>();
     public DbSet<AccessToken> AccessTokens => Set<AccessToken>();
     public DbSet<RelayProxy> RelayProxys => Set<RelayProxy>();
     public DbSet<Webhook> Webhooks => Set<Webhook>();
@@ -77,9 +77,9 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new SegmentConfiguration());
         modelBuilder.ApplyConfiguration(new FeatureFlagConfiguration());
         modelBuilder.ApplyConfiguration(new FlagRevisionConfiguration());
-        //modelBuilder.ApplyConfiguration(new FlagDraftConfiguration());
-        //modelBuilder.ApplyConfiguration(new FlagScheduleConfiguration());
-        //modelBuilder.ApplyConfiguration(new FlagChangeRequestConfiguration());
+        modelBuilder.ApplyConfiguration(new FlagDraftConfiguration());
+        modelBuilder.ApplyConfiguration(new FlagScheduleConfiguration());
+        modelBuilder.ApplyConfiguration(new FlagChangeRequestConfiguration());
         modelBuilder.ApplyConfiguration(new TriggerConfiguration());
 
         modelBuilder.ApplyConfiguration(new AuditLogConfiguration());
@@ -89,8 +89,8 @@ public class AppDbContext : DbContext
         modelBuilder.ApplyConfiguration(new GroupPolicyConfiguration());
         modelBuilder.ApplyConfiguration(new MemberPolicyConfiguration());
 
-        //modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
-        //modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
         modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
         modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
         modelBuilder.ApplyConfiguration(new WebhookConfiguration());

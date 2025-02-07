@@ -17,6 +17,10 @@ public class FlagDraft : FullAuditedEntity
 
     public DataChange DataChange { get; set; }
 
+    public FlagDraft()
+    {
+    }
+
     public FlagDraft(
         Guid envId,
         Guid flagId,

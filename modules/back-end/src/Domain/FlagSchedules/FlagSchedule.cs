@@ -18,6 +18,11 @@ public class FlagSchedule : FullAuditedEntity
 
     public Guid? ChangeRequestId { get; set; }
 
+    public FlagSchedule()
+    {
+
+    }
+
     public FlagSchedule(
         Guid orgId,
         Guid envId,

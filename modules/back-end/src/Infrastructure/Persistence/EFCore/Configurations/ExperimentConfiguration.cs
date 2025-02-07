@@ -1,4 +1,5 @@
 ﻿using Amazon.Runtime;
+using Domain.ExperimentMetrics;
 using Domain.Experiments;
 using Domain.FeatureFlags;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,7 @@ public class ExperimentConfiguration : IEntityTypeConfiguration<Experiment>
         builder.HasOne(typeof(Domain.Environments.Environment))
             .WithMany()
             .HasForeignKey(nameof(Experiment.EnvId));
-        builder.HasOne(typeof(Metric))
+        builder.HasOne(typeof(ExperimentMetric))
             .WithMany()
             .HasForeignKey(nameof(Experiment.MetricId));
         builder.HasOne(typeof(FeatureFlag))
