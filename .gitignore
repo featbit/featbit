@@ -18,3 +18,4 @@ benchmark/k6-scripts/test-results/
 
 #Ignore IntelliJ IDEA files
 .idea/
+.fake

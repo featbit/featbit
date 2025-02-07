@@ -6,40 +6,32 @@ using Microsoft.Net.Http.Headers;
 
 namespace Api.Authorization;
 
-public class ApiAuthorizationResultHandler : IAuthorizationMiddlewareResultHandler
+public sealed class ApiAuthorizationResultHandler : IAuthorizationMiddlewareResultHandler
 {
+    private static readonly ApiResponse<object> UnauthorizedResponse = ApiResponse<object>.Error(ErrorCodes.Unauthorized);
+    private static readonly ApiResponse<object> ForbiddenResponse = ApiResponse<object>.Error(ErrorCodes.Forbidden);
+
     public async Task HandleAsync(
         RequestDelegate next,
         HttpContext context,
         AuthorizationPolicy policy,
         PolicyAuthorizationResult authorizeResult)
     {
-        var response = context.Response;
-
         if (authorizeResult.Challenged)
         {
-            response.Headers.Append(
-                HeaderNames.WWWAuthenticate,
-                JwtBearerDefaults.AuthenticationScheme
-            );
-            response.StatusCode = StatusCodes.Status401Unauthorized;
-
-            var unauthorized = ApiResponse<object>.Error(ErrorCodes.Unauthorized);
-            await response.WriteAsJsonAsync(unauthorized);
-
+            context.Response.Headers[HeaderNames.WWWAuthenticate] = JwtBearerDefaults.AuthenticationScheme;
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsJsonAsync(UnauthorizedResponse);
             return;
         }
 
         if (authorizeResult.Forbidden)
         {
-            response.StatusCode = StatusCodes.Status403Forbidden;
-
-            var forbidden = ApiResponse<object>.Error(ErrorCodes.Forbidden);
-            await response.WriteAsJsonAsync(forbidden);
-
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsJsonAsync(ForbiddenResponse);
             return;
         }
 
         await next(context);
     }
-}
+}   
