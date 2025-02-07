@@ -7,7 +7,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using Environment = Domain.Environments.Environment;
 
-namespace Infrastructure.Segments;
+namespace Infrastructure.AppService;
 
 public class SegmentAppService : ISegmentAppService
 {

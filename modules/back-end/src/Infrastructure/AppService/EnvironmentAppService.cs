@@ -3,7 +3,7 @@ using Application.Segments;
 using Domain.Resources;
 using Domain.Segments;
 
-namespace Infrastructure.Environments;
+namespace Infrastructure.AppService;
 
 public class EnvironmentAppService : IEnvironmentAppService
 {
