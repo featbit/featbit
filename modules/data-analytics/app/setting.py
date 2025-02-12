@@ -2,7 +2,7 @@ import os
 
 from utils import get_from_env, str_to_bool
 
-IS_PRO = get_from_env("IS_PRO", False, type_cast=str_to_bool)
+IS_PRO = get_from_env("IS_PRO", True, type_cast=str_to_bool)
 
 WSGI = get_from_env("WSGI", False, type_cast=str_to_bool)
 
@@ -34,6 +34,10 @@ CLICKHOUSE_CONN_POOL_MAX = get_from_env("CLICKHOUSE_CONN_POOL_MAX", 1000, type_c
 CLICKHOUSE_ENABLE_STORAGE_POLICY = get_from_env("CLICKHOUSE_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool)
 CLICKHOUSE_KAFKA_HOSTS = os.getenv("CLICKHOUSE_KAFKA_HOSTS", "kafka:9092")
 CLICKHOUSE_REPLICATION = get_from_env("CLICKHOUSE_REPLICATION", True, type_cast=str_to_bool)
+
+
+# Postgresql
+
 
 CACHE_TYPE = os.getenv("CACHE_TYPE", "RedisCache")
 CACHE_KEY_PREFIX = "featbit:das:"

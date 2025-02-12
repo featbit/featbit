@@ -12,6 +12,8 @@ from app.main.models.statistics import (EndUserParams, EndUserStatistics,
                                         IntervalParams)
 from app.mongodb.models.event import bulk_create_events as bulk_create_events_mongod
 from app.setting import IS_PRO
+
+from app.postgresql.models.event import bulk_create_events as bulk_create_events_postgresql
 from utils import internal_error_handler, to_md5_hexdigest
 
 main = get_main_blueprint()
@@ -41,10 +43,12 @@ def create_events():
 
 def _create_events(json_events: Union[str, bytes]) -> None:
     events = json.loads(json_events)
-    if IS_PRO:
-        bulk_create_events_ch(events)
-    else:
-        bulk_create_events_mongod(events)
+    # if IS_PRO:
+    #     bulk_create_events_ch(events)
+    # else:
+    #     bulk_create_events_mongod(events)
+
+    bulk_create_events_postgresql(events)
 
 
 @main.route('/events/stat/<event>', methods=['POST'])

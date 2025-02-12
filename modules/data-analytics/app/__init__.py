@@ -67,15 +67,18 @@ def _create_app(config_name='default') -> Flask:
     cache = get_cache(config=cache_config)
     cache.init_app(__app)
 
-    if IS_PRO:
-        if WSGI:
-            _init_aps_scheduler(__app)
-        from app.commands import migrate_clickhouse
-        __app.cli.add_command(migrate_clickhouse, name='migrate-database')
-    else:
-        get_mongodb(__app, MONGO_URI)
-        from app.commands import migrate_mongodb
-        __app.cli.add_command(migrate_mongodb, name='migrate-database')
+    # if IS_PRO:
+    #     if WSGI:
+    #         _init_aps_scheduler(__app)
+    #     from app.commands import migrate_clickhouse
+    #     __app.cli.add_command(migrate_clickhouse, name='migrate-database')
+    # else:
+    #     get_mongodb(__app, MONGO_URI)
+    #     from app.commands import migrate_mongodb
+    #     __app.cli.add_command(migrate_mongodb, name='migrate-database')
+
+    from app.commands import migrate_postgresql
+    __app.cli.add_command(migrate_postgresql, name='migrate-database')
 
     return __app
 
