@@ -6,12 +6,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class AccessTokenService : MongoDbService<AccessToken>, IAccessTokenService
+public class AccessTokenService(MongoDbClient mongoDb) : MongoDbService<AccessToken>(mongoDb), IAccessTokenService
 {
-    public AccessTokenService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task<PagedResult<AccessToken>> GetListAsync(Guid organizationId, AccessTokenFilter filter)
     {
         var query = Queryable.Where(x => x.OrganizationId == organizationId);
@@ -42,10 +38,5 @@ public class AccessTokenService : MongoDbService<AccessToken>, IAccessTokenServi
             .ToListAsync();
 
         return new PagedResult<AccessToken>(totalCount, items);
-    }
-
-    public async Task DeleteAsync(Guid id)
-    {
-        await Collection.DeleteOneAsync(x => x.Id == id);
     }
 }

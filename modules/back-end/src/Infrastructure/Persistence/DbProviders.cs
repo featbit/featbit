@@ -1,6 +1,6 @@
-namespace Infrastructure.Persistence.EntityFrameworkCore;
+namespace Infrastructure.Persistence;
 
-public class Provider
+public abstract class DbProviders
 {
     public const string MongoDb = nameof(MongoDb);
 

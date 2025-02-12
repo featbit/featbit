@@ -5,16 +5,10 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class ProjectService : MongoDbService<Project>, IProjectService
+public class ProjectService(MongoDbClient mongoDb, IEnvironmentService envService)
+    : MongoDbService<Project>(mongoDb), IProjectService
 {
-    private readonly IEnvironmentService _envService;
-
-    public ProjectService(MongoDbClient mongoDb, IEnvironmentService envService) : base(mongoDb)
-    {
-        _envService = envService;
-    }
-
-    public async Task<ProjectWithEnvs> GetWithEnvsAsync(Guid id)
+    public async Task<ProjectWithEnvs?> GetWithEnvsAsync(Guid id)
     {
         var projects = MongoDb.QueryableOf<Project>();
         var envs = MongoDb.QueryableOf<Environment>();
@@ -66,7 +60,7 @@ public class ProjectService : MongoDbService<Project>, IProjectService
         var envs = envNames
             .Select(envName => new Environment(project.Id, envName, envName.ToLower()))
             .ToArray();
-        await _envService.AddManyWithBuiltInPropsAsync(envs);
+        await envService.AddManyWithBuiltInPropsAsync(envs);
 
         return new ProjectWithEnvs
         {
@@ -95,7 +89,7 @@ public class ProjectService : MongoDbService<Project>, IProjectService
             .Where(x => x.ProjectId == id)
             .Select(x => x.Id)
             .ToListAsync();
-        await _envService.DeleteManyAsync(envIds);
+        await envService.DeleteManyAsync(envIds);
 
         return true;
     }
@@ -110,6 +104,6 @@ public class ProjectService : MongoDbService<Project>, IProjectService
             .Where(x => projectIds.Contains(x.ProjectId))
             .Select(x => x.Id)
             .ToListAsync();
-        await _envService.DeleteManyAsync(envIds);
+        await envService.DeleteManyAsync(envIds);
     }
 }

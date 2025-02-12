@@ -14,7 +14,5 @@ public interface IWebhookService : IService<Webhook>
 
     Task<bool> IsNameUsedAsync(Guid orgId, string name);
 
-    Task DeleteAsync(Guid id);
-
     Task<PagedResult<WebhookDelivery>> GetDeliveriesAsync(Guid webhookId, WebhookDeliveryFilter filter);
 }

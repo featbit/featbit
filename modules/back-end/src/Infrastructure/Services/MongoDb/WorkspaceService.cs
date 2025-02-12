@@ -3,12 +3,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class WorkspaceService : MongoDbService<Workspace>, IWorkspaceService
+public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>(mongoDb), IWorkspaceService
 {
-    public WorkspaceService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key)
     {
         return await AnyAsync(ws =>

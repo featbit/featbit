@@ -8,13 +8,9 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class EnvironmentService : MongoDbService<Environment>, IEnvironmentService
+public class EnvironmentService(MongoDbClient mongoDb) : MongoDbService<Environment>(mongoDb), IEnvironmentService
 {
-    public EnvironmentService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
-    public async Task<ResourceDescriptor> GetResourceDescriptorAsync(Guid envId)
+    public async Task<ResourceDescriptor?> GetResourceDescriptorAsync(Guid envId)
     {
         var organizations = MongoDb.QueryableOf<Organization>();
         var projects = MongoDb.QueryableOf<Project>();

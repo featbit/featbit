@@ -62,4 +62,6 @@ public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
     {
         await Collection.ReplaceOneAsync(entity => entity.Id == replacement.Id, replacement);
     }
+
+    public async Task DeleteOneAsync(Guid id) => await Collection.DeleteOneAsync(x => x.Id == id);
 }

@@ -6,12 +6,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class UserService : MongoDbService<User>, IUserService
+public class UserService(MongoDbClient mongoDb) : MongoDbService<User>(mongoDb), IUserService
 {
-    public UserService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task<string> GetOperatorAsync(Guid operatorId)
     {
         if (operatorId == SystemUser.Id)
@@ -47,6 +43,4 @@ public class UserService : MongoDbService<User>, IUserService
 
         return await query.ToListAsync();
     }
-
-    public async Task DeleteAsync(Guid id) => await Collection.DeleteOneAsync(x => x.Id == id);
 }

@@ -2,9 +2,4 @@ using Domain.FlagRevisions;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class FlagRevisionService : MongoDbService<FlagRevision>, IFlagRevisionService
-{
-    public FlagRevisionService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-}
+public class FlagRevisionService(MongoDbClient mongoDb) : MongoDbService<FlagRevision>(mongoDb), IFlagRevisionService;

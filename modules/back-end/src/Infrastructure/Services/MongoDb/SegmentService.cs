@@ -1,18 +1,21 @@
+using Application.Bases;
+using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Segments;
 using Domain.FeatureFlags;
+using Domain.Resources;
 using Domain.Segments;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class SegmentService : MongoDbService<Segment>, ISegmentService
+public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logger)
+    : MongoDbService<Segment>(mongoDb), ISegmentService
 {
-    public SegmentService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task<PagedResult<Segment>> GetListAsync(Guid workspaceId, string rn, SegmentFilter userFilter)
     {
         var filterBuilder = Builders<Segment>.Filter;
@@ -67,11 +70,6 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
         return await query.ToListAsync();
     }
 
-    public async Task DeleteAsync(Guid id)
-    {
-        await Collection.DeleteOneAsync(x => x.Id == id);
-    }
-
     public async Task<ICollection<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id)
     {
         var segmentId = id.ToString();
@@ -98,5 +96,73 @@ public class SegmentService : MongoDbService<Segment>, ISegmentService
         }
 
         return references;
+    }
+
+    public async Task<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment)
+    {
+        if (segment.IsEnvironmentSpecific)
+        {
+            return [segment.EnvId];
+        }
+
+        var envIds = new List<Guid>();
+        foreach (var scope in segment.Scopes)
+        {
+            var scopeEnvIds = await SearchScope(scope);
+            envIds.AddRange(scopeEnvIds);
+        }
+
+        return envIds;
+
+        async Task<ICollection<Guid>> SearchScope(string scope)
+        {
+            if (!RN.TryParse(scope, out var props))
+            {
+                logger.LogError(
+                    "Inconsistent segment data for {Segment}: the scope '{Scope}' is not a valid RN.",
+                    segment.Id,
+                    scope
+                );
+
+                throw new BusinessException(ErrorCodes.InconsistentData);
+            }
+
+            var match = new Dictionary<string, string>();
+
+            var envProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
+            if (envProp != null && envProp.Key != "*")
+            {
+                match.Add("key", envProp.Key);
+            }
+
+            var projectProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Project);
+            if (projectProp != null && projectProp.Key != "*")
+            {
+                match.Add("projects.key", projectProp.Key);
+            }
+
+            var orgProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Organization);
+            if (orgProp != null && orgProp.Key != "*")
+            {
+                match.Add("organizations.key", orgProp.Key);
+            }
+
+            var query = MongoDb.CollectionOf<Environment>().Aggregate()
+                .Lookup("Projects", "projectId", "_id", "projects")
+                .Unwind("projects")
+                .Lookup("Organizations", "projects.organizationId", "_id", "organizations")
+                .Unwind("organizations")
+                .Match(new BsonDocument
+                {
+                    {
+                        "$and",
+                        new BsonArray(match.Select(x => new BsonDocument(x.Key, x.Value)))
+                    }
+                })
+                .Project(new BsonDocument("_id", 1));
+
+            var documents = await query.ToListAsync();
+            return documents.Select(x => x["_id"].AsGuid).ToList();
+        }
     }
 }

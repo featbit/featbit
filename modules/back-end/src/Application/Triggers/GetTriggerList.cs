@@ -18,7 +18,7 @@ public class GetTriggerListHandler : IRequestHandler<GetTriggerList, IEnumerable
 
     public async Task<IEnumerable<Trigger>> Handle(GetTriggerList request, CancellationToken cancellationToken)
     {
-        var triggers = await _service.GetListAsync(request.TargetId);
+        var triggers = await _service.FindManyAsync(x => x.TargetId == request.TargetId);
 
         // obscure token
         foreach (var trigger in triggers)

@@ -10,12 +10,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class PolicyService : MongoDbService<Policy>, IPolicyService
+public class PolicyService(MongoDbClient mongoDb) : MongoDbService<Policy>(mongoDb), IPolicyService
 {
-    public PolicyService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task DeleteAsync(Guid id)
     {
         // delete policy 

@@ -17,6 +17,7 @@
         <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="8.1.0" />
         <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
         <PackageReference Include="Confluent.Kafka" Version="2.5.3" />
+        <PackageReference Include="LinqKit.Core" Version="1.2.8" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
         <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
@@ -24,10 +25,6 @@
         <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
         <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\Postgres\" />
     </ItemGroup>
 
 </Project>

@@ -9,15 +9,9 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class OrganizationService : MongoDbService<Organization>, IOrganizationService
+public class OrganizationService(MongoDbClient mongoDb, IProjectService projectService)
+    : MongoDbService<Organization>(mongoDb), IOrganizationService
 {
-    private readonly IProjectService _projectService;
-
-    public OrganizationService(MongoDbClient mongoDb, IProjectService projectService) : base(mongoDb)
-    {
-        _projectService = projectService;
-    }
-
     public async Task<string[]> GetScopesAsync(ScopeString[] scopeStrings)
     {
         var projectIds = scopeStrings.Select(x => x.ProjectId);
@@ -138,6 +132,6 @@ public class OrganizationService : MongoDbService<Organization>, IOrganizationSe
             .Where(x => x.OrganizationId == id)
             .Select(x => x.Id)
             .ToListAsync();
-        await _projectService.DeleteManyAsync(projectIds);
+        await projectService.DeleteManyAsync(projectIds);
     }
 }

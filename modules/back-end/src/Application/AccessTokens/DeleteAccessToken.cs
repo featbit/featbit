@@ -16,7 +16,7 @@ public class DeleteAccessTokenHandler : IRequestHandler<DeleteAccessToken, bool>
 
     public async Task<bool> Handle(DeleteAccessToken request, CancellationToken cancellationToken)
     {
-        await _service.DeleteAsync(request.Id);
+        await _service.DeleteOneAsync(request.Id);
 
         return true;
     }

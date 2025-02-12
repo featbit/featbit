@@ -85,11 +85,6 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
         );
     }
 
-    public async Task DeleteAsync(Guid id)
-    {
-        await Collection.DeleteOneAsync(x => x.Id == id);
-    }
-
     public async Task<ICollection<string>> GetAllTagsAsync(Guid envId)
     {
         var filter = new ExpressionFilterDefinition<FeatureFlag>(x => x.EnvId == envId && !x.IsArchived);

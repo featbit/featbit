@@ -9,15 +9,8 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class ResourceServiceV2 : IResourceServiceV2
+public class ResourceServiceV2(MongoDbClient mongoDb) : IResourceServiceV2
 {
-    public MongoDbClient MongoDb { get; }
-
-    public ResourceServiceV2(MongoDbClient mongoDb)
-    {
-        MongoDb = mongoDb;
-    }
-
     public async Task<string> GetRNAsync(Guid resourceId, string resourceType)
     {
         var rn = resourceType switch
@@ -58,7 +51,7 @@ public class ResourceServiceV2 : IResourceServiceV2
             return Enumerable.Empty<ResourceV2>();
         }
 
-        var query = MongoDb.QueryableOf<Organization>()
+        var query = mongoDb.QueryableOf<Organization>()
             .Where(x => x.WorkspaceId == spaceId)
             .Select(x => new ResourceV2
             {
@@ -85,9 +78,9 @@ public class ResourceServiceV2 : IResourceServiceV2
         IMongoQueryable<ResourceV2> GetWorkspaceProjectsQuery()
         {
             var workspaceLevelQuery =
-                from workspace in MongoDb.QueryableOf<Workspace>()
-                join organization in MongoDb.QueryableOf<Organization>() on workspace.Id equals organization.WorkspaceId
-                join project in MongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
+                from workspace in mongoDb.QueryableOf<Workspace>()
+                join organization in mongoDb.QueryableOf<Organization>() on workspace.Id equals organization.WorkspaceId
+                join project in mongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
                 where workspace.Id == spaceId
                 select new ResourceV2
                 {
@@ -104,8 +97,8 @@ public class ResourceServiceV2 : IResourceServiceV2
         IMongoQueryable<ResourceV2> GetOrganizationProjectsQuery()
         {
             var organizationLevelQuery =
-                from organization in MongoDb.QueryableOf<Organization>()
-                join project in MongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
+                from organization in mongoDb.QueryableOf<Organization>()
+                join project in mongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
                 where organization.Id == spaceId
                 select new ResourceV2
                 {
@@ -132,10 +125,10 @@ public class ResourceServiceV2 : IResourceServiceV2
         IMongoQueryable<ResourceV2> GetWorkspaceEnvsQuery()
         {
             var workspaceLevelQuery =
-                from workspace in MongoDb.QueryableOf<Workspace>()
-                join organization in MongoDb.QueryableOf<Organization>() on workspace.Id equals organization.WorkspaceId
-                join project in MongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
-                join env in MongoDb.QueryableOf<Environment>() on project.Id equals env.ProjectId
+                from workspace in mongoDb.QueryableOf<Workspace>()
+                join organization in mongoDb.QueryableOf<Organization>() on workspace.Id equals organization.WorkspaceId
+                join project in mongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
+                join env in mongoDb.QueryableOf<Environment>() on project.Id equals env.ProjectId
                 where workspace.Id == spaceId
                 select new ResourceV2
                 {
@@ -152,9 +145,9 @@ public class ResourceServiceV2 : IResourceServiceV2
         IMongoQueryable<ResourceV2> GetOrganizationEnvsQuery()
         {
             var organizationLevelQuery =
-                from organization in MongoDb.QueryableOf<Organization>()
-                join project in MongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
-                join env in MongoDb.QueryableOf<Environment>() on project.Id equals env.ProjectId
+                from organization in mongoDb.QueryableOf<Organization>()
+                join project in mongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
+                join env in mongoDb.QueryableOf<Environment>() on project.Id equals env.ProjectId
                 where organization.Id == spaceId
                 select new ResourceV2
                 {
@@ -192,9 +185,9 @@ public class ResourceServiceV2 : IResourceServiceV2
     private async Task<string> GetEnvRnAsync(Guid envId)
     {
         var query =
-            from organization in MongoDb.QueryableOf<Organization>()
-            join project in MongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
-            join env in MongoDb.QueryableOf<Environment>() on project.Id equals env.ProjectId
+            from organization in mongoDb.QueryableOf<Organization>()
+            join project in mongoDb.QueryableOf<Project>() on organization.Id equals project.OrganizationId
+            join env in mongoDb.QueryableOf<Environment>() on project.Id equals env.ProjectId
             where env.Id == envId
             select new
             {

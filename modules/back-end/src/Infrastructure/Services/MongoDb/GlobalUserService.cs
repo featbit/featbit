@@ -6,12 +6,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class GlobalUserService : MongoDbService<GlobalUser>, IGlobalUserService
+public class GlobalUserService(MongoDbClient mongoDb) : MongoDbService<GlobalUser>(mongoDb), IGlobalUserService
 {
-    public GlobalUserService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task<PagedResult<GlobalUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter)
     {
         var query = Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == null);

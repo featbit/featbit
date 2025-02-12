@@ -6,12 +6,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class WebhookService : MongoDbService<Webhook>, IWebhookService
+public class WebhookService(MongoDbClient mongoDb) : MongoDbService<Webhook>(mongoDb), IWebhookService
 {
-    public WebhookService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task AddDeliveryAsync(WebhookDelivery delivery)
     {
         await MongoDb.CollectionOf<WebhookDelivery>().InsertOneAsync(delivery);
@@ -72,11 +68,6 @@ public class WebhookService : MongoDbService<Webhook>, IWebhookService
             x.OrgId == orgId &&
             string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)
         );
-    }
-
-    public async Task DeleteAsync(Guid id)
-    {
-        await Collection.DeleteOneAsync(x => x.Id == id);
     }
 
     public async Task<PagedResult<WebhookDelivery>> GetDeliveriesAsync(Guid webhookId, WebhookDeliveryFilter filter)

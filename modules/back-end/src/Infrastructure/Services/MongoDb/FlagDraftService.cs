@@ -2,9 +2,4 @@
 
 namespace Infrastructure.Services.MongoDb;
 
-public class FlagDraftService : MongoDbService<FlagDraft>, IFlagDraftService
-{
-    public FlagDraftService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-}
+public class FlagDraftService(MongoDbClient mongoDb) : MongoDbService<FlagDraft>(mongoDb), IFlagDraftService;

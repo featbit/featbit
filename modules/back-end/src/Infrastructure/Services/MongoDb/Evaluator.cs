@@ -5,7 +5,7 @@ using Domain.Segments;
 using Domain.Targeting;
 using MongoDB.Driver.Linq;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Services.MongoDb;
 
 public class Evaluator : IEvaluator
 {
@@ -102,6 +102,11 @@ public class Evaluator : IEvaluator
         foreach (var segmentId in segmentIds)
         {
             var segment = await segments.FirstOrDefaultAsync(x => x.Id == new Guid(segmentId));
+            if (segment == null)
+            {
+                continue;
+            }
+
             if (segment.IsMatch(user))
             {
                 return true;

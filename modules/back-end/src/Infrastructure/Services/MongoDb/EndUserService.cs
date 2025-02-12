@@ -8,12 +8,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class EndUserService : MongoDbService<EndUser>, IEndUserService
+public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mongoDb), IEndUserService
 {
-    public EndUserService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
     {
         var filterBuilder = Builders<EndUser>.Filter;
@@ -206,7 +202,7 @@ public class EndUserService : MongoDbService<EndUser>, IEndUserService
             .Select(propName => new EndUserProperty(envId, propName))
             .ToArray();
 
-        if (newProps.Any())
+        if (newProps.Length != 0)
         {
             await MongoDb.CollectionOf<EndUserProperty>().InsertManyAsync(newProps);
         }

@@ -10,28 +10,23 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class ExperimentService : MongoDbService<Experiment>, IExperimentService
+public class ExperimentService(MongoDbClient mongoDb, IOlapService olapService)
+    : MongoDbService<Experiment>(mongoDb), IExperimentService
 {
-    private readonly IFeatureFlagService _featureFlagService;
-    private readonly IOlapService _olapService;
-    private readonly IExperimentMetricService _experimentMetricService;
-
-    public ExperimentService(MongoDbClient mongoDb, IFeatureFlagService featureFlagService, IOlapService olapService,
-        IExperimentMetricService experimentMetricService) : base(mongoDb)
-    {
-        _featureFlagService = featureFlagService;
-        _olapService = olapService;
-        _experimentMetricService = experimentMetricService;
-    }
-
     public async Task ArchiveExperiment(Guid envId, Guid experimentId)
     {
         var experiment = await GetAsync(experimentId);
 
         var operationTime = DateTime.UtcNow;
+
+        var featureFlag = await MongoDb.QueryableOf<FeatureFlag>().FirstOrDefaultAsync(x => x.Id == experiment.FeatureFlagId);
+        var metric = await MongoDb.QueryableOf<ExperimentMetric>().FirstOrDefaultAsync(x => x.Id == experiment.MetricId);
+        if (featureFlag == null || metric == null)
+        {
+            return;
+        }
+
         // stop active iterations
-        var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
-        var metric = await _experimentMetricService.GetAsync(experiment.MetricId);
         foreach (var iteration in experiment.Iterations.Where(x => !x.EndTime.HasValue))
         {
             iteration.EndTime = operationTime;
@@ -54,7 +49,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 EndExptTime = iteration.EndTime?.ToUnixTimeMilliseconds()
             };
 
-            var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
+            var olapExptResult = await olapService.GetExptIterationResultAsync(param);
             if (olapExptResult != null)
             {
                 iteration.Results = olapExptResult.Results;
@@ -65,6 +60,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         experiment.UpdatedAt = operationTime;
         experiment.Status = ExperimentStatus.Paused;
         experiment.IsArchived = true;
+
         await UpdateAsync(experiment);
     }
 
@@ -74,10 +70,15 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
 
         if (experiment.Iterations.Any())
         {
-            var operationTime = DateTime.UtcNow;
             // stop active iterations
-            var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
-            var metric = await _experimentMetricService.GetAsync(experiment.MetricId);
+            var featureFlag = await MongoDb.QueryableOf<FeatureFlag>().FirstOrDefaultAsync(x => x.Id == experiment.FeatureFlagId);
+            var metric = await MongoDb.QueryableOf<ExperimentMetric>().FirstOrDefaultAsync(x => x.Id == experiment.MetricId);
+            if (featureFlag == null || metric == null)
+            {
+                return;
+            }
+
+            var operationTime = DateTime.UtcNow;
             foreach (var iteration in experiment.Iterations.Where(x => !x.EndTime.HasValue))
             {
                 iteration.EndTime = operationTime;
@@ -101,7 +102,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                     Alpha = experiment.Alpha
                 };
 
-                var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
+                var olapExptResult = await olapService.GetExptIterationResultAsync(param);
                 if (olapExptResult != null)
                 {
                     iteration.Results = olapExptResult.Results;
@@ -129,10 +130,15 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         }
 
         experiment.Status = ExperimentStatus.Paused;
+        
+        var featureFlag = await MongoDb.QueryableOf<FeatureFlag>().FirstOrDefaultAsync(x => x.Id == experiment.FeatureFlagId);
+        var metric = await MongoDb.QueryableOf<ExperimentMetric>().FirstOrDefaultAsync(x => x.Id == experiment.MetricId);
+        if (featureFlag == null || metric == null)
+        {
+            return;
+        }
 
         // stop active iterations
-        var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
-        var metric = await _experimentMetricService.GetAsync(experiment.MetricId);
         foreach (var it in experiment.Iterations.Where(x => !x.EndTime.HasValue))
         {
             it.EndTime = operationTime;
@@ -156,7 +162,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 EndExptTime = it.EndTime.Value.ToUnixTimeMilliseconds()
             };
 
-            var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
+            var olapExptResult = await olapService.GetExptIterationResultAsync(param);
             if (olapExptResult != null)
             {
                 it.Results = olapExptResult.Results;
@@ -174,10 +180,15 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         var operationTime = DateTime.UtcNow;
 
         experiment.Iterations ??= new List<ExperimentIteration>();
+        
+        var featureFlag = await MongoDb.QueryableOf<FeatureFlag>().FirstOrDefaultAsync(x => x.Id == experiment.FeatureFlagId);
+        var metric = await MongoDb.QueryableOf<ExperimentMetric>().FirstOrDefaultAsync(x => x.Id == experiment.MetricId);
+        if (featureFlag == null || metric == null)
+        {
+            return null;
+        }
 
         // stop active iterations
-        var featureFlag = await _featureFlagService.GetAsync(experiment.FeatureFlagId);
-        var metric = await _experimentMetricService.GetAsync(experiment.MetricId);
         foreach (var iteration in experiment.Iterations.Where(x => !x.EndTime.HasValue))
         {
             iteration.EndTime = operationTime;
@@ -200,7 +211,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 EndExptTime = iteration.EndTime?.ToUnixTimeMilliseconds()
             };
 
-            var olapExptResult = await _olapService.GetExptIterationResultAsync(param);
+            var olapExptResult = await olapService.GetExptIterationResultAsync(param);
             if (olapExptResult != null)
             {
                 iteration.Results = olapExptResult.Results;
@@ -213,8 +224,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
         {
             Id = Guid.NewGuid().ToString(),
             StartTime = operationTime,
-            // EndTime, Don't need to set end time as this is a start experiment signal
-            Results = new List<IterationResult>(),
+            Results = [],
             CustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
             CustomEventTrackOption = metric.CustomEventTrackOption,
             CustomEventUnit = metric.CustomEventUnit,
@@ -256,7 +266,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 iterationResults.IsUpdated = false;
                 iterationResults.Results = targetIteration.Results;
                 results.Add(iterationResults);
-                
+
                 continue;
             }
 
@@ -278,7 +288,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 Alpha = experiment.Alpha
             };
 
-            var olapExptResults = await _olapService.GetExptIterationResultAsync(param);
+            var olapExptResults = await olapService.GetExptIterationResultAsync(param);
             if (olapExptResults != null)
             {
                 iterationResults.IsFinish = olapExptResults.IsFinish;
@@ -346,7 +356,7 @@ public class ExperimentService : MongoDbService<Experiment>, IExperimentService
                 };
 
             var totalCount = await query.CountAsync();
-            
+
             List<ExperimentVm> items;
 
             if (filter.PageSize == -1) // no pagination

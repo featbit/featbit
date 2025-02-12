@@ -1,8 +1,5 @@
-using System.Text.Json.Nodes;
 using Domain.Messages;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace Infrastructure.Messages;
 
@@ -10,48 +7,31 @@ public class InsightMessageHandler : IMessageHandler, IDisposable
 {
     public string Topic => Topics.Insights;
 
-    private readonly IMongoCollection<BsonDocument> _events;
-    private readonly List<BsonDocument> _eventsBuffer;
+    private readonly List<object> _eventsBuffer;
 
+    private readonly IInsightService _insightService;
     private readonly PeriodicTimer _timer;
     private readonly Task _flushWorker;
 
     private readonly ILogger<InsightMessageHandler> _logger;
 
-    public InsightMessageHandler(MongoDbClient mongodb, ILogger<InsightMessageHandler> logger)
+    public InsightMessageHandler(IInsightService insightService, ILogger<InsightMessageHandler> logger)
     {
-        _events = mongodb.CollectionOf("Events");
-        _eventsBuffer = new List<BsonDocument>();
-
+        _insightService = insightService;
         _logger = logger;
-
-        _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        
+        _eventsBuffer = [];
+        _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
         _flushWorker = FlushEventsAsync();
     }
 
     public Task HandleAsync(string message, CancellationToken cancellationToken)
     {
-        var jsonNode = JsonNode.Parse(message)!.AsObject();
-
-        // Replace uuid with _id
-        jsonNode["_id"] = jsonNode["uuid"]!.GetValue<string>();
-        jsonNode.Remove("uuid");
-
-        // Convert properties JSON string to object
-        jsonNode["properties"] = JsonNode.Parse(jsonNode["properties"]!.GetValue<string>());
-
-        // Convert timestamp to UTC DateTime
-        var timestampInMilliseconds = jsonNode["timestamp"]!.GetValue<long>() / 1000;
-        var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampInMilliseconds).UtcDateTime;
-        jsonNode["timestamp"] = timestamp;
-
-        // Convert JSON object to BSON document
-        var bsonDocument = BsonDocument.Parse(jsonNode.ToJsonString());
-        // Change timestamp type to DateTime, otherwise it will be String
-        bsonDocument["timestamp"] = timestamp;
-
-        // Add event to buffer
-        _eventsBuffer.Add(bsonDocument);
+        if (_insightService.TryParse(message, out var @event))
+        {
+            // Add event to buffer
+            _eventsBuffer.Add(@event);
+        }
 
         return Task.CompletedTask;
     }
@@ -76,7 +56,7 @@ public class InsightMessageHandler : IMessageHandler, IDisposable
                 // Split each snapshot into groups of 100
                 foreach (var chunked in snapshots.Chunk(100))
                 {
-                    await _events.InsertManyAsync(chunked);
+                    await _insightService.AddManyAsync(chunked);
                 }
 
                 // Check log level here to avoid unnecessary memory allocation

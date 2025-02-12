@@ -4,12 +4,8 @@ using MongoDB.Driver;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class FlagScheduleService : MongoDbService<FlagSchedule>, IFlagScheduleService
+public class FlagScheduleService(MongoDbClient mongoDb) : MongoDbService<FlagSchedule>(mongoDb), IFlagScheduleService
 {
-    public FlagScheduleService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task DeleteAsync(Guid id)
     {
         await Collection.DeleteOneAsync(x => x.Id == id);

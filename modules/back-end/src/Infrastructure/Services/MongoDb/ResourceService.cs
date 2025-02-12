@@ -8,15 +8,8 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class ResourceService : IResourceService
+public class ResourceService(MongoDbClient mongoDb) : IResourceService
 {
-    public MongoDbClient MongoDb { get; }
-
-    public ResourceService(MongoDbClient mongoDb)
-    {
-        MongoDb = mongoDb;
-    }
-
     public async Task<IEnumerable<Resource>> GetResourcesAsync(Guid organizationId, ResourceFilter filter)
     {
         var name = filter.Name;
@@ -38,7 +31,7 @@ public class ResourceService : IResourceService
 
     public async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)
     {
-        var query = MongoDb.QueryableOf<Project>()
+        var query = mongoDb.QueryableOf<Project>()
             .Where(project => project.OrganizationId == organizationId)
             .Select(project => new
             {
@@ -67,9 +60,9 @@ public class ResourceService : IResourceService
 
     public async Task<IEnumerable<Resource>> GetEnvsAsync(Guid organizationId, string name)
     {
-        var organizations = MongoDb.QueryableOf<Organization>();
-        var projects = MongoDb.QueryableOf<Project>();
-        var envs = MongoDb.QueryableOf<Environment>();
+        var organizations = mongoDb.QueryableOf<Organization>();
+        var projects = mongoDb.QueryableOf<Project>();
+        var envs = mongoDb.QueryableOf<Environment>();
 
         var query =
             from env in envs

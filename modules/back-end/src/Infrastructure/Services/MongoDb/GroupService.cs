@@ -9,12 +9,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class GroupService : MongoDbService<Group>, IGroupService
+public class GroupService(MongoDbClient mongoDb) : MongoDbService<Group>(mongoDb), IGroupService
 {
-    public GroupService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task DeleteAsync(Guid id)
     {
         // delete group

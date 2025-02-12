@@ -6,12 +6,8 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class RelayProxyService : MongoDbService<RelayProxy>, IRelayProxyService
+public class RelayProxyService(MongoDbClient mongoDb) : MongoDbService<RelayProxy>(mongoDb), IRelayProxyService
 {
-    public RelayProxyService(MongoDbClient mongoDb) : base(mongoDb)
-    {
-    }
-
     public async Task<PagedResult<RelayProxy>> GetListAsync(Guid organizationId, RelayProxyFilter filter)
     {
         var query = Queryable.Where(x => x.OrganizationId == organizationId);
@@ -30,10 +26,5 @@ public class RelayProxyService : MongoDbService<RelayProxy>, IRelayProxyService
             .ToListAsync();
 
         return new PagedResult<RelayProxy>(totalCount, items);
-    }
-
-    public async Task DeleteAsync(Guid id)
-    {
-        await Collection.DeleteOneAsync(x => x.Id == id);
     }
 }

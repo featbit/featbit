@@ -11,19 +11,12 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class MemberService : IMemberService
+public class MemberService(MongoDbClient mongoDb) : IMemberService
 {
-    private readonly MongoDbClient _mongoDb;
-
-    public MemberService(MongoDbClient mongoDb)
-    {
-        _mongoDb = mongoDb;
-    }
-
     public async Task<Member> GetAsync(Guid organizationId, Guid memberId)
     {
-        var users = _mongoDb.QueryableOf<User>();
-        var organizationUsers = _mongoDb.QueryableOf<OrganizationUser>();
+        var users = mongoDb.QueryableOf<User>();
+        var organizationUsers = mongoDb.QueryableOf<OrganizationUser>();
 
         var query =
             from user in users
@@ -54,22 +47,22 @@ public class MemberService : IMemberService
     public async Task DeleteAsync(Guid organizationId, Guid memberId)
     {
         // delete organization user
-        await _mongoDb.CollectionOf<OrganizationUser>()
+        await mongoDb.CollectionOf<OrganizationUser>()
             .DeleteManyAsync(x => x.OrganizationId == organizationId && x.UserId == memberId);
 
         // delete group member
-        await _mongoDb.CollectionOf<GroupMember>()
+        await mongoDb.CollectionOf<GroupMember>()
             .DeleteManyAsync(x => x.OrganizationId == organizationId && x.MemberId == memberId);
 
         // delete member policies
-        await _mongoDb.CollectionOf<MemberPolicy>()
+        await mongoDb.CollectionOf<MemberPolicy>()
             .DeleteManyAsync(x => x.OrganizationId == organizationId && x.MemberId == memberId);
     }
 
     public async Task<PagedResult<Member>> GetListAsync(Guid organizationId, MemberFilter filter)
     {
-        var users = _mongoDb.QueryableOf<User>();
-        var organizationUsers = _mongoDb.QueryableOf<OrganizationUser>();
+        var users = mongoDb.QueryableOf<User>();
+        var organizationUsers = mongoDb.QueryableOf<OrganizationUser>();
 
         var query =
             from user in users
@@ -114,8 +107,8 @@ public class MemberService : IMemberService
 
     public async Task<List<MemberGroup>> GetGroupsAsync(Guid organizationId, IEnumerable<Guid> memberIds)
     {
-        var groups = _mongoDb.QueryableOf<Group>();
-        var groupMembers = _mongoDb.QueryableOf<GroupMember>();
+        var groups = mongoDb.QueryableOf<Group>();
+        var groupMembers = mongoDb.QueryableOf<GroupMember>();
 
         var query =
             from theGroup in groups
@@ -140,8 +133,8 @@ public class MemberService : IMemberService
         Guid memberId,
         MemberGroupFilter filter)
     {
-        var groups = _mongoDb.QueryableOf<Group>();
-        var groupMembers = _mongoDb.QueryableOf<GroupMember>();
+        var groups = mongoDb.QueryableOf<Group>();
+        var groupMembers = mongoDb.QueryableOf<GroupMember>();
 
         // aws document db not support '$let' operator which means we cannot operate on 'allGroupMembers' in the main query
         var query =
@@ -190,8 +183,8 @@ public class MemberService : IMemberService
     public async Task<IEnumerable<Policy>> GetPoliciesAsync(Guid organizationId, Guid memberId)
     {
         // direct policies
-        var policies = _mongoDb.QueryableOf<Policy>();
-        var memberPolicies = _mongoDb.QueryableOf<MemberPolicy>();
+        var policies = mongoDb.QueryableOf<Policy>();
+        var memberPolicies = mongoDb.QueryableOf<MemberPolicy>();
 
         var directPolicyQuery =
             from policy in policies
@@ -201,9 +194,9 @@ public class MemberService : IMemberService
             select policy;
 
         // inherited policies
-        var groups = _mongoDb.QueryableOf<Group>();
-        var groupMembers = _mongoDb.QueryableOf<GroupMember>();
-        var groupPolicies = _mongoDb.QueryableOf<GroupPolicy>();
+        var groups = mongoDb.QueryableOf<Group>();
+        var groupMembers = mongoDb.QueryableOf<GroupMember>();
+        var groupPolicies = mongoDb.QueryableOf<GroupPolicy>();
 
         var inheritedPolicyQuery =
             from theGroup in groups
@@ -229,8 +222,8 @@ public class MemberService : IMemberService
         Guid memberId,
         MemberPolicyFilter filter)
     {
-        var policies = _mongoDb.QueryableOf<Policy>();
-        var memberPolicies = _mongoDb.QueryableOf<MemberPolicy>();
+        var policies = mongoDb.QueryableOf<Policy>();
+        var memberPolicies = mongoDb.QueryableOf<MemberPolicy>();
 
         var query =
             from policy in policies
@@ -284,10 +277,10 @@ public class MemberService : IMemberService
         Guid memberId,
         InheritedMemberPolicyFilter filter)
     {
-        var groups = _mongoDb.QueryableOf<Group>();
-        var groupMembers = _mongoDb.QueryableOf<GroupMember>();
-        var groupPolicies = _mongoDb.QueryableOf<GroupPolicy>();
-        var policies = _mongoDb.QueryableOf<Policy>();
+        var groups = mongoDb.QueryableOf<Group>();
+        var groupMembers = mongoDb.QueryableOf<GroupMember>();
+        var groupPolicies = mongoDb.QueryableOf<GroupPolicy>();
+        var policies = mongoDb.QueryableOf<Policy>();
 
         var query =
             from theGroup in groups
@@ -324,7 +317,7 @@ public class MemberService : IMemberService
 
     public async Task AddPolicyAsync(MemberPolicy policy)
     {
-        var existed = await _mongoDb.QueryableOf<MemberPolicy>().CountAsync(
+        var existed = await mongoDb.QueryableOf<MemberPolicy>().CountAsync(
             x => x.OrganizationId == policy.OrganizationId && x.MemberId == policy.MemberId && x.PolicyId == policy.PolicyId
         ) > 0;
         if (existed)
@@ -332,12 +325,12 @@ public class MemberService : IMemberService
             return;
         }
 
-        await _mongoDb.CollectionOf<MemberPolicy>().InsertOneAsync(policy);
+        await mongoDb.CollectionOf<MemberPolicy>().InsertOneAsync(policy);
     }
 
     public async Task RemovePolicyAsync(Guid organizationId, Guid memberId, Guid policyId)
     {
-        await _mongoDb.CollectionOf<MemberPolicy>().DeleteOneAsync(
+        await mongoDb.CollectionOf<MemberPolicy>().DeleteOneAsync(
             x => x.OrganizationId == organizationId && x.MemberId == memberId && x.PolicyId == policyId
         );
     }

@@ -7,16 +7,16 @@ public class DeleteFlagChangeRequest : IRequest<bool>
 
 public class DeleteFlagChangeRequestHandler : IRequestHandler<DeleteFlagChangeRequest, bool>
 {
-    private readonly IFlagChangeRequestService _flagChangeRequestService;
+    private readonly IFlagChangeRequestService _service;
 
-    public DeleteFlagChangeRequestHandler(IFlagChangeRequestService flagChangeRequestService)
+    public DeleteFlagChangeRequestHandler(IFlagChangeRequestService service)
     {
-        _flagChangeRequestService = flagChangeRequestService;
+        _service = service;
     }
 
     public async Task<bool> Handle(DeleteFlagChangeRequest request, CancellationToken cancellationToken)
     {
-        await _flagChangeRequestService.DeleteAsync(request.Id);
+        await _service.DeleteOneAsync(request.Id);
 
         return true;
     }
