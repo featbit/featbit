@@ -50,8 +50,8 @@ public static class ConfigureServices
         });
 
         // custom services
-        var dbProvider = configuration.GetValue("DbProvider", DbProviders.MongoDb);
-        if (dbProvider == DbProviders.MongoDb)
+        var dbProvider = configuration.GetValue("DbProvider", DbProvider.MongoDb);
+        if (dbProvider == DbProvider.MongoDb)
         {
             AddMongoDbServices();
         }
@@ -104,9 +104,15 @@ public static class ConfigureServices
         void AddEntityFrameworkCoreServices()
         {
             // ef db context
+            var postgresOptions = configuration.GetValue<PostgresOptions>(PostgresOptions.Postgres);
+            if (postgresOptions is null)
+            {
+                throw new InvalidOperationException("Postgres options are not configured");
+            }
+
             services.AddDbContext<AppDbContext>(
                 op => op
-                    .UseNpgsql("Host=localhost;Username=postgres;Password=123456;Database=featbit")
+                    .UseNpgsql(postgresOptions.ConnectionString)
                     .UseSnakeCaseNamingConvention()
                     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             );
@@ -139,7 +145,6 @@ public static class ConfigureServices
             services.AddTransient<IWebhookService, EntityFrameworkCoreServices.WebhookService>();
             services.AddTransient<IInsightService, EntityFrameworkCoreServices.InsightService>();
         }
-
 
         void AddMessagingServices()
         {

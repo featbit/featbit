@@ -16,6 +16,7 @@
         <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="8.0.1" />
         <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="8.1.0" />
         <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="8.0.1" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.12" />
         <PackageReference Include="Confluent.Kafka" Version="2.5.3" />
         <PackageReference Include="LinqKit.Core" Version="1.2.8" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />

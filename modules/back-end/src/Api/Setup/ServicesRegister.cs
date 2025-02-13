@@ -21,6 +21,9 @@ public static class ServicesRegister
 {
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
+        // validate configurations on start
+        builder.Configuration.ValidateOnStart();
+
         // add services for controllers
         builder.Services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvcOptions>();
         builder.Services.AddControllers();
