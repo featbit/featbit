@@ -1,4 +1,4 @@
-name: featbit-dev-postgre
+name: featbit-dev-postgres
 services:
   ui:
     image: featbit/ui:dev
@@ -82,7 +82,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 0tJXCokSvOB8
-      POSTGRES_DB: featbit
     volumes:
       - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
       - postgres_data:/var/lib/postgresql/data
