@@ -6,11 +6,10 @@ using Application.EndUsers;
 using Domain.EndUsers;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class EndUserService(AppDbContext dbContext, ILogger<EndUserService> logger)
+public class EndUserService(AppDbContext dbContext)
     : EntityFrameworkCoreService<EndUser>(dbContext), IEndUserService
 {
     public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)

@@ -72,7 +72,7 @@ public static class ConfigureServices
             services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
             services.AddSingleton<MongoDbClient>();
 
-            services.AddSingleton<IEvaluator, MongoServices.Evaluator>();
+            services.AddTransient<IEvaluator, MongoServices.Evaluator>();
             services.AddTransient<IWorkspaceService, MongoServices.WorkspaceService>();
             services.AddTransient<IUserService, MongoServices.UserService>();
             services.AddTransient<IOrganizationService, MongoServices.OrganizationService>();
@@ -104,20 +104,15 @@ public static class ConfigureServices
         void AddEntityFrameworkCoreServices()
         {
             // ef db context
-            var postgresOptions = configuration.GetValue<PostgresOptions>(PostgresOptions.Postgres);
-            if (postgresOptions is null)
-            {
-                throw new InvalidOperationException("Postgres options are not configured");
-            }
-
+            var postgresProvider = configuration.GetDbProvider();
             services.AddDbContext<AppDbContext>(
                 op => op
-                    .UseNpgsql(postgresOptions.ConnectionString)
+                    .UseNpgsql(postgresProvider.ConnectionString)
                     .UseSnakeCaseNamingConvention()
                     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             );
 
-            services.AddSingleton<IEvaluator, EntityFrameworkCoreServices.Evaluator>();
+            services.AddTransient<IEvaluator, EntityFrameworkCoreServices.Evaluator>();
             services.AddTransient<IWorkspaceService, EntityFrameworkCoreServices.WorkspaceService>();
             services.AddTransient<IUserService, EntityFrameworkCoreServices.UserService>();
             services.AddTransient<IOrganizationService, EntityFrameworkCoreServices.OrganizationService>();

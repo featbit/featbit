@@ -1,5 +1,6 @@
 using Domain.AuditLogs;
 using Domain.FlagSchedules;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -8,21 +9,12 @@ namespace Infrastructure.AppService;
 public class FlagScheduleWorker : BackgroundService
 {
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(45));
-
-    private readonly IFlagScheduleService _flagScheduleService;
-    private readonly IFeatureFlagAppService _featureFlagAppService;
-    private readonly IFlagChangeRequestService _flagChangeRequestService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<FlagScheduleWorker> _logger;
 
-    public FlagScheduleWorker(
-        IFlagScheduleService flagScheduleService,
-        IFeatureFlagAppService featureFlagAppService,
-        IFlagChangeRequestService flagChangeRequestService,
-        ILogger<FlagScheduleWorker> logger)
+    public FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagScheduleWorker> logger)
     {
-        _flagScheduleService = flagScheduleService;
-        _featureFlagAppService = featureFlagAppService;
-        _flagChangeRequestService = flagChangeRequestService;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -47,9 +39,14 @@ public class FlagScheduleWorker : BackgroundService
 
     private async Task DoWorkAsync(CancellationToken cancellationToken)
     {
+        using var scope = _serviceProvider.CreateScope();
+        var flagScheduleService = scope.ServiceProvider.GetRequiredService<IFlagScheduleService>();
+        var featureFlagAppService = scope.ServiceProvider.GetRequiredService<IFeatureFlagAppService>();
+        var flagChangeRequestService = scope.ServiceProvider.GetRequiredService<IFlagChangeRequestService>();
+
         try
         {
-            var pendingSchedules = await _flagScheduleService.FindManyAsync(
+            var pendingSchedules = await flagScheduleService.FindManyAsync(
                 x => x.Status == FlagScheduleStatus.PendingExecution && x.ScheduledTime <= DateTime.UtcNow
             );
 
@@ -87,20 +84,20 @@ public class FlagScheduleWorker : BackgroundService
         async Task ApplyScheduleAsync(FlagSchedule schedule)
         {
             // apply flag draft
-            await _featureFlagAppService.ApplyDraftAsync(
+            await featureFlagAppService.ApplyDraftAsync(
                 schedule.FlagDraftId, Operations.ApplyFlagSchedule, schedule.CreatorId
             );
 
             // update schedule status
             schedule.Applied(schedule.CreatorId);
-            await _flagScheduleService.UpdateAsync(schedule);
+            await flagScheduleService.UpdateAsync(schedule);
 
             // update change request status
             if (schedule.ChangeRequestId.HasValue)
             {
-                var changeRequest = await _flagChangeRequestService.GetAsync(schedule.ChangeRequestId.Value);
+                var changeRequest = await flagChangeRequestService.GetAsync(schedule.ChangeRequestId.Value);
                 changeRequest.Applied(schedule.CreatorId);
-                await _flagChangeRequestService.UpdateAsync(changeRequest);
+                await flagChangeRequestService.UpdateAsync(changeRequest);
             }
         }
     }

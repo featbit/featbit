@@ -109,10 +109,10 @@ public static class ServicesRegister
 
         // authorization
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
-        builder.Services.AddSingleton<ILicenseService, LicenseService>();
+        builder.Services.AddTransient<ILicenseService, LicenseService>();
         builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
-        builder.Services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
-        builder.Services.AddSingleton<IAuthorizationHandler, LicenseRequirementHandler>();
+        builder.Services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
+        builder.Services.AddScoped<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>
         {
             // iam permission check 

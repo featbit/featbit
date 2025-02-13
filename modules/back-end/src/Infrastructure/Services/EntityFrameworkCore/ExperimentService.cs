@@ -172,7 +172,7 @@ public class ExperimentService(AppDbContext dbContext, IOlapService olapService)
         await UpdateAsync(experiment);
     }
 
-    public async Task<ExperimentIteration> StartAsync(Guid envId, Guid experimentId)
+    public async Task<ExperimentIteration?> StartAsync(Guid envId, Guid experimentId)
     {
         var experiment = await GetAsync(experimentId);
 
