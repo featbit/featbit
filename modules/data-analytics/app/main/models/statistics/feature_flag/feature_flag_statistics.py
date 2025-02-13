@@ -2,6 +2,7 @@ from datetime import datetime
 from itertools import groupby
 from typing import Any, Dict, Iterable, Optional
 
+from app import DB_PROVIDER, MangoDbProvider, PostgresDbProvider
 from app.clickhouse.client import sync_execute
 from app.main.models.statistics.feature_flag.sql import (
     GET_FLAG_EVENTS_BY_INTERVAL_SQL_CH, make_statistic_ff_events_from_mongod, GET_FLAG_EVENTS_BY_INTERVAL_SQL_PG)
@@ -95,11 +96,15 @@ class FeatureFlagIntervalStatistics:
                 counts = groups.get(ts_str, [])
                 yield {"time": ts_str, "variations": counts}
 
-        rs = execute_query(GET_FLAG_EVENTS_BY_INTERVAL_SQL_PG, args=self._query_params)
-        # if IS_PRO:
-        #     rs = sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL_CH, args=self._query_params)
-        # else:
-        #     rs = make_statistic_ff_events_from_mongod(self._query_params)
+        if IS_PRO:
+            rs = sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL_CH, args=self._query_params)
+        elif DB_PROVIDER == MangoDbProvider:
+            rs = make_statistic_ff_events_from_mongod(self._query_params)
+        elif DB_PROVIDER == PostgresDbProvider:
+            rs = execute_query(GET_FLAG_EVENTS_BY_INTERVAL_SQL_PG, args=self._query_params)
+        else:
+            raise ValueError(f"DB_PROVIDER not supported: {DB_PROVIDER}")
+
         counts_gen = ({"time": handle_time(time).strftime(DATE_UTC_FMT), "id": var_key, "val": count}
                       for count, var_key, time in rs)  # type: ignore
         counts_by_group = dict((time, list(group)) for time, group in groupby(sorted(counts_gen, key=lambda x: x["time"]), key=lambda x: x.pop("time")))

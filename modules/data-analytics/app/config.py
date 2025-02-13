@@ -11,3 +11,7 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     pass
+
+
+MangoDbProvider = "MongoDb"
+PostgresDbProvider = "Postgres"

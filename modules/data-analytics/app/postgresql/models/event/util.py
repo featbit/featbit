@@ -4,21 +4,10 @@ import psycopg
 from flask import current_app
 from psycopg.types.json import Json
 
+from app.setting import POSTGRES_CONNECTION_STRING, POSTGRES_DATABASE, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, \
+    POSTGRES_PORT
 from utils import create_event
 
-POSTGRES_USER = 'postgres'
-POSTGRES_PASSWORD = '0tJXCokSvOB8'
-POSTGRES_HOST = 'localhost'
-POSTGRES_PORT = '5432'
-POSTGRES_DATABASE = 'featbit'
-
-db_config = {
-    "dbname": POSTGRES_DATABASE,
-    "user": POSTGRES_USER,
-    "password": POSTGRES_PASSWORD,
-    "host": POSTGRES_HOST,
-    "port": POSTGRES_PORT
-}
 
 def bulk_create_events(list_properties: List[Dict[str, Any]]) -> None:
     events = [create_event(props) for props in list_properties]
@@ -38,7 +27,19 @@ def bulk_create_events(list_properties: List[Dict[str, Any]]) -> None:
         event["properties"] = Json(event["properties"])
 
     try:
-        with psycopg.connect(**db_config) as conn:
+        if POSTGRES_CONNECTION_STRING:
+            conn = psycopg.connect(POSTGRES_CONNECTION_STRING)
+        else:
+            db_config = {
+                "dbname": POSTGRES_DATABASE,
+                "user": POSTGRES_USER,
+                "password": POSTGRES_PASSWORD,
+                "host": POSTGRES_HOST,
+                "port": POSTGRES_PORT
+            }
+            conn = psycopg.connect(**db_config)
+
+        with conn:
             with conn.cursor() as cur:
                 cur.executemany(query, events)
     except psycopg.Error as e:

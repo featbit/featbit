@@ -2,7 +2,7 @@ from random import randint
 
 import requests
 
-url = "http://127.0.0.1:5000/api/events"
+url = "http://127.0.0.1:8200/api/events"
 
 for group in range(1, 5):
     events = []

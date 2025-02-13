@@ -4,28 +4,27 @@ import psycopg
 from flask import current_app
 from importlib import import_module
 
-#from app.setting import (POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DATABASE)
+from app.setting import POSTGRES_DATABASE, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_CONNECTION_STRING
 
 MIGRATIONS_PACKAGE_NAME = 'app.postgresql.migrations'
 
-POSTGRES_USER = 'postgres'
-POSTGRES_PASSWORD = '0tJXCokSvOB8'
-POSTGRES_HOST = 'localhost'
-POSTGRES_PORT = '5432'
-POSTGRES_DATABASE = 'featbit'
-
-db_config = {
-    "dbname": POSTGRES_DATABASE,
-    "user": POSTGRES_USER,
-    "password": POSTGRES_PASSWORD,
-    "host": POSTGRES_HOST,
-    "port": POSTGRES_PORT
-}
 
 def migrate(upto: int = 9999, check: bool = False, plan: bool = False, print_sql: bool = False) -> None:
     current_app.logger.info("Migration in PostgreSQL")
 
-    with psycopg.connect(**db_config) as conn:
+    if POSTGRES_CONNECTION_STRING:
+        conn = psycopg.connect(POSTGRES_CONNECTION_STRING)
+    else:
+        db_config = {
+            "dbname": POSTGRES_DATABASE,
+            "user": POSTGRES_USER,
+            "password": POSTGRES_PASSWORD,
+            "host": POSTGRES_HOST,
+            "port": POSTGRES_PORT
+        }
+        conn = psycopg.connect(**db_config)
+
+    with conn:
         conn.autocommit = True
 
         with conn.cursor() as cur:

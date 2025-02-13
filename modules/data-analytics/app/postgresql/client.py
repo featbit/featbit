@@ -4,18 +4,8 @@ from time import perf_counter
 from typing import Any, Dict, List, Optional, Tuple, Union
 from flask import current_app
 
-from app.setting import SHELL_PLUS_PRINT_SQL
-
-# from app.setting import (
-#     POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD,
-#     POSTGRES_CONN_POOL_MIN, POSTGRES_CONN_POOL_MAX, SHELL_PLUS_PRINT_SQL
-# )
-
-POSTGRES_USER = 'postgres'
-POSTGRES_PASSWORD = '0tJXCokSvOB8'
-POSTGRES_HOST = 'localhost'
-POSTGRES_PORT = '5432'
-POSTGRES_DATABASE = 'featbit'
+from app.setting import SHELL_PLUS_PRINT_SQL, POSTGRES_CONNECTION_STRING, POSTGRES_DATABASE, POSTGRES_USER, \
+    POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
 
 InsertParams = Union[List, Tuple]
 NonInsertParams = Dict[str, Any]
@@ -28,13 +18,19 @@ __pg_pool: Optional[psycopg_pool.ConnectionPool] = None
 def create_pg_pool():
     """Create a PostgreSQL connection pool"""
     global __pg_pool
+
     if __pg_pool is None:
+        conninfo = POSTGRES_CONNECTION_STRING if POSTGRES_CONNECTION_STRING else (
+            f"dbname={POSTGRES_DATABASE} user={POSTGRES_USER} password={POSTGRES_PASSWORD} "
+            f"host={POSTGRES_HOST} port={POSTGRES_PORT}"
+        )
+
         __pg_pool = psycopg_pool.ConnectionPool(
-            conninfo=f"dbname={POSTGRES_DATABASE} user={POSTGRES_USER} password={POSTGRES_PASSWORD} "
-                     f"host={POSTGRES_HOST} port={POSTGRES_PORT}",
+            conninfo=conninfo,
             min_size=10,
             max_size=100,
         )
+
     return __pg_pool
 
 

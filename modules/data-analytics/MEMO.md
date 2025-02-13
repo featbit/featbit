@@ -22,3 +22,13 @@ flask migrate-database
 ```
 
 # Launch APP
+
+# Create fake data
+
+```bash
+python intergration_tests/insert_fake_ff_events.py
+```
+
+```bash
+python intergration_tests/insert_fake_metric_events.py
+```
