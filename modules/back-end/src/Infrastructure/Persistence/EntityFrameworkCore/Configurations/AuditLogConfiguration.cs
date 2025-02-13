@@ -1,5 +1,4 @@
 ﻿using Domain.AuditLogs;
-using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,10 +9,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
     
     public void Configure(EntityTypeBuilder<AuditLog> builder)
     {
-        builder.HasOne(typeof(Domain.Environments.Environment))
-            .WithMany()
-            .HasForeignKey(nameof(AuditLog.EnvId));
-
+        builder.HasIndex(x => x.EnvId);
         builder.HasIndex(x => x.RefId);
         builder.HasIndex(x => x.RefType);
 

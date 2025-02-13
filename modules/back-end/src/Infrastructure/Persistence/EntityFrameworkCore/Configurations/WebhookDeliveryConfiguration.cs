@@ -8,9 +8,7 @@ public class WebhookDeliveryConfiguration : IEntityTypeConfiguration<WebhookDeli
 {
     public void Configure(EntityTypeBuilder<WebhookDelivery> builder)
     {
-        builder.HasOne(typeof(Webhook))
-            .WithMany()
-            .HasForeignKey(nameof(WebhookDelivery.WebhookId));
+        builder.HasIndex(x => x.WebhookId);
 
         builder.Property(x => x.Success).IsRequired();
         builder.Property(x => x.StartedAt).IsRequired();

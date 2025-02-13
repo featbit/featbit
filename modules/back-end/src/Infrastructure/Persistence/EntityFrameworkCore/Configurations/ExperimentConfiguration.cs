@@ -1,6 +1,4 @@
-﻿using Domain.ExperimentMetrics;
-using Domain.Experiments;
-using Domain.FeatureFlags;
+﻿using Domain.Experiments;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,9 +8,7 @@ public class ExperimentConfiguration : IEntityTypeConfiguration<Experiment>
 {
     public void Configure(EntityTypeBuilder<Experiment> builder)
     {
-        builder.HasOne(typeof(Domain.Environments.Environment))
-            .WithMany()
-            .HasForeignKey(nameof(Experiment.EnvId));
+        builder.HasIndex(x => x.EnvId);
 
         builder.Property(x => x.IsArchived).IsRequired();
         builder.Property(x => x.Status).HasMaxLength(255).IsRequired();

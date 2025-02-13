@@ -1,6 +1,4 @@
-﻿using Domain.Organizations;
-using Domain.Users;
-using Domain.Webhooks;
+﻿using Domain.Webhooks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,9 +8,7 @@ public class WebhookConfiguration : IEntityTypeConfiguration<Webhook>
 {
     public void Configure(EntityTypeBuilder<Webhook> builder)
     {
-        builder.HasOne(typeof(Organization))
-            .WithMany()
-            .HasForeignKey(nameof(Webhook.OrgId));
+        builder.HasIndex(x => x.OrgId);
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)

@@ -1,4 +1,3 @@
-using Domain.Projects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Environment = Domain.Environments.Environment;
@@ -9,9 +8,7 @@ public class EnvironmentConfiguration : IEntityTypeConfiguration<Environment>
 {
     public void Configure(EntityTypeBuilder<Environment> builder)
     {
-        builder.HasOne(typeof(Project))
-            .WithMany()
-            .HasForeignKey(nameof(Environment.ProjectId));
+        builder.HasIndex(x => x.ProjectId);
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)

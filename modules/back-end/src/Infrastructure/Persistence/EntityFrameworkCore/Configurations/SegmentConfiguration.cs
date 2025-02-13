@@ -1,5 +1,4 @@
 ﻿using Domain.Segments;
-using Domain.Workspaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,13 +8,8 @@ public class SegmentConfiguration : IEntityTypeConfiguration<Segment>
 {
     public void Configure(EntityTypeBuilder<Segment> builder)
     {
-        builder.HasOne(typeof(Workspace))
-            .WithMany()
-            .HasForeignKey(nameof(Segment.WorkspaceId));
-        builder.HasOne(typeof(Domain.Environments.Environment))
-            .WithMany()
-            .HasForeignKey(nameof(Segment.EnvId));
-
+        builder.HasIndex(x => x.WorkspaceId);
+        builder.HasIndex(x => x.EnvId);
 
         builder.Property(x => x.Name).HasMaxLength(255).IsRequired();
         builder.Property(x => x.Type).HasMaxLength(255).IsRequired();

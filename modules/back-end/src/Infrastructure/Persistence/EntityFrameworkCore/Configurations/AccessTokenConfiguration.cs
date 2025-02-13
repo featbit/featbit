@@ -1,6 +1,4 @@
 ﻿using Domain.AccessTokens;
-using Domain.Organizations;
-using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,9 +9,7 @@ public class AccessTokenConfiguration : IEntityTypeConfiguration<AccessToken>
     
     public void Configure(EntityTypeBuilder<AccessToken> builder)
     {
-        builder.HasOne(typeof(Organization))
-            .WithMany()
-            .HasForeignKey(nameof(AccessToken.OrganizationId));
+        builder.HasIndex(x => x.OrganizationId);
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)
@@ -28,5 +24,6 @@ public class AccessTokenConfiguration : IEntityTypeConfiguration<AccessToken>
             .IsRequired();
 
         builder.Property(x => x.Permissions).HasColumnType("jsonb");
+
     }
 }

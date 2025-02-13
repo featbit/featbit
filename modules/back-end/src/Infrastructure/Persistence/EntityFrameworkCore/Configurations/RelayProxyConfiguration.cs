@@ -1,5 +1,4 @@
-﻿using Domain.Organizations;
-using Domain.RelayProxies;
+﻿using Domain.RelayProxies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,9 +8,7 @@ public class RelayProxyConfiguration : IEntityTypeConfiguration<RelayProxy>
 {
     public void Configure(EntityTypeBuilder<RelayProxy> builder)
     {
-        builder.HasOne(typeof(Organization))
-            .WithMany()
-            .HasForeignKey(nameof(RelayProxy.OrganizationId));
+        builder.HasIndex(x => x.OrganizationId);
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)

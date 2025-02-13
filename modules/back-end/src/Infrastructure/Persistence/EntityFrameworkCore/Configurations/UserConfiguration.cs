@@ -1,5 +1,4 @@
 ﻿using Domain.Users;
-using Domain.Workspaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,9 +9,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
     
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.HasOne(typeof(Workspace))
-            .WithMany()
-            .HasForeignKey(nameof(User.WorkspaceId));
+        builder.HasIndex(x => x.WorkspaceId);
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)

@@ -1,5 +1,4 @@
 using Domain.Organizations;
-using Domain.Workspaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,9 +8,7 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
 {
     public void Configure(EntityTypeBuilder<Organization> builder)
     {
-        builder.HasOne(typeof(Workspace))
-            .WithMany()
-            .HasForeignKey(nameof(Organization.WorkspaceId));
+        builder.HasIndex(x => x.WorkspaceId);
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)

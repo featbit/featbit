@@ -1,5 +1,4 @@
-﻿using Domain.Organizations;
-using Domain.Policies;
+﻿using Domain.Policies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,9 +8,7 @@ public class PolicyConfiguration : IEntityTypeConfiguration<Policy>
 {
     public void Configure(EntityTypeBuilder<Policy> builder)
     {
-        builder.HasOne(typeof(Organization))
-            .WithMany()
-            .HasForeignKey(nameof(Policy.OrganizationId));
+        builder.HasIndex(x => x.OrganizationId);
 
         builder.Property(x => x.Name)
             .HasMaxLength(255)

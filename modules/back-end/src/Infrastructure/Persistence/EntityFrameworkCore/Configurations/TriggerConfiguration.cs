@@ -1,5 +1,4 @@
-﻿using Domain.FeatureFlags;
-using Domain.Triggers;
+﻿using Domain.Triggers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,9 +8,7 @@ public class TriggerConfiguration : IEntityTypeConfiguration<Trigger>
 {
     public void Configure(EntityTypeBuilder<Trigger> builder)
     {
-        builder.HasOne(typeof(FeatureFlag))
-            .WithMany()
-            .HasForeignKey(nameof(Trigger.TargetId));
+        builder.HasIndex(x => x.TargetId);
 
         builder.Property(x => x.Type)
             .HasMaxLength(255)

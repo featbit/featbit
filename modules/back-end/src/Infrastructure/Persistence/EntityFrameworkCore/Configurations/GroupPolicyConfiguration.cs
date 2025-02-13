@@ -8,8 +8,6 @@ public class GroupPolicyConfiguration : IEntityTypeConfiguration<GroupPolicy>
 {
     public void Configure(EntityTypeBuilder<GroupPolicy> builder)
     {
-        builder.HasOne(typeof(Group))
-            .WithMany()
-            .HasForeignKey(nameof(GroupPolicy.GroupId));
+        builder.HasIndex(x => x.GroupId);
     }
 }

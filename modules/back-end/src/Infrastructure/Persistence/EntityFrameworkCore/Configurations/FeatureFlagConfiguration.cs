@@ -9,12 +9,7 @@ public class FeatureFlagConfiguration : IEntityTypeConfiguration<FeatureFlag>
 {
     public void Configure(EntityTypeBuilder<FeatureFlag> builder)
     {
-        builder.HasOne(typeof(Environment))
-            .WithMany()
-            .HasForeignKey(nameof(FeatureFlag.EnvId));
-
-
-        builder.HasIndex(x => x.Key);
+        builder.HasIndex(x => x.EnvId);
 
         builder.Property(x => x.Revision).IsRequired();
         builder.Property(x => x.IsEnabled).IsRequired();

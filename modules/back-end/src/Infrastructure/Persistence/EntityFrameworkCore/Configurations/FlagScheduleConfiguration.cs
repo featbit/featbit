@@ -1,7 +1,4 @@
-﻿using Domain.FeatureFlags;
-using Domain.FlagDrafts;
-using Domain.FlagSchedules;
-using Domain.Organizations;
+﻿using Domain.FlagSchedules;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,12 +8,8 @@ public class FlagScheduleConfiguration : IEntityTypeConfiguration<FlagSchedule>
 {   
     public void Configure(EntityTypeBuilder<FlagSchedule> builder)
     {
-        builder.HasOne(typeof(Organization))
-            .WithMany()
-            .HasForeignKey(nameof(FlagSchedule.OrgId));
-        builder.HasOne(typeof(Domain.Environments.Environment))
-            .WithMany()
-            .HasForeignKey(nameof(FlagSchedule.EnvId));
+        builder.HasIndex(x => x.OrgId);
+        builder.HasIndex(x => x.EnvId);
 
         builder.Property(x => x.Status)
             .HasMaxLength(255)

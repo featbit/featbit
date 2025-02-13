@@ -1,4 +1,3 @@
-using Domain.Organizations;
 using Domain.Projects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,10 +8,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 {
     public void Configure(EntityTypeBuilder<Project> builder)
     {
-        builder.HasOne(typeof(Organization))
-            .WithMany()
-            .HasForeignKey(nameof(Project.OrganizationId));
-
+        builder.HasIndex(x => x.OrganizationId);
         builder.HasIndex(x => new { x.OrganizationId, x.Key }).IsUnique();
 
         builder.Property(x => x.Name)

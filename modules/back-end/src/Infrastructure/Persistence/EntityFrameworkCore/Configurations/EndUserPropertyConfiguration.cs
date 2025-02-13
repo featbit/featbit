@@ -8,9 +8,7 @@ public class EndUserPropertyConfiguration : IEntityTypeConfiguration<EndUserProp
 {
     public void Configure(EntityTypeBuilder<EndUserProperty> builder)
     {
-        builder.HasOne(typeof(Domain.Environments.Environment))
-            .WithMany()
-            .HasForeignKey(nameof(EndUserProperty.EnvId));
+        builder.HasIndex(x => x.EnvId);
 
         builder.Property(x => x.Name).HasMaxLength(255).IsRequired();
         builder.Property(x => x.UsePresetValuesOnly).IsRequired();

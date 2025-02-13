@@ -1,7 +1,4 @@
-﻿using Domain.FeatureFlags;
-using Domain.FlagChangeRequests;
-using Domain.FlagDrafts;
-using Domain.Organizations;
+﻿using Domain.FlagChangeRequests;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,12 +8,8 @@ public class FlagChangeRequestConfiguration : IEntityTypeConfiguration<FlagChang
 {
     public void Configure(EntityTypeBuilder<FlagChangeRequest> builder)
     {
-        builder.HasOne(typeof(Organization))
-            .WithMany()
-            .HasForeignKey(nameof(FlagChangeRequest.OrgId));
-        builder.HasOne(typeof(Domain.Environments.Environment))
-            .WithMany()
-            .HasForeignKey(nameof(FlagChangeRequest.EnvId));
+        builder.HasIndex(x => x.OrgId);
+        builder.HasIndex(x => x.EnvId);
 
         builder.Property(x => x.Status)
             .HasMaxLength(255)
