@@ -93,4 +93,12 @@ public class WebhookService(AppDbContext dbContext) : EntityFrameworkCoreService
 
         return new PagedResult<WebhookDelivery>(totalCount, deliveries);
     }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        await DeleteOneAsync(id);
+
+        // delete deliveries
+        await SetOf<WebhookDelivery>().Where(x => x.WebhookId == id).ExecuteDeleteAsync();
+    }
 }

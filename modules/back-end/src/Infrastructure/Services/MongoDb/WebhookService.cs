@@ -100,4 +100,12 @@ public class WebhookService(MongoDbClient mongoDb) : MongoDbService<Webhook>(mon
 
         return new PagedResult<WebhookDelivery>(totalCount, deliveries);
     }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        await Collection.DeleteOneAsync(x => x.Id == id);
+
+        // delete deliveries
+        await MongoDb.CollectionOf<WebhookDelivery>().DeleteManyAsync(x => x.WebhookId == id);
+    }
 }
