@@ -16,5 +16,6 @@ CREATE INDEX idx_events_timestamp ON events (timestamp);
 
 CREATE INDEX idx_events_tag0_expr ON events ((properties->>'tag_0'));
 CREATE INDEX idx_events_tag1_expr ON events ((properties->>'tag_1'));
+CREATE INDEX idx_events_tag2_expr ON events ((properties->>'tag_2'));
 CREATE INDEX idx_events_tag3_expr ON events ((properties->>'tag_3'));
 """

@@ -2,13 +2,15 @@ from typing import Any, Dict, Iterable
 
 from app.clickhouse.client import sync_execute
 from app.experimentation.models.event.sql import (
-    GET_BINOMIAL_TEST_VARS_SQL, GET_NUMERIC_TEST_VARS_SQL,
+    GET_BINOMIAL_TEST_VARS_SQL_CH, GET_NUMERIC_TEST_VARS_SQL_CH,
+    GET_BINOMIAL_TEST_VARS_SQL_PG, GET_NUMERIC_TEST_VARS_SQL_PG,
     cal_experiment_vars_from_mongod)
 from app.experimentation.models.experiment import Experiment, Variation
 from app.experimentation.models.experiment.experiment_types import (
     BinomialVariation, FrequenstSettings, NumericVariation, OnlineTTest,
     TTestResult)
 from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, IS_PRO
+from app.postgresql.client import execute_query
 
 
 def analyze_experiment(experiment: Experiment):
@@ -58,11 +60,15 @@ def analyze_experiment(experiment: Experiment):
 
 def _get_variations(experiment: Experiment, query_params: Dict[str, Any]) -> Dict[str, Variation]:
     binomial_test = not experiment.is_numeric_expt
-    if IS_PRO:
-        sql = GET_BINOMIAL_TEST_VARS_SQL if binomial_test else GET_NUMERIC_TEST_VARS_SQL
-        rs = sync_execute(sql, args=query_params)
-    else:
-        rs = cal_experiment_vars_from_mongod(query_params, binomial_test)
+
+    sql = GET_BINOMIAL_TEST_VARS_SQL_PG if binomial_test else GET_NUMERIC_TEST_VARS_SQL_PG
+    rs = execute_query(sql, args=query_params)
+
+    # if IS_PRO:
+    #     sql = GET_BINOMIAL_TEST_VARS_SQL_CH if binomial_test else GET_NUMERIC_TEST_VARS_SQL_CH
+    #     rs = sync_execute(sql, args=query_params)
+    # else:
+    #     rs = cal_experiment_vars_from_mongod(query_params, binomial_test)
     vars = {}
     if binomial_test:
         for count, exposure, var_key in rs:  # type: ignore
