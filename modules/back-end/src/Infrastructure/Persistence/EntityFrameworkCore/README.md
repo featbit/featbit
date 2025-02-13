@@ -9,5 +9,5 @@ dotnet tool restore
 
 ```shell
 cd featbit/modules/back-end/src
-dotnet ef dbcontext script --project Infrastructure --startup-project Api --verbose -o Infrastructure/Persistence/EFCore/initial.sql
+dotnet ef dbcontext script --project Infrastructure --startup-project Api --verbose -o Infrastructure/Persistence/EntityFrameworkCore/initial.sql
 ```
