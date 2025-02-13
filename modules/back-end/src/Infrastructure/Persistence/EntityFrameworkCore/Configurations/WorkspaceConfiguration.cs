@@ -8,15 +8,11 @@ public class WorkspaceConfiguration : IEntityTypeConfiguration<Workspace>
 {
     public void Configure(EntityTypeBuilder<Workspace> builder)
     {
-        builder.Property(x => x.Name)
-            .HasMaxLength(255)
-            .IsRequired();
+        builder.ToTable("workspaces");
 
-        builder.Property(x => x.Key)
-            .HasMaxLength(255)
-            .IsRequired();
+        builder.Property(x => x.Name).HasMaxLength(128).IsRequired();
+        builder.Property(x => x.Key).HasMaxLength(128).IsRequired();
 
-        builder.Property(x => x.Sso)
-            .HasColumnType("jsonb");
+        builder.Property(x => x.Sso).HasColumnType("jsonb");
     }
 }

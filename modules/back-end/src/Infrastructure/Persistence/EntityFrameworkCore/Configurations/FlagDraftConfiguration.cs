@@ -6,14 +6,12 @@ namespace Infrastructure.Persistence.EntityFrameworkCore.Configurations;
 
 public class FlagDraftConfiguration : IEntityTypeConfiguration<FlagDraft>
 {
-    
     public void Configure(EntityTypeBuilder<FlagDraft> builder)
     {
-        builder.HasIndex(x => x.EnvId);
+        builder.ToTable("flag_drafts");
 
-        builder.Property(x => x.Status)
-            .HasMaxLength(255)
-            .IsRequired();
+        builder.Property(x => x.Status).HasMaxLength(64).IsRequired();
+        builder.Property(x => x.Comment).HasMaxLength(512);
 
         builder.Property(x => x.DataChange).HasColumnType("jsonb");
     }

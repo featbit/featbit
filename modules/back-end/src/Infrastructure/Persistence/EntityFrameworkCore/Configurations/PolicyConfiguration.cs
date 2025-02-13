@@ -8,14 +8,13 @@ public class PolicyConfiguration : IEntityTypeConfiguration<Policy>
 {
     public void Configure(EntityTypeBuilder<Policy> builder)
     {
+        builder.ToTable("policies");
+
         builder.HasIndex(x => x.OrganizationId);
 
-        builder.Property(x => x.Name)
-            .HasMaxLength(255)
-            .IsRequired();
-        builder.Property(x => x.Type)
-            .HasMaxLength(255)
-            .IsRequired();
+        builder.Property(x => x.Name).HasMaxLength(128).IsRequired();
+        builder.Property(x => x.Description).HasMaxLength(512);
+        builder.Property(x => x.Type).HasMaxLength(64).IsRequired();
 
         builder.Property(x => x.Statements).HasColumnType("jsonb");
     }

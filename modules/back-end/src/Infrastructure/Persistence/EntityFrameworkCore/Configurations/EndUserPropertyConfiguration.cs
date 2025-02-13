@@ -8,9 +8,9 @@ public class EndUserPropertyConfiguration : IEntityTypeConfiguration<EndUserProp
 {
     public void Configure(EntityTypeBuilder<EndUserProperty> builder)
     {
-        builder.HasIndex(x => x.EnvId);
+        builder.ToTable("end_user_properties");
 
-        builder.Property(x => x.Name).HasMaxLength(255).IsRequired();
+        builder.Property(x => x.Name).HasMaxLength(128).IsRequired();
         builder.Property(x => x.UsePresetValuesOnly).IsRequired();
         builder.Property(x => x.IsBuiltIn).IsRequired();
         builder.Property(x => x.IsDigestField).IsRequired();

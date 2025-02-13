@@ -8,14 +8,16 @@ public class SegmentConfiguration : IEntityTypeConfiguration<Segment>
 {
     public void Configure(EntityTypeBuilder<Segment> builder)
     {
+        builder.ToTable("segments");
+
         builder.HasIndex(x => x.WorkspaceId);
         builder.HasIndex(x => x.EnvId);
 
-        builder.Property(x => x.Name).HasMaxLength(255).IsRequired();
-        builder.Property(x => x.Type).HasMaxLength(255).IsRequired();
+        builder.Property(x => x.Name).HasMaxLength(128).IsRequired();
+        builder.Property(x => x.Type).HasMaxLength(64).IsRequired();
+        builder.Property(x => x.Description).HasMaxLength(512);
         builder.Property(x => x.IsArchived).IsRequired();
-        builder.Property(x => x.Scopes).HasMaxLength(255).IsRequired();
-        
+
         builder.Property(x => x.Rules).HasColumnType("jsonb");
     }
 }

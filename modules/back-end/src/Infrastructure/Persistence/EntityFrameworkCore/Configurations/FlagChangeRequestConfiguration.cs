@@ -8,12 +8,10 @@ public class FlagChangeRequestConfiguration : IEntityTypeConfiguration<FlagChang
 {
     public void Configure(EntityTypeBuilder<FlagChangeRequest> builder)
     {
-        builder.HasIndex(x => x.OrgId);
-        builder.HasIndex(x => x.EnvId);
+        builder.ToTable("flag_change_requests");
 
-        builder.Property(x => x.Status)
-            .HasMaxLength(255)
-            .IsRequired();
+        builder.Property(x => x.Status).HasMaxLength(64).IsRequired();
+        builder.Property(x => x.Reason).HasMaxLength(512);
 
         builder.Property(x => x.Reviewers).HasColumnType("jsonb");
     }

@@ -6,9 +6,8 @@ namespace Infrastructure.Persistence.EntityFrameworkCore.Configurations;
 
 public class MemberPolicyConfiguration : IEntityTypeConfiguration<MemberPolicy>
 {
-    
     public void Configure(EntityTypeBuilder<MemberPolicy> builder)
     {
-        builder.HasIndex(x => x.OrganizationId);
+        builder.ToTable("member_policies");
     }
 }

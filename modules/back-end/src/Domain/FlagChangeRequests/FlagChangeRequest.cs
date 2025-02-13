@@ -21,7 +21,6 @@ public class FlagChangeRequest : FullAuditedEntity
     // for ef core
     protected FlagChangeRequest()
     {
-
     }
 
     public FlagChangeRequest(

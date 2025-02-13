@@ -6,11 +6,10 @@ namespace Infrastructure.Persistence.EntityFrameworkCore.Configurations;
 
 public class OrganizationUserConfiguration : IEntityTypeConfiguration<OrganizationUser>
 {
-    
     public void Configure(EntityTypeBuilder<OrganizationUser> builder)
     {
-        builder.HasIndex(x => x.OrganizationId);
+        builder.ToTable("organization_users");
 
-        builder.HasIndex(x => new { x.OrganizationId, x.UserId }).IsUnique();
+        builder.HasIndex(x => x.OrganizationId);
     }
 }

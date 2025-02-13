@@ -15,7 +15,6 @@ public class Policy : AuditedEntity
     // for ef core
     protected Policy()
     {
-
     }
 
     public Policy(Guid organizationId, string name, string description)

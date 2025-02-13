@@ -8,15 +8,11 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 {
     public void Configure(EntityTypeBuilder<Project> builder)
     {
+        builder.ToTable("projects");
+
         builder.HasIndex(x => x.OrganizationId);
-        builder.HasIndex(x => new { x.OrganizationId, x.Key }).IsUnique();
 
-        builder.Property(x => x.Name)
-            .HasMaxLength(255)
-            .IsRequired();
-
-        builder.Property(x => x.Key)
-            .HasMaxLength(255)
-            .IsRequired();
+        builder.Property(x => x.Name).HasMaxLength(128).IsRequired();
+        builder.Property(x => x.Key).HasMaxLength(128).IsRequired();
     }
 }

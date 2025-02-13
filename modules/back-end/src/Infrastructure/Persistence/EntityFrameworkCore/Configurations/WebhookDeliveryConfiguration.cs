@@ -8,11 +8,9 @@ public class WebhookDeliveryConfiguration : IEntityTypeConfiguration<WebhookDeli
 {
     public void Configure(EntityTypeBuilder<WebhookDelivery> builder)
     {
-        builder.HasIndex(x => x.WebhookId);
+        builder.ToTable("webhook_deliveries");
 
-        builder.Property(x => x.Success).IsRequired();
-        builder.Property(x => x.StartedAt).IsRequired();
-        builder.Property(x => x.EndedAt).IsRequired();
+        builder.HasIndex(x => x.WebhookId);
 
         builder.Property(x => x.Request).HasColumnType("jsonb");
         builder.Property(x => x.Response).HasColumnType("jsonb");

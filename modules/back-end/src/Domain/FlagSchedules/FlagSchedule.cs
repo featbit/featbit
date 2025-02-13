@@ -21,7 +21,6 @@ public class FlagSchedule : FullAuditedEntity
     // for ef core
     protected FlagSchedule()
     {
-
     }
 
     public FlagSchedule(

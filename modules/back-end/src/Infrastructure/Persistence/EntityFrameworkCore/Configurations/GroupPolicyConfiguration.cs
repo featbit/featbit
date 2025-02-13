@@ -8,6 +8,6 @@ public class GroupPolicyConfiguration : IEntityTypeConfiguration<GroupPolicy>
 {
     public void Configure(EntityTypeBuilder<GroupPolicy> builder)
     {
-        builder.HasIndex(x => x.GroupId);
+        builder.ToTable("group_policies");
     }
 }

@@ -8,20 +8,14 @@ public class EnvironmentConfiguration : IEntityTypeConfiguration<Environment>
 {
     public void Configure(EntityTypeBuilder<Environment> builder)
     {
+        builder.ToTable("environments");
+
         builder.HasIndex(x => x.ProjectId);
 
-        builder.Property(x => x.Name)
-            .HasMaxLength(255)
-            .IsRequired();
+        builder.Property(x => x.Name).HasMaxLength(128).IsRequired();
+        builder.Property(x => x.Key).HasMaxLength(128).IsRequired();
 
-        builder.Property(x => x.Key)
-            .HasMaxLength(255)
-            .IsRequired();
-
-        builder.Property(x => x.Secrets)
-            .HasColumnType("jsonb");
-
-        builder.Property(x => x.Settings)
-            .HasColumnType("jsonb");
+        builder.Property(x => x.Secrets).HasColumnType("jsonb");
+        builder.Property(x => x.Settings).HasColumnType("jsonb");
     }
 }

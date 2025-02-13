@@ -8,6 +8,6 @@ public class GroupMemberConfiguration : IEntityTypeConfiguration<GroupMember>
 {
     public void Configure(EntityTypeBuilder<GroupMember> builder)
     {
-        builder.HasIndex(x => x.OrganizationId);
+        builder.ToTable("group_members");
     }
 }
