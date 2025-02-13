@@ -8,19 +8,24 @@ from importlib import import_module
 
 MIGRATIONS_PACKAGE_NAME = 'app.postgresql.migrations'
 
+POSTGRES_USER = 'postgres'
+POSTGRES_PASSWORD = '0tJXCokSvOB8'
+POSTGRES_HOST = 'localhost'
+POSTGRES_PORT = '5432'
+POSTGRES_DATABASE = 'featbit'
+
+db_config = {
+    "dbname": POSTGRES_DATABASE,
+    "user": POSTGRES_USER,
+    "password": POSTGRES_PASSWORD,
+    "host": POSTGRES_HOST,
+    "port": POSTGRES_PORT
+}
 
 def migrate(upto: int = 9999, check: bool = False, plan: bool = False, print_sql: bool = False) -> None:
-    POSTGRES_USER = 'postgres'
-    POSTGRES_PASSWORD = '0tJXCokSvOB8'
-    POSTGRES_HOST = 'localhost'
-    POSTGRES_PORT = '5432'
-    POSTGRES_DATABASE = 'featbit'
-
-    db_url = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DATABASE}"
-
     current_app.logger.info("Migration in PostgreSQL")
 
-    with psycopg.connect(db_url) as conn:
+    with psycopg.connect(**db_config) as conn:
         conn.autocommit = True
 
         with conn.cursor() as cur:

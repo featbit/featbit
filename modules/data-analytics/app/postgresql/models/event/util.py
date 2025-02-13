@@ -12,6 +12,13 @@ POSTGRES_HOST = 'localhost'
 POSTGRES_PORT = '5432'
 POSTGRES_DATABASE = 'featbit'
 
+db_config = {
+    "dbname": POSTGRES_DATABASE,
+    "user": POSTGRES_USER,
+    "password": POSTGRES_PASSWORD,
+    "host": POSTGRES_HOST,
+    "port": POSTGRES_PORT
+}
 
 def bulk_create_events(list_properties: List[Dict[str, Any]]) -> None:
     events = [create_event(props) for props in list_properties]
@@ -29,14 +36,6 @@ def bulk_create_events(list_properties: List[Dict[str, Any]]) -> None:
     # Wrap JSONB fields with `Json()`
     for event in events:
         event["properties"] = Json(event["properties"])
-
-    db_config = {
-        "dbname": POSTGRES_DATABASE,
-        "user": POSTGRES_USER,
-        "password": POSTGRES_PASSWORD,
-        "host": POSTGRES_HOST,
-        "port": POSTGRES_PORT
-    }
 
     try:
         with psycopg.connect(**db_config) as conn:
