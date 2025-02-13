@@ -6,7 +6,17 @@ from app.clickhouse.models.event import event_table_name
 from app.main.models.statistics.time_series import date_trunc_format
 from app.mongodb.models.event.util import get_events_sample_from_mongod
 
-FLAG_EVENTS_BY_INTERVAL_CTE = f"""flag_events_by_interval as
+FLAG_EVENTS_BY_INTERVAL_CTE_PG = f"""flag_events_by_interval as
+(SELECT properties->>'tag_0' AS target_user, properties->>'tag_1' AS variation, date_trunc(%(interval_type)s, timestamp, %(tz)s) AS time
+FROM events
+WHERE distinct_id = %(flag_id)s
+AND event = 'FlagValue'
+AND env_id = %(env_id)s
+AND timestamp > %(start)s
+AND timestamp < %(end)s
+)"""
+
+FLAG_EVENTS_BY_INTERVAL_CTE_CH = f"""flag_events_by_interval as
 (SELECT tag_0 AS target_user, tag_1 AS variation, date_trunc(%(interval_type)s, timestamp, %(tz)s) AS time
 FROM {event_table_name()}
 WHERE distinct_id = %(flag_id)s
@@ -22,8 +32,13 @@ GROUP BY variation, time
 ORDER BY variation
 """
 
-GET_FLAG_EVENTS_BY_INTERVAL_SQL = f"""WITH
-{FLAG_EVENTS_BY_INTERVAL_CTE}
+GET_FLAG_EVENTS_BY_INTERVAL_SQL_CH = f"""WITH
+{FLAG_EVENTS_BY_INTERVAL_CTE_CH}
+{GET_FLAG_EVENTS_BY_INTERVAL_STATISTICS_SQL}
+"""
+
+GET_FLAG_EVENTS_BY_INTERVAL_SQL_PG = f"""WITH
+{FLAG_EVENTS_BY_INTERVAL_CTE_PG}
 {GET_FLAG_EVENTS_BY_INTERVAL_STATISTICS_SQL}
 """
 

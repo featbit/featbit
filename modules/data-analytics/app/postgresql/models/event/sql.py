@@ -13,4 +13,8 @@ CREATE INDEX idx_events_distinct_id ON events (distinct_id);
 CREATE INDEX idx_events_env_id ON events (env_id);
 CREATE INDEX idx_events_event ON events (event);
 CREATE INDEX idx_events_timestamp ON events (timestamp);
+
+CREATE INDEX idx_events_tag0_expr ON events ((properties->>'tag_0'));
+CREATE INDEX idx_events_tag1_expr ON events ((properties->>'tag_1'));
+CREATE INDEX idx_events_tag3_expr ON events ((properties->>'tag_3'));
 """

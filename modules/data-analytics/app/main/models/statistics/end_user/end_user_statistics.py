@@ -3,9 +3,10 @@ from typing import Any, Dict, Optional
 
 from app.clickhouse.client import sync_execute
 from app.main.models.statistics.end_user.sql import (
-    count_and_list_user_from_mongodb, count_user_sql, get_users_sql)
+    count_and_list_user_from_mongodb, get_users_sql_ch, count_user_sql_ch, get_users_sql_pg, count_user_sql_pg)
 from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, IS_PRO
 from utils import to_UTC_datetime
+from app.postgresql.client import execute_query
 
 END_USER_PARAMS_NECESSARY_COLUMNS = ['flagExptId', 'envId', 'startTime']
 
@@ -100,14 +101,22 @@ class EndUserStatistics:
         has_variation = 'variation' in self._query_params
         has_user = 'user_search_key' in self._query_params
 
-        if IS_PRO:
-            if has_user:
-                self._query_params['user_search_key'] = f"%{self._query_params['user_search_key']}%"
-            for res in sync_execute(count_user_sql(has_variation, has_user), args=self._query_params):  # type: ignore
-                user_count = res[0]
-            rs = sync_execute(get_users_sql(has_variation, has_user), args=self._query_params)
-        else:
-            user_count, rs = count_and_list_user_from_mongodb(self._query_params, has_variation=has_variation, has_user=has_user)
+        # the following if is for both CH and PG
+        if has_user:
+            self._query_params['user_search_key'] = f"%{self._query_params['user_search_key']}%"
+
+        for res in execute_query(count_user_sql_pg(has_variation, has_user), args=self._query_params):  # type: ignore
+            user_count = res[0]
+        rs = execute_query(get_users_sql_pg(has_variation, has_user), args=self._query_params)
+
+        # if IS_PRO:
+        #     if has_user:
+        #         self._query_params['user_search_key'] = f"%{self._query_params['user_search_key']}%"
+        #     for res in sync_execute(count_user_sql_ch(has_variation, has_user), args=self._query_params):  # type: ignore
+        #         user_count = res[0]
+        #     rs = sync_execute(get_users_sql_ch(has_variation, has_user), args=self._query_params)
+        # else:
+        #     user_count, rs = count_and_list_user_from_mongodb(self._query_params, has_variation=has_variation, has_user=has_user)
 
         items = [{"variationId": var_key, "keyId": user_key, "name": user_name, "lastEvaluatedAt": time.strftime(DATE_UTC_FMT)}
                  for var_key, user_key, user_name, time in rs]  # type: ignore
