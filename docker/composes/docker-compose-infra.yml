@@ -92,6 +92,7 @@ services:
       
   postgresql:
     image: postgres:15.10
+    container_name: postgresql
     restart: on-failure
     ports:
       - "5432:5432"
