@@ -365,7 +365,7 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpPut("{key}/tags")]
-    public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, ICollection<string> tags)
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, string[] tags)
     {
         var request = new SetTags
         {
