@@ -17,8 +17,6 @@ public static class HealthCheckBuilderExtensions
     {
         var tags = new[] { ReadinessTag };
 
-        builder.AddDbContextCheck<AppDbContext>(tags: tags);
-
         var provider = configuration.GetDbProvider();
         if (provider.Name == DbProvider.MongoDb)
         {
