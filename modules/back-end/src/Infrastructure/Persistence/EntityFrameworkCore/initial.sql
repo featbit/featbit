@@ -22,7 +22,7 @@ CREATE TABLE audit_logs (
     keyword character varying(128) NOT NULL,
     operation character varying(64) NOT NULL,
     data_change jsonb,
-    comment text,
+    comment character varying(512),
     creator_id uuid NOT NULL,
     created_at timestamp with time zone NOT NULL,
     CONSTRAINT pk_audit_logs PRIMARY KEY (id)
@@ -264,7 +264,7 @@ CREATE TABLE organizations (
     key character varying(128) NOT NULL,
     initialized boolean NOT NULL DEFAULT FALSE,
     license text,
-    default_permissions jsonb,
+    default_permissions jsonb NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     CONSTRAINT pk_organizations PRIMARY KEY (id)

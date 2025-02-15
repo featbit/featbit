@@ -1,14 +1,9 @@
 using Application.Caches;
-using Confluent.Kafka;
-using Domain.Messages;
 using Domain.Users;
 using Infrastructure;
-using Infrastructure.Kafka;
-using Infrastructure.Messages;
 using Infrastructure.Persistence;
 using Infrastructure.Redis;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Services = Infrastructure.Services;
 using AppServices = Infrastructure.AppService;
@@ -37,7 +32,7 @@ public static class ConfigureServices
         services.AddHostedService<AppServices.FlagScheduleWorker>();
 
         // messaging services
-        AddMessagingServices();
+        services.AddMessagingServices(configuration);
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -69,8 +64,7 @@ public static class ConfigureServices
 
         void AddMongoDbServices()
         {
-            services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
-            services.AddSingleton<MongoDbClient>();
+            services.AddMongoDb(configuration);
 
             services.AddTransient<IEvaluator, MongoServices.Evaluator>();
             services.AddTransient<IWorkspaceService, MongoServices.WorkspaceService>();
@@ -103,14 +97,7 @@ public static class ConfigureServices
 
         void AddEntityFrameworkCoreServices()
         {
-            // ef db context
-            var postgresProvider = configuration.GetDbProvider();
-            services.AddDbContext<AppDbContext>(
-                op => op
-                    .UseNpgsql(postgresProvider.ConnectionString)
-                    .UseSnakeCaseNamingConvention()
-                    .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-            );
+            services.AddPostgres(configuration);
 
             services.AddTransient<IEvaluator, EntityFrameworkCoreServices.Evaluator>();
             services.AddTransient<IWorkspaceService, EntityFrameworkCoreServices.WorkspaceService>();
@@ -139,35 +126,6 @@ public static class ConfigureServices
             services.AddTransient<IFlagChangeRequestService, EntityFrameworkCoreServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, EntityFrameworkCoreServices.WebhookService>();
             services.AddTransient<IInsightService, EntityFrameworkCoreServices.InsightService>();
-        }
-
-        void AddMessagingServices()
-        {
-            if (configuration.IsProVersion())
-            {
-                var producerConfigDictionary = new Dictionary<string, string>();
-                configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
-                var producerConfig = new ProducerConfig(producerConfigDictionary);
-                services.AddSingleton(producerConfig);
-
-                var consumerConfigDictionary = new Dictionary<string, string>();
-                configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
-                var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
-                services.AddSingleton(consumerConfig);
-
-                // use kafka as message queue in pro version
-                services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
-                services.AddHostedService<KafkaMessageConsumer>();
-            }
-            else
-            {
-                // use redis as message queue
-                services.AddSingleton<IMessageProducer, RedisMessageProducer>();
-
-                services.AddTransient<IMessageHandler, EndUserMessageHandler>();
-                services.AddTransient<IMessageHandler, InsightMessageHandler>();
-                services.AddHostedService<RedisMessageConsumer>();
-            }
         }
     }
 }

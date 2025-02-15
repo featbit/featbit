@@ -29,8 +29,10 @@ VALUES (user_id, 'test@featbit.com', 'AQAAAAEAACcQAAAAELDHEjCrDQrmnAXU5C//mOLvUB
         'tester', 'Local', workspace_id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- seed organization
-INSERT INTO organizations (id, workspace_id, name, key, initialized, created_at, updated_at)
-VALUES (organization_id, workspace_id, 'playground', 'playground', false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO organizations (id, workspace_id, name, key, initialized, default_permissions, created_at, updated_at)
+VALUES (organization_id, workspace_id, 'playground', 'playground', false,
+        jsonb_build_object('policyIds', jsonb_build_array(developer_policy_id), 'groupIds', jsonb_build_array()),
+        CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- seed organization users
 INSERT INTO organization_users (id, organization_id, user_id, invitor_id, initial_password, created_at, updated_at)
