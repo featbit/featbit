@@ -87,10 +87,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         var searchText = filter.SearchText;
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            query = query.Where(x =>
-                x.Email.Contains(searchText, StringComparison.CurrentCultureIgnoreCase) ||
-                x.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase)
-            );
+            query = query.Where(x => x.Email.Contains(searchText) || x.Name.Contains(searchText));
         }
 
         var totalCount = await query.CountAsync();
@@ -164,7 +161,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         var name = filter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var totalCount = await query.CountAsync();
@@ -256,7 +253,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         var name = filter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var totalCount = await query.CountAsync();
@@ -308,7 +305,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         var name = filter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var totalCount = await query.CountAsync();

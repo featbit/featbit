@@ -15,7 +15,7 @@ public class GlobalUserService(AppDbContext dbContext)
         var name = filter.Name;
         if (!string.IsNullOrEmpty(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var total = await query.CountAsync();

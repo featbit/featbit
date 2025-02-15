@@ -42,7 +42,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
             });
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var items = await query.ToListAsync();
@@ -79,7 +79,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
 
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var items = await query.ToListAsync();

@@ -17,10 +17,7 @@ public class FeatureFlagService(AppDbContext dbContext)
         var nameOrKey = userFilter.Name;
         if (!string.IsNullOrWhiteSpace(nameOrKey))
         {
-            query = query.Where(flag =>
-                flag.Name.Contains(nameOrKey, StringComparison.CurrentCultureIgnoreCase) ||
-                flag.Key.Contains(nameOrKey, StringComparison.CurrentCultureIgnoreCase)
-            );
+            query = query.Where(flag => flag.Name.Contains(nameOrKey) || flag.Key.Contains(nameOrKey));
         }
 
         // isEnabled filter
@@ -63,7 +60,7 @@ public class FeatureFlagService(AppDbContext dbContext)
     {
         return await AnyAsync(flag =>
             flag.EnvId == envId &&
-            string.Equals(flag.Key, key, StringComparison.OrdinalIgnoreCase)
+            string.Equals(flag.Key.ToLower(), key.ToLower())
         );
     }
 

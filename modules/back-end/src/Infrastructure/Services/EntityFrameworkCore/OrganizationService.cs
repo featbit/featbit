@@ -49,7 +49,7 @@ public class OrganizationService(AppDbContext dbContext, IProjectService project
     {
         return await AnyAsync(organization =>
             organization.WorkspaceId == workspaceId &&
-            string.Equals(organization.Key, key, StringComparison.OrdinalIgnoreCase)
+            string.Equals(organization.Key.ToLower(), key.ToLower())
         );
     }
 

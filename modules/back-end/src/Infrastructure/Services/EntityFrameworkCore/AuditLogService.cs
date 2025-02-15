@@ -22,10 +22,7 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
         var query = userFilter.Query;
         if (!string.IsNullOrWhiteSpace(query))
         {
-            queryable = queryable.Where(x =>
-                x.Keyword.Contains(query, StringComparison.CurrentCultureIgnoreCase) ||
-                x.Comment.Contains(query, StringComparison.CurrentCultureIgnoreCase)
-            );
+            queryable = queryable.Where(x => x.Keyword.Contains(query) || x.Comment.Contains(query));
         }
 
         // creator filter

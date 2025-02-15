@@ -15,7 +15,7 @@ public class ExperimentMetricService(AppDbContext dbContext)
         // name filter
         if (!string.IsNullOrWhiteSpace(metricFilter.metricName))
         {
-            query = query.Where(x => x.Name.Contains(metricFilter.metricName, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(metricFilter.metricName));
         }
 
         // event type filter

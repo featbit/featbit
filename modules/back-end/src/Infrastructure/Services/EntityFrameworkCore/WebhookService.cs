@@ -21,7 +21,7 @@ public class WebhookService(AppDbContext dbContext) : EntityFrameworkCoreService
         // name filter
         if (!string.IsNullOrWhiteSpace(filter.Name))
         {
-            query = query.Where(x => x.Name.Contains(filter.Name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(filter.Name));
         }
 
         // envId filter
@@ -59,7 +59,7 @@ public class WebhookService(AppDbContext dbContext) : EntityFrameworkCoreService
     {
         return await AnyAsync(x =>
             x.OrgId == orgId &&
-            string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)
+            string.Equals(x.Name.ToLower(), name.ToLower())
         );
     }
 

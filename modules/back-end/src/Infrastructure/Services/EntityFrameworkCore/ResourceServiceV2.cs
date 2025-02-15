@@ -171,7 +171,7 @@ public class ResourceServiceV2(AppDbContext dbContext) : IResourceServiceV2
         var hasNameFilter = !string.IsNullOrWhiteSpace(name);
         if (hasNameFilter)
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var items = await query.ToListAsync();

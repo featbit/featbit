@@ -15,7 +15,7 @@ public class RelayProxyService(AppDbContext dbContext)
         var name = filter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var totalCount = await query.CountAsync();

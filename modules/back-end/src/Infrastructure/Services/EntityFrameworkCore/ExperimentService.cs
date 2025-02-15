@@ -332,9 +332,7 @@ public class ExperimentService(AppDbContext dbContext, IOlapService olapService)
                 join ff in QueryableOf<FeatureFlag>()
                     on expt.FeatureFlagId equals ff.Id
                 where expt.EnvId == envId && !expt.IsArchived && !ff.IsArchived &&
-                      (string.IsNullOrWhiteSpace(filter.FeatureFlagName) ||
-                       ff.Name.Contains(filter.FeatureFlagName,
-                           StringComparison.CurrentCultureIgnoreCase))
+                      (string.IsNullOrWhiteSpace(filter.FeatureFlagName) || ff.Name.Contains(filter.FeatureFlagName))
                 select new ExperimentVm
                 {
                     Id = expt.Id,

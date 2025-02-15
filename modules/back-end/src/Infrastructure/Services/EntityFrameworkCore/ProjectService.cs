@@ -74,7 +74,7 @@ public class ProjectService(AppDbContext dbContext, IEnvironmentService envServi
     {
         return await AnyAsync(project =>
             project.OrganizationId == organizationId &&
-            string.Equals(project.Key, key, StringComparison.OrdinalIgnoreCase)
+            string.Equals(project.Key.ToLower(), key.ToLower())
         );
     }
 

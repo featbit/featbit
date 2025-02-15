@@ -30,7 +30,7 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
         var name = groupFilter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var totalCount = await query.CountAsync();
@@ -78,7 +78,7 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
         var searchText = filter.SearchText;
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            query = query.Where(x => x.Email.Contains(searchText, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Email.Contains(searchText));
         }
 
         var totalCount = await query.CountAsync();
@@ -130,7 +130,7 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
         var name = filter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            query = query.Where(x => x.Name.Contains(name));
         }
 
         var totalCount = await query.CountAsync();

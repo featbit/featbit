@@ -10,7 +10,7 @@ public class WorkspaceService(AppDbContext dbContext)
     {
         return await AnyAsync(ws =>
             ws.Id != workspaceId &&
-            string.Equals(ws.Key, key, StringComparison.OrdinalIgnoreCase)
+            string.Equals(ws.Key.ToLower(), key.ToLower())
         );
     }
 

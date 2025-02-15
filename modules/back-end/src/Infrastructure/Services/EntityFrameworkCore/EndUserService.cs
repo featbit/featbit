@@ -24,7 +24,7 @@ public class EndUserService(AppDbContext dbContext)
                 : envUserFilter;
 
         // excluded keyIds
-        var excludedKeyIds = userFilter.ExcludedKeyIds ?? Array.Empty<string>();
+        var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
         if (excludedKeyIds.Any())
         {
             baseFilter.And(x => !excludedKeyIds.Contains(x.KeyId));
@@ -32,21 +32,16 @@ public class EndUserService(AppDbContext dbContext)
 
         Expression<Func<EndUser, bool>> orFilters = PredicateBuilder.New<EndUser>(true);
 
-        // built-in properties
-
-        // mongodb not support ordinal comparisons yet, use StringComparison.CurrentCultureIgnoreCase
-        // https://jira.mongodb.org/browse/CSHARP-4090#:~:text=until%20the%20database%20supports%20ordinal%20comparisons.
-
         var keyId = userFilter.KeyId;
         if (!string.IsNullOrWhiteSpace(keyId))
         {
-            orFilters.Or(x => x.KeyId.Contains(keyId, StringComparison.CurrentCultureIgnoreCase));
+            orFilters.Or(x => x.KeyId.Contains(keyId));
         }
 
         var name = userFilter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            orFilters.Or(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            orFilters.Or(x => x.Name.Contains(name));
         }
 
         // custom properties
@@ -55,7 +50,7 @@ public class EndUserService(AppDbContext dbContext)
         {
             orFilters.Or(x => x.CustomizedProperties.Any(y =>
                 y.Name == customizedProperty.Name &&
-                y.Value.Contains(customizedProperty.Value, StringComparison.CurrentCultureIgnoreCase)
+                y.Value.Contains(customizedProperty.Value)
             ));
         }
 
@@ -141,7 +136,7 @@ public class EndUserService(AppDbContext dbContext)
         var customizedProperties = user.CustomizedProperties;
         if (customizedProperties == null || !customizedProperties.Any())
         {
-            return Array.Empty<EndUserProperty>();
+            return [];
         }
 
         var messageProperties = customizedProperties.Select(x => x.Name);

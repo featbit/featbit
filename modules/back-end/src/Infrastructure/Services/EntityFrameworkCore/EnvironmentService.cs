@@ -107,7 +107,7 @@ public class EnvironmentService(AppDbContext dbContext)
     {
         return await AnyAsync(environment =>
             environment.ProjectId == projectId &&
-            string.Equals(environment.Key, key, StringComparison.OrdinalIgnoreCase)
+            string.Equals(environment.Key.ToLower(), key.ToLower())
         );
     }
 }
