@@ -69,10 +69,15 @@ public class FeatureFlagService(AppDbContext dbContext)
 
     public async Task<ICollection<string>> GetAllTagsAsync(Guid envId)
     {
-        return await Queryable
+        // https://github.com/npgsql/efcore.pg/issues/1525
+        // https://github.com/dotnet/efcore/issues/32505
+        // SelectMany is not supported in efcore 8.x
+
+        var allTags = await Queryable
             .Where(x => x.EnvId == envId && !x.IsArchived)
-            .SelectMany(x => x.Tags)
-            .Distinct()
+            .Select(x => x.Tags)
             .ToListAsync();
+
+        return allTags.SelectMany(x => x).Distinct().ToArray();
     }
 }

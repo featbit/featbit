@@ -10,8 +10,8 @@ public class Secret
 
     public string Value { get; set; }
 
-    // for ef core
-    protected Secret()
+    // for ef core and System.Text.Json
+    public Secret()
     {
     }
 
