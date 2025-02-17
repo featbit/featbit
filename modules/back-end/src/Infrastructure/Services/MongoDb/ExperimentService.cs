@@ -66,7 +66,7 @@ public class ExperimentService(MongoDbClient mongoDb, IOlapService olapService)
 
     public async Task ArchiveIterations(Guid envId, Guid experimentId)
     {
-        var experiment = await this.GetAsync(experimentId);
+        var experiment = await GetAsync(experimentId);
 
         if (experiment.Iterations.Any())
         {
@@ -324,100 +324,59 @@ public class ExperimentService(MongoDbClient mongoDb, IOlapService olapService)
 
     public async Task<PagedResult<ExperimentVm>> GetListAsync(Guid envId, ExperimentFilter filter)
     {
-        if (string.IsNullOrWhiteSpace(filter.FeatureFlagId.ToString()))
+        var flags = MongoDb.QueryableOf<FeatureFlag>();
+        var metrics = MongoDb.QueryableOf<ExperimentMetric>();
+
+        if (!string.IsNullOrWhiteSpace(filter.FeatureFlagName))
         {
-            var query =
-                from expt in Queryable
-                join metric in MongoDb.QueryableOf<ExperimentMetric>()
-                    on expt.MetricId equals metric.Id
-                join ff in MongoDb.QueryableOf<FeatureFlag>()
-                    on expt.FeatureFlagId equals ff.Id
-                where expt.EnvId == envId && !expt.IsArchived && !ff.IsArchived &&
-                      (string.IsNullOrWhiteSpace(filter.FeatureFlagName) ||
-                       ff.Name.Contains(filter.FeatureFlagName,
-                           StringComparison.CurrentCultureIgnoreCase))
-                select new ExperimentVm
-                {
-                    Id = expt.Id,
-                    BaselineVariation = ff.Variations.First(v => v.Id == expt.BaselineVariationId),
-                    FeatureFlagId = ff.Id,
-                    FeatureFlagKey = ff.Key,
-                    FeatureFlagName = ff.Name,
-                    MetricId = expt.MetricId,
-                    MetricName = metric.Name,
-                    MetricEventName = metric.EventName,
-                    MetricEventType = metric.EventType,
-                    MetricCustomEventUnit = metric.CustomEventUnit,
-                    Status = expt.Status,
-                    MetricCustomEventTrackOption = metric.CustomEventTrackOption,
-                    MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
-                    Iterations = expt.Iterations != null ? expt.Iterations.Where(p => !p.IsArchived).ToList() : expt.Iterations,
-                    Alpha = expt.Alpha ?? 0.05
-                };
-
-            var totalCount = await query.CountAsync();
-
-            List<ExperimentVm> items;
-
-            if (filter.PageSize == -1) // no pagination
-            {
-                items = await query.ToListAsync();
-            }
-            else
-            {
-                items = await query
-                    .Skip(filter.PageIndex * filter.PageSize)
-                    .Take(filter.PageSize)
-                    .ToListAsync();
-            }
-
-            return new PagedResult<ExperimentVm>(totalCount, items);
+            flags = flags.Where(x => x.Name.Contains(filter.FeatureFlagName));
         }
-        else
+
+        if (filter.FeatureFlagId.HasValue)
         {
-            var query =
-                from expt in Queryable
-                join metric in MongoDb.QueryableOf<ExperimentMetric>()
-                    on expt.MetricId equals metric.Id
-                join ff in MongoDb.QueryableOf<FeatureFlag>()
-                    on expt.FeatureFlagId equals ff.Id
-                where expt.EnvId == envId && !expt.IsArchived && !ff.IsArchived &&
-                      expt.FeatureFlagId == filter.FeatureFlagId
-                select new ExperimentVm
-                {
-                    Id = expt.Id,
-                    BaselineVariation = ff.Variations.First(v => v.Id == expt.BaselineVariationId),
-                    FeatureFlagId = ff.Id,
-                    FeatureFlagKey = ff.Key,
-                    FeatureFlagName = ff.Name,
-                    MetricId = expt.MetricId,
-                    MetricName = metric.Name,
-                    MetricEventName = metric.EventName,
-                    MetricEventType = metric.EventType,
-                    MetricCustomEventUnit = metric.CustomEventUnit,
-                    Status = expt.Status,
-                    MetricCustomEventTrackOption = metric.CustomEventTrackOption,
-                    MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
-                    Iterations = expt.Iterations != null ? expt.Iterations.Where(p => !p.IsArchived).ToList() : expt.Iterations, 
-                    Alpha = expt.Alpha
-                };
-
-            var totalCount = await query.CountAsync();
-            List<ExperimentVm> items;
-
-            if (filter.PageSize == -1) // no pagination
-            {
-                items = await query.ToListAsync();
-            }
-            else
-            {
-                items = await query
-                    .Skip(filter.PageIndex * filter.PageSize)
-                    .Take(filter.PageSize)
-                    .ToListAsync();
-            }
-
-            return new PagedResult<ExperimentVm>(totalCount, items);
+            flags = flags.Where(x => x.Id == filter.FeatureFlagId.Value);
         }
+
+        var query = from flag in flags
+            join experiment in Queryable on flag.Id equals experiment.FeatureFlagId
+            join metric in metrics on experiment.MetricId equals metric.Id
+            where experiment.EnvId == envId && !experiment.IsArchived
+            select new ExperimentVm
+            {
+                Id = experiment.Id,
+                BaselineVariationId = experiment.BaselineVariationId,
+                Variations = flag.Variations,
+                FeatureFlagId = flag.Id,
+                FeatureFlagKey = flag.Key,
+                FeatureFlagName = flag.Name,
+                MetricId = experiment.MetricId,
+                MetricName = metric.Name,
+                MetricEventName = metric.EventName,
+                MetricEventType = metric.EventType,
+                MetricCustomEventUnit = metric.CustomEventUnit,
+                Status = experiment.Status,
+                MetricCustomEventTrackOption = metric.CustomEventTrackOption,
+                MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
+                Iterations = experiment.Iterations,
+                Alpha = experiment.Alpha
+            };
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip(filter.PageIndex * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        foreach (var item in items)
+        {
+            item.Iterations = item.Iterations != null
+                ? item.Iterations.Where(p => !p.IsArchived).ToList()
+                : item.Iterations;
+            item.BaselineVariation = item.Variations.FirstOrDefault(x => x.Id == item.BaselineVariationId);
+            item.Alpha ??= 0.05;
+        }
+
+        return new PagedResult<ExperimentVm>(totalCount, items);
     }
 }
