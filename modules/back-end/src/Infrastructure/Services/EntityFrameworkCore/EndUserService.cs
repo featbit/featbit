@@ -30,31 +30,37 @@ public class EndUserService(AppDbContext dbContext)
             baseFilter.And(x => !excludedKeyIds.Contains(x.KeyId));
         }
 
-        Expression<Func<EndUser, bool>> orFilters = PredicateBuilder.New<EndUser>(true);
+        List<Expression<Func<EndUser, bool>>> orFilters = [];
 
         var keyId = userFilter.KeyId;
         if (!string.IsNullOrWhiteSpace(keyId))
         {
-            orFilters.Or(x => x.KeyId.Contains(keyId));
+            orFilters.Add(x => x.KeyId.Contains(keyId));
         }
 
         var name = userFilter.Name;
         if (!string.IsNullOrWhiteSpace(name))
         {
-            orFilters.Or(x => x.Name.Contains(name));
+            orFilters.Add(x => x.Name.Contains(name));
         }
 
         // custom properties
         var customizedProperties = userFilter.CustomizedProperties ?? new List<EndUserCustomizedProperty>();
         foreach (var customizedProperty in customizedProperties)
         {
-            orFilters.Or(x => x.CustomizedProperties.Any(y =>
+            orFilters.Add(x => x.CustomizedProperties.Any(y =>
                 y.Name == customizedProperty.Name &&
                 y.Value.Contains(customizedProperty.Value)
             ));
         }
 
-        var filter = baseFilter.And(orFilters);
+        var filter = baseFilter;
+        if (orFilters.Count != 0)
+        {
+            var orFilter = orFilters.Aggregate((x, y) => x.Or(y));
+            filter = filter.And(orFilter);
+        }
+
         var query = Queryable.Where(filter);
 
         var totalCount = await query.LongCountAsync();

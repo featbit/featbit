@@ -72,7 +72,7 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         }
 
         var filter = filterBuilder.And(mustFilters);
-        if (orFilters.Any())
+        if (orFilters.Count != 0)
         {
             filter &= filterBuilder.Or(orFilters);
         }
