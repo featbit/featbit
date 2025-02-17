@@ -27,4 +27,12 @@ public class RelayProxyService(MongoDbClient mongoDb) : MongoDbService<RelayProx
 
         return new PagedResult<RelayProxy>(totalCount, items);
     }
+
+    public Task<bool> IsNameUsedAsync(Guid organizationId, string name)
+    {
+        return AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase)
+        );
+    }
 }

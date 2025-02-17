@@ -202,4 +202,12 @@ public class GroupService(MongoDbClient mongoDb) : MongoDbService<Group>(mongoDb
         await MongoDb.CollectionOf<GroupPolicy>()
             .DeleteOneAsync(x => x.GroupId == groupId && x.PolicyId == policyId);
     }
+
+    public Task<bool> IsNameUsedAsync(Guid organizationId, string name)
+    {
+        return AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase)
+        );
+    }
 }

@@ -156,4 +156,12 @@ public class PolicyService(MongoDbClient mongoDb) : MongoDbService<Policy>(mongo
 
         return new PagedResult<PolicyMember>(totalCount, vms);
     }
+
+    public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
+    {
+        return await AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase)
+        );
+    }
 }

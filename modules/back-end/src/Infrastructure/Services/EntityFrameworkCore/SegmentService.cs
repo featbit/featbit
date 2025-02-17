@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
@@ -143,5 +144,23 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
             var ids = await query.ToListAsync();
             return ids;
         }
+    }
+
+    public async Task<bool> IsNameUsedAsync(Guid workspaceId, string type, Guid envId, string name)
+    {
+        Expression<Func<Segment, bool>> predicate = type switch
+        {
+            SegmentType.Shared => x =>
+                x.WorkspaceId == workspaceId &&
+                x.Type == SegmentType.Shared &&
+                string.Equals(x.Name.ToLower(), name.ToLower()),
+
+            _ => x =>
+                x.EnvId == envId &&
+                x.Type == SegmentType.EnvironmentSpecific &&
+                string.Equals(x.Name.ToLower(), name.ToLower())
+        };
+
+        return await AnyAsync(predicate);
     }
 }

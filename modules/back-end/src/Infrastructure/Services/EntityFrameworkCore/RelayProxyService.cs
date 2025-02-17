@@ -27,4 +27,14 @@ public class RelayProxyService(AppDbContext dbContext)
 
         return new PagedResult<RelayProxy>(totalCount, items);
     }
+
+    public Task<bool> IsNameUsedAsync(Guid organizationId, string name)
+    {
+        var isNameUsed = AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Name.ToLower(), name.ToLower())
+        );
+
+        return isNameUsed;
+    }
 }

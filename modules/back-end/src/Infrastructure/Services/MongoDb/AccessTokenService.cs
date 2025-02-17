@@ -39,4 +39,12 @@ public class AccessTokenService(MongoDbClient mongoDb) : MongoDbService<AccessTo
 
         return new PagedResult<AccessToken>(totalCount, items);
     }
+
+    public Task<bool> IsNameUsedAsync(Guid organizationId, string name)
+    {
+        return AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase)
+        );
+    }
 }

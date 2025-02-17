@@ -39,4 +39,14 @@ public class AccessTokenService(AppDbContext dbContext)
 
         return new PagedResult<AccessToken>(totalCount, items);
     }
+
+    public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
+    {
+        var isNameUsed = await AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Name.ToLower(), name.ToLower())
+        );
+
+        return isNameUsed;
+    }
 }

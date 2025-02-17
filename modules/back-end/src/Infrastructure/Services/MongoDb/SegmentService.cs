@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
@@ -164,5 +165,23 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
             var documents = await query.ToListAsync();
             return documents.Select(x => x["_id"].AsGuid).ToList();
         }
+    }
+
+    public async Task<bool> IsNameUsedAsync(Guid workspaceId, string type, Guid envId, string name)
+    {
+        Expression<Func<Segment, bool>> predicate = type switch
+        {
+            SegmentType.Shared => x =>
+                x.WorkspaceId == workspaceId &&
+                x.Type == SegmentType.Shared &&
+                string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase),
+
+            _ => x =>
+                x.EnvId == envId &&
+                x.Type == SegmentType.EnvironmentSpecific &&
+                string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)
+        };
+
+        return await AnyAsync(predicate);
     }
 }

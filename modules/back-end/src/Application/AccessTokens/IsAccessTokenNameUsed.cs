@@ -7,22 +7,8 @@ public class IsAccessTokenNameUsed : IRequest<bool>
     public string Name { get; set; }
 }
 
-public class IsAccessTokenNameUsedHandler : IRequestHandler<IsAccessTokenNameUsed, bool>
+public class IsAccessTokenNameUsedHandler(IAccessTokenService service) : IRequestHandler<IsAccessTokenNameUsed, bool>
 {
-    private readonly IAccessTokenService _service;
-
-    public IsAccessTokenNameUsedHandler(IAccessTokenService service)
-    {
-        _service = service;
-    }
-
-    public async Task<bool> Handle(IsAccessTokenNameUsed request, CancellationToken cancellationToken)
-    {
-        var isNameUsed = await _service.AnyAsync(x =>
-            x.OrganizationId == request.OrganizationId &&
-            string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase)
-        );
-
-        return isNameUsed;
-    }
+    public async Task<bool> Handle(IsAccessTokenNameUsed request, CancellationToken cancellationToken) =>
+        await service.IsNameUsedAsync(request.OrganizationId, request.Name);
 }

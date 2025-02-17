@@ -194,4 +194,14 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
             .Where(x => x.GroupId == groupId && x.PolicyId == policyId)
             .ExecuteDeleteAsync();
     }
+
+    public Task<bool> IsNameUsedAsync(Guid organizationId, string name)
+    {
+        var isNameUsed = AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Name.ToLower(), name.ToLower())
+        );
+
+        return isNameUsed;
+    }
 }
