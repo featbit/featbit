@@ -3,7 +3,7 @@ using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Segments;
-using Domain.FeatureFlags;
+using Dapper;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Resources;
@@ -61,28 +61,27 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
     {
         var segmentId = id.ToString();
 
-        var query = QueryableOf<FeatureFlag>().Where(flag =>
-            flag.EnvId == envId &&
-            flag.Rules.Any(rule =>
-                rule.Conditions.Any(condition =>
-                    SegmentConsts.ConditionProperties.Contains(condition.Property) &&
-                    condition.Value.Contains(segmentId)
-                )
-            )
-        ).Select(x => new FlagReference
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Key = x.Key
-        });
+        const string sql = """
+                           SELECT id as Id, env_id as EnvId, name as Name, key as Key
+                           FROM feature_flags
+                           WHERE env_id = @envId
+                             AND EXISTS (SELECT 1
+                                         FROM jsonb_array_elements(rules) AS rule
+                                         WHERE EXISTS (SELECT 1
+                                                       FROM jsonb_array_elements(rule -> 'conditions') AS condition
+                                                       WHERE condition ->> 'property' = ANY(@conditionProperties)
+                                                         AND condition ->> 'value' LIKE '%' || @segmentId || '%'));
+                           """;
 
-        var references = await query.ToListAsync();
-        foreach (var reference in references)
+        var parameters = new
         {
-            reference.EnvId = envId;
-        }
+            envId,
+            conditionProperties = SegmentConsts.ConditionProperties,
+            segmentId
+        };
 
-        return references;
+        var references = await DbConnection.QueryAsync<FlagReference>(sql, parameters);
+        return references.ToArray();
     }
 
     public async Task<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment)

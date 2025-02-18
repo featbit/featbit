@@ -1,3 +1,4 @@
+using Dapper;
 using Domain.EndUsers;
 using Domain.Environments;
 using Domain.Organizations;
@@ -79,7 +80,7 @@ public class EnvironmentService(AppDbContext dbContext)
         await SetOf<EndUserProperty>().Where(x => x.EnvId == id).ExecuteDeleteAsync();
 
         // delete environment events
-        await ExecuteSqlAsync($"DELETE FROM events WHERE env_id = {id}");
+        await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = @id", new { id });
     }
 
     public async Task DeleteManyAsync(ICollection<Guid> ids)
@@ -93,7 +94,7 @@ public class EnvironmentService(AppDbContext dbContext)
         await SetOf<EndUserProperty>().Where(x => ids.Contains(x.EnvId)).ExecuteDeleteAsync();
 
         // delete environment events
-        await ExecuteSqlAsync($"DELETE FROM events WHERE env_id IN ({string.Join(',', ids)})");
+        await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = ANY(@ids)", new { ids });
     }
 
     public async Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type)

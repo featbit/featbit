@@ -1,3 +1,4 @@
+using System.Data;
 using System.Linq.Expressions;
 using Application.Bases.Exceptions;
 using Domain.Bases;
@@ -17,7 +18,7 @@ public class EntityFrameworkCoreService<TEntity>(AppDbContext dbContext) : IServ
 
     protected DbSet<TOtherEntity> SetOf<TOtherEntity>() where TOtherEntity : class => dbContext.Set<TOtherEntity>();
 
-    protected async Task ExecuteSqlAsync(FormattableString sql) => await dbContext.Database.ExecuteSqlAsync(sql);
+    protected IDbConnection DbConnection => dbContext.Database.GetDbConnection();
 
     protected async Task<int> SaveChangesAsync() => await dbContext.SaveChangesAsync();
 
