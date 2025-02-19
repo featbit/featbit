@@ -14,6 +14,11 @@ public class Organization : AuditedEntity
 
     public OrganizationPermissions DefaultPermissions { get; set; }
 
+    // for ef core and System.Text.Json
+    public Organization()
+    {
+    }
+
     public Organization(Guid workspaceId, string name, string key)
     {
         WorkspaceId = workspaceId;
