@@ -38,11 +38,13 @@ public static class ConfigureServices
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IIdentityService, Services.IdentityService>();
 
-        // typed http clients
+        // http clients
         services.AddHttpClient<IOlapService, Services.OlapService>(httpClient =>
         {
             httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]!);
         });
+        services.AddHttpClient<IAgentService, Services.AgentService>();
+        services.AddHttpClient<IWebhookSender, Services.WebhookSender>();
 
         // custom services
         var dbProvider = configuration.GetValue("DbProvider", DbProvider.MongoDb);
@@ -55,8 +57,6 @@ public static class ConfigureServices
             AddEntityFrameworkCoreServices();
         }
 
-        services.AddHttpClient<IAgentService, Services.AgentService>();
-        services.AddHttpClient<IWebhookSender, Services.WebhookSender>();
         services.AddTransient<IEnvironmentAppService, AppServices.EnvironmentAppService>();
         services.AddTransient<IFeatureFlagAppService, AppServices.FeatureFlagAppService>();
 
@@ -65,6 +65,8 @@ public static class ConfigureServices
         void AddMongoDbServices()
         {
             services.AddMongoDb(configuration);
+
+            services.AddTransient<IWebhookHandler, Services.WebhookHandler>();
 
             services.AddTransient<IEvaluator, MongoServices.Evaluator>();
             services.AddTransient<IWorkspaceService, MongoServices.WorkspaceService>();
@@ -98,6 +100,10 @@ public static class ConfigureServices
         void AddEntityFrameworkCoreServices()
         {
             services.AddPostgres(configuration);
+
+            services.AddTransient<IGeneralWebhookHandler, Services.WebhookHandler>();
+            services.AddTransient<IScopedWebhookHandler, Services.ScopedWebhookHandler>();
+            services.AddTransient<IWebhookHandler>(x => x.GetRequiredService<IScopedWebhookHandler>());
 
             services.AddTransient<IEvaluator, EntityFrameworkCoreServices.Evaluator>();
             services.AddTransient<IWorkspaceService, EntityFrameworkCoreServices.WorkspaceService>();

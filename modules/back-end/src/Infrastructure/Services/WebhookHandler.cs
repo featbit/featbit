@@ -6,9 +6,9 @@ using Domain.SemanticPatch;
 using Domain.Utils;
 using Domain.Webhooks;
 
-namespace Application.Webhooks;
+namespace Infrastructure.Services;
 
-public class WebhookHandler : IWebhookHandler
+public class WebhookHandler : IGeneralWebhookHandler
 {
     private static readonly string[] FlagCreatedEvents = { WebhookEvents.FlagEvents.Created };
     private static readonly string[] FlagDeletedEvents = { WebhookEvents.FlagEvents.Deleted };
