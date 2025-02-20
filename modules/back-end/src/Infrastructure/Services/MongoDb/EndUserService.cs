@@ -14,7 +14,7 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
     {
         var filterBuilder = Builders<EndUser>.Filter;
 
-        var globalUserFilter = filterBuilder.Eq(x => x.WorkspaceId, workspaceId) & filterBuilder.Eq(x => x.EnvId, null);
+        var globalUserFilter = filterBuilder.Eq(x => x.WorkspaceId, workspaceId);
         var envUserFilter = filterBuilder.Eq(x => x.EnvId, envId);
 
         var baseFilter = userFilter.GlobalUserOnly

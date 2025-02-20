@@ -18,11 +18,10 @@ public class EndUserService(AppDbContext dbContext)
         var table = new Query("end_users");
 
         var baseQuery = userFilter.GlobalUserOnly
-            ? table.Where("workspace_id", workspaceId).WhereNull("env_id")
+            ? table.Where("workspace_id", workspaceId)
             : userFilter.IncludeGlobalUser
-                ? table.Where(x => x
-                    .Where(q1 => q1.Where("workspace_id", workspaceId).WhereNull("env_id"))
-                    .OrWhere("env_id", envId)
+                ? table.Where(
+                    x => x.Where("workspace_id", workspaceId).OrWhere("env_id", envId)
                 )
                 : table.Where("env_id", envId);
 
