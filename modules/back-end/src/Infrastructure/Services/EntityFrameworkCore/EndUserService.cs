@@ -1,11 +1,12 @@
-using System.Linq.Expressions;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.EndUsers;
+using Dapper;
 using Domain.EndUsers;
-using LinqKit;
 using Microsoft.EntityFrameworkCore;
+using SqlKata;
+using SqlKata.Compilers;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
@@ -14,63 +15,69 @@ public class EndUserService(AppDbContext dbContext)
 {
     public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
     {
-        Expression<Func<EndUser, bool>> globalUserFilter = x => x.WorkspaceId == workspaceId && x.EnvId == null;
-        Expression<Func<EndUser, bool>> envUserFilter = x => x.EnvId == envId;
+        var table = new Query("end_users");
 
-        var baseFilter = userFilter.GlobalUserOnly
-            ? globalUserFilter
+        var baseQuery = userFilter.GlobalUserOnly
+            ? table.Where("workspace_id", workspaceId).WhereNull("env_id")
             : userFilter.IncludeGlobalUser
-                ? globalUserFilter.Or(envUserFilter)
-                : envUserFilter;
+                ? table.Where(x => x
+                    .Where(q1 => q1.Where("workspace_id", workspaceId).WhereNull("env_id"))
+                    .OrWhere("env_id", envId)
+                )
+                : table.Where("env_id", envId);
+
+        var pgCompiler = new PostgresCompiler();
 
         // excluded keyIds
         var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
-        if (excludedKeyIds.Any())
+        if (excludedKeyIds.Length != 0)
         {
-            baseFilter.And(x => !excludedKeyIds.Contains(x.KeyId));
-        }
-
-        List<Expression<Func<EndUser, bool>>> orFilters = [];
-
-        var keyId = userFilter.KeyId;
-        if (!string.IsNullOrWhiteSpace(keyId))
-        {
-            orFilters.Add(x => x.KeyId.Contains(keyId));
+            baseQuery.WhereNotIn("key_id", excludedKeyIds);
         }
 
         var name = userFilter.Name;
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            orFilters.Add(x => x.Name.Contains(name));
-        }
+        var keyId = userFilter.KeyId;
+        var customizedProperties = userFilter.CustomizedProperties ?? [];
 
-        // custom properties
-        var customizedProperties = userFilter.CustomizedProperties ?? new List<EndUserCustomizedProperty>();
-        foreach (var customizedProperty in customizedProperties)
-        {
-            orFilters.Add(x => x.CustomizedProperties.Any(y =>
-                y.Name == customizedProperty.Name &&
-                y.Value.Contains(customizedProperty.Value)
-            ));
-        }
+        baseQuery.Where(
+            group => group
+                .When(!string.IsNullOrWhiteSpace(keyId), q => q.OrWhereContains("key_id", keyId))
+                .When(!string.IsNullOrWhiteSpace(name), q => q.OrWhereContains("name", name))
+                .When(customizedProperties.Count > 0, q =>
+                {
+                    List<object> parameters = [];
 
-        var filter = baseFilter;
-        if (orFilters.Count != 0)
-        {
-            var orFilter = orFilters.Aggregate((x, y) => x.Or(y));
-            filter = filter.And(orFilter);
-        }
+                    var wheres = customizedProperties.Select(cp =>
+                    {
+                        parameters.Add(cp.Name);
+                        parameters.Add($"%{cp.Value}%");
 
-        var query = Queryable.Where(filter);
+                        return "(cp->>'name'= ? and cp->>'value' ilike ?)";
+                    });
+                    var where = string.Join(" or ", wheres);
 
-        var totalCount = await query.LongCountAsync();
-        var itemsQuery = query
-            .OrderByDescending(x => x.UpdatedAt)
-            .Skip(userFilter.PageIndex * userFilter.PageSize)
-            .Take(userFilter.PageSize);
-        var items = await itemsQuery.ToListAsync();
+                    return q.OrWhereRaw(
+                        $"exists(select 1 from jsonb_array_elements(customized_properties) as cp where {where})",
+                        parameters.ToArray()
+                    );
+                })
+        );
 
-        return new PagedResult<EndUser>(totalCount, items);
+        var countSr = pgCompiler.Compile(
+            baseQuery.Clone().AsCount()
+        );
+        var itemsSr = pgCompiler.Compile(
+            baseQuery
+                .Clone()
+                .OrderByDesc("updated_at")
+                .Skip(userFilter.PageIndex * userFilter.PageSize)
+                .Take(userFilter.PageSize)
+        );
+
+        var totalCount = await DbConnection.ExecuteScalarAsync<int>(countSr.Sql, countSr.NamedBindings);
+        var items = await DbConnection.QueryAsync<EndUser>(itemsSr.Sql, itemsSr.NamedBindings);
+
+        return new PagedResult<EndUser>(totalCount, items.ToArray());
     }
 
     public async Task<EndUser> UpsertAsync(EndUser user)

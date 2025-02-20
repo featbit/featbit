@@ -1,8 +1,11 @@
 using Confluent.Kafka;
+using Dapper;
+using Domain.EndUsers;
 using Domain.Messages;
 using Domain.Utils;
 using Infrastructure.Kafka;
 using Infrastructure.Messages;
+using Infrastructure.Persistence.Dapper;
 using Infrastructure.Redis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +20,15 @@ public static class ServiceCollectionExtensions
     {
         services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
         services.AddSingleton<MongoDbClient>();
+    }
+
+    public static void ConfigureDapper(this IServiceCollection services)
+    {
+        // our database uses snake_case naming convention
+        DefaultTypeMap.MatchNamesWithUnderscores = true;
+
+        // jsonb column type mappings (add when needed)
+        SqlMapper.AddTypeHandler(typeof(ICollection<EndUserCustomizedProperty>), new JsonObjectTypeHandler());
     }
 
     public static void AddPostgres(this IServiceCollection services, IConfiguration configuration)

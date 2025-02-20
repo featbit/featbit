@@ -100,6 +100,7 @@ public static class ConfigureServices
         void AddEntityFrameworkCoreServices()
         {
             services.AddPostgres(configuration);
+            services.ConfigureDapper();
 
             services.AddTransient<IGeneralWebhookHandler, Services.WebhookHandler>();
             services.AddTransient<IScopedWebhookHandler, Services.ScopedWebhookHandler>();
