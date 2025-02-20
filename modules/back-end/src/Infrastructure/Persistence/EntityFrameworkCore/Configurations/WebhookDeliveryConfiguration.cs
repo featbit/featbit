@@ -1,6 +1,9 @@
-﻿using Domain.Webhooks;
+﻿using System.Text.Json;
+using Domain.Utils;
+using Domain.Webhooks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Infrastructure.Persistence.EntityFrameworkCore.Configurations;
 
@@ -12,8 +15,13 @@ public class WebhookDeliveryConfiguration : IEntityTypeConfiguration<WebhookDeli
 
         builder.HasIndex(x => x.WebhookId);
 
-        builder.Property(x => x.Request).HasColumnType("jsonb");
-        builder.Property(x => x.Response).HasColumnType("jsonb");
-        builder.Property(x => x.Error).HasColumnType("jsonb");
+        var converter = new ValueConverter<object, string>(
+            v => JsonSerializer.Serialize(v, ReusableJsonSerializerOptions.Web),
+            v => JsonSerializer.Deserialize<object>(v, ReusableJsonSerializerOptions.Web) ?? new object()
+        );
+
+        builder.Property(x => x.Request).HasColumnType("jsonb").HasConversion(converter);
+        builder.Property(x => x.Response).HasColumnType("jsonb").HasConversion(converter);
+        builder.Property(x => x.Error).HasColumnType("jsonb").HasConversion(converter);
     }
 }
