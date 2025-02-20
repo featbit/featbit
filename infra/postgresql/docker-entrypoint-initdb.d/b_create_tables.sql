@@ -205,18 +205,6 @@ CREATE TABLE flag_schedules
 );
 
 
-CREATE TABLE global_users
-(
-    id                    uuid NOT NULL,
-    workspace_id          uuid NOT NULL,
-    env_id                uuid,
-    key_id                text,
-    name                  text,
-    customized_properties jsonb,
-    CONSTRAINT pk_global_users PRIMARY KEY (id)
-);
-
-
 CREATE TABLE group_members
 (
     id              uuid                     NOT NULL,
@@ -447,10 +435,13 @@ CREATE INDEX ix_audit_logs_env_id ON audit_logs (env_id);
 CREATE INDEX ix_audit_logs_ref_id ON audit_logs (ref_id);
 
 
-CREATE INDEX ix_end_users_env_id ON end_users (env_id);
+CREATE UNIQUE INDEX ix_end_users_env_id_key_id ON end_users (env_id, key_id);
 
 
 CREATE INDEX ix_end_users_updated_at ON end_users (updated_at);
+
+
+CREATE INDEX ix_end_users_workspace_id ON end_users (workspace_id);
 
 
 CREATE INDEX ix_environments_project_id ON environments (project_id);
@@ -466,9 +457,6 @@ CREATE INDEX ix_feature_flags_env_id ON feature_flags (env_id);
 
 
 CREATE INDEX ix_feature_flags_updated_at ON feature_flags (updated_at);
-
-
-CREATE INDEX ix_global_users_workspace_id ON global_users (workspace_id);
 
 
 CREATE INDEX ix_groups_organization_id ON groups (organization_id);

@@ -10,7 +10,8 @@ public class EndUserConfiguration : IEntityTypeConfiguration<EndUser>
     {
         builder.ToTable("end_users");
 
-        builder.HasIndex(x => x.EnvId);
+        builder.HasIndex(x => x.WorkspaceId);
+        builder.HasIndex(x => new { x.EnvId, x.KeyId }).IsUnique();
         builder.HasIndex(x => x.UpdatedAt);
 
         builder.Property(x => x.KeyId).HasMaxLength(512).IsRequired();
