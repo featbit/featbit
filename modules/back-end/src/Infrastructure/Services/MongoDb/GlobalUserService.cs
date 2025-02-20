@@ -6,9 +6,9 @@ using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class GlobalUserService(MongoDbClient mongoDb) : MongoDbService<GlobalUser>(mongoDb), IGlobalUserService
+public class GlobalUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mongoDb), IGlobalUserService
 {
-    public async Task<PagedResult<GlobalUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter)
+    public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter)
     {
         var query = Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == null);
 
@@ -24,6 +24,6 @@ public class GlobalUserService(MongoDbClient mongoDb) : MongoDbService<GlobalUse
             .Take(filter.PageSize)
             .ToListAsync();
 
-        return new PagedResult<GlobalUser>(total, data);
+        return new PagedResult<EndUser>(total, data);
     }
 }

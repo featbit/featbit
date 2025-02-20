@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Services.EntityFrameworkCore;
 
 public class GlobalUserService(AppDbContext dbContext)
-    : EntityFrameworkCoreService<GlobalUser>(dbContext), IGlobalUserService
+    : EntityFrameworkCoreService<EndUser>(dbContext), IGlobalUserService
 {
-    public async Task<PagedResult<GlobalUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter)
+    public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter)
     {
         var query = Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == null);
 
@@ -19,11 +19,11 @@ public class GlobalUserService(AppDbContext dbContext)
         }
 
         var total = await query.CountAsync();
-        var data = await query
+        var endUsers = await query
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
 
-        return new PagedResult<GlobalUser>(total, data);
+        return new PagedResult<EndUser>(total, endUsers);
     }
 }

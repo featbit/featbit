@@ -16,7 +16,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new ProjectConfiguration());
         modelBuilder.ApplyConfiguration(new EnvironmentConfiguration());
         modelBuilder.ApplyConfiguration(new EndUserConfiguration());
-        modelBuilder.ApplyConfiguration(new GlobalUserConfiguration());
         modelBuilder.ApplyConfiguration(new EndUserPropertyConfiguration());
         modelBuilder.ApplyConfiguration(new SegmentConfiguration());
         modelBuilder.ApplyConfiguration(new FeatureFlagConfiguration());
