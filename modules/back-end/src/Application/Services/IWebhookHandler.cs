@@ -10,3 +10,7 @@ public interface IWebhookHandler
 
     Task HandleAsync(Guid envId, Segment segment, DataChange dataChange, Guid operatorId);
 }
+
+public interface IGeneralWebhookHandler : IWebhookHandler;
+
+public interface IScopedWebhookHandler : IWebhookHandler;

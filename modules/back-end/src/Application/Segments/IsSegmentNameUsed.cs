@@ -1,5 +1,3 @@
-using Domain.Segments;
-
 namespace Application.Segments;
 
 public class IsSegmentNameUsed : IRequest<bool>
@@ -13,30 +11,8 @@ public class IsSegmentNameUsed : IRequest<bool>
     public string Name { get; set; }
 }
 
-public class IsSegmentNameUsedHandler : IRequestHandler<IsSegmentNameUsed, bool>
+public class IsSegmentNameUsedHandler(ISegmentService service) : IRequestHandler<IsSegmentNameUsed, bool>
 {
-    private readonly ISegmentService _service;
-
-    public IsSegmentNameUsedHandler(ISegmentService service)
-    {
-        _service = service;
-    }
-
-    public async Task<bool> Handle(IsSegmentNameUsed request, CancellationToken cancellationToken)
-    {
-        if (request.Type == SegmentType.EnvironmentSpecific)
-        {
-            return await _service.AnyAsync(x =>
-                x.EnvId == request.EnvId &&
-                x.Type == SegmentType.EnvironmentSpecific &&
-                string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase)
-            );
-        }
-
-        return await _service.AnyAsync(x =>
-            x.WorkspaceId == request.WorkspaceId &&
-            x.Type == SegmentType.Shared &&
-            string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase)
-        );
-    }
+    public async Task<bool> Handle(IsSegmentNameUsed request, CancellationToken cancellationToken) =>
+        await service.IsNameUsedAsync(request.WorkspaceId, request.Type, request.EnvId, request.Name);
 }

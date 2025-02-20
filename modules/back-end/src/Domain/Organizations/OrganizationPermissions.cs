@@ -6,7 +6,7 @@ public class OrganizationPermissions
 {
     public ICollection<Guid> PolicyIds { get; set; } = [BuiltInPolicy.Developer];
 
-    public ICollection<Guid> GroupIds { get; set; } = Array.Empty<Guid>();
+    public ICollection<Guid> GroupIds { get; set; } = [];
 
     public bool IsValid()
     {

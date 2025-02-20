@@ -10,6 +10,11 @@ public class Secret
 
     public string Value { get; set; }
 
+    // for ef core and System.Text.Json
+    public Secret()
+    {
+    }
+
     public Secret(Guid envId, string name, string type)
     {
         Id = Guid.NewGuid().ToString("D");

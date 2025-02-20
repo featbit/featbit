@@ -12,6 +12,11 @@ public class Policy : AuditedEntity
 
     public ICollection<PolicyStatement> Statements { get; set; }
 
+    // for ef core
+    protected Policy()
+    {
+    }
+
     public Policy(Guid organizationId, string name, string description)
     {
         OrganizationId = organizationId;

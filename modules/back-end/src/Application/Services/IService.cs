@@ -20,4 +20,6 @@ public interface IService<TEntity> where TEntity : Entity
     Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);
 
     Task UpdateAsync(TEntity segment);
+
+    Task DeleteOneAsync(Guid id);
 }

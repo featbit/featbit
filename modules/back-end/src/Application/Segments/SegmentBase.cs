@@ -9,11 +9,11 @@ public class SegmentBase
 
     public string Description { get; set; }
 
-    public ICollection<string> Scopes { get; set; } = Array.Empty<string>();
+    public string[] Scopes { get; set; } = [];
 
-    public ICollection<string> Included { get; set; } = Array.Empty<string>();
+    public string[] Included { get; set; } = [];
 
-    public ICollection<string> Excluded { get; set; } = Array.Empty<string>();
+    public string[] Excluded { get; set; } = [];
 
     public ICollection<MatchRule> Rules { get; set; } = Array.Empty<MatchRule>();
 }

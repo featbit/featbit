@@ -5,7 +5,8 @@ import pandas as pd
 from app.clickhouse.models.event.sql import event_table_name
 from app.mongodb.models.event.util import get_events_sample_from_mongod
 
-FLAG_EVENTS_CTE = f"""flag_events as
+# ClickHouse
+FLAG_EVENTS_CTE_CH = f"""flag_events as
 (
 SELECT tag_0 AS target_user, tag_1 AS variation
 FROM {event_table_name()}
@@ -17,7 +18,7 @@ AND timestamp < %(end)s
 AND tag_2 = 'true'
 )"""
 
-CUSTOM_EVENTS_CTE = f"""custom_events as
+CUSTOM_EVENTS_CTE_CH = f"""custom_events as
 (
 SELECT tag_0 AS target_user, tag_0 AS exposure_user
 FROM {event_table_name()}
@@ -28,7 +29,7 @@ AND timestamp > %(start)s
 AND timestamp < %(end)s
 )"""
 
-CUSTOM_EVENTS_WITH_WEIGHT_CTE = f"""custom_events as
+CUSTOM_EVENTS_WITH_WEIGHT_CTE_CH = f"""custom_events as
 (
 SELECT tag_0 AS target_user, toFloat64(tag_1) AS exposure_weight
 FROM {event_table_name()}
@@ -39,14 +40,14 @@ AND timestamp > %(start)s
 AND timestamp < %(end)s
 )"""
 
-VARIATION_CTE = """variations as
+VARIATION_CTE_CH = """variations as
 (
 SELECT target_user, max(if(empty(exposure_user),0,1.0)) AS exposure_weight, variation
 FROM flag_events GLOBAL LEFT JOIN custom_events USING target_user
 GROUP BY target_user, variation
 )"""
 
-VARIATION_WITH_WEIGHT_CTE = """variations as
+VARIATION_WITH_WEIGHT_CTE_CH = """variations as
 (
 SELECT target_user, sum(exposure_weight) AS exposure_weight, variation
 FROM flag_events GLOBAL INNER JOIN custom_events USING target_user
@@ -58,25 +59,92 @@ FROM variations
 GROUP BY variation
 ORDER BY variation"""
 
-GET_NUMERIC_VARS_SQL = """SELECT count(target_user), sum(exposure_weight), avg(exposure_weight), varSamp(exposure_weight), variation
+GET_NUMERIC_VARS_SQL_CH = """SELECT count(target_user), sum(exposure_weight), avg(exposure_weight), varSamp(exposure_weight), variation
 FROM variations
 GROUP BY variation
 ORDER BY variation"""
 
 
-GET_BINOMIAL_TEST_VARS_SQL = f"""WITH
-{FLAG_EVENTS_CTE},
-{CUSTOM_EVENTS_CTE},
-{VARIATION_CTE}
+GET_BINOMIAL_TEST_VARS_SQL_CH = f"""WITH
+{FLAG_EVENTS_CTE_CH},
+{CUSTOM_EVENTS_CTE_CH},
+{VARIATION_CTE_CH}
 {GET_BINOMIAL_VARS_SQL}"""
 
-GET_NUMERIC_TEST_VARS_SQL = f"""WITH
-{FLAG_EVENTS_CTE},
-{CUSTOM_EVENTS_WITH_WEIGHT_CTE},
-{VARIATION_WITH_WEIGHT_CTE}
-{GET_NUMERIC_VARS_SQL}"""
+GET_NUMERIC_TEST_VARS_SQL_CH = f"""WITH
+{FLAG_EVENTS_CTE_CH},
+{CUSTOM_EVENTS_WITH_WEIGHT_CTE_CH},
+{VARIATION_WITH_WEIGHT_CTE_CH}
+{GET_NUMERIC_VARS_SQL_CH}"""
+
+# PG
+FLAG_EVENTS_CTE_PG = f"""flag_events as
+(
+SELECT properties->>'tag_0' AS target_user, properties->>'tag_1' AS variation
+FROM events
+WHERE distinct_id = %(flag_id)s
+AND event = 'FlagValue'
+AND env_id = %(env_id)s
+AND timestamp > %(start)s
+AND timestamp < %(end)s
+AND properties->>'tag_2' = 'true'
+)"""
+
+CUSTOM_EVENTS_CTE_PG = f"""custom_events as
+(
+SELECT properties->>'tag_0' AS target_user, properties->>'tag_0' AS exposure_user
+FROM events
+WHERE distinct_id = %(event_name)s
+AND event = %(event)s
+AND env_id = %(env_id)s
+AND timestamp > %(start)s
+AND timestamp < %(end)s
+)"""
+
+VARIATION_CTE_PG = """variations as
+(
+SELECT fe.target_user, max(CASE WHEN ce.exposure_user IS NULL THEN 0 ELSE 1.0 END) AS exposure_weight, fe.variation
+FROM flag_events fe LEFT JOIN custom_events ce ON fe.target_user = ce.target_user
+GROUP BY fe.target_user, fe.variation
+)"""
+
+VARIATION_WITH_WEIGHT_CTE_PG = """variations as
+(
+SELECT fe.target_user, SUM(ce.exposure_weight) AS exposure_weight, fe.variation
+FROM flag_events fe INNER JOIN custom_events ce ON fe.target_user = ce.target_user
+GROUP BY fe.target_user, fe.variation
+)"""
+
+CUSTOM_EVENTS_WITH_WEIGHT_CTE_PG = f"""custom_events as
+(
+SELECT properties->>'tag_0' AS target_user, CAST(properties->>'tag_1' AS FLOAT8) AS exposure_weight
+FROM events
+WHERE distinct_id = %(event_name)s
+AND event = %(event)s
+AND env_id = %(env_id)s
+AND timestamp > %(start)s
+AND timestamp < %(end)s
+)"""
+
+GET_NUMERIC_VARS_SQL_PG = """SELECT count(target_user), sum(exposure_weight), avg(exposure_weight), VAR_SAMP(exposure_weight), variation
+FROM variations
+GROUP BY variation
+ORDER BY variation"""
+
+GET_BINOMIAL_TEST_VARS_SQL_PG = f"""WITH
+{FLAG_EVENTS_CTE_PG},
+{CUSTOM_EVENTS_CTE_PG},
+{VARIATION_CTE_PG}
+{GET_BINOMIAL_VARS_SQL}"""
+
+GET_NUMERIC_TEST_VARS_SQL_PG = f"""WITH
+{FLAG_EVENTS_CTE_PG},
+{CUSTOM_EVENTS_WITH_WEIGHT_CTE_PG},
+{VARIATION_WITH_WEIGHT_CTE_PG}
+{GET_NUMERIC_VARS_SQL_PG}"""
 
 
+# MongoDB
 def _query_ff_events_sample_from_mongod(query_params: Dict[str, Any]) -> List[Dict[str, Any]]:
     return [
         {

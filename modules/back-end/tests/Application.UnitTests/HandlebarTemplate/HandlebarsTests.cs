@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Domain.Utils;
 using HandlebarsDotNet;
-using Infrastructure.Webhooks;
+using Infrastructure.Services;
 
 namespace Application.UnitTests.HandlebarTemplate;
 

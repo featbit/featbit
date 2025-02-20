@@ -18,6 +18,11 @@ public class FlagSchedule : FullAuditedEntity
 
     public Guid? ChangeRequestId { get; set; }
 
+    // for ef core
+    protected FlagSchedule()
+    {
+    }
+
     public FlagSchedule(
         Guid orgId,
         Guid envId,

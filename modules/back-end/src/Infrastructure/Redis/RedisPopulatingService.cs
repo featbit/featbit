@@ -1,11 +1,7 @@
 using System.Diagnostics;
 using Application.Caches;
-using Domain.FeatureFlags;
-using Domain.Segments;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using StackExchange.Redis;
-using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Redis;
 
@@ -15,25 +11,25 @@ public class RedisPopulatingService : ICachePopulatingService
     private const string PopulateLockKey = "featbit:populate-redis";
 
     private readonly IDatabase _redis;
-    private readonly MongoDbClient _mongodb;
     private readonly ICacheService _cache;
+    private readonly IFeatureFlagService _flagService;
+    private readonly ISegmentService _segmentService;
     private readonly IEnvironmentService _envService;
-    private readonly ISegmentAppService _segmentAppService;
     private readonly ILogger<RedisPopulatingService> _logger;
 
     public RedisPopulatingService(
         IRedisClient redis,
-        MongoDbClient mongodb,
         ICacheService cache,
+        IFeatureFlagService flagService,
+        ISegmentService segmentService,
         IEnvironmentService envService,
-        ISegmentAppService segmentAppService,
         ILogger<RedisPopulatingService> logger)
     {
         _redis = redis.GetDatabase();
-        _mongodb = mongodb;
         _cache = cache;
+        _flagService = flagService;
+        _segmentService = segmentService;
         _envService = envService;
-        _segmentAppService = segmentAppService;
         _logger = logger;
     }
 
@@ -74,7 +70,7 @@ public class RedisPopulatingService : ICachePopulatingService
 
     public async Task PopulateFlagsAsync()
     {
-        var flags = await _mongodb.QueryableOf<FeatureFlag>().ToListAsync();
+        var flags = await _flagService.FindManyAsync(_ => true);
         foreach (var flag in flags)
         {
             await _cache.UpsertFlagAsync(flag);
@@ -86,10 +82,10 @@ public class RedisPopulatingService : ICachePopulatingService
     private async Task PopulateSegmentAsync()
     {
         // populate segments
-        var segments = await _mongodb.QueryableOf<Segment>().ToListAsync();
+        var segments = await _segmentService.FindManyAsync(_ => true);
         foreach (var segment in segments)
         {
-            var envIds = await _segmentAppService.GetEnvironmentIdsAsync(segment);
+            var envIds = await _segmentService.GetEnvironmentIdsAsync(segment);
             await _cache.UpsertSegmentAsync(envIds, segment);
         }
 
@@ -98,7 +94,7 @@ public class RedisPopulatingService : ICachePopulatingService
 
     private async Task PopulateSecretsAsync()
     {
-        var envs = await _mongodb.QueryableOf<Environment>().ToListAsync();
+        var envs = await _envService.FindManyAsync(_ => true);
         foreach (var env in envs)
         {
             var descriptor = await _envService.GetResourceDescriptorAsync(env.Id);

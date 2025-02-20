@@ -15,18 +15,11 @@ public class ImportGlobalUser : IRequest<bool>
     }
 }
 
-public class ImportGlobalUserHandler : IRequestHandler<ImportGlobalUser, bool>
+public class ImportGlobalUserHandler(IEndUserService endUserService) : IRequestHandler<ImportGlobalUser, bool>
 {
-    private readonly IEndUserService _endUserService;
-
-    public ImportGlobalUserHandler(IEndUserService endUserService)
-    {
-        _endUserService = endUserService;
-    }
-
     public async Task<bool> Handle(ImportGlobalUser request, CancellationToken cancellationToken)
     {
-        await _endUserService.UpsertAsync(request.WorkspaceId, envId: null, request.Users);
+        await endUserService.UpsertAsync(request.WorkspaceId, envId: null, request.Users);
 
         return true;
     }
