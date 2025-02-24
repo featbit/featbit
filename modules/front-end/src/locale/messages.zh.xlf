@@ -2271,11 +2271,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">153</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">204</context>
+          <context context-type="linenumber">211</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/profile/profile.component.ts</context>
@@ -5066,7 +5066,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">450</context>
+          <context context-type="linenumber">460</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -9727,7 +9727,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">456</context>
+          <context context-type="linenumber">466</context>
         </context-group>
         <target>用户组</target>
       </trans-unit>
@@ -9911,7 +9911,7 @@
         <source>Default permissions updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">148</context>
+          <context context-type="linenumber">155</context>
         </context-group>
         <target>更新成功！</target>
       </trans-unit>
@@ -9919,7 +9919,7 @@
         <source>Organization name updated!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">199</context>
+          <context context-type="linenumber">206</context>
         </context-group>
         <target>机构名称更新成功！</target>
       </trans-unit>
@@ -10775,15 +10775,27 @@
         </context-group>
         <target>修改机构名称</target>
       </trans-unit>
-      <trans-unit id="iam.action.iam" datatype="html">
-        <source>IAM</source>
+      <trans-unit id="iam.action.update-org-default-user-permissions" datatype="html">
+        <source>Update org default user permissions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">365</context>
+        </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">366</context>
         </context-group>
+        <target>修改机构默认用户权限</target>
+      </trans-unit>
+      <trans-unit id="iam.action.iam" datatype="html">
+        <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">367</context>
+          <context context-type="linenumber">376</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">377</context>
         </context-group>
         <target>权限管理</target>
       </trans-unit>
@@ -10791,11 +10803,11 @@
         <source>List access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">377</context>
+          <context context-type="linenumber">387</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">378</context>
+          <context context-type="linenumber">388</context>
         </context-group>
         <target>查看访问策略列表</target>
       </trans-unit>
@@ -10803,11 +10815,11 @@
         <source>Manage service access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">386</context>
+          <context context-type="linenumber">396</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">387</context>
+          <context context-type="linenumber">397</context>
         </context-group>
         <target>管理 Service 访问策略</target>
       </trans-unit>
@@ -10815,11 +10827,11 @@
         <source>Manage personal access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">395</context>
+          <context context-type="linenumber">405</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">396</context>
+          <context context-type="linenumber">406</context>
         </context-group>
         <target>管理 Personal 访问策略</target>
       </trans-unit>
@@ -10827,11 +10839,11 @@
         <source>List relay proxies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">406</context>
+          <context context-type="linenumber">416</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">407</context>
+          <context context-type="linenumber">417</context>
         </context-group>
         <target>查看中继代理列表</target>
       </trans-unit>
@@ -10839,11 +10851,11 @@
         <source>Manage relay proxies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">415</context>
+          <context context-type="linenumber">425</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">416</context>
+          <context context-type="linenumber">426</context>
         </context-group>
         <target>管理中继代理</target>
       </trans-unit>
@@ -10851,7 +10863,7 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">448</context>
+          <context context-type="linenumber">458</context>
         </context-group>
         <target>组织机构</target>
       </trans-unit>
@@ -10859,7 +10871,7 @@
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">452</context>
+          <context context-type="linenumber">462</context>
         </context-group>
         <target>环境</target>
       </trans-unit>
@@ -10867,7 +10879,7 @@
         <source>Flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">454</context>
+          <context context-type="linenumber">464</context>
         </context-group>
         <target>开关</target>
       </trans-unit>
