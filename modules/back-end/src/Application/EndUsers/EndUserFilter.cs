@@ -19,14 +19,14 @@ public class EndUserFilter : PagedRequest
 
     public EndUserFilter(SearchEndUser query)
     {
-        CustomizedProperties = new List<EndUserCustomizedProperty>();
+        CustomizedProperties = [];
 
         // pagination params
         PageIndex = query.PageIndex;
         PageSize = query.PageSize;
 
         // excluded keyIds
-        ExcludedKeyIds = query.ExcludedKeyIds ?? Array.Empty<string>();
+        ExcludedKeyIds = query.ExcludedKeyIds ?? [];
 
         // by default, we only search for env users
         // if IncludeGlobalUser is true, we search for both env & global users

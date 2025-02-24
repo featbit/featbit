@@ -89,6 +89,22 @@ services:
       - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
       - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-server:/var/lib/clickhouse
+      
+  postgresql:
+    image: postgres:15.10
+    container_name: postgresql
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 0tJXCokSvOB8
+      POSTGRES_DB: featbit
+    volumes:
+      - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - featbit-network
 
 networks:
   featbit-network:
@@ -103,3 +119,4 @@ volumes:
   redis:
   kafka:
   clickhouse-server:
+  postgres_data:

@@ -30,7 +30,7 @@ public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
             throw new BusinessException(ErrorCodes.CannotDeleteUnArchivedSegment);
         }
 
-        await _service.DeleteAsync(request.Id);
+        await _service.DeleteOneAsync(request.Id);
 
         // publish on segment change notification
         var notification = new OnSegmentDeleted(segment, _currentUser.Id);

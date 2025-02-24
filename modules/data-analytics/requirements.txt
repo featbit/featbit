@@ -20,3 +20,4 @@ Flask-APScheduler
 python-dotenv
 opentelemetry-distro[otlp] 
 opentelemetry-instrumentation
+psycopg[binary,pool]

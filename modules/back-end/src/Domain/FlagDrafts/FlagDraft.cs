@@ -17,6 +17,11 @@ public class FlagDraft : FullAuditedEntity
 
     public DataChange DataChange { get; set; }
 
+    // for ef core
+    protected FlagDraft()
+    {
+    }
+
     public FlagDraft(
         Guid envId,
         Guid flagId,

@@ -13,5 +13,5 @@ def migrate() -> None:
     db = get_db()
     if MONGO_DB_EVENTS_COLLECTION not in db.list_collection_names():
         db.Events.create_index([("event", ASCENDING), ("env_id", ASCENDING), ("distinct_id", ASCENDING), ("timestamp", ASCENDING)])
-        current_app.logger.info("Clickhouse migrations up to date!")
+        current_app.logger.info("MongoDB migrations up to date!")
     current_app.logger.info("✅ Migration successful")

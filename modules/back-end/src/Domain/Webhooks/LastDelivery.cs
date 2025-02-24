@@ -8,6 +8,11 @@ public class LastDelivery
 
     public int? Response { get; set; }
 
+    // for ef core and System.Text.Json
+    public LastDelivery()
+    {
+    }
+
     public LastDelivery(WebhookDelivery delivery)
     {
         Success = delivery.Success;

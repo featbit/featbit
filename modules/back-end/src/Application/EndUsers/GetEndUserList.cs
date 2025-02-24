@@ -12,17 +12,8 @@ public class GetEndUserList : IRequest<PagedResult<EndUser>>
     public EndUserFilter Filter { get; set; }
 }
 
-public class GetEndUserListHandler : IRequestHandler<GetEndUserList, PagedResult<EndUser>>
+public class GetEndUserListHandler(IEndUserService service) : IRequestHandler<GetEndUserList, PagedResult<EndUser>>
 {
-    private readonly IEndUserService _service;
-
-    public GetEndUserListHandler(IEndUserService service)
-    {
-        _service = service;
-    }
-
-    public async Task<PagedResult<EndUser>> Handle(GetEndUserList request, CancellationToken cancellationToken)
-    {
-        return await _service.GetListAsync(request.WorkspaceId, request.EnvId, request.Filter);
-    }
+    public async Task<PagedResult<EndUser>> Handle(GetEndUserList request, CancellationToken cancellationToken) =>
+        await service.GetListAsync(request.WorkspaceId, request.EnvId, request.Filter);
 }

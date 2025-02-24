@@ -12,5 +12,7 @@ public interface ISegmentService : IService<Segment>
 
     Task<ICollection<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id);
 
-    Task DeleteAsync(Guid id);
+    Task<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment);
+
+    Task<bool> IsNameUsedAsync(Guid workspaceId, string type, Guid envId, string name);
 }

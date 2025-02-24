@@ -80,11 +80,10 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
             }
         }
 
-        var existed =
-            await _service.FindOneAsync(at => at.OrganizationId == request.OrganizationId && string.Equals(at.Name, request.Name, StringComparison.OrdinalIgnoreCase));
-        if (existed != null)
+        var isNameUsed = await _service.IsNameUsedAsync(request.OrganizationId, request.Name);
+        if (isNameUsed)
         {
-            throw new BusinessException(ErrorCodes.EntityExistsAlready);
+            throw new BusinessException(ErrorCodes.NameHasBeenUsed);
         }
 
         var accessToken =

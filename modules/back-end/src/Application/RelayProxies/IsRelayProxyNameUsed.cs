@@ -7,22 +7,8 @@ public class IsRelayProxyNameUsed : IRequest<bool>
     public string Name { get; set; }
 }
 
-public class IsRelayProxyNameUsedHandler : IRequestHandler<IsRelayProxyNameUsed, bool>
+public class IsRelayProxyNameUsedHandler(IRelayProxyService service) : IRequestHandler<IsRelayProxyNameUsed, bool>
 {
-    private readonly IRelayProxyService _service;
-
-    public IsRelayProxyNameUsedHandler(IRelayProxyService service)
-    {
-        _service = service;
-    }
-
-    public async Task<bool> Handle(IsRelayProxyNameUsed request, CancellationToken cancellationToken)
-    {
-        var isNameUsed = await _service.AnyAsync(x =>
-            x.OrganizationId == request.OrganizationId &&
-            string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase)
-        );
-
-        return isNameUsed;
-    }
+    public async Task<bool> Handle(IsRelayProxyNameUsed request, CancellationToken cancellationToken) =>
+        await service.IsNameUsedAsync(request.OrganizationId, request.Name);
 }
