@@ -130,7 +130,7 @@ db.Policies.insertOne(
                 _id: getUUIDString(),
                 resourceType: "organization",
                 effect: "allow",
-                actions: ["UpdateOrgDefaultPermissions"],
+                actions: ["UpdateOrgDefaultUserPermissions"],
                 resources: ["organization/*"]
             },
             {
