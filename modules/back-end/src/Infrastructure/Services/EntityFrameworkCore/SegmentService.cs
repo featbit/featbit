@@ -81,7 +81,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         };
 
         var references = await DbConnection.QueryAsync<FlagReference>(sql, parameters);
-        return references.ToArray();
+        return references.AsList();
     }
 
     public async Task<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment)

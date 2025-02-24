@@ -76,7 +76,7 @@ public class EndUserService(AppDbContext dbContext)
         var totalCount = await DbConnection.ExecuteScalarAsync<int>(countSr.Sql, countSr.NamedBindings);
         var items = await DbConnection.QueryAsync<EndUser>(itemsSr.Sql, itemsSr.NamedBindings);
 
-        return new PagedResult<EndUser>(totalCount, items.ToArray());
+        return new PagedResult<EndUser>(totalCount, items.AsList());
     }
 
     public async Task<EndUser> UpsertAsync(EndUser user)
