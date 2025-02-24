@@ -358,6 +358,16 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isSpecificApplicable: false
   },
 
+  UpdateOrgDefaultPermissions: {
+    id: uuidv4(),
+    name: 'UpdateOrgDefaultPermissions',
+    resourceType: ResourceTypeEnum.organization,
+    displayName: $localize`:@@iam.action.update-org-default-permissions:Update org default permissions`,
+    description: $localize`:@@iam.action.update-org-default-permissions:Update org default permissions`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
+
   // iam
   CanManageIAM: {
     id: uuidv4(),
