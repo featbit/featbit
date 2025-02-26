@@ -26,6 +26,7 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - SSOEnabled=true
+      - DbProvider=Postgres
     depends_on:
       - postgresql
       - redis
@@ -41,6 +42,8 @@ services:
     build:
       context: ./modules/evaluation-server
       dockerfile: ./deploy/Dockerfile
+    environment:
+      - DbProvider=Postgres
     depends_on:
       - postgresql
       - redis
