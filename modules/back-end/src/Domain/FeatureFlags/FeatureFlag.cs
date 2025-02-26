@@ -210,8 +210,6 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public Variation DisabledVariation => GetVariation(DisabledVariationId);
-
     public Variation GetVariation(string variationId)
     {
         return Variations.FirstOrDefault(x => x.Id == variationId);

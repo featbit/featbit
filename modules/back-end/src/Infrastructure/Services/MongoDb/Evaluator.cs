@@ -21,7 +21,7 @@ public class Evaluator : IEvaluator
         // if flag is disabled
         if (!flag.IsEnabled)
         {
-            return new UserVariation(flag.DisabledVariation, "flag disabled");
+            return new UserVariation(flag.GetVariation(flag.DisabledVariationId), "flag disabled");
         }
 
         // if user is targeted
