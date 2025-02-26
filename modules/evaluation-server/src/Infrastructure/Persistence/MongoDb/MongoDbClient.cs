@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
-namespace Infrastructure.MongoDb;
+namespace Infrastructure.Persistence.MongoDb;
 
 public class MongoDbClient : IMongoDbClient
 {
@@ -19,11 +18,7 @@ public class MongoDbClient : IMongoDbClient
 
         var value = options.Value;
 
-        // linq provider v3 has many improvement in version 2.14.x we should use it
-        var clientSettings = MongoClientSettings.FromConnectionString(value.ConnectionString);
-        clientSettings.LinqProvider = LinqProvider.V3;
-
-        Database = new MongoClient(clientSettings).GetDatabase(value.Database);
+        Database = new MongoClient(value.ConnectionString).GetDatabase(value.Database);
     }
 
     public async Task<bool> IsHealthyAsync()

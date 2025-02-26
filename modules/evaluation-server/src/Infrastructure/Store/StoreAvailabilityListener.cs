@@ -9,7 +9,7 @@ public class StoreAvailabilityListener
     private static StoreAvailabilityListener? _instance;
     public static StoreAvailabilityListener Instance => _instance ??= new StoreAvailabilityListener();
 
-    // assume redis is the default available store 
+    // assume redis is the default available store
     public string AvailableStore = Stores.Redis;
 
     public event Action<string, string>? OnStoreAvailabilityChanged;

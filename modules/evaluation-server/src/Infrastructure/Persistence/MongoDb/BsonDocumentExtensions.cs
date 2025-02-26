@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using MongoDB.Bson;
 
-namespace Infrastructure.MongoDb;
+namespace Infrastructure.Persistence.MongoDb;
 
 public static class BsonDocumentExtensions
 {

@@ -2,7 +2,7 @@ using Domain.Shared;
 
 namespace Infrastructure.Store;
 
-public class NoneStore : IStore
+public class NoneStore : IDbStore
 {
     public string Name => Stores.None;
 
