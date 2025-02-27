@@ -71,9 +71,25 @@ Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or click
 
 ### MongoDB Settings
 
-| Name                    | Description                             | Value                                      |
-|-------------------------|-----------------------------------------|--------------------------------------------|
-| `MONGO_HOST`            | Mongodb host, used to check db liveness | `"mongodb"`                                |
-| `MONGO_PORT`            | Mongodb port, used to check db liveness | `27017`                                    |
-| `MONGO_URI`             | Mongodb connection string               | `"mongodb://admin:password@mongodb:27017"` |
-| `MONGO_INITDB_DATABASE` | Mongodb database name                   | `"featbit"`                                |
+Make sure assign false to `IS_PRO`
+
+| Name                    | Description                                             | Value                                      |
+|-------------------------|---------------------------------------------------------|--------------------------------------------|
+| `DB_PROVIDER`           | Database provider, used to select MongoDB or PostgreSQL | `"mongodb"`                                |
+| `MONGO_HOST`            | Mongodb host, used to check db liveness                 | `"mongodb"`                                |
+| `MONGO_PORT`            | Mongodb port, used to check db liveness                 | `27017`                                    |
+| `MONGO_URI`             | Mongodb connection string                               | `"mongodb://admin:password@mongodb:27017"` |
+| `MONGO_INITDB_DATABASE` | Mongodb database name                                   | `"featbit"`                                |
+
+### PostgreSQL Settings
+
+Make sure assign false to `IS_PRO`
+
+| Name                | Description                                             | Value             |
+|---------------------|---------------------------------------------------------|-------------------|
+| `DB_PROVIDER`       | Database provider, used to select MongoDB or PostgreSQL | `"MongoDb"`       |
+| `POSTGRES_USER`     | PostgreSQL port, used to check db liveness              | `"postgres`       |
+| `POSTGRES_PASSWORD` | PostgreSQL database password                            | `"0tJXCokSvOB8"`  |
+| `POSTGRES_HOST`     | PostgreSQL database host                                | `"postgresql"`    |
+| `POSTGRES_PORT`     | PostgreSQL database port                                | `5432`            |
+| `POSTGRES_DATABASE` | PostgreSQL database name                                | `"featbit"`       |

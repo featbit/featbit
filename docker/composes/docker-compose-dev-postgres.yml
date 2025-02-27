@@ -70,11 +70,11 @@ services:
       REDIS_PORT: 6379
       CHECK_DB_LIVNESS: false
       DB_PROVIDER: Postgres
-      POSTGRES_CONNECTION_STRING: postgresql://postgres:0tJXCokSvOB8@postgresql:5432/featbit
-      POSTGRES_USER:
-      POSTGRES_PASSWORD:
-      POSTGRES_HOST:
-      POSTGRES_PORT:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 0tJXCokSvOB8
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: featbit
 
   postgresql:
     image: postgres:15.10
