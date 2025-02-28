@@ -26,10 +26,13 @@ finally
     Log.CloseAndFlush();
 }
 
+return;
+
 void InitializeSerilog()
 {
     var configuration = new LoggerConfiguration()
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
         .Enrich.FromLogContext()
         .Enrich.WithClientIp("X-Forwarded-For")
         .Enrich.WithRequestHeader("User-Agent")

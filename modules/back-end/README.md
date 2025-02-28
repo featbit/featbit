@@ -39,13 +39,6 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 | `AllowedHosts` | Hosts allowed to connect to the API       | `"*"`   |
 | `IS_PRO`       | If `true` operates in PRO mode with kafka | `false` |
 
-### Logging
-
-| Name                                      | Description                    | Value           |
-|-------------------------------------------|--------------------------------|-----------------|
-| `Logging__LogLevel__Default`              | Sets the default logging level | `"Information"` |
-| `Logging__LogLevel__Microsoft_AspNetCore` | aspnet-core logging level      | `"Warning"`     |
-
 ### JWT
 
 | Name            | Description     | Value                    |
