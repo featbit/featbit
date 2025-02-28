@@ -10,14 +10,6 @@
 2. `docker build --progress plain -f ./Dockerfile -t featbit/data-analytics-server:local .`
 3. `docker run -d -p 8200:80 --name featbit-data-analytics-server-local featbit/data-analytics-server:local`
 
-We recommend you to run it via:
-
-```bash
-git clone https://github.com/featbit/featbit.git
-cd featbit/
-docker compose up da-server -d
-```
-
 ## Environment variables
 
 ### General
