@@ -10,6 +10,8 @@ public class TriggerConfiguration : IEntityTypeConfiguration<Trigger>
     {
         builder.ToTable("triggers");
 
+        builder.HasIndex(x => x.TargetId);
+
         builder.Property(x => x.Type).HasMaxLength(64).IsRequired();
         builder.Property(x => x.Action).HasMaxLength(64).IsRequired();
         builder.Property(x => x.Token).HasMaxLength(128).IsRequired();

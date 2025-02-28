@@ -10,8 +10,7 @@ public class FeatureFlagConfiguration : IEntityTypeConfiguration<FeatureFlag>
     {
         builder.ToTable("feature_flags");
 
-        builder.HasIndex(x => x.EnvId);
-        builder.HasIndex(x => x.UpdatedAt);
+        builder.HasIndex(x => new { x.EnvId, x.UpdatedAt });
 
         builder.Property(x => x.Revision).IsRequired();
         builder.Property(x => x.IsEnabled).IsRequired();

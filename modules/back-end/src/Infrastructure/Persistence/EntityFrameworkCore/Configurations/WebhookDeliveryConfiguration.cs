@@ -13,7 +13,7 @@ public class WebhookDeliveryConfiguration : IEntityTypeConfiguration<WebhookDeli
     {
         builder.ToTable("webhook_deliveries");
 
-        builder.HasIndex(x => x.WebhookId);
+        builder.HasIndex(x => new { x.WebhookId, x.StartedAt });
 
         var converter = new ValueConverter<object, string>(
             v => JsonSerializer.Serialize(v, ReusableJsonSerializerOptions.Web),

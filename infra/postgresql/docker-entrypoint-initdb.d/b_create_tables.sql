@@ -426,13 +426,7 @@ CREATE TABLE workspaces
 CREATE INDEX ix_access_tokens_organization_id ON access_tokens (organization_id);
 
 
-CREATE INDEX ix_audit_logs_created_at ON audit_logs (created_at);
-
-
-CREATE INDEX ix_audit_logs_env_id ON audit_logs (env_id);
-
-
-CREATE INDEX ix_audit_logs_ref_id ON audit_logs (ref_id);
+CREATE INDEX ix_audit_logs_env_id_ref_id_created_at ON audit_logs (env_id, ref_id, created_at);
 
 
 CREATE UNIQUE INDEX ix_end_users_env_id_key_id ON end_users (env_id, key_id);
@@ -450,19 +444,31 @@ CREATE INDEX ix_environments_project_id ON environments (project_id);
 CREATE INDEX ix_experiment_metrics_env_id ON experiment_metrics (env_id);
 
 
-CREATE INDEX ix_experiments_env_id ON experiments (env_id);
+CREATE INDEX ix_experiments_env_id_feature_flag_id ON experiments (env_id, feature_flag_id);
 
 
-CREATE INDEX ix_feature_flags_env_id ON feature_flags (env_id);
+CREATE INDEX ix_feature_flags_env_id_updated_at ON feature_flags (env_id, updated_at);
 
 
-CREATE INDEX ix_feature_flags_updated_at ON feature_flags (updated_at);
+CREATE INDEX ix_flag_change_requests_flag_id ON flag_change_requests (flag_id);
+
+
+CREATE INDEX ix_flag_schedules_flag_id ON flag_schedules (flag_id);
+
+
+CREATE INDEX ix_group_members_organization_id_group_id_member_id ON group_members (organization_id, group_id, member_id);
+
+
+CREATE INDEX ix_group_policies_group_id_policy_id ON group_policies (group_id, policy_id);
 
 
 CREATE INDEX ix_groups_organization_id ON groups (organization_id);
 
 
-CREATE INDEX ix_organization_users_organization_id ON organization_users (organization_id);
+CREATE INDEX ix_member_policies_organization_id_member_id_policy_id ON member_policies (organization_id, member_id, policy_id);
+
+
+CREATE INDEX ix_organization_users_organization_id_user_id ON organization_users (organization_id, user_id);
 
 
 CREATE INDEX ix_organizations_workspace_id ON organizations (workspace_id);
@@ -477,18 +483,18 @@ CREATE INDEX ix_projects_organization_id ON projects (organization_id);
 CREATE INDEX ix_relay_proxies_organization_id ON relay_proxies (organization_id);
 
 
-CREATE INDEX ix_segments_env_id ON segments (env_id);
+CREATE INDEX ix_segments_workspace_id_updated_at ON segments (workspace_id, updated_at);
 
 
-CREATE INDEX ix_segments_workspace_id ON segments (workspace_id);
+CREATE INDEX ix_triggers_target_id ON triggers (target_id);
 
 
-CREATE INDEX ix_users_workspace_id ON users (workspace_id);
+CREATE UNIQUE INDEX ix_users_workspace_id_email ON users (workspace_id, email);
 
 
-CREATE INDEX ix_webhook_deliveries_webhook_id ON webhook_deliveries (webhook_id);
+CREATE INDEX ix_webhook_deliveries_webhook_id_started_at ON webhook_deliveries (webhook_id, started_at);
 
 
-CREATE INDEX ix_webhooks_org_id ON webhooks (org_id);
+CREATE INDEX ix_webhooks_org_id_created_at ON webhooks (org_id, created_at);
 
 

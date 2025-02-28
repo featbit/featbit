@@ -10,7 +10,7 @@ public class ExperimentConfiguration : IEntityTypeConfiguration<Experiment>
     {
         builder.ToTable("experiments");
 
-        builder.HasIndex(x => x.EnvId);
+        builder.HasIndex(x => new { x.EnvId, x.FeatureFlagId });
 
         builder.Property(x => x.IsArchived).IsRequired();
         builder.Property(x => x.Status).HasMaxLength(64).IsRequired();

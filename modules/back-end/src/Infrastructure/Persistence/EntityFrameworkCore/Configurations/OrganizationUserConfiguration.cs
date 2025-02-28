@@ -10,6 +10,6 @@ public class OrganizationUserConfiguration : IEntityTypeConfiguration<Organizati
     {
         builder.ToTable("organization_users");
 
-        builder.HasIndex(x => x.OrganizationId);
+        builder.HasIndex(x => new { x.OrganizationId, x.UserId });
     }
 }

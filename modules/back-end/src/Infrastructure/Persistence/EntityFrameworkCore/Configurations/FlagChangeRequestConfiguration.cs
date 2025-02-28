@@ -10,6 +10,8 @@ public class FlagChangeRequestConfiguration : IEntityTypeConfiguration<FlagChang
     {
         builder.ToTable("flag_change_requests");
 
+        builder.HasIndex(x => x.FlagId);
+
         builder.Property(x => x.Status).HasMaxLength(64).IsRequired();
         builder.Property(x => x.Reason).HasMaxLength(512);
 

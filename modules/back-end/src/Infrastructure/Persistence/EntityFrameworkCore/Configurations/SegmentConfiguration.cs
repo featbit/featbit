@@ -10,8 +10,7 @@ public class SegmentConfiguration : IEntityTypeConfiguration<Segment>
     {
         builder.ToTable("segments");
 
-        builder.HasIndex(x => x.WorkspaceId);
-        builder.HasIndex(x => x.EnvId);
+        builder.HasIndex(x => new { x.WorkspaceId, x.UpdatedAt });
 
         builder.Property(x => x.Name).HasMaxLength(128).IsRequired();
         builder.Property(x => x.Type).HasMaxLength(64).IsRequired();

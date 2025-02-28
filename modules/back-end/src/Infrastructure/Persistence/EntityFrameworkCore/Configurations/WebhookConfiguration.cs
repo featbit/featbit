@@ -10,7 +10,7 @@ public class WebhookConfiguration : IEntityTypeConfiguration<Webhook>
     {
         builder.ToTable("webhooks");
 
-        builder.HasIndex(x => x.OrgId);
+        builder.HasIndex(x => new { x.OrgId, x.CreatedAt });
 
         builder.Property(x => x.Name).HasMaxLength(128).IsRequired();
         builder.Property(x => x.Url).IsRequired();
