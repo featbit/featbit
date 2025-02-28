@@ -4,7 +4,11 @@
 * Track every event on your website or app
 * Understand your users and how to improve your product via A/B/N test
 
-## Build & Run on local
+## Build & Run
+
+1. `cd ./featbit/modules/data-analytics/`
+2. `docker build --progress plain -f ./Dockerfile -t featbit/data-analytics-server:local .`
+3. `docker run -d -p 8200:80 --name featbit-data-analytics-server-local featbit/data-analytics-server:local`
 
 We recommend you to run it via:
 
@@ -25,9 +29,10 @@ docker compose up da-server -d
 | `CACHE_TYPE`       | Type of cache used                                       | `"RedisCache"` |
 | `TEST`             | If `true`, runs the application in test mode             | `"false"`      |
 
-Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or clickhouse
+> [!NOTE]  
+> Set CHECK_DB_LIVNESS to **false** if you use external db.
 
-### Kafka Settings
+### Kafka
 
 | Name                      | Description                     | Default Value  |
 |---------------------------|---------------------------------|----------------|
@@ -37,7 +42,7 @@ Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or click
 | `KAFKA_SASL_USER`         | SASL user for Kafka             | `""`           |
 | `KAFKA_SASL_PASSWORD`     | SASL password for Kafka         | `""`           |
 
-### ClickHouse Settings
+### ClickHouse
 
 | Name                     | Description                                        | Default Value          |
 |--------------------------|----------------------------------------------------|------------------------|
@@ -54,7 +59,7 @@ Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or click
 | `CLICKHOUSE_SECURE`      | If `true`, enables secure connection to ClickHouse | `"false"`              |
 | `CLICKHOUSE_VERIFY`      | If `true`, verifies the ClickHouse connection      | `"true"`               |
 
-### Redis Settings
+### Redis
 
 | Name                             | Description                        | Default Value       |
 |----------------------------------|------------------------------------|---------------------|
@@ -69,7 +74,7 @@ Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or click
 | `REDIS_SENTINEL_PASSWORD`        | Password for Redis sentinel        | `""`                |
 | `REDIS_SENTINEL_MASTER_SET`      | Master set for Redis sentinel      | `"mymaster"`        |
 
-### MongoDB Settings
+### MongoDb
 
 Make sure assign false to `IS_PRO`
 
@@ -81,7 +86,7 @@ Make sure assign false to `IS_PRO`
 | `MONGO_URI`             | Mongodb connection string                             | `"mongodb://admin:password@mongodb:27017"` |
 | `MONGO_INITDB_DATABASE` | Mongodb database name                                 | `"featbit"`                                |
 
-### PostgreSQL Settings
+### Postgres
 
 Make sure assign false to `IS_PRO`
 
