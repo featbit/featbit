@@ -7,11 +7,9 @@
 
 ## Build & Run
 
-1. `cd ./featbit`
-2. `docker-compose -f .\docker-compose-dev.yml up -d api`
-3. run `docker inspect --format '{{json .State}}' featbit-mongodb-dev | jq` to check mongodb's status
-4. run `docker inspect --format '{{json .State.Health}}' featbit-api-dev | jq` to check api service's health status
-5. open http://localhost:5000/swagger
+1. `cd ./featbit/modules/back-end`
+2. `docker build --progress plain -f ./deploy/Dockerfile -t featbit/api:local .`
+3. `docker run -d -p 5000:5000 --name featbit-api-local featbit/api:local`
 
 ## Default User
 
@@ -22,13 +20,16 @@
 
 you have a few options to check the app's health status
 
-### Dump Health Check
+### Liveness
 
-**Dump Health Check** don't check that the application can connect to its dependencies, and often only exercise the most
-basic requirements of the application itself i.e. can they respond to an HTTP request.
+Run `curl http://localhost:5000/health/liveness` to verify that the application has not crashed. This does not check
+that the application can connect to its dependencies, and often only exercises the most basic requirements of the
+application itself i.e. can they respond to an HTTP request.
 
-- run `docker inspect --format '{{json .State.Health}}' featbit-api-dev | jq` check if container's STATUS is healthy
-- run `curl http://localhost:5000/health/liveness` manually to check the application's liveness
+### Readiness
+
+Run `curl http://localhost:5000/health/readiness` to verify if the application is working correctly, that it can service
+requests, and that it can connect to its dependencies (a database, message queue, or other API, for example).
 
 ## Environment Variables
 

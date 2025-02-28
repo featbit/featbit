@@ -3,20 +3,23 @@
 ## Build & Run
 
 1. `cd ./featbit/modules/evaluation-server`
-2. `docker build --progress plain -f ./deploy/Dockerfile -t featbit/evaluation-server .`
-3. `docker run -d -p 6000:6000 --name featbit-evaluation-server featbit/evaluation-server`
+2. `docker build --progress plain -f ./deploy/Dockerfile -t featbit/evaluation-server:local .`
+3. `docker run -d -p 5100:5100 --name featbit-evaluation-server-local featbit/evaluation-server:local`
 
 ## Health Check
 
 you have a few options to check the app's health status
 
-### Dump Health Check
+### Liveness
 
-**Dump Health Check** don't check that the application can connect to its dependencies, and often only exercise the most
-basic requirements of the application itself i.e. can they respond to an HTTP request.
+Run `curl http://localhost:5100/health/liveness` to verify that the application has not crashed. This does not check
+that the application can connect to its dependencies, and often only exercises the most basic requirements of the
+application itself i.e. can they respond to an HTTP request.
 
-- run `docker inspect featbit-evaluation-server` check if container's STATUS is healthy
-- run `curl http://localhost:5000/health/liveness` manually to check the application's liveness
+### Readiness
+
+Run `curl http://localhost:5100/health/readiness` to verify if the application is working correctly, that it can service
+requests, and that it can connect to its dependencies (a database, message queue, or other API, for example).
 
 # Environment Variables
 
