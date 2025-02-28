@@ -4,7 +4,7 @@ from typing import List, Tuple
 
 from flask import Flask
 
-from app.config import DevelopmentConfig, ProductionConfig, MangoDbProvider, PostgresDbProvider
+from app.config import DevelopmentConfig, ProductionConfig, MongoDbProvider, PostgresDbProvider
 from app.extensions import get_cache, get_mongodb, get_scheduler
 from app.setting import (CACHE_KEY_PREFIX, CACHE_TYPE, DEFAULT_LOGGING_CONFIG,
                          IS_PRO, MONGO_URI, REDIS_CLUSTER_HOST_PORT_PAIRS,
@@ -72,7 +72,7 @@ def _create_app(config_name='default') -> Flask:
             _init_aps_scheduler(__app)
         from app.commands import migrate_clickhouse
         __app.cli.add_command(migrate_clickhouse, name='migrate-database')
-    elif DB_PROVIDER == MangoDbProvider:
+    elif DB_PROVIDER == MongoDbProvider:
         get_mongodb(__app, MONGO_URI)
         from app.commands import migrate_mongodb
         __app.cli.add_command(migrate_mongodb, name='migrate-database')

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from app import MangoDbProvider, PostgresDbProvider
+from app import MongoDbProvider, PostgresDbProvider
 from app.clickhouse.client import sync_execute
 from app.main.models.statistics.end_user.sql import (
     count_and_list_user_from_mongodb, get_users_sql_ch, count_user_sql_ch, get_users_sql_pg, count_user_sql_pg)
@@ -108,7 +108,7 @@ class EndUserStatistics:
             for res in sync_execute(count_user_sql_ch(has_variation, has_user), args=self._query_params):  # type: ignore
                 user_count = res[0]
             rs = sync_execute(get_users_sql_ch(has_variation, has_user), args=self._query_params)
-        elif DB_PROVIDER == MangoDbProvider:
+        elif DB_PROVIDER == MongoDbProvider:
             user_count, rs = count_and_list_user_from_mongodb(self._query_params, has_variation=has_variation, has_user=has_user)
         elif DB_PROVIDER == PostgresDbProvider:
             if has_user:

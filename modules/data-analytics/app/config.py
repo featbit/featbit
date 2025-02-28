@@ -13,5 +13,5 @@ class ProductionConfig(Config):
     pass
 
 
-MangoDbProvider = "MongoDb"
+MongoDbProvider = "MongoDb"
 PostgresDbProvider = "Postgres"

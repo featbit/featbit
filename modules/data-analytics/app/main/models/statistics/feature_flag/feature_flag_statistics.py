@@ -2,7 +2,7 @@ from datetime import datetime
 from itertools import groupby
 from typing import Any, Dict, Iterable, Optional
 
-from app import DB_PROVIDER, MangoDbProvider, PostgresDbProvider
+from app import DB_PROVIDER, MongoDbProvider, PostgresDbProvider
 from app.clickhouse.client import sync_execute
 from app.main.models.statistics.feature_flag.sql import (
     GET_FLAG_EVENTS_BY_INTERVAL_SQL_CH, make_statistic_ff_events_from_mongod, GET_FLAG_EVENTS_BY_INTERVAL_SQL_PG)
@@ -98,7 +98,7 @@ class FeatureFlagIntervalStatistics:
 
         if IS_PRO:
             rs = sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL_CH, args=self._query_params)
-        elif DB_PROVIDER == MangoDbProvider:
+        elif DB_PROVIDER == MongoDbProvider:
             rs = make_statistic_ff_events_from_mongod(self._query_params)
         elif DB_PROVIDER == PostgresDbProvider:
             rs = execute_query(GET_FLAG_EVENTS_BY_INTERVAL_SQL_PG, args=self._query_params)

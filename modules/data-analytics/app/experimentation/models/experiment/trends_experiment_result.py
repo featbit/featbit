@@ -1,6 +1,6 @@
 from typing import Any, Dict, Iterable
 
-from app import MangoDbProvider, PostgresDbProvider
+from app import MongoDbProvider, PostgresDbProvider
 from app.clickhouse.client import sync_execute
 from app.experimentation.models.event.sql import (
     GET_BINOMIAL_TEST_VARS_SQL_CH, GET_NUMERIC_TEST_VARS_SQL_CH,
@@ -65,7 +65,7 @@ def _get_variations(experiment: Experiment, query_params: Dict[str, Any]) -> Dic
     if IS_PRO:
         sql = GET_BINOMIAL_TEST_VARS_SQL_CH if binomial_test else GET_NUMERIC_TEST_VARS_SQL_CH
         rs = sync_execute(sql, args=query_params)
-    elif DB_PROVIDER == MangoDbProvider:
+    elif DB_PROVIDER == MongoDbProvider:
         rs = cal_experiment_vars_from_mongod(query_params, binomial_test)
     elif DB_PROVIDER == PostgresDbProvider:
         sql = GET_BINOMIAL_TEST_VARS_SQL_PG if binomial_test else GET_NUMERIC_TEST_VARS_SQL_PG
