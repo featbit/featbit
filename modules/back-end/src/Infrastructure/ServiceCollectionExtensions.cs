@@ -18,7 +18,10 @@ public static class ServiceCollectionExtensions
 {
     public static void AddMongoDb(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
+        services.AddOptionsWithValidateOnStart<MongoDbOptions>()
+            .Bind(configuration.GetSection(MongoDbOptions.MongoDb))
+            .ValidateDataAnnotations();
+
         services.AddSingleton<MongoDbClient>();
     }
 
@@ -50,8 +53,7 @@ public static class ServiceCollectionExtensions
         );
     }
 
-    public static void AddMessagingServices(this IServiceCollection services,
-        IConfiguration configuration)
+    public static void AddMessagingServices(this IServiceCollection services, IConfiguration configuration)
     {
         if (configuration.IsProVersion())
         {

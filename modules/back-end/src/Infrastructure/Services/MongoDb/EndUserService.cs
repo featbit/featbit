@@ -29,8 +29,8 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         };
 
         // excluded keyIds
-        var excludedKeyIds = userFilter.ExcludedKeyIds ?? Array.Empty<string>();
-        if (excludedKeyIds.Any())
+        var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
+        if (excludedKeyIds.Length != 0)
         {
             var excludedKeyIdsFilter = filterBuilder.Nin(x => x.KeyId, excludedKeyIds);
             mustFilters.Add(excludedKeyIdsFilter);

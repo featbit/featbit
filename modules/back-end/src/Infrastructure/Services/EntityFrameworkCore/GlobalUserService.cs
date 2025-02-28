@@ -20,6 +20,7 @@ public class GlobalUserService(AppDbContext dbContext)
 
         var total = await query.CountAsync();
         var endUsers = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
