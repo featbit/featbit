@@ -6,21 +6,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.AppService;
 
-public class FlagScheduleWorker : BackgroundService
+public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagScheduleWorker> logger)
+    : BackgroundService
 {
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(45));
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<FlagScheduleWorker> _logger;
-
-    public FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagScheduleWorker> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (await _timer.WaitForNextTickAsync(stoppingToken) && !stoppingToken.IsCancellationRequested)
+        while (await _timer.WaitForNextTickAsync(stoppingToken))
         {
             await DoWorkAsync(stoppingToken);
         }
@@ -28,7 +21,7 @@ public class FlagScheduleWorker : BackgroundService
 
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Stopping flag schedule worker...");
+        logger.LogInformation("Stopping flag schedule worker...");
 
         // This will cause any active call to WaitForNextTickAsync() to return false immediately.
         _timer.Dispose();
@@ -39,7 +32,7 @@ public class FlagScheduleWorker : BackgroundService
 
     private async Task DoWorkAsync(CancellationToken cancellationToken)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         var flagScheduleService = scope.ServiceProvider.GetRequiredService<IFlagScheduleService>();
         var featureFlagAppService = scope.ServiceProvider.GetRequiredService<IFeatureFlagAppService>();
         var flagChangeRequestService = scope.ServiceProvider.GetRequiredService<IFlagChangeRequestService>();
@@ -56,14 +49,14 @@ public class FlagScheduleWorker : BackgroundService
                 {
                     await ApplyScheduleAsync(schedule);
 
-                    _logger.LogInformation(
+                    logger.LogInformation(
                         "{ScheduleId}:{ScheduleTitle}: Flag schedule has been applied.", schedule.Id,
                         schedule.Title
                     );
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex,
+                    logger.LogError(ex,
                         "{ScheduleId}:{ScheduleTitle}: Error occurred while applying flag schedule.",
                         schedule.Id, schedule.Title
                     );
@@ -76,7 +69,7 @@ public class FlagScheduleWorker : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while processing flag schedule.");
+            logger.LogError(ex, "Error occurred while processing flag schedule.");
         }
 
         return;
