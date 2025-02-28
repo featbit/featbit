@@ -14,10 +14,10 @@ public class FeatureFlagService(AppDbContext dbContext)
         var query = Queryable.Where(x => x.EnvId == envId && x.IsArchived == userFilter.IsArchived);
 
         // name/key filter
-        var nameOrKey = userFilter.Name;
+        var nameOrKey = userFilter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(nameOrKey))
         {
-            query = query.Where(flag => flag.Name.Contains(nameOrKey) || flag.Key.Contains(nameOrKey));
+            query = query.Where(flag => flag.Name.ToLower().Contains(nameOrKey) || flag.Key.ToLower().Contains(nameOrKey));
         }
 
         // isEnabled filter

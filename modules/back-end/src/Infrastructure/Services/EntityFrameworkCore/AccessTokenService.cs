@@ -12,10 +12,10 @@ public class AccessTokenService(AppDbContext dbContext)
     {
         var query = Queryable.Where(x => x.OrganizationId == organizationId);
 
-        var name = filter.Name;
+        var name = filter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var type = filter.Type;

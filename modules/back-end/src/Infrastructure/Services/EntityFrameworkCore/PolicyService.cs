@@ -28,10 +28,10 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
         var query = QueryableOf<Policy>()
             .Where(x => x.OrganizationId == organizationId || x.Type == PolicyTypes.SysManaged);
 
-        var name = filter.Name;
+        var name = filter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var totalCount = await query.CountAsync();
@@ -72,10 +72,10 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
         }
 
         // name filter
-        var name = filter.Name;
+        var name = filter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var totalCount = await query.CountAsync();
@@ -130,10 +130,10 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
         }
 
         // email filter
-        var searchText = filter.SearchText;
+        var searchText = filter.SearchText?.ToLower();
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            query = query.Where(x => x.Email.Contains(searchText));
+            query = query.Where(x => x.Email.ToLower().Contains(searchText));
         }
 
         var totalCount = await query.CountAsync();

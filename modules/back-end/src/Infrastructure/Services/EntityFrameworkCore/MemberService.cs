@@ -84,10 +84,10 @@ public class MemberService(AppDbContext dbContext) : IMemberService
             };
 
         // email/name filter
-        var searchText = filter.SearchText;
+        var searchText = filter.SearchText?.ToLower();
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            query = query.Where(x => x.Email.Contains(searchText) || x.Name.Contains(searchText));
+            query = query.Where(x => x.Email.ToLower().Contains(searchText) || x.Name.ToLower().Contains(searchText));
         }
 
         var totalCount = await query.CountAsync();
@@ -158,10 +158,10 @@ public class MemberService(AppDbContext dbContext) : IMemberService
             query = query.Where(x => x.GroupMembers.Any(y => y.MemberId == memberId));
         }
 
-        var name = filter.Name;
+        var name = filter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var totalCount = await query.CountAsync();
@@ -250,10 +250,10 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         }
 
         // name filter
-        var name = filter.Name;
+        var name = filter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var totalCount = await query.CountAsync();
@@ -302,10 +302,10 @@ public class MemberService(AppDbContext dbContext) : IMemberService
                 GroupName = theGroup.Name
             };
 
-        var name = filter.Name;
+        var name = filter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var totalCount = await query.CountAsync();

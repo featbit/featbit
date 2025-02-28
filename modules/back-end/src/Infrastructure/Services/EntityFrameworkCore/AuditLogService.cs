@@ -19,10 +19,12 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
         }
 
         // query(keyword/comment) filter
-        var query = userFilter.Query;
+        var query = userFilter.Query?.ToLower();
         if (!string.IsNullOrWhiteSpace(query))
         {
-            queryable = queryable.Where(x => x.Keyword.Contains(query) || x.Comment.Contains(query));
+            queryable = queryable.Where(x =>
+                x.Keyword.ToLower().Contains(query) || x.Comment.ToLower().Contains(query)
+            );
         }
 
         // creator filter

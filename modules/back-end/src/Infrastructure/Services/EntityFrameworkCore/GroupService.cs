@@ -27,10 +27,10 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
         var query = Queryable.Where(x => x.OrganizationId == organizationId);
 
         // name filter
-        var name = groupFilter.Name;
+        var name = groupFilter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var totalCount = await query.CountAsync();
@@ -75,10 +75,10 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
         }
 
         // email filter
-        var searchText = filter.SearchText;
+        var searchText = filter.SearchText?.ToLower();
         if (!string.IsNullOrWhiteSpace(searchText))
         {
-            query = query.Where(x => x.Email.Contains(searchText));
+            query = query.Where(x => x.Email.ToLower().Contains(searchText));
         }
 
         var totalCount = await query.CountAsync();
@@ -127,10 +127,10 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
         }
 
         // name filter
-        var name = filter.Name;
+        var name = filter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var totalCount = await query.CountAsync();

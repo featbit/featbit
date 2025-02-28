@@ -13,9 +13,10 @@ public class ExperimentMetricService(AppDbContext dbContext)
         var query = Queryable.Where(x => x.EnvId == envId && !x.IsArvhived);
 
         // name filter
-        if (!string.IsNullOrWhiteSpace(metricFilter.metricName))
+        var name = metricFilter.metricName?.ToLower();
+        if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(metricFilter.metricName));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         // event type filter

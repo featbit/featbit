@@ -19,9 +19,10 @@ public class WebhookService(AppDbContext dbContext) : EntityFrameworkCoreService
         var query = Queryable.Where(x => x.OrgId == orgId);
 
         // name filter
-        if (!string.IsNullOrWhiteSpace(filter.Name))
+        var name = filter.Name?.ToLower();
+        if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(x => x.Name.Contains(filter.Name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         // envId filter

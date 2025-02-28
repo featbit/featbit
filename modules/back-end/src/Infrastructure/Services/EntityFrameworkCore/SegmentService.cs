@@ -27,10 +27,10 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
             );
 
         // name filter
-        var name = userFilter.Name;
+        var name = userFilter.Name?.ToLower();
         if (!string.IsNullOrWhiteSpace(name))
         {
-            query = query.Where(segment => segment.Name.Contains(name));
+            query = query.Where(segment => segment.Name.ToLower().Contains(name));
         }
 
         var totalCount = await query.CountAsync();

@@ -12,10 +12,10 @@ public class GlobalUserService(AppDbContext dbContext)
     {
         var query = Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == null);
 
-        var name = filter.Name;
+        var name = filter.Name?.ToLower();
         if (!string.IsNullOrEmpty(name))
         {
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(x => x.Name.ToLower().Contains(name));
         }
 
         var total = await query.CountAsync();
