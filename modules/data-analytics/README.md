@@ -18,7 +18,7 @@ docker compose up da-server -d
 
 ### General
 
-| Name               | Description                                              | Value          |
+| Name               | Description                                              | Default Value  |
 |--------------------|----------------------------------------------------------|----------------|
 | `IS_PRO`           | If `true` operates in PRO mode with kafka and clickhouse | `"false"`      |
 | `CHECK_DB_LIVNESS` | Whether to check db liveness on app startup              | `"true"`       |
@@ -29,7 +29,7 @@ Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or click
 
 ### Kafka Settings
 
-| Name                      | Description                     | Value          |
+| Name                      | Description                     | Default Value  |
 |---------------------------|---------------------------------|----------------|
 | `KAFKA_HOSTS`             | Kafka servers used by producers | `"kafka:9092"` |
 | `KAFKA_SECURITY_PROTOCOL` | Security protocol used by Kafka | `"PLAINTEXT"`  |
@@ -39,7 +39,7 @@ Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or click
 
 ### ClickHouse Settings
 
-| Name                     | Description                                        | Value                  |
+| Name                     | Description                                        | Default Value          |
 |--------------------------|----------------------------------------------------|------------------------|
 | `CLICKHOUSE_HOST`        | Hostname of the ClickHouse server                  | `"clickhouse-server"`  |
 | `CLICKHOUSE_ALT_HOST`    | Alternate hostname for the ClickHouse server       | `""`                   |
@@ -56,7 +56,7 @@ Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or click
 
 ### Redis Settings
 
-| Name                             | Description                        | Value               |
+| Name                             | Description                        | Default Value       |
 |----------------------------------|------------------------------------|---------------------|
 | `REDIS_USER`                     | User for Redis server              | `""`                |
 | `REDIS_PASSWORD`                 | Password for Redis server          | `""`                |
@@ -73,23 +73,23 @@ Note that set CHECK_DB_LIVNESS to **false** if you use external mongodb or click
 
 Make sure assign false to `IS_PRO`
 
-| Name                    | Description                                             | Value                                      |
-|-------------------------|---------------------------------------------------------|--------------------------------------------|
-| `DB_PROVIDER`           | Database provider, used to select MongoDB or PostgreSQL | `"mongodb"`                                |
-| `MONGO_HOST`            | Mongodb host, used to check db liveness                 | `"mongodb"`                                |
-| `MONGO_PORT`            | Mongodb port, used to check db liveness                 | `27017`                                    |
-| `MONGO_URI`             | Mongodb connection string                               | `"mongodb://admin:password@mongodb:27017"` |
-| `MONGO_INITDB_DATABASE` | Mongodb database name                                   | `"featbit"`                                |
+| Name                    | Description                                           | Default Value                              |
+|-------------------------|-------------------------------------------------------|--------------------------------------------|
+| `DB_PROVIDER`           | Database provider, used to select MongoDB or Postgres | `"MongoDb"`                                |
+| `MONGO_HOST`            | Mongodb host, used to check db liveness               | `"mongodb"`                                |
+| `MONGO_PORT`            | Mongodb port, used to check db liveness               | `27017`                                    |
+| `MONGO_URI`             | Mongodb connection string                             | `"mongodb://admin:password@mongodb:27017"` |
+| `MONGO_INITDB_DATABASE` | Mongodb database name                                 | `"featbit"`                                |
 
 ### PostgreSQL Settings
 
 Make sure assign false to `IS_PRO`
 
-| Name                | Description                                             | Value             |
-|---------------------|---------------------------------------------------------|-------------------|
-| `DB_PROVIDER`       | Database provider, used to select MongoDB or PostgreSQL | `"MongoDb"`       |
-| `POSTGRES_USER`     | PostgreSQL port, used to check db liveness              | `"postgres`       |
-| `POSTGRES_PASSWORD` | PostgreSQL database password                            | `"0tJXCokSvOB8"`  |
-| `POSTGRES_HOST`     | PostgreSQL database host                                | `"postgresql"`    |
-| `POSTGRES_PORT`     | PostgreSQL database port                                | `5432`            |
-| `POSTGRES_DATABASE` | PostgreSQL database name                                | `"featbit"`       |
+| Name                | Description                                             | Default Value    |
+|---------------------|---------------------------------------------------------|------------------|
+| `DB_PROVIDER`       | Database provider, used to select MongoDB or PostgreSQL | `"MongoDb"`      |
+| `POSTGRES_USER`     | PostgreSQL port, used to check db liveness              | `"postgres`      |
+| `POSTGRES_PASSWORD` | PostgreSQL database password                            | `"0tJXCokSvOB8"` |
+| `POSTGRES_HOST`     | PostgreSQL database host                                | `"postgresql"`   |
+| `POSTGRES_PORT`     | PostgreSQL database port                                | `5432`           |
+| `POSTGRES_DATABASE` | PostgreSQL database name                                | `"featbit"`      |

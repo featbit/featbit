@@ -34,14 +34,15 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 
 ### General
 
-| Name           | Description                               | Value   |
-|----------------|-------------------------------------------|---------|
-| `AllowedHosts` | Hosts allowed to connect to the API       | `"*"`   |
-| `IS_PRO`       | If `true` operates in PRO mode with kafka | `false` |
+| Name           | Description                                                   | Default Value |
+|----------------|---------------------------------------------------------------|---------------|
+| `AllowedHosts` | Hosts allowed to connect to the API                           | `"*"`         |
+| `IS_PRO`       | If `true` operates in PRO mode with kafka                     | `false`       |
+| `DbProvider`   | Database provider, used to select **MongoDB** or **Postgres** | `"MongoDb"`   |
 
 ### JWT
 
-| Name            | Description     | Value                    |
+| Name            | Description     | Default Value            |
 |-----------------|-----------------|--------------------------|
 | `Jwt__Issuer`   | JWT Issuer Name | `"featbit"`              |
 | `Jwt__Audience` | JWT Audience    | `"featbit-api"`          |
@@ -49,14 +50,20 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 
 ### MongoDB
 
-| Name                        | Description               | Value                                      |
+| Name                        | Description               | Default Value                              |
 |-----------------------------|---------------------------|--------------------------------------------|
 | `MongoDb__ConnectionString` | Mongodb connection string | `"mongodb://admin:password@mongodb:27017"` |
 | `MongoDb__Database`         | Mongodb database name     | `"featbit"`                                |
 
+## Postgres
+
+| Name                         | Description                | Default Value                                                                        |
+|------------------------------|----------------------------|--------------------------------------------------------------------------------------|
+| `Postgres__ConnectionString` | Postgres connection string | `"Host=postgres;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit"` |
+
 ### Redis
 
-| Name                      | Description                                                                       | Value          |
+| Name                      | Description                                                                       | Default Value  |
 |---------------------------|-----------------------------------------------------------------------------------|----------------|
 | `Redis__ConnectionString` | Redis Connection String                                                           | `"redis:6379"` |
 | `Redis__Password`         | Redis Password. If provided, override the password specified in connection string | `""`           |
@@ -66,7 +73,7 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 Most of the standard [kafka producer configs](https://kafka.apache.org/documentation/#producerconfigs)
 and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) are available, here are some examples
 
-| Name                                        | Description                                                                         | Value           |
+| Name                                        | Description                                                                         | Default Value   |
 |---------------------------------------------|-------------------------------------------------------------------------------------|-----------------|
 | `Kafka__Producer__bootstrap.servers`        | Kafka Servers used by producers                                                     | `"kafka:9092"`  |
 | `Kafka__Producer__linger.ms`                | Delay for batching Kafka messages                                                   | `"50"`          |
@@ -79,6 +86,6 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 
 ### OLAP
 
-| Name                | Description                       | Value                |
+| Name                | Description                       | Default Value        |
 |---------------------|-----------------------------------|----------------------|
 | `OLAP__ServiceHost` | URI for the data analytics server | `"http://da-server"` |
