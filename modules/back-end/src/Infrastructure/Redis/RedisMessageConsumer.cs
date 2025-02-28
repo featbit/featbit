@@ -38,10 +38,6 @@ public partial class RedisMessageConsumer : BackgroundService
 
         _logger.LogInformation("Start consuming {Topic} messages...", topic);
 
-        using var scope = _serviceProvider.CreateScope();
-        var handlers = scope.ServiceProvider.GetServices<IMessageHandler>()
-            .ToDictionary(x => x.Topic, x => x);
-
         while (!cancellationToken.IsCancellationRequested)
         {
             try
@@ -55,7 +51,11 @@ public partial class RedisMessageConsumer : BackgroundService
                     continue;
                 }
 
-                if (!handlers.TryGetValue(topic, out var handler))
+                using var scope = _serviceProvider.CreateScope();
+                var handlers = scope.ServiceProvider.GetServices<IMessageHandler>();
+
+                var handler = handlers.FirstOrDefault(h => h.Topic == topic);
+                if (handler == null)
                 {
                     Log.NoHandlerForTopic(_logger, topic);
                     continue;
