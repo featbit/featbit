@@ -74,8 +74,8 @@ public static class ServiceCollectionExtensions
             // use redis as message queue
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
 
-            services.AddTransient<IMessageHandler, EndUserMessageHandler>();
-            services.AddTransient<IMessageHandler, InsightMessageHandler>();
+            services.AddKeyedTransient<IMessageHandler, EndUserMessageHandler>(nameof(EndUserMessageHandler));
+            services.AddKeyedTransient<IMessageHandler, InsightMessageHandler>(nameof(InsightMessageHandler));
             services.AddHostedService<RedisMessageConsumer>();
         }
     }

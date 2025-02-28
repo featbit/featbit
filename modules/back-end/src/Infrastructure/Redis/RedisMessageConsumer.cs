@@ -1,4 +1,5 @@
 using Domain.Messages;
+using Infrastructure.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -52,9 +53,14 @@ public partial class RedisMessageConsumer : BackgroundService
                 }
 
                 using var scope = _serviceProvider.CreateScope();
-                var handlers = scope.ServiceProvider.GetServices<IMessageHandler>();
+                var sp = scope.ServiceProvider;
 
-                var handler = handlers.FirstOrDefault(h => h.Topic == topic);
+                var handler = topic switch
+                {
+                    Topics.EndUser => sp.GetRequiredKeyedService<IMessageHandler>(nameof(EndUserMessageHandler)),
+                    Topics.Insights => sp.GetRequiredKeyedService<IMessageHandler>(nameof(InsightMessageHandler)),
+                    _ => null
+                };
                 if (handler == null)
                 {
                     Log.NoHandlerForTopic(_logger, topic);
