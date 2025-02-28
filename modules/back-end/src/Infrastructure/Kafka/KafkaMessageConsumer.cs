@@ -38,9 +38,6 @@ public partial class KafkaMessageConsumer : BackgroundService
         _consumer.Subscribe(Topics.EndUser);
         _logger.LogInformation("Start consuming {Topic} messages...", Topics.EndUser);
 
-        using var scope = _serviceProvider.CreateScope();
-        var endUserService = scope.ServiceProvider.GetRequiredService<IEndUserService>();
-
         ConsumeResult<Null, string>? consumeResult = null;
         var message = string.Empty;
         while (!cancellationToken.IsCancellationRequested)
@@ -65,6 +62,9 @@ public partial class KafkaMessageConsumer : BackgroundService
                 {
                     continue;
                 }
+
+                using var scope = _serviceProvider.CreateScope();
+                var endUserService = scope.ServiceProvider.GetRequiredService<IEndUserService>();
 
                 // upsert endUser and it's properties
                 var endUser = endUserMessage.AsEndUser();
