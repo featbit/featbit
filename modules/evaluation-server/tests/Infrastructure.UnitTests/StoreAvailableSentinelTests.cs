@@ -77,7 +77,7 @@ public class StoreAvailableSentinelTests
         _dbStore1.Verify(x => x.IsAvailableAsync(), Times.Once);
         _dbStore2.Verify(x => x.IsAvailableAsync(), Times.Once);
 
-        Assert.Equal("1_dbStore", StoreAvailabilityListener.Instance.AvailableStore);
+        Assert.Equal(DbStore2Name, StoreAvailabilityListener.Instance.AvailableStore);
 
         Assert.Equal(LogLevel.Debug, _logger.Level);
         Assert.Equal($"Store availability check timed out for {DbStore1Name}.", _logger.Message);
