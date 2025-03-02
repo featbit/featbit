@@ -5,14 +5,14 @@ namespace Application.FeatureFlags;
 public class FeatureFlagFilter : PagedRequest
 {
     /// <summary>
-    /// The name or part of the name of the feature flag
+    /// The name/key or part of the name/key of a feature flag
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
     /// The list of tags, you must use the complete name of tags
     /// </summary>
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string[] Tags { get; set; } = [];
 
     /// <summary>
     /// Return only enabled feature flags if true, and return only disabled feature flags if false.

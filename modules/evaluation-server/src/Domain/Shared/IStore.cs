@@ -16,3 +16,5 @@ public interface IStore
 
     Task<Secret?> GetSecretAsync(string secretString);
 }
+
+public interface IDbStore : IStore;

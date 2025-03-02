@@ -7,11 +7,9 @@
 
 ## Build & Run
 
-1. `cd ./featbit`
-2. `docker-compose -f .\docker-compose-dev.yml up -d api`
-3. run `docker inspect --format '{{json .State}}' featbit-mongodb-dev | jq` to check mongodb's status
-4. run `docker inspect --format '{{json .State.Health}}' featbit-api-dev | jq` to check api service's health status
-5. open http://localhost:5000/swagger
+1. `cd ./featbit/modules/back-end`
+2. `docker build --progress plain -f ./deploy/Dockerfile -t featbit/api:local .`
+3. `docker run -d -p 5000:5000 --name featbit-api-local featbit/api:local`
 
 ## Default User
 
@@ -22,33 +20,30 @@
 
 you have a few options to check the app's health status
 
-### Dump Health Check
+### Liveness
 
-**Dump Health Check** don't check that the application can connect to its dependencies, and often only exercise the most
-basic requirements of the application itself i.e. can they respond to an HTTP request.
+Run `curl http://localhost:5000/health/liveness` to verify that the application has not crashed. This does not check
+that the application can connect to its dependencies, and often only exercises the most basic requirements of the
+application itself i.e. can they respond to an HTTP request.
 
-- run `docker inspect --format '{{json .State.Health}}' featbit-api-dev | jq` check if container's STATUS is healthy
-- run `curl http://localhost:5000/health/liveness` manually to check the application's liveness
+### Readiness
+
+Run `curl http://localhost:5000/health/readiness` to verify if the application is working correctly, that it can service
+requests, and that it can connect to its dependencies (a database, message queue, or other API, for example).
 
 ## Environment Variables
 
 ### General
 
-| Name           | Description                               | Value   |
-|----------------|-------------------------------------------|---------|
-| `AllowedHosts` | Hosts allowed to connect to the API       | `"*"`   |
-| `IS_PRO`       | If `true` operates in PRO mode with kafka | `false` |
-
-### Logging
-
-| Name                                      | Description                    | Value           |
-|-------------------------------------------|--------------------------------|-----------------|
-| `Logging__LogLevel__Default`              | Sets the default logging level | `"Information"` |
-| `Logging__LogLevel__Microsoft_AspNetCore` | aspnet-core logging level      | `"Warning"`     |
+| Name           | Description                                                   | Default Value |
+|----------------|---------------------------------------------------------------|---------------|
+| `AllowedHosts` | Hosts allowed to connect to the API                           | `"*"`         |
+| `IS_PRO`       | If `true` operates in PRO mode with kafka                     | `false`       |
+| `DbProvider`   | Database provider, used to select **MongoDB** or **Postgres** | `"MongoDb"`   |
 
 ### JWT
 
-| Name            | Description     | Value                    |
+| Name            | Description     | Default Value            |
 |-----------------|-----------------|--------------------------|
 | `Jwt__Issuer`   | JWT Issuer Name | `"featbit"`              |
 | `Jwt__Audience` | JWT Audience    | `"featbit-api"`          |
@@ -56,14 +51,20 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 
 ### MongoDB
 
-| Name                        | Description               | Value                                      |
+| Name                        | Description               | Default Value                              |
 |-----------------------------|---------------------------|--------------------------------------------|
 | `MongoDb__ConnectionString` | Mongodb connection string | `"mongodb://admin:password@mongodb:27017"` |
 | `MongoDb__Database`         | Mongodb database name     | `"featbit"`                                |
 
+## Postgres
+
+| Name                         | Description                | Default Value                                                                        |
+|------------------------------|----------------------------|--------------------------------------------------------------------------------------|
+| `Postgres__ConnectionString` | Postgres connection string | `"Host=postgres;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit"` |
+
 ### Redis
 
-| Name                      | Description                                                                       | Value          |
+| Name                      | Description                                                                       | Default Value  |
 |---------------------------|-----------------------------------------------------------------------------------|----------------|
 | `Redis__ConnectionString` | Redis Connection String                                                           | `"redis:6379"` |
 | `Redis__Password`         | Redis Password. If provided, override the password specified in connection string | `""`           |
@@ -73,7 +74,7 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 Most of the standard [kafka producer configs](https://kafka.apache.org/documentation/#producerconfigs)
 and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) are available, here are some examples
 
-| Name                                        | Description                                                                         | Value           |
+| Name                                        | Description                                                                         | Default Value   |
 |---------------------------------------------|-------------------------------------------------------------------------------------|-----------------|
 | `Kafka__Producer__bootstrap.servers`        | Kafka Servers used by producers                                                     | `"kafka:9092"`  |
 | `Kafka__Producer__linger.ms`                | Delay for batching Kafka messages                                                   | `"50"`          |
@@ -86,6 +87,6 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 
 ### OLAP
 
-| Name                | Description                       | Value                |
+| Name                | Description                       | Default Value        |
 |---------------------|-----------------------------------|----------------------|
 | `OLAP__ServiceHost` | URI for the data analytics server | `"http://da-server"` |

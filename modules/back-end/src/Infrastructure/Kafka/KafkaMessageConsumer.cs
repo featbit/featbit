@@ -3,6 +3,7 @@ using Confluent.Kafka;
 using Domain.EndUsers;
 using Domain.Messages;
 using Domain.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -11,17 +12,17 @@ namespace Infrastructure.Kafka;
 public partial class KafkaMessageConsumer : BackgroundService
 {
     private readonly IConsumer<Null, string> _consumer;
-    private readonly IEndUserService _service;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<KafkaMessageConsumer> _logger;
 
     public KafkaMessageConsumer(
         ConsumerConfig config,
-        IEndUserService service,
+        IServiceProvider serviceProvider,
         ILogger<KafkaMessageConsumer> logger)
     {
-        _service = service;
-        _logger = logger;
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
+        _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -62,10 +63,13 @@ public partial class KafkaMessageConsumer : BackgroundService
                     continue;
                 }
 
+                using var scope = _serviceProvider.CreateScope();
+                var endUserService = scope.ServiceProvider.GetRequiredService<IEndUserService>();
+
                 // upsert endUser and it's properties
                 var endUser = endUserMessage.AsEndUser();
-                await _service.UpsertAsync(endUser);
-                await _service.AddNewPropertiesAsync(endUser);
+                await endUserService.UpsertAsync(endUser);
+                await endUserService.AddNewPropertiesAsync(endUser);
             }
             catch (ConsumeException ex)
             {

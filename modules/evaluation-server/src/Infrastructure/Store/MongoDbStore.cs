@@ -1,11 +1,11 @@
 using Domain.Shared;
-using Infrastructure.MongoDb;
+using Infrastructure.Persistence.MongoDb;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Infrastructure.Store;
 
-public class MongoDbStore : IStore
+public class MongoDbStore : IDbStore
 {
     public string Name => Stores.MongoDb;
 

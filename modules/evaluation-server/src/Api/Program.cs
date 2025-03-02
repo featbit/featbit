@@ -24,10 +24,13 @@ finally
     Log.CloseAndFlush();
 }
 
+return;
+
 void InitializeSerilog()
 {
     var configuration = new LoggerConfiguration()
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .MinimumLevel.Override("Npgsql.Command", LogEventLevel.Warning)
         .Enrich.FromLogContext()
         .WriteTo.Console(new CompactJsonFormatter());
 

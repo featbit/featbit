@@ -5,7 +5,7 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Store;
 
-public class RedisStore : IStore
+public class RedisStore : IDbStore
 {
     public string Name => Stores.Redis;
 
