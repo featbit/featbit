@@ -11,7 +11,6 @@ from utils import create_event
 
 def bulk_create_events(list_properties: List[Dict[str, Any]]) -> None:
     events = [create_event(props) for props in list_properties]
-    # TODO bulk insert events to postgresql
 
     if not events:
         return  # No events to insert

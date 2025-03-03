@@ -36,7 +36,7 @@ GET_USERS_PAGENATION_CH = """WITH users_cte AS
 (
 {user_subquery}
 )
-SELECT variation, user_key, max(user_name), max(timestamp) AS time
+SELECT variation, user_key, any(user_name), max(timestamp) AS time
 FROM users_cte
 GROUP BY variation, user_key
 ORDER BY time DESC

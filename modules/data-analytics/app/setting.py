@@ -2,7 +2,7 @@ import os
 
 from utils import get_from_env, str_to_bool
 
-IS_PRO = get_from_env("IS_PRO", True, type_cast=str_to_bool)
+IS_PRO = get_from_env("IS_PRO", False, type_cast=str_to_bool)
 
 WSGI = get_from_env("WSGI", False, type_cast=str_to_bool)
 
@@ -40,8 +40,8 @@ DB_PROVIDER = os.getenv("DB_PROVIDER", "MongoDb")
 #f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DATABASE}"
 POSTGRES_CONNECTION_STRING = os.getenv("POSTGRES_CONNECTION_STRING", "")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
+POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "0tJXCokSvOB8")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgresql")
 POSTGRES_PORT = os.getenv("POSTGRES_USER", "5432")
 POSTGRES_DATABASE = os.getenv("POSTGRES_DATABASE", "featbit")
 

@@ -73,9 +73,8 @@ def _list_pending_migrations(cur, upto: int, print_sql: bool):
 def _apply_migrations(cur, conn, upto: int):
     applied_migrations = _get_applied_migrations(cur)
     all_migrations = _get_all_migrations()
-    print(all_migrations)
 
-    for migration in sorted(set(all_migrations) - applied_migrations):
+    for migration in sorted(all_migrations - applied_migrations):
         if int(migration[:4]) > upto:
             break
 
