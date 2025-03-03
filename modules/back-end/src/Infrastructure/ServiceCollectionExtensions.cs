@@ -47,7 +47,7 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContext<AppDbContext>(
             op => op
-                .UseNpgsql(dataSource)
+                .UseNpgsql(dataSource, options => options.EnableRetryOnFailure())
                 .UseSnakeCaseNamingConvention()
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
         );
