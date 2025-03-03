@@ -56,7 +56,7 @@ def _list_pending_migrations(cur, upto: int, print_sql: bool):
     applied_migrations = _get_applied_migrations(cur)
     all_migrations = _get_all_migrations()
 
-    pending_migrations = sorted(set(all_migrations) - applied_migrations)
+    pending_migrations = sorted(all_migrations - applied_migrations)
 
     if pending_migrations:
         current_app.logger.info("List of PostgreSQL migrations to be applied:")
