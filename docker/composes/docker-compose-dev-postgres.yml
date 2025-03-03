@@ -27,6 +27,7 @@ services:
     environment:
       - SSOEnabled=true
       - DbProvider=Postgres
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
     depends_on:
       - postgresql
       - redis
@@ -44,6 +45,7 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - DbProvider=Postgres
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
     depends_on:
       - postgresql
       - redis

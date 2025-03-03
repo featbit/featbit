@@ -1,5 +1,4 @@
 name: featbit
-version: "3"
 services:
   ui:
     image: featbit/featbit-ui:latest
@@ -17,6 +16,7 @@ services:
   api-server:
     image: featbit/featbit-api-server:latest
     environment:
+      - DbProvider=MongoDb
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis:6379
@@ -33,6 +33,7 @@ services:
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
     environment:
+      - DbProvider=MongoDb
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis:6379
@@ -54,6 +55,7 @@ services:
     networks:
       - featbit-network
     environment:
+      DB_PROVIDER: MongoDb
       REDIS_HOST: redis
       REDIS_PORT: 6379
       MONGO_URI: mongodb://admin:password@mongodb:27017
