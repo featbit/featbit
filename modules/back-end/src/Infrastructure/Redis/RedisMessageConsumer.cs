@@ -1,4 +1,6 @@
 using Domain.Messages;
+using Infrastructure.Messages;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -7,16 +9,16 @@ namespace Infrastructure.Redis;
 public partial class RedisMessageConsumer : BackgroundService
 {
     private readonly IRedisClient _redis;
-    private readonly Dictionary<string, IMessageHandler> _handlers;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RedisMessageConsumer> _logger;
 
     public RedisMessageConsumer(
         IRedisClient redis,
-        IEnumerable<IMessageHandler> handlers,
+        IServiceProvider serviceProvider,
         ILogger<RedisMessageConsumer> logger)
     {
         _redis = redis;
-        _handlers = handlers.ToDictionary(x => x.Topic, x => x);
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -36,6 +38,7 @@ public partial class RedisMessageConsumer : BackgroundService
         var db = _redis.GetDatabase();
 
         _logger.LogInformation("Start consuming {Topic} messages...", topic);
+
         while (!cancellationToken.IsCancellationRequested)
         {
             try
@@ -49,7 +52,16 @@ public partial class RedisMessageConsumer : BackgroundService
                     continue;
                 }
 
-                if (!_handlers.TryGetValue(topic, out var handler))
+                using var scope = _serviceProvider.CreateScope();
+                var sp = scope.ServiceProvider;
+
+                var handler = topic switch
+                {
+                    Topics.EndUser => sp.GetRequiredKeyedService<IMessageHandler>(nameof(EndUserMessageHandler)),
+                    Topics.Insights => sp.GetRequiredKeyedService<IMessageHandler>(nameof(InsightMessageHandler)),
+                    _ => null
+                };
+                if (handler == null)
                 {
                     Log.NoHandlerForTopic(_logger, topic);
                     continue;

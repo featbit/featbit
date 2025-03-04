@@ -1,7 +1,6 @@
 using System.Reflection;
 using Application.Bases.Behaviours;
 using Application.Users;
-using Application.Webhooks;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -25,7 +24,6 @@ public static class ConfigureServices
         // custom services
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
-        services.AddTransient<IWebhookHandler, WebhookHandler>();
 
         // add httpclient services
         services.AddHttpClient();

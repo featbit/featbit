@@ -1,12 +1,12 @@
 using Domain.Messages;
 using Domain.Shared;
+using Infrastructure;
 using Infrastructure.Kafka;
-using Infrastructure.MongoDb;
+using Infrastructure.Persistence;
 using Infrastructure.Redis;
 using Infrastructure.Store;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Streaming.Consumers;
 
 namespace Streaming.DependencyInjection;
@@ -55,37 +55,23 @@ public static class StreamingBuilderExtensions
         return builder;
     }
 
-    public static IStreamingBuilder UseRedisStore(this IStreamingBuilder builder, ConfigurationManager configuration)
+    public static IStreamingBuilder UseHybridStore(this IStreamingBuilder builder, IConfiguration configuration)
     {
         var services = builder.Services;
 
-        services.Configure<RedisOptions>(configuration.GetSection(RedisOptions.Redis));
-        services.TryAddSingleton<IRedisClient, RedisClient>();
-        services.AddSingleton<IStore, RedisStore>();
+        var dbProvider = configuration.GetDbProvider();
+        if (dbProvider.Name == DbProvider.MongoDb)
+        {
+            services.AddMongoDbStore(configuration);
+        }
+        else
+        {
+            services.AddPostgresStore(configuration);
+        }
 
-        return builder;
-    }
+        // redis store is always used
+        services.AddRedisStore(configuration);
 
-    public static IStreamingBuilder UseMongoDbStore(this IStreamingBuilder builder, ConfigurationManager configuration)
-    {
-        var services = builder.Services;
-
-        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
-        services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
-        services.AddSingleton<IStore, MongoDbStore>();
-
-        return builder;
-    }
-
-    public static IStreamingBuilder UseHybridStore(this IStreamingBuilder builder, ConfigurationManager configuration)
-    {
-        var services = builder.Services;
-
-        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
-        services.Configure<RedisOptions>(configuration.GetSection(RedisOptions.Redis));
-
-        services.TryAddSingleton<IRedisClient, RedisClient>();
-        services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
         services.AddSingleton<IStore, HybridStore>();
         services.AddHostedService<StoreAvailableSentinel>();
 

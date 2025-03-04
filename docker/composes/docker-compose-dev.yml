@@ -26,6 +26,8 @@ services:
       dockerfile: ./deploy/Dockerfile
     environment:
       - SSOEnabled=true
+      - DbProvider=MongoDb
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
     depends_on:
       - mongodb
       - redis
@@ -41,6 +43,9 @@ services:
     build:
       context: ./modules/evaluation-server
       dockerfile: ./deploy/Dockerfile
+    environment:
+      - DbProvider=MongoDb
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
     depends_on:
       - mongodb
       - redis

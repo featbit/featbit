@@ -1,5 +1,4 @@
 name: featbit-pro
-version: "3"
 services:
   ui:
     image: featbit/featbit-ui:latest
@@ -17,6 +16,7 @@ services:
   api-server:
     image: featbit/featbit-api-server:latest
     environment:
+      - DbProvider=MongoDb
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
@@ -37,6 +37,7 @@ services:
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
     environment:
+      - DbProvider=MongoDb
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092

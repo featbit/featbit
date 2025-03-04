@@ -3,7 +3,6 @@ using Domain.Environments;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using Domain.Workspaces;
-using MongoDB.Driver;
 using StackExchange.Redis;
 
 namespace Infrastructure.Redis;
@@ -11,12 +10,10 @@ namespace Infrastructure.Redis;
 public class RedisCacheService : ICacheService
 {
     private readonly IDatabase _redis;
-    private readonly MongoDbClient _mongodb;
 
-    public RedisCacheService(IRedisClient redis, MongoDbClient mongodb)
+    public RedisCacheService(IRedisClient redis)
     {
         _redis = redis.GetDatabase();
-        _mongodb = mongodb;
     }
 
     public async Task UpsertFlagAsync(FeatureFlag flag)
@@ -106,7 +103,7 @@ public class RedisCacheService : ICacheService
         await _redis.KeyDeleteAsync(key);
     }
 
-    public async Task<string> GetLicenseAsync(Guid workspaceId)
+    public async Task<string> GetOrSetLicenseAsync(Guid workspaceId, Func<Task<string>> licenseGetter)
     {
         var key = RedisKeys.License(workspaceId);
         if (await _redis.KeyExistsAsync(key))
@@ -115,14 +112,8 @@ public class RedisCacheService : ICacheService
             return value.ToString();
         }
 
-        // key not exist, get license from mongodb and cache it
-        var license = await _mongodb.CollectionOf<Workspace>()
-            .Find(x => x.Id == workspaceId)
-            .Project(y => y.License)
-            .FirstOrDefaultAsync();
-
-        var licenseCache = license ?? string.Empty;
-        await _redis.StringSetAsync(key, licenseCache);
-        return licenseCache;
+        var license = await licenseGetter();
+        await _redis.StringSetAsync(key, license);
+        return license;
     }
 }

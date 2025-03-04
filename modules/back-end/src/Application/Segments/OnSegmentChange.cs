@@ -44,7 +44,6 @@ public class OnSegmentChange : INotification
 public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
 {
     private readonly ISegmentService _segmentService;
-    private readonly ISegmentAppService _segmentAppService;
     private readonly IMessageProducer _messageProducer;
     private readonly ICacheService _cache;
     private readonly IAuditLogService _auditLogService;
@@ -52,14 +51,12 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
 
     public OnSegmentChangeHandler(
         ISegmentService segmentService,
-        ISegmentAppService segmentAppService,
         IMessageProducer messageProducer,
         ICacheService cache,
         IAuditLogService auditLogService,
         IWebhookHandler webhookHandler)
     {
         _segmentService = segmentService;
-        _segmentAppService = segmentAppService;
         _messageProducer = messageProducer;
         _cache = cache;
         _auditLogService = auditLogService;
@@ -72,7 +69,7 @@ public class OnSegmentChangeHandler : INotificationHandler<OnSegmentChange>
         await _auditLogService.AddOneAsync(notification.GetAuditLog());
 
         var segment = notification.Segment;
-        var envIds = await _segmentAppService.GetEnvironmentIdsAsync(segment);
+        var envIds = await _segmentService.GetEnvironmentIdsAsync(segment);
 
         // update cache
         await _cache.UpsertSegmentAsync(envIds, segment);

@@ -2,11 +2,13 @@ from datetime import datetime
 from itertools import groupby
 from typing import Any, Dict, Iterable, Optional
 
+from app import DB_PROVIDER, MongoDbProvider, PostgresDbProvider
 from app.clickhouse.client import sync_execute
 from app.main.models.statistics.feature_flag.sql import (
-    GET_FLAG_EVENTS_BY_INTERVAL_SQL, make_statistic_ff_events_from_mongod)
+    GET_FLAG_EVENTS_BY_INTERVAL_SQL_CH, make_statistic_ff_events_from_mongod, GET_FLAG_EVENTS_BY_INTERVAL_SQL_PG)
 from app.main.models.statistics.time_series import (FrequencyType,
                                                     generate_time_series)
+from app.postgresql.client import execute_query
 from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, IS_PRO
 from utils import time_to_special_tz, to_UTC_datetime
 
@@ -95,9 +97,14 @@ class FeatureFlagIntervalStatistics:
                 yield {"time": ts_str, "variations": counts}
 
         if IS_PRO:
-            rs = sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL, args=self._query_params)
-        else:
+            rs = sync_execute(GET_FLAG_EVENTS_BY_INTERVAL_SQL_CH, args=self._query_params)
+        elif DB_PROVIDER == MongoDbProvider:
             rs = make_statistic_ff_events_from_mongod(self._query_params)
+        elif DB_PROVIDER == PostgresDbProvider:
+            rs = execute_query(GET_FLAG_EVENTS_BY_INTERVAL_SQL_PG, args=self._query_params)
+        else:
+            raise ValueError(f"DB_PROVIDER not supported: {DB_PROVIDER}")
+
         counts_gen = ({"time": handle_time(time).strftime(DATE_UTC_FMT), "id": var_key, "val": count}
                       for count, var_key, time in rs)  # type: ignore
         counts_by_group = dict((time, list(group)) for time, group in groupby(sorted(counts_gen, key=lambda x: x["time"]), key=lambda x: x.pop("time")))

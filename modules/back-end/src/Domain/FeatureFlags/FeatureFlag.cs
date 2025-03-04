@@ -34,7 +34,7 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool ExptIncludeAllTargets { get; set; }
 
-    public ICollection<string> Tags { get; set; }
+    public string[] Tags { get; set; }
 
     public bool IsArchived { get; set; }
 
@@ -52,7 +52,7 @@ public class FeatureFlag : FullAuditedEntity
         ICollection<Variation> variations,
         string disabledVariationId,
         string enabledVariationId,
-        ICollection<string> tags,
+        string[] tags,
         Guid currentUserId) : base(currentUserId)
     {
         Revision = Guid.NewGuid();
@@ -79,14 +79,14 @@ public class FeatureFlag : FullAuditedEntity
                 new()
                 {
                     Id = enabledVariationId,
-                    Rollout = new double[] { 0, 1 },
+                    Rollout = [0, 1],
                     ExptRollout = 1
                 }
             }
         };
         ExptIncludeAllTargets = true;
 
-        Tags = tags ?? Array.Empty<string>();
+        Tags = tags ?? [];
         IsArchived = false;
     }
 
@@ -210,18 +210,16 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public Variation DisabledVariation => GetVariation(DisabledVariationId);
-
     public Variation GetVariation(string variationId)
     {
         return Variations.FirstOrDefault(x => x.Id == variationId);
     }
 
-    public DataChange SetTags(ICollection<string> tags, Guid currentUserId)
+    public DataChange SetTags(string[] tags, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
-        Tags = tags ?? Array.Empty<string>();
+        Tags = tags ?? [];
         MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);

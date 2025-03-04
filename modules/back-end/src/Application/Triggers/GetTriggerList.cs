@@ -7,18 +7,11 @@ public class GetTriggerList : IRequest<IEnumerable<Trigger>>
     public Guid TargetId { get; set; }
 }
 
-public class GetTriggerListHandler : IRequestHandler<GetTriggerList, IEnumerable<Trigger>>
+public class GetTriggerListHandler(ITriggerService service) : IRequestHandler<GetTriggerList, IEnumerable<Trigger>>
 {
-    private readonly ITriggerService _service;
-
-    public GetTriggerListHandler(ITriggerService service)
-    {
-        _service = service;
-    }
-
     public async Task<IEnumerable<Trigger>> Handle(GetTriggerList request, CancellationToken cancellationToken)
     {
-        var triggers = await _service.GetListAsync(request.TargetId);
+        var triggers = await service.FindManyAsync(x => x.TargetId == request.TargetId);
 
         // obscure token
         foreach (var trigger in triggers)
@@ -26,6 +19,6 @@ public class GetTriggerListHandler : IRequestHandler<GetTriggerList, IEnumerable
             trigger.Token = trigger.Token[..5] + "************************";
         }
 
-        return triggers;
+        return triggers.OrderByDescending(x => x.CreatedAt);
     }
 }

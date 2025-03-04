@@ -16,6 +16,8 @@ try
         .Run();
 }
 catch (Exception ex)
+    // see https://github.com/dotnet/efcore/issues/29923
+    when (ex is not HostAbortedException && ex.Source != "Microsoft.EntityFrameworkCore.Design")
 {
     Log.Fatal(ex, "Application terminated unexpectedly");
 }
@@ -24,10 +26,13 @@ finally
     Log.CloseAndFlush();
 }
 
+return;
+
 void InitializeSerilog()
 {
     var configuration = new LoggerConfiguration()
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
         .Enrich.FromLogContext()
         .Enrich.WithClientIp("X-Forwarded-For")
         .Enrich.WithRequestHeader("User-Agent")

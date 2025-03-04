@@ -13,4 +13,6 @@ public interface IPolicyService : IService<Policy>
     Task<PagedResult<PolicyGroup>> GetGroupsAsync(Guid organizationId, Guid policyId, PolicyGroupFilter filter);
 
     Task<PagedResult<PolicyMember>> GetMembersAsync(Guid organizationId, Guid policyId, PolicyMemberFilter filter);
+
+    Task<bool> IsNameUsedAsync(Guid organizationId, string name);
 }

@@ -1,0 +1,127 @@
+name: featbit-dev-postgres
+services:
+  ui:
+    image: featbit/ui:dev
+    container_name: ui
+    build:
+      context: ./modules/front-end
+      dockerfile: ./Dockerfile
+    environment:
+      - API_URL=http://localhost:5000
+      - DEMO_URL=http://localhost:5173
+      - EVALUATION_URL=http://localhost:5100
+    depends_on:
+      - api-server
+      - demo-dino-game-vue
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
+
+  api-server:
+    image: featbit/api:dev
+    container_name: api
+    build:
+      context: ./modules/back-end
+      dockerfile: ./deploy/Dockerfile
+    environment:
+      - SSOEnabled=true
+      - DbProvider=Postgres
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
+    depends_on:
+      - postgresql
+      - redis
+      - da-server
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
+
+  evaluation-server:
+    image: featbit/evaluation-server:dev
+    container_name: evaluation-server
+    build:
+      context: ./modules/evaluation-server
+      dockerfile: ./deploy/Dockerfile
+    environment:
+      - DbProvider=Postgres
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
+    depends_on:
+      - postgresql
+      - redis
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
+
+  da-server:
+    image: featbit/data-analytics-server:dev
+    container_name: data-analytics-server
+    build:
+      context: ./modules/data-analytics
+      dockerfile: ./Dockerfile
+    depends_on:
+      - postgresql
+      - redis
+    ports:
+      - "8200:80"
+    networks:
+      - featbit-network
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CHECK_DB_LIVNESS: false
+      DB_PROVIDER: Postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 0tJXCokSvOB8
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: featbit
+
+  postgresql:
+    image: postgres:15.10
+    container_name: postgresql
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 0tJXCokSvOB8
+    volumes:
+      - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - featbit-network
+
+  redis:
+    image: bitnami/redis:6.2.10
+    container_name: redis
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - featbit-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/bitnami/redis/data
+
+  demo-dino-game-vue:
+    image: featbit/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "5173:80"
+
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.1.0.0/16
+
+volumes:
+  redis:
+  postgres_data:

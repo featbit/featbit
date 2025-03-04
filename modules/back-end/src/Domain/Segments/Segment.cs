@@ -16,13 +16,13 @@ public class Segment : AuditedEntity
 
     public string Type { get; set; }
 
-    public ICollection<string> Scopes { get; set; }
+    public string[] Scopes { get; set; }
 
     public string Description { get; set; }
 
-    public ICollection<string> Included { get; set; }
+    public string[] Included { get; set; }
 
-    public ICollection<string> Excluded { get; set; }
+    public string[] Excluded { get; set; }
 
     public ICollection<MatchRule> Rules { get; set; }
 
@@ -35,9 +35,9 @@ public class Segment : AuditedEntity
         Guid envId,
         string name,
         string type,
-        ICollection<string> scopes,
-        ICollection<string> included,
-        ICollection<string> excluded,
+        string[] scopes,
+        string[] included,
+        string[] excluded,
         ICollection<MatchRule> rules,
         string description)
     {
@@ -46,8 +46,8 @@ public class Segment : AuditedEntity
         Name = name;
         Type = type;
         Scopes = scopes;
-        Included = included ?? Array.Empty<string>();
-        Excluded = excluded ?? Array.Empty<string>();
+        Included = included ?? [];
+        Excluded = excluded ?? [];
         Rules = rules;
         Description = description ?? string.Empty;
 
@@ -57,16 +57,16 @@ public class Segment : AuditedEntity
 
     public DataChange Update(
         string name,
-        ICollection<string> included,
-        ICollection<string> excluded,
+        string[] included,
+        string[] excluded,
         ICollection<MatchRule> rules,
         string description)
     {
         var dataChange = new DataChange(this);
 
         Name = name;
-        Included = included ?? Array.Empty<string>();
-        Excluded = excluded ?? Array.Empty<string>();
+        Included = included ?? [];
+        Excluded = excluded ?? [];
         Rules = rules;
         Description = description ?? string.Empty;
 
