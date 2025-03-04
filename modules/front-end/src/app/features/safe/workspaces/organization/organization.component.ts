@@ -28,6 +28,7 @@ export class OrganizationComponent implements OnInit {
   allOrganizations: IOrganization[];
 
   canUpdateOrgName: boolean = false;
+  canUpdateDefaultPermissions: boolean = false;
 
   license: License;
 
@@ -63,6 +64,7 @@ export class OrganizationComponent implements OnInit {
 
   ngOnInit(): void {
     this.canUpdateOrgName = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgName);
+    this.canUpdateDefaultPermissions = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgDefaultUserPermissions);
     this.allOrganizations = this.organizationService.organizations;
 
     const currentOrganizationId = getCurrentOrganization().id;
@@ -123,6 +125,11 @@ export class OrganizationComponent implements OnInit {
   }
 
   updateDefaultPermissions() {
+    if (!this.canUpdateDefaultPermissions) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     if (!this.defaultPermissionsForm.valid) {
       for (const i in this.defaultPermissionsForm.controls) {
         this.defaultPermissionsForm.controls[i].markAsDirty();
