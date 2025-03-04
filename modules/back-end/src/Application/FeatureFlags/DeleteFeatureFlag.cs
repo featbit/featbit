@@ -35,7 +35,7 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
             throw new BusinessException(ErrorCodes.CannotDeleteUnArchivedFeatureFlag);
         }
 
-        await _service.DeleteAsync(flag.Id);
+        await _service.DeleteOneAsync(flag.Id);
 
         // publish on feature flag delete notification
         await _publisher.Publish(new OnFeatureFlagDeleted(flag, _currentUser.Id), cancellationToken);

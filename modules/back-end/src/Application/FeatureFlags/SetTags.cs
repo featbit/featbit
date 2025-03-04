@@ -10,7 +10,7 @@ public class SetTags : IRequest<bool>
 
     public string Key { get; set; }
 
-    public ICollection<string> Tags { get; set; }
+    public string[] Tags { get; set; }
 }
 
 public class SetTagsHandler : IRequestHandler<SetTags, bool>

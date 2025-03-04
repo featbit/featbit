@@ -12,7 +12,5 @@ public interface IFeatureFlagService : IService<FeatureFlag>
 
     Task<bool> HasKeyBeenUsedAsync(Guid envId, string key);
 
-    Task DeleteAsync(Guid id);
-
     Task<ICollection<string>> GetAllTagsAsync(Guid envId);
 }

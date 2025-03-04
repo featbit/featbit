@@ -4,6 +4,7 @@ from typing import Union
 
 from flask import abort, current_app, jsonify, request
 
+from app import MongoDbProvider, PostgresDbProvider
 from app.clickhouse.models.event import bulk_create_events as bulk_create_events_ch
 from app.extensions import get_cache
 from app.main import get_main_blueprint
@@ -11,7 +12,9 @@ from app.main.models.statistics import (EndUserParams, EndUserStatistics,
                                         FeatureFlagIntervalStatistics,
                                         IntervalParams)
 from app.mongodb.models.event import bulk_create_events as bulk_create_events_mongod
-from app.setting import IS_PRO
+from app.setting import IS_PRO, DB_PROVIDER
+
+from app.postgresql.models.event import bulk_create_events as bulk_create_events_postgresql
 from utils import internal_error_handler, to_md5_hexdigest
 
 main = get_main_blueprint()
@@ -43,8 +46,12 @@ def _create_events(json_events: Union[str, bytes]) -> None:
     events = json.loads(json_events)
     if IS_PRO:
         bulk_create_events_ch(events)
-    else:
+    elif DB_PROVIDER == MongoDbProvider:
         bulk_create_events_mongod(events)
+    elif DB_PROVIDER == PostgresDbProvider:
+        bulk_create_events_postgresql(events)
+    else:
+        raise ValueError(f"DB_PROVIDER not supported: {DB_PROVIDER}")
 
 
 @main.route('/events/stat/<event>', methods=['POST'])

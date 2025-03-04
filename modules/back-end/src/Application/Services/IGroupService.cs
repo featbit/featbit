@@ -21,4 +21,6 @@ public interface IGroupService : IService<Group>
     Task AddPolicyAsync(Guid groupId, Guid policyId);
 
     Task RemovePolicyAsync(Guid groupId, Guid policyId);
+
+    Task<bool> IsNameUsedAsync(Guid organizationId, string name);
 }

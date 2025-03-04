@@ -33,7 +33,7 @@ public class RemoveFromWorkspaceHandler : IRequestHandler<RemoveFromWorkspace, b
         }
 
         // remove member from workspace
-        await _userService.DeleteAsync(request.MemberId);
+        await _userService.DeleteOneAsync(request.MemberId);
 
         return true;
     }
