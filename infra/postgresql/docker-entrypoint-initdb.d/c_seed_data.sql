@@ -68,6 +68,13 @@ VALUES
              ),
              jsonb_build_object(
                      'id', gen_random_uuid(),
+                     'resourceType', 'organization',
+                     'effect', 'allow',
+                     'actions', ARRAY['UpdateOrgDefaultUserPermissions'],
+                     'resources', ARRAY['organization/*']
+             ),
+             jsonb_build_object(
+                     'id', gen_random_uuid(),
                      'resourceType', 'iam',
                      'effect', 'allow',
                      'actions', ARRAY['CanManageIAM'],
