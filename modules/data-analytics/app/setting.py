@@ -85,7 +85,7 @@ DEFAULT_LOGGING_CONFIG = {
         'formatter': 'default'
     }},
     'root': {
-        'level': 'INFO',
+        'level': 'WARN',
         'handlers': ['wsgi']
     }
 }
