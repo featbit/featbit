@@ -121,5 +121,5 @@ class EndUserStatistics:
 
         items = [{"variationId": var_key, "keyId": user_key, "name": user_name, "lastEvaluatedAt": time.strftime(DATE_UTC_FMT)}
                  for var_key, user_key, user_name, time in rs]  # type: ignore
-        return {"totalCount": user_count,  # type: ignore
+        return {"totalCount": user_count or 0,  # type: ignore
                 "items": items}
