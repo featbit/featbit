@@ -64,10 +64,10 @@ db.Organizations.insertOne(
         initialized: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-		defaultPermissions: {
-			policyIds:[developerPolicyId],
-			groupIds:[]
-		}
+        defaultPermissions: {
+            policyIds: [developerPolicyId],
+            groupIds: []
+        }
     }
 )
 print('collection seeded: Organizations')
@@ -126,7 +126,7 @@ db.Policies.insertOne(
                 actions: ["UpdateOrgName"],
                 resources: ["organization/*"]
             },
-			{
+            {
                 _id: getUUIDString(),
                 resourceType: "organization",
                 effect: "allow",
