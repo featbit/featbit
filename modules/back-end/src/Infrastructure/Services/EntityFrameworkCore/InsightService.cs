@@ -41,7 +41,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
         }
     }
 
-    public async Task AddManyAsync(object[] insights)
+    public async Task AddManyAsync(IEnumerable<object> insights)
     {
         var connection = dbContext.Database.GetDbConnection();
 

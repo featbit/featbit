@@ -4,5 +4,5 @@ public interface IInsightService
 {
     bool TryParse(string json, out object insight);
 
-    Task AddManyAsync(object[] insights);
+    Task AddManyAsync(IEnumerable<object> insights);
 }
