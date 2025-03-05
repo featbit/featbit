@@ -43,6 +43,6 @@ public class InsightService(MongoDbClient mongoDb) : IInsightService
         }
     }
 
-    public async Task AddManyAsync(IEnumerable<object> insights) =>
-        await mongoDb.CollectionOf("Events").InsertManyAsync(insights as IEnumerable<BsonDocument>);
+    public async Task AddManyAsync(object[] insights) =>
+        await mongoDb.CollectionOf("Events").InsertManyAsync(insights as BsonDocument[]);
 }

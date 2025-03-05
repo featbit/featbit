@@ -24,7 +24,7 @@ public class InsightsWriter : IDisposable
         _flushWorker = StartFlushLoopAsync();
     }
 
-    public void TryAddInsight(object insight)
+    public void Record(object insight)
     {
         lock (_bufferLock)
         {
@@ -69,11 +69,10 @@ public class InsightsWriter : IDisposable
             using var scope = _scopeFactory.CreateScope();
             var insightService = scope.ServiceProvider.GetRequiredService<IInsightService>();
 
-            // Split each snapshot into groups of 100
-            for (var i = 0; i < snapshots.Length; i += 100)
+            // Split snapshot into groups of 100
+            foreach (var chunked in snapshots.Chunk(100))
             {
-                var chunk = new ArraySegment<object>(snapshots, i, Math.Min(100, snapshots.Length - i));
-                await insightService.AddManyAsync(chunk);
+                await insightService.AddManyAsync(chunked);
             }
 
             // Check log level here to avoid unnecessary memory allocation
