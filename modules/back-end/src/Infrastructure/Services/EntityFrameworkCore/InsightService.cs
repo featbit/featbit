@@ -1,6 +1,6 @@
-using System.Text.Json;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
@@ -25,7 +25,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
             var root = jsonDocument.RootElement;
 
             var timestampMs = root.GetProperty("timestamp").GetInt64() / 1000;
-            var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).DateTime;
+            var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).UtcDateTime;
 
             var item = new object?[]
             {
