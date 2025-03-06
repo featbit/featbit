@@ -1,3 +1,4 @@
+using Domain.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +21,7 @@ public class InsightsWriter : IDisposable
         _scopeFactory = scopeFactory;
         _logger = logger;
 
-        _timer = new PeriodicTimer(TimeSpan.FromMilliseconds(250));
+        _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         _flushWorker = StartFlushLoopAsync();
     }
 
@@ -52,6 +53,8 @@ public class InsightsWriter : IDisposable
 
         async Task FlushCore()
         {
+            var stopwatch = ValueStopwatch.StartNew();
+
             // Get snapshots of the insights and clear the buffer.
             object[] snapshots;
             lock (_bufferLock)
@@ -69,16 +72,16 @@ public class InsightsWriter : IDisposable
             using var scope = _scopeFactory.CreateScope();
             var insightService = scope.ServiceProvider.GetRequiredService<IInsightService>();
 
-            // Split snapshot into groups of 100
-            foreach (var chunked in snapshots.Chunk(100))
-            {
-                await insightService.AddManyAsync(chunked);
-            }
+            await insightService.AddManyAsync(snapshots);
 
             // Check log level here to avoid unnecessary memory allocation
             if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogDebug("{Count} insight events has been handled", snapshots.Length);
+                _logger.LogDebug(
+                    "{Count} insight events has been handled in {ElapsedMilliseconds}ms.",
+                    snapshots.Length,
+                    stopwatch.GetElapsedTime().TotalMilliseconds
+                );
             }
         }
     }
