@@ -34,7 +34,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
                 root.GetProperty("distinct_id").GetString(),
                 root.GetProperty("env_id").GetString(),
                 root.GetProperty("event").GetString(),
-                root.GetProperty("properties").ToString(),
+                root.GetProperty("properties").GetString(),
                 timestamp
             };
 
