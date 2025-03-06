@@ -1,6 +1,7 @@
-using Dapper;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
@@ -25,7 +26,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
             var root = jsonDocument.RootElement;
 
             var timestampMs = root.GetProperty("timestamp").GetInt64() / 1000;
-            var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).UtcDateTime;
+            var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).DateTime;
 
             var item = new object?[]
             {
@@ -33,7 +34,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
                 root.GetProperty("distinct_id").GetString(),
                 root.GetProperty("env_id").GetString(),
                 root.GetProperty("event").GetString(),
-                root.GetProperty("properties").ToString(),
+                root.GetProperty("properties").GetString(),
                 timestamp
             };
 
@@ -43,30 +44,35 @@ public class InsightService(AppDbContext dbContext) : IInsightService
 
     public async Task AddManyAsync(object[] insights)
     {
-        const string insertSql =
-            "INSERT INTO events (id, distinct_id, env_id, event, properties, timestamp) VALUES {0}";
+        await dbContext.Database.OpenConnectionAsync();
 
-        var paramNames = string.Join(",", insights.Select(
-            (_, i) => $"(@id{i}, @distinct_id{i}, @env_id{i}, @event{i}, @properties{i}::jsonb, @timestamp{i})")
-        );
-
-        var formattedSql = string.Format(insertSql, paramNames);
-
-        var parameters = new DynamicParameters();
-
-        for (var i = 0; i < insights.Length; i++)
+        try
         {
-            var insight = (object[])insights[i];
+            var conn = dbContext.Database.GetDbConnection() as NpgsqlConnection;
 
-            parameters.Add($"id{i}", insight[0]);
-            parameters.Add($"distinct_id{i}", insight[1]);
-            parameters.Add($"env_id{i}", insight[2]);
-            parameters.Add($"event{i}", insight[3]);
-            parameters.Add($"properties{i}", insight[4]);
-            parameters.Add($"timestamp{i}", insight[5]);
+            await using var writer = await conn!.BeginBinaryImportAsync(
+                "COPY events (id, distinct_id, env_id, event, properties, timestamp) FROM STDIN (FORMAT BINARY)"
+            );
+
+            foreach (var insight in insights)
+            {
+                var values = (object[])insight;
+
+                await writer.StartRowAsync();
+
+                await writer.WriteAsync(values[0], NpgsqlDbType.Uuid);
+                await writer.WriteAsync(values[1], NpgsqlDbType.Varchar);
+                await writer.WriteAsync(values[2], NpgsqlDbType.Varchar);
+                await writer.WriteAsync(values[3], NpgsqlDbType.Varchar);
+                await writer.WriteAsync(values[4], NpgsqlDbType.Jsonb);
+                await writer.WriteAsync(values[5], NpgsqlDbType.Timestamp);
+            }
+
+            await writer.CompleteAsync();
         }
-
-        var connection = dbContext.Database.GetDbConnection();
-        await connection.ExecuteAsync(formattedSql, parameters);
+        finally
+        {
+            await dbContext.Database.CloseConnectionAsync();
+        }
     }
 }

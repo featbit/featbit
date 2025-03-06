@@ -1,10 +1,19 @@
 using System.Text.Json.Nodes;
 using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace Infrastructure.Services.MongoDb;
 
 public class InsightService(MongoDbClient mongoDb) : IInsightService
 {
+    private readonly InsertManyOptions _insertManyOptions = new()
+    {
+        // for faster insert
+
+        BypassDocumentValidation = true,
+        IsOrdered = false
+    };
+
     public bool TryParse(string json, out object? insight)
     {
         try
@@ -43,6 +52,10 @@ public class InsightService(MongoDbClient mongoDb) : IInsightService
         }
     }
 
-    public async Task AddManyAsync(object[] insights) =>
-        await mongoDb.CollectionOf("Events").InsertManyAsync(insights as BsonDocument[]);
+    public async Task AddManyAsync(object[] insights)
+    {
+        var documents = insights.Cast<BsonDocument>();
+
+        await mongoDb.CollectionOf("Events").InsertManyAsync(documents, _insertManyOptions);
+    }
 }

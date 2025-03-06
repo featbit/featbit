@@ -1,5 +1,4 @@
 name: featbit-infra
-version: "3"
 services:
   mongodb:
     image: mongo:5.0.14
@@ -30,7 +29,6 @@ services:
 
   kafka:
     image: bitnami/kafka:3.5
-    container_name: kafka
     restart: on-failure
     ports:
       - '9092:9092'
@@ -72,7 +70,6 @@ services:
 
   clickhouse-server:
     image: clickhouse/clickhouse-server:23.7
-    container_name: clickhouse-server
     restart: on-failure
     depends_on:
       - kafka
@@ -92,14 +89,12 @@ services:
       
   postgresql:
     image: postgres:15.10
-    container_name: postgresql
     restart: on-failure
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 0tJXCokSvOB8
-      POSTGRES_DB: featbit
     volumes:
       - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
       - postgres_data:/var/lib/postgresql/data
