@@ -60,6 +60,9 @@ public static class ConfigureServices
         services.AddTransient<IEnvironmentAppService, AppServices.EnvironmentAppService>();
         services.AddTransient<IFeatureFlagAppService, AppServices.FeatureFlagAppService>();
 
+        // InsightsWriter must be a singleton service
+        services.AddSingleton(typeof(AppServices.InsightsWriter));
+
         return services;
 
         void AddMongoDbServices()

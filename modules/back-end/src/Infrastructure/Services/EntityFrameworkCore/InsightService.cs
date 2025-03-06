@@ -27,13 +27,13 @@ public class InsightService(AppDbContext dbContext) : IInsightService
             var timestampMs = root.GetProperty("timestamp").GetInt64() / 1000;
             var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).UtcDateTime;
 
-            var item = new
+            var item = new object?[]
             {
-                uuid = root.GetProperty("uuid").GetGuid(),
-                distinct_id = root.GetProperty("distinct_id").GetString(),
-                env_id = root.GetProperty("env_id").GetString(),
-                @event = root.GetProperty("event").GetString(),
-                properties = root.GetProperty("properties").ToString(),
+                root.GetProperty("uuid").GetGuid(),
+                root.GetProperty("distinct_id").GetString(),
+                root.GetProperty("env_id").GetString(),
+                root.GetProperty("event").GetString(),
+                root.GetProperty("properties").ToString(),
                 timestamp
             };
 
@@ -43,13 +43,30 @@ public class InsightService(AppDbContext dbContext) : IInsightService
 
     public async Task AddManyAsync(object[] insights)
     {
+        const string insertSql =
+            "INSERT INTO events (id, distinct_id, env_id, event, properties, timestamp) VALUES {0}";
+
+        var paramNames = string.Join(",", insights.Select(
+            (_, i) => $"(@id{i}, @distinct_id{i}, @env_id{i}, @event{i}, @properties{i}::jsonb, @timestamp{i})")
+        );
+
+        var formattedSql = string.Format(insertSql, paramNames);
+
+        var parameters = new DynamicParameters();
+
+        for (var i = 0; i < insights.Length; i++)
+        {
+            var insight = (object[])insights[i];
+
+            parameters.Add($"id{i}", insight[0]);
+            parameters.Add($"distinct_id{i}", insight[1]);
+            parameters.Add($"env_id{i}", insight[2]);
+            parameters.Add($"event{i}", insight[3]);
+            parameters.Add($"properties{i}", insight[4]);
+            parameters.Add($"timestamp{i}", insight[5]);
+        }
+
         var connection = dbContext.Database.GetDbConnection();
-
-        const string sql = """
-                           insert into events (id, distinct_id, env_id, event, properties, timestamp) 
-                           values (@uuid, @distinct_id, @env_id, @event, @properties::jsonb, @timestamp)
-                           """;
-
-        await connection.ExecuteAsync(sql, insights);
+        await connection.ExecuteAsync(formattedSql, parameters);
     }
 }

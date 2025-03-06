@@ -1,4 +1,5 @@
 using Domain.Messages;
+using Infrastructure.AppService;
 using Infrastructure.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +25,9 @@ public partial class RedisMessageConsumer : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // eager resolve InsightsWriter to start flushing insights loop
+        _ = _serviceProvider.GetRequiredService<InsightsWriter>();
+
         var tasks = new[]
         {
             ConsumeAsync(Topics.EndUser, stoppingToken),
