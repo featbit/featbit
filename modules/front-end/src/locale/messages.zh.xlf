@@ -598,7 +598,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
@@ -2095,7 +2095,7 @@
         <source>Bulk copy precheck failed. Please try again.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">116</context>
         </context-group>
         <target>批量复制失败，请重试。</target>
       </trans-unit>
@@ -2103,7 +2103,7 @@
         <source>Operation failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">138</context>
+          <context context-type="linenumber">140</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
@@ -4855,13 +4855,13 @@
         </context-group>
         <target>内置属性</target>
       </trans-unit>
-      <trans-unit id="users.idx.click-to-edit-set-comment" datatype="html">
-        <source>Click to set/modify comment</source>
+      <trans-unit id="users.idx.click-to-edit-comment" datatype="html">
+        <source>Click to edit comment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
           <context context-type="linenumber">68</context>
         </context-group>
-        <target>点击设置/修改备注</target>
+        <target>点击编辑备注</target>
       </trans-unit>
       <trans-unit id="common.remove-confirm" datatype="html">
         <source>This operation cannot be reverted, are you sure to remove it?</source>

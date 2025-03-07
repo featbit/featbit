@@ -194,7 +194,7 @@ public class EndUserService(AppDbContext dbContext)
         return newProps;
     }
 
-    public async Task<IEnumerable<EndUserProperty>> GetPropertiesAsync(Guid envId)
+    public async Task<ICollection<EndUserProperty>> GetPropertiesAsync(Guid envId)
     {
         var properties = await QueryableOf<EndUserProperty>()
             .Where(x => x.EnvId == envId)

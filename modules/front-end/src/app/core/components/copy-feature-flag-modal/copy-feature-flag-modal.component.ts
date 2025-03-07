@@ -16,6 +16,7 @@ type BulkCopyCheckItem = {
   keyCheck: boolean;
   targetUserCheck: boolean;
   targetRuleCheck: boolean;
+  newProperties: string[];
   passed: boolean;
 }
 
@@ -40,6 +41,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
         keyCheck: false,
         targetUserCheck: false,
         targetRuleCheck: false,
+        newProperties: [],
         passed: false
       }
     ));

@@ -16,7 +16,7 @@ public interface IEndUserService : IService<EndUser>
 
     Task<EndUserProperty[]> AddNewPropertiesAsync(Guid envId, IEnumerable<string> propertyNames);
 
-    Task<IEnumerable<EndUserProperty>> GetPropertiesAsync(Guid envId);
+    Task<ICollection<EndUserProperty>> GetPropertiesAsync(Guid envId);
 
     Task<EndUserProperty> UpsertPropertyAsync(EndUserProperty property);
 

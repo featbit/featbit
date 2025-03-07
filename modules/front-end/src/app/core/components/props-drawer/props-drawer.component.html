@@ -65,7 +65,7 @@
                 <td style="text-align: center">
                   <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)"></label>
                 </td>
-                <td style="text-align: center" nzEllipsis i18n-nz-tooltip="@@users.idx.click-to-edit-set-comment" nz-tooltip="Click to set/modify comment" (click)="editProp(row)">
+                <td style="text-align: center" nzEllipsis i18n-nz-tooltip="@@users.idx.click-to-edit-comment" nz-tooltip="Click to edit comment" (click)="editProp(row)">
                   {{row.remark}}
                 </td>
               </ng-template>

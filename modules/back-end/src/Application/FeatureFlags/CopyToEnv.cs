@@ -16,15 +16,18 @@ public class CopyToEnv : IRequest<CopyToEnvResult>
 public class CopyToEnvHandler : IRequestHandler<CopyToEnv, CopyToEnvResult>
 {
     private readonly IFeatureFlagService _service;
+    private readonly IEndUserService _endUserService;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
 
     public CopyToEnvHandler(
         IFeatureFlagService service,
+        IEndUserService endUserService,
         ICurrentUser currentUser,
         IPublisher publisher)
     {
         _service = service;
+        _endUserService = endUserService;
         _currentUser = currentUser;
         _publisher = publisher;
     }
@@ -37,6 +40,12 @@ public class CopyToEnvHandler : IRequestHandler<CopyToEnv, CopyToEnvResult>
         foreach (var flag in flags)
         {
             await CopyAsync(flag);
+        }
+
+        var newPropertiesToAdd = precheckResults.SelectMany(x => x.NewProperties).Distinct().ToArray();
+        if (newPropertiesToAdd.Length > 0)
+        {
+            await _endUserService.AddNewPropertiesAsync(request.TargetEnvId, newPropertiesToAdd);
         }
 
         return new CopyToEnvResult(flags.Count);

@@ -15,15 +15,18 @@ public class CopyToEnvPrecheck : IRequest<ICollection<CopyToEnvPrecheckResult>>
 public class CopyToEnvPrecheckHandler : IRequestHandler<CopyToEnvPrecheck, ICollection<CopyToEnvPrecheckResult>>
 {
     private readonly IFeatureFlagService _flagService;
+    private readonly IEndUserService _endUserService;
     private readonly ISegmentService _segmentService;
     private readonly IResourceServiceV2 _resourceService;
 
     public CopyToEnvPrecheckHandler(
         IFeatureFlagService flagService,
+        IEndUserService endUserService,
         ISegmentService segmentService,
         IResourceServiceV2 resourceService)
     {
         _flagService = flagService;
+        _endUserService = endUserService;
         _segmentService = segmentService;
         _resourceService = resourceService;
     }
@@ -41,6 +44,7 @@ public class CopyToEnvPrecheckHandler : IRequestHandler<CopyToEnvPrecheck, IColl
         ).Select(x => x.Key).ToArray();
 
         var targetEnvRN = await _resourceService.GetRNAsync(request.TargetEnvId, ResourceTypes.Env);
+        var targetEnvProperties = await _endUserService.GetPropertiesAsync(request.TargetEnvId);
 
         var results = new List<CopyToEnvPrecheckResult>();
         foreach (var flag in flags)
@@ -50,7 +54,8 @@ public class CopyToEnvPrecheckHandler : IRequestHandler<CopyToEnvPrecheck, IColl
                 Id = flag.Id,
                 KeyCheck = !duplicateKeys.Contains(flag.Key),
                 TargetUserCheck = flag.TargetUsers.Count == 0,
-                TargetRuleCheck = await CheckRules(flag.Rules)
+                TargetRuleCheck = await CheckRules(flag.Rules),
+                NewProperties = CheckNewProperties(flag.Rules)
             };
 
             results.Add(result);
@@ -95,6 +100,32 @@ public class CopyToEnvPrecheckHandler : IRequestHandler<CopyToEnvPrecheck, IColl
             }
 
             return true;
+        }
+
+        string[] CheckNewProperties(ICollection<TargetRule> rules)
+        {
+            if (rules.Count == 0)
+            {
+                return [];
+            }
+
+            var propertyNames = rules.SelectMany(x => x.Conditions)
+                // exclude segment conditions
+                .Where(x => !x.IsSegmentCondition())
+                .Select(x => x.Property)
+                .Distinct()
+                .ToArray();
+
+            if (propertyNames.Length == 0)
+            {
+                return [];
+            }
+
+            var newProperties = propertyNames
+                .Where(x => targetEnvProperties.All(y => y.Name != x))
+                .ToArray();
+
+            return newProperties;
         }
     }
 }

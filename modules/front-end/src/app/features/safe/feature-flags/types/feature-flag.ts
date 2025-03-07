@@ -36,6 +36,7 @@ export type CopyToEnvPrecheckResult = {
   keyCheck: boolean;
   targetUserCheck: boolean;
   targetRuleCheck: boolean;
+  newProperties: string[];
   passed: boolean;
 }
 
