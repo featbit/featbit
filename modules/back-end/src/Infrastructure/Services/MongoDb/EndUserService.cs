@@ -210,7 +210,7 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         return newProps;
     }
 
-    public async Task<IEnumerable<EndUserProperty>> GetPropertiesAsync(Guid envId)
+    public async Task<ICollection<EndUserProperty>> GetPropertiesAsync(Guid envId)
     {
         var properties = await MongoDb.QueryableOf<EndUserProperty>()
             .Where(x => x.EnvId == envId)
