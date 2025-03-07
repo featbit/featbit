@@ -12,6 +12,7 @@ using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -23,6 +24,9 @@ public static class ServicesRegister
     {
         // validate configurations on start
         builder.Configuration.ValidateOnStart();
+
+        // serilog
+        builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
         // add services for controllers
         builder.Services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvcOptions>();

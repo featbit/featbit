@@ -41,6 +41,13 @@ requests, and that it can connect to its dependencies (a database, message queue
 | `IS_PRO`       | If `true` operates in PRO mode with kafka                     | `false`       |
 | `DbProvider`   | Database provider, used to select **MongoDB** or **Postgres** | `"MongoDb"`   |
 
+## Logging
+
+| Name                                               | Description                                      | Default Value                                                                                |
+|----------------------------------------------------|--------------------------------------------------|----------------------------------------------------------------------------------------------|
+| `Logging__MinimumLevel__Default`                   | Default log level                                | `"Information"`                                                                              |
+| `Logging__MinimumLevel__Override__<SourceContext>` | Override log level for a specific source context | Example: `env "Logging__MinimumLevel__Override__Microsoft.EntityFrameworkCore=Information" ` |
+
 ### JWT
 
 | Name            | Description     | Default Value            |

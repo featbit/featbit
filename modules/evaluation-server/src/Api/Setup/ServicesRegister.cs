@@ -1,6 +1,7 @@
 using Confluent.Kafka;
 using Infrastructure.Fakes;
 using Infrastructure;
+using Serilog;
 using Streaming.DependencyInjection;
 
 namespace Api.Setup;
@@ -13,6 +14,9 @@ public static class ServicesRegister
         var configuration = builder.Configuration;
 
         services.AddControllers();
+
+        // serilog
+        builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
