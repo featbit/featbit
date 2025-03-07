@@ -34,6 +34,13 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 | `Logging__LogLevel__Default`              | Sets the default logging level | `"Information"` |
 | `Logging__LogLevel__Microsoft_AspNetCore` | aspnet-core logging level      | `"Warning"`     |
 
+## Logging
+
+| Name                                               | Description                                      | Default Value                                                                 |
+|----------------------------------------------------|--------------------------------------------------|-------------------------------------------------------------------------------|
+| `Logging__MinimumLevel__Default`                   | Default log level                                | `"Information"`                                                               |
+| `Logging__MinimumLevel__Override__<SourceContext>` | Override log level for a specific source context | Example: `env "Logging__MinimumLevel__Override__Npgsql.Command=Information" ` |
+
 ## MongoDB
 
 | Name                        | Description               | Value                                      |
