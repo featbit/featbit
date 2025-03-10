@@ -1,6 +1,7 @@
 using Application.Caches;
 using Domain.Users;
 using Infrastructure;
+using Infrastructure.MQ;
 using Infrastructure.Persistence;
 using Infrastructure.Redis;
 using Microsoft.AspNetCore.Identity;
@@ -32,7 +33,7 @@ public static class ConfigureServices
         services.AddHostedService<AppServices.FlagScheduleWorker>();
 
         // messaging services
-        services.AddMessagingServices(configuration);
+        services.AddMq(configuration);
 
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

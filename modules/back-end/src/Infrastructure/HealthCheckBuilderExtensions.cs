@@ -1,4 +1,5 @@
-﻿using Infrastructure.Kafka;
+﻿using Infrastructure.MQ;
+using Infrastructure.MQ.Kafka;
 using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,11 +18,11 @@ public static class HealthCheckBuilderExtensions
     {
         var tags = new[] { ReadinessTag };
 
-        var provider = configuration.GetDbProvider();
-        if (provider.Name == DbProvider.MongoDb)
+        var dbProvider = configuration.GetDbProvider();
+        if (dbProvider.Name == DbProvider.MongoDb)
         {
             builder.AddMongoDb(
-                provider.ConnectionString,
+                dbProvider.ConnectionString,
                 tags: tags,
                 timeout: Timeout
             );
@@ -31,6 +32,12 @@ public static class HealthCheckBuilderExtensions
             builder.AddDbContextCheck<AppDbContext>(tags: tags);
         }
 
+        var mqProvider = configuration.GetMqProvider();
+        if (mqProvider == MqProvider.Kafka)
+        {
+            builder.AddKafka(configuration, tags, Timeout);
+        }
+
         // add redis health check
         var redisConnectionString = configuration.GetValue<string>("Redis:ConnectionString")!;
         builder.AddRedis(
@@ -38,11 +45,6 @@ public static class HealthCheckBuilderExtensions
             tags: tags,
             timeout: Timeout
         );
-
-        if (configuration.IsProVersion())
-        {
-            builder.AddKafka(configuration, tags, Timeout);
-        }
 
         return builder;
     }

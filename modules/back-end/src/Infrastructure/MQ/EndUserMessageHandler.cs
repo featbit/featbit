@@ -3,7 +3,7 @@ using Domain.EndUsers;
 using Domain.Messages;
 using Domain.Utils;
 
-namespace Infrastructure.Messages;
+namespace Infrastructure.MQ;
 
 public class EndUserMessageHandler(IEndUserService service) : IMessageHandler
 {

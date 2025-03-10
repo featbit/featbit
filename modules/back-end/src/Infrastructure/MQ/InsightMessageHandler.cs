@@ -1,7 +1,7 @@
 using Domain.Messages;
 using Infrastructure.AppService;
 
-namespace Infrastructure.Messages;
+namespace Infrastructure.MQ;
 
 public class InsightMessageHandler(IInsightService insightService, InsightsWriter insightsWriter) : IMessageHandler
 {

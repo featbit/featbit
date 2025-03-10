@@ -5,7 +5,7 @@ using Domain.Messages;
 using Domain.Utils;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Kafka;
+namespace Infrastructure.MQ.Kafka;
 
 public partial class KafkaMessageProducer : IMessageProducer
 {

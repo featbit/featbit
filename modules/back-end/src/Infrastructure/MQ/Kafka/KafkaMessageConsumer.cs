@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Kafka;
+namespace Infrastructure.MQ.Kafka;
 
 public partial class KafkaMessageConsumer : BackgroundService
 {
