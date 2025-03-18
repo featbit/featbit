@@ -1,6 +1,6 @@
-using Confluent.Kafka;
 using Infrastructure.Fakes;
 using Infrastructure;
+using Infrastructure.MQ;
 using Serilog;
 using Streaming.DependencyInjection;
 
@@ -41,32 +41,19 @@ public static class ServicesRegister
         var streamingBuilder = services.AddStreamingCore();
         if (configuration.GetValue("IntegrationTests", false))
         {
-            streamingBuilder.UseStore<FakeStore>().UseNullMessageQueue();
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection([
+                    new KeyValuePair<string, string?>(MqProvider.SectionName, MqProvider.None)
+                ])
+                .Build();
+
+            streamingBuilder.UseStore<FakeStore>().UseMq(config);
         }
         else
         {
-            streamingBuilder.UseHybridStore(configuration);
-
-            if (configuration.IsProVersion())
-            {
-                var producerConfigDictionary = new Dictionary<string, string>();
-                configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
-                var producerConfig = new ProducerConfig(producerConfigDictionary);
-                services.AddSingleton(producerConfig);
-
-                var consumerConfigDictionary = new Dictionary<string, string>();
-                configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
-                var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
-                services.AddSingleton(consumerConfig);
-
-                // use kafka as message queue in pro version
-                streamingBuilder.UseKafkaMessageQueue();
-            }
-            else
-            {
-                // use redis as message queue in standard version
-                streamingBuilder.UseRedisMessageQueue();
-            }
+            streamingBuilder
+                .UseHybridStore(configuration)
+                .UseMq(configuration);
         }
 
         return builder;

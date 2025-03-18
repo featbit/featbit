@@ -1,10 +1,11 @@
 using System.Text.Json;
 using Domain.Messages;
 using Domain.Shared;
+using Infrastructure.Redis;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace Infrastructure.Redis;
+namespace Infrastructure.MQ.Redis;
 
 public partial class RedisMessageProducer : IMessageProducer
 {

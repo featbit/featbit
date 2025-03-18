@@ -1,9 +1,10 @@
 using Domain.Messages;
+using Infrastructure.Redis;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace Infrastructure.Redis;
+namespace Infrastructure.MQ.Redis;
 
 public partial class RedisMessageConsumer : BackgroundService
 {

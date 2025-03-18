@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Redis;
+namespace Infrastructure.MQ.Redis;
 
 public partial class RedisMessageConsumer
 {

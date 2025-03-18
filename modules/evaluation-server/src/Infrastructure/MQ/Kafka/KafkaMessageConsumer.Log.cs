@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.Kafka;
+namespace Infrastructure.MQ.Kafka;
 
 partial class KafkaMessageConsumer
 {

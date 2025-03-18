@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Infrastructure.Kafka;
+namespace Infrastructure.MQ.Kafka;
 
 public static class KafkaHealthCheckBuilderExtensions
 {
