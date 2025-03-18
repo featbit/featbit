@@ -36,15 +36,19 @@ public static class ServiceCollectionExtensions
 
         var postgresProvider = configuration.GetDbProvider();
 
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresProvider.ConnectionString);
-        dataSourceBuilder.EnableDynamicJson().ConfigureJsonOptions(ReusableJsonSerializerOptions.Web);
-        var dataSource = dataSourceBuilder.Build();
+        services.AddNpgsqlDataSource(postgresProvider.ConnectionString, builder =>
+        {
+            builder
+                .EnableDynamicJson()
+                .ConfigureJsonOptions(ReusableJsonSerializerOptions.Web);
+        });
 
-        services.AddDbContext<AppDbContext>(
-            op => op
-                .UseNpgsql(dataSource, options => options.EnableRetryOnFailure())
+        services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+        {
+            options
+                .UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSource>(), op => op.EnableRetryOnFailure())
                 .UseSnakeCaseNamingConvention()
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-        );
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        });
     }
 }

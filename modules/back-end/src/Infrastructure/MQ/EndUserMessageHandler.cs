@@ -9,7 +9,7 @@ public class EndUserMessageHandler(IEndUserService service) : IMessageHandler
 {
     public string Topic => Topics.EndUser;
 
-    public async Task HandleAsync(string message, CancellationToken cancellationToken)
+    public async Task HandleAsync(string message)
     {
         var endUserMessage =
             JsonSerializer.Deserialize<EndUserMessage>(message, ReusableJsonSerializerOptions.Web);

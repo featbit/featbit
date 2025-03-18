@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 
-namespace Infrastructure.MQ.Redis;
+namespace Infrastructure.MQ.Postgres;
 
-public partial class RedisMessageConsumer
+public partial class PostgresMessageConsumer
 {
     public static partial class Log
     {

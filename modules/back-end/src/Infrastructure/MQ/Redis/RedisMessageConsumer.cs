@@ -59,12 +59,7 @@ public partial class RedisMessageConsumer : BackgroundService
                 using var scope = _serviceProvider.CreateScope();
                 var sp = scope.ServiceProvider;
 
-                var handler = topic switch
-                {
-                    Topics.EndUser => sp.GetRequiredKeyedService<IMessageHandler>(nameof(EndUserMessageHandler)),
-                    Topics.Insights => sp.GetRequiredKeyedService<IMessageHandler>(nameof(InsightMessageHandler)),
-                    _ => null
-                };
+                var handler = sp.GetKeyedService<IMessageHandler>(topic);
                 if (handler == null)
                 {
                     Log.NoHandlerForTopic(_logger, topic);
@@ -74,7 +69,7 @@ public partial class RedisMessageConsumer : BackgroundService
                 var message = rawMessage.ToString();
                 try
                 {
-                    await handler.HandleAsync(message, cancellationToken);
+                    await handler.HandleAsync(message);
                     Log.MessageHandled(_logger, message);
                 }
                 catch (Exception ex)

@@ -7,7 +7,7 @@ public class InsightMessageHandler(IInsightService insightService, InsightsWrite
 {
     public string Topic => Topics.Insights;
 
-    public Task HandleAsync(string message, CancellationToken cancellationToken)
+    public Task HandleAsync(string message)
     {
         if (insightService.TryParse(message, out var insight))
         {

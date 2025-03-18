@@ -38,5 +38,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
         modelBuilder.ApplyConfiguration(new WebhookConfiguration());
         modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());
+        modelBuilder.ApplyConfiguration(new QueueMessageConfiguration());
     }
 }

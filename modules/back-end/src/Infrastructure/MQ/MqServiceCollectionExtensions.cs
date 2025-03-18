@@ -1,6 +1,7 @@
 using Confluent.Kafka;
 using Domain.Messages;
 using Infrastructure.MQ.Kafka;
+using Infrastructure.MQ.Postgres;
 using Infrastructure.MQ.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +22,9 @@ public static class MqServiceCollectionExtensions
             case MqProvider.Kafka:
                 AddKafkaMq();
                 break;
+            case MqProvider.Postgres:
+                AddPostgresMq();
+                break;
         }
 
         return;
@@ -28,10 +32,10 @@ public static class MqServiceCollectionExtensions
         void AddRedisMq()
         {
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
-
-            services.AddKeyedTransient<IMessageHandler, EndUserMessageHandler>(nameof(EndUserMessageHandler));
-            services.AddKeyedTransient<IMessageHandler, InsightMessageHandler>(nameof(InsightMessageHandler));
             services.AddHostedService<RedisMessageConsumer>();
+
+            services.AddKeyedTransient<IMessageHandler, EndUserMessageHandler>(Topics.EndUser);
+            services.AddKeyedTransient<IMessageHandler, InsightMessageHandler>(Topics.Insights);
         }
 
         void AddKafkaMq()
@@ -48,6 +52,15 @@ public static class MqServiceCollectionExtensions
 
             services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
             services.AddHostedService<KafkaMessageConsumer>();
+        }
+
+        void AddPostgresMq()
+        {
+            services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
+            services.AddHostedService<PostgresMessageConsumer>();
+
+            services.AddKeyedTransient<IMessageHandler, EndUserMessageHandler>(Topics.EndUser);
+            services.AddKeyedTransient<IMessageHandler, InsightMessageHandler>(Topics.Insights);
         }
     }
 }

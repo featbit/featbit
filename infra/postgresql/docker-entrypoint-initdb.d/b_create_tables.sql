@@ -306,6 +306,22 @@ CREATE TABLE projects
 );
 
 
+CREATE TABLE queue_messages
+(
+    id                bigint GENERATED ALWAYS AS IDENTITY,
+    topic             character varying(128)   NOT NULL,
+    status            character varying(64)    NOT NULL DEFAULT 'Pending',
+    enqueued_at       timestamp with time zone NOT NULL DEFAULT (now()),
+    not_visible_until timestamp with time zone,
+    last_deliver_at   timestamp with time zone,
+    last_handled_at   timestamp with time zone,
+    deliver_count     integer                  NOT NULL DEFAULT 0,
+    payload           text,
+    error             text,
+    CONSTRAINT pk_queue_messages PRIMARY KEY (id)
+);
+
+
 CREATE TABLE relay_proxies
 (
     id              uuid                     NOT NULL,
@@ -478,6 +494,9 @@ CREATE INDEX ix_policies_organization_id ON policies (organization_id);
 
 
 CREATE INDEX ix_projects_organization_id ON projects (organization_id);
+
+
+CREATE INDEX ix_queue_messages_not_visible_until_topic_status ON queue_messages (not_visible_until, topic, status);
 
 
 CREATE INDEX ix_relay_proxies_organization_id ON relay_proxies (organization_id);
