@@ -4,6 +4,7 @@ using Domain.Shared;
 using Infrastructure;
 using Infrastructure.MQ;
 using Infrastructure.MQ.Kafka;
+using Infrastructure.MQ.Postgres;
 using Infrastructure.MQ.Redis;
 using Infrastructure.Persistence;
 using Infrastructure.Store;
@@ -86,7 +87,8 @@ public static class StreamingBuilderExtensions
 
         void UsePostgresMq()
         {
-            // TODO
+            services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
+            services.AddHostedService<PostgresMessageConsumer>();
         }
     }
 

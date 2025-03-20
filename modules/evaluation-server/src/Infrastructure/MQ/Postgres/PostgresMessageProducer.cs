@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Dapper;
 using Domain.Messages;
-using Domain.Utils;
+using Domain.Shared;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -10,7 +10,7 @@ namespace Infrastructure.MQ.Postgres;
 public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogger<PostgresMessageProducer> logger)
     : IMessageProducer
 {
-    public async Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
+    public async Task PublishAsync<TMessage>(string topic, TMessage? message) where TMessage : class
     {
         try
         {
@@ -22,17 +22,6 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
                 "insert into queue_messages (topic, payload) values (@Topic, @Message) returning id",
                 new { Topic = topic, Message = jsonMessage }
             );
-
-            // for notification topics, we also need to notify the subscribers
-            if (topic is Topics.FeatureFlagChange or Topics.SegmentChange)
-            {
-                var channel = Topics.ToChannel(topic);
-
-                await connection.ExecuteAsync(
-                    "notify @Channel, @MessageId",
-                    new { Channel = channel, MessageId = messageId }
-                );
-            }
 
             Log.MessagePublished(logger, topic, messageId, jsonMessage);
         }
