@@ -12,6 +12,8 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
 {
     public async Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
     {
+        var isNotificationTopic = topic is Topics.FeatureFlagChange or Topics.SegmentChange;
+
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
@@ -19,12 +21,19 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
             await using var connection = await dataSource.OpenConnectionAsync();
 
             var messageId = await connection.ExecuteScalarAsync<long>(
-                "insert into queue_messages (topic, payload) values (@Topic, @Message) returning id",
-                new { Topic = topic, Message = jsonMessage }
+                "insert into queue_messages (topic, status, payload) values (@Topic, @Status, @Message) returning id",
+                new
+                {
+                    Topic = topic,
+                    Status = isNotificationTopic
+                        ? QueueMessageStatus.Notified
+                        : QueueMessageStatus.Pending,
+                    Message = jsonMessage
+                }
             );
 
-            // for notification topics, we also need to notify the subscribers
-            if (topic is Topics.FeatureFlagChange or Topics.SegmentChange)
+            // for notification topics, we need to notify the subscribers
+            if (isNotificationTopic)
             {
                 var channel = Topics.ToChannel(topic);
 

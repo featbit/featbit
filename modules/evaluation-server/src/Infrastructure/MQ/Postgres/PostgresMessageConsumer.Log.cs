@@ -52,5 +52,9 @@ public partial class PostgresMessageConsumer
         [LoggerMessage(12, LogLevel.Error, "Exception occurred while disposing current connection.",
             EventName = "ErrorDisposeConnection")]
         public static partial void ErrorDisposeConnection(ILogger logger, Exception exception);
+
+        [LoggerMessage(13, LogLevel.Error, "Exception occurred while adding missing messages to queue.",
+            EventName = "ErrorAddMissingMessages")]
+        public static partial void ErrorAddMissingMessages(ILogger logger, Exception exception);
     }
 }
