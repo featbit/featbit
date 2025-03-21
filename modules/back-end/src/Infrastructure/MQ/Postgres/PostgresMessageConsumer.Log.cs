@@ -27,9 +27,10 @@ public partial class PostgresMessageConsumer
             EventName = "MessageProcessed")]
         public static partial void MessageProcessed(ILogger logger, long id, string status, string error);
 
-        [LoggerMessage(7, LogLevel.Error, "Exception occurred while consuming topic: {Topic}.",
+        [LoggerMessage(7, LogLevel.Error,
+            "Exception occurred while consuming topic: {Topic}. Will retry in {Interval} seconds.",
             EventName = "ErrorConsumeTopic")]
-        public static partial void ErrorConsumeTopic(ILogger logger, string topic, Exception ex);
+        public static partial void ErrorConsumeTopic(ILogger logger, string topic, int interval, Exception ex);
 
         [LoggerMessage(8, LogLevel.Debug,
             "Wait for {Interval} seconds before the next poll because message count {MessageCount} is less than the batch size {BatchSize}.",

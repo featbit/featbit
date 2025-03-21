@@ -17,27 +17,29 @@ public partial class PostgresMessageConsumer(
     private const int PollBatchSize = 50;
     private const int PollIntervalInSeconds = 1;
 
-    private const string FetchSql = $"""
-                                             with available_messages as (
-                                                 select id
-                                                 from messages
-                                                 where (not_visible_until is null or (not_visible_until <= now())) 
-                                                     and topic = @Topic
-                                                     and status = {QueueMessageStatus.Pending}
-                                                 order by id asc
-                                                 limit @BatchSize
-                                                 for update skip locked
-                                             )
-                                             update queue_messages qm
-                                             set status = {QueueMessageStatus.Processing}, 
-                                                 not_visible_until = now() + interval '1 minute',
-                                                 deliver_count = deliver_count + 1,
-                                                 last_deliver_at = now()
-                                             from available_messages am
-                                             where qm.id = am.id
-                                             returning qm.id, qm.payload
-                                     "
-                                     """;
+    private const int RetryIntervalInSeconds = 5;
+
+    private const string FetchSql =
+        $"""
+         with available_messages as (
+             select id
+             from queue_messages
+             where (not_visible_until is null or (not_visible_until <= now())) 
+                 and topic = @Topic
+                 and status = '{QueueMessageStatus.Pending}'
+             order by id asc
+             limit @BatchSize
+             for update skip locked
+         )
+         update queue_messages qm
+         set status = '{QueueMessageStatus.Processing}', 
+             not_visible_until = now() + interval '1 minute',
+             deliver_count = deliver_count + 1,
+             last_deliver_at = now()
+         from available_messages am
+         where qm.id = am.id
+         returning qm.id, qm.payload
+         """;
 
     private const string MarkAsHandledSql =
         "update queue_messages set status = @Status, last_handled_at = now(), error = @Error where id = @Id";
@@ -76,7 +78,7 @@ public partial class PostgresMessageConsumer(
                 // if messages are less than batch size, delay consumer by PollIntervalInSeconds
                 if (messages.Count < PollBatchSize)
                 {
-                    Log.WaitForNextPoll(logger, messages.Count, PollBatchSize, PollIntervalInSeconds);
+                    Log.WaitForNextPoll(logger, PollIntervalInSeconds, messages.Count, PollBatchSize);
                     await Task.Delay(TimeSpan.FromSeconds(PollIntervalInSeconds), stoppingToken);
                 }
             }
@@ -86,10 +88,10 @@ public partial class PostgresMessageConsumer(
             }
             catch (Exception ex)
             {
-                Log.ErrorConsumeTopic(logger, topic, ex);
+                Log.ErrorConsumeTopic(logger, topic, RetryIntervalInSeconds, ex);
 
-                // Exception occurred while consuming topic, delay consumer by 1 second
-                await Task.Delay(1000, stoppingToken);
+                // Exception occurred while consuming topic, retry after RetryIntervalInSeconds
+                await Task.Delay(TimeSpan.FromSeconds(RetryIntervalInSeconds), stoppingToken);
             }
         }
 
