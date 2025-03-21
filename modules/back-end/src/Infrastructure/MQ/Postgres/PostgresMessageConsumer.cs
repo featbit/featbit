@@ -15,7 +15,7 @@ public partial class PostgresMessageConsumer(
     : BackgroundService
 {
     private const int PollBatchSize = 50;
-    private static TimeSpan PollInterval => TimeSpan.FromSeconds(1);
+    private const int PollIntervalInSeconds = 1;
 
     private const string FetchSql = $"""
                                              with available_messages as (
@@ -55,12 +55,14 @@ public partial class PostgresMessageConsumer(
 
     private async Task ProcessAsync(string topic, CancellationToken stoppingToken)
     {
+        Log.StartConsumingTopic(logger, topic);
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 // poll messages
                 var messages = await PollAsync(topic, stoppingToken);
+                Log.MessagePolled(logger, topic, messages.Count);
 
                 // handle messages
                 await using var connection = await dataSource.OpenConnectionAsync(stoppingToken);
@@ -68,24 +70,14 @@ public partial class PostgresMessageConsumer(
                 {
                     var error = await HandleAsync(topic, payload);
 
-                    // mark message as handled
-                    await connection.ExecuteAsync(
-                        MarkAsHandledSql,
-                        new
-                        {
-                            Status = string.IsNullOrWhiteSpace(error)
-                                ? QueueMessageStatus.Completed
-                                : QueueMessageStatus.Failed,
-                            Error = error,
-                            Id = id
-                        }
-                    );
+                    await MarkAsProcessed(connection, id, error);
                 }
 
-                // if messages are less than batch size, delay consumer by PollInterval
+                // if messages are less than batch size, delay consumer by PollIntervalInSeconds
                 if (messages.Count < PollBatchSize)
                 {
-                    await Task.Delay(PollInterval, stoppingToken);
+                    Log.WaitForNextPoll(logger, messages.Count, PollBatchSize, PollIntervalInSeconds);
+                    await Task.Delay(TimeSpan.FromSeconds(PollIntervalInSeconds), stoppingToken);
                 }
             }
             catch (OperationCanceledException)
@@ -99,6 +91,21 @@ public partial class PostgresMessageConsumer(
                 // Exception occurred while consuming topic, delay consumer by 1 second
                 await Task.Delay(1000, stoppingToken);
             }
+        }
+
+        return;
+
+        async Task MarkAsProcessed(NpgsqlConnection conn, long id, string error)
+        {
+            var status = string.IsNullOrWhiteSpace(error)
+                ? QueueMessageStatus.Completed
+                : QueueMessageStatus.Failed;
+
+            await conn.ExecuteAsync(
+                MarkAsHandledSql, new { Status = status, Error = error, Id = id }
+            );
+
+            Log.MessageProcessed(logger, id, status, error);
         }
     }
 
