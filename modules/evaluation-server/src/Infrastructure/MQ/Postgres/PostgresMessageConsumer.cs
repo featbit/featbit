@@ -2,6 +2,7 @@ using System.Data;
 using System.Threading.Channels;
 using Dapper;
 using Domain.Messages;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -55,11 +56,11 @@ public partial class PostgresMessageConsumer : BackgroundService
         """;
 
     public PostgresMessageConsumer(
-        NpgsqlDataSource dataSource,
+        IConfiguration configuration,
         IEnumerable<IMessageConsumer> handlers,
         ILogger<PostgresMessageConsumer> logger)
     {
-        var builder = new NpgsqlConnectionStringBuilder(dataSource.ConnectionString)
+        var builder = new NpgsqlConnectionStringBuilder(configuration["Postgres:ConnectionString"]!)
         {
             // override the default keepalive interval and application name
             KeepAlive = KeepAliveIntervalInSeconds,
@@ -86,6 +87,8 @@ public partial class PostgresMessageConsumer : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            var startError = false;
+
             try
             {
                 var connection = await SetupConnectionAsync();
@@ -118,11 +121,17 @@ public partial class PostgresMessageConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                Log.ErrorStartListening(_logger, ex);
+                startError = true;
+                Log.ErrorStartListening(_logger, RestartIntervalInSeconds, ex);
             }
 
+            // the listen task is stopped due to start error
+            if (startError)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(RestartIntervalInSeconds), stoppingToken);
+            }
             // the listen task is stopped due to connection closed
-            if (_listenCts.IsCancellationRequested)
+            else if (_listenCts.IsCancellationRequested)
             {
                 Log.ListenStoppedDueToConnectionClosed(_logger, RestartIntervalInSeconds);
 

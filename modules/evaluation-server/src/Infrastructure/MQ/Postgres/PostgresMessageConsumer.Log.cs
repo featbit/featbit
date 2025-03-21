@@ -45,9 +45,10 @@ public partial class PostgresMessageConsumer
         [LoggerMessage(10, LogLevel.Information, "Listening stopped.", EventName = "ListeningStopped")]
         public static partial void ListeningStopped(ILogger logger);
 
-        [LoggerMessage(11, LogLevel.Error, "Exception occurred while starting listening.",
+        [LoggerMessage(11, LogLevel.Error,
+            "Exception occurred while starting listening. Will restart in {RestartIntervalInSeconds} seconds.",
             EventName = "ErrorStartListening")]
-        public static partial void ErrorStartListening(ILogger logger, Exception exception);
+        public static partial void ErrorStartListening(ILogger logger, int restartIntervalInSeconds, Exception exception);
 
         [LoggerMessage(12, LogLevel.Error, "Exception occurred while disposing current connection.",
             EventName = "ErrorDisposeConnection")]
