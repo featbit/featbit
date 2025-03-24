@@ -14,8 +14,8 @@ public partial class PostgresMessageConsumer(
     ILogger<PostgresMessageConsumer> logger)
     : BackgroundService
 {
-    private const int PollBatchSize = 50;
-    private const int PollIntervalInSeconds = 1;
+    private const int PollBatchSize = 100;
+    private const int PollIntervalInSeconds = 3;
     private const int RetryIntervalInSeconds = 5;
 
     private const string FetchSql =
