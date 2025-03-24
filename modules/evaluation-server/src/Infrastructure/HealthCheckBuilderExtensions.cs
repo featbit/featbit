@@ -18,12 +18,12 @@ public static class HealthCheckBuilderExtensions
     {
         var tags = new[] { ReadinessTag };
 
-        var provider = configuration.GetDbProvider();
-        switch (provider.Name)
+        var dbProvider = configuration.GetDbProvider();
+        switch (dbProvider.Name)
         {
             case DbProvider.MongoDb:
                 builder.AddMongoDb(
-                    provider.ConnectionString,
+                    dbProvider.ConnectionString,
                     tags: tags,
                     timeout: Timeout
                 );
@@ -33,6 +33,12 @@ public static class HealthCheckBuilderExtensions
                 break;
         }
 
+        var mqProvider = configuration.GetMqProvider();
+        if (mqProvider == MqProvider.Kafka)
+        {
+            builder.AddKafka(configuration, tags, Timeout);
+        }
+
         // add redis health check
         var redisConnectionString = configuration.GetValue<string>("Redis:ConnectionString")!;
         builder.AddRedis(
@@ -40,12 +46,6 @@ public static class HealthCheckBuilderExtensions
             tags: tags,
             timeout: Timeout
         );
-
-        var mqProvider = configuration.GetMqProvider();
-        if (mqProvider == MqProvider.Kafka)
-        {
-            builder.AddKafka(configuration, tags, Timeout);
-        }
 
         return builder;
     }
