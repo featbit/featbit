@@ -266,9 +266,9 @@ public partial class PostgresMessageConsumer : BackgroundService
 
         Log.NotificationReceived(
             _logger,
-            args.Payload,
+            args.Channel,
             args.PID,
-            args.Channel
+            args.Payload
         );
 
         MessageChannel.Writer.TryWrite(new ChannelMessage(args.Channel, messageId));
