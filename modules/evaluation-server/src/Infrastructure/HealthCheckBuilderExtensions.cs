@@ -29,7 +29,7 @@ public static class HealthCheckBuilderExtensions
                 );
                 break;
             case DbProvider.Postgres:
-                builder.AddNpgSql();
+                builder.AddNpgSql(tags: tags);
                 break;
         }
 
