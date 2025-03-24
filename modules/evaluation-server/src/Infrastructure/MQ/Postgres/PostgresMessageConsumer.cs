@@ -45,6 +45,9 @@ public partial class PostgresMessageConsumer : BackgroundService
     // The time when the connection was closed
     private DateTime? _connectionClosedAt;
 
+    // The message id of the last message consumed
+    private long _lastMessageId = -1;
+
     // The time when we start the listen task
     private DateTime? _startedAt;
 
@@ -55,7 +58,11 @@ public partial class PostgresMessageConsumer : BackgroundService
         where not_visible_until is null
           and topic = any (@Topics)
           and status = 'Notified'
-          and enqueued_at > @LastEnqueuedAt
+          and (
+            (@LastMessageId = -1 and enqueued_at > @LastEnqueuedAt) or
+            (@LastMessageId != -1 and id > @LastMessageId)
+            )
+        order by id;
         """;
 
     public PostgresMessageConsumer(
@@ -170,6 +177,8 @@ public partial class PostgresMessageConsumer : BackgroundService
             {
                 await ConsumeCoreAsync(channel, messageId);
                 Log.MessageHandled(_logger, messageId);
+
+                _lastMessageId = messageId;
             }
             catch (Exception ex)
             {
@@ -283,7 +292,12 @@ public partial class PostgresMessageConsumer : BackgroundService
             var lastEnqueuedAt = _connectionClosedAt ?? _startedAt;
 
             var missingMessages = await connection.QueryAsync<(long id, string topic)>(
-                FetchMissedMessagesSql, new { Topics = ListeningTopics, LastEnqueuedAt = lastEnqueuedAt }
+                FetchMissedMessagesSql, new
+                {
+                    Topics = ListeningTopics,
+                    LastMessageId = _lastMessageId,
+                    LastEnqueuedAt = lastEnqueuedAt
+                }
             );
 
             foreach (var message in missingMessages)
