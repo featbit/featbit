@@ -45,7 +45,7 @@ public static class StreamingBuilderExtensions
                 AddKafkaMq();
                 break;
             case MqProvider.Postgres:
-                UsePostgresMq();
+                AddPostgresMq();
                 break;
         }
 
@@ -85,7 +85,7 @@ public static class StreamingBuilderExtensions
             services.AddHostedService<KafkaMessageConsumer>();
         }
 
-        void UsePostgresMq()
+        void AddPostgresMq()
         {
             services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
             services.AddHostedService<PostgresMessageConsumer>();
