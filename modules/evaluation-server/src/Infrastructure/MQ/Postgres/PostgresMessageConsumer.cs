@@ -88,7 +88,7 @@ public partial class PostgresMessageConsumer : BackgroundService
 
     private async Task ListenAsync(CancellationToken stoppingToken)
     {
-        _startedAt = DateTime.Now;
+        _startedAt = DateTime.UtcNow;
 
         while (!stoppingToken.IsCancellationRequested)
         {
