@@ -17,7 +17,7 @@ public class KafkaConfigTests
     [Fact]
     public async Task DefaultProducerConsumerConfig()
     {
-        var proServices = _app.WithWebHostBuilder(builder => builder.UseSetting("MqProvider", MqProvider.Kafka))
+        var proServices = _app.WithWebHostBuilder(builder => builder.UseSetting(MqProvider.SectionName, MqProvider.Kafka))
             .Services;
 
         var producerConfig = proServices.GetRequiredService<ProducerConfig>();

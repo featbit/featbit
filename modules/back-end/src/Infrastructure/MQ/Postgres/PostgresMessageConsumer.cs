@@ -16,7 +16,6 @@ public partial class PostgresMessageConsumer(
 {
     private const int PollBatchSize = 50;
     private const int PollIntervalInSeconds = 1;
-
     private const int RetryIntervalInSeconds = 5;
 
     private const string FetchSql =
