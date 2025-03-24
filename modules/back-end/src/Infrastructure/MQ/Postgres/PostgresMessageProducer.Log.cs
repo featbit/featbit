@@ -13,5 +13,13 @@ public partial class PostgresMessageProducer
         [LoggerMessage(2, LogLevel.Error, "Exception occurred while publishing message.",
             EventName = "ErrorPublishMessage")]
         public static partial void ErrorPublishMessage(ILogger logger, Exception exception);
+
+        [LoggerMessage(3, LogLevel.Information, "Notifications cleaned. Count: {Count}",
+            EventName = "NotificationsCleaned")]
+        public static partial void NotificationsCleaned(ILogger logger, int count);
+
+        [LoggerMessage(4, LogLevel.Error, "Exception occurred while cleaning notifications.",
+            EventName = "ErrorCleanupNotifications")]
+        public static partial void ErrorCleanupNotifications(ILogger logger, Exception exception);
     }
 }

@@ -40,9 +40,6 @@ public partial class PostgresMessageConsumer(
          returning qm.id, qm.payload
          """;
 
-    private const string MarkAsHandledSql =
-        "update queue_messages set status = @Status, last_handled_at = now(), error = @Error where id = @Id";
-
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var tasks = new[]
@@ -102,9 +99,20 @@ public partial class PostgresMessageConsumer(
                 ? QueueMessageStatus.Completed
                 : QueueMessageStatus.Failed;
 
-            await conn.ExecuteAsync(
-                MarkAsHandledSql, new { Status = status, Error = error, Id = id }
-            );
+            if (status == QueueMessageStatus.Completed)
+            {
+                await conn.ExecuteAsync(
+                    "delete from queue_messages where id = @Id",
+                    new { Id = id }
+                );
+            }
+            else
+            {
+                await conn.ExecuteAsync(
+                    "update queue_messages set status = @Status, last_handled_at = now(), error = @Error where id = @Id",
+                    new { Status = status, Error = error, Id = id }
+                );
+            }
 
             Log.MessageProcessed(logger, id, status, error);
         }
