@@ -1,4 +1,3 @@
-version: "3.7"
 name: featbit-pro-dev
 
 x-clickhouse-defaults: &clickhouse-defaults
@@ -142,7 +141,8 @@ services:
       - Kafka__Consumer__security.protocol=SASL_PLAINTEXT
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
-      - IS_PRO=true
+      - DbProvider=MongoDb
+      - MqProvider=Kafka
       - SSOEnabled=false
     depends_on:
       mongodb:
@@ -176,7 +176,8 @@ services:
       - Kafka__Consumer__sasl.mechanism=PLAIN
       - Kafka__Consumer__security.protocol=SASL_PLAINTEXT
       - Redis__ConnectionString=redis:6379
-      - IS_PRO=true
+      - DbProvider=MongoDb
+      - MqProvider=Kafka
     depends_on:
       mongodb:
         condition: service_started
@@ -356,7 +357,7 @@ services:
     volumes:
       - kafka_2_data:/bitnami/kafka
   
-
+  
   init-kafka-topics:
     image: bitnami/kafka:3.5
     depends_on:
@@ -376,7 +377,7 @@ services:
         /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka-0:9092 --partitions 6 --replication-factor 2 --topic featbit-insights --command-config /etc/kafka/config.properties;
         echo "Seed kafka topic finished."
     volumes:
-      - ./infra/kafka/config.properties:/etc/kafka/config.properties    
+      - ./infra/kafka/config.properties:/etc/kafka/config.properties
     networks:
       - featbit-network
 

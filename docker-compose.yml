@@ -17,6 +17,7 @@ services:
     image: featbit/featbit-api-server:latest
     environment:
       - DbProvider=MongoDb
+      - MqProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis:6379
@@ -34,6 +35,7 @@ services:
     image: featbit/featbit-evaluation-server:latest
     environment:
       - DbProvider=MongoDb
+      - MqProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis:6379

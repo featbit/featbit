@@ -1,5 +1,4 @@
 name: featbit-clickhouse
-version: "3"
 services:
 
   clickhouse-server:

@@ -1,5 +1,4 @@
 name: featbit-pro-dev-kafka-ha
-version: "3"
 services:
   ui:
     image: featbit/ui:dev
@@ -26,7 +25,8 @@ services:
       context: ./modules/back-end
       dockerfile: ./deploy/Dockerfile
     environment:
-      - IS_PRO=true
+      - DbProvider=MongoDb
+      - MqProvider=Kafka
       - SSOEnabled=false
       - KAFKA__BOOTSTRAPSERVERS=kafka:9092
       - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
@@ -49,7 +49,8 @@ services:
       context: ./modules/evaluation-server
       dockerfile: ./deploy/Dockerfile
     environment:
-      - IS_PRO=true
+      - DbProvider=MongoDb
+      - MqProvider=Kafka
       - KAFKA__BOOTSTRAPSERVERS=kafka:9092
       - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
     depends_on:
@@ -173,8 +174,8 @@ services:
       - DESTINATION=kafka-consumer:9092
       - TOPICS=featbit-feature-flag-change,featbit-segment-change,featbit-endusers,featbit-insights
     networks:
-      - featbit-network    
-
+      - featbit-network
+  
   init-kafka-topics:
     image: bitnami/kafka:3.5
     depends_on:
