@@ -41,7 +41,7 @@ DB_PROVIDER = os.getenv("DB_PROVIDER", "MongoDb")
 POSTGRES_CONNECTION_STRING = os.getenv("POSTGRES_CONNECTION_STRING", "")
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "0tJXCokSvOB8")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgresql")
+POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 POSTGRES_DATABASE = os.getenv("POSTGRES_DATABASE", "featbit")
 
