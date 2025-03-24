@@ -48,8 +48,7 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
                 // cleanup old notifications
                 if (!_lastCleanupAt.HasValue || DateTime.UtcNow - _lastCleanupAt.Value > TimeSpan.FromDays(1))
                 {
-                    // run cleanup in the background
-                    _ = CleanupNotificationsAsync(connection);
+                    await CleanupNotificationsAsync(connection);
                 }
             }
 
