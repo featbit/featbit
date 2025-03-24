@@ -20,7 +20,7 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
 
             await using var connection = await dataSource.OpenConnectionAsync();
 
-            var messageId = await connection.ExecuteScalarAsync<long>(
+            var messageId = await connection.ExecuteScalarAsync<string>(
                 "insert into queue_messages (topic, status, payload) values (@Topic, @Status, @Message) returning id",
                 new
                 {
@@ -38,12 +38,12 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
                 var channel = Topics.ToChannel(topic);
 
                 await connection.ExecuteAsync(
-                    "notify @Channel, @MessageId",
+                    "select pg_notify(@Channel, @MessageId)",
                     new { Channel = channel, MessageId = messageId }
                 );
             }
 
-            Log.MessagePublished(logger, topic, messageId, jsonMessage);
+            Log.MessagePublished(logger, topic, messageId!, jsonMessage);
         }
         catch (Exception ex)
         {

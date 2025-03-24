@@ -40,8 +40,8 @@ public partial class PostgresMessageConsumer
             EventName = "NoHandlerForChannel")]
         public static partial void NoHandlerForChannel(ILogger logger, string channel);
 
-        [LoggerMessage(9, LogLevel.Debug, "Message handled: {Message}", EventName = "MessageHandled")]
-        public static partial void MessageHandled(ILogger logger, string message);
+        [LoggerMessage(9, LogLevel.Debug, "Message handled: {Id}", EventName = "MessageHandled")]
+        public static partial void MessageHandled(ILogger logger, long id);
 
         [LoggerMessage(10, LogLevel.Error, "Exception occurred while consuming message: {Message}.",
             EventName = "ErrorConsumeMessage")]
@@ -60,8 +60,15 @@ public partial class PostgresMessageConsumer
             EventName = "ErrorDisposeConnection")]
         public static partial void ErrorDisposeConnection(ILogger logger, Exception exception);
 
-        [LoggerMessage(14, LogLevel.Error, "Exception occurred while adding missing messages to queue.",
-            EventName = "ErrorAddMissingMessages")]
-        public static partial void ErrorAddMissingMessages(ILogger logger, Exception exception);
+        [LoggerMessage(14, LogLevel.Debug, "Connection disposed.", EventName = "ConnectionDisposed")]
+        public static partial void ConnectionDisposed(ILogger logger);
+
+        [LoggerMessage(15, LogLevel.Error, "Exception occurred while adding missed messages to queue.",
+            EventName = "ErrorAddMissedMessages")]
+        public static partial void ErrorAddMissedMessages(ILogger logger, Exception exception);
+
+        [LoggerMessage(16, LogLevel.Warning, "Received invalid message: {Message}",
+            EventName = "InvalidMessageReceived")]
+        public static partial void InvalidMessageReceived(ILogger logger, string message);
     }
 }

@@ -8,7 +8,7 @@ public partial class PostgresMessageProducer
     {
         [LoggerMessage(1, LogLevel.Debug, "Message published. Topic: {Topic}. Message(Id={Id}): {Message}",
             EventName = "MessagePublished")]
-        public static partial void MessagePublished(ILogger logger, string topic, long id, string message);
+        public static partial void MessagePublished(ILogger logger, string topic, string id, string message);
 
         [LoggerMessage(2, LogLevel.Error, "Exception occurred while publishing message.",
             EventName = "ErrorPublishMessage")]

@@ -9,7 +9,7 @@ using Npgsql;
 
 namespace Infrastructure.MQ.Postgres;
 
-internal record ChannelMessage(string Channel, string MessageId);
+internal record ChannelMessage(string Channel, long MessageId);
 
 public partial class PostgresMessageConsumer : BackgroundService
 {
@@ -45,14 +45,17 @@ public partial class PostgresMessageConsumer : BackgroundService
     // The time when the connection was closed
     private DateTime? _connectionClosedAt;
 
-    private const string FetchMissingMessagesSql =
+    // The time when we start the listen task
+    private DateTime? _startedAt;
+
+    private const string FetchMissedMessagesSql =
         """
         select id, topic
         from queue_messages
         where not_visible_until is null
           and topic = any (@Topics)
           and status = 'Notified'
-          and enqueued_at >= @ConnectionClosedAt
+          and enqueued_at > @LastEnqueuedAt
         """;
 
     public PostgresMessageConsumer(
@@ -85,6 +88,8 @@ public partial class PostgresMessageConsumer : BackgroundService
 
     private async Task ListenAsync(CancellationToken stoppingToken)
     {
+        _startedAt = DateTime.Now;
+
         while (!stoppingToken.IsCancellationRequested)
         {
             var startError = false;
@@ -92,6 +97,9 @@ public partial class PostgresMessageConsumer : BackgroundService
             try
             {
                 var connection = await SetupConnectionAsync();
+
+                // add missed messages if any
+                await AddMissedMessagesAsync(connection);
 
                 var cts = CancellationTokenSource.CreateLinkedTokenSource(_listenCts.Token, stoppingToken);
 
@@ -141,9 +149,6 @@ public partial class PostgresMessageConsumer : BackgroundService
                 // wait for the restart interval
                 await Task.Delay(TimeSpan.FromSeconds(RestartIntervalInSeconds), stoppingToken);
 
-                // before restart, add missing messages to channel
-                await AddMissingMessagesAsync(stoppingToken);
-
                 // reset the cancellation token source
                 _listenCts.Dispose();
                 _listenCts = new CancellationTokenSource();
@@ -174,16 +179,11 @@ public partial class PostgresMessageConsumer : BackgroundService
 
         return;
 
-        async Task ConsumeCoreAsync(string channel, string messageId)
+        async Task ConsumeCoreAsync(string channel, long messageId)
         {
             if (!_handlers.TryGetValue(channel, out var handler))
             {
                 Log.NoHandlerForChannel(_logger, channel);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(messageId))
-            {
                 return;
             }
 
@@ -212,11 +212,14 @@ public partial class PostgresMessageConsumer : BackgroundService
             try
             {
                 await _connection.DisposeAsync();
+                Log.ConnectionDisposed(_logger);
             }
             catch (Exception ex)
             {
                 Log.ErrorDisposeConnection(_logger, ex);
             }
+
+            _connection = null;
         }
 
         var connection = await _dataSource.OpenConnectionAsync();
@@ -255,6 +258,12 @@ public partial class PostgresMessageConsumer : BackgroundService
 
     private void OnNotificationReceived(object sender, NpgsqlNotificationEventArgs args)
     {
+        if (string.IsNullOrWhiteSpace(args.Payload) || !long.TryParse(args.Payload, out var messageId))
+        {
+            Log.InvalidMessageReceived(_logger, args.Payload);
+            return;
+        }
+
         Log.NotificationReceived(
             _logger,
             args.Payload,
@@ -262,23 +271,19 @@ public partial class PostgresMessageConsumer : BackgroundService
             args.Channel
         );
 
-        MessageChannel.Writer.TryWrite(new ChannelMessage(args.Channel, args.Payload));
+        MessageChannel.Writer.TryWrite(new ChannelMessage(args.Channel, messageId));
     }
 
-    private async Task AddMissingMessagesAsync(CancellationToken cancellationToken)
+    private async Task AddMissedMessagesAsync(NpgsqlConnection connection)
     {
-        if (_connectionClosedAt is null)
-        {
-            // this should never happen logically but just in case
-            return;
-        }
-
         try
         {
-            await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+            // if the connection is closed, use the connection closed time;
+            // otherwise, use the time when the listen task started
+            var lastEnqueuedAt = _connectionClosedAt ?? _startedAt;
 
-            var missingMessages = await connection.QueryAsync<(string id, string topic)>(
-                FetchMissingMessagesSql, new { Topics = ListeningTopics, ConnectionClosedAt = _connectionClosedAt }
+            var missingMessages = await connection.QueryAsync<(long id, string topic)>(
+                FetchMissedMessagesSql, new { Topics = ListeningTopics, LastEnqueuedAt = lastEnqueuedAt }
             );
 
             foreach (var message in missingMessages)
@@ -289,7 +294,7 @@ public partial class PostgresMessageConsumer : BackgroundService
         }
         catch (Exception ex)
         {
-            Log.ErrorAddMissingMessages(_logger, ex);
+            Log.ErrorAddMissedMessages(_logger, ex);
         }
     }
 }
