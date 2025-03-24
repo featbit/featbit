@@ -27,34 +27,40 @@ public partial class PostgresMessageConsumer
         public static partial void ErrorWaitNotification(ILogger logger, Exception exception);
 
         [LoggerMessage(6, LogLevel.Warning,
+            "Listening stopped due to start error. Will restart in {RestartIntervalInSeconds} seconds.",
+            EventName = "ListenStoppedDueToStartError")]
+        public static partial void ListenStoppedDueToStartError(ILogger logger, int restartIntervalInSeconds);
+
+        [LoggerMessage(7, LogLevel.Warning,
             "Listening stopped due to connection closed. Will restart in {RestartIntervalInSeconds} seconds.",
             EventName = "ListenStoppedDueToConnectionClosed")]
         public static partial void ListenStoppedDueToConnectionClosed(ILogger logger, int restartIntervalInSeconds);
 
-        [LoggerMessage(7, LogLevel.Warning, "No message handler for channel: {Channel}",
+        [LoggerMessage(8, LogLevel.Warning, "No message handler for channel: {Channel}",
             EventName = "NoHandlerForChannel")]
         public static partial void NoHandlerForChannel(ILogger logger, string channel);
 
-        [LoggerMessage(8, LogLevel.Debug, "Message handled: {Message}", EventName = "MessageHandled")]
+        [LoggerMessage(9, LogLevel.Debug, "Message handled: {Message}", EventName = "MessageHandled")]
         public static partial void MessageHandled(ILogger logger, string message);
 
-        [LoggerMessage(9, LogLevel.Error, "Exception occurred while consuming message: {Message}.",
+        [LoggerMessage(10, LogLevel.Error, "Exception occurred while consuming message: {Message}.",
             EventName = "ErrorConsumeMessage")]
         public static partial void ErrorConsumeMessage(ILogger logger, string message, Exception exception);
 
-        [LoggerMessage(10, LogLevel.Information, "Listening stopped.", EventName = "ListeningStopped")]
+        [LoggerMessage(11, LogLevel.Information, "Listening stopped.", EventName = "ListeningStopped")]
         public static partial void ListeningStopped(ILogger logger);
 
-        [LoggerMessage(11, LogLevel.Error,
+        [LoggerMessage(12, LogLevel.Error,
             "Exception occurred while starting listening. Will restart in {RestartIntervalInSeconds} seconds.",
             EventName = "ErrorStartListening")]
-        public static partial void ErrorStartListening(ILogger logger, int restartIntervalInSeconds, Exception exception);
+        public static partial void ErrorStartListening(ILogger logger, int restartIntervalInSeconds,
+            Exception exception);
 
-        [LoggerMessage(12, LogLevel.Error, "Exception occurred while disposing current connection.",
+        [LoggerMessage(13, LogLevel.Error, "Exception occurred while disposing current connection.",
             EventName = "ErrorDisposeConnection")]
         public static partial void ErrorDisposeConnection(ILogger logger, Exception exception);
 
-        [LoggerMessage(13, LogLevel.Error, "Exception occurred while adding missing messages to queue.",
+        [LoggerMessage(14, LogLevel.Error, "Exception occurred while adding missing messages to queue.",
             EventName = "ErrorAddMissingMessages")]
         public static partial void ErrorAddMissingMessages(ILogger logger, Exception exception);
     }

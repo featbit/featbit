@@ -128,6 +128,9 @@ public partial class PostgresMessageConsumer : BackgroundService
             // the listen task is stopped due to start error
             if (startError)
             {
+                Log.ListenStoppedDueToStartError(_logger, RestartIntervalInSeconds);
+
+                // wait for the restart interval
                 await Task.Delay(TimeSpan.FromSeconds(RestartIntervalInSeconds), stoppingToken);
             }
             // the listen task is stopped due to connection closed
