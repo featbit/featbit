@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from app import MongoDbProvider, PostgresDbProvider
+from app import MongoDbProvider, PostgresDbProvider, ClickHouseDbProvider
 from app.clickhouse.client import sync_execute
 from app.main.models.statistics.end_user.sql import (
     count_and_list_user_from_mongodb, get_users_sql_ch, count_user_sql_ch, get_users_sql_pg, count_user_sql_pg)
-from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, IS_PRO, DB_PROVIDER
+from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, DB_PROVIDER
 from utils import to_UTC_datetime
 from app.postgresql.client import execute_query
 
@@ -78,7 +78,7 @@ class EndUserParams:
 
 class EndUserStatistics:
     def __init__(self, params: "EndUserParams"):
-        if IS_PRO:
+        if DB_PROVIDER == ClickHouseDbProvider:
             start = params.start.strftime(DATE_ISO_FMT)
             end = params.end.strftime(DATE_ISO_FMT)
         else:
@@ -102,7 +102,7 @@ class EndUserStatistics:
         has_variation = 'variation' in self._query_params
         has_user = 'user_search_key' in self._query_params
 
-        if IS_PRO:
+        if DB_PROVIDER == ClickHouseDbProvider:
             if has_user:
                 self._query_params['user_search_key'] = f"%{self._query_params['user_search_key']}%"
             for res in sync_execute(count_user_sql_ch(has_variation, has_user), args=self._query_params):  # type: ignore
