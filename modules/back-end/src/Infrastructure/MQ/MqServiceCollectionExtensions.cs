@@ -1,6 +1,7 @@
 using Confluent.Kafka;
 using Domain.Messages;
 using Infrastructure.MQ.Kafka;
+using Infrastructure.MQ.None;
 using Infrastructure.MQ.Postgres;
 using Infrastructure.MQ.Redis;
 using Microsoft.Extensions.Configuration;
@@ -16,20 +17,28 @@ public static class MqServiceCollectionExtensions
 
         switch (mqProvider)
         {
+            case MqProvider.None:
+                AddNone();
+                break;
             case MqProvider.Redis:
-                AddRedisMq();
+                AddRedis();
                 break;
             case MqProvider.Kafka:
-                AddKafkaMq();
+                AddKafka();
                 break;
             case MqProvider.Postgres:
-                AddPostgresMq();
+                AddPostgres();
                 break;
         }
 
         return;
 
-        void AddRedisMq()
+        void AddNone()
+        {
+            services.AddSingleton<IMessageProducer, NoneMessageProducer>();
+        }
+
+        void AddRedis()
         {
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
             services.AddHostedService<RedisMessageConsumer>();
@@ -38,7 +47,7 @@ public static class MqServiceCollectionExtensions
             services.AddKeyedTransient<IMessageHandler, InsightMessageHandler>(Topics.Insights);
         }
 
-        void AddKafkaMq()
+        void AddKafka()
         {
             var producerConfigDictionary = new Dictionary<string, string>();
             configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
@@ -54,7 +63,7 @@ public static class MqServiceCollectionExtensions
             services.AddHostedService<KafkaMessageConsumer>();
         }
 
-        void AddPostgresMq()
+        void AddPostgres()
         {
             services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
             services.AddHostedService<PostgresMessageConsumer>();
