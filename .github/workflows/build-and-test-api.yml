@@ -16,7 +16,7 @@ on:
 
 jobs:
   validate:
-    name: build-and-test-els
+    name: build-and-test-api
     runs-on: ubuntu-latest
     defaults:
       run:
