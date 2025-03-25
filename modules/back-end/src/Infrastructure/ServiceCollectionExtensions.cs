@@ -1,12 +1,7 @@
-using Confluent.Kafka;
 using Dapper;
 using Domain.EndUsers;
-using Domain.Messages;
 using Domain.Utils;
-using Infrastructure.Kafka;
-using Infrastructure.Messages;
 using Infrastructure.Persistence.Dapper;
-using Infrastructure.Redis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,44 +36,19 @@ public static class ServiceCollectionExtensions
 
         var postgresProvider = configuration.GetDbProvider();
 
-        var dataSourceBuilder = new NpgsqlDataSourceBuilder(postgresProvider.ConnectionString);
-        dataSourceBuilder.EnableDynamicJson().ConfigureJsonOptions(ReusableJsonSerializerOptions.Web);
-        var dataSource = dataSourceBuilder.Build();
+        services.AddNpgsqlDataSource(postgresProvider.ConnectionString, builder =>
+        {
+            builder
+                .EnableDynamicJson()
+                .ConfigureJsonOptions(ReusableJsonSerializerOptions.Web);
+        });
 
-        services.AddDbContext<AppDbContext>(
-            op => op
-                .UseNpgsql(dataSource, options => options.EnableRetryOnFailure())
+        services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+        {
+            options
+                .UseNpgsql(serviceProvider.GetRequiredService<NpgsqlDataSource>(), op => op.EnableRetryOnFailure())
                 .UseSnakeCaseNamingConvention()
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-        );
-    }
-
-    public static void AddMessagingServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        if (configuration.IsProVersion())
-        {
-            var producerConfigDictionary = new Dictionary<string, string>();
-            configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
-            var producerConfig = new ProducerConfig(producerConfigDictionary);
-            services.AddSingleton(producerConfig);
-
-            var consumerConfigDictionary = new Dictionary<string, string>();
-            configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
-            var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
-            services.AddSingleton(consumerConfig);
-
-            // use kafka as message queue in pro version
-            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
-            services.AddHostedService<KafkaMessageConsumer>();
-        }
-        else
-        {
-            // use redis as message queue
-            services.AddSingleton<IMessageProducer, RedisMessageProducer>();
-
-            services.AddKeyedTransient<IMessageHandler, EndUserMessageHandler>(nameof(EndUserMessageHandler));
-            services.AddKeyedTransient<IMessageHandler, InsightMessageHandler>(nameof(InsightMessageHandler));
-            services.AddHostedService<RedisMessageConsumer>();
-        }
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        });
     }
 }

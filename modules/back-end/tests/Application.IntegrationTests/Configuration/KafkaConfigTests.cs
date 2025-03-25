@@ -1,4 +1,5 @@
 using Confluent.Kafka;
+using Infrastructure.MQ;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.IntegrationTests.Configuration;
@@ -16,7 +17,8 @@ public class KafkaConfigTests
     [Fact]
     public async Task DefaultProducerConsumerConfig()
     {
-        var proServices = _app.WithWebHostBuilder(builder => builder.UseSetting("IS_PRO", "true")).Services;
+        var proServices = _app.WithWebHostBuilder(builder => builder.UseSetting(MqProvider.SectionName, MqProvider.Kafka))
+            .Services;
 
         var producerConfig = proServices.GetRequiredService<ProducerConfig>();
         var consumerConfig = proServices.GetRequiredService<ConsumerConfig>();

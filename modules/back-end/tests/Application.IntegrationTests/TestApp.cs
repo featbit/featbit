@@ -6,7 +6,6 @@ using Application.Caches;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
-using Infrastructure.Kafka;
 using Infrastructure.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Application.IntegrationTests;
@@ -39,12 +39,14 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
 
-            // remove the kafka consumer from the test application because it is not needed
-            var kafkaConsumerService =
-                collection.FirstOrDefault(x => x.ImplementationType == typeof(KafkaMessageConsumer));
-            if (kafkaConsumerService != null)
+            var hostedServices = collection.Where(x =>
+                x.ServiceType.IsAssignableTo(typeof(IHostedService)) &&
+                x.ImplementationType?.FullName?.Contains("Microsoft") == false
+            ).ToArray();
+
+            foreach (var service in hostedServices)
             {
-                collection.Remove(kafkaConsumerService);
+                collection.Remove(service);
             }
         });
 

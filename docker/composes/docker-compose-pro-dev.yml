@@ -1,5 +1,4 @@
 name: featbit-pro-dev
-version: "3"
 services:
   ui:
     image: featbit/ui:dev
@@ -26,7 +25,8 @@ services:
       context: ./modules/back-end
       dockerfile: ./deploy/Dockerfile
     environment:
-      - IS_PRO=true
+      - DbProvider=MongoDb
+      - MqProvider=Kafka
       - SSOEnabled=false
     depends_on:
       mongodb:
@@ -47,7 +47,8 @@ services:
       context: ./modules/evaluation-server
       dockerfile: ./deploy/Dockerfile
     environment:
-      - IS_PRO=true
+      - DbProvider=MongoDb
+      - MqProvider=Kafka
     depends_on:
       mongodb:
         condition: service_started

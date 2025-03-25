@@ -2,6 +2,8 @@ namespace Infrastructure.Persistence;
 
 public class DbProvider
 {
+    public const string SectionName = nameof(DbProvider);
+
     public const string MongoDb = nameof(MongoDb);
 
     public const string Postgres = nameof(Postgres);

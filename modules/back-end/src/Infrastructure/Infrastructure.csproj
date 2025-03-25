@@ -22,6 +22,7 @@
         <PackageReference Include="LinqKit.Core" Version="1.2.8" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
         <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
+        <PackageReference Include="Npgsql.DependencyInjection" Version="8.0.7" />
         <PackageReference Include="SqlKata" Version="4.0.1" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
         <PackageReference Include="Handlebars.Net" Version="2.1.6" />

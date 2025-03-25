@@ -35,11 +35,11 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ### General
 
-| Name           | Description                                                   | Default Value |
-|----------------|---------------------------------------------------------------|---------------|
-| `AllowedHosts` | Hosts allowed to connect to the API                           | `"*"`         |
-| `IS_PRO`       | If `true` operates in PRO mode with kafka                     | `false`       |
-| `DbProvider`   | Database provider, used to select **MongoDB** or **Postgres** | `"MongoDb"`   |
+| Name           | Description                                                                 | Default Value |
+|----------------|-----------------------------------------------------------------------------|---------------|
+| `AllowedHosts` | Hosts allowed to connect to the API                                         | `"*"`         |
+| `DbProvider`   | Database provider, used to select **MongoDB** or **Postgres**               | `"MongoDb"`   |
+| `MqProvider`   | Message Queue provider, used to select **Redis**, **Kafka** or **Postgres** | `"Redis"`     |
 
 ## Logging
 
