@@ -1,9 +1,8 @@
-using Application.Caches;
 using Domain.Users;
 using Infrastructure;
+using Infrastructure.Caches;
 using Infrastructure.MQ;
 using Infrastructure.Persistence;
-using Infrastructure.Redis;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Services = Infrastructure.Services;
@@ -21,13 +20,8 @@ public static class ConfigureServices
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // redis
-        services.AddSingleton<IRedisClient, DefaultRedisClient>();
-        services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
-        services.AddTransient<ICacheService, RedisCacheService>();
-
-        // populating cache
-        services.AddHostedService<CachePopulatingHostedService>();
+        // caching
+        services.AddCache(configuration);
 
         // flag schedule worker
         services.AddHostedService<AppServices.FlagScheduleWorker>();

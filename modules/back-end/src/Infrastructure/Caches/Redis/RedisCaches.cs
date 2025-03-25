@@ -4,7 +4,7 @@ using Domain.Segments;
 using Domain.Utils;
 using StackExchange.Redis;
 
-namespace Infrastructure.Redis;
+namespace Infrastructure.Caches.Redis;
 
 public static class RedisCaches
 {

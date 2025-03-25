@@ -6,7 +6,7 @@ using Application.Caches;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
-using Infrastructure.Redis;
+using Infrastructure.Caches.None;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -34,8 +34,7 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(passwordHasher);
             collection.Replace(currentUser);
 
-            collection.Replace(ServiceDescriptor.Singleton<IRedisClient, TestRedisClient>());
-            collection.Replace(ServiceDescriptor.Transient<ICachePopulatingService, TestCachePopulatingService>());
+            collection.Replace(ServiceDescriptor.Transient<ICachePopulatingService, NonePopulatingService>());
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
 

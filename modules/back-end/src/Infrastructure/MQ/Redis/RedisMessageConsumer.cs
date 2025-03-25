@@ -1,6 +1,6 @@
 using Domain.Messages;
 using Infrastructure.AppService;
-using Infrastructure.Redis;
+using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

@@ -1,4 +1,5 @@
-﻿using Infrastructure.MQ;
+﻿using Infrastructure.Caches;
+using Infrastructure.MQ;
 using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 
@@ -22,5 +23,11 @@ public static class ConfigurationExtensions
             Name = name,
             ConnectionString = connectionString
         };
+    }
+
+    public static string GetCacheProvider(this IConfiguration configuration)
+    {
+        var provider = configuration.GetValue(CacheProvider.SectionName, CacheProvider.Redis)!;
+        return provider;
     }
 }
