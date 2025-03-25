@@ -1,4 +1,4 @@
-name: featbit-dev-postgres
+name: featbit-dev-postgres-clickhouse
 services:
   ui:
     image: featbit/ui:dev
