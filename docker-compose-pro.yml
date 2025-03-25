@@ -63,12 +63,10 @@ services:
     networks:
       - featbit-network
     environment:
+      DB_PROVIDER: ClickHouse
       KAFKA_HOSTS: kafka:9092
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
-      IS_PRO: true
       CHECK_DB_LIVNESS: true
 
   mongodb:
