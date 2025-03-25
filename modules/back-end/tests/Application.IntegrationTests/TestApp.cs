@@ -6,6 +6,7 @@ using Application.Services;
 using Application.Users;
 using Domain.Users;
 using Infrastructure.Caches;
+using Infrastructure.MQ;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +22,7 @@ public class TestApp : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseSetting(MqProvider.SectionName, MqProvider.None);
         builder.UseSetting(CacheProvider.SectionName, CacheProvider.None);
 
         builder.ConfigureServices(collection =>
