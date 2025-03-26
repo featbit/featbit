@@ -2,7 +2,7 @@ using Domain.Shared;
 
 namespace Infrastructure.Fakes;
 
-public class FakeStore : IStore
+public class FakeStore : IDbStore
 {
     public string Name => "Fake";
 

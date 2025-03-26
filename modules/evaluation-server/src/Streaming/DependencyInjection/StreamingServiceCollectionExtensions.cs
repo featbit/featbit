@@ -1,9 +1,7 @@
 using Domain;
-using Domain.Shared;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.MongoDb;
-using Infrastructure.Redis;
-using Infrastructure.Store;
+using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,39 +41,30 @@ public static class StreamingServiceCollectionExtensions
         return new StreamingBuilder(services);
     }
 
-    public static IServiceCollection AddRedisStore(this IServiceCollection services, IConfiguration configuration)
+    public static void TryAddRedis(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptionsWithValidateOnStart<RedisOptions>()
             .Bind(configuration.GetSection(RedisOptions.Redis))
             .ValidateDataAnnotations();
 
         services.TryAddSingleton<IRedisClient, RedisClient>();
-        services.AddTransient<IDbStore, RedisStore>();
-
-        return services;
     }
 
-    public static IServiceCollection AddMongoDbStore(this IServiceCollection services, IConfiguration configuration)
+    public static void TryAddMongoDb(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptionsWithValidateOnStart<MongoDbOptions>()
             .Bind(configuration.GetSection(MongoDbOptions.MongoDb))
             .ValidateDataAnnotations();
 
         services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
-        services.AddTransient<IDbStore, MongoDbStore>();
-
-        return services;
     }
 
-    public static IServiceCollection AddPostgresStore(this IServiceCollection services, IConfiguration configuration)
+    public static void TryAddPostgres(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptionsWithValidateOnStart<PostgresOptions>()
             .Bind(configuration.GetSection(PostgresOptions.Postgres))
             .ValidateDataAnnotations();
 
         services.AddNpgsqlDataSource(configuration["Postgres:ConnectionString"]!);
-        services.AddTransient<IDbStore, PostgresStore>();
-
-        return services;
     }
 }

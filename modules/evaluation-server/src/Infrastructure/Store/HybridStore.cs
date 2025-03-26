@@ -8,7 +8,6 @@ public class HybridStore : IStore
     public string Name => Stores.Hybrid;
 
     private readonly Dictionary<string, IDbStore> _dbStores;
-    private readonly IStore _none = new NoneStore();
 
     private IStore AvailableStore { get; set; }
     private static StoreAvailabilityListener Listener => StoreAvailabilityListener.Instance;
@@ -33,7 +32,7 @@ public class HybridStore : IStore
         IStore GetAvailableStore(string store) =>
             _dbStores.TryGetValue(store, out var availableStore)
                 ? availableStore
-                : _none;
+                : throw new ArgumentException($"Store {store} is not supported");
     }
 
     public Task<bool> IsAvailableAsync() => Task.FromResult(Listener.AvailableStore != Stores.None);

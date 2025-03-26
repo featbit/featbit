@@ -1,5 +1,8 @@
 ﻿using System.Net.WebSockets;
 using Domain.Shared;
+using Infrastructure.Caches;
+using Infrastructure.MQ;
+using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -13,7 +16,9 @@ public class TestApp : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseSetting("IntegrationTests", "true");
+        builder.UseSetting(DbProvider.SectionName, DbProvider.Fake);
+        builder.UseSetting(MqProvider.SectionName, MqProvider.None);
+        builder.UseSetting(CacheProvider.SectionName, CacheProvider.None);
 
         base.ConfigureWebHost(builder);
     }
