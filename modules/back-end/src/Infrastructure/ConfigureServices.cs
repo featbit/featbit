@@ -62,7 +62,7 @@ public static class ConfigureServices
 
         void AddMongoDbServices()
         {
-            services.AddMongoDb(configuration);
+            services.TryAddMongoDb(configuration);
 
             services.AddTransient<IWebhookHandler, Services.WebhookHandler>();
 
@@ -97,7 +97,7 @@ public static class ConfigureServices
 
         void AddEntityFrameworkCoreServices()
         {
-            services.AddPostgres(configuration);
+            services.TryAddPostgres(configuration);
             services.ConfigureDapper();
 
             services.AddTransient<IGeneralWebhookHandler, Services.WebhookHandler>();

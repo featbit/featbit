@@ -40,6 +40,8 @@ public static class MqServiceCollectionExtensions
 
         void AddRedis()
         {
+            services.TryAddRedis(configuration);
+
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
             services.AddHostedService<RedisMessageConsumer>();
 
@@ -65,6 +67,8 @@ public static class MqServiceCollectionExtensions
 
         void AddPostgres()
         {
+            services.TryAddPostgres(configuration);
+            
             services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
             services.AddHostedService<PostgresMessageConsumer>();
 

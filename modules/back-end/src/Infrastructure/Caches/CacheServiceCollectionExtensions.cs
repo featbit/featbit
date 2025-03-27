@@ -35,7 +35,8 @@ public static class CacheServiceCollectionExtensions
 
         void AddRedis()
         {
-            services.AddSingleton<IRedisClient, DefaultRedisClient>();
+            services.TryAddRedis(configuration);
+
             services.AddTransient<ICachePopulatingService, RedisPopulatingService>();
             services.AddTransient<ICacheService, RedisCacheService>();
         }
