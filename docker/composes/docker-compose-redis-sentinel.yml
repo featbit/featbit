@@ -29,7 +29,10 @@ services:
       - Redis__ConnectionString=redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379,serviceName=mymaster,defaultDatabase=1,ssl=false,user=featbit
       - Redis__Password=featbit
       - OLAP__ServiceHost=http://da-server
-      - SSOEnabled=false      
+      - SSOEnabled=false
+      - DbProvider=MongoDb
+      - MqProvider=Redis
+      - CacheProvider=Redis
     depends_on:
       - mongodb
       - redis-sentinel-1
@@ -52,6 +55,9 @@ services:
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379,serviceName=mymaster,defaultDatabase=1,ssl=false,user=featbit
       - Redis__Password=featbit
+      - DbProvider=MongoDb
+      - MqProvider=Redis
+      - CacheProvider=Redis
     depends_on:
       - mongodb
       - redis-sentinel-1
@@ -118,7 +124,7 @@ services:
     volumes:
       - redis:/bitnami/redis/data
       - ./infra/redis/users.acl:/opt/bitnami/redis/mounted-etc/users.acl
-    
+  
   redis-slave-1:
     image: 'bitnami/redis:6.2'
     container_name: redis-slave-1
@@ -156,7 +162,7 @@ services:
     volumes:
       - redis-slave-2:/bitnami/redis/data
       - ./infra/redis/users.acl:/opt/bitnami/redis/mounted-etc/users.acl
-    
+  
   redis-sentinel-1:
     image: 'bitnami/redis-sentinel:6.2'
     container_name: redis-sentinel-1

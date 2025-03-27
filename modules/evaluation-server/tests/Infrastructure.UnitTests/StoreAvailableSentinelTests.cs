@@ -32,7 +32,7 @@ public class StoreAvailableSentinelTests
         _dbStore2.Setup(x => x.Name).Returns(DbStore2Name);
         _dbStores = [_dbStore1.Object, _dbStore2.Object];
 
-        serviceCollection.AddSingleton<IStore, EmptyStore>();
+        serviceCollection.AddSingleton<IStore, TestStore>();
         _serviceProvider = serviceCollection.BuildServiceProvider();
     }
 
@@ -85,13 +85,15 @@ public class StoreAvailableSentinelTests
     }
 }
 
-class StoreAvailabilityData : TheoryData<bool, bool, string>
+internal class StoreAvailabilityData : TheoryData<bool, bool, string>
 {
     public StoreAvailabilityData()
     {
         Add(true, true, "0_dbStore");
+
         Add(false, true, "1_dbStore");
         Add(true, false, "0_dbStore");
-        Add(false, false, Stores.None);
+
+        Add(false, false, "0_dbStore");
     }
 }

@@ -27,6 +27,7 @@ services:
     environment:
       - DbProvider=MongoDb
       - MqProvider=Kafka
+      - CacheProvider=Redis
       - SSOEnabled=false
     depends_on:
       mongodb:
@@ -49,6 +50,7 @@ services:
     environment:
       - DbProvider=MongoDb
       - MqProvider=Kafka
+      - CacheProvider=Redis
     depends_on:
       mongodb:
         condition: service_started

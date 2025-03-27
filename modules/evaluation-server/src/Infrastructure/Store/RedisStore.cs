@@ -1,6 +1,6 @@
 using System.Text;
 using Domain.Shared;
-using Infrastructure.Redis;
+using Infrastructure.Caches.Redis;
 using StackExchange.Redis;
 
 namespace Infrastructure.Store;

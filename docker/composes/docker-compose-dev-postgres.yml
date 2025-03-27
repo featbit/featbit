@@ -28,6 +28,7 @@ services:
       - SSOEnabled=true
       - DbProvider=Postgres
       - MqProvider=Redis
+      - CacheProvider=Redis
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
     depends_on:
       - postgresql
@@ -47,6 +48,7 @@ services:
     environment:
       - DbProvider=Postgres
       - MqProvider=Redis
+      - CacheProvider=Redis
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
     depends_on:
       - postgresql

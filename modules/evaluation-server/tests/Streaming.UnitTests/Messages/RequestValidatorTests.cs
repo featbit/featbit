@@ -38,14 +38,6 @@ internal class TestSystemClock : ISystemClock
     public DateTimeOffset UtcNow { get; }
 }
 
-internal class TestStore : EmptyStore
-{
-    public override string Name => "Test";
-
-    public override Task<Secret?> GetSecretAsync(string secretString) =>
-        Task.FromResult(TestData.GetSecret(secretString));
-}
-
 public class Requests : TheoryData<WebSocket, string, string, string, long, bool>
 {
     public Requests()

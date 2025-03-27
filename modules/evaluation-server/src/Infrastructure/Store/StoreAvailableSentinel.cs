@@ -26,6 +26,9 @@ public class StoreAvailableSentinel : IHostedService
         // see `Stores.cs` for more details
         _dbStores = dbStores.OrderBy(x => x.Name).ToArray();
 
+        // we assume that the first store (the highest priority store) is available by default
+        StoreAvailabilityListener.Instance.SetAvailable(_dbStores[0].Name);
+
         _logger = logger;
     }
 
@@ -38,7 +41,11 @@ public class StoreAvailableSentinel : IHostedService
         // start checking store availability loop
         _ = StartCheckLoop(cancellationToken);
 
-        _logger.LogInformation("Store availability sentinel started. Default available store: {Store}.", Stores.Redis);
+        _logger.LogInformation(
+            "Store availability sentinel started. Default available store: {Store}.",
+            StoreAvailabilityListener.Instance.AvailableStore
+        );
+
         return Task.CompletedTask;
     }
 
@@ -88,7 +95,6 @@ public class StoreAvailableSentinel : IHostedService
             }
         }
 
-        StoreAvailabilityListener.Instance.SetAvailable(Stores.None);
         _logger.LogError("No available store can be used.");
     }
 

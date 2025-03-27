@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Domain.Messages;
 using Domain.Shared;
-using Infrastructure.Redis;
+using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 

@@ -1,6 +1,4 @@
-using Infrastructure.Fakes;
 using Infrastructure;
-using Infrastructure.MQ;
 using Serilog;
 using Streaming.DependencyInjection;
 
@@ -37,24 +35,11 @@ public static class ServicesRegister
         // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();
 
-        // build streaming service
-        var streamingBuilder = services.AddStreamingCore();
-        if (configuration.GetValue("IntegrationTests", false))
-        {
-            var config = new ConfigurationBuilder()
-                .AddInMemoryCollection([
-                    new KeyValuePair<string, string?>(MqProvider.SectionName, MqProvider.None)
-                ])
-                .Build();
-
-            streamingBuilder.UseStore<FakeStore>().UseMq(config);
-        }
-        else
-        {
-            streamingBuilder
-                .UseHybridStore(configuration)
-                .UseMq(configuration);
-        }
+        // streaming services
+        services
+            .AddStreamingCore()
+            .UseStore(configuration)
+            .UseMq(configuration);
 
         return builder;
     }

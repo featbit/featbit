@@ -16,7 +16,6 @@ public class EnvironmentAppService : IEnvironmentAppService
         _segmentService = segmentService;
     }
 
-
     public async Task<PagedResult<Segment>> GetPagedSegmentsAsync(GetSegmentList request)
     {
         var rn = await _resourceService.GetRNAsync(request.EnvId, ResourceTypes.Env);

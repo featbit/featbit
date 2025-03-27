@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 
-namespace Infrastructure.Redis;
+namespace Infrastructure.Caches.Redis;
 
 public class DefaultRedisClient : IRedisClient
 {

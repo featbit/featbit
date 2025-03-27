@@ -18,6 +18,7 @@ services:
     environment:
       - DbProvider=MongoDb
       - MqProvider=Kafka
+      - CacheProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
@@ -39,6 +40,7 @@ services:
     environment:
       - DbProvider=MongoDb
       - MqProvider=Kafka
+      - CacheProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092

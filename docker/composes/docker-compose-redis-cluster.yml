@@ -29,7 +29,10 @@ services:
       - Redis__ConnectionString=redis-node-5:6379,redis-node-4:6379,redis-node-3:6379,redis-node-2:6379,redis-node-1:6379,redis-node-0:6379,ssl=false
       - Redis__Password=bitnami
       - OLAP__ServiceHost=http://da-server
-      - SSOEnabled=false      
+      - SSOEnabled=false
+      - DbProvider=MongoDb
+      - MqProvider=Redis
+      - CacheProvider=Redis
     depends_on:
       - mongodb
       - redis-node-5
@@ -50,6 +53,9 @@ services:
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis-node-5:6379,redis-node-4:6379,redis-node-3:6379,redis-node-2:6379,redis-node-1:6379,redis-node-0:6379,ssl=false
       - Redis__Password=bitnami
+      - DbProvider=MongoDb
+      - MqProvider=Redis
+      - CacheProvider=Redis
     depends_on:
       - mongodb
       - redis-node-5

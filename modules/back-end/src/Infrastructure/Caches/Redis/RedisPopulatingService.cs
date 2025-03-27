@@ -3,7 +3,7 @@ using Application.Caches;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace Infrastructure.Redis;
+namespace Infrastructure.Caches.Redis;
 
 public class RedisPopulatingService : ICachePopulatingService
 {

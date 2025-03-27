@@ -1,5 +1,5 @@
 using Domain.Messages;
-using Infrastructure.Redis;
+using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;

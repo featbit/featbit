@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Infrastructure.Redis;
+namespace Infrastructure.Caches.Redis;
 
 public class RedisOptions
 {
