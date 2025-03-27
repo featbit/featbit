@@ -18,6 +18,7 @@ services:
     environment:
       - DbProvider=MongoDb
       - MqProvider=Redis
+      - CacheProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis:6379
@@ -36,6 +37,7 @@ services:
     environment:
       - DbProvider=MongoDb
       - MqProvider=Redis
+      - CacheProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis:6379

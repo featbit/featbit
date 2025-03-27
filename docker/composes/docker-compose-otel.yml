@@ -29,6 +29,9 @@ services:
       - ENABLE_OPENTELEMETRY=true
       - OTEL_SERVICE_NAME=featbit-api
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - DbProvider=MongoDb
+      - MqProvider=Redis
+      - CacheProvider=Redis
     depends_on:
       - mongodb
       - redis
@@ -51,6 +54,9 @@ services:
       - ENABLE_OPENTELEMETRY=true
       - OTEL_SERVICE_NAME=featbit-els
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - DbProvider=MongoDb
+      - MqProvider=Redis
+      - CacheProvider=Redis
     ports:
       - "5100:5100"
     networks:

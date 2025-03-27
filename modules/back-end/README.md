@@ -35,11 +35,12 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ### General
 
-| Name           | Description                                                                 | Default Value |
-|----------------|-----------------------------------------------------------------------------|---------------|
-| `AllowedHosts` | Hosts allowed to connect to the API                                         | `"*"`         |
-| `DbProvider`   | Database provider, used to select **MongoDB** or **Postgres**               | `"MongoDb"`   |
-| `MqProvider`   | Message Queue provider, used to select **Redis**, **Kafka** or **Postgres** | `"Redis"`     |
+| Name            | Description                                                                 | Default Value |
+|-----------------|-----------------------------------------------------------------------------|---------------|
+| `AllowedHosts`  | Hosts allowed to connect to the API                                         | `"*"`         |
+| `DbProvider`    | Database provider, used to select **MongoDB** or **Postgres**               | `"MongoDb"`   |
+| `MqProvider`    | Message Queue provider, used to select **Redis**, **Kafka** or **Postgres** | `"Redis"`     |
+| `CacheProvider` | Cache provider, used to select **Redis** or **None**                        | `"Redis"`     |
 
 ## Logging
 

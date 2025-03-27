@@ -28,6 +28,7 @@ services:
       - SSOEnabled=true
       - DbProvider=MongoDb
       - MqProvider=Redis
+      - CacheProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
     depends_on:
       - mongodb
@@ -47,6 +48,7 @@ services:
     environment:
       - DbProvider=MongoDb
       - MqProvider=Redis
+      - CacheProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
     depends_on:
       - mongodb
