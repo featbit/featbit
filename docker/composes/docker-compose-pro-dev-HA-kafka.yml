@@ -29,8 +29,8 @@ services:
       - MqProvider=Kafka
       - CacheProvider=Redis
       - SSOEnabled=false
-      - KAFKA__BOOTSTRAPSERVERS=kafka:9092
-      - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
+      - Kafka__Producer__bootstrap.servers=kafka:9092
+      - Kafka__Consumer__bootstrap.servers=kafka-consumer:9092
     depends_on:
       mongodb:
         condition: service_started
@@ -53,8 +53,8 @@ services:
       - DbProvider=MongoDb
       - MqProvider=Kafka
       - CacheProvider=Redis
-      - KAFKA__BOOTSTRAPSERVERS=kafka:9092
-      - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
+      - Kafka__Producer__bootstrap.servers=kafka:9092
+      - Kafka__Consumer__bootstrap.servers=kafka-consumer:9092
     depends_on:
       mongodb:
         condition: service_started
@@ -81,13 +81,10 @@ services:
     networks:
       - featbit-network
     environment:
+      DB_PROVIDER: ClickHouse
       KAFKA_HOSTS: kafka:9092
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_DB: 0
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka-consumer:9092
-      IS_PRO: true
 
   mongodb:
     image: mongo:5.0.14

@@ -143,12 +143,15 @@ services:
       - OLAP__ServiceHost=http://da-server
       - DbProvider=MongoDb
       - MqProvider=Kafka
+      - CacheProvider=Redis
       - SSOEnabled=false
     depends_on:
       mongodb:
         condition: service_started
       init-kafka-topics:
         condition: service_completed_successfully
+      redis:
+        condition: service_started
       da-server:
         condition: service_started
     ports:
@@ -178,6 +181,7 @@ services:
       - Redis__ConnectionString=redis:6379
       - DbProvider=MongoDb
       - MqProvider=Kafka
+      - CacheProvider=Redis
     depends_on:
       mongodb:
         condition: service_started
@@ -221,15 +225,12 @@ services:
       KAFKA_SASL_MECHANISM: PLAIN
       KAFKA_SASL_USER: kafka
       KAFKA_SASL_PASSWORD: bitnami
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_DB: 0
+      DB_PROVIDER: ClickHouse
       CLICKHOUSE_HOST: clickhouse-blue-1
       CLICKHOUSE_PORT: '9000'
       CLICKHOUSE_HTTP_PORT: '8123'
       CLICKHOUSE_ALT_HOST: clickhouse-green-1:9000,clickhouse-orange-1:9000
       CLICKHOUSE_KAFKA_HOSTS: kafka-0:9092
-      IS_PRO: true
 
   mongodb:
     image: mongo:5.0.14
