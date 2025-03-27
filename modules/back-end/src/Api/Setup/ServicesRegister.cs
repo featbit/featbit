@@ -22,9 +22,6 @@ public static class ServicesRegister
 {
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
-        // validate configurations on start
-        builder.Configuration.ValidateOnStart();
-
         // serilog
         builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
