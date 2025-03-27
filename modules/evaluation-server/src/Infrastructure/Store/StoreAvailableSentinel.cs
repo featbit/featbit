@@ -41,7 +41,11 @@ public class StoreAvailableSentinel : IHostedService
         // start checking store availability loop
         _ = StartCheckLoop(cancellationToken);
 
-        _logger.LogInformation("Store availability sentinel started. Default available store: {Store}.", Stores.Redis);
+        _logger.LogInformation(
+            "Store availability sentinel started. Default available store: {Store}.",
+            StoreAvailabilityListener.Instance.AvailableStore
+        );
+
         return Task.CompletedTask;
     }
 
