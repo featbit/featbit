@@ -5,7 +5,7 @@ using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Npgsql;
 using Streaming.Connections;
 using Streaming.Messages;
 using Streaming.Services;
@@ -43,24 +43,39 @@ public static class StreamingServiceCollectionExtensions
 
     public static void TryAddRedis(this IServiceCollection services, IConfiguration configuration)
     {
+        if (services.Any(service => service.ServiceType == typeof(IRedisClient)))
+        {
+            return;
+        }
+
         services.AddOptionsWithValidateOnStart<RedisOptions>()
             .Bind(configuration.GetSection(RedisOptions.Redis))
             .ValidateDataAnnotations();
 
-        services.TryAddSingleton<IRedisClient, RedisClient>();
+        services.AddSingleton<IRedisClient, RedisClient>();
     }
 
     public static void TryAddMongoDb(this IServiceCollection services, IConfiguration configuration)
     {
+        if (services.Any(service => service.ServiceType == typeof(IMongoDbClient)))
+        {
+            return;
+        }
+
         services.AddOptionsWithValidateOnStart<MongoDbOptions>()
             .Bind(configuration.GetSection(MongoDbOptions.MongoDb))
             .ValidateDataAnnotations();
 
-        services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
+        services.AddSingleton<IMongoDbClient, MongoDbClient>();
     }
 
     public static void TryAddPostgres(this IServiceCollection services, IConfiguration configuration)
     {
+        if (services.Any(service => service.ServiceType == typeof(NpgsqlDataSource)))
+        {
+            return;
+        }
+
         services.AddOptionsWithValidateOnStart<PostgresOptions>()
             .Bind(configuration.GetSection(PostgresOptions.Postgres))
             .ValidateDataAnnotations();
