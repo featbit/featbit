@@ -1,6 +1,6 @@
 from typing import Any, Dict, Iterable
 
-from app import MongoDbProvider, PostgresDbProvider
+from app import MongoDbProvider, PostgresDbProvider, ClickHouseDbProvider
 from app.clickhouse.client import sync_execute
 from app.experimentation.models.event.sql import (
     GET_BINOMIAL_TEST_VARS_SQL_CH, GET_NUMERIC_TEST_VARS_SQL_CH,
@@ -10,12 +10,12 @@ from app.experimentation.models.experiment import Experiment, Variation
 from app.experimentation.models.experiment.experiment_types import (
     BinomialVariation, FrequenstSettings, NumericVariation, OnlineTTest,
     TTestResult)
-from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, IS_PRO, DB_PROVIDER
+from app.setting import DATE_ISO_FMT, DATE_UTC_FMT, DB_PROVIDER
 from app.postgresql.client import execute_query
 
 
 def analyze_experiment(experiment: Experiment):
-    if IS_PRO:
+    if DB_PROVIDER == ClickHouseDbProvider:
         start = experiment.start.strftime(DATE_ISO_FMT)
         end = experiment.end.strftime(DATE_ISO_FMT)
     else:
@@ -62,7 +62,7 @@ def analyze_experiment(experiment: Experiment):
 def _get_variations(experiment: Experiment, query_params: Dict[str, Any]) -> Dict[str, Variation]:
     binomial_test = not experiment.is_numeric_expt
 
-    if IS_PRO:
+    if DB_PROVIDER == ClickHouseDbProvider:
         sql = GET_BINOMIAL_TEST_VARS_SQL_CH if binomial_test else GET_NUMERIC_TEST_VARS_SQL_CH
         rs = sync_execute(sql, args=query_params)
     elif DB_PROVIDER == MongoDbProvider:

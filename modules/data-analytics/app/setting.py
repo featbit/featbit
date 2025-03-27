@@ -2,7 +2,6 @@ import os
 
 from utils import get_from_env, str_to_bool
 
-IS_PRO = get_from_env("IS_PRO", False, type_cast=str_to_bool)
 
 WSGI = get_from_env("WSGI", False, type_cast=str_to_bool)
 
@@ -45,22 +44,7 @@ POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 POSTGRES_DATABASE = os.getenv("POSTGRES_DATABASE", "featbit")
 
-
-CACHE_TYPE = os.getenv("CACHE_TYPE", "RedisCache")
 CACHE_KEY_PREFIX = "featbit:das:"
-REDIS_USER = os.getenv("REDIS_USER", None)
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
-REDIS_DB = get_from_env("REDIS_DB", 0, type_cast=int)
-REDIS_SSL = get_from_env("REDIS_SSL", False, type_cast=str_to_bool)
-
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = get_from_env("REDIS_PORT", 6379, type_cast=int)
-
-REDIS_CLUSTER_HOST_PORT_PAIRS = os.getenv("REDIS_CLUSTER_HOST_PORT_PAIRS", "localhost:6379")
-
-REDIS_SENTINEL_HOST_PORT_PAIRS = os.getenv("REDIS_SENTINEL_HOST_PORT_PAIRS", "localhost:26379")
-REDIS_SENTINEL_PASSWORD = os.getenv("REDIS_SENTINEL_PASSWORD", None)
-REDIS_SENTINEL_MASTER_SET = os.getenv("REDIS_SENTINEL_MASTER_SET", "mymaster")
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://admin:password@localhost:27017")
 MONGO_DB = os.getenv("MONGO_INITDB_DATABASE", "featbit")

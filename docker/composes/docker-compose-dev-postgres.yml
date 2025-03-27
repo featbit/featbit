@@ -66,14 +66,11 @@ services:
       dockerfile: ./Dockerfile
     depends_on:
       - postgresql
-      - redis
     ports:
       - "8200:80"
     networks:
       - featbit-network
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
       CHECK_DB_LIVNESS: false
       DB_PROVIDER: Postgres
       POSTGRES_USER: postgres

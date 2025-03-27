@@ -12,20 +12,21 @@
 
 ## Environment variables
 
+
 ### General
 
-| Name               | Description                                              | Default Value  |
-|--------------------|----------------------------------------------------------|----------------|
-| `IS_PRO`           | If `true` operates in PRO mode with kafka and clickhouse | `"false"`      |
-| `CHECK_DB_LIVNESS` | Whether to check db liveness on app startup              | `"true"`       |
-| `CACHE_TYPE`       | Type of cache used                                       | `"RedisCache"` |
-| `TEST`             | If `true`, runs the application in test mode             | `"false"`      |
-| `DB_PROVIDER`      | Database provider, used to select MongoDB or Postgres    | `"MongoDb"`    |
+| Name               | Description                                                   | Default Value  |
+|--------------------|---------------------------------------------------------------|----------------|
+| `CHECK_DB_LIVNESS` | Whether to check db liveness on app startup                   | `"true"`       |
+| `TEST`             | If `true`, runs the application in test mode                  | `"false"`      |
+| `DB_PROVIDER`      | Database provider, 3 options: ClickHouse, MongoDB or Postgres | `"MongoDb"`    |
 
 > [!NOTE]
 > Set CHECK_DB_LIVNESS to **false** if you use external db.
 
 ### Kafka
+
+Make sure assign `ClickHouse` to `DB_PROVIDER`
 
 | Name                      | Description                     | Default Value  |
 |---------------------------|---------------------------------|----------------|
@@ -36,6 +37,8 @@
 | `KAFKA_SASL_PASSWORD`     | SASL password for Kafka         | `""`           |
 
 ### ClickHouse
+
+Make sure assign `ClickHouse` to `DB_PROVIDER`
 
 | Name                     | Description                                        | Default Value          |
 |--------------------------|----------------------------------------------------|------------------------|
@@ -52,24 +55,9 @@
 | `CLICKHOUSE_SECURE`      | If `true`, enables secure connection to ClickHouse | `"false"`              |
 | `CLICKHOUSE_VERIFY`      | If `true`, verifies the ClickHouse connection      | `"true"`               |
 
-### Redis
-
-| Name                             | Description                        | Default Value       |
-|----------------------------------|------------------------------------|---------------------|
-| `REDIS_USER`                     | User for Redis server              | `""`                |
-| `REDIS_PASSWORD`                 | Password for Redis server          | `""`                |
-| `REDIS_DB`                       | Database number for Redis server   | `0`                 |
-| `REDIS_SSL`                      | If `true`, enables SSL for Redis   | `"false"`           |
-| `REDIS_HOST`                     | Hostname of the Redis server       | `"localhost"`       |
-| `REDIS_PORT`                     | Port of the Redis server           | `6379`              |
-| `REDIS_CLUSTER_HOST_PORT_PAIRS`  | Host-port pairs for Redis cluster  | `"localhost:6379"`  |
-| `REDIS_SENTINEL_HOST_PORT_PAIRS` | Host-port pairs for Redis sentinel | `"localhost:26379"` |
-| `REDIS_SENTINEL_PASSWORD`        | Password for Redis sentinel        | `""`                |
-| `REDIS_SENTINEL_MASTER_SET`      | Master set for Redis sentinel      | `"mymaster"`        |
-
 ### MongoDb
 
-Make sure assign false to `IS_PRO`
+Make sure assign `MongoDb` to `DB_PROVIDER`
 
 | Name                    | Description                             | Default Value                              |
 |-------------------------|-----------------------------------------|--------------------------------------------|
@@ -80,7 +68,7 @@ Make sure assign false to `IS_PRO`
 
 ### Postgres
 
-Make sure assign false to `IS_PRO`
+Make sure assign `Postgres` to `DB_PROVIDER`
 
 | Name                | Description                                | Default Value    |
 |---------------------|--------------------------------------------|------------------|

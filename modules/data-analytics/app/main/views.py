@@ -6,13 +6,14 @@ from flask import abort, current_app, jsonify, request
 
 from app import MongoDbProvider, PostgresDbProvider
 from app.clickhouse.models.event import bulk_create_events as bulk_create_events_ch
+from app.config import ClickHouseDbProvider
 from app.extensions import get_cache
 from app.main import get_main_blueprint
 from app.main.models.statistics import (EndUserParams, EndUserStatistics,
                                         FeatureFlagIntervalStatistics,
                                         IntervalParams)
 from app.mongodb.models.event import bulk_create_events as bulk_create_events_mongod
-from app.setting import IS_PRO, DB_PROVIDER
+from app.setting import DB_PROVIDER
 
 from app.postgresql.models.event import bulk_create_events as bulk_create_events_postgresql
 from utils import internal_error_handler, to_md5_hexdigest
@@ -44,7 +45,7 @@ def create_events():
 
 def _create_events(json_events: Union[str, bytes]) -> None:
     events = json.loads(json_events)
-    if IS_PRO:
+    if DB_PROVIDER == ClickHouseDbProvider:
         bulk_create_events_ch(events)
     elif DB_PROVIDER == MongoDbProvider:
         bulk_create_events_mongod(events)

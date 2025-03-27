@@ -1,34 +1,41 @@
-name: featbit-pro
+name: featbit-dev-postgres-clickhouse
 services:
   ui:
-    image: featbit/featbit-ui:latest
+    image: featbit/ui:dev
+    container_name: ui
+    build:
+      context: ./modules/front-end
+      dockerfile: ./Dockerfile
     environment:
       - API_URL=http://localhost:5000
-      - DEMO_URL=https://featbit-samples.vercel.app
+      - DEMO_URL=http://localhost:5173
       - EVALUATION_URL=http://localhost:5100
     depends_on:
       - api-server
+      - demo-dino-game-vue
     ports:
       - "8081:80"
     networks:
       - featbit-network
 
   api-server:
-    image: featbit/featbit-api-server:latest
+    image: featbit/api:dev
+    container_name: api
+    build:
+      context: ./modules/back-end
+      dockerfile: ./deploy/Dockerfile
     environment:
-      - DbProvider=MongoDb
+      - SSOEnabled=true
+      - DbProvider=Postgres
       - MqProvider=Kafka
-      - CacheProvider=Redis
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
     depends_on:
-      - mongodb
+      - postgresql
       - redis
-      - kafka
       - da-server
     ports:
       - "5000:5000"
@@ -36,18 +43,20 @@ services:
       - featbit-network
 
   evaluation-server:
-    image: featbit/featbit-evaluation-server:latest
+    image: featbit/evaluation-server:dev
+    container_name: evaluation-server
+    build:
+      context: ./modules/evaluation-server
+      dockerfile: ./deploy/Dockerfile
     environment:
-      - DbProvider=MongoDb
+      - DbProvider=Postgres
       - MqProvider=Kafka
-      - CacheProvider=Redis
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
     depends_on:
-      - mongodb
+      - postgresql
       - kafka
       - redis
     ports:
@@ -56,7 +65,11 @@ services:
       - featbit-network
 
   da-server:
-    image: featbit/featbit-data-analytics-server:latest
+    image: featbit/data-analytics-server:dev
+    container_name: data-analytics-server
+    build:
+      context: ./modules/data-analytics
+      dockerfile: ./Dockerfile
     depends_on:
       - kafka
       - clickhouse-server
@@ -70,33 +83,6 @@ services:
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
       CHECK_DB_LIVNESS: true
-
-  mongodb:
-    image: mongo:5.0.14
-    restart: on-failure
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
-      - MONGO_INITDB_DATABASE=featbit
-    volumes:
-      - mongodb:/data/db
-      - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
-    networks:
-      - featbit-network
-
-  redis:
-    image: bitnami/redis:6.2.10
-    restart: on-failure
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    networks:
-      - featbit-network
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis:/data
 
   kafka:
     image: bitnami/kafka:3.5
@@ -159,16 +145,53 @@ services:
       - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
       - clickhouse-server:/var/lib/clickhouse
 
+  postgresql:
+    image: postgres:15.10
+    container_name: postgresql
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 0tJXCokSvOB8
+    volumes:
+      - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - featbit-network
+
+  redis:
+    image: bitnami/redis:6.2.10
+    container_name: redis
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - featbit-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/bitnami/redis/data
+
+  demo-dino-game-vue:
+    image: featbit/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "5173:80"
+
 networks:
   featbit-network:
     name: featbit-network
     driver: bridge
     ipam:
       config:
-        - subnet: 172.10.0.0/16
+        - subnet: 172.1.0.0/16
 
 volumes:
-  mongodb:
   redis:
   kafka:
+  postgres_data:
   clickhouse-server:
+

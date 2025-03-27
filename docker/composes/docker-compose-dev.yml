@@ -66,14 +66,12 @@ services:
       dockerfile: ./Dockerfile
     depends_on:
       - mongodb
-      - redis
     ports:
       - "8200:80"
     networks:
       - featbit-network
     environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      DB_PROVIDER: MongoDb
       MONGO_URI: mongodb://admin:password@mongodb:27017
       MONGO_INITDB_DATABASE: featbit
       MONGO_HOST: mongodb

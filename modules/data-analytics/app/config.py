@@ -15,3 +15,4 @@ class ProductionConfig(Config):
 
 MongoDbProvider = "MongoDb"
 PostgresDbProvider = "Postgres"
+ClickHouseDbProvider = "ClickHouse"
