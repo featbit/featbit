@@ -105,6 +105,20 @@ services:
     volumes:
       - kafka:/bitnami/kafka
   
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    depends_on:
+      - kafka
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=featbit-kafka
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    networks:
+      - featbit-network
+  
   init-kafka-topics:
     image: bitnami/kafka:3.5
     depends_on:
