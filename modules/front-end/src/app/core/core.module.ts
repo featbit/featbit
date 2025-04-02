@@ -104,6 +104,7 @@ import { EndUserDrawerComponent } from './components/end-user-drawer/end-user-dr
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { SegmentCreationModalComponent } from './components/segment-creation-modal/segment-creation-modal.component';
 import { CopyFeatureFlagModalComponent } from '@core/components/copy-feature-flag-modal/copy-feature-flag-modal.component';
+import { BroadcastService } from "@services/broadcast.service";
 
 @NgModule({
   declarations: [
@@ -258,7 +259,8 @@ import { CopyFeatureFlagModalComponent } from '@core/components/copy-feature-fla
   ]
 })
 export class CoreModule {
-  constructor(handlebars: HandlebarsService) {
+  constructor(handlebars: HandlebarsService, broadcastService: BroadcastService) {
     handlebars.init();
+    broadcastService.init();
   }
 }

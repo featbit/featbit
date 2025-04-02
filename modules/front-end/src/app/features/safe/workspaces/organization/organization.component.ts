@@ -11,6 +11,7 @@ import { IPagedPolicy, PolicyFilter } from "@features/safe/iam/types/policy";
 import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
 import { PolicyService } from "@services/policy.service";
 import { GroupService } from "@services/group.service";
+import { BroadcastService } from "@services/broadcast.service";
 
 @Component({
   selector: 'organization',
@@ -56,7 +57,8 @@ export class OrganizationComponent implements OnInit {
     private message: NzMessageService,
     private permissionsService: PermissionsService,
     private policyService: PolicyService,
-    private groupService: GroupService
+    private groupService: GroupService,
+    private broadcastService: BroadcastService
   ) {
     this.getPolicies();
     this.getGroups();
@@ -172,13 +174,13 @@ export class OrganizationComponent implements OnInit {
     if (organization) {
       this.organizationService.organizations = [...this.organizationService.organizations, organization];
       this.organizationService.switchOrganization(organization);
-      window.location.reload();
+      this.broadcastService.organizationChanged();
     }
   }
 
   onOrganizationChange() {
     this.organizationService.switchOrganization(this.currentOrganization);
-    window.location.reload();
+    this.broadcastService.organizationChanged();
   }
 
   updateOrganizationName() {
