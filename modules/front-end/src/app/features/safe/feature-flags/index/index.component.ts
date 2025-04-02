@@ -125,22 +125,25 @@ export class IndexComponent implements OnInit {
     this.refreshCheckedStatus();
   }
 
-  // batch copy
-  batchCopyVisible: boolean = false;
-  checkedItems: FeatureFlagListCheckItem[] = [];
-  openBatchCopyModal() {
+  copyVisible: boolean = false;
+  copyItems: FeatureFlagListCheckItem[] = [];
+  batchCopy() {
     if (this.checkedItemKeys.size === 0) {
       this.msg.warning($localize `:@@ff.idx.select-ff-to-copy:Please select at least one feature flag to copy`);
       return;
     }
 
-    this.checkedItems = [];
+    this.copyItems = [];
     for (const key of this.checkedItemKeys) {
       const { id, name } = this.parseItemKey(key);
-      this.checkedItems.push({ id, name, checked: true });
+      this.copyItems.push({ id, name, checked: true });
     }
 
-    this.batchCopyVisible = true;
+    this.copyVisible = true;
+  }
+  copy(flag: IFeatureFlagListItem) {
+    this.copyItems = [ { id: flag.id, name: flag.name, checked: true } ];
+    this.copyVisible = true;
   }
 
   //#region switch list
