@@ -112,11 +112,7 @@ export class HeaderComponent implements OnInit {
     this.projectService.upsertCurrentProjectEnvLocally(projectEnv);
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
-
-    // wait env modal close animation
-    setTimeout(() => {
-      this.broadcastService.environmentChanged();
-    }, 5);
+    this.broadcastService.environmentChanged();
   }
 
   private setCurrentEnv() {
