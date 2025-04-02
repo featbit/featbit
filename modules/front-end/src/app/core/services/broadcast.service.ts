@@ -25,11 +25,11 @@ export class BroadcastService {
           break;
 
         case 'user-logged-in':
+        case 'org-changed':
           this.navigateToIndex();
           break;
 
         case 'user-logged-out':
-        case 'org-changed':
           this.navigateToLogin();
           break;
       }
