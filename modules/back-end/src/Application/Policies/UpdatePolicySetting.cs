@@ -18,7 +18,7 @@ public class UpdatePolicySettingValidator : AbstractValidator<UpdatePolicySettin
     public UpdatePolicySettingValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 

@@ -23,13 +23,13 @@ public class UpdateExperimentMetricValidator : AbstractValidator<UpdateExperimen
     public UpdateExperimentMetricValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
         RuleFor(x => x.EventName)
-            .NotEmpty().WithErrorCode(ErrorCodes.EventNameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("eventName"));
         RuleFor(x => x.EventType)
-            .NotEmpty().WithErrorCode(ErrorCodes.EventTypeIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("eventType"));
         RuleFor(x => x.MaintainerUserId)
-            .NotEmpty().WithErrorCode(ErrorCodes.MaintainerIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("maintainerUserId"));
     }
 }
 

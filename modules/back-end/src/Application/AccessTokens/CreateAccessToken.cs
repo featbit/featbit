@@ -23,15 +23,15 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
     public CreateAccessTokenValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
 
         RuleFor(x => x.Type)
-            .Must(AccessTokenTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidAccessTokenType);
+            .Must(AccessTokenTypes.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
 
         RuleFor(x => x.Permissions)
             .Must(permissions => permissions.Any())
             .Unless(x => x.Type == AccessTokenTypes.Personal)
-            .WithErrorCode(ErrorCodes.ServiceAccessTokenMustDefinePolicies);
+            .WithErrorCode(ErrorCodes.Invalid("permissions"));
     }
 }
 

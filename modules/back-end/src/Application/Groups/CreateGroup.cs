@@ -17,7 +17,7 @@ public class CreateGroupValidator : AbstractValidator<CreateGroup>
     public CreateGroupValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 

@@ -16,7 +16,7 @@ public class UpdateEnvironmentValidator : AbstractValidator<UpdateEnvironment>
     public UpdateEnvironmentValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 

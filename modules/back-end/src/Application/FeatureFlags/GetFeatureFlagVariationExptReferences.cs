@@ -8,7 +8,7 @@ public class GetFeatureFlagVariationExptReferences : IRequest<ICollection<Experi
     public Guid EnvId { get; set; }
 
     public Guid FeatureFlagId { get; set; }
-    
+
     public string VariationId { get; set; }
 }
 
@@ -17,10 +17,10 @@ public class IsFeatureFlagVariationValidator : AbstractValidator<GetFeatureFlagV
     public IsFeatureFlagVariationValidator()
     {
         RuleFor(x => x.FeatureFlagId)
-            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagIdIsRequired);
-        
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("featureFlagId"));
+
         RuleFor(x => x.VariationId)
-            .NotEmpty().WithErrorCode(ErrorCodes.FeatureFlagVariationIdIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("variationId"));
     }
 }
 
@@ -36,7 +36,7 @@ public class IsFeatureFlagVariationUsedHandler : IRequestHandler<GetFeatureFlagV
     public async Task<ICollection<ExperimentVm>> Handle(GetFeatureFlagVariationExptReferences request, CancellationToken cancellationToken)
     {
         // No pagination
-        var experiments = await _service.GetListAsync(request.EnvId, new ExperimentFilter { FeatureFlagId = request.FeatureFlagId, PageSize = -1});
+        var experiments = await _service.GetListAsync(request.EnvId, new ExperimentFilter { FeatureFlagId = request.FeatureFlagId, PageSize = -1 });
         return experiments.Items.Where(x => x.BaselineVariation.Id == request.VariationId).ToArray();
     }
 }

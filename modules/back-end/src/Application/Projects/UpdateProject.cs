@@ -14,7 +14,7 @@ public class UpdateProjectValidator : AbstractValidator<UpdateProject>
     public UpdateProjectValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 
