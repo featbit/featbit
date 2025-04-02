@@ -83,6 +83,6 @@ export class BroadcastService {
       path = [ match[1], ...path ].filter(x => x !== '');
     }
 
-    window.location.href = `${protocol}//${host}${path.join('/')}`;
+    window.location.href = `${protocol}//${host}/${path.join('/')}`;
   }
 }
