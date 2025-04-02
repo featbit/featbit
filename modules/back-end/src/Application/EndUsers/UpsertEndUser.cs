@@ -24,10 +24,10 @@ public class UpsertEndUserValidator : AbstractValidator<UpsertEndUser>
     public UpsertEndUserValidator()
     {
         RuleFor(x => x.KeyId)
-            .NotEmpty().WithErrorCode(ErrorCodes.KeyIdIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("keyId"));
 
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 

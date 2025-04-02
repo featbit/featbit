@@ -17,7 +17,7 @@ public class CreatePolicyValidator : AbstractValidator<CreatePolicy>
     public CreatePolicyValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 

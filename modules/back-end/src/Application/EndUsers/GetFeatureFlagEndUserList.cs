@@ -16,19 +16,19 @@ public class GetFeatureFlagEndUserListValidator : AbstractValidator<GetFeatureFl
     public GetFeatureFlagEndUserListValidator()
     {
         RuleFor(x => x.Filter.FeatureFlagKey)
-            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("featureFlagKey"));
 
         RuleFor(x => x.Filter.From)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidFrom);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("from"));
 
         RuleFor(x => x.Filter.To)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidTo);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("to"));
     }
 }
 
 public class
     GetFeatureFlagEndUserListHandler : IRequestHandler<GetFeatureFlagEndUserList,
-        PagedResult<FeatureFlagEndUserStatsVm>>
+    PagedResult<FeatureFlagEndUserStatsVm>>
 {
     private readonly IFeatureFlagService _featureFlagService;
     private readonly IOlapService _olapService;
@@ -57,7 +57,7 @@ public class
         };
 
         var stats = await _olapService.GetFeatureFlagEndUserStats(param);
-        
+
         var items = stats.Items
             .Select(it => new FeatureFlagEndUserStatsVm
             {
@@ -66,7 +66,7 @@ public class
                 Name = it.Name,
                 LastEvaluatedAt = it.LastEvaluatedAt
             }).ToList();
-        
+
         return new PagedResult<FeatureFlagEndUserStatsVm>(stats.TotalCount, items);
     }
 }

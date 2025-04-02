@@ -23,7 +23,7 @@ public class UpdateRelayProxyValidator : AbstractValidator<UpdateRelayProxy>
     public UpdateRelayProxyValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
 
         RuleFor(x => x.Scopes)
             .Must((proxy, scopes) =>

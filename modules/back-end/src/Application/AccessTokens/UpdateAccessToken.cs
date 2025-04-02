@@ -14,7 +14,7 @@ public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
     public UpdateAccessTokenValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 

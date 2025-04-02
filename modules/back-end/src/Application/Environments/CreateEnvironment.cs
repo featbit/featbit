@@ -20,10 +20,10 @@ public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
     public CreateEnvironmentValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
 
         RuleFor(x => x.Key)
-            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("key"));
     }
 }
 
