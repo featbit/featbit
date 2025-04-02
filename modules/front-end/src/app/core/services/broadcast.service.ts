@@ -26,11 +26,11 @@ export class BroadcastService {
             break;
 
           case 'user-logged-in':
-            this.navigateToIndex();
+            this.reloadToIndex();
             break;
 
           case 'user-logged-out':
-            this.navigateToLogin();
+            this.reloadToLogin();
             break;
 
           case 'org-changed':
@@ -58,19 +58,15 @@ export class BroadcastService {
 
   userLoggedOut() {
     this.channel.postMessage('user-logged-out');
-    this.navigateToLogin();
+    this.router.navigateByUrl('/login').then();
   }
 
   private reloadToIndex() {
     this.router.navigateByUrl('/').then(() => window.location.reload());
   }
 
-  private navigateToIndex() {
-    this.router.navigateByUrl('/').then();
-  }
-
-  private navigateToLogin() {
-    this.router.navigateByUrl('/login').then();
+  private reloadToLogin() {
+    this.router.navigateByUrl('/login').then(() => window.location.reload());
   }
 
   private reloadPageAfterEnvironmentChanged() {
