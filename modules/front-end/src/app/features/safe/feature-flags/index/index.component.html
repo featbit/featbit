@@ -43,7 +43,7 @@
         </button>
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
-            <li nz-menu-item (click)="openBatchCopyModal()" i18n="@@ff.idx.copy-to-env">Copy to environment</li>
+            <li nz-menu-item (click)="batchCopy()" i18n="@@ff.idx.batch-copy-to">Batch Copy To</li>
           </ul>
         </nz-dropdown-menu>
       </div>
@@ -143,6 +143,8 @@
           <td>
             <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag.key)" i18n="@@common.details">Details</a>
             <nz-divider nzType="vertical"></nz-divider>
+            <a style="color: #23AD7F" (click)="copy(featureFlag)" i18n="@@common.copy-to">Copy To</a>
+            <nz-divider nzType="vertical"></nz-divider>
             <ng-container *ngIf="isArchived;then archivedOps else unarchivedOps"></ng-container>
             <ng-template #archivedOps>
               <a style="color: #717D8A"
@@ -172,7 +174,7 @@
 
 <feature-flag-drawer [visible]="creationDrawerVisible" (onClose)="closeCreationDrawer()"></feature-flag-drawer>
 <copy-feature-flag-modal
-  [flags]="checkedItems"
-  [visible]="batchCopyVisible"
-  (close)="batchCopyVisible = false">
+  [flags]="copyItems"
+  [visible]="copyVisible"
+  (close)="copyVisible = false">
 </copy-feature-flag-modal>
