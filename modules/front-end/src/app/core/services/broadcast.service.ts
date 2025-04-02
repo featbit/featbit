@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, NgZone } from "@angular/core";
 import { Router } from "@angular/router";
 
 @Injectable({
@@ -8,7 +8,7 @@ import { Router } from "@angular/router";
 export class BroadcastService {
   private channel = new BroadcastChannel('featbit-ui-broadcast-channel');
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private ngZone: NgZone) {
   }
 
   private _initialized = false;
@@ -18,25 +18,23 @@ export class BroadcastService {
       return;
     }
 
-    this.channel.onmessage = (event) => {
-      switch (event.data) {
-        case 'env-changed':
-          this.reloadPageAfterEnvironmentChanged();
-          break;
+    this.channel.onmessage = (event) =>
+      this.ngZone.run(() => {
+        switch (event.data) {
+          case 'env-changed':
+            this.reloadPageAfterEnvironmentChanged();
+            break;
 
-        case 'user-logged-in':
-          this.navigateToIndex();
-          break;
+          case 'user-logged-in':
+          case 'org-changed':
+            this.navigateToIndex();
+            break;
 
-        case 'org-changed':
-          this.reloadToIndex();
-          break;
-
-        case 'user-logged-out':
-          this.navigateToLogin();
-          break;
-      }
-    }
+          case 'user-logged-out':
+            this.navigateToLogin();
+            break;
+        }
+      });
 
     this._initialized = true;
   }
@@ -58,11 +56,6 @@ export class BroadcastService {
   userLoggedOut() {
     this.channel.postMessage('user-logged-out');
     this.navigateToLogin();
-  }
-
-  private reloadToIndex() {
-    this.navigateToIndex();
-    window.location.reload();
   }
 
   private navigateToIndex() {
