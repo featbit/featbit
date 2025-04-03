@@ -9,7 +9,6 @@ import {
   License
 } from '@shared/types';
 import { ProjectService } from '@services/project.service';
-import { Router } from '@angular/router';
 import { Breadcrumb, BreadcrumbService } from '@services/bread-crumb.service';
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MessageQueueService } from "@services/message-queue.service";
@@ -17,11 +16,12 @@ import { Observable } from "rxjs";
 import { copyToClipboard } from '@utils/index';
 import { EnvService } from '@core/services/env.service';
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { BroadcastService } from "@services/broadcast.service";
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.less']
+  styleUrls: [ './header.component.less' ]
 })
 export class HeaderComponent implements OnInit {
 
@@ -45,12 +45,12 @@ export class HeaderComponent implements OnInit {
   env: IEnvironment;
 
   constructor(
-    private router: Router,
     private projectService: ProjectService,
     private message: NzMessageService,
     private breadcrumbService: BreadcrumbService,
     private messageQueueService: MessageQueueService,
-    private envService: EnvService
+    private envService: EnvService,
+    private broadcastService: BroadcastService,
   ) {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
   }
@@ -98,7 +98,7 @@ export class HeaderComponent implements OnInit {
     this.envModalVisible = false;
   }
 
-  async envModalConfirm() {
+  envModalConfirm() {
     const projectEnv = {
       projectId: this.selectedProject.id,
       projectName: this.selectedProject.name,
@@ -112,15 +112,7 @@ export class HeaderComponent implements OnInit {
     this.projectService.upsertCurrentProjectEnvLocally(projectEnv);
     this.currentProjectEnv = projectEnv;
     this.envModalVisible = false;
-
-    let path = this.router.url.split('/').slice(0, 2);
-    const match = window.location.pathname.match(/^\/(en|zh)\//);
-
-    if (match) {
-      path = [match[1], ...path].filter(x => x !== '');
-    }
-
-    window.location.href = `${window.location.protocol}//${window.location.host}/${path.join('/')}`;
+    this.broadcastService.environmentChanged();
   }
 
   private setCurrentEnv() {
