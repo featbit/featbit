@@ -4,6 +4,7 @@ using Infrastructure.MQ.Kafka;
 using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace Infrastructure;
 
@@ -42,9 +43,8 @@ public static class HealthCheckBuilderExtensions
         var cacheProvider = configuration.GetCacheProvider();
         if (cacheProvider == CacheProvider.Redis)
         {
-            var redisConnectionString = configuration.GetValue<string>("Redis:ConnectionString")!;
             builder.AddRedis(
-                redisConnectionString,
+                serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>(),
                 tags: tags,
                 timeout: Timeout
             );

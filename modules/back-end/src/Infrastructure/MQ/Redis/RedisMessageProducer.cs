@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Domain.Messages;
 using Domain.Utils;
-using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -12,7 +11,7 @@ public partial class RedisMessageProducer : IMessageProducer
     private readonly IDatabase _database;
     private readonly ILogger<RedisMessageProducer> _logger;
 
-    public RedisMessageProducer(IRedisClient redis, ILogger<RedisMessageProducer> logger)
+    public RedisMessageProducer(IConnectionMultiplexer redis, ILogger<RedisMessageProducer> logger)
     {
         _database = redis.GetDatabase();
         _logger = logger;
