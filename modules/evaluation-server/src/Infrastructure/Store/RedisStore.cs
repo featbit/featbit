@@ -9,16 +9,16 @@ public class RedisStore : IDbStore
 {
     public string Name => Stores.Redis;
 
-    private readonly IRedisClient _client;
+    private readonly IRedisClient _redisClient;
     private readonly IDatabase _redis;
 
-    public RedisStore(IRedisClient client)
+    public RedisStore(IRedisClient redisClient)
     {
-        _client = client;
-        _redis = client.GetDatabase();
+        _redisClient = redisClient;
+        _redis = redisClient.GetDatabase();
     }
 
-    public Task<bool> IsAvailableAsync() => _client.IsHealthyAsync();
+    public Task<bool> IsAvailableAsync() => _redisClient.IsHealthyAsync();
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {

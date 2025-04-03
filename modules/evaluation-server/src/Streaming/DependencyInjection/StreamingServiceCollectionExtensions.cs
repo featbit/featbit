@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
-using StackExchange.Redis;
 using Streaming.Connections;
 using Streaming.Messages;
 using Streaming.Services;

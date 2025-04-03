@@ -13,11 +13,11 @@ public partial class RedisMessageConsumer : BackgroundService
     private readonly ILogger<RedisMessageConsumer> _logger;
 
     public RedisMessageConsumer(
-        IRedisClient redis,
+        IRedisClient redisClient,
         IEnumerable<IMessageConsumer> handlers,
         ILogger<RedisMessageConsumer> logger)
     {
-        _subscriber = redis.GetSubscriber();
+        _subscriber = redisClient.GetSubscriber();
         _handlers = handlers.ToDictionary(x => x.Topic, x => x);
         _logger = logger;
     }
