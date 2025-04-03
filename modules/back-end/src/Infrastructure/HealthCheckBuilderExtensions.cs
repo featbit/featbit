@@ -1,10 +1,10 @@
 ﻿using Infrastructure.Caches;
+using Infrastructure.Caches.Redis;
 using Infrastructure.MQ;
 using Infrastructure.MQ.Kafka;
 using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
 
 namespace Infrastructure;
 
@@ -44,7 +44,7 @@ public static class HealthCheckBuilderExtensions
         if (cacheProvider == CacheProvider.Redis)
         {
             builder.AddRedis(
-                serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>(),
+                serviceProvider => serviceProvider.GetRequiredService<IRedisClient>().Connection,
                 tags: tags,
                 timeout: Timeout
             );

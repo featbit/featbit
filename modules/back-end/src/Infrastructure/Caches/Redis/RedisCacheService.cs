@@ -11,7 +11,7 @@ public class RedisCacheService : ICacheService
 {
     private readonly IDatabase _redis;
 
-    public RedisCacheService(IConnectionMultiplexer redis)
+    public RedisCacheService(IRedisClient redis)
     {
         _redis = redis.GetDatabase();
     }

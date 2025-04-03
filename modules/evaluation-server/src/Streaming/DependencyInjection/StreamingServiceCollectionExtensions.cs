@@ -45,7 +45,7 @@ public static class StreamingServiceCollectionExtensions
 
     public static void TryAddRedis(this IServiceCollection services, IConfiguration configuration)
     {
-        if (services.Any(service => service.ServiceType == typeof(IConnectionMultiplexer)))
+        if (services.Any(service => service.ServiceType == typeof(IRedisClient)))
         {
             return;
         }
@@ -54,8 +54,7 @@ public static class StreamingServiceCollectionExtensions
             .Bind(configuration.GetSection(RedisOptions.Redis))
             .ValidateDataAnnotations();
 
-        var multiplexer = ConnectionMultiplexer.Connect(configuration.GetRedisConnectionString());
-        services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+        services.AddSingleton<IRedisClient, RedisClient>();
     }
 
     public static void TryAddMongoDb(this IServiceCollection services, IConfiguration configuration)

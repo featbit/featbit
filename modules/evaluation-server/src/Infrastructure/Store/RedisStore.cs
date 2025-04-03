@@ -9,54 +9,16 @@ public class RedisStore : IDbStore
 {
     public string Name => Stores.Redis;
 
-    private readonly IConnectionMultiplexer _multiplexer;
+    private readonly IRedisClient _client;
     private readonly IDatabase _redis;
 
-    public RedisStore(IConnectionMultiplexer multiplexer)
+    public RedisStore(IRedisClient client)
     {
-        _multiplexer = multiplexer;
-        _redis = multiplexer.GetDatabase();
+        _client = client;
+        _redis = client.GetDatabase();
     }
 
-    public async Task<bool> IsAvailableAsync()
-    {
-        // reference: https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/blob/master/src/HealthChecks.Redis/RedisHealthCheck.cs
-        try
-        {
-            foreach (var endPoint in _multiplexer.GetEndPoints(configuredOnly: true))
-            {
-                var server = _multiplexer.GetServer(endPoint);
-                if (server.ServerType != ServerType.Cluster)
-                {
-                    await _multiplexer.GetDatabase().PingAsync().ConfigureAwait(false);
-                    await server.PingAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    var clusterInfo = await server.ExecuteAsync("CLUSTER", "INFO").ConfigureAwait(false);
-                    if (clusterInfo is object && !clusterInfo.IsNull)
-                    {
-                        if (!clusterInfo.ToString().Contains("cluster_state:ok"))
-                        {
-                            // $"INFO CLUSTER is not on OK state for endpoint {endPoint}"
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        // $"INFO CLUSTER is null or can't be read for endpoint {endPoint}"
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
+    public Task<bool> IsAvailableAsync() => _client.IsHealthyAsync();
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {

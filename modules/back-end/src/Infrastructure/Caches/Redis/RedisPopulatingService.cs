@@ -18,7 +18,7 @@ public class RedisPopulatingService : ICachePopulatingService
     private readonly ILogger<RedisPopulatingService> _logger;
 
     public RedisPopulatingService(
-        IConnectionMultiplexer redis,
+        IRedisClient redis,
         ICacheService cache,
         IFeatureFlagService flagService,
         ISegmentService segmentService,
