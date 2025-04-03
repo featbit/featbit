@@ -54,10 +54,10 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ## Redis
 
-| Name                      | Description                                                                        | Default Value                     |
-|---------------------------|------------------------------------------------------------------------------------|-----------------------------------|
-| `Redis__ConnectionString` | Redis Connection String                                                            | `"redis:6379,abortConnect=false"` |
-| `Redis__Password`         | Redis Password. If provided, override the password specified in connection string. | `""`                              |
+| Name                      | Description                                                                                   | Default Value                     |
+|---------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------|
+| `Redis__ConnectionString` | Redis Connection String                                                                       | `"redis:6379,abortConnect=false"` |
+| `Redis__Password`         | Redis Password (Optional). If provided, override the password specified in connection string. | `""`                              |
 
 ## Kafka
 
