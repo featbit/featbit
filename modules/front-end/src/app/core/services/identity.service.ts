@@ -14,6 +14,7 @@ import { UserService } from "@services/user.service";
 import { IResponse } from "@shared/types";
 import { Observable } from "rxjs";
 import { IResetPasswordResult } from "@features/safe/workspaces/types/profiles";
+import { BroadcastService } from "@services/broadcast.service";
 
 @Injectable({
   providedIn: 'root'
@@ -27,7 +28,8 @@ export class IdentityService {
   constructor(
     private http: HttpClient,
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private broadcastService: BroadcastService
   ) { }
 
   loginByEmail(email: string, password: string, workspaceKey: string) {
@@ -52,6 +54,7 @@ export class IdentityService {
       this.userService.getProfile().subscribe({
         next: async (profile: IResponse) => {
           localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
+          this.broadcastService.userLoggedIn();
 
           resolve();
 
@@ -87,7 +90,7 @@ export class IdentityService {
     }
 
     localStorage.clear();
-    Object.keys(storageToKeep).forEach(k => localStorage.setItem(k, storageToKeep[k]))
-    this.router.navigateByUrl('/login').then();
+    Object.keys(storageToKeep).forEach(k => localStorage.setItem(k, storageToKeep[k]));
+    this.broadcastService.userLoggedOut();
   }
 }
