@@ -1,4 +1,5 @@
 using Domain;
+using Infrastructure;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.MongoDb;
 using Infrastructure.Caches.Redis;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using StackExchange.Redis;
 using Streaming.Connections;
 using Streaming.Messages;
 using Streaming.Services;
@@ -43,7 +45,7 @@ public static class StreamingServiceCollectionExtensions
 
     public static void TryAddRedis(this IServiceCollection services, IConfiguration configuration)
     {
-        if (services.Any(service => service.ServiceType == typeof(IRedisClient)))
+        if (services.Any(service => service.ServiceType == typeof(IConnectionMultiplexer)))
         {
             return;
         }
@@ -52,7 +54,8 @@ public static class StreamingServiceCollectionExtensions
             .Bind(configuration.GetSection(RedisOptions.Redis))
             .ValidateDataAnnotations();
 
-        services.AddSingleton<IRedisClient, RedisClient>();
+        var multiplexer = ConnectionMultiplexer.Connect(configuration.GetRedisConnectionString());
+        services.AddSingleton<IConnectionMultiplexer>(multiplexer);
     }
 
     public static void TryAddMongoDb(this IServiceCollection services, IConfiguration configuration)
@@ -80,6 +83,6 @@ public static class StreamingServiceCollectionExtensions
             .Bind(configuration.GetSection(PostgresOptions.Postgres))
             .ValidateDataAnnotations();
 
-        services.AddNpgsqlDataSource(configuration["Postgres:ConnectionString"]!);
+        services.AddNpgsqlDataSource(configuration.GetPostgresConnectionString());
     }
 }

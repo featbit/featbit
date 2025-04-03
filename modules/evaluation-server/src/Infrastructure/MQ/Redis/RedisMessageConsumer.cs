@@ -1,5 +1,4 @@
 using Domain.Messages;
-using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
@@ -13,11 +12,11 @@ public partial class RedisMessageConsumer : BackgroundService
     private readonly ILogger<RedisMessageConsumer> _logger;
 
     public RedisMessageConsumer(
-        IRedisClient redisClient,
+        IConnectionMultiplexer redis,
         IEnumerable<IMessageConsumer> handlers,
         ILogger<RedisMessageConsumer> logger)
     {
-        _subscriber = redisClient.GetSubscriber();
+        _subscriber = redis.GetSubscriber();
         _handlers = handlers.ToDictionary(x => x.Topic, x => x);
         _logger = logger;
     }
