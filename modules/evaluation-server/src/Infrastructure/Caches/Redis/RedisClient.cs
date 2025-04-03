@@ -6,7 +6,8 @@ namespace Infrastructure.Caches.Redis;
 public class RedisClient : IRedisClient
 {
     private readonly Lazy<ConnectionMultiplexer> _lazyConnection;
-    private ConnectionMultiplexer Connection => _lazyConnection.Value;
+
+    public IConnectionMultiplexer Connection => _lazyConnection.Value;
 
     public RedisClient(IConfiguration configuration)
     {
