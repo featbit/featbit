@@ -8,7 +8,7 @@ namespace Infrastructure.MQ.Redis;
 
 public partial class RedisMessageConsumer : BackgroundService
 {
-    private readonly ISubscriber _subscriber;
+    private readonly IRedisClient _redisClient;
     private readonly Dictionary<string, IMessageConsumer> _handlers;
     private readonly ILogger<RedisMessageConsumer> _logger;
 
@@ -17,7 +17,7 @@ public partial class RedisMessageConsumer : BackgroundService
         IEnumerable<IMessageConsumer> handlers,
         ILogger<RedisMessageConsumer> logger)
     {
-        _subscriber = redisClient.GetSubscriber();
+        _redisClient = redisClient;
         _handlers = handlers.ToDictionary(x => x.Topic, x => x);
         _logger = logger;
     }
@@ -26,7 +26,7 @@ public partial class RedisMessageConsumer : BackgroundService
     {
         // Subscribe Topics.FeatureFlagChange, Topics.SegmentChange
         var channel = new RedisChannel(Topics.DataChangePattern, RedisChannel.PatternMode.Pattern);
-        var queue = await _subscriber.SubscribeAsync(channel);
+        var queue = await _redisClient.GetSubscriber().SubscribeAsync(channel);
 
         _logger.LogInformation(
             "Start consuming flag & segment change messages through channel {Channel}.",

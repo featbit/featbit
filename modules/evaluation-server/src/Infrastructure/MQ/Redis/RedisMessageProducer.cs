@@ -3,21 +3,12 @@ using Domain.Messages;
 using Domain.Shared;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
 
 namespace Infrastructure.MQ.Redis;
 
-public partial class RedisMessageProducer : IMessageProducer
+public partial class RedisMessageProducer(IRedisClient redisClient, ILogger<RedisMessageProducer> logger)
+    : IMessageProducer
 {
-    private readonly IDatabase _database;
-    private readonly ILogger<RedisMessageProducer> _logger;
-
-    public RedisMessageProducer(IRedisClient redisClient, ILogger<RedisMessageProducer> logger)
-    {
-        _database = redisClient.GetDatabase();
-        _logger = logger;
-    }
-
     public async Task PublishAsync<TMessage>(string topic, TMessage? message) where TMessage : class
     {
         try
@@ -25,13 +16,13 @@ public partial class RedisMessageProducer : IMessageProducer
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
 
             // RPush json message to topic list
-            await _database.ListRightPushAsync(topic, jsonMessage);
+            await redisClient.GetDatabase().ListRightPushAsync(topic, jsonMessage);
 
-            Log.MessagePublished(_logger, jsonMessage);
+            Log.MessagePublished(logger, jsonMessage);
         }
         catch (Exception ex)
         {
-            Log.ErrorPublishMessage(_logger, ex);
+            Log.ErrorPublishMessage(logger, ex);
         }
     }
 }
