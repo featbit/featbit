@@ -7,48 +7,43 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Caches.Redis;
 
-public class RedisCacheService : ICacheService
+public class RedisCacheService(IRedisClient redis) : ICacheService
 {
-    private readonly IDatabase _redis;
-
-    public RedisCacheService(IRedisClient redis)
-    {
-        _redis = redis.GetDatabase();
-    }
+    private IDatabase Redis => redis.GetDatabase();
 
     public async Task UpsertFlagAsync(FeatureFlag flag)
     {
         // upsert flag
         var cache = RedisCaches.Flag(flag);
-        await _redis.StringSetAsync(cache.Key, cache.Value);
+        await Redis.StringSetAsync(cache.Key, cache.Value);
 
         // upsert index
         var index = RedisCaches.FlagIndex(flag);
-        await _redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
+        await Redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
     }
 
     public async Task DeleteFlagAsync(Guid envId, Guid flagId)
     {
         // delete cache
         var cacheKey = RedisKeys.Flag(flagId);
-        await _redis.KeyDeleteAsync(cacheKey);
+        await Redis.KeyDeleteAsync(cacheKey);
 
         // delete index
         var index = RedisKeys.FlagIndex(envId);
-        await _redis.SortedSetRemoveAsync(index, flagId.ToString());
+        await Redis.SortedSetRemoveAsync(index, flagId.ToString());
     }
 
     public async Task UpsertSegmentAsync(ICollection<Guid> envIds, Segment segment)
     {
         // upsert cache
         var cache = RedisCaches.Segment(segment);
-        await _redis.StringSetAsync(cache.Key, cache.Value);
+        await Redis.StringSetAsync(cache.Key, cache.Value);
 
         // upsert index
         foreach (var envId in envIds)
         {
             var index = RedisCaches.SegmentIndex(envId, segment);
-            await _redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
+            await Redis.SortedSetAddAsync(index.Key, index.Member, index.Score);
         }
     }
 
@@ -56,13 +51,13 @@ public class RedisCacheService : ICacheService
     {
         // delete cache
         var cacheKey = RedisKeys.Segment(segmentId);
-        await _redis.KeyDeleteAsync(cacheKey);
+        await Redis.KeyDeleteAsync(cacheKey);
 
         // delete index
         foreach (var envId in envIds)
         {
             var index = RedisKeys.SegmentIndex(envId);
-            await _redis.SortedSetRemoveAsync(index, segmentId.ToString());
+            await Redis.SortedSetRemoveAsync(index, segmentId.ToString());
         }
     }
 
@@ -71,7 +66,7 @@ public class RedisCacheService : ICacheService
         var key = RedisKeys.License(workspace.Id);
         var value = workspace.License;
 
-        await _redis.StringSetAsync(key, value);
+        await Redis.StringSetAsync(key, value);
     }
 
     public async Task UpsertSecretAsync(ResourceDescriptor resourceDescriptor, Secret secret)
@@ -93,27 +88,27 @@ public class RedisCacheService : ICacheService
             new("envKey", environment.Key)
         };
 
-        await _redis.HashSetAsync(key, fields);
+        await Redis.HashSetAsync(key, fields);
     }
 
     public async Task DeleteSecretAsync(Secret secret)
     {
         var key = RedisKeys.Secret(secret.Value);
 
-        await _redis.KeyDeleteAsync(key);
+        await Redis.KeyDeleteAsync(key);
     }
 
     public async Task<string> GetOrSetLicenseAsync(Guid workspaceId, Func<Task<string>> licenseGetter)
     {
         var key = RedisKeys.License(workspaceId);
-        if (await _redis.KeyExistsAsync(key))
+        if (await Redis.KeyExistsAsync(key))
         {
-            var value = await _redis.StringGetAsync(key);
+            var value = await Redis.StringGetAsync(key);
             return value.ToString();
         }
 
         var license = await licenseGetter();
-        await _redis.StringSetAsync(key, license);
+        await Redis.StringSetAsync(key, license);
         return license;
     }
 }

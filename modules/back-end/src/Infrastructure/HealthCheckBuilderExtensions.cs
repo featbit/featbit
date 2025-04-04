@@ -1,4 +1,5 @@
 ﻿using Infrastructure.Caches;
+using Infrastructure.Caches.Redis;
 using Infrastructure.MQ;
 using Infrastructure.MQ.Kafka;
 using Infrastructure.Persistence;
@@ -42,9 +43,8 @@ public static class HealthCheckBuilderExtensions
         var cacheProvider = configuration.GetCacheProvider();
         if (cacheProvider == CacheProvider.Redis)
         {
-            var redisConnectionString = configuration.GetValue<string>("Redis:ConnectionString")!;
             builder.AddRedis(
-                redisConnectionString,
+                serviceProvider => serviceProvider.GetRequiredService<IRedisClient>().Connection,
                 tags: tags,
                 timeout: Timeout
             );

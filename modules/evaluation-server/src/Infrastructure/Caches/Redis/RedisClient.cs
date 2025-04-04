@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 
 namespace Infrastructure.Caches.Redis;
@@ -6,24 +6,15 @@ namespace Infrastructure.Caches.Redis;
 public class RedisClient : IRedisClient
 {
     private readonly Lazy<ConnectionMultiplexer> _lazyConnection;
-    private IConnectionMultiplexer ConnectionMultiplexer => _lazyConnection.Value;
 
-    public RedisClient(IOptions<RedisOptions> options)
+    public IConnectionMultiplexer Connection => _lazyConnection.Value;
+
+    public RedisClient(IConfiguration configuration)
     {
-        var value = options.Value;
-
-        var connectionString = value.ConnectionString;
-        var configurationOptions = ConfigurationOptions.Parse(connectionString);
-
-        // if user has specified a password in the configuration, use it
-        var password = value.Password;
-        if (!string.IsNullOrWhiteSpace(password))
-        {
-            configurationOptions.Password = password;
-        }
+        var connectionString = configuration.GetRedisConnectionString();
 
         _lazyConnection = new Lazy<ConnectionMultiplexer>(
-            () => StackExchange.Redis.ConnectionMultiplexer.Connect(configurationOptions)
+            () => ConnectionMultiplexer.Connect(connectionString)
         );
     }
 
@@ -33,12 +24,12 @@ public class RedisClient : IRedisClient
         // reference: https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/blob/master/src/HealthChecks.Redis/RedisHealthCheck.cs
         try
         {
-            foreach (var endPoint in ConnectionMultiplexer!.GetEndPoints(configuredOnly: true))
+            foreach (var endPoint in Connection!.GetEndPoints(configuredOnly: true))
             {
-                var server = ConnectionMultiplexer.GetServer(endPoint);
+                var server = Connection.GetServer(endPoint);
                 if (server.ServerType != ServerType.Cluster)
                 {
-                    await ConnectionMultiplexer.GetDatabase().PingAsync().ConfigureAwait(false);
+                    await Connection.GetDatabase().PingAsync().ConfigureAwait(false);
                     await server.PingAsync().ConfigureAwait(false);
                 }
                 else
@@ -68,7 +59,7 @@ public class RedisClient : IRedisClient
         }
     }
 
-    public IDatabase GetDatabase() => ConnectionMultiplexer.GetDatabase();
+    public IDatabase GetDatabase() => Connection.GetDatabase();
 
-    public ISubscriber GetSubscriber() => ConnectionMultiplexer.GetSubscriber();
+    public ISubscriber GetSubscriber() => Connection.GetSubscriber();
 }

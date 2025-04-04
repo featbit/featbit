@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Application.Caches;
 using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
 
 namespace Infrastructure.Caches.Redis;
 
@@ -10,7 +9,7 @@ public class RedisPopulatingService : ICachePopulatingService
     private const string IsPopulatedKey = "featbit:redis-is-populated";
     private const string PopulateLockKey = "featbit:populate-redis";
 
-    private readonly IDatabase _redis;
+    private readonly IRedisClient _redisClient;
     private readonly ICacheService _cache;
     private readonly IFeatureFlagService _flagService;
     private readonly ISegmentService _segmentService;
@@ -18,14 +17,14 @@ public class RedisPopulatingService : ICachePopulatingService
     private readonly ILogger<RedisPopulatingService> _logger;
 
     public RedisPopulatingService(
-        IRedisClient redis,
+        IRedisClient redisClient,
         ICacheService cache,
         IFeatureFlagService flagService,
         ISegmentService segmentService,
         IEnvironmentService envService,
         ILogger<RedisPopulatingService> logger)
     {
-        _redis = redis.GetDatabase();
+        _redisClient = redisClient;
         _cache = cache;
         _flagService = flagService;
         _segmentService = segmentService;
@@ -35,7 +34,9 @@ public class RedisPopulatingService : ICachePopulatingService
 
     public async Task PopulateAsync()
     {
-        var isPopulated = await _redis.StringGetAsync(IsPopulatedKey) == "true";
+        var redis = _redisClient.GetDatabase();
+
+        var isPopulated = await redis.StringGetAsync(IsPopulatedKey) == "true";
         if (isPopulated)
         {
             _logger.LogInformation("Redis has been populated before, ignore run again");
@@ -43,7 +44,7 @@ public class RedisPopulatingService : ICachePopulatingService
         }
 
         var lockValue = Guid.NewGuid().ToString();
-        if (await _redis.LockTakeAsync(PopulateLockKey, lockValue, TimeSpan.FromSeconds(5)))
+        if (await redis.LockTakeAsync(PopulateLockKey, lockValue, TimeSpan.FromSeconds(5)))
         {
             _logger.LogInformation("Start to populate redis.");
             var stopWatch = Stopwatch.StartNew();
@@ -54,7 +55,7 @@ public class RedisPopulatingService : ICachePopulatingService
                 await PopulateSecretsAsync();
 
                 // mark redis as populated
-                await _redis.StringSetAsync(IsPopulatedKey, "true");
+                await redis.StringSetAsync(IsPopulatedKey, "true");
             }
             catch (Exception ex)
             {
@@ -63,7 +64,7 @@ public class RedisPopulatingService : ICachePopulatingService
             finally
             {
                 _logger.LogInformation("Populate redis finished in {Elapsed} ms.", stopWatch.ElapsedMilliseconds);
-                await _redis.LockReleaseAsync(PopulateLockKey, lockValue);
+                await redis.LockReleaseAsync(PopulateLockKey, lockValue);
             }
         }
     }

@@ -1,4 +1,5 @@
 using Domain;
+using Infrastructure;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.MongoDb;
 using Infrastructure.Caches.Redis;
@@ -80,6 +81,6 @@ public static class StreamingServiceCollectionExtensions
             .Bind(configuration.GetSection(PostgresOptions.Postgres))
             .ValidateDataAnnotations();
 
-        services.AddNpgsqlDataSource(configuration["Postgres:ConnectionString"]!);
+        services.AddNpgsqlDataSource(configuration.GetPostgresConnectionString());
     }
 }

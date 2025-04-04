@@ -7,26 +7,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.MQ.Redis;
 
-public partial class RedisMessageConsumer : BackgroundService
+public partial class RedisMessageConsumer(
+    IRedisClient redisClient,
+    IServiceProvider serviceProvider,
+    ILogger<RedisMessageConsumer> logger)
+    : BackgroundService
 {
-    private readonly IRedisClient _redis;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<RedisMessageConsumer> _logger;
-
-    public RedisMessageConsumer(
-        IRedisClient redis,
-        IServiceProvider serviceProvider,
-        ILogger<RedisMessageConsumer> logger)
-    {
-        _redis = redis;
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
-
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // eager resolve InsightsWriter to start flushing insights loop
-        _ = _serviceProvider.GetRequiredService<InsightsWriter>();
+        _ = serviceProvider.GetRequiredService<InsightsWriter>();
 
         var tasks = new[]
         {
@@ -39,16 +29,16 @@ public partial class RedisMessageConsumer : BackgroundService
 
     public async Task ConsumeAsync(string topic, CancellationToken cancellationToken)
     {
-        var db = _redis.GetDatabase();
+        var redis = redisClient.GetDatabase();
 
-        _logger.LogInformation("Start consuming {Topic} messages...", topic);
+        logger.LogInformation("Start consuming {Topic} messages...", topic);
 
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
                 // LPop json message from topic list
-                var rawMessage = await db.ListLeftPopAsync(topic);
+                var rawMessage = await redis.ListLeftPopAsync(topic);
                 if (!rawMessage.HasValue)
                 {
                     // If the topic doesn't exist yet or there are no messages, delay the consumer by 1 second
@@ -56,13 +46,13 @@ public partial class RedisMessageConsumer : BackgroundService
                     continue;
                 }
 
-                using var scope = _serviceProvider.CreateScope();
+                using var scope = serviceProvider.CreateScope();
                 var sp = scope.ServiceProvider;
 
                 var handler = sp.GetKeyedService<IMessageHandler>(topic);
                 if (handler == null)
                 {
-                    Log.NoHandlerForTopic(_logger, topic);
+                    Log.NoHandlerForTopic(logger, topic);
                     continue;
                 }
 
@@ -70,11 +60,11 @@ public partial class RedisMessageConsumer : BackgroundService
                 try
                 {
                     await handler.HandleAsync(message);
-                    Log.MessageHandled(_logger, message);
+                    Log.MessageHandled(logger, message);
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorConsumeMessage(_logger, message, ex);
+                    Log.ErrorConsumeMessage(logger, message, ex);
                 }
             }
             catch (OperationCanceledException)
@@ -83,7 +73,7 @@ public partial class RedisMessageConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                Log.ErrorConsumeTopic(_logger, topic, ex);
+                Log.ErrorConsumeTopic(logger, topic, ex);
 
                 // Exception occurred while consuming topic, delay consumer by 1 second
                 await Task.Delay(1000, cancellationToken);

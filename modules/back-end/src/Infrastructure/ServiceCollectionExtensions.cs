@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using StackExchange.Redis;
 
 namespace Infrastructure;
 
@@ -32,7 +33,7 @@ public static class ServiceCollectionExtensions
             .Bind(configuration.GetSection(RedisOptions.Redis))
             .ValidateDataAnnotations();
 
-        services.AddSingleton<IRedisClient, DefaultRedisClient>();
+        services.AddSingleton<IRedisClient, RedisClient>();
     }
 
     public static void TryAddMongoDb(this IServiceCollection services, IConfiguration configuration)
@@ -63,7 +64,7 @@ public static class ServiceCollectionExtensions
         // https://github.com/npgsql/efcore.pg/issues/1107
         // https://github.com/npgsql/efcore.pg/issues/3119
 
-        services.AddNpgsqlDataSource(configuration["Postgres:ConnectionString"]!, builder =>
+        services.AddNpgsqlDataSource(configuration.GetPostgresConnectionString(), builder =>
         {
             builder
                 .EnableDynamicJson()
