@@ -16,7 +16,7 @@ public class SdkController : PublicApiControllerBase
     [HttpGet("server/latest-all")]
     public async Task<IActionResult> GetServerSideSdkPayloadAsync([FromQuery] long timestamp = 0)
     {
-        if (!Authenticated)
+        if (EnvId == Guid.Empty)
         {
             return Unauthorized();
         }
@@ -39,7 +39,7 @@ public class SdkController : PublicApiControllerBase
     [HttpPost("client/latest-all")]
     public async Task<IActionResult> GetClientSdkPayloadAsync(EndUser endUser, [FromQuery] long timestamp = 0)
     {
-        if (!Authenticated)
+        if (EnvId == Guid.Empty)
         {
             return Unauthorized();
         }

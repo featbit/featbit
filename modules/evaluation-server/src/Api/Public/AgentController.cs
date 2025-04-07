@@ -8,7 +8,7 @@ public class AgentController(IDbStore store) : PublicApiControllerBase
     [HttpGet("relay-proxy/get-envs")]
     public async Task<IActionResult> GetRelayProxyEnvsAsync()
     {
-        if (!Authenticated || RelayProxyKey == string.Empty)
+        if (RelayProxyKey == string.Empty)
         {
             return Unauthorized();
         }

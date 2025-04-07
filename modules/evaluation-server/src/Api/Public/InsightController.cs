@@ -27,7 +27,7 @@ public class InsightController : PublicApiControllerBase
     [HttpPost("track")]
     public async Task<IActionResult> TrackAsync(ICollection<Insight> insights)
     {
-        if (!Authenticated)
+        if (EnvId == Guid.Empty)
         {
             return Unauthorized();
         }
