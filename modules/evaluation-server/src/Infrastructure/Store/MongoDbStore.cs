@@ -106,14 +106,9 @@ public class MongoDbStore : IDbStore
             return (rn, workspaceId);
         }
     }
-
-    public async Task<Secret?> GetSecretAsync(string secretString)
+    
+    private async Task<BsonDocument?> GetEnvByIdAsync(Guid envId)
     {
-        if (!Secret.TryParse(secretString, out var envId))
-        {
-            return null;
-        }
-
         var pipeline = new BsonDocument[]
         {
             new("$match", new BsonDocument("_id", new BsonBinaryData(envId, GuidRepresentation.Standard))),
@@ -136,13 +131,23 @@ public class MongoDbStore : IDbStore
             .GetCollection<BsonDocument>("Environments")
             .Aggregate<BsonDocument>(pipeline);
 
-        var document = await query.FirstOrDefaultAsync();
-        if (document is null)
+        return await query.FirstOrDefaultAsync();
+    }
+
+    public async Task<Secret?> GetSecretAsync(string secretString)
+    {
+        if (!Secret.TryParse(secretString, out var envId))
         {
             return null;
         }
 
-        var secret = document["env"]["secrets"].AsBsonArray.FirstOrDefault(x => x["value"] == secretString);
+        var envDoc = await GetEnvByIdAsync(envId);
+        if (envDoc == null)
+        {
+            return null;
+        }
+        
+        var secret = envDoc["env"]["secrets"].AsBsonArray.FirstOrDefault(x => x["value"] == secretString);
         if (secret == null)
         {
             return null;
@@ -150,9 +155,52 @@ public class MongoDbStore : IDbStore
 
         return new Secret(
             secret["type"].AsString,
-            document["project"]["key"].AsString,
-            document["env"]["id"].AsGuid,
-            document["env"]["key"].AsString
+            envDoc["project"]["key"].AsString,
+            envDoc["env"]["id"].AsGuid,
+            envDoc["env"]["key"].AsString
         );
+    }
+
+    public async Task<IEnumerable<Secret?>> GetSecretsFromRelayProxyKey(string relayProxyKey)
+    {
+        var query = _mongodb.GetCollection<BsonDocument>("RelayProxies")
+            .Find(x => x["key"] == relayProxyKey);
+
+        var relayProxy = await query.FirstAsync();
+        
+        // TODO isAllEnvs
+        if (relayProxy["isAllEnvs"] == true)
+        {
+            return null;
+        }
+        
+        var envIds = relayProxy["scopes"].AsBsonArray.SelectMany(x => x["envIds"].AsBsonArray);
+        
+        var secrets = new List<Secret>();
+        foreach (var envId in envIds)
+        {
+            var envDoc = await GetEnvByIdAsync(envId.AsGuid);
+            if (envDoc != null)
+            {
+                var secretDocs = envDoc["env"]["secrets"].AsBsonArray;
+                if (secretDocs != null)
+                {
+                    foreach (var secretDoc in secretDocs)
+                    {
+                        var secret = new Secret(
+                            secretDoc["type"].AsString,
+                            envDoc["project"]["key"].AsString,
+                            envDoc["env"]["id"].AsGuid,
+                            envDoc["env"]["key"].AsString,
+                            secretDoc["value"].AsString
+                        );
+                
+                        secrets.Add(secret);
+                    }
+                }
+            }
+        }
+        
+        return secrets;
     }
 }

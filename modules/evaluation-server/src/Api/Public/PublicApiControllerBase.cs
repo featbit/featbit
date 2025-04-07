@@ -16,5 +16,14 @@ public class PublicApiControllerBase : ControllerBase
         }
     }
 
-    protected bool Authenticated => EnvId != Guid.Empty;
+    protected string RelayProxyKey
+    {
+        get
+        {
+            string? relayProxyKey = Request.Headers.Authorization;
+            return relayProxyKey.StartsWith("rp-") ? relayProxyKey : string.Empty;
+        }
+    }
+
+    protected bool Authenticated => EnvId != Guid.Empty || RelayProxyKey != string.Empty;
 }

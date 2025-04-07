@@ -19,4 +19,9 @@ public class TestStore : IStore
 
     public Task<Secret?> GetSecretAsync(string secretString) =>
         Task.FromResult(TestData.GetSecret(secretString));
+
+    public Task<IEnumerable<Secret?>> GetSecretsFromRelayProxyKey(string relayProxyKey)
+    {
+        throw new NotImplementedException();
+    }
 }

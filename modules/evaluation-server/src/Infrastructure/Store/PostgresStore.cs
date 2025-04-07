@@ -142,6 +142,46 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
         return null;
     }
 
+    public async Task<IEnumerable<Secret?>> GetSecretsFromRelayProxyKey(string relayProxyKey)
+    {
+        await using var connection = await dataSource.OpenConnectionAsync();
+
+        var data = await connection.QueryAsync(
+            """
+            select env.id as env_id, env.key as env_key, env.secrets as env_secrets, pro.key as project_key
+            FROM relay_proxies rp
+            CROSS JOIN jsonb_array_elements(rp.scopes) AS scope
+            cross JOIN jsonb_array_elements_text(scope->'envIds') AS env_id
+            JOIN environments env ON env.id = env_id::uuid
+            JOIN projects pro ON pro.id = env.project_id
+            WHERE rp.key = @relayProxyKey
+            """, new { relayProxyKey }
+        );
+
+        var secrets = new List<Secret>();
+        
+        foreach (var rowObj in data)
+        {
+            var row = (IDictionary<string, object>)rowObj;
+
+            using var json = JsonDocument.Parse((row["env_secrets"] as string)!);
+            foreach (var element in json.RootElement.EnumerateArray())
+            {
+                var secret = new Secret(
+                    element.GetProperty("type").GetString()!,
+                    (row["project_key"] as string)!,
+                    (Guid)row["env_id"],
+                    (row["env_key"] as string)!,
+                    element.GetProperty("value").GetString()!
+                );
+                
+                secrets.Add(secret);
+            }
+        }
+
+        return secrets;
+    }
+
     private static byte[] SerializeFlag(IDictionary<string, object> row)
     {
         using MemoryStream stream = new();
