@@ -24,6 +24,4 @@ public class PublicApiControllerBase : ControllerBase
             return relayProxyKey.StartsWith("rp-") ? relayProxyKey : string.Empty;
         }
     }
-
-    protected bool Authenticated => EnvId != Guid.Empty || RelayProxyKey != string.Empty;
 }
