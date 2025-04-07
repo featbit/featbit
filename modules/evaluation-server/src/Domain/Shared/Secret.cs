@@ -9,6 +9,9 @@ public class Secret
     public Guid EnvId { get; set; }
 
     public string EnvKey { get; set; }
+    
+    // The secret value
+    public string Value { get; set; }
 
     public Secret(string type, string projectKey, Guid envId, string envKey)
     {
@@ -16,6 +19,15 @@ public class Secret
         ProjectKey = projectKey;
         EnvId = envId;
         EnvKey = envKey;
+    }
+    
+    public Secret(string type, string projectKey, Guid envId, string envKey, string value)
+    {
+        Type = type;
+        ProjectKey = projectKey;
+        EnvId = envId;
+        EnvKey = envKey;
+        Value = value;
     }
 
     public static bool TryParse(string? secretString, out Guid envId)

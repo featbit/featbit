@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <PackageVersion>2.3.0</PackageVersion>
+        <PackageVersion>3.0.0-local</PackageVersion>
         <Authors>FeatBit</Authors>
         <Owners>FeatBit</Owners>
         <Company>FeatBit</Company>

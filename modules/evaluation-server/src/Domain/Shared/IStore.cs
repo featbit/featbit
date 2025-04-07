@@ -15,6 +15,8 @@ public interface IStore
     Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp);
 
     Task<Secret?> GetSecretAsync(string secretString);
+    
+    Task<IEnumerable<Secret?>> GetSecretsFromRelayProxyKey(string relayProxyKey);
 }
 
 public interface IDbStore : IStore;
