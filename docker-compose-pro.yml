@@ -16,17 +16,16 @@ services:
   api-server:
     image: featbit/featbit-api-server:latest
     environment:
-      - DbProvider=MongoDb
+      - DbProvider=Postgres
       - MqProvider=Kafka
       - CacheProvider=Redis
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
     depends_on:
-      - mongodb
+      - postgresql
       - redis
       - kafka
       - da-server
@@ -38,16 +37,15 @@ services:
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
     environment:
-      - DbProvider=MongoDb
+      - DbProvider=Postgres
       - MqProvider=Kafka
       - CacheProvider=Redis
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
     depends_on:
-      - mongodb
+      - postgresql
       - kafka
       - redis
     ports:
@@ -71,18 +69,18 @@ services:
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
       CHECK_DB_LIVNESS: true
 
-  mongodb:
-    image: mongo:5.0.14
+  postgresql:
+    image: postgres:15.10
+    container_name: postgresql
     restart: on-failure
     ports:
-      - "27017:27017"
+      - "5432:5432"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
-      - MONGO_INITDB_DATABASE=featbit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: please_change_me
     volumes:
-      - mongodb:/data/db
-      - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - postgres:/var/lib/postgresql/data
     networks:
       - featbit-network
 
@@ -168,7 +166,7 @@ networks:
         - subnet: 172.10.0.0/16
 
 volumes:
-  mongodb:
+  postgres:
   redis:
   kafka:
   clickhouse-server:

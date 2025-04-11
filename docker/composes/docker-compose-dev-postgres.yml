@@ -29,7 +29,7 @@ services:
       - DbProvider=Postgres
       - MqProvider=Redis
       - CacheProvider=Redis
-      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
     depends_on:
       - postgresql
       - redis
@@ -49,7 +49,7 @@ services:
       - DbProvider=Postgres
       - MqProvider=Redis
       - CacheProvider=Redis
-      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
     depends_on:
       - postgresql
       - redis
@@ -74,7 +74,7 @@ services:
       CHECK_DB_LIVNESS: false
       DB_PROVIDER: Postgres
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 0tJXCokSvOB8
+      POSTGRES_PASSWORD: please_change_me
       POSTGRES_HOST: postgresql
       POSTGRES_PORT: 5432
       POSTGRES_DATABASE: featbit
@@ -87,10 +87,10 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 0tJXCokSvOB8
+      POSTGRES_PASSWORD: please_change_me
     volumes:
       - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
-      - postgres_data:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql/data
     networks:
       - featbit-network
 
@@ -125,4 +125,4 @@ networks:
 
 volumes:
   redis:
-  postgres_data:
+  postgres:

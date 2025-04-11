@@ -28,9 +28,9 @@ requests, and that it can connect to its dependencies (a database, message queue
 | Name            | Description                                                                 | Default Value |
 |-----------------|-----------------------------------------------------------------------------|---------------|
 | `AllowedHosts`  | Hosts allowed to connect to the API                                         | `"*"`         |
-| `DbProvider`    | Database provider, used to select **MongoDB** or **Postgres**               | `"MongoDb"`   |
-| `MqProvider`    | Message Queue provider, used to select **Redis**, **Kafka** or **Postgres** | `"Redis"`     |
-| `CacheProvider` | Cache provider, used to select **Redis** or **None**                        | `"Redis"`     |
+| `DbProvider`    | Database provider, used to select **MongoDB** or **Postgres**               | `"Postgres"`  |
+| `MqProvider`    | Message Queue provider, used to select **Redis**, **Kafka** or **Postgres** | `"Postgres"`  |
+| `CacheProvider` | Cache provider, used to select **Redis** or **None**                        | `"None"`      |
 
 ## Logging
 
@@ -48,16 +48,16 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ## Postgres
 
-| Name                         | Description                | Default Value                                                                        |
-|------------------------------|----------------------------|--------------------------------------------------------------------------------------|
-| `Postgres__ConnectionString` | Postgres connection string | `"Host=postgres;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit"` |
+| Name                         | Description                | Default Value                                                                            |
+|------------------------------|----------------------------|------------------------------------------------------------------------------------------|
+| `Postgres__ConnectionString` | Postgres connection string | `"Host=postgres;Port=5432;Username=postgres;Password=please_change_me;Database=featbit"` |
 
 ## Redis
 
-| Name                      | Description                                                                                   | Default Value                     |
-|---------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------|
-| `Redis__ConnectionString` | Redis Connection String                                                                       | `"redis:6379,abortConnect=false"` |
-| `Redis__Password`         | Redis Password (Optional). If provided, override the password specified in connection string. | `""`                              |
+| Name                      | Description                                                                                   | Default Value  |
+|---------------------------|-----------------------------------------------------------------------------------------------|----------------|
+| `Redis__ConnectionString` | Redis Connection String                                                                       | `"redis:6379"` |
+| `Redis__Password`         | Redis Password (Optional). If provided, override the password specified in connection string. | `""`           |
 
 ## Kafka
 

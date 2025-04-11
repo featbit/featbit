@@ -17,12 +17,14 @@ services:
     image: featbit/featbit-api-server:latest
     environment:
       - DbProvider=Postgres
-      - MqProvider=Postgres
-      - CacheProvider=None
+      - MqProvider=Redis
+      - CacheProvider=Redis
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+      - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
     depends_on:
       - postgresql
+      - redis
       - da-server
     ports:
       - "5000:5000"
@@ -33,11 +35,13 @@ services:
     image: featbit/featbit-evaluation-server:latest
     environment:
       - DbProvider=Postgres
-      - MqProvider=Postgres
-      - CacheProvider=None
+      - MqProvider=Redis
+      - CacheProvider=Redis
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+      - Redis__ConnectionString=redis:6379
     depends_on:
       - postgresql
+      - redis
     ports:
       - "5100:5100"
     networks:
@@ -74,6 +78,19 @@ services:
       - postgres:/var/lib/postgresql/data
     networks:
       - featbit-network
+  
+  redis:
+    image: bitnami/redis:6.2.10
+    container_name: redis
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - featbit-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/bitnami/redis/data
 
 networks:
   featbit-network:
@@ -85,3 +102,4 @@ networks:
 
 volumes:
   postgres:
+  redis:
