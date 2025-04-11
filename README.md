@@ -55,7 +55,7 @@
 
 ## Try FeatBit Online
 
-Try FeatBit immediately with [our online demo](https://tryitonline.featbit.co). The video below shows you how to get started quickly.
+Try FeatBit immediately with [our online demo](https://app.featbit.co). The video below shows you how to get started quickly.
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
