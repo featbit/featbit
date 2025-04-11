@@ -9,7 +9,6 @@ This directory contains these compose files for development purposes, including
 - [docker-compose-pro-dev.yml](docker-compose-pro-dev.yml): FeatBit Professional, images will be built from code
   directly
 - [docker-compose-infra.yml](docker-compose-infra.yml): FeatBit infrastructures
-- [docker-compose-services.yml](docker-compose-services.yml): FeatBit Core Services
 - [docker-compose-clickhouse.yml](docker-compose-clickhouse.yml): Clickhouse for FeatBit
 
 > **Note**

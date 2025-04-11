@@ -12,14 +12,13 @@
 
 ## Environment variables
 
-
 ### General
 
-| Name               | Description                                                   | Default Value  |
-|--------------------|---------------------------------------------------------------|----------------|
-| `CHECK_DB_LIVNESS` | Whether to check db liveness on app startup                   | `"true"`       |
-| `TEST`             | If `true`, runs the application in test mode                  | `"false"`      |
-| `DB_PROVIDER`      | Database provider, 3 options: ClickHouse, MongoDB or Postgres | `"MongoDb"`    |
+| Name               | Description                                                   | Default Value |
+|--------------------|---------------------------------------------------------------|---------------|
+| `CHECK_DB_LIVNESS` | Whether to check db liveness on app startup                   | `"true"`      |
+| `TEST`             | If `true`, runs the application in test mode                  | `"false"`     |
+| `DB_PROVIDER`      | Database provider, 3 options: ClickHouse, MongoDB or Postgres | `"MongoDb"`   |
 
 > [!NOTE]
 > Set CHECK_DB_LIVNESS to **false** if you use external db.
@@ -70,10 +69,10 @@ Make sure assign `MongoDb` to `DB_PROVIDER`
 
 Make sure assign `Postgres` to `DB_PROVIDER`
 
-| Name                | Description                                | Default Value    |
-|---------------------|--------------------------------------------|------------------|
-| `POSTGRES_USER`     | PostgreSQL port, used to check db liveness | `"postgres`      |
-| `POSTGRES_PASSWORD` | PostgreSQL database password               | `"0tJXCokSvOB8"` |
-| `POSTGRES_HOST`     | PostgreSQL database host                   | `"postgresql"`   |
-| `POSTGRES_PORT`     | PostgreSQL database port                   | `"5432"`         |
-| `POSTGRES_DATABASE` | PostgreSQL database name                   | `"featbit"`      |
+| Name                | Description                                | Default Value        |
+|---------------------|--------------------------------------------|----------------------|
+| `POSTGRES_USER`     | PostgreSQL port, used to check db liveness | `"postgres`          |
+| `POSTGRES_PASSWORD` | PostgreSQL database password               | `"please_change_me"` |
+| `POSTGRES_HOST`     | PostgreSQL database host                   | `"postgresql"`       |
+| `POSTGRES_PORT`     | PostgreSQL database port                   | `"5432"`             |
+| `POSTGRES_DATABASE` | PostgreSQL database name                   | `"featbit"`          |

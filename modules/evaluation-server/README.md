@@ -48,16 +48,16 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ## Postgres
 
-| Name                         | Description                | Default Value                                                                        |
-|------------------------------|----------------------------|--------------------------------------------------------------------------------------|
-| `Postgres__ConnectionString` | Postgres connection string | `"Host=postgres;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit"` |
+| Name                         | Description                | Default Value                                                                            |
+|------------------------------|----------------------------|------------------------------------------------------------------------------------------|
+| `Postgres__ConnectionString` | Postgres connection string | `"Host=postgres;Port=5432;Username=postgres;Password=please_change_me;Database=featbit"` |
 
 ## Redis
 
-| Name                      | Description                                                                                   | Default Value                     |
-|---------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------|
-| `Redis__ConnectionString` | Redis Connection String                                                                       | `"redis:6379,abortConnect=false"` |
-| `Redis__Password`         | Redis Password (Optional). If provided, override the password specified in connection string. | `""`                              |
+| Name                      | Description                                                                                   | Default Value  |
+|---------------------------|-----------------------------------------------------------------------------------------------|----------------|
+| `Redis__ConnectionString` | Redis Connection String                                                                       | `"redis:6379"` |
+| `Redis__Password`         | Redis Password (Optional). If provided, override the password specified in connection string. | `""`           |
 
 ## Kafka
 
