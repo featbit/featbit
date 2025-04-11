@@ -47,7 +47,6 @@ services:
     image: featbit/featbit-data-analytics-server:latest
     depends_on:
       - postgresql
-      - redis
     ports:
       - "8200:80"
     networks:

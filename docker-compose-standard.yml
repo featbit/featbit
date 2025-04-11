@@ -17,7 +17,7 @@ services:
     image: featbit/featbit-api-server:latest
     environment:
       - DbProvider=Postgres
-      - MqProvider=Postgres
+      - MqProvider=Redis
       - CacheProvider=Redis
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Redis__ConnectionString=redis:6379
@@ -35,7 +35,7 @@ services:
     image: featbit/featbit-evaluation-server:latest
     environment:
       - DbProvider=Postgres
-      - MqProvider=Postgres
+      - MqProvider=Redis
       - CacheProvider=Redis
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Redis__ConnectionString=redis:6379
@@ -51,7 +51,6 @@ services:
     image: featbit/featbit-data-analytics-server:latest
     depends_on:
       - postgresql
-      - redis
     ports:
       - "8200:80"
     networks:
