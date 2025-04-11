@@ -71,7 +71,7 @@ Make sure assign `Postgres` to `DB_PROVIDER`
 
 | Name                | Description                                | Default Value        |
 |---------------------|--------------------------------------------|----------------------|
-| `POSTGRES_USER`     | PostgreSQL port, used to check db liveness | `"postgres`          |
+| `POSTGRES_USER`     | PostgreSQL port, used to check db liveness | `"postgres"`         |
 | `POSTGRES_PASSWORD` | PostgreSQL database password               | `"please_change_me"` |
 | `POSTGRES_HOST`     | PostgreSQL database host                   | `"postgresql"`       |
 | `POSTGRES_PORT`     | PostgreSQL database port                   | `"5432"`             |

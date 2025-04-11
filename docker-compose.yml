@@ -53,6 +53,11 @@ services:
       - featbit-network
     environment:
       DB_PROVIDER: Postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: please_change_me
+      POSTGRES_HOST: postgresql
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: featbit
       CHECK_DB_LIVNESS: true
 
   postgresql:
