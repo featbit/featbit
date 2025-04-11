@@ -18,7 +18,7 @@
 |--------------------|---------------------------------------------------------------|---------------|
 | `CHECK_DB_LIVNESS` | Whether to check db liveness on app startup                   | `"true"`      |
 | `TEST`             | If `true`, runs the application in test mode                  | `"false"`     |
-| `DB_PROVIDER`      | Database provider, 3 options: ClickHouse, MongoDB or Postgres | `"MongoDb"`   |
+| `DB_PROVIDER`      | Database provider, 3 options: ClickHouse, MongoDB or Postgres | `"Postgres"`  |
 
 > [!NOTE]
 > Set CHECK_DB_LIVNESS to **false** if you use external db.
