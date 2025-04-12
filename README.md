@@ -55,7 +55,7 @@
 
 ## Try FeatBit Online
 
-Try FeatBit immediately with [our online demo](https://tryitonline.featbit.co). The video below shows you how to get started quickly.
+Try FeatBit immediately with [our online demo](https://app.featbit.co). The video below shows you how to get started quickly.
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
@@ -129,7 +129,7 @@ else
 
 ## Configure and run FeatBit anywhere
 
-The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/installation/full-installation), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/relay-proxy/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
+The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/installation/docker-compose), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/relay-proxy/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
 
 ## Documentation & Community
 
