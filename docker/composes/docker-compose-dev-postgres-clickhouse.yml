@@ -28,7 +28,7 @@ services:
       - SSOEnabled=true
       - DbProvider=Postgres
       - MqProvider=Kafka
-      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
@@ -51,7 +51,7 @@ services:
     environment:
       - DbProvider=Postgres
       - MqProvider=Kafka
-      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=0tJXCokSvOB8;Database=featbit
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
@@ -167,7 +167,7 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 0tJXCokSvOB8
+      POSTGRES_PASSWORD: please_change_me
     volumes:
       - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
       - postgres_data:/var/lib/postgresql/data
