@@ -170,5 +170,35 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 }
             }
         );
+
+        yield return SwaggerExample.Create(
+            "Add a new variation", new List<Operation>
+            {
+                new()
+                {
+                    op = "add",
+                    path = "/variations/-",
+                    value = new
+                    {
+                        id = "2848dccc-9659-4d43-bd86-2ed599efe595",
+                        name = "New variation",
+                        value = "new value"
+                    }
+                }
+            }
+        );
+
+        yield return SwaggerExample.Create(
+            "Update the first variation value",
+            new List<Operation>
+            {
+                new()
+                {
+                    op = "replace",
+                    path = "/variations/0/value",
+                    value = "new variation value"
+                }
+            }
+        );
     }
 }

@@ -1,3 +1,4 @@
+using Api.Authentication;
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Domain.SemanticPatch;
@@ -7,6 +8,7 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/audit-logs")]
 public class AuditLogController : ApiControllerBase
 {
+    [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetListAsync(Guid envId, [FromQuery] AuditLogFilter filter)
     {
