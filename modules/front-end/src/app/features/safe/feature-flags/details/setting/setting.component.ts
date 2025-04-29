@@ -227,12 +227,12 @@ export class SettingComponent {
       return;
     }
 
-    this.experimentService.getFeatureFlagVariationReferences(this.featureFlag.id, id).subscribe({
-      next: (res) => {
-        if (res.length === 0) {
+    this.experimentService.getVariationReferences(this.featureFlag.id, id).subscribe({
+      next: (references) => {
+        if (references.length === 0) {
           this.variations.removeAt(index);
         } else {
-          this.variationExptReferences = [...res];
+          this.variationExptReferences = [...references];
           this.exptReferenceModalVisible = true;
         }
       },
