@@ -43,15 +43,12 @@ export class ExperimentService {
     );
   }
 
-  getFeatureFlagVariationReferences(featureFlagId: string, variationId: string): Observable<IExpt[]> {
-    const queryParam = {
-      featureFlagId,
-      variationId
-    };
+  getVariationReferences(flagId: string, variationId: string): Observable<IExpt[]> {
+    const queryParam = { flagId, variationId };
 
     return this.http.get<IExpt[]>(
       `${this.baseUrl}/variation-experiment-references`,
-      {params: new HttpParams({fromObject: queryParam})}
+      { params: new HttpParams({ fromObject: queryParam }) }
     );
   }
 

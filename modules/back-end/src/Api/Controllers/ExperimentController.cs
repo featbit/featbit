@@ -34,12 +34,12 @@ public class ExperimentController : ApiControllerBase
     }
     
     [HttpGet("variation-experiment-references")]
-    public async Task<ApiResponse<ICollection<ExperimentVm>>> IsVariationUsedAsync(Guid envId, Guid featureFlagId, string variationId)
+    public async Task<ApiResponse<ICollection<ExperimentVm>>> GetVariationReferencesAsync(Guid envId, Guid flagId, string variationId)
     {
-        var request = new GetFeatureFlagVariationExptReferences
+        var request = new GetVariationReferences
         {
             EnvId = envId,
-            FeatureFlagId = featureFlagId,
+            FlagId = flagId,
             VariationId = variationId
         };
 

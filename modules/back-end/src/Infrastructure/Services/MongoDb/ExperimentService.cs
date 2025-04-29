@@ -363,10 +363,12 @@ public class ExperimentService(MongoDbClient mongoDb, IOlapService olapService)
 
         var totalCount = await query.CountAsync();
 
-        var items = await query
-            .Skip(filter.PageIndex * filter.PageSize)
-            .Take(filter.PageSize)
-            .ToListAsync();
+        var items = filter.PageSize == -1
+            ? await query.ToListAsync()
+            : await query
+                .Skip(filter.PageIndex * filter.PageSize)
+                .Take(filter.PageSize)
+                .ToListAsync();
 
         foreach (var item in items)
         {
