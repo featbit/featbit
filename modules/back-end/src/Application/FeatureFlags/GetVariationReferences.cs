@@ -27,8 +27,7 @@ public class GetVariationReferencesValidator : AbstractValidator<GetVariationRef
 public class GetVariationReferencesHandler(IExperimentService service)
     : IRequestHandler<GetVariationReferences, ICollection<ExperimentVm>>
 {
-    public async Task<ICollection<ExperimentVm>> Handle(GetVariationReferences request,
-        CancellationToken cancellationToken)
+    public async Task<ICollection<ExperimentVm>> Handle(GetVariationReferences request, CancellationToken cancellationToken)
     {
         var filter = new ExperimentFilter
         {
