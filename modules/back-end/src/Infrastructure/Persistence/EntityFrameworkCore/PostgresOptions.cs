@@ -8,4 +8,6 @@ public class PostgresOptions
 
     [Required(ErrorMessage = "Postgres connection string must be set.")]
     public string ConnectionString { get; set; } = string.Empty;
+
+    public string Password { get; set; } = string.Empty;
 }
