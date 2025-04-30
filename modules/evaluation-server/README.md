@@ -48,9 +48,10 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ## Postgres
 
-| Name                         | Description                | Default Value                                                                            |
-|------------------------------|----------------------------|------------------------------------------------------------------------------------------|
-| `Postgres__ConnectionString` | Postgres connection string | `"Host=postgres;Port=5432;Username=postgres;Password=please_change_me;Database=featbit"` |
+| Name                         | Description                                                                                      | Default Value                                                                            |
+|------------------------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
+| `Postgres__ConnectionString` | Postgres connection string                                                                       | `"Host=postgres;Port=5432;Username=postgres;Password=please_change_me;Database=featbit"` |
+| `Postgres__Password`         | Postgres password (Optional). If provided, override the password specified in connection string. | `""`                                                                                     |
 
 ## Redis
 
