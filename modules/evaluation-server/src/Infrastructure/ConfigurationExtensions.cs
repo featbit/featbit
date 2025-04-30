@@ -2,6 +2,7 @@
 using Infrastructure.MQ;
 using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 using StackExchange.Redis;
 
 namespace Infrastructure;
@@ -48,5 +49,17 @@ public static class ConfigurationExtensions
     }
 
     public static string GetPostgresConnectionString(this IConfiguration configuration)
-        => configuration["Postgres:ConnectionString"]!;
+    {
+        var connectionString = configuration["Postgres:ConnectionString"];
+        var builder = new NpgsqlConnectionStringBuilder(connectionString!);
+
+        // if we specified a password in the configuration, use it
+        var password = configuration["Postgres:Password"];
+        if (!string.IsNullOrWhiteSpace(password))
+        {
+            builder.Password = password;
+        }
+
+        return builder.ToString();
+    }
 }
