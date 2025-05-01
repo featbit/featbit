@@ -70,7 +70,7 @@ public partial class PostgresMessageConsumer : BackgroundService
         IEnumerable<IMessageConsumer> handlers,
         ILogger<PostgresMessageConsumer> logger)
     {
-        var builder = new NpgsqlConnectionStringBuilder(configuration["Postgres:ConnectionString"]!)
+        var builder = new NpgsqlConnectionStringBuilder(configuration.GetPostgresConnectionString())
         {
             // override the default keepalive interval and application name
             KeepAlive = KeepAliveIntervalInSeconds,
