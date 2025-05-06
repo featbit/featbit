@@ -53,7 +53,7 @@ public class SyncToRemoteHandler : IRequestHandler<SyncToRemote, string>
         // sync to remote url
         var remoteUrl = setting.Value;
 
-        using var client = _httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient();
         var payload = await GetSyncPayloadAsync(request.WorkspaceId, request.EnvId);
         var content = new StringContent(
             JsonSerializer.Serialize(payload, ReusableJsonSerializerOptions.Web),
