@@ -19,10 +19,17 @@ public class ConnectionManagerTests
         manager.Add(connection);
         Assert.Equal(LogLevel.Trace, _logger.Level);
         Assert.Null(_logger.Ex);
+        Assert.Equal(
+            $$"""{OriginalFormat}={ConnectionId}: connection added,ConnectionId={{connection.Id}}""",
+            _logger.Message);
 
         // remove connection
         manager.Remove(connection);
         Assert.Equal(LogLevel.Trace, _logger.Level);
         Assert.Null(_logger.Ex);
+        Assert.Equal(
+            $$"""{OriginalFormat}={ConnectionId}: connection removed,ConnectionId={{connection.Id}}""",
+            _logger.Message
+        );
     }
 }
