@@ -8,7 +8,6 @@ public class ConnectionTests
 {
     private readonly Mock<WebSocket> _webSocketMock = new();
     private readonly Connection _connection;
-    private readonly Guid _envId = new("33055a8d-4ec6-4bb9-9edb-43524c4bbd5e");
 
     public ConnectionTests()
     {

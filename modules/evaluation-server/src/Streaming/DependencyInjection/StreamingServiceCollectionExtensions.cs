@@ -29,12 +29,11 @@ public static class StreamingServiceCollectionExtensions
             .AddTransient<IDataSyncService, DataSyncService>();
 
         // connection
-        services
-            .AddSingleton<IConnectionManager, ConnectionManager>()
-            .AddScoped<IConnectionHandler, ConnectionHandler>();
+        services.AddSingleton<IConnectionManager, ConnectionManager>();
 
         // message handlers
         services
+            .AddSingleton<MessageDispatcher>()
             .AddTransient<IMessageHandler, PingMessageHandler>()
             .AddTransient<IMessageHandler, EchoMessageHandler>()
             .AddTransient<IMessageHandler, DataSyncMessageHandler>();

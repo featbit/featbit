@@ -29,7 +29,7 @@ public class SegmentChangeMessageConsumer : IMessageConsumer
             throw new InvalidDataException("invalid segment change data");
         }
 
-        // push change message to sdk
+        // push change messages to sdk
         var envId = segment.GetProperty("envId").GetGuid();
         var flagIds = affectedFlagIds.Deserialize<string[]>()!;
         var connections = _connectionManager.GetEnvConnections(envId);

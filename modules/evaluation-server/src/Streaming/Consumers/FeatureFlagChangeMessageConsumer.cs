@@ -24,7 +24,7 @@ public class FeatureFlagChangeMessageConsumer : IMessageConsumer
         using var document = JsonDocument.Parse(message);
         var flag = document.RootElement;
 
-        // push change message to sdk
+        // push change messages to sdk
         var envId = flag.GetProperty("envId").GetGuid();
         var connections = _connectionManager.GetEnvConnections(envId);
         foreach (var connection in connections)

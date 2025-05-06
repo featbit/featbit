@@ -108,7 +108,7 @@ public partial class PostgresMessageConsumer : BackgroundService
                 // add missed messages if any
                 await AddMissedMessagesAsync(connection);
 
-                var cts = CancellationTokenSource.CreateLinkedTokenSource(_listenCts.Token, stoppingToken);
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(_listenCts.Token, stoppingToken);
 
                 await connection.ExecuteAsync(ListenChannelsSql, cts.Token);
                 Log.StartListening(_logger, string.Join(',', ListeningChannels));
