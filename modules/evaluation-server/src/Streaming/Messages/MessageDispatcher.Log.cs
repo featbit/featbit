@@ -15,7 +15,7 @@ sealed partial class MessageDispatcher
             EventName = "ReceivedEmpty")]
         public static partial void ReceivedEmpty(ILogger logger, [LogProperties] Connection connection);
 
-        [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "No handler found for message type {MessageType}",
+        [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "No handler for message type: {MessageType}",
             EventName = "NoHandlerFor")]
         public static partial void NoHandlerFor(ILogger logger, string messageType, [LogProperties] Connection connection);
 

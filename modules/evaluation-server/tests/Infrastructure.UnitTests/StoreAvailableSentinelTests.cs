@@ -5,8 +5,8 @@ using Domain.Shared;
 using Infrastructure.Store;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
-using TestBase;
 using Xunit;
 
 namespace Infrastructure.UnitTests;
@@ -22,7 +22,7 @@ public class StoreAvailableSentinelTests
     private readonly Mock<IDbStore> _dbStore2 = new();
     private readonly IDbStore[] _dbStores;
 
-    private readonly InMemoryFakeLogger<StoreAvailableSentinel> _logger = new();
+    private readonly FakeLogger<StoreAvailableSentinel> _logger = new();
 
     public StoreAvailableSentinelTests()
     {
@@ -55,9 +55,11 @@ public class StoreAvailableSentinelTests
 
         if (!isDbStore1Healthy && !isDbStore2Healthy)
         {
-            Assert.Equal(LogLevel.Error, _logger.Level);
-            Assert.Equal("No available store can be used.", _logger.Message);
-            Assert.Null(_logger.Ex);
+            var latestRecord = _logger.LatestRecord;
+
+            Assert.Equal(LogLevel.Error, latestRecord.Level);
+            Assert.Equal("No available store can be used.", latestRecord.Message);
+            Assert.Null(latestRecord.Exception);
         }
     }
 
@@ -79,9 +81,11 @@ public class StoreAvailableSentinelTests
 
         Assert.Equal(DbStore2Name, StoreAvailabilityListener.Instance.AvailableStore);
 
-        Assert.Equal(LogLevel.Debug, _logger.Level);
-        Assert.Equal($"Store availability check timed out for {DbStore1Name}.", _logger.Message);
-        Assert.Null(_logger.Ex);
+        var latestRecord = _logger.LatestRecord;
+
+        Assert.Equal(LogLevel.Debug, latestRecord.Level);
+        Assert.Equal($"Store availability check timed out for {DbStore1Name}.", latestRecord.Message);
+        Assert.Null(latestRecord.Exception);
     }
 }
 
