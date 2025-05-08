@@ -28,4 +28,4 @@ if [ "$ENABLE_OPENTELEMETRY" = "true" ]; then
     export CORECLR_PROFILER_PATH="$INSTALL_DIR/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so"
 fi
 
-dotnet Api.dll
+exec dotnet Api.dll
