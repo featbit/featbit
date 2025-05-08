@@ -36,8 +36,8 @@ Wait until those services are successfully launched, and we're ready to run API 
 
 ## Run API
 
-The API project is built with [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), make sure you have the
-latest .NET 6.0 SDK installed before you start.
+The API project is built with [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0), make sure you have the
+latest .NET 8.0 SDK installed before you start.
 
 Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, then the swagger should be available
 at [http://localhost:5000/swagger](http://localhost:5000/swagger).
