@@ -28,4 +28,6 @@ if [ "$ENABLE_OPENTELEMETRY" = "true" ]; then
     export CORECLR_PROFILER_PATH="$INSTALL_DIR/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so"
 fi
 
+# Use 'exec' to replace the shell process with the application process.
+# This ensures proper signal handling (e.g., SIGTERM) and graceful shutdown.
 exec dotnet Api.dll
