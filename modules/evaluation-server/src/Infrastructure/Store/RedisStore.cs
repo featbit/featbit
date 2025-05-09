@@ -93,4 +93,9 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
             entries[3].ToString()
         );
     }
+
+    public async Task<IEnumerable<Secret?>> GetSecretsFromRelayProxyKey(string relayProxyKey)
+    {
+        throw new NotImplementedException();
+    }
 }

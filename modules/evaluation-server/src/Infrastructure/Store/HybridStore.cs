@@ -51,4 +51,7 @@ public class HybridStore : IStore
 
     public async Task<Secret?> GetSecretAsync(string secretString) =>
         await AvailableStore.GetSecretAsync(secretString);
+
+    public async Task<IEnumerable<Secret?>> GetSecretsFromRelayProxyKey(string relayProxyKey) => 
+        await AvailableStore.GetSecretsFromRelayProxyKey(relayProxyKey);
 }
