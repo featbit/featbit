@@ -16,14 +16,14 @@ public partial class ConnectionManager : IConnectionManager
     {
         _connectionStore.Add(connection);
 
-        Log.ConnectionAdded(_logger, connection.Id);
+        Log.ConnectionAdded(_logger, connection);
     }
 
     public void Remove(Connection connection)
     {
         _connectionStore.Remove(connection);
 
-        Log.ConnectionRemoved(_logger, connection.Id);
+        Log.ConnectionRemoved(_logger, connection);
     }
 
     public ICollection<Connection> GetEnvConnections(Guid envId)

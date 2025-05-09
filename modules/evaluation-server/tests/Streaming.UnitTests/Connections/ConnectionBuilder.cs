@@ -1,34 +1,18 @@
 using System.Net.WebSockets;
 using Domain.Shared;
-using Moq;
 using Streaming.Connections;
 
 namespace Streaming.UnitTests.Connections;
 
 public class ConnectionBuilder
 {
-    private string _id;
-    private WebSocket _websocket;
-    private Secret _secret;
-    private Client _client;
-    private string _type;
-    private string _version;
-    private long _connectAt;
-
-    public ConnectionBuilder()
-    {
-        _id = Guid.NewGuid().ToString("D");
-
-        var websocketMock = new Mock<WebSocket>();
-        websocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
-        _websocket = websocketMock.Object;
-
-        _secret = TestData.ClientSecret;
-        _client = new Client("127.0.0.1", "localhost");
-        _type = ConnectionType.Client;
-        _version = ConnectionVersion.V2;
-        _connectAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-    }
+    private string _id = Guid.NewGuid().ToString("D");
+    private WebSocket _websocket = null!;
+    private Secret _secret = TestData.ClientSecret;
+    private Client _client = new("127.0.0.1", "localhost");
+    private string _type = ConnectionType.Client;
+    private string _version = ConnectionVersion.V2;
+    private long _connectAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
     public Connection Build()
     {

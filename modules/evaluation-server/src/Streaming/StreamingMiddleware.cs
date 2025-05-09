@@ -3,29 +3,26 @@ using System.Net.WebSockets;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Streaming.Connections;
+using Streaming.Messages;
 
 namespace Streaming;
 
-public class StreamingMiddleware
+public class StreamingMiddleware(IHostApplicationLifetime applicationLifetime, RequestDelegate next)
 {
     private const string StreamingPath = "/streaming";
-    private readonly IHostApplicationLifetime _applicationLifetime;
-    private readonly RequestDelegate _next;
 
-    public StreamingMiddleware(IHostApplicationLifetime applicationLifetime, RequestDelegate next)
-    {
-        _applicationLifetime = applicationLifetime;
-        _next = next;
-    }
-
-    public async Task InvokeAsync(HttpContext context, IRequestValidator requestValidator, IConnectionHandler handler)
+    public async Task InvokeAsync(
+        HttpContext context,
+        IRequestValidator requestValidator,
+        MessageDispatcher dispatcher,
+        IConnectionManager connectionManager)
     {
         var request = context.Request;
 
         // if not streaming request
         if (!request.Path.StartsWithSegments(StreamingPath) || !context.WebSockets.IsWebSocketRequest)
         {
-            await _next.Invoke(context);
+            await next.Invoke(context);
             return;
         }
 
@@ -49,7 +46,26 @@ public class StreamingMiddleware
         var client = await GetClientAsync(context);
         connection.AttachClient(client);
 
-        await handler.OnConnectedAsync(connection, _applicationLifetime.ApplicationStopping);
+        // add connection
+        connectionManager.Add(connection);
+
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(
+            context.RequestAborted,
+            applicationLifetime.ApplicationStopping
+        );
+
+        // dispatch connection messages
+        await dispatcher.DispatchAsync(connection, cts.Token);
+
+        // dispatcher ends means the connection was closed
+        await connection.CloseAsync(
+            ws.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
+            ws.CloseStatusDescription ?? string.Empty,
+            DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        );
+
+        // remove connection
+        connectionManager.Remove(connection);
     }
 
     private static async Task<Client> GetClientAsync(HttpContext context)

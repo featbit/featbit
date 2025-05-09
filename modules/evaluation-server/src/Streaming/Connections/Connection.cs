@@ -1,8 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using Domain.EndUsers;
 using Domain.Shared;
-using Streaming.Messages;
+using Microsoft.Extensions.Logging;
 using Streaming.Protocol;
 
 namespace Streaming.Connections;
@@ -11,25 +10,32 @@ public class Connection
 {
     public string Id { get; }
 
+    [LogPropertyIgnore]
     public WebSocket WebSocket { get; }
 
     /// <summary>
     /// client-side sdk EndUser
     /// </summary>
+    [LogPropertyIgnore]
     public EndUser? User { get; set; }
 
+    [LogPropertyIgnore]
     public string Type { get; }
 
+    [LogPropertyIgnore]
     public string Version { get; }
 
+    [LogPropertyIgnore]
     public long ConnectAt { get; }
 
+    [LogPropertyIgnore]
     public long CloseAt { get; private set; }
 
     #region extra
 
     public string ProjectKey { get; }
 
+    [LogPropertyIgnore]
     public Guid EnvId { get; }
 
     public string EnvKey { get; }
@@ -64,9 +70,9 @@ public class Connection
         ClientHost = string.Empty;
     }
 
-    public async Task SendAsync(Message message, CancellationToken cancellationToken)
+    public async Task SendAsync(ReadOnlyMemory<byte> bytes, CancellationToken cancellationToken)
     {
-        await WebSocket.SendAsync(message.Bytes, message.Type, true, cancellationToken);
+        await WebSocket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken);
     }
 
     public async Task SendAsync(ServerMessage message, CancellationToken cancellationToken)
