@@ -11,6 +11,7 @@ internal sealed class DefaultWebSocketConnectionContext : WebsocketConnectionCon
 {
     private readonly HttpContext _httpContext;
 
+    public override string? RawQuery { get; }
     public override WebSocket WebSocket { get; }
     public override string Type { get; }
     public override string Version { get; }
@@ -22,11 +23,12 @@ internal sealed class DefaultWebSocketConnectionContext : WebsocketConnectionCon
 
     public DefaultWebSocketConnectionContext(WebSocket websocket, HttpContext httpContext)
     {
-        WebSocket = websocket;
         _httpContext = httpContext;
 
-        var query = _httpContext.Request.Query;
+        RawQuery = httpContext.Request.QueryString.Value;
+        WebSocket = websocket;
 
+        var query = httpContext.Request.Query;
         Type = query["type"].ToString();
         Version = query["version"].ToString();
         Token = query["token"].ToString();

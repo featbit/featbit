@@ -4,6 +4,8 @@ namespace Streaming.Connections;
 
 public abstract class WebsocketConnectionContext
 {
+    public abstract string? RawQuery { get; }
+
     public abstract WebSocket WebSocket { get; }
 
     public abstract string Type { get; }

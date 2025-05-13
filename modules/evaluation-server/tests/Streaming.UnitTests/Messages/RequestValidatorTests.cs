@@ -1,8 +1,12 @@
 ﻿using System.Net.WebSockets;
 using Domain.Shared;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using Streaming.Connections;
+using Streaming.Services;
 
 namespace Streaming.UnitTests.Messages;
 
@@ -14,12 +18,36 @@ public class RequestValidatorTests
         var validator = new RequestValidator(
             new TestSystemClock(TestData.ClientToken.Timestamp),
             new TestStore(),
-            null!
+            null!,
+            NullLogger<RequestValidator>.Instance
         );
 
         var ctx = SetupTestContext();
         var validationResult = await validator.ValidateAsync(ctx);
 
+        Assert.True(validationResult.IsValid);
+        Assert.Empty(validationResult.Reason);
+
+        Assert.Single(validationResult.Secrets);
+        Assert.Equivalent(TestData.ClientSecret, validationResult.Secrets[0]);
+    }
+
+    [Fact]
+    public async Task ValidRelayProxy()
+    {
+        var rpService = new Mock<IRelayProxyService>();
+        rpService.Setup(x => x.GetSecretsAsync(It.IsAny<string>()))
+            .ReturnsAsync([TestData.ClientSecret]);
+
+        var ctx = SetupTestContext(type: ConnectionType.RelayProxy);
+        var validator = new RequestValidator(
+            new TestSystemClock(TestData.ClientToken.Timestamp),
+            new TestStore(),
+            rpService.Object,
+            NullLogger<RequestValidator>.Instance
+        );
+
+        var validationResult = await validator.ValidateAsync(ctx);
         Assert.True(validationResult.IsValid);
         Assert.Empty(validationResult.Reason);
 
@@ -96,6 +124,47 @@ public class RequestValidatorTests
         );
     }
 
+    [Fact]
+    public async Task InvalidRelayProxyToken()
+    {
+        var rpService = new Mock<IRelayProxyService>();
+        rpService.Setup(x => x.GetSecretsAsync(It.IsAny<string>()))
+            .ReturnsAsync([]);
+
+        await EnsureInvalidAsync(
+            expectedReason: "Invalid relay proxy token: rp-xxx",
+            type: ConnectionType.RelayProxy,
+            token: "rp-xxx",
+            relayProxyService: rpService.Object
+        );
+    }
+
+    [Fact]
+    public async Task ValidationErrorThrowsAndLogged()
+    {
+        var errorStoreMock = new Mock<IStore>();
+        errorStoreMock.Setup(x => x.GetSecretAsync(It.IsAny<string>()))
+            .Throws(new Exception("Test exception"));
+
+        var logger = new FakeLogger<RequestValidator>();
+
+        var validator = new RequestValidator(
+            new TestSystemClock(TestData.ClientToken.Timestamp),
+            errorStoreMock.Object,
+            null!,
+            logger
+        );
+
+        var ctx = SetupTestContext();
+        await Assert.ThrowsAsync<Exception>(() => validator.ValidateAsync(ctx));
+
+        // assert exception is logged
+        var latestLog = logger.LatestRecord;
+        Assert.Equal(LogLevel.Error, latestLog.Level);
+        Assert.Equal("Exception occurred while validating request: ?raw-query.", latestLog.Message);
+        Assert.NotNull(latestLog.Exception);
+    }
+
     private static async Task EnsureInvalidAsync(
         string expectedReason,
         WebSocket? webSocket = null,
@@ -103,12 +172,14 @@ public class RequestValidatorTests
         string? version = null,
         string? token = null,
         long? current = null,
-        IStore? store = null)
+        IStore? store = null,
+        IRelayProxyService? relayProxyService = null)
     {
         var validator = new RequestValidator(
             new TestSystemClock(current ?? TestData.ClientToken.Timestamp),
             store ?? new TestStore(),
-            null!
+            relayProxyService ?? null!,
+            NullLogger<RequestValidator>.Instance
         );
 
         var ctx = SetupTestContext(webSocket, type, version, token);
@@ -130,6 +201,8 @@ public class RequestValidatorTests
 
         var contextMock = new Mock<WebsocketConnectionContext>();
 
+        contextMock.Setup(x => x.RawQuery)
+            .Returns("?raw-query");
         contextMock
             .Setup(x => x.WebSocket)
             .Returns(webSocket ?? openedWebsocketMock.Object);
