@@ -19,23 +19,18 @@ public class Connection
     [LogPropertyIgnore]
     public EndUser? User { get; set; }
 
-    [LogPropertyIgnore]
     public string Type { get; }
 
-    [LogPropertyIgnore]
     public string Version { get; }
 
-    [LogPropertyIgnore]
     public long ConnectAt { get; }
 
-    [LogPropertyIgnore]
     public long CloseAt { get; private set; }
 
     #region extra
 
     public string ProjectKey { get; }
 
-    [LogPropertyIgnore]
     public Guid EnvId { get; }
 
     public string EnvKey { get; }
@@ -46,13 +41,32 @@ public class Connection
 
     #endregion
 
+    public Connection(WebsocketConnectionContext context, Secret secret)
+    {
+        Id = Guid.NewGuid().ToString("D");
+
+        WebSocket = context.WebSocket;
+        Type = context.Type;
+        Version = context.Version;
+        ConnectAt = context.ConnectAt;
+        CloseAt = 0;
+
+        ProjectKey = secret.ProjectKey;
+        EnvId = secret.EnvId;
+        EnvKey = secret.EnvKey;
+
+        ClientIpAddress = context.Client.IpAddress;
+        ClientHost = context.Client.Host;
+    }
+
     public Connection(
         string id,
         WebSocket webSocket,
         Secret secret,
         string type,
         string version,
-        long connectAt)
+        long connectAt,
+        Client client)
     {
         Id = id;
 
@@ -66,8 +80,8 @@ public class Connection
         EnvId = secret.EnvId;
         EnvKey = secret.EnvKey;
 
-        ClientIpAddress = string.Empty;
-        ClientHost = string.Empty;
+        ClientIpAddress = client.IpAddress;
+        ClientHost = client.Host;
     }
 
     public async Task SendAsync(ReadOnlyMemory<byte> bytes, CancellationToken cancellationToken)
@@ -80,20 +94,19 @@ public class Connection
         await WebSocket.SendAsync(message.GetBytes(), WebSocketMessageType.Text, true, cancellationToken);
     }
 
-    public async Task CloseAsync(WebSocketCloseStatus status, string description, long closeAt)
+    public async Task CloseAsync(WebSocketCloseStatus status, string description)
     {
         if (WebSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
         {
             await WebSocket.CloseOutputAsync(status, description, CancellationToken.None);
         }
 
-        CloseAt = closeAt;
+        MarkAsClosed();
     }
 
-    public void AttachClient(Client client)
+    public void MarkAsClosed()
     {
-        ClientIpAddress = client.IpAddress;
-        ClientHost = client.Host;
+        CloseAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     }
 
     /// <summary>

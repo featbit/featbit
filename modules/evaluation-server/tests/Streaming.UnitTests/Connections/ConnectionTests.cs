@@ -21,13 +21,13 @@ public class ConnectionTests
     {
         _webSocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
 
-        await _connection.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, 1662904887947);
+        await _connection.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty);
 
         _webSocketMock.Verify(
             ws => ws.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None),
             Times.Once
         );
 
-        Assert.Equal(1662904887947, _connection.CloseAt);
+        Assert.NotEqual(0, _connection.CloseAt);
     }
 }

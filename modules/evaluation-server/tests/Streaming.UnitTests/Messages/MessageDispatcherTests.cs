@@ -41,10 +41,6 @@ public class MessageDispatcherTests
     [Fact]
     public async Task EchoSingleFragmentMessage()
     {
-        _wsMock.SetupSequence(ws => ws.State)
-            .Returns(WebSocketState.Open)
-            .Returns(WebSocketState.Closed);
-
         SetupReceive([_echoMessage]);
 
         await _dispatcher.DispatchAsync(_connection, CancellationToken.None);
@@ -55,10 +51,6 @@ public class MessageDispatcherTests
     [Fact]
     public async Task EchoMultiFragmentMessage()
     {
-        _wsMock.SetupSequence(ws => ws.State)
-            .Returns(WebSocketState.Open)
-            .Returns(WebSocketState.Closed);
-
         var firstHalf = _echoMessage.Take(_echoMessage.Length / 2).ToArray();
         var secondHalf = _echoMessage.Skip(_echoMessage.Length / 2).ToArray();
 

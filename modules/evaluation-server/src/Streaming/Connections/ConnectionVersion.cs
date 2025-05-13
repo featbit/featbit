@@ -1,6 +1,6 @@
 ﻿namespace Streaming.Connections;
 
-public class ConnectionVersion
+public static class ConnectionVersion
 {
     public const string V1 = "1";
 

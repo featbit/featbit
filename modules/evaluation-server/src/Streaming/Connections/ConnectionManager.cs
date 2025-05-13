@@ -1,33 +1,68 @@
+using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 
 namespace Streaming.Connections;
 
-public partial class ConnectionManager : IConnectionManager
+public sealed partial class ConnectionManager(ILogger<ConnectionManager> logger) : IConnectionManager
 {
-    private readonly ConnectionStore _connectionStore = new();
-    private readonly ILogger<ConnectionManager> _logger;
+    internal readonly ConcurrentDictionary<string, Connection> Connections = new(StringComparer.Ordinal);
 
-    public ConnectionManager(ILogger<ConnectionManager> logger)
+    public Connection Add(WebsocketConnectionContext context)
     {
-        _logger = logger;
+        var primaryConnection = context.Connection;
+
+        if (context.Type == ConnectionType.RelayProxy)
+        {
+            foreach (var connection in context.MappedRpConnections)
+            {
+                Connections.TryAdd(connection.Id, connection);
+            }
+        }
+        else
+        {
+            Connections.TryAdd(primaryConnection.Id, primaryConnection);
+        }
+
+        Log.ConnectionAdded(logger, primaryConnection);
+
+        return primaryConnection;
     }
 
-    public void Add(Connection connection)
+    public void Remove(WebsocketConnectionContext context)
     {
-        _connectionStore.Add(connection);
+        var connection = context.Connection;
 
-        Log.ConnectionAdded(_logger, connection);
-    }
+        if (context.Type == ConnectionType.RelayProxy)
+        {
+            foreach (var mappedConnection in context.MappedRpConnections)
+            {
+                mappedConnection.MarkAsClosed();
+                Connections.TryRemove(mappedConnection.Id, out _);
+            }
+        }
+        else
+        {
+            Connections.TryRemove(connection.Id, out _);
+        }
 
-    public void Remove(Connection connection)
-    {
-        _connectionStore.Remove(connection);
-
-        Log.ConnectionRemoved(_logger, connection);
+        Log.ConnectionRemoved(logger, connection);
     }
 
     public ICollection<Connection> GetEnvConnections(Guid envId)
     {
-        return _connectionStore.Find(x => x.EnvId == envId);
+        var connections = new List<Connection>();
+
+        // the enumerator returned from the concurrent dictionary is safe to use concurrently with reads and writes to the dictionary
+        // see https://learn.microsoft.com/en-us/dotnet/api/system.collections.concurrent.concurrentdictionary-2.getenumerator?view=net-6.0
+        foreach (var entry in Connections)
+        {
+            var connection = entry.Value;
+            if (connection.EnvId == envId)
+            {
+                connections.Add(connection);
+            }
+        }
+
+        return connections;
     }
 }

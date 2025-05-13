@@ -1,49 +1,69 @@
 using System.Net.WebSockets;
 using Domain.Shared;
 using Microsoft.Extensions.Internal;
+using Streaming.Services;
 
 namespace Streaming.Connections;
 
-public class RequestValidator : IRequestValidator
+public sealed class RequestValidator(ISystemClock systemClock, IStore store, IRelayProxyService relayProxyService)
+    : IRequestValidator
 {
-    private readonly ISystemClock _systemClock;
-    private readonly IStore _store;
-
-    public RequestValidator(ISystemClock systemClock, IStore store)
+    public async Task<ValidationResult> ValidateAsync(WebsocketConnectionContext context)
     {
-        _systemClock = systemClock;
-        _store = store;
-    }
+        var (ws, type, version, tokenString) = context;
 
-    public async Task<Connection?> ValidateAsync(WebSocket ws, string? type, string? version, string? tokenString)
-    {
-        if (!ConnectionType.IsRegistered(type) || !ConnectionVersion.IsSupported(version))
+        // connection type
+        if (!ConnectionType.IsRegistered(type))
         {
-            return null;
+            return ValidationResult.Failed($"Invalid type: {type}");
         }
 
-        // token
-        var token = new Token(tokenString.AsSpan());
-        var current = _systemClock.UtcNow.ToUnixTimeMilliseconds();
-        if (!token.IsValid || Math.Abs(current - token.Timestamp) > 30 * 1000)
+        // connection version
+        if (!ConnectionVersion.IsSupported(version))
         {
-            return null;
-        }
-
-        // secret
-        var secret = await _store.GetSecretAsync(token.SecretString);
-        if (secret is null || secret.Type != type)
-        {
-            return null;
+            return ValidationResult.Failed($"Invalid version: {version}");
         }
 
         // websocket state
         if (ws is not { State: WebSocketState.Open })
         {
-            return null;
+            return ValidationResult.Failed($"Invalid websocket state: {ws?.State}");
         }
 
-        var connection = new Connection(Guid.NewGuid().ToString("D"), ws, secret, type, version!, current);
-        return connection;
+        return type == ConnectionType.RelayProxy
+            ? await ValidateRelayProxyAsync()
+            : await ValidateSecretTokenAsync();
+
+        async Task<ValidationResult> ValidateSecretTokenAsync()
+        {
+            // token
+            var token = new Token(tokenString.AsSpan());
+            var current = systemClock.UtcNow.ToUnixTimeMilliseconds();
+            if (!token.IsValid || Math.Abs(current - token.Timestamp) > 30 * 1000)
+            {
+                return ValidationResult.Failed($"Invalid token: {tokenString}");
+            }
+
+            var secret = await store.GetSecretAsync(token.SecretString);
+            if (secret is null)
+            {
+                return ValidationResult.Failed($"Secret is not found: {token.SecretString}");
+            }
+
+            if (secret.Type != type)
+            {
+                return ValidationResult.Failed($"Inconsistent secret used: {secret.Type}. Request type: {type}");
+            }
+
+            return ValidationResult.Ok([secret]);
+        }
+
+        async Task<ValidationResult> ValidateRelayProxyAsync()
+        {
+            var secrets = await relayProxyService.GetSecretsAsync(tokenString);
+            return secrets.Length == 0
+                ? ValidationResult.Failed($"Relay proxy is not found: {tokenString}")
+                : ValidationResult.Ok(secrets);
+        }
     }
 }

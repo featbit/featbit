@@ -1,6 +1,5 @@
 ﻿using System.Net.WebSockets;
 using Domain.Shared;
-using Infrastructure.Store;
 using Microsoft.Extensions.Internal;
 using Moq;
 using Streaming.Connections;
@@ -9,72 +8,146 @@ namespace Streaming.UnitTests.Messages;
 
 public class RequestValidatorTests
 {
+    [Fact]
+    public async Task Valid()
+    {
+        var validator = new RequestValidator(
+            new TestSystemClock(TestData.ClientToken.Timestamp),
+            new TestStore(),
+            null!
+        );
+
+        var ctx = SetupTestContext();
+        var validationResult = await validator.ValidateAsync(ctx);
+
+        Assert.True(validationResult.IsValid);
+        Assert.Empty(validationResult.Reason);
+
+        Assert.Single(validationResult.Secrets);
+        Assert.Equivalent(TestData.ClientSecret, validationResult.Secrets[0]);
+    }
+
     [Theory]
-    [ClassData(typeof(Requests))]
-    public async Task Should_Validate_Request(WebSocket webSocket, string type, string version, string tokenString,
-        long currentTimestamp, bool isValid)
+    [InlineData("")]
+    [InlineData("unknown")]
+    public async Task InvalidType(string type)
     {
-        var validator = new RequestValidator(new TestSystemClock(currentTimestamp), new TestStore());
-
-        var connection = await validator.ValidateAsync(webSocket, type, version, tokenString);
-        if (isValid)
-        {
-            Assert.NotNull(connection);
-        }
-        else
-        {
-            Assert.Null(connection);
-        }
-    }
-}
-
-internal class TestSystemClock : ISystemClock
-{
-    public TestSystemClock(long timestamp)
-    {
-        UtcNow = DateTimeOffset.FromUnixTimeMilliseconds(timestamp);
+        await EnsureInvalidAsync(
+            expectedReason: $"Invalid type: {type}",
+            type: type
+        );
     }
 
-    public DateTimeOffset UtcNow { get; }
-}
-
-public class Requests : TheoryData<WebSocket, string, string, string, long, bool>
-{
-    public Requests()
+    [Theory]
+    [InlineData("unknown")]
+    public async Task InvalidVersion(string version)
     {
-        const string server = ConnectionType.Client;
-        const string version = "";
-        const string token = TestData.ClientTokenString;
-        var tokenCreatedAt = TestData.ClientToken.Timestamp;
+        await EnsureInvalidAsync(
+            expectedReason: $"Invalid version: {version}",
+            version: version
+        );
+    }
 
-        // mocked websockets
+    [Fact]
+    public async Task InvalidWebSocketState()
+    {
+        var abortedWebsocketMock = new Mock<WebSocket>();
+        abortedWebsocketMock.Setup(x => x.State).Returns(WebSocketState.Aborted);
+
+        await EnsureInvalidAsync(
+            expectedReason: "Invalid websocket state: Aborted",
+            webSocket: abortedWebsocketMock.Object
+        );
+    }
+
+    [Fact]
+    public async Task InvalidToken()
+    {
+        await EnsureInvalidAsync(
+            expectedReason: "Invalid token: ",
+            token: string.Empty
+        );
+
+        await EnsureInvalidAsync(
+            expectedReason: "Invalid token: 123456",
+            token: "123456"
+        );
+
+        await EnsureInvalidAsync(
+            expectedReason: $"Invalid token: {TestData.ClientTokenString}",
+            current: TestData.ClientToken.Timestamp + 31 * 1000
+        );
+
+        await EnsureInvalidAsync(
+            expectedReason: $"Invalid token: {TestData.ClientTokenString}",
+            current: TestData.ClientToken.Timestamp - 31 * 1000
+        );
+
+        var nullStore = new Mock<IStore>();
+        nullStore.Setup(x => x.GetSecretAsync(It.IsAny<string>())).ReturnsAsync(() => null);
+        await EnsureInvalidAsync(
+            expectedReason: $"Secret is not found: {TestData.ClientSecretString}",
+            store: nullStore.Object
+        );
+
+        await EnsureInvalidAsync(
+            expectedReason: $"Inconsistent secret used: {ConnectionType.Client}. Request type: {ConnectionType.Server}",
+            type: ConnectionType.Server
+        );
+    }
+
+    private static async Task EnsureInvalidAsync(
+        string expectedReason,
+        WebSocket? webSocket = null,
+        string? type = null,
+        string? version = null,
+        string? token = null,
+        long? current = null,
+        IStore? store = null)
+    {
+        var validator = new RequestValidator(
+            new TestSystemClock(current ?? TestData.ClientToken.Timestamp),
+            store ?? new TestStore(),
+            null!
+        );
+
+        var ctx = SetupTestContext(webSocket, type, version, token);
+        var validationResult = await validator.ValidateAsync(ctx);
+
+        Assert.False(validationResult.IsValid);
+        Assert.Equal(expectedReason, validationResult.Reason);
+        Assert.Empty(validationResult.Secrets);
+    }
+
+    private static WebsocketConnectionContext SetupTestContext(
+        WebSocket? webSocket = null,
+        string? type = null,
+        string? version = null,
+        string? token = null)
+    {
         var openedWebsocketMock = new Mock<WebSocket>();
         openedWebsocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
 
-        var abortedWebsocketMock = new Mock<WebSocket>();
-        abortedWebsocketMock.Setup(x => x.State).Returns(WebSocketState.Closed);
+        var contextMock = new Mock<WebsocketConnectionContext>();
 
-        var openedWebsocket = openedWebsocketMock.Object;
-        var abortedWebsocket = abortedWebsocketMock.Object;
+        contextMock
+            .Setup(x => x.WebSocket)
+            .Returns(webSocket ?? openedWebsocketMock.Object);
+        contextMock
+            .Setup(x => x.Type)
+            .Returns(type ?? ConnectionType.Client);
+        contextMock
+            .Setup(x => x.Version)
+            .Returns(version ?? ConnectionVersion.V2);
+        contextMock
+            .Setup(x => x.Token)
+            .Returns(token ?? TestData.ClientTokenString);
 
-        // valid
-        Add(openedWebsocket, server, version, token, tokenCreatedAt, true);
-
-        // invalid websocket
-        Add(null!, server, version, token, tokenCreatedAt, false);
-        Add(abortedWebsocket, server, version, token, tokenCreatedAt, false);
-
-        // invalid client
-        Add(openedWebsocket, "invalid-client", version, token, tokenCreatedAt, false);
-
-        // invalid version
-        Add(openedWebsocket, server, "invalid-version", token, tokenCreatedAt, false);
-
-        // invalid token string
-        Add(openedWebsocket, server, version, "invalid-token-string", tokenCreatedAt, false);
-
-        // invalid timestamp (after/before 31s)
-        Add(openedWebsocket, server, version, token, tokenCreatedAt + 31 * 1000, false);
-        Add(openedWebsocket, server, version, token, tokenCreatedAt - 31 * 1000, false);
+        return contextMock.Object;
     }
+}
+
+internal class TestSystemClock(long current) : ISystemClock
+{
+    public DateTimeOffset UtcNow { get; } = DateTimeOffset.FromUnixTimeMilliseconds(current);
 }

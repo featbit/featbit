@@ -23,10 +23,11 @@ public static class StreamingServiceCollectionExtensions
         // request validator
         services.AddSingleton<IRequestValidator, RequestValidator>();
 
-        // data-sync service
+        // services
         services
             .AddEvaluator()
-            .AddTransient<IDataSyncService, DataSyncService>();
+            .AddTransient<IDataSyncService, DataSyncService>()
+            .AddTransient<IRelayProxyService, RelayProxyService>();
 
         // connection
         services.AddSingleton<IConnectionManager, ConnectionManager>();

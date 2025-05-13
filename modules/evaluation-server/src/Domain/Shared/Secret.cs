@@ -1,3 +1,5 @@
+#nullable disable
+
 namespace Domain.Shared;
 
 public class Secret
@@ -10,6 +12,11 @@ public class Secret
 
     public string EnvKey { get; set; }
 
+    // for dapper deserialization
+    public Secret()
+    {
+    }
+
     public Secret(string type, string projectKey, Guid envId, string envKey)
     {
         Type = type;
@@ -18,7 +25,7 @@ public class Secret
         EnvKey = envKey;
     }
 
-    public static bool TryParse(string? secretString, out Guid envId)
+    public static bool TryParse(string secretString, out Guid envId)
     {
         // secret string format: {encodedGuid}{encodedEnvId}
         // encoded guid's length will always be 22, see GuidHelper.Encode

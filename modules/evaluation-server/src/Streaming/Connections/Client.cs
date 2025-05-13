@@ -11,4 +11,6 @@ public class Client
         IpAddress = ipAddress;
         Host = host;
     }
+
+    public static Client Empty => new(string.Empty, string.Empty);
 }

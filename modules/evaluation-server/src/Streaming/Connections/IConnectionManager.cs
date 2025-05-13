@@ -5,16 +5,15 @@ public interface IConnectionManager
     /// <summary>
     /// Called when a connection is started.
     /// </summary>
-    /// <param name="connection">The connection.</param>
-    /// <returns>A <see cref="Task"/> that represents the asynchronous connect.</returns>
-    void Add(Connection connection);
+    /// <param name="connection">The websocket connection context.</param>
+    /// <returns>The primary connection.</returns>
+    Connection Add(WebsocketConnectionContext connection);
 
     /// <summary>
     /// Called when a connection is finished.
     /// </summary>
-    /// <param name="connection">The connection.</param>
-    /// <returns>A <see cref="Task"/> that represents the asynchronous disconnect.</returns>
-    void Remove(Connection connection);
+    /// <param name="context">The websocket connection context.</param>
+    void Remove(WebsocketConnectionContext context);
 
     /// <summary>
     /// Get environment connections

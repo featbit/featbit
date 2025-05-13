@@ -16,8 +16,7 @@ public class ConnectionBuilder
 
     public Connection Build()
     {
-        var connection = new Connection(_id, _websocket, _secret, _type, _version, _connectAt);
-        connection.AttachClient(_client);
+        var connection = new Connection(_id, _websocket, _secret, _type, _version, _connectAt, _client);
         return connection;
     }
 
