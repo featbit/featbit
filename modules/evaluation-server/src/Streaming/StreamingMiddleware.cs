@@ -31,7 +31,7 @@ public class StreamingMiddleware(
 
         using var websocket = await httpContext.WebSockets.AcceptWebSocketAsync();
 
-        var connectionContext = new DefaultWebSocketConnectionContext(websocket, httpContext);
+        var connectionContext = new DefaultConnectionContext(websocket, httpContext);
         var validationResult = await requestValidator.ValidateAsync(connectionContext);
         if (!validationResult.IsValid)
         {
@@ -46,7 +46,7 @@ public class StreamingMiddleware(
 
         await connectionContext.PrepareForProcessingAsync(validationResult.Secrets);
 
-        var connection = connectionManager.Add(connectionContext);
+        connectionManager.Add(connectionContext);
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(
             httpContext.RequestAborted,
@@ -54,13 +54,10 @@ public class StreamingMiddleware(
         );
 
         // dispatch connection messages
-        await dispatcher.DispatchAsync(connection, cts.Token);
+        await dispatcher.DispatchAsync(connectionContext, cts.Token);
 
         // dispatch end means the connection was closed
-        await connection.CloseAsync(
-            websocket.CloseStatus ?? WebSocketCloseStatus.NormalClosure,
-            websocket.CloseStatusDescription ?? string.Empty
-        );
+        await connectionContext.CloseAsync();
 
         connectionManager.Remove(connectionContext);
     }

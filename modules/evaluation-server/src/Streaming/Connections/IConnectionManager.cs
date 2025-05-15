@@ -7,13 +7,13 @@ public interface IConnectionManager
     /// </summary>
     /// <param name="connection">The websocket connection context.</param>
     /// <returns>The primary connection.</returns>
-    Connection Add(WebsocketConnectionContext connection);
+    void Add(ConnectionContext connection);
 
     /// <summary>
     /// Called when a connection is finished.
     /// </summary>
     /// <param name="context">The websocket connection context.</param>
-    void Remove(WebsocketConnectionContext context);
+    void Remove(ConnectionContext context);
 
     /// <summary>
     /// Get environment connections

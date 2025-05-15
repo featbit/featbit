@@ -19,22 +19,22 @@ public class DataSyncService : IDataSyncService
         _evaluator = evaluator;
     }
 
-    public async Task<object> GetPayloadAsync(Connection connection, DataSyncMessage message)
+    public async Task<object> GetPayloadAsync(ConnectionContext connectionContext, DataSyncMessage message)
     {
-        // attach client-side sdk EndUser
-        if (connection.Type == ConnectionType.Client)
-        {
-            connection.AttachUser(message.User!);
-        }
+        var connection = connectionContext.Connection;
+        var rpConnections = connectionContext.MappedRpConnections;
 
         // if timestamp is null or not specified, treat as 0 (default value)
         var timestamp = message.Timestamp.GetValueOrDefault();
 
-        object payload = connection.Type switch
+        object payload = connectionContext.Type switch
         {
             ConnectionType.Client => await GetClientSdkPayloadAsync(connection.EnvId, connection.User!, timestamp),
             ConnectionType.Server => await GetServerSdkPayloadAsync(connection.EnvId, timestamp),
-            _ => throw new ArgumentOutOfRangeException(nameof(connection), $"unsupported sdk type {connection.Type}")
+            ConnectionType.RelayProxy => await GetRelayProxyPayloadAsync(rpConnections.Select(x => x.EnvId), timestamp),
+            _ => throw new ArgumentOutOfRangeException(
+                nameof(connection.Type), $"unsupported connection type {connection.Type}"
+            )
         };
 
         return payload;
@@ -78,6 +78,28 @@ public class DataSyncService : IDataSyncService
         }
 
         return new ServerSdkPayload(eventType, featureFlags, segments);
+    }
+
+    public async Task<object> GetRelayProxyPayloadAsync(IEnumerable<Guid> envIds, long timestamp)
+    {
+        var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
+
+        List<object> payloads = [];
+        foreach (var envId in envIds)
+        {
+            var serverSdkPayload = await GetServerSdkPayloadAsync(envId, timestamp);
+
+            var payload = new
+            {
+                envId = envId,
+                flags = serverSdkPayload.FeatureFlags,
+                segments = serverSdkPayload.Segments
+            };
+
+            payloads.Add(payload);
+        }
+
+        return new { eventType, payloads };
     }
 
     public async Task<object> GetFlagChangePayloadAsync(Connection connection, JsonElement flag)

@@ -2,6 +2,7 @@ using System.Text.Json;
 using Dapper;
 using Domain.Shared;
 using Infrastructure;
+using Infrastructure.Fakes;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.MongoDb;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,8 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
         {
             DbProvider.MongoDb => await GetSecretsFromMongoDb(),
             DbProvider.Postgres => await GetSecretsFromPostgres(),
+            // Fake store is for integration tests
+            DbProvider.Fake => FakeStore.GetRpSecretsAsync(key),
             _ => []
         };
 

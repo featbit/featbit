@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using Domain.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Streaming.Services;
@@ -9,11 +10,12 @@ namespace Streaming.Connections;
 public sealed class RequestValidator(
     ISystemClock systemClock,
     IStore store,
-    IRelayProxyService relayProxyService,
+    StreamingOptions options,
+    IServiceProvider serviceProvider,
     ILogger<RequestValidator> logger)
     : IRequestValidator
 {
-    public async Task<ValidationResult> ValidateAsync(WebsocketConnectionContext context)
+    public async Task<ValidationResult> ValidateAsync(ConnectionContext context)
     {
         try
         {
@@ -29,18 +31,18 @@ public sealed class RequestValidator(
         }
     }
 
-    private async Task<ValidationResult> ValidateCoreAsync(WebsocketConnectionContext context)
+    private async Task<ValidationResult> ValidateCoreAsync(ConnectionContext context)
     {
         var (ws, type, version, tokenString) = context;
 
         // connection type
-        if (!ConnectionType.IsRegistered(type))
+        if (!options.SupportedTypes.Contains(type))
         {
             return ValidationResult.Failed($"Invalid type: {type}");
         }
 
         // connection version
-        if (!ConnectionVersion.IsSupported(version))
+        if (!options.SupportedVersions.Contains(version))
         {
             return ValidationResult.Failed($"Invalid version: {version}");
         }
@@ -81,7 +83,9 @@ public sealed class RequestValidator(
 
         async Task<ValidationResult> ValidateRelayProxyAsync()
         {
-            var secrets = await relayProxyService.GetSecretsAsync(tokenString);
+            var rpService = serviceProvider.GetRequiredService<IRelayProxyService>();
+
+            var secrets = await rpService.GetSecretsAsync(tokenString);
             return secrets.Length == 0
                 ? ValidationResult.Failed($"Invalid relay proxy token: {tokenString}")
                 : ValidationResult.Ok(secrets);

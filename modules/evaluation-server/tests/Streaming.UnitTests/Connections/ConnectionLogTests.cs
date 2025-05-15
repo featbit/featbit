@@ -1,5 +1,5 @@
+using Domain.Shared;
 using Microsoft.Extensions.Logging.Testing;
-using Moq;
 using Streaming.Connections;
 
 namespace Streaming.UnitTests.Connections;
@@ -7,22 +7,58 @@ namespace Streaming.UnitTests.Connections;
 public class ConnectionLogTests
 {
     [Fact]
-    public void LogConnectionProperties()
+    public void ClientConnectionProperties()
     {
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);
 
-        var connection = new ConnectionBuilder().Build();
+        var context = new ConnectionContextBuilder().Build();
+        manager.Add(context);
 
-        var contextMock = new Mock<WebsocketConnectionContext>();
-        contextMock
-            .Setup(x => x.Type)
-            .Returns(connection.Type);
-        contextMock
-            .Setup(x => x.Connection)
-            .Returns(connection);
+        var latestRecord = logger.LatestRecord;
 
-        manager.Add(contextMock.Object);
+        Assert.Equal("Connection added", latestRecord.Message);
+
+        var expectedProperties = new Dictionary<string, string?>
+        {
+            ["{OriginalFormat}"] = "Connection added",
+
+            ["connection.type"] = context.Type,
+            ["connection.token"] = context.Token,
+            ["connection.version"] = context.Version,
+
+            ["connection.connect.at"] = context.ConnectAt.ToString(),
+            ["connection.closed.at"] = context.ClosedAt.ToString(),
+
+            ["connection.client.ip"] = context.Client?.IpAddress,
+            ["connection.client.host"] = context.Client?.Host,
+
+            ["connection.project.key"] = context.Connection.ProjectKey,
+            ["connection.env.id"] = context.Connection.EnvId.ToString(),
+            ["connection.env.key"] = context.Connection.EnvKey
+        };
+
+        Assert.Equivalent(latestRecord.StructuredState, expectedProperties);
+    }
+
+    [Fact]
+    public void RelayProxyConnectionProperties()
+    {
+        var logger = new FakeLogger<ConnectionManager>();
+        var manager = new ConnectionManager(logger);
+
+        Secret[] secrets =
+        [
+            new(ConnectionType.Client, "p1", Guid.NewGuid(), "dev"),
+            new(ConnectionType.Server, "p1", Guid.NewGuid(), "prod"),
+        ];
+
+        var context = new ConnectionContextBuilder()
+            .WithType(ConnectionType.RelayProxy)
+            .WithSecrets(secrets)
+            .Build();
+
+        manager.Add(context);
 
         var latestRecord = logger.LatestRecord;
 
@@ -31,18 +67,20 @@ public class ConnectionLogTests
         var expectedProperties = new Dictionary<string, object?>
         {
             ["{OriginalFormat}"] = "Connection added",
-            ["connection.Id"] = connection.Id,
-            ["connection.Type"] = connection.Type,
-            ["connection.Version"] = connection.Version,
-            ["connection.ConnectAt"] = connection.ConnectAt,
-            ["connection.CloseAt"] = connection.CloseAt,
-            ["connection.EnvId"] = connection.EnvId,
-            ["connection.ProjectKey"] = connection.ProjectKey,
-            ["connection.EnvKey"] = connection.EnvKey,
-            ["connection.ClientIpAddress"] = connection.ClientIpAddress,
-            ["connection.ClientHost"] = connection.ClientHost,
+
+            ["connection.type"] = context.Type,
+            ["connection.token"] = context.Token,
+            ["connection.version"] = context.Version,
+
+            ["connection.connect.at"] = context.ConnectAt,
+            ["connection.closed.at"] = context.ClosedAt,
+
+            ["connection.client.ip"] = context.Client?.IpAddress,
+            ["connection.client.host"] = context.Client?.Host,
+
+            ["connection.rp.connections"] = "p1:dev,p1:prod"
         };
 
-        Assert.Equivalent(expectedProperties, latestRecord.StructuredState);
+        Assert.Equivalent(latestRecord.StructuredState, expectedProperties);
     }
 }

@@ -7,10 +7,8 @@ public sealed partial class ConnectionManager(ILogger<ConnectionManager> logger)
 {
     internal readonly ConcurrentDictionary<string, Connection> Connections = new(StringComparer.Ordinal);
 
-    public Connection Add(WebsocketConnectionContext context)
+    public void Add(ConnectionContext context)
     {
-        var primaryConnection = context.Connection;
-
         if (context.Type == ConnectionType.RelayProxy)
         {
             foreach (var connection in context.MappedRpConnections)
@@ -20,32 +18,29 @@ public sealed partial class ConnectionManager(ILogger<ConnectionManager> logger)
         }
         else
         {
-            Connections.TryAdd(primaryConnection.Id, primaryConnection);
+            Connections.TryAdd(context.Connection.Id, context.Connection);
         }
 
-        Log.ConnectionAdded(logger, primaryConnection);
-
-        return primaryConnection;
+        Log.ConnectionAdded(logger, context);
     }
 
-    public void Remove(WebsocketConnectionContext context)
+    public void Remove(ConnectionContext context)
     {
-        var connection = context.Connection;
-
         if (context.Type == ConnectionType.RelayProxy)
         {
             foreach (var mappedConnection in context.MappedRpConnections)
             {
-                mappedConnection.MarkAsClosed();
                 Connections.TryRemove(mappedConnection.Id, out _);
             }
         }
         else
         {
-            Connections.TryRemove(connection.Id, out _);
+            Connections.TryRemove(context.Connection.Id, out _);
         }
 
-        Log.ConnectionRemoved(logger, connection);
+        context.MarkAsClosed();
+
+        Log.ConnectionRemoved(logger, context);
     }
 
     public ICollection<Connection> GetEnvConnections(Guid envId)

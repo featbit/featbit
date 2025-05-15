@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Streaming.Connections;
 
-internal sealed class DefaultWebSocketConnectionContext : WebsocketConnectionContext
+internal sealed class DefaultConnectionContext : ConnectionContext
 {
     private readonly HttpContext _httpContext;
 
@@ -16,12 +16,13 @@ internal sealed class DefaultWebSocketConnectionContext : WebsocketConnectionCon
     public override string Type { get; }
     public override string Version { get; }
     public override string Token { get; }
-    public override long ConnectAt { get; }
-    public override Client Client { get; protected set; }
+    public override Client? Client { get; protected set; }
     public override Connection Connection { get; protected set; }
     public override Connection[] MappedRpConnections { get; protected set; }
+    public override long ConnectAt { get; }
+    public override long ClosedAt { get; protected set; }
 
-    public DefaultWebSocketConnectionContext(WebSocket websocket, HttpContext httpContext)
+    public DefaultConnectionContext(WebSocket websocket, HttpContext httpContext)
     {
         _httpContext = httpContext;
 
@@ -34,7 +35,7 @@ internal sealed class DefaultWebSocketConnectionContext : WebsocketConnectionCon
         Token = query["token"].ToString();
         ConnectAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-        Client = Client.Empty;
+        Client = null;
         Connection = null!;
         MappedRpConnections = [];
     }
@@ -45,18 +46,13 @@ internal sealed class DefaultWebSocketConnectionContext : WebsocketConnectionCon
 
         if (Type == ConnectionType.RelayProxy)
         {
-            // primary connection of relay proxy
-            Connection = new Connection(
-                Guid.NewGuid().ToString("D"), WebSocket, new Secret(), Type, Version, ConnectAt, Client
-            );
-
             MappedRpConnections = secrets
-                .Select(secret => new Connection(this, secret))
+                .Select(secret => new Connection(WebSocket, secret))
                 .ToArray();
         }
         else
         {
-            var connection = new Connection(this, secrets[0]);
+            var connection = new Connection(WebSocket, secrets[0]);
             Connection = connection;
         }
 
@@ -64,7 +60,7 @@ internal sealed class DefaultWebSocketConnectionContext : WebsocketConnectionCon
 
         async Task ResolveClientAsync()
         {
-            var logger = _httpContext.RequestServices.GetRequiredService<ILogger<WebsocketConnectionContext>>();
+            var logger = _httpContext.RequestServices.GetRequiredService<ILogger<ConnectionContext>>();
 
             var ipAddr = GetIpAddr();
             var host = await GetHostAsync();

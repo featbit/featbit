@@ -39,4 +39,20 @@ public static class TestData
             _ => null
         };
     }
+
+    public const string RelayProxyTokenString = "rp-MDcwNTEzNDExNzQ3MQtXO7IPcN6U-z5fAktj18CQ";
+
+    private static readonly Secret[] RelayProxySecrets =
+    [
+        new("relay-proxy", "webapp", new Guid("226b9bf8-4af3-4ffa-9b01-162270e4cd40"), "dev")
+    ];
+
+    public static Secret[] GetRpSecrets(string secretString)
+    {
+        return secretString switch
+        {
+            RelayProxyTokenString => RelayProxySecrets,
+            _ => []
+        };
+    }
 }
