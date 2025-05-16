@@ -23,7 +23,7 @@ public class Secret
         EnvKey = envKey;
     }
 
-    public static bool TryParse(string secretString, out Guid envId)
+    public static bool TryParse(string? secretString, out Guid envId)
     {
         // secret string format: {encodedGuid}{encodedEnvId}
         // encoded guid's length will always be 22, see GuidHelper.Encode
