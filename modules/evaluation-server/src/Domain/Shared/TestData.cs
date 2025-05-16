@@ -44,7 +44,7 @@ public static class TestData
 
     private static readonly Secret[] RelayProxySecrets =
     [
-        new("relay-proxy", "webapp", new Guid("226b9bf8-4af3-4ffa-9b01-162270e4cd40"), "dev")
+        new("server", "webapp", new Guid("226b9bf8-4af3-4ffa-9b01-162270e4cd40"), "dev")
     ];
 
     public static Secret[] GetRpSecrets(string secretString)

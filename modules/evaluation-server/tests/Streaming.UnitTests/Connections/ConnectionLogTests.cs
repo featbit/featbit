@@ -49,13 +49,13 @@ public class ConnectionLogTests
 
         Secret[] secrets =
         [
-            new(ConnectionType.Client, "p1", Guid.NewGuid(), "dev"),
             new(ConnectionType.Server, "p1", Guid.NewGuid(), "prod"),
+            new(ConnectionType.Server, "p2", Guid.NewGuid(), "prod"),
         ];
 
         var context = new ConnectionContextBuilder()
             .WithType(ConnectionType.RelayProxy)
-            .WithSecrets(secrets)
+            .WithServerSecrets(secrets)
             .Build();
 
         manager.Add(context);
@@ -78,7 +78,7 @@ public class ConnectionLogTests
             ["connection.client.ip"] = context.Client?.IpAddress,
             ["connection.client.host"] = context.Client?.Host,
 
-            ["connection.rp.connections"] = "p1:dev,p1:prod"
+            ["connection.rp.connections"] = "p1:prod,p2:prod"
         };
 
         Assert.Equivalent(latestRecord.StructuredState, expectedProperties);

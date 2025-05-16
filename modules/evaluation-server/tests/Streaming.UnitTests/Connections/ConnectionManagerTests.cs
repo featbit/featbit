@@ -40,13 +40,13 @@ public class ConnectionManagerTests
 
         Secret[] secrets =
         [
-            new(ConnectionType.Client, "p1", Guid.NewGuid(), "dev"),
             new(ConnectionType.Server, "p1", Guid.NewGuid(), "prod"),
+            new(ConnectionType.Server, "p2", Guid.NewGuid(), "prod"),
         ];
 
         var context = new ConnectionContextBuilder()
             .WithType(ConnectionType.RelayProxy)
-            .WithSecrets(secrets)
+            .WithServerSecrets(secrets)
             .Build();
 
         manager.Add(context);

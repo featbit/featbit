@@ -99,7 +99,7 @@ public class ConnectionContextBuilder
         return this;
     }
 
-    public ConnectionContextBuilder WithSecrets(Secret[] secrets)
+    public ConnectionContextBuilder WithServerSecrets(Secret[] secrets)
     {
         _secrets = secrets;
         return this;

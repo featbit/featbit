@@ -85,10 +85,10 @@ public sealed class RequestValidator(
         {
             var rpService = serviceProvider.GetRequiredService<IRelayProxyService>();
 
-            var secrets = await rpService.GetSecretsAsync(tokenString);
-            return secrets.Length == 0
+            var serverSecrets = await rpService.GetServerSecretsAsync(tokenString);
+            return serverSecrets.Length == 0
                 ? ValidationResult.Failed($"Invalid relay proxy token: {tokenString}")
-                : ValidationResult.Ok(secrets);
+                : ValidationResult.Ok(serverSecrets);
         }
     }
 }

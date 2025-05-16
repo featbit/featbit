@@ -32,8 +32,8 @@ public class RequestValidatorTests
     public async Task ValidRelayProxy()
     {
         var rpService = new Mock<IRelayProxyService>();
-        rpService.Setup(x => x.GetSecretsAsync(It.IsAny<string>()))
-            .ReturnsAsync([TestData.ClientSecret]);
+        rpService.Setup(x => x.GetServerSecretsAsync(It.IsAny<string>()))
+            .ReturnsAsync([TestData.ServerSecret]);
 
         var context = SetupTestContext(type: ConnectionType.RelayProxy);
         var validator = SetupValidator(rpService: rpService.Object);
@@ -43,7 +43,7 @@ public class RequestValidatorTests
         Assert.Empty(validationResult.Reason);
 
         Assert.Single(validationResult.Secrets);
-        Assert.Equivalent(TestData.ClientSecret, validationResult.Secrets[0]);
+        Assert.Equivalent(TestData.ServerSecret, validationResult.Secrets[0]);
     }
 
     [Theory]
@@ -119,7 +119,7 @@ public class RequestValidatorTests
     public async Task InvalidRelayProxyToken()
     {
         var rpService = new Mock<IRelayProxyService>();
-        rpService.Setup(x => x.GetSecretsAsync(It.IsAny<string>()))
+        rpService.Setup(x => x.GetServerSecretsAsync(It.IsAny<string>()))
             .ReturnsAsync([]);
 
         await EnsureInvalidAsync(

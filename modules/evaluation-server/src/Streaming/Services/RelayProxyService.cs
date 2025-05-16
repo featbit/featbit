@@ -16,22 +16,22 @@ namespace Streaming.Services;
 public class RelayProxyService(IConfiguration configuration, IServiceProvider serviceProvider)
     : IRelayProxyService
 {
-    public async Task<Secret[]> GetSecretsAsync(string key)
+    public async Task<Secret[]> GetServerSecretsAsync(string key)
     {
         var dbProvider = configuration.GetDbProvider();
 
         var result = dbProvider.Name switch
         {
-            DbProvider.MongoDb => await GetSecretsFromMongoDb(),
-            DbProvider.Postgres => await GetSecretsFromPostgres(),
+            DbProvider.MongoDb => await GetFromMongoDb(),
+            DbProvider.Postgres => await GetFromPostgres(),
             // Fake store is for integration tests
-            DbProvider.Fake => FakeStore.GetRpSecretsAsync(key),
+            DbProvider.Fake => FakeStore.GetRpSecrets(key),
             _ => []
         };
 
         return result;
 
-        async Task<Secret[]> GetSecretsFromPostgres()
+        async Task<Secret[]> GetFromPostgres()
         {
             var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
 
@@ -68,8 +68,9 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                     select env.id as envId, env.key as envKey, project.key as projectKey, secret ->> 'type' as type
                     from environments env
                              join projects project on env.project_id = project.id,
-                          jsonb_array_elements(env.secrets) as secret
+                         jsonb_array_elements(env.secrets) as secret
                     where project.organization_id = @OrganizationId
+                      and secret ->> 'type' = 'server'
                     """;
             }
 
@@ -90,12 +91,12 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                        from environments env
                                 join projects project on env.project_id = project.id,
                              jsonb_array_elements(env.secrets) as secret
-                       where env.id =  any(@EnvIds)
+                       where env.id =  any(@EnvIds) and secret ->> 'type' = 'server'
                        """;
             }
         }
 
-        async Task<Secret[]> GetSecretsFromMongoDb()
+        async Task<Secret[]> GetFromMongoDb()
         {
             var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
             var db = mongodb.Database;
@@ -131,8 +132,10 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                 var envId = document["env"]["id"].AsGuid;
                 var envKey = document["env"]["key"].AsString;
                 var projectKey = document["project"]["key"].AsString;
+                var serverSecrets = document["env"]["secrets"].AsBsonArray
+                    .Where(x => x["type"].AsString == "server");
 
-                return document["env"]["secrets"].AsBsonArray.Select(x => new Secret
+                return serverSecrets.Select(x => new Secret
                 {
                     EnvId = envId,
                     EnvKey = envKey,
