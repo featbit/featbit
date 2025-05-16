@@ -52,8 +52,7 @@ internal sealed class DefaultConnectionContext : ConnectionContext
         }
         else
         {
-            var connection = new Connection(WebSocket, secrets[0]);
-            Connection = connection;
+            Connection = new Connection(WebSocket, secrets[0]);
         }
 
         return;
