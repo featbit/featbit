@@ -6,7 +6,6 @@ public interface IConnectionManager
     /// Called when a connection is started.
     /// </summary>
     /// <param name="connection">The websocket connection context.</param>
-    /// <returns>The primary connection.</returns>
     void Add(ConnectionContext connection);
 
     /// <summary>

@@ -23,8 +23,7 @@ public sealed class RequestValidator(
         }
         catch (Exception ex)
         {
-            var request = context.RawQuery;
-            logger.ErrorValidateRequest(request, ex);
+            logger.ErrorValidateRequest(context.RawQuery, ex);
 
             // throw original exception
             throw;
@@ -57,9 +56,18 @@ public sealed class RequestValidator(
             ? await ValidateRelayProxyAsync()
             : await ValidateSecretTokenAsync();
 
+        async Task<ValidationResult> ValidateRelayProxyAsync()
+        {
+            var rpService = serviceProvider.GetRequiredService<IRelayProxyService>();
+
+            var serverSecrets = await rpService.GetServerSecretsAsync(tokenString);
+            return serverSecrets.Length == 0
+                ? ValidationResult.Failed($"Invalid relay proxy token: {tokenString}")
+                : ValidationResult.Ok(serverSecrets);
+        }
+
         async Task<ValidationResult> ValidateSecretTokenAsync()
         {
-            // token
             var token = new Token(tokenString.AsSpan());
             var current = systemClock.UtcNow.ToUnixTimeMilliseconds();
             if (!token.IsValid || Math.Abs(current - token.Timestamp) > 30 * 1000)
@@ -79,16 +87,6 @@ public sealed class RequestValidator(
             }
 
             return ValidationResult.Ok([secret]);
-        }
-
-        async Task<ValidationResult> ValidateRelayProxyAsync()
-        {
-            var rpService = serviceProvider.GetRequiredService<IRelayProxyService>();
-
-            var serverSecrets = await rpService.GetServerSecretsAsync(tokenString);
-            return serverSecrets.Length == 0
-                ? ValidationResult.Failed($"Invalid relay proxy token: {tokenString}")
-                : ValidationResult.Ok(serverSecrets);
         }
     }
 }
