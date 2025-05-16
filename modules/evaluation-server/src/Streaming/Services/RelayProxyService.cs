@@ -135,13 +135,7 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                 var serverSecrets = document["env"]["secrets"].AsBsonArray
                     .Where(x => x["type"].AsString == "server");
 
-                return serverSecrets.Select(x => new Secret
-                {
-                    EnvId = envId,
-                    EnvKey = envKey,
-                    ProjectKey = projectKey,
-                    Type = x["type"].AsString
-                });
+                return serverSecrets.Select(x => new Secret(x["type"].AsString, projectKey, envId, envKey));
             });
 
             return secrets.ToArray();
