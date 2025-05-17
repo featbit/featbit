@@ -38,7 +38,7 @@ public class ConnectionLogTests
             ["connection.env.key"] = context.Connection.EnvKey
         };
 
-        Assert.Equivalent(latestRecord.StructuredState, expectedProperties);
+        Assert.Equivalent(latestRecord.StructuredState, expectedProperties, strict: true);
     }
 
     [Fact]
@@ -81,6 +81,6 @@ public class ConnectionLogTests
             ["connection.rp.connections"] = "p1:prod,p2:prod"
         };
 
-        Assert.Equivalent(latestRecord.StructuredState, expectedProperties);
+        Assert.Equivalent(latestRecord.StructuredState, expectedProperties, strict: true);
     }
 }

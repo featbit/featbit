@@ -25,15 +25,21 @@ public class RequestValidatorTests
         Assert.Empty(validationResult.Reason);
 
         Assert.Single(validationResult.Secrets);
-        Assert.Equivalent(TestData.ClientSecret, validationResult.Secrets[0]);
+        Assert.Equivalent(TestData.ClientSecret, validationResult.Secrets[0], strict: true);
     }
 
     [Fact]
     public async Task ValidRelayProxy()
     {
         var rpService = new Mock<IRelayProxyService>();
-        rpService.Setup(x => x.GetServerSecretsAsync(It.IsAny<string>()))
-            .ReturnsAsync([TestData.ServerSecret]);
+
+        Secret[] secrets =
+        [
+            new(ConnectionType.Server, "p1", Guid.NewGuid(), "prod"),
+            new(ConnectionType.Server, "p2", Guid.NewGuid(), "prod")
+        ];
+
+        rpService.Setup(x => x.GetServerSecretsAsync(It.IsAny<string>())).ReturnsAsync(secrets);
 
         var context = SetupTestContext(type: ConnectionType.RelayProxy);
         var validator = SetupValidator(rpService: rpService.Object);
@@ -42,8 +48,9 @@ public class RequestValidatorTests
         Assert.True(validationResult.IsValid);
         Assert.Empty(validationResult.Reason);
 
-        Assert.Single(validationResult.Secrets);
-        Assert.Equivalent(TestData.ServerSecret, validationResult.Secrets[0]);
+        Assert.Equal(2, validationResult.Secrets.Length);
+        Assert.Equivalent(secrets[0], validationResult.Secrets[0], strict: true);
+        Assert.Equivalent(secrets[1], validationResult.Secrets[1], strict: true);
     }
 
     [Theory]

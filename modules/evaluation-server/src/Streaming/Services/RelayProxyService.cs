@@ -91,7 +91,7 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                        from environments env
                                 join projects project on env.project_id = project.id,
                              jsonb_array_elements(env.secrets) as secret
-                       where env.id =  any(@EnvIds) and secret ->> 'type' = 'server'
+                       where env.id = any(@EnvIds) and secret ->> 'type' = 'server'
                        """;
             }
         }
