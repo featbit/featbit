@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Internal;
+using Streaming.Connections;
 
 namespace Application.IntegrationTests;
 
@@ -42,13 +43,13 @@ public class TestApp : WebApplicationFactory<Program>
 
     public async Task<WebSocket> ConnectWithTokenAsync(string type = "client")
     {
-        var token = type == "client"
-            ? TestData.ClientTokenString
-            : TestData.ServerTokenString;
-
-        var tokenCreatedAt = type == "client"
-            ? TestData.ClientToken.Timestamp
-            : TestData.ServerToken.Timestamp;
+        var (tokenCreatedAt, token) = type switch
+        {
+            ConnectionType.Client => (TestData.ClientToken.Timestamp, TestData.ClientTokenString),
+            ConnectionType.Server => (TestData.ServerToken.Timestamp, TestData.ServerTokenString),
+            ConnectionType.RelayProxy => (0, TestData.RelayProxyTokenString),
+            _ => throw new ArgumentException("Invalid connection type", nameof(type))
+        };
 
         return await ConnectAsync(tokenCreatedAt, $"?type={type}&version=2&token={token}");
     }

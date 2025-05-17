@@ -10,6 +10,6 @@ public class EndUserMessage : EndUser
 
         KeyId = user.KeyId ?? "";
         Name = user.Name ?? "";
-        CustomizedProperties = user.CustomizedProperties ?? Array.Empty<CustomizedProperty>();
+        CustomizedProperties = user.CustomizedProperties ?? [];
     }
 }

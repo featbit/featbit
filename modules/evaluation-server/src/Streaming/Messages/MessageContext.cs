@@ -5,13 +5,13 @@ namespace Streaming.Messages;
 
 public class MessageContext
 {
-    public Connection Connection { get; set; }
+    public ConnectionContext Connection { get; }
 
     public JsonElement Data { get; set; }
 
     public CancellationToken CancellationToken { get; set; }
 
-    public MessageContext(Connection connection, JsonElement data, CancellationToken cancellationToken)
+    public MessageContext(ConnectionContext connection, JsonElement data, CancellationToken cancellationToken)
     {
         Connection = connection;
         Data = data;

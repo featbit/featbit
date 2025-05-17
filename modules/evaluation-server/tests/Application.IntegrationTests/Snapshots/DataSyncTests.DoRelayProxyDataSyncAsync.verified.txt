@@ -1,0 +1,453 @@
+﻿{
+  messageType: data-sync,
+  data: {
+    eventType: full,
+    payloads: [
+      {
+        envId: Guid_1,
+        flags: [
+          {
+            id: Guid_2,
+            createdAt: DateTimeOffset_1,
+            updatedAt: DateTimeOffset_2,
+            creatorId: Guid_3,
+            updatorId: Guid_3,
+            envId: Guid_1,
+            name: returns true,
+            key: returns-true,
+            variationType: boolean,
+            variations: [
+              {
+                id: Guid_4,
+                value: true
+              },
+              {
+                id: Guid_5,
+                value: false
+              }
+            ],
+            isEnabled: true,
+            disabledVariationId: Guid_5,
+            fallthrough: {
+              dispatchKey: null,
+              includedInExpt: true,
+              variations: [
+                {
+                  id: Guid_4,
+                  rollout: [
+                    0,
+                    1
+                  ],
+                  exptRollout: 1
+                }
+              ]
+            },
+            exptIncludeAllTargets: true,
+            isArchived: false
+          },
+          {
+            id: Guid_6,
+            createdAt: DateTimeOffset_3,
+            updatedAt: DateTimeOffset_4,
+            creatorId: Guid_3,
+            updatorId: Guid_3,
+            envId: Guid_1,
+            name: return 10p true,
+            key: return-10p-true,
+            variationType: boolean,
+            variations: [
+              {
+                id: Guid_7,
+                value: true
+              },
+              {
+                id: Guid_8,
+                value: false
+              }
+            ],
+            isEnabled: true,
+            disabledVariationId: Guid_8,
+            fallthrough: {
+              dispatchKey: keyId,
+              includedInExpt: true,
+              variations: [
+                {
+                  id: Guid_7,
+                  rollout: [
+                    0,
+                    0.1
+                  ],
+                  exptRollout: 1
+                },
+                {
+                  id: Guid_8,
+                  rollout: [
+                    0.1,
+                    1
+                  ],
+                  exptRollout: 1
+                }
+              ]
+            },
+            exptIncludeAllTargets: true,
+            isArchived: false
+          },
+          {
+            id: Guid_9,
+            createdAt: DateTimeOffset_5,
+            updatedAt: DateTimeOffset_6,
+            creatorId: Guid_3,
+            updatorId: Guid_3,
+            envId: Guid_1,
+            name: individual targeting,
+            key: individual-targeting,
+            variationType: boolean,
+            variations: [
+              {
+                id: Guid_10,
+                value: true
+              },
+              {
+                id: Guid_11,
+                value: false
+              }
+            ],
+            targetUsers: [
+              {
+                keyIds: [
+                  true-1,
+                  true-2,
+                  true-3,
+                  true-4,
+                  true-5,
+                  true-6,
+                  true-7,
+                  true-8,
+                  true-9,
+                  true-10
+                ],
+                variationId: Guid_10
+              },
+              {
+                keyIds: [
+                  false-1,
+                  false-2,
+                  false-3,
+                  false-4,
+                  false-5
+                ],
+                variationId: Guid_11
+              }
+            ],
+            isEnabled: true,
+            disabledVariationId: Guid_11,
+            fallthrough: {
+              dispatchKey: null,
+              includedInExpt: true,
+              variations: [
+                {
+                  id: Guid_10,
+                  rollout: [
+                    0,
+                    1
+                  ],
+                  exptRollout: 1
+                }
+              ]
+            },
+            exptIncludeAllTargets: true,
+            isArchived: false
+          },
+          {
+            id: Guid_12,
+            createdAt: DateTimeOffset_7,
+            updatedAt: DateTimeOffset_8,
+            creatorId: Guid_3,
+            updatorId: Guid_3,
+            envId: Guid_1,
+            name: two custom rules,
+            key: two-custom-rules,
+            variationType: boolean,
+            variations: [
+              {
+                id: Guid_13,
+                value: true
+              },
+              {
+                id: Guid_14,
+                value: false
+              }
+            ],
+            rules: [
+              {
+                id: Guid_15,
+                name: Rule 1,
+                dispatchKey: null,
+                includedInExpt: false,
+                conditions: [
+                  {
+                    property: age,
+                    op: BiggerThan,
+                    value: 22
+                  },
+                  {
+                    property: name,
+                    op: EndsWith,
+                    value: _qa
+                  }
+                ],
+                variations: [
+                  {
+                    id: Guid_13,
+                    rollout: [
+                      0,
+                      1
+                    ],
+                    exptRollout: 1
+                  }
+                ]
+              },
+              {
+                id: Guid_16,
+                name: Rule 2,
+                dispatchKey: keyId,
+                includedInExpt: false,
+                conditions: [
+                  {
+                    property: country,
+                    op: IsOneOf,
+                    value: ["cn","us","jp","gb","es","ss"]
+                  }
+                ],
+                variations: [
+                  {
+                    id: Guid_13,
+                    rollout: [
+                      0,
+                      0.2
+                    ],
+                    exptRollout: 1
+                  },
+                  {
+                    id: Guid_14,
+                    rollout: [
+                      0.2,
+                      1
+                    ],
+                    exptRollout: 1
+                  }
+                ]
+              }
+            ],
+            isEnabled: true,
+            disabledVariationId: Guid_14,
+            fallthrough: {
+              dispatchKey: null,
+              includedInExpt: true,
+              variations: [
+                {
+                  id: Guid_13,
+                  rollout: [
+                    0,
+                    1
+                  ],
+                  exptRollout: 1
+                }
+              ]
+            },
+            exptIncludeAllTargets: true,
+            isArchived: false
+          },
+          {
+            id: Guid_17,
+            createdAt: DateTimeOffset_9,
+            updatedAt: DateTimeOffset_10,
+            creatorId: Guid_3,
+            updatorId: Guid_3,
+            envId: Guid_1,
+            name: custom rule with segment,
+            key: custom-rule-with-segment,
+            variationType: boolean,
+            variations: [
+              {
+                id: Guid_18,
+                value: true
+              },
+              {
+                id: Guid_19,
+                value: false
+              }
+            ],
+            rules: [
+              {
+                id: Guid_20,
+                name: Rule 1,
+                dispatchKey: keyId,
+                includedInExpt: false,
+                conditions: [
+                  {
+                    property: User is in segment,
+                    op: null,
+                    value: ["0779d76b-afc6-4886-ab65-af8c004273ad"]
+                  }
+                ],
+                variations: [
+                  {
+                    id: Guid_18,
+                    rollout: [
+                      0,
+                      0.1
+                    ],
+                    exptRollout: 1
+                  },
+                  {
+                    id: Guid_19,
+                    rollout: [
+                      0.1,
+                      1
+                    ],
+                    exptRollout: 1
+                  }
+                ]
+              },
+              {
+                id: Guid_21,
+                name: Rule 2,
+                dispatchKey: null,
+                includedInExpt: false,
+                conditions: [
+                  {
+                    property: User is in segment,
+                    op: null,
+                    value: ["556c11b2-f08a-4e10-b0b7-af8e008125b3"]
+                  }
+                ],
+                variations: [
+                  {
+                    id: Guid_19,
+                    rollout: [
+                      0,
+                      1
+                    ],
+                    exptRollout: 1
+                  }
+                ]
+              }
+            ],
+            isEnabled: true,
+            disabledVariationId: Guid_19,
+            fallthrough: {
+              dispatchKey: null,
+              includedInExpt: true,
+              variations: [
+                {
+                  id: Guid_18,
+                  rollout: [
+                    0,
+                    1
+                  ],
+                  exptRollout: 1
+                }
+              ]
+            },
+            exptIncludeAllTargets: true,
+            isArchived: false
+          }
+        ],
+        segments: [
+          {
+            id: Guid_22,
+            createdAt: DateTimeOffset_11,
+            updatedAt: DateTimeOffset_12,
+            envId: Guid_1,
+            name: segment-01,
+            description:
+- 10 users in individual targeting return true, 5 returns false
+- Cover types of attribute: Number, String, List, Boolean,
+            included: [
+              true-6,
+              true-5,
+              true-4,
+              true-3,
+              true-1,
+              true-2,
+              true-7,
+              true-8,
+              true-9,
+              true-10
+            ],
+            excluded: [
+              false-1,
+              false-2,
+              false-3,
+              false-4,
+              false-5
+            ],
+            rules: [
+              {
+                id: Guid_23,
+                name: Rule 1,
+                conditions: [
+                  {
+                    property: age,
+                    op: LessEqualThan,
+                    value: 22
+                  },
+                  {
+                    property: country,
+                    op: IsOneOf,
+                    value: ["cn","us","es"]
+                  },
+                  {
+                    property: name,
+                    op: NotEqual,
+                    value: bob
+                  },
+                  {
+                    property: isMember,
+                    op: IsTrue,
+                    value: IsTrue
+                  }
+                ]
+              }
+            ],
+            isArchived: false
+          },
+          {
+            id: Guid_24,
+            createdAt: DateTimeOffset_13,
+            updatedAt: DateTimeOffset_14,
+            envId: Guid_1,
+            name: segment-02,
+            description: has two rules,
+            rules: [
+              {
+                id: Guid_25,
+                name: Rule 1,
+                conditions: [
+                  {
+                    property: age,
+                    op: BiggerThan,
+                    value: 20
+                  }
+                ]
+              },
+              {
+                id: Guid_26,
+                name: Rule 2,
+                conditions: [
+                  {
+                    property: age,
+                    op: BiggerThan,
+                    value: 30
+                  }
+                ]
+              }
+            ],
+            isArchived: false
+          }
+        ]
+      }
+    ]
+  }
+}

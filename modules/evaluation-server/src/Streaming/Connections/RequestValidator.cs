@@ -1,49 +1,99 @@
 using System.Net.WebSockets;
 using Domain.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging;
+using Streaming.Services;
 
 namespace Streaming.Connections;
 
-public class RequestValidator : IRequestValidator
+public sealed class RequestValidator(
+    ISystemClock systemClock,
+    IStore store,
+    StreamingOptions options,
+    IServiceProvider serviceProvider,
+    ILogger<RequestValidator> logger)
+    : IRequestValidator
 {
-    private readonly ISystemClock _systemClock;
-    private readonly IStore _store;
+    private const long TokenTimeoutMs = 30 * 1000;
 
-    public RequestValidator(ISystemClock systemClock, IStore store)
+    public async Task<ValidationResult> ValidateAsync(ConnectionContext context)
     {
-        _systemClock = systemClock;
-        _store = store;
+        try
+        {
+            return await ValidateCoreAsync(context);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorValidateRequest(context.RawQuery, ex);
+
+            // throw original exception
+            throw;
+        }
     }
 
-    public async Task<Connection?> ValidateAsync(WebSocket ws, string? type, string? version, string? tokenString)
+    private async Task<ValidationResult> ValidateCoreAsync(ConnectionContext context)
     {
-        if (!ConnectionType.IsRegistered(type) || !ConnectionVersion.IsSupported(version))
+        var (ws, type, version, tokenString) = context;
+
+        // connection type
+        if (!options.SupportedTypes.Contains(type))
         {
-            return null;
+            return ValidationResult.Failed($"Invalid type: {type}");
         }
 
-        // token
-        var token = new Token(tokenString.AsSpan());
-        var current = _systemClock.UtcNow.ToUnixTimeMilliseconds();
-        if (!token.IsValid || Math.Abs(current - token.Timestamp) > 30 * 1000)
+        // connection version
+        if (!options.SupportedVersions.Contains(version))
         {
-            return null;
-        }
-
-        // secret
-        var secret = await _store.GetSecretAsync(token.SecretString);
-        if (secret is null || secret.Type != type)
-        {
-            return null;
+            return ValidationResult.Failed($"Invalid version: {version}");
         }
 
         // websocket state
         if (ws is not { State: WebSocketState.Open })
         {
-            return null;
+            return ValidationResult.Failed($"Invalid websocket state: {ws?.State}");
         }
 
-        var connection = new Connection(Guid.NewGuid().ToString("D"), ws, secret, type, version!, current);
-        return connection;
+        return type == ConnectionType.RelayProxy
+            ? await ValidateRelayProxyAsync()
+            : await ValidateSecretTokenAsync();
+
+        async Task<ValidationResult> ValidateRelayProxyAsync()
+        {
+            var rpService = serviceProvider.GetRequiredService<IRelayProxyService>();
+
+            var serverSecrets = await rpService.GetServerSecretsAsync(tokenString);
+            return serverSecrets.Length == 0
+                ? ValidationResult.Failed($"Invalid relay proxy token: {tokenString}")
+                : ValidationResult.Ok(serverSecrets);
+        }
+
+        async Task<ValidationResult> ValidateSecretTokenAsync()
+        {
+            var token = new Token(tokenString.AsSpan());
+            var current = systemClock.UtcNow.ToUnixTimeMilliseconds();
+            if (!token.IsValid)
+            {
+                return ValidationResult.Failed($"Invalid token: {tokenString}");
+            }
+
+            if (Math.Abs(current - token.Timestamp) > TokenTimeoutMs)
+            {
+                return ValidationResult.Failed($"Token is expired: {tokenString}");
+            }
+
+            var secret = await store.GetSecretAsync(token.SecretString);
+            if (secret is null)
+            {
+                return ValidationResult.Failed($"Secret is not found: {token.SecretString}");
+            }
+
+            if (secret.Type != type)
+            {
+                return ValidationResult.Failed($"Inconsistent secret used: {secret.Type}. Request type: {type}");
+            }
+
+            return ValidationResult.Ok([secret]);
+        }
     }
 }

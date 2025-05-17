@@ -32,6 +32,15 @@ public class DataSyncTests
         await DoDataSyncAndVerifyAsync(ConnectionType.Client, request);
     }
 
+    [Fact]
+    public async Task DoRelayProxyDataSyncAsync()
+    {
+        const string request =
+            "{'messageType':'data-sync','data':{'timestamp':0}}";
+
+        await DoDataSyncAndVerifyAsync(ConnectionType.RelayProxy, request);
+    }
+
     private async Task DoDataSyncAndVerifyAsync(string type, string jsonMessage)
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
