@@ -15,6 +15,8 @@ public sealed class RequestValidator(
     ILogger<RequestValidator> logger)
     : IRequestValidator
 {
+    private const long TokenTimeoutMs = 30 * 1000;
+
     public async Task<ValidationResult> ValidateAsync(ConnectionContext context)
     {
         try
@@ -70,9 +72,14 @@ public sealed class RequestValidator(
         {
             var token = new Token(tokenString.AsSpan());
             var current = systemClock.UtcNow.ToUnixTimeMilliseconds();
-            if (!token.IsValid || Math.Abs(current - token.Timestamp) > 30 * 1000)
+            if (!token.IsValid)
             {
                 return ValidationResult.Failed($"Invalid token: {tokenString}");
+            }
+
+            if (Math.Abs(current - token.Timestamp) > TokenTimeoutMs)
+            {
+                return ValidationResult.Failed($"Token is expired: {tokenString}");
             }
 
             var secret = await store.GetSecretAsync(token.SecretString);

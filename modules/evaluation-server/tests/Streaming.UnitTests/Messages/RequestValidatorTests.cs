@@ -93,12 +93,12 @@ public class RequestValidatorTests
         );
 
         await EnsureInvalidAsync(
-            expectedReason: $"Invalid token: {TestData.ClientTokenString}",
+            expectedReason: $"Token is expired: {TestData.ClientTokenString}",
             current: TestData.ClientToken.Timestamp + 31 * 1000
         );
 
         await EnsureInvalidAsync(
-            expectedReason: $"Invalid token: {TestData.ClientTokenString}",
+            expectedReason: $"Token is expired: {TestData.ClientTokenString}",
             current: TestData.ClientToken.Timestamp - 31 * 1000
         );
 
