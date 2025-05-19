@@ -1,3 +1,4 @@
+using Domain.Shared;
 using Microsoft.Extensions.Logging.Testing;
 using Streaming.Connections;
 
@@ -6,27 +7,80 @@ namespace Streaming.UnitTests.Connections;
 public class ConnectionLogTests
 {
     [Fact]
-    public void LogConnectionProperties()
+    public void ClientConnectionProperties()
     {
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);
 
-        var connection = new ConnectionBuilder().Build();
-        manager.Add(connection);
-
-        var expectedProperties = new Dictionary<string, string?>
-        {
-            ["{OriginalFormat}"] = "Connection added",
-            ["connection.Id"] = connection.Id,
-            ["connection.ProjectKey"] = connection.ProjectKey,
-            ["connection.EnvKey"] = connection.EnvKey,
-            ["connection.ClientIpAddress"] = connection.ClientIpAddress,
-            ["connection.ClientHost"] = connection.ClientHost,
-        };
+        var context = new ConnectionContextBuilder().Build();
+        manager.Add(context);
 
         var latestRecord = logger.LatestRecord;
 
         Assert.Equal("Connection added", latestRecord.Message);
-        Assert.Equivalent(expectedProperties, latestRecord.StructuredState);
+
+        var expectedProperties = new Dictionary<string, string?>
+        {
+            ["{OriginalFormat}"] = "Connection added",
+
+            ["connection.type"] = context.Type,
+            ["connection.token"] = context.Token,
+            ["connection.version"] = context.Version,
+
+            ["connection.connect.at"] = context.ConnectAt.ToString(),
+            ["connection.closed.at"] = context.ClosedAt.ToString(),
+
+            ["connection.client.ip"] = context.Client?.IpAddress,
+            ["connection.client.host"] = context.Client?.Host,
+
+            ["connection.project.key"] = context.Connection.ProjectKey,
+            ["connection.env.id"] = context.Connection.EnvId.ToString(),
+            ["connection.env.key"] = context.Connection.EnvKey
+        };
+
+        Assert.Equivalent(latestRecord.StructuredState, expectedProperties, strict: true);
+    }
+
+    [Fact]
+    public void RelayProxyConnectionProperties()
+    {
+        var logger = new FakeLogger<ConnectionManager>();
+        var manager = new ConnectionManager(logger);
+
+        Secret[] secrets =
+        [
+            new(ConnectionType.Server, "p1", Guid.NewGuid(), "prod"),
+            new(ConnectionType.Server, "p2", Guid.NewGuid(), "prod"),
+        ];
+
+        var context = new ConnectionContextBuilder()
+            .WithType(ConnectionType.RelayProxy)
+            .WithServerSecrets(secrets)
+            .Build();
+
+        manager.Add(context);
+
+        var latestRecord = logger.LatestRecord;
+
+        Assert.Equal("Connection added", latestRecord.Message);
+
+        var expectedProperties = new Dictionary<string, object?>
+        {
+            ["{OriginalFormat}"] = "Connection added",
+
+            ["connection.type"] = context.Type,
+            ["connection.token"] = context.Token,
+            ["connection.version"] = context.Version,
+
+            ["connection.connect.at"] = context.ConnectAt,
+            ["connection.closed.at"] = context.ClosedAt,
+
+            ["connection.client.ip"] = context.Client?.IpAddress,
+            ["connection.client.host"] = context.Client?.Host,
+
+            ["connection.rp.connections"] = "p1:prod,p2:prod"
+        };
+
+        Assert.Equivalent(latestRecord.StructuredState, expectedProperties, strict: true);
     }
 }

@@ -15,18 +15,29 @@ namespace Streaming.DependencyInjection;
 
 public static class StreamingServiceCollectionExtensions
 {
-    public static IStreamingBuilder AddStreamingCore(this IServiceCollection services)
+    public static IStreamingBuilder AddStreamingCore(
+        this IServiceCollection services,
+        Action<StreamingOptions>? configureOptions = null)
     {
+        // add streaming options
+        var options = new StreamingOptions();
+        configureOptions?.Invoke(options);
+        services.AddSingleton(options);
+
         // system clock
         services.AddSingleton<ISystemClock, SystemClock>();
 
         // request validator
         services.AddSingleton<IRequestValidator, RequestValidator>();
 
-        // data-sync service
+        // services
         services
             .AddEvaluator()
             .AddTransient<IDataSyncService, DataSyncService>();
+        if (options.SupportedTypes.Contains(ConnectionType.RelayProxy))
+        {
+            services.AddTransient<IRelayProxyService, RelayProxyService>();
+        }
 
         // connection
         services.AddSingleton<IConnectionManager, ConnectionManager>();

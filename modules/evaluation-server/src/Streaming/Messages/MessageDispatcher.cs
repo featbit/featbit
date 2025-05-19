@@ -30,7 +30,7 @@ public sealed partial class MessageDispatcher
         _logger = logger;
     }
 
-    public async Task DispatchAsync(Connection connection, CancellationToken token)
+    public async Task DispatchAsync(ConnectionContext connection, CancellationToken token)
     {
         var ws = connection.WebSocket;
 
@@ -55,7 +55,7 @@ public sealed partial class MessageDispatcher
         }
     }
 
-    private async Task DispatchCoreAsync(Connection connection, CancellationToken token)
+    private async Task DispatchCoreAsync(ConnectionContext connection, CancellationToken token)
     {
         var ws = connection.WebSocket;
 
@@ -135,7 +135,7 @@ public sealed partial class MessageDispatcher
         }
     }
 
-    private async Task HandleMessageAsync(Connection connection, Memory<byte> bytes, CancellationToken token)
+    private async Task HandleMessageAsync(ConnectionContext connection, Memory<byte> bytes, CancellationToken token)
     {
         try
         {
