@@ -148,7 +148,7 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
         using Utf8JsonWriter writer = new(stream);
 
         // ignore the following properties as they're unnecessary: 
-        // revision, tags, is_archived, created_at, creator_id, updator_id
+        // revision, tags, created_at, creator_id, updator_id
 
         writer.WriteStartObject();
 
@@ -166,6 +166,7 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
         writer.WriteJsonString("fallthrough", row["fallthrough"] as string);
         writer.WriteBoolean("exptIncludeAllTargets", (bool)row["expt_include_all_targets"]);
         writer.WriteString("updatedAt", (DateTime)row["updated_at"]);
+        writer.WriteBoolean("isArchived", (bool)row["is_archived"]);
 
         writer.WriteEndObject();
 
@@ -179,7 +180,7 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
         using Utf8JsonWriter writer = new(stream);
 
         // ignore the following properties as they're unnecessary:
-        // workspace_id, type, scopes, is_archived, created_at
+        // workspace_id, type, scopes, created_at
         writer.WriteStartObject();
 
         writer.WriteString("id", (Guid)row["id"]);
@@ -190,6 +191,7 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
         writer.WriteStringArray("excluded", row["excluded"] as string[]);
         writer.WriteJsonString("rules", row["rules"] as string);
         writer.WriteString("updatedAt", (DateTime)row["updated_at"]);
+        writer.WriteBoolean("isArchived", (bool)row["is_archived"]);
 
         writer.WriteEndObject();
 
