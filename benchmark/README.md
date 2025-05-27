@@ -9,6 +9,10 @@ system. Below is how we run the load test on AWS EC2 instances.
 To better measure the capacity of the evaluation server, we've refactored the code to run as a standalone service. All
 its dependencies like Kafka, Redis and so on are mocked. The service runs on the following EC2 instance.
 
+> [!TIP]
+> To load test against the real environment, here is
+> a [docker-compose example](https://gist.github.com/deleteLater/3560f1494dc1a9c684b98c20ebfbf392).
+
 - Type: AWS t2.micro 1 vCPU + 1 G (x86)
 - Ubuntu: 20.04
 
