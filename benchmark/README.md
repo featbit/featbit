@@ -77,10 +77,12 @@ SSH into the instance and do the following to run the tests
 - Clone featbit repo `git clone https://github.com/featbit/featbit` to this EC2 instance
 - Install k6 `sudo snap install k6`
 - Install nodejs `sudo apt install nodejs`
-- Open **benchmark/k6-scripts/data-sync.js** and update the value of **ELS_SERVER** with
+- Open **benchmark/k6-scripts/env.js** and update the value of `ELS_SERVER` `CLIENT_SECRET` `SERVER_SECRET`
 
 ```javascript
 const ELS_SERVER = "ws://evaluation-server-ec2-instance-public-address:5100"
+const CLIENT_SECRET = "the-client-secret-of-the-test-environment"
+const SERVER_SECRET = "the-server-secret-of-the-test-environment"
 ```
 
 - Go to the k6 scripts folder `cd benchmark/k6-scripts`
