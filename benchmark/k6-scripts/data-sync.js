@@ -2,13 +2,9 @@ import exec from 'k6/execution';
 import { WebSocket } from 'k6/experimental/websockets';
 import { Counter, Trend } from "k6/metrics";
 
-import { generateConnectionToken } from './utils.js';
+import { STREAMING_CLIENT_URL } from './env.js';
 import { htmlReport } from "./k6-reporter.js";
 import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.4/index.js'
-
-const CLIENT_SECRET = "lhNG5qLXKkOOt0hCVDD8FAqfzdaiGib0We8h18hyuDaw";
-const ELS_SERVER = "ws://localhost:5100"
-const WS_URL = `${ELS_SERVER}/streaming?type=client&token=${generateConnectionToken(CLIENT_SECRET)}`;
 
 const PING_INTERVAL = 18 * 1000; // 18 seconds
 
@@ -58,7 +54,7 @@ export const options = {
 }
 
 export default function () {
-  const ws = new WebSocket(WS_URL);
+  const ws = new WebSocket(STREAMING_CLIENT_URL);
   const keyId = `k6-vu-${exec.vu.idInTest}`;
 
   let dataSyncSendTime = 0;

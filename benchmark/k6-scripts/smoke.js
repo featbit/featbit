@@ -1,6 +1,6 @@
 import { WebSocket } from 'k6/experimental/websockets';
 
-import { generateConnectionToken } from './utils.js';
+import { STREAMING_SERVER_URL, STREAMING_CLIENT_URL } from './env.js';
 import { check } from 'k6';
 
 const WebSocketReadyState = {
@@ -9,13 +9,6 @@ const WebSocketReadyState = {
   CLOSING: 2,     // The connection is in the process of closing.
   CLOSED: 3       // The connection is closed or couldn't be opened.
 };
-
-const CLIENT_SECRET = "lhNG5qLXKkOOt0hCVDD8FAqfzdaiGib0We8h18hyuDaw";
-const SERVER_SECRET = "9txK47n0ykq8zdfWHncsxQqfzdaiGib0We8h18hyuDaw";
-const ELS_SERVER = "ws://localhost:5100";
-
-const STREAMING_CLIENT_URL = `${ELS_SERVER}/streaming?type=client&token=${generateConnectionToken(CLIENT_SECRET)}`;
-const STREAMING_SERVER_URL = `${ELS_SERVER}/streaming?type=server&token=${generateConnectionToken(SERVER_SECRET)}`;
 
 const CLIENT_DATA_SYNC_MESSAGE = JSON.stringify({
   messageType: 'data-sync',
