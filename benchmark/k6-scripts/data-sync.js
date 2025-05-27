@@ -3,6 +3,8 @@ import { WebSocket } from 'k6/experimental/websockets';
 import { Counter, Trend } from "k6/metrics";
 
 import { generateConnectionToken } from './utils.js';
+import { htmlReport } from "./k6-reporter.js";
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.4/index.js'
 
 const CLIENT_SECRET = "lhNG5qLXKkOOt0hCVDD8FAqfzdaiGib0We8h18hyuDaw";
 const ELS_SERVER = "ws://localhost:5100"
@@ -122,4 +124,15 @@ export default function () {
 
     CLOSED_CONNECTION_COUNTER.add(1);
   }
+}
+
+export function handleSummary(data) {
+  console.log(`Throughput: ${THROUGHPUT}/s, ${RAMPING_UP_TARGET} max VUs, ${RAMPING_UP_DURATION_SECONDS}s duration for ramping up phase and keep stable for ${KEEP_PEAK_DURATION_SECONDS}s`);
+
+  const report_name = `data-sync-summary-${THROUGHPUT}.html`;
+
+  return {
+    'stdout': textSummary(data, { indent: ' ', enableColors: true }),
+    [report_name]: htmlReport(data)
+  };
 }
