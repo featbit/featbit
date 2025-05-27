@@ -1,7 +1,7 @@
 # Load Tests
 
-In order to better measure the performance of FeatBit, we have carried out and will continue to carry out a series of
-tests. We have currently carried out a load test against the evaluation server, as it is the bottleneck of the whole
+To better measure the performance of FeatBit, we've carried out and will continue to carry out a series of
+tests. We've currently carried out a load test against the evaluation server, as it is the bottleneck of the whole
 system. Below is how we run the load test on AWS EC2 instances.
 
 # Prerequisite
