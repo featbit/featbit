@@ -34,12 +34,15 @@ const SERVER_DATA_SYNC_MESSAGE = JSON.stringify({
 
 const CONNECTION_DURATION_SECONDS = 2;
 
+// wait a bit longer than the connection duration to ensure the WebSocket is closed
+const WEBSOCKET_CLOSE_WAIT_TIME = (CONNECTION_DURATION_SECONDS + 2) * 1000;
+
 export default async function () {
   console.log(`Starting WebSocket client test for ${CONNECTION_DURATION_SECONDS} seconds...`);
 
   startWs(STREAMING_CLIENT_URL, 'client');
   // wait for the client WebSocket to finish
-  await new Promise(resolve => setTimeout(resolve, CONNECTION_DURATION_SECONDS + 2));
+  await new Promise(resolve => setTimeout(resolve, WEBSOCKET_CLOSE_WAIT_TIME));
 
   console.log(`Client WebSocket finished.\n\n`);
 
@@ -47,7 +50,7 @@ export default async function () {
 
   startWs(STREAMING_SERVER_URL, 'server');
   // wait for the server WebSocket to finish
-  await new Promise(resolve => setTimeout(resolve, CONNECTION_DURATION_SECONDS + 2));
+  await new Promise(resolve => setTimeout(resolve, WEBSOCKET_CLOSE_WAIT_TIME));
 
   console.log(`Server WebSocket finished.\n\n`);
 }
@@ -57,6 +60,9 @@ function startWs(url, type) {
 
   let echoSent = false;
   let echoReceived = false;
+
+  let pingSent = false;
+  let pongReceived = false;
 
   let dataSyncSent = false;
   let dataSyncReceived = false;
@@ -77,6 +83,15 @@ function startWs(url, type) {
     echoSent = true;
     console.log(`Echo message sent from client: ${echoMessage.data}`);
 
+    const pingMessage = {
+      messageType: 'ping',
+      data: {}
+    };
+    ws.send(JSON.stringify(pingMessage));
+
+    pingSent = true;
+    console.log(`Ping message sent from client: ${JSON.stringify(pingMessage)}`);
+
     const dataSyncMessage = type === 'server' ? SERVER_DATA_SYNC_MESSAGE : CLIENT_DATA_SYNC_MESSAGE;
     ws.send(dataSyncMessage);
 
@@ -90,8 +105,12 @@ function startWs(url, type) {
       console.log(`Received echo message from server: ${data.data}`);
       echoReceived = true;
     }
+    if (data.messageType === 'pong') {
+      console.log(`Received pong message from server: ${JSON.stringify(data)}`);
+      pongReceived = true;
+    }
     if (data.messageType === 'data-sync') {
-      console.log(`Received data sync message from server: ${JSON.stringify(data.data, null, 2)}`);
+      console.log(`Received data sync message from server: ${JSON.stringify(data.data)}`);
       dataSyncReceived = true;
     }
   };
@@ -108,6 +127,8 @@ function startWs(url, type) {
       'is closed': (ws) => ws.readyState === WebSocketReadyState.CLOSED,
       'echo message sent': () => echoSent,
       'echo message received': () => echoReceived,
+      'ping message sent': () => pingSent,
+      'pong message received': () => pongReceived,
       'data sync message sent': () => dataSyncSent,
       'data sync message received': () => dataSyncReceived,
     });
