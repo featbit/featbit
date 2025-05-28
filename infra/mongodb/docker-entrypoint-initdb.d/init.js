@@ -123,21 +123,11 @@ db.Policies.insertOne(
                 _id: getUUIDString(),
                 resourceType: "workspace",
                 effect: "allow",
-                actions: ["UpdateWorkspaceGeneralSettings"],
-                resources: ["workspace/*"]
-            },
-			{
-                _id: getUUIDString(),
-                resourceType: "workspace",
-                effect: "allow",
-                actions: ["UpdateWorkspaceLicense"],
-                resources: ["workspace/*"]
-            },
-			{
-                _id: getUUIDString(),
-                resourceType: "workspace",
-                effect: "allow",
-                actions: ["UpdateWorkspaceSSOSettings"],
+                actions: [
+                    "UpdateWorkspaceGeneralSettings",
+                    "UpdateWorkspaceLicense",
+                    "UpdateWorkspaceSSOSettings"
+				],
                 resources: ["workspace/*"]
             },
             {
