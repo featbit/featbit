@@ -127,7 +127,7 @@ db.Policies.insertOne(
                     "UpdateWorkspaceGeneralSettings",
                     "UpdateWorkspaceLicense",
                     "UpdateWorkspaceSSOSettings"
-				],
+                ],
                 resources: ["workspace/*"]
             },
             {
