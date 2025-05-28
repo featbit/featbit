@@ -6,6 +6,8 @@ import { IWorkspace, License, LicenseFeatureEnum } from '@shared/types';
 import { MessageQueueService } from '@core/services/message-queue.service';
 import { WorkspaceService } from "@services/workspace.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { PermissionsService } from "@services/permissions.service";
 
 @Component({
   selector: 'workspace',
@@ -18,6 +20,10 @@ export class WorkspaceComponent implements OnInit {
   nameKeyForm!: FormGroup;
   ssoForm!: FormGroup;
   licenseForm!: FormGroup;
+
+  canUpdateGeneralSettings: boolean = false;
+  canUpdateLicense: boolean = false;
+  canUpdateSSOSettings: boolean = false;
 
   isSsoGranted: boolean = false;
 
@@ -32,6 +38,7 @@ export class WorkspaceComponent implements OnInit {
   constructor(
     private messageQueueService: MessageQueueService,
     private workspaceService: WorkspaceService,
+    private permissionsService: PermissionsService,
     private message: NzMessageService
   ) { }
 
@@ -41,6 +48,11 @@ export class WorkspaceComponent implements OnInit {
     this.workspace = workspace;
     this.license = new License(workspace.license);
     this.isSsoGranted = this.license.isGranted(LicenseFeatureEnum.Sso);
+
+    this.canUpdateGeneralSettings = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceGeneralSettings);
+    this.canUpdateLicense = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceLicense);
+    this.canUpdateSSOSettings = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceSSOSettings);
+
     this.initForm();
     this.isLoading = false;
   }

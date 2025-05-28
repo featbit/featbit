@@ -18,6 +18,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
         return filter.Type switch
         {
             ResourceTypes.All => new[] { Resource.All },
+            ResourceTypes.Workspace => new[] { Resource.Workspace },
             ResourceTypes.Organization => new[] { Resource.AllOrganizations },
             ResourceTypes.Iam => new[] { Resource.AllIam },
             ResourceTypes.AccessToken => new[] { Resource.AllAccessToken },

@@ -121,6 +121,27 @@ db.Policies.insertOne(
         statements: [
             {
                 _id: getUUIDString(),
+                resourceType: "workspace",
+                effect: "allow",
+                actions: ["UpdateWorkspaceGeneralSettings"],
+                resources: ["workspace/*"]
+            },
+			{
+                _id: getUUIDString(),
+                resourceType: "workspace",
+                effect: "allow",
+                actions: ["UpdateWorkspaceLicense"],
+                resources: ["workspace/*"]
+            },
+			{
+                _id: getUUIDString(),
+                resourceType: "workspace",
+                effect: "allow",
+                actions: ["UpdateWorkspaceSSOSettings"],
+                resources: ["workspace/*"]
+            },
+            {
+                _id: getUUIDString(),
                 resourceType: "organization",
                 effect: "allow",
                 actions: ["UpdateOrgName"],
