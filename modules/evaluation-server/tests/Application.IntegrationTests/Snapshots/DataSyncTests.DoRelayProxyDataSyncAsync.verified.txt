@@ -19,10 +19,12 @@
             variations: [
               {
                 id: Guid_4,
+                name: True,
                 value: true
               },
               {
                 id: Guid_5,
+                name: False,
                 value: false
               }
             ],
@@ -58,10 +60,12 @@
             variations: [
               {
                 id: Guid_7,
+                name: True,
                 value: true
               },
               {
                 id: Guid_8,
+                name: False,
                 value: false
               }
             ],
@@ -105,10 +109,12 @@
             variations: [
               {
                 id: Guid_10,
+                name: True,
                 value: true
               },
               {
                 id: Guid_11,
+                name: False,
                 value: false
               }
             ],
@@ -171,10 +177,12 @@
             variations: [
               {
                 id: Guid_13,
+                name: True,
                 value: true
               },
               {
                 id: Guid_14,
+                name: False,
                 value: false
               }
             ],
@@ -271,10 +279,12 @@
             variations: [
               {
                 id: Guid_18,
+                name: True,
                 value: true
               },
               {
                 id: Guid_19,
+                name: False,
                 value: false
               }
             ],
