@@ -59,13 +59,6 @@ VALUES
      'Contains all the permissions required by an administrator',
      'SysManaged',
      jsonb_build_array(
-            jsonb_build_object(
-                     'id', gen_random_uuid(),
-                     'resourceType', 'workspace',
-                     'effect', 'allow',
-                     'actions', ARRAY['UpdateWorkspaceGeneralSettings', 'UpdateWorkspaceLicense', 'UpdateWorkspaceSSOSettings'],
-                     'resources', ARRAY['workspace/*']
-             ),
              jsonb_build_object(
                      'id', gen_random_uuid(),
                      'resourceType', 'organization',
