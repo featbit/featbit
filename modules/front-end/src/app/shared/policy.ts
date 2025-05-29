@@ -107,7 +107,7 @@ export const ResourceTypeAll: ResourceType = {
 
 export const ResourceTypeWorkspace: ResourceType = {
   type: ResourceTypeEnum.workspace,
-  pattern: generalResourceRNPattern.organization,
+  pattern: generalResourceRNPattern.workspace,
   displayName: $localize`:@@iam.rsc-type.workspace:Workspace`
 };
 
