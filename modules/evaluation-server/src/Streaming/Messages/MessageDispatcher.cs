@@ -14,7 +14,7 @@ public sealed partial class MessageDispatcher
     private const string DataPropertyName = "data";
 
     // Default buffer size for receiving messages (in bytes)
-    private const int DefaultBufferSize = 4 * 1024;
+    private const int DefaultBufferSize = 2 * 1024;
 
     // Maximum number of fragments for a message, for most of the time messages should be single-fragment
     private const int MaxMessageFragment = 4;
