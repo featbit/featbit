@@ -89,6 +89,8 @@ public sealed partial class MessageDispatcher
             {
                 // handle the message
                 var message = buffer.AsMemory()[..receiveResult.Count];
+
+                Log.Received(_logger, message.Length, connection);
                 await HandleMessageAsync(connection, message, token);
             }
             else
@@ -118,6 +120,8 @@ public sealed partial class MessageDispatcher
 
                     // handle the message
                     var message = fragments.GetBytes();
+
+                    Log.ReceivedMultiFragment(_logger, message.Length, connection);
                     await HandleMessageAsync(connection, message, token);
                 }
                 finally

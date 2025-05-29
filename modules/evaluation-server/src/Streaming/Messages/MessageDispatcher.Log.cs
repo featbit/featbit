@@ -48,7 +48,27 @@ sealed partial class MessageDispatcher
             ConnectionContext connection
         );
 
-        [LoggerMessage(EventId = 6, Level = LogLevel.Error, Message = "Exception occurred while processing message: {Message}",
+        [LoggerMessage(EventId = 6, Level = LogLevel.Trace, Message = "Received {Length} bytes message from client",
+            EventName = "Received")]
+        public static partial void Received(
+            ILogger logger,
+            int length,
+            [TagProvider(typeof(ConnectionContextTagProvider), nameof(ConnectionContextTagProvider.RecordTags))]
+            ConnectionContext connection
+        );
+
+        [LoggerMessage(EventId = 7, Level = LogLevel.Warning,
+            Message = "Received multi-fragment message of length {Length} from client. This should be a rare case.",
+            EventName = "ReceivedMultiFragment")]
+        public static partial void ReceivedMultiFragment(
+            ILogger logger,
+            int length,
+            [TagProvider(typeof(ConnectionContextTagProvider), nameof(ConnectionContextTagProvider.RecordTags))]
+            ConnectionContext connection
+        );
+
+        [LoggerMessage(EventId = 8, Level = LogLevel.Error,
+            Message = "Exception occurred while processing message: {Message}",
             EventName = "ErrorHandleMessage")]
         public static partial void ErrorHandleMessage(
             ILogger logger,
@@ -58,7 +78,7 @@ sealed partial class MessageDispatcher
             Exception ex
         );
 
-        [LoggerMessage(EventId = 7, Level = LogLevel.Error, Message = "Exception occurred while dispatching message",
+        [LoggerMessage(EventId = 9, Level = LogLevel.Error, Message = "Exception occurred while dispatching message",
             EventName = "ErrorDispatchMessage")]
         public static partial void ErrorDispatchMessage(
             ILogger logger,
