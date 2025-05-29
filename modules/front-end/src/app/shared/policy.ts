@@ -51,6 +51,7 @@ export interface IamPolicyAction {
 
 export enum ResourceTypeEnum {
   All = '*',
+  workspace = 'workspace',
   organization = 'organization',
   IAM = 'iam',
   AccessToken = 'access-token',
@@ -85,6 +86,7 @@ export interface RNViewModel {
 
 export const generalResourceRNPattern = {
   all: '*',
+  workspace: 'workspace/*',
   organization: 'organization/*',
   iam: 'iam/*',
   accessToken: 'access-token/*',
@@ -101,6 +103,12 @@ export const ResourceTypeAll: ResourceType = {
   type: ResourceTypeEnum.All,
   pattern: generalResourceRNPattern.all,
   displayName: $localize`:@@iam.rsc-type.all:All`
+};
+
+export const ResourceTypeWorkspace: ResourceType = {
+  type: ResourceTypeEnum.workspace,
+  pattern: generalResourceRNPattern.workspace,
+  displayName: $localize`:@@iam.rsc-type.workspace:Workspace`
 };
 
 export const ResourceTypeOrganization: ResourceType = {
@@ -153,6 +161,7 @@ export const ResourceTypeSegment = {
 
 export const resourcesTypes: ResourceType[] = [
   ResourceTypeAll,
+  ResourceTypeWorkspace,
   ResourceTypeOrganization,
   ResourceTypeIAM,
   ResourceTypeAccessToken,
@@ -173,6 +182,7 @@ export interface ResourceParamViewModel {
 
 export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[] } = {
   [ResourceTypeEnum.All]: [],
+  [ResourceTypeEnum.workspace]: [],
   [ResourceTypeEnum.organization]: [],
   [ResourceTypeEnum.IAM]: [],
   [ResourceTypeEnum.AccessToken]: [],
@@ -347,6 +357,35 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isSpecificApplicable: false
   },
 
+  // workspace
+  UpdateWorkspaceGeneralSettings: {
+    id: uuidv4(),
+    name: 'UpdateWorkspaceGeneralSettings',
+    resourceType: ResourceTypeEnum.workspace,
+    displayName: $localize`:@@iam.action.update-ws-general:Update workspace general settings`,
+    description: $localize`:@@iam.action.update-ws-general:Update workspace general settings`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
+  UpdateWorkspaceLicense: {
+    id: uuidv4(),
+    name: 'UpdateWorkspaceLicense',
+    resourceType: ResourceTypeEnum.workspace,
+    displayName: $localize`:@@iam.action.update-ws-license:Update workspace license`,
+    description: $localize`:@@iam.action.update-ws-license:Update workspace license`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
+  UpdateWorkspaceSSOSettings: {
+    id: uuidv4(),
+    name: 'UpdateWorkspaceSSOSettings',
+    resourceType: ResourceTypeEnum.workspace,
+    displayName: $localize`:@@iam.action.update-ws-sso:Update workspace SSO settings`,
+    description: $localize`:@@iam.action.update-ws-sso:Update workspace SSO settings`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
+
   // org
   UpdateOrgName: {
     id: uuidv4(),
@@ -357,7 +396,6 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: false
   },
-
   UpdateOrgDefaultUserPermissions: {
     id: uuidv4(),
     name: 'UpdateOrgDefaultUserPermissions',
@@ -433,7 +471,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
 // if returns false, that means the actions which cannot be applied to a specific resource should be hidden
 // ex: CreateProject should not be available for a specific project: project/abc
 export function isResourceGeneral(type: ResourceTypeEnum, rn: string): boolean {
-  const generalResourceTypes = [ResourceTypeEnum.All, ResourceTypeEnum.organization, ResourceTypeEnum.IAM, ResourceTypeEnum.AccessToken, ResourceTypeEnum.RelayProxy];
+  const generalResourceTypes = [ResourceTypeEnum.All, ResourceTypeEnum.workspace, ResourceTypeEnum.organization, ResourceTypeEnum.IAM, ResourceTypeEnum.AccessToken, ResourceTypeEnum.RelayProxy];
   if (generalResourceTypes.includes(type)) {
     return true;
   }
