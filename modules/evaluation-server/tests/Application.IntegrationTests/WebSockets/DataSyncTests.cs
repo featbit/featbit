@@ -1,5 +1,6 @@
 using System.Net.WebSockets;
 using System.Text;
+using System.Text.Json;
 using Streaming.Connections;
 
 namespace Application.IntegrationTests.WebSockets;
@@ -17,8 +18,14 @@ public class DataSyncTests
     [Fact]
     public async Task DoServerDataSyncAsync()
     {
-        const string request =
-            "{'messageType':'data-sync','data':{'timestamp':0}}";
+        var request = new
+        {
+            messageType = "data-sync",
+            data = new
+            {
+                timestamp = 0
+            }
+        };
 
         await DoDataSyncAndVerifyAsync(ConnectionType.Server, request);
     }
@@ -26,8 +33,37 @@ public class DataSyncTests
     [Fact]
     public async Task DoClientDataSyncAsync()
     {
-        const string request =
-            "{'messageType':'data-sync', 'data':{'timestamp': 0, 'user': {'keyId':'3db19c81-e149-4b97-8a0d-79d34531fe59','name':'tester'}}}";
+        var request = new
+        {
+            messageType = "data-sync",
+            data = new
+            {
+                timestamp = 0,
+                user = new
+                {
+                    keyId = "3db19c81-e149-4b97-8a0d-79d34531fe59",
+                    name = "tester",
+                    customizedProperties = new object[]
+                    {
+                        new
+                        {
+                            name = "email",
+                            value = "tester@featbit.com"
+                        },
+                        new
+                        {
+                            name = "role",
+                            value = "qa"
+                        },
+                        new
+                        {
+                            name = "location",
+                            value = "127.0.0.1"
+                        }
+                    }
+                }
+            }
+        };
 
         await DoDataSyncAndVerifyAsync(ConnectionType.Client, request);
     }
@@ -35,20 +71,26 @@ public class DataSyncTests
     [Fact]
     public async Task DoRelayProxyDataSyncAsync()
     {
-        const string request =
-            "{'messageType':'data-sync','data':{'timestamp':0}}";
+        var request = new
+        {
+            messageType = "data-sync",
+            data = new
+            {
+                timestamp = 0
+            }
+        };
 
         await DoDataSyncAndVerifyAsync(ConnectionType.RelayProxy, request);
     }
 
-    private async Task DoDataSyncAndVerifyAsync(string type, string jsonMessage)
+    private async Task DoDataSyncAndVerifyAsync(string type, object request)
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
         var cancellationToken = cts.Token;
 
         var ws = await _app.ConnectWithTokenAsync(type);
-        var dataSync = Encoding.UTF8.GetBytes(jsonMessage.Replace("'", "\""));
 
+        var dataSync = JsonSerializer.SerializeToUtf8Bytes(request);
         await ws.SendAsync(dataSync, WebSocketMessageType.Text, true, cancellationToken);
 
         var buffer = new byte[8 * 1024];
