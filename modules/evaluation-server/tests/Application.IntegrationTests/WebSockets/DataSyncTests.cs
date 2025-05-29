@@ -15,8 +15,10 @@ public class DataSyncTests
         _app = app;
     }
 
-    [Fact]
-    public async Task DoServerDataSyncAsync()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task DoServerDataSyncAsync(bool multiFragment)
     {
         var request = new
         {
@@ -27,11 +29,13 @@ public class DataSyncTests
             }
         };
 
-        await DoDataSyncAndVerifyAsync(ConnectionType.Server, request);
+        await DoDataSyncAndVerifyAsync(ConnectionType.Server, request, multiFragment);
     }
 
-    [Fact]
-    public async Task DoClientDataSyncAsync()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task DoClientDataSyncAsync(bool multiFragment)
     {
         var request = new
         {
@@ -65,11 +69,13 @@ public class DataSyncTests
             }
         };
 
-        await DoDataSyncAndVerifyAsync(ConnectionType.Client, request);
+        await DoDataSyncAndVerifyAsync(ConnectionType.Client, request, multiFragment);
     }
 
-    [Fact]
-    public async Task DoRelayProxyDataSyncAsync()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task DoRelayProxyDataSyncAsync(bool multiFragment)
     {
         var request = new
         {
@@ -80,10 +86,10 @@ public class DataSyncTests
             }
         };
 
-        await DoDataSyncAndVerifyAsync(ConnectionType.RelayProxy, request);
+        await DoDataSyncAndVerifyAsync(ConnectionType.RelayProxy, request, multiFragment);
     }
 
-    private async Task DoDataSyncAndVerifyAsync(string type, object request)
+    private async Task DoDataSyncAndVerifyAsync(string type, object request, bool multiFragment)
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
         var cancellationToken = cts.Token;
@@ -91,7 +97,19 @@ public class DataSyncTests
         var ws = await _app.ConnectWithTokenAsync(type);
 
         var dataSync = JsonSerializer.SerializeToUtf8Bytes(request);
-        await ws.SendAsync(dataSync, WebSocketMessageType.Text, true, cancellationToken);
+
+        if (multiFragment)
+        {
+            var firstFragment = dataSync[..(dataSync.Length / 2)];
+            var secondFragment = dataSync[(dataSync.Length / 2)..];
+
+            await ws.SendAsync(firstFragment, WebSocketMessageType.Text, false, cancellationToken);
+            await ws.SendAsync(secondFragment, WebSocketMessageType.Text, true, cancellationToken);
+        }
+        else
+        {
+            await ws.SendAsync(dataSync, WebSocketMessageType.Text, true, cancellationToken);
+        }
 
         var buffer = new byte[8 * 1024];
         var result = await ws.ReceiveAsync(buffer, cancellationToken);
@@ -100,6 +118,6 @@ public class DataSyncTests
         Assert.Equal(WebSocketMessageType.Text, result.MessageType);
 
         var jsonString = Encoding.UTF8.GetString(buffer[..result.Count]);
-        await VerifyJson(jsonString);
+        await VerifyJson(jsonString).UseParameters(multiFragment);
     }
 }

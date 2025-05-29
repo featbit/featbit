@@ -45,8 +45,8 @@ services:
 
   da-server:
     image: featbit/featbit-data-analytics-server:latest
-    depends_on:
-      - postgresql
+#    depends_on:
+#      - postgresql
     ports:
       - "8200:80"
     networks:
