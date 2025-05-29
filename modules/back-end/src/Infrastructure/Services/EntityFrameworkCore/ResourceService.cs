@@ -17,14 +17,14 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
 
         return filter.Type switch
         {
-            ResourceTypes.All => new[] { Resource.All },
-            ResourceTypes.Workspace => new[] { Resource.Workspace },
-            ResourceTypes.Organization => new[] { Resource.AllOrganizations },
-            ResourceTypes.Iam => new[] { Resource.AllIam },
-            ResourceTypes.AccessToken => new[] { Resource.AllAccessToken },
-            ResourceTypes.RelayProxy => new[] { Resource.AllRelayProxies },
-            ResourceTypes.FeatureFlag => new[] { Resource.AllFeatureFlag },
-            ResourceTypes.Segment => new[] { Resource.AllSegments },
+            ResourceTypes.All => [Resource.All],
+            ResourceTypes.Workspace => [Resource.AllWorkspace],
+            ResourceTypes.Organization => [Resource.AllOrganizations],
+            ResourceTypes.Iam => [Resource.AllIam],
+            ResourceTypes.AccessToken => [Resource.AllAccessToken],
+            ResourceTypes.RelayProxy => [Resource.AllRelayProxies],
+            ResourceTypes.FeatureFlag => [Resource.AllFeatureFlag],
+            ResourceTypes.Segment => [Resource.AllSegments],
             ResourceTypes.Env => await GetEnvsAsync(organizationId, name),
             ResourceTypes.Project => await GetProjectsAsync(organizationId, name),
             _ => Array.Empty<Resource>()

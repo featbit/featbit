@@ -9,18 +9,11 @@ public class GetResourceList : IRequest<IEnumerable<Resource>>
     public ResourceFilter Filter { get; set; }
 }
 
-public class GetResourceListHandler : IRequestHandler<GetResourceList, IEnumerable<Resource>>
+public class GetResourceListHandler(IResourceService service) : IRequestHandler<GetResourceList, IEnumerable<Resource>>
 {
-    private readonly IResourceService _service;
-
-    public GetResourceListHandler(IResourceService service)
-    {
-        _service = service;
-    }
-
     public async Task<IEnumerable<Resource>> Handle(GetResourceList request, CancellationToken cancellationToken)
     {
-        var resources = await _service.GetResourcesAsync(request.OrganizationId, request.Filter);
+        var resources = await service.GetResourcesAsync(request.OrganizationId, request.Filter);
         return resources;
     }
 }

@@ -18,14 +18,14 @@ public class Resource
         Type = ResourceTypes.All
     };
 
-    public static readonly Resource Workspace = new()
+    public static readonly Resource AllWorkspace = new()
     {
         Id = new Guid("5208c66b-ae1e-4985-a253-9250f02f354d"),
         Name = "workspace",
         Rn = "workspace/*",
         Type = ResourceTypes.Workspace
     };
-    
+
     public static readonly Resource AllOrganizations = new()
     {
         Id = new Guid("e394832e-bd98-43de-b174-e0c98e03d19d"),
