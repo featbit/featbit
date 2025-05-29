@@ -1,3 +1,7 @@
+const dbName = "featbit";
+print('use', dbName, 'database')
+db = db.getSiblingDB(dbName)
+
 // https://github.com/featbit/featbit/pull/754
 db.Policies.updateOne(
     {
