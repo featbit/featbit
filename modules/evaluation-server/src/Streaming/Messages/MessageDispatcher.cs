@@ -14,9 +14,7 @@ public sealed partial class MessageDispatcher
     private const string DataPropertyName = "data";
 
     // Default buffer size for receiving messages (in bytes)
-    // – ping: {"messageType": "ping", "data": {}} (32 bytes)
-    // – data-sync: {"messageType":"data-sync","data":{"timestamp":<unix-timestamp-in-ms>}}. (50 bytes if timestamp is 0, otherwise 62 bytes)
-    private const int DefaultBufferSize = 64;
+    private const int DefaultBufferSize = 2 * 1024;
 
     // Maximum number of fragments for a message, for most of the time messages should be single-fragment
     private const int MaxMessageFragment = 4;
@@ -91,13 +89,14 @@ public sealed partial class MessageDispatcher
             {
                 // handle the message
                 var message = buffer.AsMemory()[..receiveResult.Count];
+
+                Log.Received(_logger, message.Length, connection);
                 await HandleMessageAsync(connection, message, token);
             }
             else
             {
                 // multi-fragment message, this should be a rare case
                 var fragments = new MessageFragments();
-
                 fragments.Append(buffer, receiveResult.Count);
                 try
                 {
@@ -121,6 +120,8 @@ public sealed partial class MessageDispatcher
 
                     // handle the message
                     var message = fragments.GetBytes();
+
+                    Log.ReceivedMultiFragment(_logger, message.Length, connection);
                     await HandleMessageAsync(connection, message, token);
                 }
                 finally
